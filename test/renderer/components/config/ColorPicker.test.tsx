@@ -1,23 +1,18 @@
-import React from 'react';
-import { createTheme } from "@mui/material";
-import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
-import { describe, it, expect } from '@jest/globals';
-import renderer from 'react-test-renderer';
-import defaultTheme from '../../../../src/renderer/data/theme';
-import ColorPicker from '../../../../src/renderer/components/config/ColorPicker';
+import React from "react";
+import { describe, it, expect } from "@jest/globals";
+import renderer from "react-test-renderer";
+import ColorPicker from "../../../../src/renderer/components/config/ColorPicker";
+import TestProvider from "../../../util/TestProvider";
 
 describe("ColorPicker", () => {
-  it('should match snapshot', () => {
-    const theme = createTheme(defaultTheme as any)
+  it("should match snapshot", () => {
     const component = renderer.create(
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <ColorPicker currentColor='#fff' onChangeColor={(e: any) => {}} />
-        </ThemeProvider>
-      </StyledEngineProvider>
+      <TestProvider>
+        <ColorPicker currentColor="#fff" onChangeColor={(e: any) => {}} />
+      </TestProvider>
     );
 
     let tree = component.toJSON();
     expect(tree).toMatchSnapshot();
-  })
+  });
 });

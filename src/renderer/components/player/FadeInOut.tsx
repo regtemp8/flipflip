@@ -22,7 +22,7 @@ export default class FadeInOut extends React.Component {
     delay: 0,
   };
 
-  _fadeTimeout: NodeJS.Timeout = null;
+  _fadeTimeout: number = null;
   _fadeOut = false;
 
   render() {
