@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {animated} from "react-spring";
-import Timeout = NodeJS.Timeout;
 
 import {getRandomColor, getRandomListItem} from "../../data/utils";
 import {BT, HTF, IT, OT, SL, ST, TF, VTF} from "../../data/const";
@@ -41,10 +40,10 @@ export default class ImageView extends React.Component {
   readonly contentRef: React.RefObject<HTMLDivElement> = React.createRef();
   _image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement = null;
   _scale: number = null;
-  _timeouts: Array<Timeout>;
+  _timeouts: Array<number>;
 
   componentDidMount() {
-    this._timeouts = new Array<Timeout>();
+    this._timeouts = new Array<number>();
     this._applyImage();
   }
 

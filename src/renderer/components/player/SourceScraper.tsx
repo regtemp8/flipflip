@@ -467,7 +467,7 @@ export default class SourceScraper extends React.Component {
   };
 
   _isMounted = false;
-  _backForth: NodeJS.Timeout = null;
+  _backForth: number = null;
   _promiseQueue: Array<{source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}> = null;
   _nextPromiseQueue: Array<{source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}> = null;
   _nextAllURLs: Map<string, Array<string>> = null;
