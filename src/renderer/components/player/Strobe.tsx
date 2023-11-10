@@ -23,7 +23,7 @@ export default class Strobe extends React.Component {
     delay: 0,
   };
 
-  _strobeTimeout: NodeJS.Timeout = null;
+  _strobeTimeout: number = null;
 
   render() {
     return (

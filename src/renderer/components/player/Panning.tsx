@@ -24,7 +24,7 @@ export default class Panning extends React.Component {
     duration: this.getDuration(),
   };
 
-  _panTimeout: NodeJS.Timeout = null;
+  _panTimeout: number = null;
   _panOut = false;
 
   render() {

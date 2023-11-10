@@ -1,7 +1,6 @@
 import * as React from "react";
 import Sound from "react-sound";
 import clsx from "clsx";
-import Timeout = NodeJS.Timeout;
 
 import { Collapse, Grid, IconButton, Slider, Theme, Tooltip, Typography } from "@mui/material";
 
@@ -198,7 +197,7 @@ class AudioControl extends React.Component {
     );
   }
 
-  _timeout: Timeout = null;
+  _timeout: number = null;
   _queueNextTrack = false;
   componentDidMount() {
     if (this.state.playing) {

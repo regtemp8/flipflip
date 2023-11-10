@@ -301,7 +301,7 @@ class PlayerBars extends React.Component {
     deleteError: null as string,
   };
 
-  _interval: NodeJS.Timer = null;
+  _interval: number = null;
   _appBarTimeout: any = null;
   _drawerTimeout: any = null;
   _tagDrawerTimeout: any = null;

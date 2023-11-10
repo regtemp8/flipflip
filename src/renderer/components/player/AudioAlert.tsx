@@ -1,6 +1,5 @@
 import * as React from "react";
 import {animated, useTransition} from "react-spring";
-import Timeout = NodeJS.Timeout;
 
 import { Theme, Typography } from "@mui/material";
 import createStyles from '@mui/styles/createStyles';
@@ -94,7 +93,7 @@ class AudioAlert extends React.Component {
     this.setState({visible: false});
   }
 
-  _timeout: Timeout = null;
+  _timeout: number = null;
   componentDidMount() {
     if (this.props.audio) {
       this.show();
