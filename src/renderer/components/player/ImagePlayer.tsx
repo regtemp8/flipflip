@@ -60,7 +60,7 @@ export default class ImagePlayer extends React.Component {
     historyOffset: 0,
   };
 
-  _backForth: NodeJS.Timeout = null;
+  _backForth: number = null;
   _isMounted: boolean;
   _isLooping: boolean;
   _loadedSources: Array<string>;
@@ -71,9 +71,9 @@ export default class ImagePlayer extends React.Component {
   _sourceComplete: boolean;
   _count: number;
   _nextSourceIndex: Map<string, number>;
-  _timeout: NodeJS.Timeout;
-  _waitTimeouts: Array<NodeJS.Timeout>;
-  _imgLoadTimeouts: Array<NodeJS.Timeout>;
+  _timeout: number;
+  _waitTimeouts: Array<number>;
+  _imgLoadTimeouts: Array<number>;
   _toggleStrobe: boolean;
   _runFetchLoopCallRequests: Array<number>;
   _animationFrameHandle: number;
@@ -170,8 +170,8 @@ export default class ImagePlayer extends React.Component {
     this._sourceComplete = false;
     this._count = 0;
     this._nextSourceIndex = new Map<string, number>();
-    this._waitTimeouts = new Array<NodeJS.Timeout>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
-    this._imgLoadTimeouts = new Array<NodeJS.Timeout>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
+    this._waitTimeouts = new Array<number>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
+    this._imgLoadTimeouts = new Array<number>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
     this._toggleStrobe = false;
     this.props.advanceHack.listener = () => {
       let delay = 100;

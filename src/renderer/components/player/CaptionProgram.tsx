@@ -756,7 +756,7 @@ export default class CaptionProgram extends React.Component {
   _timeStarted: Date = null;
   _nextTimestamp: number = null;
   _lastTimestamp: number = null;
-  _timestampTimeout: NodeJS.Timeout = null;
+  _timestampTimeout: number = null;
   timestampLoop() {
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
