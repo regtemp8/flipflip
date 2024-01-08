@@ -4,12 +4,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import renderer from "react-test-renderer";
 import ThemeColorPicker from "../ThemeColorPicker";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
+import { setThemePalettePrimary } from "../../../../store/app/slice";
+import { selectAppThemePalettePrimaryMain } from "../../../../store/app/selectors";
 
 describe("ThemeColorPicker", () => {
   it("should render without color when currentColor is null", () => {
+    const action = setThemePalettePrimary
+
+    store.dispatch(action({ main: null }))
     const component = renderer.create(
-      <TestProvider>
-        <ThemeColorPicker currentColor={null} onChangeColor={(e: any) => {}} />
+      <TestProvider store={store}>
+        <ThemeColorPicker action={action} selector={selectAppThemePalettePrimaryMain()} />
       </TestProvider>
     );
 
@@ -17,9 +23,12 @@ describe("ThemeColorPicker", () => {
     expect(tree).toMatchSnapshot();
   });
   it("should render color when currentColor has value", () => {
+    const action = setThemePalettePrimary
+
+    store.dispatch(action({ main: "#f00"}))
     const component = renderer.create(
-      <TestProvider>
-        <ThemeColorPicker currentColor="#f00" onChangeColor={(e: any) => {}} />
+      <TestProvider store={store}>
+        <ThemeColorPicker action={action} selector={selectAppThemePalettePrimaryMain()} />
       </TestProvider>
     );
 
@@ -27,10 +36,13 @@ describe("ThemeColorPicker", () => {
     expect(tree).toMatchSnapshot();
   });
   it("should change color and input when a color preset button is clicked", async () => {
-    const onChange = jest.fn()
+    const action = setThemePalettePrimary
+
+    store.dispatch(action({ main: "#f00"}))
+    const mockFn = jest.fn(action)
     const { container } = render(
-      <TestProvider>
-        <ThemeColorPicker currentColor="#f00" onChangeColor={onChange} />
+      <TestProvider store={store}>
+        <ThemeColorPicker action={mockFn} selector={selectAppThemePalettePrimaryMain()} />
       </TestProvider>
     );
     
@@ -38,14 +50,16 @@ describe("ThemeColorPicker", () => {
     const button = container.querySelector('button[value="' + color + '"]')
     fireEvent.click(button)
     
-    expect(onChange.mock.calls).toHaveLength(1);
-    expect(onChange.mock.calls[0][0].main).toBe(color);
-
+    expect(mockFn.mock.calls).toHaveLength(1);
+    expect(mockFn.mock.calls[0][0].main).toBe(color);
   });
   it("should not allow input changes", async () => {
+    const action = setThemePalettePrimary
+
+    store.dispatch(action({ main: "#f00"}))
     render(
-      <TestProvider>
-        <ThemeColorPicker currentColor="#f00" onChangeColor={(e: any) => {}} />
+      <TestProvider store={store}>
+        <ThemeColorPicker action={action} selector={selectAppThemePalettePrimaryMain()} />
       </TestProvider>
     );
 
@@ -53,9 +67,12 @@ describe("ThemeColorPicker", () => {
     expect(input.hasAttribute('readonly')).toBe(true)
   });
   it("should not show color picker when color is clicked", async () => {
+    const action = setThemePalettePrimary
+
+    store.dispatch(action({ main: "#f00"}))
     const {container} = render(
-      <TestProvider>
-        <ThemeColorPicker currentColor='#f00' onChangeColor={(e: any) => {}} />
+      <TestProvider store={store}>
+        <ThemeColorPicker action={action} selector={selectAppThemePalettePrimaryMain()} />
       </TestProvider>
     );
 

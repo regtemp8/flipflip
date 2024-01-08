@@ -4,7 +4,9 @@ import renderer from "react-test-renderer";
 import AudioPlaylist from "../AudioPlaylist";
 import TestProvider from "../../../../../test/util/TestProvider";
 import { RP } from "../../../data/const";
-import Scene from "../../../data/Scene";
+import store from "../../../../store/store";
+import { newScene } from "../../../../storage/Scene";
+import { setScene } from "../../../../store/scene/slice";
 
 jest.mock('../AudioControl', () => 'AudioControl');
 jest.mock('../../library/SourceIcon', () => 'SourceIcon');
@@ -14,18 +16,18 @@ jest.mock('react-sortablejs', () => 'Sortable');
 
 describe("AudioPlaylist", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
+    const sceneID = 3
+    const playlist = { audios: [], shuffle: false, repeat: RP.none }
+    store.dispatch(setScene(newScene({ id: sceneID, audioPlaylists: [playlist] })))
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <AudioPlaylist
+          sceneID={sceneID}
           playlistIndex={0}
-          playlist={{ audios: [], shuffle: false, repeat: RP.none }}
-          scene={scene}
-          sidebar={false}
+          playlist={playlist}
           startPlaying={false}
           onAddTracks={(playlistIndex) => {}}
           onSourceOptions={(audio) => {}}
-          onUpdateScene={(scene, fn) => {}}
         />
       </TestProvider>
     );

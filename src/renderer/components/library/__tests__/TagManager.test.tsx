@@ -3,6 +3,7 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import TagManager from "../TagManager";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
 
 jest.mock('../../../animations/Jiggle', () => 'Jiggle');
 
@@ -12,13 +13,8 @@ jest.mock('react-sortablejs', () => 'Sortable');
 describe("TagManager", () => {
   it("should match snapshot", () => {
     const component = renderer.create(
-      <TestProvider>
-        <TagManager
-          tags={[]}
-          goBack={() => {}}
-          onSort={(scene, algorithm, ascending) => {}}
-          onUpdateTags={(tags) => {}}
-        />
+      <TestProvider store={store}>
+        <TagManager />
       </TestProvider>
     );
 

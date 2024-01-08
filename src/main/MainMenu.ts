@@ -1,34 +1,38 @@
 import { shell } from 'electron'
-import defaultMenu from "electron-default-menu";
+import type { MenuItemConstructorOptions } from 'electron'
+import defaultMenu from 'electron-default-menu'
+
+import { isMacOSX } from './MainUtils'
 
 // Define default menu (optionally append to)
-export function createMenuTemplate(app: any, replace?: any) {
-  const menu = defaultMenu(app, shell);
-  if (process.platform !== 'darwin') {
+export function createMenuTemplate (
+  app: any,
+  replace?: any
+): MenuItemConstructorOptions[] {
+  const menu = defaultMenu(app, shell)
+  if (!isMacOSX) {
     menu.splice(0, 0, {
       label: 'File',
-      submenu: [
-        {role: 'quit'}
-      ]
+      submenu: [{ role: 'quit' }]
     })
   }
   menu.splice(2, 1, {
     label: 'View',
     submenu: [
-      {role: 'reload'},
-      {role: 'forcereload'},
-      {role: 'toggledevtools'},
+      { role: 'reload' },
+      { role: 'forceReload' },
+      { role: 'toggleDevTools' }
     ]
-  });
+  })
   if (replace) {
-    menu.splice(4, 1, replace);
+    menu.splice(4, 1, replace)
   } else {
-    menu.splice(4, 1);
+    menu.splice(4, 1)
   }
 
-  return menu;
+  return menu
 }
 
-export function createMainMenu(menu: any, template: any) {
-  menu.setApplicationMenu(menu.buildFromTemplate(template));
+export function createMainMenu (menu: any, template: any): void {
+  menu.setApplicationMenu(menu.buildFromTemplate(template))
 }

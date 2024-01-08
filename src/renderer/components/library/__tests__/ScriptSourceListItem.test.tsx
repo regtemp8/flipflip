@@ -3,26 +3,26 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import ScriptSourceListItem from "../ScriptSourceListItem";
 import TestProvider from "../../../../../test/util/TestProvider";
-import CaptionScript from "../../../data/CaptionScript";
+import store from "../../../../store/store";
+import { setCaptionScript } from "../../../../store/captionScript/slice";
+import { newCaptionScript } from "../../../../store/captionScript/CaptionScript";
 
 jest.mock('../SourceIcon', () => 'SourceIcon');
 
 describe("ScriptSourceListItem", () => {
   it("should match snapshot", () => {
-    const script = new CaptionScript({url: 'script.txt'});
+    const scriptID = 3
+    store.dispatch(setCaptionScript(newCaptionScript({id: scriptID, url: 'script.txt'})))
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <ScriptSourceListItem
           checked={false}
           index={0}
           isEditing={null}
-          specialMode={null}
           lastSelected={false}
-          source={script}
+          scriptID={scriptID}
           style={null}
-          tutorial={null}
           onDelete={(source) => {}}
-          onEditScript={(source) => {}}
           onEndEdit={(newURL) => {}}
           onPlay={(source) => {}}
           onRemove={(source) => {}}
@@ -30,7 +30,6 @@ describe("ScriptSourceListItem", () => {
           onStartEdit={(id) => {}}
           onToggleSelect={() => {}}
           savePosition={() => {}}
-          systemMessage={(message) => {}}
         />
       </TestProvider>
     );

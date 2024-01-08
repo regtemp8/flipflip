@@ -1,111 +1,117 @@
-import * as React from 'react';
-import {animated, useTransition} from "react-spring";
+import React, { type PropsWithChildren } from 'react'
+import { animated, useTransition } from 'react-spring'
 
-import {TF} from "../../data/const";
-import {getEaseFunction} from "../../data/utils";
-import Scene from "../../data/Scene";
-import Audio from "../../data/Audio";
+import { getDuration, getEaseFunction } from '../../data/utils'
+import { useAppSelector } from '../../../store/hooks'
+import {
+  selectSceneFadeTF,
+  selectSceneFadeDuration,
+  selectSceneFadeDurationMin,
+  selectSceneFadeDurationMax,
+  selectSceneFadeSinRate,
+  selectSceneFadeBPMMulti,
+  selectSceneFadeEase,
+  selectSceneFadeExp,
+  selectSceneFadeAmp,
+  selectSceneFadePer,
+  selectSceneFadeOv
+} from '../../../store/scene/selectors'
+import { selectAudioBPM } from '../../../store/audio/selectors'
 
-export default class CrossFade extends React.Component {
-  readonly props: {
-    image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement,
-    scene: Scene,
-    timeToNextFrame: number,
-    currentAudio: Audio,
-    children?: React.ReactNode,
-  };
-
-  render() {
-    if (this.props.scene.crossFade) {
-      return (
-        <this.FadeLayer>
-          {this.props.children}
-        </this.FadeLayer>
-      );
-    } else {
-      return this.props.children;
-    }
-  }
-
-  FadeLayer = (data: {children: React.ReactNode}) => {
-    let fadeDuration = 0;
-    switch (this.props.scene.fadeTF) {
-      case TF.scene:
-        fadeDuration = this.props.timeToNextFrame;
-        break;
-      case TF.constant:
-        fadeDuration = this.props.scene.fadeDuration;
-        break;
-      case TF.random:
-        fadeDuration = Math.floor(Math.random() * (this.props.scene.fadeDurationMax - this.props.scene.fadeDurationMin + 1)) + this.props.scene.fadeDurationMin;
-        break;
-      case TF.sin:
-        const sinRate = (Math.abs(this.props.scene.fadeSinRate - 100) + 2) * 1000;
-        fadeDuration = Math.floor(Math.abs(Math.sin(Date.now() / sinRate)) * (this.props.scene.fadeDurationMax - this.props.scene.fadeDurationMin + 1)) + this.props.scene.fadeDurationMin;
-        break;
-      case TF.bpm:
-        const bpmMulti = this.props.scene.fadeBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
-        fadeDuration = 60000 / (bpm * bpmMulti);
-        // If we cannot parse this, default to 1s
-        if (!fadeDuration) {
-          fadeDuration = 1000;
-        }
-        break;
-    }
-
-    const fadeTransitions: [{item: any, props: any, key: any}] = useTransition(
-      this.props.image,
-      (image: any) => {
-        return image.key
-      },
-      {
-        initial: { // Initial (first time) base values, optional (can be null)
-          opacity: 1,
-          volume: 1,
-        },
-        from: { // Base values, optional
-          opacity: 0,
-          volume: 0,
-        },
-        enter: { // Styles apply for entering elements
-          opacity: 1,
-          volume: 1,
-        },
-        leave: { // Styles apply for leaving elements
-          opacity: 0,
-          volume: 0,
-        },
-        unique: true, // If this is true, items going in and out with the same key will be re-used
-        config: {
-          duration: fadeDuration,
-          easing : getEaseFunction(this.props.scene.fadeEase, this.props.scene.fadeExp, this.props.scene.fadeAmp, this.props.scene.fadePer, this.props.scene.fadeOv)
-        },
-      }
-    );
-
-    return (
-      <React.Fragment>
-        {fadeTransitions.map(({item, props, key}) => {
-          return (
-            <animated.div
-              key={key}
-              volume={props.volume}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                ...props
-              }}>
-              {data.children}
-            </animated.div>
-          );
-        })}
-      </React.Fragment>
-    );
-  };
+export interface CrossFadeProps {
+  image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  sceneID: number
+  timeToNextFrame: number
+  currentAudio: number
 }
 
-(CrossFade as any).displayName="CrossFade";
+export default function CrossFade (props: PropsWithChildren<CrossFadeProps>) {
+  const fadeTF = useAppSelector(selectSceneFadeTF(props.sceneID))
+  const fadeDuration = useAppSelector(selectSceneFadeDuration(props.sceneID))
+  const fadeDurationMin = useAppSelector(
+    selectSceneFadeDurationMin(props.sceneID)
+  )
+  const fadeDurationMax = useAppSelector(
+    selectSceneFadeDurationMax(props.sceneID)
+  )
+  const fadeSinRate = useAppSelector(selectSceneFadeSinRate(props.sceneID))
+  const fadeBPMMulti = useAppSelector(selectSceneFadeBPMMulti(props.sceneID))
+  const fadeEase = useAppSelector(selectSceneFadeEase(props.sceneID))
+  const fadeExp = useAppSelector(selectSceneFadeExp(props.sceneID))
+  const fadeAmp = useAppSelector(selectSceneFadeAmp(props.sceneID))
+  const fadePer = useAppSelector(selectSceneFadePer(props.sceneID))
+  const fadeOv = useAppSelector(selectSceneFadeOv(props.sceneID))
+  const bpm = useAppSelector(selectAudioBPM(props.currentAudio))
+
+  const duration = getDuration(
+    {
+      timingFunction: fadeTF,
+      time: fadeDuration,
+      timeMin: fadeDurationMin,
+      timeMax: fadeDurationMax,
+      sinRate: fadeSinRate,
+      bpmMulti: fadeBPMMulti
+    },
+    props.timeToNextFrame,
+    bpm
+  )
+
+  const fadeTransitions: [{ item: any, props: any, key: any }] = useTransition(
+    props.image,
+    (image: any) => {
+      return image.key
+    },
+    {
+      initial: {
+        // Initial (first time) base values, optional (can be null)
+        opacity: 1,
+        volume: 1
+      },
+      from: {
+        // Base values, optional
+        opacity: 0,
+        volume: 0
+      },
+      enter: {
+        // Styles apply for entering elements
+        opacity: 1,
+        volume: 1
+      },
+      leave: {
+        // Styles apply for leaving elements
+        opacity: 0,
+        volume: 0
+      },
+      unique: true, // If this is true, items going in and out with the same key will be re-used
+      config: {
+        duration,
+        easing: getEaseFunction(fadeEase, fadeExp, fadeAmp, fadePer, fadeOv)
+      }
+    }
+  )
+
+  return (
+    <React.Fragment>
+      {fadeTransitions.map((transition) => {
+        return (
+          <animated.div
+            key={transition.key}
+            volume={transition.props.volume}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              ...transition.props
+            }}
+          >
+            {props.children}
+          </animated.div>
+        )
+      })}
+    </React.Fragment>
+  )
+}
+
+;(CrossFade as any).displayName = 'CrossFade'

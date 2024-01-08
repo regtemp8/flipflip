@@ -1,531 +1,152 @@
-import {remote, ipcRenderer, IpcMessageEvent} from 'electron';
-import * as React from 'react';
+import React, { useEffect, useRef } from 'react'
 
+import { Box, createTheme, CssBaseline } from '@mui/material'
+import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles'
+
+import ErrorBoundary from './error/ErrorBoundary'
+import ScenePicker from './ScenePicker'
+import ConfigForm from './config/ConfigForm'
+import Library from './library/Library'
+import TagManager from './library/TagManager'
+import GridSetup from './config/GridSetup'
+import VideoClipper from './config/VideoClipper'
+import Player from './player/Player'
+import NewPlayer from './player/NewPlayer'
+import SceneDetail from './sceneDetail/SceneDetail'
+import Tutorial from './Tutorial'
+import AudioLibrary from './library/AudioLibrary'
+import CaptionScriptor from './sceneDetail/CaptionScriptor'
+import ScriptLibrary from './library/ScriptLibrary'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
-  Alert,
-  Box,
-  createTheme,
-  CssBaseline,
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  Slide,
-  Snackbar,
-} from "@mui/material";
-import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
+  selectAppLastRoute,
+  selectAppTutorial,
+  selectAppTheme,
+  selectAppIsInitialized
+} from '../../store/app/selectors'
+import type Route from '../../store/app/data/Route'
+import { fetchAppStorage, saveAppStorageInterval } from '../../store/app/thunks'
+import { fetchConstants } from '../../store/constants/thunks'
+import { startFromScene } from '../../store/scene/thunks'
+import SystemMessageDialog from './SystemMessageDialog'
+import SystemSnack from './SystemSnack'
+import { ThemeOptions } from '@mui/system'
 
-import {IPC, SP} from "../data/const";
-import {getCachePath} from "../data/utils";
-import * as actions from '../data/actions';
-import ErrorBoundary from "../../main/ErrorBoundary";
-import AppStorage from '../data/AppStorage';
-import ScenePicker from './ScenePicker';
-import ConfigForm from './config/ConfigForm';
-import Library from './library/Library';
-import TagManager from "./library/TagManager";
-import GridSetup from "./config/GridSetup";
-import VideoClipper from "./config/VideoClipper";
-import Player from './player/Player';
-import SceneDetail from './sceneDetail/SceneDetail';
-import Tutorial from "./Tutorial";
-import AudioLibrary from "./library/AudioLibrary";
-import CaptionScriptor from "./sceneDetail/CaptionScriptor";
-import ScriptLibrary from "./library/ScriptLibrary";
+// TODO Be able to change audio/script playlists during playback
+//      Be able to right click on grid scenes as overlay
+//      Be able to modify source tags as popup during playback
+//      Generate different sources even for same scenes in grid
+//      Add configurable privacy screen with shortcut and ability to set image
+//      Add minimize shortcut key in same vain?
+export default function Meta() {
+  const dispatch = useAppDispatch()
+  const initialized = useAppSelector(selectAppIsInitialized())
+  const theme = useAppSelector(selectAppTheme())
+  const tutorial = useAppSelector(selectAppTutorial())
+  const route = useAppSelector(selectAppLastRoute())
 
-const appStorage = new AppStorage(remote.getCurrentWindow().id);
+  // START LOG COMPONENT CHANGES
+  // const p_initialized = useRef<boolean>()
+  // const p_theme = useRef<ThemeOptions>()
+  // const p_tutorial = useRef<string>()
+  // const p_route = useRef<Route>()
 
-function TransitionUp(props: any) {
-  return <Slide {...props} direction="up" />;
-}
+  // console.log('00------------------------00')
+  // if(p_initialized.current !== initialized){
+  //   console.log('INITIALIZED CHANGED')
+  // }
+  // if(p_theme.current !== theme){
+  //   console.log('THEME CHANGED')
+  // }
+  // if(p_tutorial.current !== tutorial){
+  //   console.log('TUTORIAL CHANGED')
+  // }
+  // if(p_route.current !== route){
+  //   console.log('ROUTE CHANGED')
+  // }
 
-export default class Meta extends React.Component {
-  readonly state = appStorage.initialState;
+  // console.log('00------------------------00')
+  // p_initialized.current = initialized
+  // p_theme.current = theme
+  // p_tutorial.current = tutorial
+  // p_route.current = route
+  // END LOG COMPONENT CHANGES
 
-  isRoute(kind: string): Boolean {
-    return actions.isRoute(this.state, kind);
-  }
-
-  applyAction(fn: any, ...args: any[]) {
-    // Actions are functions that take (state, args+) and return {objectDiff}.
-    // So we simply call the function and setState(return value).
-    // This is basically the Redux pattern with fewer steps.
-    const result = fn(this.state, ...args);
-    // run `window.logStateChanges = true` to see these
-    if ((window as any).logStateChanges) {
-      console.log(result);
-    }
-    this.setState(result);
-  }
-
-  progressAction(fn: any, ...args: any[]) {
-    const getState = () => {return this.state};
-    fn(getState, this.setState.bind(this), ...args);
-  }
-
-  componentDidMount() {
-    // We never bother cleaning this up, but that's OK because this is the top level
-    // component of the whole app.
-    ipcRenderer.on(IPC.startScene, this.startScene.bind(this));
+  useEffect(() => {
+    dispatch(fetchAppStorage())
+    dispatch(fetchConstants())
+    window.flipflip.events.onStartScene(startScene.bind(this))
 
     // Disable react-sound's verbose console output
-    (window as any).soundManager.setup({debugMode: false});
+    ;(window as any).soundManager.setup({ debugMode: false })
+    window.flipflip.api.getWindowId().then((id) => {
+      if (id === 1) {
+        dispatch(saveAppStorageInterval())
+      }
+    })
 
-    if (remote.getCurrentWindow().id == 1) {
-      setInterval(this.queueSave.bind(this), 500);
+    return () => {
+      window.flipflip.events.removeStartScene()
     }
+  }, [])
+
+  // Returns true if the last route matches the given kind
+  const isRoute = (route: Route, kind: string): boolean => {
+    return route && route.kind === kind
   }
 
-  _queueSave = false;
-  _lastSave: Date = null;
-  queueSave() {
-    if (this._queueSave && (this._lastSave == null || new Date().getTime() - this._lastSave.getTime() > 3000)) {
-      appStorage.save(this.state);
-      this._lastSave = new Date();
-      this._queueSave = false;
-    }
+  const startScene = (sceneName: string) => {
+    dispatch(startFromScene(sceneName))
   }
 
-  componentDidUpdate(prevProps: any, prevState: any) {
-    if (prevState.version !== this.state.version ||
-      prevState.config !== this.state.config ||
-      prevState.scenes !== this.state.scenes ||
-      prevState.sceneGroups !== this.state.sceneGroups ||
-      prevState.grids !== this.state.grids ||
-      prevState.library !== this.state.library ||
-      prevState.audios !== this.state.audios ||
-      prevState.scripts !== this.state.scripts ||
-      prevState.playlists !== this.state.playlists ||
-      prevState.tags !== this.state.tags ||
-      prevState.route !== this.state.route ||
-      prevState.specialMode !== this.state.specialMode ||
-      prevState.openTab !== this.state.openTab ||
-      prevState.displayedSources !== this.state.displayedSources ||
-      prevState.libraryYOffset !== this.state.libraryYOffset ||
-      prevState.libraryFilters !== this.state.libraryFilters ||
-      prevState.librarySelected !== this.state.librarySelected ||
-      prevState.audioOpenTab !== this.state.audioOpenTab ||
-      prevState.audioYOffset !== this.state.audioYOffset ||
-      prevState.audioFilters !== this.state.audioFilters ||
-      prevState.audioSelected !== this.state.audioSelected ||
-      prevState.scriptYOffset !== this.state.scriptYOffset ||
-      prevState.scriptFilters !== this.state.scriptFilters ||
-      prevState.scriptSelected !== this.state.scriptSelected ||
-      prevState.progressMode !== this.state.progressMode ||
-      prevState.progressTitle !== this.state.progressTitle ||
-      prevState.progressCurrent !== this.state.progressCurrent ||
-      prevState.progressTotal !== this.state.progressTotal ||
-      prevState.progressNext !== this.state.progressNext ||
-      prevState.systemMessage !== this.state.systemMessage ||
-      prevState.systemSnackOpen !== this.state.systemSnackOpen ||
-      prevState.systemSnack !== this.state.systemSnack ||
-      prevState.tutorial !== this.state.tutorial ||
-      prevState.theme !== this.state.theme) {
-      this._queueSave = true;
-    }
-  }
-
-  startScene(ev: IpcMessageEvent, sceneName: string) {
-    this.applyAction(actions.startFromScene, sceneName);
-  }
-
-  // TODO Be able to change audio/script playlists during playback
-  //      Be able to right click on grid scenes as overlay
-  //      Be able to modify source tags as popup during playback
-  //      Generate different sources even for same scenes in grid
-  //      Add configurable privacy screen with shortcut and ability to set image
-  //      Add minimize shortcut key in same vain?
-  render() {
-    const scene = actions.getActiveScene(this.state);
-    const grid = actions.getActiveGrid(this.state);
-
-    // Save a lot of typing and potential bugs
-    const a = (fn: any, ...args: any[]) => this.applyAction.bind(this, fn, ...args);
-    const p = (fn: any) => this.progressAction.bind(this, fn);
-
-    const theme = createTheme(this.state.theme);
-    // @ts-ignore
+  if (!initialized) {
     return (
       <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <ErrorBoundary
-            version={this.state.version}
-            onRestore={a(actions.restoreFromBackup)}
-            goBack={a(actions.goBack)}>
+        <ThemeProvider theme={createTheme(theme)}>
+          <ErrorBoundary>
             <Box className="Meta">
               <CssBaseline />
-              {this.state.route.length === 0 && (
-                <ScenePicker
-                  canGenerate={this.state.library.length >= 1}
-                  canGrid={this.state.scenes.length > 0}
-                  config={this.state.config}
-                  grids={this.state.grids}
-                  audioLibraryCount={this.state.audios.length}
-                  scriptLibraryCount={this.state.scripts.length}
-                  libraryCount={this.state.library.length}
-                  openTab={this.state.openTab}
-                  scenes={this.state.scenes}
-                  sceneGroups={this.state.sceneGroups}
-                  tutorial={this.state.tutorial}
-                  version={this.state.version}
-                  onAddGenerator={a(actions.addGenerator)}
-                  onAddGrid={a(actions.addGrid)}
-                  onAddGroup={a(actions.addSceneGroup)}
-                  onAddScene={a(actions.addScene)}
-                  onChangeTab={a(actions.changeScenePickerTab)}
-                  onDeleteGroup={a(actions.deleteSceneGroup)}
-                  onDeleteScenes={a(actions.deleteScenes)}
-                  onImportScene={a(actions.importScene)}
-                  onOpenConfig={a(actions.openConfig)}
-                  onOpenAudioLibrary={a(actions.openAudios)}
-                  onOpenScriptLibrary={a(actions.openScripts)}
-                  onOpenCaptionScriptor={a(actions.openScriptor)}
-                  onOpenLibrary={a(actions.openLibrary)}
-                  onOpenScene={a(actions.goToScene)}
-                  onOpenGrid={a(actions.goToGrid)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onSort={a(actions.sortScene)}
-                  onUpdateConfig={a(actions.updateConfig)}
-                  onUpdateGroups={a(actions.replaceSceneGroups)}
-                  onUpdateScenes={a(actions.replaceScenes)}
-                  onUpdateGrids={a(actions.replaceGrids)}
-                  startTutorial={a(actions.startTutorial)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('scene') && (
-                <SceneDetail
-                  autoEdit={this.state.specialMode == SP.autoEdit}
-                  allScenes={this.state.scenes}
-                  allSceneGrids={this.state.grids}
-                  config={this.state.config}
-                  library={this.state.library}
-                  scene={scene}
-                  tags={this.state.tags}
-                  tutorial={this.state.tutorial}
-                  goBack={a(actions.goBack)}
-                  onAddSource={a(actions.addSource)}
-                  onAddTracks={a(actions.addTracks)}
-                  onAddScript={a(actions.addScript)}
-                  onClearBlacklist={a(actions.clearBlacklist)}
-                  onClip={a(actions.clipVideo)}
-                  onCloneScene={a(actions.cloneScene)}
-                  onDelete={a(actions.deleteScene)}
-                  onDownload={a(actions.downloadSource)}
-                  onEditBlacklist={a(actions.editBlacklist)}
-                  onExport={a(actions.exportScene)}
-                  onGenerate={a(actions.generateScenes)}
-                  onPlayScene={a(actions.playScene)}
-                  onPlay={a(actions.playSceneFromLibrary)}
-                  onPlayAudio={a(actions.playAudio)}
-                  onPlayScript={a(actions.playScript)}
-                  onResetScene={a(actions.resetScene)}
-                  onSaveAsScene={a(actions.saveScene)}
-                  onSort={a(actions.sortSources)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onUpdateScene={a(actions.updateScene)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('library') && (
-                <Library
-                  config={this.state.config}
-                  filters={this.state.libraryFilters}
-                  library={this.state.library}
-                  progressCurrent={this.state.progressCurrent}
-                  progressMode={this.state.progressMode}
-                  progressTitle={this.state.progressTitle}
-                  progressTotal={this.state.progressTotal}
-                  selected={this.state.librarySelected}
-                  specialMode={this.state.specialMode}
-                  tags={this.state.tags}
-                  tutorial={this.state.tutorial}
-                  yOffset={this.state.libraryYOffset}
-                  goBack={a(actions.goBack)}
-                  onAddSource={a(actions.addSource)}
-                  onBatchClip={a(actions.batchClip)}
-                  onBatchTag={a(actions.batchTag)}
-                  onClearBlacklist={a(actions.clearBlacklist)}
-                  onClip={a(actions.clipVideo)}
-                  onDownload={a(actions.downloadSource)}
-                  onEditBlacklist={a(actions.editBlacklist)}
-                  onExportLibrary={a(actions.exportLibrary)}
-                  onImportFromLibrary={a(actions.importFromLibrary)}
-                  onImportLibrary={a(actions.importLibrary, appStorage.backup.bind(appStorage, this.state))}
-                  onImportInstagram={p(actions.importInstagram)}
-                  onImportReddit={p(actions.importReddit)}
-                  onImportTumblr={p(actions.importTumblr)}
-                  onImportTwitter={p(actions.importTwitter)}
-                  onManageTags={a(actions.manageTags)}
-                  onMarkOffline={p(actions.markOffline)}
-                  onPlay={a(actions.playSceneFromLibrary)}
-                  onSort={a(actions.sortSources)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onUpdateLibrary={a(actions.updateLibrary)}
-                  onUpdateMode={a(actions.setMode)}
-                  onUpdateVideoMetadata={p(actions.updateVideoMetadata)}
-                  savePosition={a(actions.saveLibraryPosition)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('audios') && (
-                <AudioLibrary
-                  cachePath={getCachePath(null, this.state.config)}
-                  filters={this.state.audioFilters}
-                  library={this.state.audios}
-                  progressCurrent={this.state.progressCurrent}
-                  progressMode={this.state.progressMode}
-                  progressTitle={this.state.progressTitle}
-                  progressTotal={this.state.progressTotal}
-                  openTab={this.state.audioOpenTab}
-                  playlists={this.state.playlists}
-                  selected={this.state.audioSelected}
-                  specialMode={this.state.specialMode}
-                  tags={this.state.tags}
-                  tutorial={this.state.tutorial}
-                  yOffset={this.state.audioYOffset}
-                  goBack={a(actions.goBack)}
-                  onAddToPlaylist={a(actions.addToPlaylist)}
-                  onBatchTag={a(actions.batchTag)}
-                  onBatchEdit={a(actions.batchEdit)}
-                  onBatchDetectBPM={p(actions.detectBPMs)}
-                  onChangeTab={a(actions.changeAudioLibraryTab)}
-                  onImportFromLibrary={a(actions.importAudioFromLibrary)}
-                  onManageTags={a(actions.manageTags)}
-                  onPlay={a(actions.playAudio)}
-                  onSort={a(actions.sortAudioSources)}
-                  onSortPlaylist={a(actions.sortPlaylist)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onUpdateLibrary={a(actions.updateAudioLibrary)}
-                  onUpdatePlaylists={a(actions.updatePlaylists)}
-                  onUpdateMode={a(actions.setMode)}
-                  savePosition={a(actions.saveAudioPosition)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('scripts') && (
-                <ScriptLibrary
-                  allScenes={this.state.scenes}
-                  filters={this.state.scriptFilters}
-                  library={this.state.scripts}
-                  selected={this.state.scriptSelected}
-                  specialMode={this.state.specialMode}
-                  tags={this.state.tags}
-                  tutorial={this.state.tutorial}
-                  yOffset={this.state.scriptYOffset}
-                  goBack={a(actions.goBack)}
-                  onBatchTag={a(actions.batchTag)}
-                  onEditScript={a(actions.openScriptInScriptor)}
-                  onImportFromLibrary={a(actions.importScriptFromLibrary)}
-                  onImportToScriptor={a(actions.importScriptToScriptor)}
-                  onManageTags={a(actions.manageTags)}
-                  onPlay={a(actions.playScript)}
-                  onSort={a(actions.sortScripts)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onUpdateLibrary={a(actions.updateScriptLibrary)}
-                  onUpdateMode={a(actions.setMode)}
-                  onUpdateScript={a(actions.updateScript)}
-                  savePosition={a(actions.saveScriptPosition)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('tags') && (
-                <TagManager
-                  tags={this.state.tags}
-                  goBack={a(actions.goBack)}
-                  onSort={a(actions.sortTags)}
-                  onUpdateTags={a(actions.updateTags)}
-                />
-              )}
-
-              {this.isRoute('clip') && (
-                <VideoClipper
-                  allTags={this.state.tags}
-                  source={actions.getActiveSource(this.state)}
-                  isLibrary={!actions.getActiveScene(this.state)}
-                  tutorial={this.state.tutorial}
-                  videoVolume={this.state.config.defaultScene.videoVolume}
-                  onTutorial={a(actions.doneTutorial)}
-                  onStartVCTutorial={a(actions.startVCTutorial)}
-                  onSetDisabledClips={a(actions.setDisabledClips)}
-                  onUpdateClips={a(actions.onUpdateClips)}
-                  goBack={a(actions.goBack)}
-                  navigateClipping={a(actions.navigateClipping)}
-                  cache={a(actions.cacheImage)}
-                />
-              )}
-
-              {this.isRoute('grid') && (
-                <GridSetup
-                  allScenes={this.state.scenes}
-                  autoEdit={this.state.specialMode == SP.autoEdit}
-                  scene={grid}
-                  tutorial={this.state.tutorial}
-                  goBack={a(actions.goBack)}
-                  onDelete={a(actions.deleteGrid)}
-                  onGenerate={a(actions.generateScenes)}
-                  onPlayGrid={a(actions.playGrid)}
-                  onTutorial={a(actions.doneTutorial)}
-                  onUpdateGrid={a(actions.updateGrid)}
-                />
-              )}
-
-              {this.isRoute('play') && (
-                <Player
-                  preventSleep
-                  config={this.state.config}
-                  scene={scene}
-                  scenes={this.state.scenes}
-                  sceneGrids={this.state.grids}
-                  theme={theme}
-                  tutorial={this.state.tutorial}
-                  onGenerate={a(actions.generateScenes)}
-                  onUpdateScene={a(actions.updateScene)}
-                  nextScene={a(actions.nextScene)}
-                  goBack={a(actions.goBack)}
-                  playTrack={a(actions.playTrack)}
-                  goToTagSource={a(actions.playSceneFromLibrary)}
-                  goToClipSource={a(actions.clipVideo)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
-                  setCount={a(actions.setCount)}
-                  cache={a(actions.cacheImage)}
-                  blacklistFile={a(actions.blacklistFile)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('libraryplay') && (
-                <Player
-                  preventSleep
-                  config={this.state.config}
-                  scene={scene}
-                  scenes={this.state.scenes}
-                  sceneGrids={this.state.grids}
-                  theme={theme}
-                  tutorial={this.state.tutorial}
-                  onGenerate={a(actions.generateScenes)}
-                  onUpdateScene={a(actions.updateScene)}
-                  goBack={a(actions.endPlaySceneFromLibrary)}
-                  playTrack={a(actions.playTrack)}
-                  tags={scene.audioScene ? actions.getAudioSource(this.state)?.tags : scene.scriptScene ? actions.getScriptSource(this.state)?.tags : actions.getLibrarySource(this.state)?.id != -1 ? actions.getLibrarySource(this.state)?.tags : null}
-                  allTags={this.state.tags}
-                  toggleTag={scene.audioScene ? a(actions.toggleAudioTag) : scene.scriptScene ? a(actions.toggleScriptTag) : a(actions.toggleTag)}
-                  inheritTags={scene.audioScene || scene.scriptScene ? undefined : a(actions.inheritTags)}
-                  navigateTagging={a(actions.navigateDisplayedLibrary)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
-                  changeAudioRoute={scene.audioScene ? a(actions.changeAudioRoute) : undefined}
-                  setCount={a(actions.setCount)}
-                  cache={a(actions.cacheImage)}
-                  goToClipSource={a(actions.clipVideo)}
-                  blacklistFile={a(actions.blacklistFile)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('gridplay') && (
-                <Player
-                  preventSleep
-                  config={this.state.config}
-                  scene={scene}
-                  scenes={this.state.scenes}
-                  sceneGrids={this.state.grids}
-                  theme={theme}
-                  tutorial={this.state.tutorial}
-                  onGenerate={a(actions.generateScenes)}
-                  onUpdateScene={a(actions.updateScene)}
-                  nextScene={a(actions.nextScene)}
-                  goBack={a(actions.endPlaySceneGrid)}
-                  playTrack={a(actions.playTrack)}
-                  goToTagSource={a(actions.playSceneFromLibrary)}
-                  goToClipSource={a(actions.clipVideo)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
-                  setCount={a(actions.setCount)}
-                  cache={a(actions.cacheImage)}
-                  blacklistFile={a(actions.blacklistFile)}
-                  systemMessage={a(actions.systemMessage)}
-                />
-              )}
-
-              {this.isRoute('config') && (
-                <ConfigForm
-                  config={this.state.config}
-                  library={this.state.library}
-                  scenes={this.state.scenes}
-                  sceneGrids={this.state.grids}
-                  tags={this.state.tags}
-                  theme={this.state.theme}
-                  goBack={a(actions.goBack)}
-                  onBackup={appStorage.backup.bind(appStorage, this.state)}
-                  onChangeThemeColor={a(actions.changeThemeColor)}
-                  onClean={actions.cleanBackups}
-                  onDefault={a(actions.setDefaultConfig)}
-                  onRestore={a(actions.restoreFromBackup)}
-                  onResetTutorials={a(actions.resetTutorials)}
-                  onToggleDarkMode={a(actions.toggleDarkMode)}
-                  onUpdateConfig={a(actions.updateConfig)}
-                />
-              )}
-
-              {this.isRoute('scriptor') && (
-                <CaptionScriptor
-                  config={this.state.config}
-                  scenes={this.state.scenes}
-                  sceneGrids={this.state.grids}
-                  tutorial={this.state.tutorial}
-                  openScript={actions.getSelectScript(this.state)}
-                  theme={theme}
-                  onAddFromLibrary={a(actions.addScriptSingle)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
-                  goBack={a(actions.goBack)}
-                  onUpdateScene={a(actions.updateScene)}
-                  onUpdateLibrary={a(actions.updateScriptLibrary)}
-                />
-              )}
-
-              <Dialog
-                open={!!this.state.systemMessage}
-                onClose={a(actions.closeMessage)}
-                aria-describedby="message-description">
-                <DialogContent>
-                  <DialogContentText id="message-description">
-                    {this.state.systemMessage}
-                  </DialogContentText>
-                </DialogContent>
-              </Dialog>
-
-              <Snackbar
-                open={this.state.systemSnackOpen}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                autoHideDuration={2000}
-                key={this.state.systemSnack + new Date()}
-                onClose={a(actions.closeMessage)}
-                TransitionComponent={TransitionUp}>
-                <Alert onClose={a(actions.closeMessage)} severity={this.state.systemSnackSeverity}>
-                  {this.state.systemSnack}
-                </Alert>
-              </Snackbar>
-
-              {this.state.tutorial && (
-                <Tutorial
-                  config={this.state.config}
-                  route={this.state.route}
-                  scene={!!scene ? scene : grid}
-                  tutorial={this.state.tutorial}
-                  onSetTutorial={a(actions.setTutorial)}
-                  onDoneTutorial={a(actions.doneTutorial)}
-                  onSkipAllTutorials={a(actions.skipTutorials)}
-                />
-              )}
+              <h1>LOADING...</h1>
             </Box>
           </ErrorBoundary>
         </ThemeProvider>
       </StyledEngineProvider>
-    );
+    )
   }
+
+  return (
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={createTheme(theme)}>
+        <ErrorBoundary>
+          <Box className="Meta">
+            <CssBaseline />
+            {!route && <ScenePicker />}
+            {isRoute(route, 'scene') && <SceneDetail sceneID={route.value} />}
+            {isRoute(route, 'library') && <Library />}
+            {isRoute(route, 'audios') && <AudioLibrary />}
+            {isRoute(route, 'scripts') && <ScriptLibrary />}
+            {isRoute(route, 'tags') && <TagManager />}
+            {isRoute(route, 'clip') && <VideoClipper />}
+            {isRoute(route, 'grid') && <GridSetup gridID={route.value} />}
+            {(isRoute(route, 'play') ||
+              isRoute(route, 'libraryplay') ||
+              isRoute(route, 'gridplay')) && (
+              <Player uuid={route.value} preventSleep />
+            )}
+            {isRoute(route, 'config') && <ConfigForm />}
+            {isRoute(route, 'scriptor') && <CaptionScriptor />}
+
+            <SystemMessageDialog />
+            <SystemSnack />
+            {tutorial && <Tutorial 
+              sceneID={isRoute(route, 'scene') ? route.value : undefined} 
+              gridID={isRoute(route, 'grid') ? route.value : undefined} 
+            />}
+          </Box>
+        </ErrorBoundary>
+      </ThemeProvider>
+    </StyledEngineProvider>
+  )
 }
 
-(Meta as any).displayName="Meta";
+;(Meta as any).displayName = 'Meta'

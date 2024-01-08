@@ -3,7 +3,9 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import SceneGenerator from "../SceneGenerator";
 import TestProvider from "../../../../../test/util/TestProvider";
-import Scene from "../../../data/Scene";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../storage/Scene";
 
 jest.mock('../../library/LibrarySearch', () => 'LibrarySearch');
 
@@ -12,17 +14,12 @@ jest.mock('@mui/material/MenuList', () => 'MenuList');
 
 describe("SceneGenerator", () => {
   it("should match snapshot", () => {
-    const scene = new Scene({generatorWeights: []});
+    const sceneID = 3
+    store.dispatch(setScene(newScene({id: sceneID, generatorWeights: []})))
+
     const component = renderer.create(
-      <TestProvider>
-        <SceneGenerator
-          library={[]}
-          scene={scene}
-          tags={[]}
-          tutorial={null}
-          onTutorial={(tutorial) => {}}
-          onUpdateScene={(scene, fn) => {}}
-        />
+      <TestProvider store={store}>
+        <SceneGenerator sceneID={sceneID} />
       </TestProvider>
     );
 

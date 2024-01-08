@@ -1,5 +1,4 @@
-import * as React from "react";
-import {existsSync} from 'fs';
+import React, { type ChangeEvent, useState } from 'react'
 
 import {
   Button,
@@ -7,145 +6,150 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  FormControlLabel,
-  Grid,
-  Switch,
-  Tooltip
-} from "@mui/material";
+  Grid
+} from '@mui/material'
 
-import {GeneralSettings} from "../../data/Config";
-import {portablePath} from "../../data/utils";
+import BaseSwitch from '../common/BaseSwitch'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { selectConstants } from '../../../store/constants/selectors'
+import {
+  setConfigGeneralSettingsPrioritizePerformance,
+  setConfigGeneralSettingsConfirmSceneDeletion,
+  setConfigGeneralSettingsConfirmBlacklist,
+  setConfigGeneralSettingsConfirmFileDeletion,
+  setConfigGeneralSettingsPortableMode,
+  setConfigGeneralSettingsDisableLocalSave
+} from '../../../store/app/slice'
+import {
+  selectAppConfigGeneralSettingsPrioritizePerformance,
+  selectAppConfigGeneralSettingsConfirmSceneDeletion,
+  selectAppConfigGeneralSettingsConfirmBlacklist,
+  selectAppConfigGeneralSettingsConfirmFileDeletion,
+  selectAppConfigGeneralSettingsPortableMode,
+  selectAppConfigGeneralSettingsDisableLocalSave
+} from '../../../store/app/selectors'
+import { restoreAppStorageFromBackup } from '../../../store/app/thunks'
 
-export default class PlayerBoolCard2 extends React.Component {
-  readonly props: {
-    generalSettings: GeneralSettings,
-    onPortableOverride(): void,
-    onUpdateGeneralSettings(fn: (settings: GeneralSettings) => void): void,
-  };
+export default function PlayerBoolCard2() {
+  const [portableDialog, setPortableDialog] = useState(false)
 
-  readonly state = {
-    portableDialog: false,
-  };
+  const dispatch = useAppDispatch()
+  const { portablePathExists, portablePath } = useAppSelector(selectConstants())
+  const prioritizePerformance = useAppSelector(
+    selectAppConfigGeneralSettingsPrioritizePerformance()
+  )
+  const portableMode = useAppSelector(
+    selectAppConfigGeneralSettingsPortableMode()
+  )
 
-  render() {
-    return(
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12}>
-          <Tooltip disableInteractive title={<div>Prioritizing performance will smooth image effects, but may dramatically increase load times.<br/>Prioritizing loading will decrease load times, but may result in jittery effects during playback</div>}>
-            <FormControlLabel
-              control={
-                <Switch checked={this.props.generalSettings.prioritizePerformance}
-                        onChange={this.onBoolInput.bind(this, 'prioritizePerformance')}/>
-              }
-              label={this.props.generalSettings.prioritizePerformance ? "Prioritize Performance" : "Prioritize Loading"}/>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12}>
-          <Tooltip disableInteractive title="If disabled, no prompt will appear to confirm Scene deletion">
-            <FormControlLabel
-              control={
-                <Switch checked={this.props.generalSettings.confirmSceneDeletion}
-                        onChange={this.onBoolInput.bind(this, 'confirmSceneDeletion')}/>
-              }
-              label="Confirm Scene Deletion"/>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12}>
-          <Tooltip disableInteractive title="If disabled, no prompt will appear to confirm blacklisting a file">
-            <FormControlLabel
-              control={
-                <Switch checked={this.props.generalSettings.confirmBlacklist}
-                        onChange={this.onBoolInput.bind(this, 'confirmBlacklist')}/>
-              }
-              label="Confirm Blacklist"/>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12}>
-          <Tooltip disableInteractive title="If disabled, no prompt will appear to confirm File deletion">
-            <FormControlLabel
-              control={
-                <Switch checked={this.props.generalSettings.confirmFileDeletion}
-                        onChange={this.onBoolInput.bind(this, 'confirmFileDeletion')}/>
-              }
-              label="Confirm File Deletion"/>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12}>
-          <Tooltip disableInteractive title="Portable Mode will save a copy of your data in the same directory as the FlipFlip executable, as well as the default save path. This needs to be enabled on each machine.">
-            <FormControlLabel
-              control={
-                <Switch checked={this.props.generalSettings.portableMode}
-                        onChange={this.onTogglePortable.bind(this)}/>
-              }
-              label="Portable Mode"/>
-          </Tooltip>
-        </Grid>
-        {this.props.generalSettings.portableMode && (
-          <Grid item xs={12}>
-            <Tooltip disableInteractive title="If on, data will only be saved in the same directory as the FlipFlip executable, and not at the default save path.">
-              <FormControlLabel
-                control={
-                  <Switch checked={this.props.generalSettings.disableLocalSave}
-                          onChange={this.onBoolInput.bind(this, 'disableLocalSave')}/>
-                }
-                label="Disable Local Saves"/>
-            </Tooltip>
-          </Grid>
-        )}
-        <Dialog
-          open={this.state.portableDialog}
-          onClose={this.onToggleDialog.bind(this)}
-          aria-describedby="portable-description">
-          <DialogContent>
-            <DialogContentText id="portable-description">
-              Do you want to use the local data on this machine or existing portable data?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.onToggleDialog.bind(this)} color="secondary">
-              Local data
-            </Button>
-            <Button onClick={this.onChoosePortable.bind(this)} color="primary">
-              Portable data
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Grid>
-    );
-  }
-
-  onTogglePortable(e: MouseEvent) {
-    const input = (e.target as HTMLInputElement);
-    const checked = input.checked;
-    if (checked && existsSync(portablePath)) {
+  const onTogglePortable = (
+    e: ChangeEvent<HTMLInputElement>,
+    checked: boolean
+  ) => {
+    if (checked && portablePathExists) {
       // Ask whether to keep local or keep portable
-      this.onToggleDialog();
+      onToggleDialog()
+    } else {
+      dispatch(setConfigGeneralSettingsPortableMode(checked))
     }
-    this.changeKey('portableMode', checked);
   }
 
-  onToggleDialog() {
-    this.setState({portableDialog: !this.state.portableDialog});
+  const onToggleDialog = () => {
+    setPortableDialog(portableDialog)
   }
 
-  onChoosePortable() {
-    this.props.onPortableOverride();
-    this.onToggleDialog();
+  const onChoosePortable = () => {
+    dispatch(setConfigGeneralSettingsPortableMode(true))
+    dispatch(restoreAppStorageFromBackup(portablePath))
+    onToggleDialog()
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = (e.target as HTMLInputElement);
-    const checked = input.checked;
-    this.changeKey(key, checked);
-  }
-
-  changeKey(key: string, value: any) {
-    this.update((s) => s[key] = value);
-  }
-
-  update(fn: (settings: any) => void) {
-    this.props.onUpdateGeneralSettings(fn);
-  }
+  return (
+    <Grid container spacing={2} alignItems="center">
+      <Grid item xs={12}>
+        <BaseSwitch
+          label={
+            prioritizePerformance
+              ? 'Prioritize Performance'
+              : 'Prioritize Loading'
+          }
+          tooltip={
+            <div>
+              Prioritizing performance will smooth image effects, but may
+              dramatically increase load times.
+              <br />
+              Prioritizing loading will decrease load times, but may result in
+              jittery effects during playback
+            </div>
+          }
+          selector={selectAppConfigGeneralSettingsPrioritizePerformance()}
+          action={setConfigGeneralSettingsPrioritizePerformance}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Confirm Scene Deletion"
+          tooltip="If disabled, no prompt will appear to confirm Scene deletion"
+          selector={selectAppConfigGeneralSettingsConfirmSceneDeletion()}
+          action={setConfigGeneralSettingsConfirmSceneDeletion}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Confirm Blacklist"
+          tooltip="If disabled, no prompt will appear to confirm blacklisting a file"
+          selector={selectAppConfigGeneralSettingsConfirmBlacklist()}
+          action={setConfigGeneralSettingsConfirmBlacklist}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Confirm File Deletion"
+          tooltip="If disabled, no prompt will appear to confirm File deletion"
+          selector={selectAppConfigGeneralSettingsConfirmFileDeletion()}
+          action={setConfigGeneralSettingsConfirmFileDeletion}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Portable Mode"
+          tooltip="Portable Mode will save a copy of your data in the same directory as the FlipFlip executable, as well as the default save path. This needs to be enabled on each machine."
+          selector={selectAppConfigGeneralSettingsPortableMode()}
+          onChange={onTogglePortable}
+        />
+      </Grid>
+      {portableMode && (
+        <Grid item xs={12}>
+          <BaseSwitch
+            label="Disable Local Saves"
+            tooltip="If on, data will only be saved in the same directory as the FlipFlip executable, and not at the default save path."
+            selector={selectAppConfigGeneralSettingsDisableLocalSave()}
+            action={setConfigGeneralSettingsDisableLocalSave}
+          />
+        </Grid>
+      )}
+      <Dialog
+        open={portableDialog}
+        onClose={onToggleDialog}
+        aria-describedby="portable-description"
+      >
+        <DialogContent>
+          <DialogContentText id="portable-description">
+            Do you want to use the local data on this machine or existing
+            portable data?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onToggleDialog} color="secondary">
+            Local data
+          </Button>
+          <Button onClick={onChoosePortable} color="primary">
+            Portable data
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Grid>
+  )
 }
 
-(PlayerBoolCard2 as any).displayName="PlayerBoolCard2";
+;(PlayerBoolCard2 as any).displayName = 'PlayerBoolCard2'

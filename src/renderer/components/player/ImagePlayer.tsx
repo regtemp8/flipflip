@@ -1,1112 +1,2058 @@
-import IncomingMessage = Electron.IncomingMessage;
-import {webFrame} from "electron";
-import * as React from 'react';
-import request from 'request';
-import fs from "fs";
-import gifInfo from 'gif-info';
+import React, { useEffect, useState, useRef } from 'react'
+import wretch from 'wretch'
+import gifInfo from 'gif-info'
 
-import {CircularProgress, Container, Typography} from "@mui/material";
+import { CircularProgress, Container, Typography } from '@mui/material'
 
-import {GO, IF, OF, OT, SL, SOF, ST, TF, VO, WF} from '../../data/const';
-import {flatten, getCachePath, getRandomListItem, getRandomNumber, toArrayBuffer, urlToPath} from '../../data/utils';
-import {getFileName, getSourceType, isVideo} from "./Scrapers";
-import Config from "../../data/Config";
-import Scene from "../../data/Scene";
-import ChildCallbackHack from './ChildCallbackHack';
-import ImageView from './ImageView';
-import Strobe from "./Strobe";
-import Audio from "../../data/Audio";
+import { GO, IF, OF, OT, SL, SOF, ST, VO, WF } from '../../data/const'
+import {
+  flatten,
+  getCachePath,
+  getDuration,
+  getRandomListItem,
+  getRandomNumber,
+  urlToPath
+} from '../../data/utils'
+import { getFileName, getSourceType, isVideo } from './Scrapers'
+import type ChildCallbackHack from './ChildCallbackHack'
+import ImageView from './ImageView'
+import Strobe from './Strobe'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import {
+  selectAppConfigCachingDirectory,
+  selectAppConfigCachingEnabled,
+  selectAppConfigDisplaySettingsMaxInMemory,
+  selectAppConfigDisplaySettingsMaxInHistory,
+  selectAppConfigDisplaySettingsMaxLoadingAtOnce,
+  selectAppConfigDisplaySettingsMinVideoSize,
+  selectAppConfigDisplaySettingsMinImageSize,
+  selectAppConfigDefaultSceneOrderFunction
+} from '../../../store/app/selectors'
+import { selectConstants } from '../../../store/constants/selectors'
+import {
+  selectSceneBackForth,
+  selectSceneBackForthTF,
+  selectSceneBackForthDuration,
+  selectSceneBackForthDurationMin,
+  selectSceneBackForthDurationMax,
+  selectSceneBackForthSinRate,
+  selectSceneBackForthBPMMulti,
+  selectSceneOrderFunction,
+  selectSceneUseWeights,
+  selectSceneFullSource,
+  selectSceneForceAllSource,
+  selectSceneForceAll,
+  selectSceneSkipVideoStart,
+  selectSceneSkipVideoEnd,
+  selectSceneVideoSpeed,
+  selectSceneVideoSpeedMin,
+  selectSceneVideoSpeedMax,
+  selectSceneVideoRandomSpeed,
+  selectSceneRandomVideoStart,
+  selectSceneContinueVideo,
+  selectSceneVideoOption,
+  selectSceneVideoTimingConstant,
+  selectSceneVideoTimingMin,
+  selectSceneVideoTimingMax,
+  selectSceneGifOption,
+  selectSceneGifTimingConstant,
+  selectSceneGifTimingMin,
+  selectSceneGifTimingMax,
+  selectSceneTimingTF,
+  selectSceneTimingDuration,
+  selectSceneTimingDurationMin,
+  selectSceneTimingDurationMax,
+  selectSceneTimingSinRate,
+  selectSceneTimingBPMMulti,
+  selectSceneSourceOrderFunction,
+  selectSceneWeightFunction,
+  selectSceneVideoOrientation,
+  selectSceneIsDownloadScene,
+  selectSceneNextSceneAllImages,
+  selectSceneNextSceneID,
+  selectSceneImageOrientation,
+  selectSceneImageTypeFilter,
+  selectSceneStrobe
+} from '../../../store/scene/selectors'
+import { selectSceneLibrarySources } from '../../../store/librarySource/selectors'
+import { setRouteGoBack, cacheImage } from '../../../store/app/thunks'
+import { nextScene } from '../../../store/scene/thunks'
+import { selectAudioBPM } from '../../../store/audio/selectors'
+import { selectPlayerSceneID, selectPlayerHasStarted } from '../../../store/player/selectors'
+import { selectSourceScraperAllPosts, selectSourceScraperAllURLs, selectSourceScraperSingleImage } from '../../../store/sourceScraper/selectors'
+import LibrarySource from '../../../store/librarySource/LibrarySource'
+import { setPlayerFirstImageLoaded } from '../../../store/player/slice'
 
 class GifInfo {
-  animated: boolean;
-  duration: number;
-  durationChrome: number;
+  animated: boolean
+  duration: number
+  durationChrome: number
 }
 
-export default class ImagePlayer extends React.Component {
-  readonly props: {
-    config: Config,
-    scene: Scene,
-    currentAudio: Audio,
-    gridView: boolean,
-    advanceHack: ChildCallbackHack,
-    allURLs: Map<string, Array<string>>,
-    allPosts: Map<string, string>,
-    isPlaying: boolean,
-    historyOffset: number,
-    hasStarted: boolean,
-    singleImage: number,
-    deleteHack?: ChildCallbackHack,
-    gridCoordinates?: Array<number>,
-    isOverlay?: boolean,
-    strobeLayer?: string,
-    setHistoryPaths(historyPaths: Array<any>): void,
-    setHistoryOffset(historyOffset: number): void,
-    onLoaded(): void,
-    setVideo(video: HTMLVideoElement): void,
-    cache(i: HTMLImageElement | HTMLVideoElement): void,
-    onEndScene?(): void,
-    setSceneCopy?(children: React.ReactNode): void,
-    setTimeToNextFrame?(timeToNextFrame: number): void,
-    playNextScene?(): void,
-  };
+export interface ImagePlayerProps {
+  uuid: string
+  currentAudio: number
+  gridView: boolean
+  advanceHack: ChildCallbackHack
+  isPlaying: boolean
+  historyOffset: number
+  deleteHack?: ChildCallbackHack
+  gridCoordinates?: number[]
+  isOverlay?: boolean
+  strobeLayer?: string
+  setHistoryPaths: (
+    historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  ) => void
+  setHistoryOffset: (historyOffset: number) => void
+  setVideo: (video: HTMLVideoElement) => void
+  setSceneCopy?: (children: React.ReactNode) => void
+  setTimeToNextFrame?: (timeToNextFrame: number) => void
+}
 
-  readonly state = {
-    readyToDisplay: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>(),
-    historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>(),
+interface ImagePlayerState {
+  image?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  timeToNextFrame: number
+  toggleStrobe: boolean
+}
+
+export default function ImagePlayer(props: ImagePlayerProps) {
+  const _hasStarted = useRef<boolean>(false)
+  const _allURLs = useRef<Record<string, string[]>>()
+  const _allPosts = useRef<Record<string, string>>()
+
+  const dispatch = useAppDispatch()
+  const { isWin32, pathSep } = useAppSelector(selectConstants())
+  const sceneID = useAppSelector(selectPlayerSceneID(props.uuid))
+  _hasStarted.current = useAppSelector(selectPlayerHasStarted(props.uuid))
+  _allURLs.current = useAppSelector(selectSourceScraperAllURLs(sceneID))
+  _allPosts.current = useAppSelector(selectSourceScraperAllPosts(sceneID))
+  const maxLoadingAtOnce = useAppSelector(
+    selectAppConfigDisplaySettingsMaxLoadingAtOnce()
+  )
+  const maxInMemory = useAppSelector(
+    selectAppConfigDisplaySettingsMaxInMemory()
+  )
+  const maxInHistory = useAppSelector(
+    selectAppConfigDisplaySettingsMaxInHistory()
+  )
+  const cachingEnabled = useAppSelector(selectAppConfigCachingEnabled())
+  const cachingDirectory = useAppSelector(selectAppConfigCachingDirectory())
+  const minVideoSize = useAppSelector(
+    selectAppConfigDisplaySettingsMinVideoSize()
+  )
+  const minImageSize = useAppSelector(
+    selectAppConfigDisplaySettingsMinImageSize()
+  )
+  const defaultSceneOrderFunction = useAppSelector(
+    selectAppConfigDefaultSceneOrderFunction()
+  )
+  const backForth = useAppSelector(selectSceneBackForth(sceneID))
+  const backForthTF = useAppSelector(selectSceneBackForthTF(sceneID))
+  const backForthDuration = useAppSelector(
+    selectSceneBackForthDuration(sceneID)
+  )
+  const backForthDurationMin = useAppSelector(
+    selectSceneBackForthDurationMin(sceneID)
+  )
+  const backForthDurationMax = useAppSelector(
+    selectSceneBackForthDurationMax(sceneID)
+  )
+  const backForthSinRate = useAppSelector(
+    selectSceneBackForthSinRate(sceneID)
+  )
+  const backForthBPMMulti = useAppSelector(
+    selectSceneBackForthBPMMulti(sceneID)
+  )
+  const orderFunction = useAppSelector(selectSceneOrderFunction(sceneID))
+  const sourceOrderFunction = useAppSelector(
+    selectSceneSourceOrderFunction(sceneID)
+  )
+  const weightFunction = useAppSelector(
+    selectSceneWeightFunction(sceneID)
+  )
+  const useWeights = useAppSelector(selectSceneUseWeights(sceneID))
+  const sources = useAppSelector(selectSceneLibrarySources(sceneID))
+  const fullSource = useAppSelector(selectSceneFullSource(sceneID))
+  const forceAllSource = useAppSelector(
+    selectSceneForceAllSource(sceneID)
+  )
+  const forceAll = useAppSelector(selectSceneForceAll(sceneID))
+  const videoOrientation = useAppSelector(
+    selectSceneVideoOrientation(sceneID)
+  )
+  const skipVideoStart = useAppSelector(
+    selectSceneSkipVideoStart(sceneID)
+  )
+  const skipVideoEnd = useAppSelector(selectSceneSkipVideoEnd(sceneID))
+  const videoSpeed = useAppSelector(selectSceneVideoSpeed(sceneID))
+  const videoSpeedMin = useAppSelector(selectSceneVideoSpeedMin(sceneID))
+  const videoSpeedMax = useAppSelector(selectSceneVideoSpeedMax(sceneID))
+  const videoRandomSpeed = useAppSelector(
+    selectSceneVideoRandomSpeed(sceneID)
+  )
+  const randomVideoStart = useAppSelector(
+    selectSceneRandomVideoStart(sceneID)
+  )
+  const continueVideo = useAppSelector(selectSceneContinueVideo(sceneID))
+  const videoOption = useAppSelector(selectSceneVideoOption(sceneID))
+  const videoTimingConstant = useAppSelector(
+    selectSceneVideoTimingConstant(sceneID)
+  )
+  const videoTimingMin = useAppSelector(
+    selectSceneVideoTimingMin(sceneID)
+  )
+  const videoTimingMax = useAppSelector(
+    selectSceneVideoTimingMax(sceneID)
+  )
+  const downloadScene = useAppSelector(
+    selectSceneIsDownloadScene(sceneID)
+  )
+  const nextSceneAllImages = useAppSelector(
+    selectSceneNextSceneAllImages(sceneID)
+  )
+  const nextSceneID = useAppSelector(selectSceneNextSceneID(sceneID))
+  const imageOrientation = useAppSelector(
+    selectSceneImageOrientation(sceneID)
+  )
+  const gifOption = useAppSelector(selectSceneGifOption(sceneID))
+  const gifTimingConstant = useAppSelector(
+    selectSceneGifTimingConstant(sceneID)
+  )
+  const gifTimingMin = useAppSelector(selectSceneGifTimingMin(sceneID))
+  const gifTimingMax = useAppSelector(selectSceneGifTimingMax(sceneID))
+  const imageTypeFilter = useAppSelector(
+    selectSceneImageTypeFilter(sceneID)
+  )
+  const timingTF = useAppSelector(selectSceneTimingTF(sceneID))
+  const timingDuration = useAppSelector(
+    selectSceneTimingDuration(sceneID)
+  )
+  const timingDurationMin = useAppSelector(
+    selectSceneTimingDurationMin(sceneID)
+  )
+  const timingDurationMax = useAppSelector(
+    selectSceneTimingDurationMax(sceneID)
+  )
+  const timingSinRate = useAppSelector(selectSceneTimingSinRate(sceneID))
+  const timingBPMMulti = useAppSelector(
+    selectSceneTimingBPMMulti(sceneID)
+  )
+  const strobe = useAppSelector(selectSceneStrobe(sceneID))
+  const bpm = useAppSelector(selectAudioBPM(props.currentAudio))
+  const singleImage = useAppSelector(selectSourceScraperSingleImage(sceneID))
+
+  const [state, setState] = useState<ImagePlayerState>({
     timeToNextFrame: 0,
-    timeoutID: 0,
-    nextImageID: 0,
-    historyOffset: 0,
-  };
+    toggleStrobe: false
+  })
 
-  _backForth: number = null;
-  _isMounted: boolean;
-  _isLooping: boolean;
-  _loadedSources: Array<string>;
-  _loadedURLs: Array<string>;
-  _playedURLs: Array<string>;
-  _nextIndex: number;
-  _nextAdvIndex: number;
-  _sourceComplete: boolean;
-  _count: number;
-  _nextSourceIndex: Map<string, number>;
-  _timeout: number;
-  _waitTimeouts: Array<number>;
-  _imgLoadTimeouts: Array<number>;
-  _toggleStrobe: boolean;
-  _runFetchLoopCallRequests: Array<number>;
-  _animationFrameHandle: number;
+  const _historyOffset = useRef<number>(0)
+  const _historyPaths = useRef<
+    Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  >([])
+  const _readyToDisplay = useRef<
+    Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | undefined>
+  >([])
+  const _backForth = useRef<number>()
+  const _isMounted = useRef<boolean>(false)
+  const _isLooping = useRef<boolean>(false)
+  const _loadedSources = useRef<string[]>([])
+  const _loadedURLs = useRef<string[]>([])
+  const _playedURLs = useRef<string[]>([])
+  const _nextIndex = useRef<number>(-1)
+  const _nextAdvIndex = useRef<number>(0)
+  const _sourceComplete = useRef<boolean>(false)
+  const _nextSourceIndex = useRef(new Map<string, number>())
+  const _timeout = useRef<number>()
+  const _waitTimeouts = useRef(
+    new Array<number | undefined>(maxLoadingAtOnce).fill(undefined)
+  )
+  const _imgLoadTimeouts = useRef(
+    new Array<number | undefined>(maxLoadingAtOnce).fill(undefined)
+  )
+  const _runFetchLoopCallRequests = useRef<number[]>([])
+  const _animationFrameHandle = useRef<number>()
+  const _lastAdvance = useRef<number>()
+  const _strictCheckCount = useRef<number>(0)
+  const _nextImageID = useRef(0)
+  const _prevSceneID = useRef<number>()
 
-  render() {
-    let offset = this.getHistoryOffset();
-    if (offset <= -this.state.historyPaths.length) {
-      offset = -this.state.historyPaths.length + 1;
-    }
+  // START LOG COMPONENT CHANGES
+  // const pr_uuid = useRef<string>()
+  // const pr_currentAudio = useRef<number>()
+  // const pr_gridView = useRef<boolean>()
+  // const pr_advanceHack = useRef<ChildCallbackHack>()
+  // const pr_isPlaying = useRef<boolean>()
+  // const pr_historyOffset = useRef<number>()
+  // const pr_deleteHack = useRef<ChildCallbackHack>()
+  // const pr_gridCoordinates = useRef<number[]>()
+  // const pr_isOverlay = useRef<boolean>()
+  // const pr_strobeLayer = useRef<string>()
+  // const pr_setHistoryPaths = useRef<(
+  //   historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  // ) => void>()
+  // const pr_setHistoryOffset = useRef<(historyOffset: number) => void>()
+  // const pr_setVideo = useRef<(video: HTMLVideoElement) => void>()
+  // const pr_setTimeToNextFrame = useRef<(timeToNextFrame: number) => void>()
+  // const pr_setSceneCopy = useRef<(children: React.ReactNode) => void>()
+  // const p_isWin32 = useRef<boolean>()
+  // const p_pathSep = useRef<string>()
+  // const p_sceneID = useRef<number>()
+  // const p_maxLoadingAtOnce = useRef<number>()
+  // const p_maxInMemory = useRef<number>()
+  // const p_maxInHistory = useRef<number>()
+  // const p_cachingEnabled = useRef<boolean>()
+  // const p_cachingDirectory = useRef<string>()
+  // const p_minVideoSize = useRef<number>()
+  // const p_minImageSize = useRef<number>()
+  // const p_defaultSceneOrderFunction = useRef<string>()
+  // const p_backForth = useRef<boolean>()
+  // const p_backForthTF = useRef<string>()
+  // const p_backForthDuration = useRef<number>()
+  // const p_backForthDurationMin = useRef<number>()
+  // const p_backForthDurationMax = useRef<number>()
+  // const p_backForthSinRate = useRef<number>()
+  // const p_backForthBPMMulti = useRef<number>()
+  // const p_orderFunction = useRef<string>()
+  // const p_sourceOrderFunction = useRef<string>()
+  // const p_weightFunction = useRef<string>()
+  // const p_useWeights = useRef<boolean>()
+  // const p_sources = useRef<LibrarySource[]>()
+  // const p_fullSource = useRef<boolean>()
+  // const p_forceAllSource = useRef<boolean>()
+  // const p_forceAll = useRef<boolean>()
+  // const p_videoOrientation = useRef<string>()
+  // const p_skipVideoStart = useRef<number>()
+  // const p_skipVideoEnd = useRef<number>()
+  // const p_videoSpeed = useRef<number>()
+  // const p_videoSpeedMin = useRef<number>()
+  // const p_videoSpeedMax = useRef<number>()
+  // const p_videoRandomSpeed = useRef<boolean>()
+  // const p_randomVideoStart = useRef<boolean>()
+  // const p_continueVideo = useRef<boolean>()
+  // const p_videoOption = useRef<string>()
+  // const p_videoTimingConstant = useRef<number>()
+  // const p_videoTimingMin = useRef<number>()
+  // const p_videoTimingMax = useRef<number>()
+  // const p_downloadScene = useRef<boolean>()
+  // const p_nextSceneAllImages = useRef<boolean>()
+  // const p_nextSceneID = useRef<number>()
+  // const p_imageOrientation = useRef<string>()
+  // const p_gifOption = useRef<string>()
+  // const p_gifTimingConstant = useRef<number>()
+  // const p_gifTimingMin = useRef<number>()
+  // const p_gifTimingMax = useRef<number>()
+  // const p_imageTypeFilter = useRef<string>()
+  // const p_timingTF = useRef<string>()
+  // const p_timingDuration = useRef<number>()
+  // const p_timingDurationMin = useRef<number>()
+  // const p_timingDurationMax = useRef<number>()
+  // const p_timingSinRate = useRef<number>()
+  // const p_timingBPMMulti = useRef<number>()
+  // const p_strobe = useRef<boolean>()
+  // const p_bpm = useRef<number>()
+  // const p_singleImage = useRef<boolean>()
+  // const r_hasStarted = useRef<boolean>()
+  // const r_allURLs = useRef<Record<string, string[]>>()
+  // const r_allPosts = useRef<Record<string, string>>()
+  // const r_state = useRef<ImagePlayerState>()
+  // const r_historyOffset = useRef<number>()
+  // const r_historyPaths = useRef<
+  //   Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  // >()
+  // const r_readyToDisplay = useRef<
+  //   Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | undefined>
+  // >()
+  // const r_backForth = useRef<number>()
+  // const r_isMounted = useRef<boolean>()
+  // const r_isLooping = useRef<boolean>()
+  // const r_loadedSources = useRef<string[]>()
+  // const r_loadedURLs = useRef<string[]>()
+  // const r_playedURLs = useRef<string[]>()
+  // const r_nextIndex = useRef<number>()
+  // const r_nextAdvIndex = useRef<number>()
+  // const r_sourceComplete = useRef<boolean>()
+  // const r_nextSourceIndex = useRef<Map<string, number>>()
+  // const r_timeout = useRef<number>()
+  // const r_waitTimeouts = useRef<Array<number | undefined>>()
+  // const r_imgLoadTimeouts = useRef<Array<number | undefined>>()
+  // const r_runFetchLoopCallRequests = useRef<number[]>()
+  // const r_animationFrameHandle = useRef<number>()
+  // const r_lastAdvance = useRef<number>()
+  // const r_strictCheckCount = useRef<number>()
+  // const r_nextImageID = useRef<number>()
+  // const r_prevSceneID = useRef<number>()
 
-    const style: any = {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      position: this.props.gridView ? 'static' : 'fixed',
-      zIndex: this.props.isOverlay ? 4 : 'auto',
-    };
+  // console.log('33------------------------33')
+  // if(props.uuid !== pr_uuid.current){
+  //   console.log('UUID PROP CHANGED')
+  // }
+  // if(props.currentAudio !== pr_currentAudio.current){
+  //   console.log('CURRENT_AUDIO PROP CHANGED')
+  // }
+  // if(props.isPlaying !== pr_isPlaying.current){
+  //   console.log('IS_PLAYING PROP CHANGED')
+  // }
+  // if(props.gridView !== pr_gridView.current){
+  //   console.log('GRID_VIEW PROP CHANGED')
+  // }
+  // if(props.historyOffset !== pr_historyOffset.current){
+  //   console.log('HISTORY_OFFSET PROP CHANGED')
+  // }
+  // if(props.advanceHack !== pr_advanceHack.current){
+  //   console.log('ADVANCE_HACK PROP CHANGED')
+  // }
+  // if(props.deleteHack !== pr_deleteHack.current){
+  //   console.log('DELETE_HACK PROP CHANGED')
+  // }
+  // if(props.gridCoordinates !== pr_gridCoordinates.current){
+  //   console.log('GRID_COORDINATES PROP CHANGED')
+  // }
+  // if(props.isOverlay !== pr_isOverlay.current){
+  //   console.log('IS_OVERLAY PROP CHANGED')
+  // }
+  // if(props.strobeLayer !== pr_strobeLayer.current){
+  //   console.log('STROBE_LAYER PROP CHANGED')
+  // }
+  // if(props.setHistoryOffset !== pr_setHistoryOffset.current){
+  //   console.log('SET_HISTORY_OFFSET PROP CHANGED')
+  // }
+  // if(props.setHistoryPaths !== pr_setHistoryPaths.current){
+  //   console.log('SET_HISTORY_PATHS PROP CHANGED')
+  // }
+  // if(props.setVideo !== pr_setVideo.current){
+  //   console.log('SET_VIDEO PROP CHANGED')
+  // }
+  // if(props.setTimeToNextFrame !== pr_setTimeToNextFrame.current){
+  //   console.log('SET_TIME_TO_NEXT_FRAME PROP CHANGED')
+  // }
+  // if(props.setSceneCopy !== pr_setSceneCopy.current){
+  //   console.log('SET_SCENE_COPY PROP CHANGED')
+  // }
+  // if(p_isWin32.current !== isWin32) {
+	// 	console.log('IS_WIN32 CHANGED')
+	// }
+  // if(p_pathSep.current !== pathSep) {
+	// 	console.log('PATH_SEP CHANGED')
+	// }
+  // if(p_sceneID.current !== sceneID) {
+	// 	console.log('SCENE_ID CHANGED')
+	// }
+  // if(p_maxLoadingAtOnce.current !== maxLoadingAtOnce) {
+	// 	console.log('MAX_LOADING_AT_ONCE CHANGED')
+	// }
+  // if(p_maxInMemory.current !== maxInMemory) {
+	// 	console.log('MAX_IN_MEMORY CHANGED')
+	// }
+  // if(p_maxInHistory.current !== maxInHistory) {
+	// 	console.log('MAX_IN_HISTORY CHANGED')
+	// }
+  // if(p_cachingEnabled.current !== cachingEnabled) {
+	// 	console.log('CACHING_ENABLED CHANGED')
+	// }
+  // if(p_cachingDirectory.current !== cachingDirectory) {
+	// 	console.log('CACHING_DIRECTORY CHANGED')
+	// }
+  // if(p_minVideoSize.current !== minVideoSize) {
+	// 	console.log('MIN_VIDEO_SIZE CHANGED')
+	// }
+  // if(p_minImageSize.current !== minImageSize) {
+	// 	console.log('MIN_IMAGE_SIZE CHANGED')
+	// }
+  // if(p_defaultSceneOrderFunction.current !== defaultSceneOrderFunction) {
+	// 	console.log('DEFAULT_SCENE_ORDER_FUNCTION CHANGED')
+	// }
+  // if(p_backForth.current !== backForth) {
+	// 	console.log('BACK_FORTH CHANGED')
+	// }
+  // if(p_backForthTF.current !== backForthTF) {
+	// 	console.log('BACK_FORTH_TF CHANGED')
+	// }
+  // if(p_backForthDuration.current !== backForthDuration) {
+	// 	console.log('BACK_FORTH_DURATION CHANGED')
+	// }
+  // if(p_backForthDurationMin.current !== backForthDurationMin) {
+	// 	console.log('BACK_FORTH_DURATION_MIN CHANGED')
+	// }
+  // if(p_backForthDurationMax.current !== backForthDurationMax) {
+	// 	console.log('BACK_FORTH_DURATION_MAX CHANGED')
+	// }
+  // if(p_backForthSinRate.current !== backForthSinRate) {
+	// 	console.log('BACK_FORTH_SIN_RATE CHANGED')
+	// }
+  // if(p_backForthBPMMulti.current !== backForthBPMMulti) {
+	// 	console.log('BACK_FORTH_BPM_MULTI CHANGED')
+	// }
+  // if(p_orderFunction.current !== orderFunction) {
+	// 	console.log('ORDER_FUNCTION CHANGED')
+	// }
+  // if(p_sourceOrderFunction.current !== sourceOrderFunction) {
+	// 	console.log('SOURCE_ORDER_FUNCTION CHANGED')
+	// }
+  // if(p_weightFunction.current !== weightFunction) {
+	// 	console.log('WEIGHT_FUNCTION CHANGED')
+	// }
+  // if(p_useWeights.current !== useWeights) {
+	// 	console.log('USE_WEIGHTS CHANGED')
+	// }
+  // if(p_sources.current !== sources) {
+	// 	console.log('SOURCES CHANGED')
+	// }
+  // if(p_fullSource.current !== fullSource) {
+	// 	console.log('FULL_SOURCE CHANGED')
+	// }
+  // if(p_forceAllSource.current !== forceAllSource) {
+	// 	console.log('FORCE_ALL_SOURCE CHANGED')
+	// }
+  // if(p_forceAll.current !== forceAll) {
+	// 	console.log('FORCE_ALL CHANGED')
+	// }
+  // if(p_videoOrientation.current !== videoOrientation) {
+	// 	console.log('VIDEO_ORIENTATION CHANGED')
+	// }
+  // if(p_skipVideoStart.current !== skipVideoStart) {
+	// 	console.log('SKIP_VIDEO_START CHANGED')
+	// }
+  // if(p_skipVideoEnd.current !== skipVideoEnd) {
+	// 	console.log('SKIP_VIDEO_END CHANGED')
+	// }
+  // if(p_videoSpeed.current !== videoSpeed) {
+	// 	console.log('VIDEO_SPEED CHANGED')
+	// }
+  // if(p_videoSpeedMin.current !== videoSpeedMin) {
+	// 	console.log('VIDEO_SPEED_MIN CHANGED')
+	// }
+  // if(p_videoSpeedMax.current !== videoSpeedMax) {
+	// 	console.log('VIDEO_SPEED_MAX CHANGED')
+	// }
+  // if(p_videoRandomSpeed.current !== videoRandomSpeed) {
+	// 	console.log('VIDEO_RANDOM_SPEED CHANGED')
+	// }
+  // if(p_randomVideoStart.current !== randomVideoStart) {
+	// 	console.log('RANDOM_VIDEO_START CHANGED')
+	// }
+  // if(p_continueVideo.current !== continueVideo) {
+	// 	console.log('CONTINUE_VIDEO CHANGED')
+	// }
+  // if(p_videoOption.current !== videoOption) {
+	// 	console.log('VIDEO_OPTION CHANGED')
+	// }
+  // if(p_videoTimingConstant.current !== videoTimingConstant) {
+	// 	console.log('VIDEO_TIMING_CONSTANT CHANGED')
+	// }
+  // if(p_videoTimingMin.current !== videoTimingMin) {
+	// 	console.log('VIDEO_TIMING_MIN CHANGED')
+	// }
+  // if(p_videoTimingMax.current !== videoTimingMax) {
+	// 	console.log('VIDEO_TIMING_MAX CHANGED')
+	// }
+  // if(p_downloadScene.current !== downloadScene) {
+	// 	console.log('DOWNLOAD_SCENE CHANGED')
+	// }
+  // if(p_nextSceneAllImages.current !== nextSceneAllImages) {
+	// 	console.log('NEXT_SCENE_ALL_IMAGES CHANGED')
+	// }
+  // if(p_nextSceneID.current !== nextSceneID) {
+	// 	console.log('NEXT_SCENE_ID CHANGED')
+	// }
+  // if(p_imageOrientation.current !== imageOrientation) {
+	// 	console.log('IMAGE_ORIENTATION CHANGED')
+	// }
+  // if(p_gifOption.current !== gifOption) {
+	// 	console.log('GIF_OPTION CHANGED')
+	// }
+  // if(p_gifTimingConstant.current !== gifTimingConstant) {
+	// 	console.log('GIF_TIMING_CONSTANT CHANGED')
+	// }
+  // if(p_gifTimingMin.current !== gifTimingMin) {
+	// 	console.log('GIF_TIMING_MIN CHANGED')
+	// }
+  // if(p_gifTimingMax.current !== gifTimingMax) {
+	// 	console.log('GIF_TIMING_MAX CHANGED')
+	// }
+  // if(p_imageTypeFilter.current !== imageTypeFilter) {
+	// 	console.log('IMAGE_TYPE_FILTER CHANGED')
+	// }
+  // if(p_timingTF.current !== timingTF) {
+	// 	console.log('TIMING_TF CHANGED')
+	// }
+  // if(p_timingDuration.current !== timingDuration) {
+	// 	console.log('TIMING_DURATION CHANGED')
+	// }
+  // if(p_timingDurationMin.current !== timingDurationMin) {
+	// 	console.log('TIMING_DURATION_MIN CHANGED')
+	// }
+  // if(p_timingDurationMax.current !== timingDurationMax) {
+	// 	console.log('TIMING_DURATION_MAX CHANGED')
+	// }
+  // if(p_timingSinRate.current !== timingSinRate) {
+	// 	console.log('TIMING_SIN_RATE CHANGED')
+	// }
+  // if(p_timingBPMMulti.current !== timingBPMMulti) {
+	// 	console.log('TIMING_BPM_MULTI CHANGED')
+	// }
+  // if(p_strobe.current !== strobe) {
+	// 	console.log('STROBE CHANGED')
+	// }
+  // if(p_bpm.current !== bpm) {
+	// 	console.log('BPM CHANGED')
+	// }
+  // if(p_singleImage.current !== singleImage) {
+	// 	console.log('SINGLE_IMAGE CHANGED')
+	// }
+  // if(r_hasStarted.current !== _hasStarted.current) {
+	// 	console.log('HAS_STARTED CHANGED')
+	// }
+  // if(r_allURLs.current !== _allURLs.current) {
+	// 	console.log('ALL_URLS CHANGED')
+	// }
+  // if(r_allPosts.current !== _allPosts.current) {
+	// 	console.log('ALL_POSTS CHANGED')
+	// }
+  // if(r_state.current !== state) {
+	// 	console.log('PLAYER STATE CHANGED')
+	// }
+  // if(r_historyOffset.current !== _historyOffset.current) {
+	// 	console.log('HISTORY_OFFSET CHANGED')
+	// }
+  // if(r_historyPaths.current !== _historyPaths.current) {
+	// 	console.log('HISTORY_PATHS CHANGED')
+	// }
+  // if(r_readyToDisplay.current !== _readyToDisplay.current) {
+	// 	console.log('READY_TO_DISPLAY CHANGED')
+	// }
+  // if(r_backForth.current !== _backForth.current) {
+	// 	console.log('BACK_FORTH CHANGED')
+	// }
+  // if(r_isMounted.current !== _isMounted.current) {
+	// 	console.log('IS_MOUNTED CHANGED')
+	// }
+  // if(r_isLooping.current !== _isLooping.current) {
+	// 	console.log('IS_LOOPING CHANGED')
+	// }
+  // if(r_loadedSources.current !== _loadedSources.current) {
+	// 	console.log('LOADED_SOURCES CHANGED')
+	// }
+  // if(r_loadedURLs.current !== _loadedURLs.current) {
+	// 	console.log('LOADED_URLS CHANGED')
+	// }
+  // if(r_playedURLs.current !== _playedURLs.current) {
+	// 	console.log('PLAYED_URLS CHANGED')
+	// }
+  // if(r_nextIndex.current !== _nextIndex.current) {
+	// 	console.log('NEXT_INDEX CHANGED')
+	// }
+  // if(r_nextAdvIndex.current !== _nextAdvIndex.current) {
+	// 	console.log('NEXT_ADV_INDEX CHANGED')
+	// }
+  // if(r_sourceComplete.current !== _sourceComplete.current) {
+	// 	console.log('SOURCE_COMPLETE CHANGED')
+	// }
+  // if(r_nextSourceIndex.current !== _nextSourceIndex.current) {
+	// 	console.log('NEXT_SOURCE_INDEX CHANGED')
+	// }
+  // if(r_timeout.current !== _timeout.current) {
+	// 	console.log('TIMEOUT CHANGED')
+	// }
+  // if(r_waitTimeouts.current !== _waitTimeouts.current) {
+	// 	console.log('WAIT_TIMEOUTS CHANGED')
+	// }
+  // if(r_imgLoadTimeouts.current !== _imgLoadTimeouts.current) {
+	// 	console.log('IMG_LOAD_TIMEOUTS CHANGED')
+	// }
+  // if(r_runFetchLoopCallRequests.current !== _runFetchLoopCallRequests.current) {
+	// 	console.log('RUN_FETCH_LOOP_CALL_REQUESTS CHANGED')
+	// }
+  // if(r_animationFrameHandle.current !== _animationFrameHandle.current) {
+	// 	console.log('ANIMATION_FRAME_HANDLE CHANGED')
+	// }
+  // if(r_lastAdvance.current !== _lastAdvance.current) {
+	// 	console.log('LAST_ADVANCE CHANGED')
+	// }
+  // if(r_strictCheckCount.current !== _strictCheckCount.current) {
+	// 	console.log('STRICT_CHECK_COUNT CHANGED')
+	// }
+  // if(r_nextImageID.current !== _nextImageID.current) {
+	// 	console.log('NEXT_IMAGE_ID CHANGED')
+	// }
+  // if(r_prevSceneID.current !== _prevSceneID.current) {
+	// 	console.log('PREV_SCENE_ID CHANGED')
+	// }
+  // console.log('33------------------------33')
 
-    return (
-      <div style={style}>
-        {(this.props.scene && this.props.scene.strobe && this.props.strobeLayer == SL.middle) && (
-          <Strobe
-            currentAudio={this.props.currentAudio}
-            zIndex={3}
-            toggleStrobe={this._toggleStrobe}
-            timeToNextFrame={this.state.timeToNextFrame}
-            scene={this.props.scene}/>
-        )}
-        {this.props.scene.downloadScene && (
-          <Container
-            maxWidth={false}
-            style={{
-              height: '100%',
-              zIndex: 3,
-              flexGrow: 1,
-              padding: 0,
-              position: 'relative',
-              alignItems: 'center',
-              justifyContent: 'center',
-              display: 'flex',
-            }}>
-            {this.props.scene.sources[0].countComplete &&
-              <CircularProgress size={300} variant="determinate"
-                                value={Math.round((this._playedURLs?.length / this.props.scene.sources[0].count) * 100)}
-              />}
-            {!this.props.scene.sources[0].countComplete && <CircularProgress size={300}/>}
-            <div
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                display: 'flex',
-                position: 'absolute',
-                flexDirection: 'column',
-              }}>
-              <Typography component="h1" variant="h6" color="inherit" noWrap style={{paddingLeft: 8, paddingRight: 8, backgroundColor: '#2C2C2C'}}>
-                {this._playedURLs?.length} / {this.props.scene.sources[0].count}{this.props.scene.sources[0].countComplete? "" : "+"}
-              </Typography>
-            </div>
-          </Container>
-        )}
-        <ImageView
-          removeChild
-          gridCoordinates={this.props.gridCoordinates}
-          image={this.state.historyPaths.length > 0 ? this.state.historyPaths[(this.state.historyPaths.length - 1) + offset] : null}
-          currentAudio={this.props.currentAudio}
-          scene={this.props.scene}
-          config={this.props.config}
-          timeToNextFrame={this.state.timeToNextFrame}
-          toggleStrobe={this._toggleStrobe}
-          fitParent={this.props.gridView}
-          hasStarted={this.props.hasStarted}
-          onLoaded={this.state.historyPaths.length == 1 ? this.props.onLoaded : undefined}
-          setSceneCopy={this.props.setSceneCopy}
-          setVideo={this.props.setVideo}/>
-      </div>
-    );
-  }
+  // pr_uuid.current = props.uuid
+  // pr_currentAudio.current = props.currentAudio
+  // pr_isPlaying.current = props.isPlaying
+  // pr_gridView.current = props.gridView
+  // pr_historyOffset.current = props.historyOffset
+  // pr_advanceHack.current = props.advanceHack
+  // pr_deleteHack.current = props.deleteHack
+  // pr_gridCoordinates.current = props.gridCoordinates
+  // pr_isOverlay.current = props.isOverlay
+  // pr_strobeLayer.current = props.strobeLayer
+  // pr_setHistoryOffset.current = props.setHistoryOffset
+  // pr_setHistoryPaths.current = props.setHistoryPaths
+  // pr_setVideo.current = props.setVideo
+  // pr_setTimeToNextFrame.current = props.setTimeToNextFrame
+  // pr_setSceneCopy.current = props.setSceneCopy
+  // p_isWin32.current = isWin32
+  // p_pathSep.current = pathSep
+  // p_sceneID.current = sceneID
+  // p_maxLoadingAtOnce.current = maxLoadingAtOnce
+  // p_maxInMemory.current = maxInMemory
+  // p_maxInHistory.current = maxInHistory
+  // p_cachingEnabled.current = cachingEnabled
+  // p_cachingDirectory.current = cachingDirectory
+  // p_minVideoSize.current = minVideoSize
+  // p_minImageSize.current = minImageSize
+  // p_defaultSceneOrderFunction.current = defaultSceneOrderFunction
+  // p_backForth.current = backForth
+  // p_backForthTF.current = backForthTF
+  // p_backForthDuration.current = backForthDuration
+  // p_backForthDurationMin.current = backForthDurationMin
+  // p_backForthDurationMax.current = backForthDurationMax
+  // p_backForthSinRate.current = backForthSinRate
+  // p_backForthBPMMulti.current = backForthBPMMulti
+  // p_orderFunction.current = orderFunction
+  // p_sourceOrderFunction.current = sourceOrderFunction
+  // p_weightFunction.current = weightFunction
+  // p_useWeights.current = useWeights
+  // p_sources.current = sources
+  // p_fullSource.current = fullSource
+  // p_forceAllSource.current = forceAllSource
+  // p_forceAll.current = forceAll
+  // p_videoOrientation.current = videoOrientation
+  // p_skipVideoStart.current = skipVideoStart
+  // p_skipVideoEnd.current = skipVideoEnd
+  // p_videoSpeed.current = videoSpeed
+  // p_videoSpeedMin.current = videoSpeedMin
+  // p_videoSpeedMax.current = videoSpeedMax
+  // p_videoRandomSpeed.current = videoRandomSpeed
+  // p_randomVideoStart.current = randomVideoStart
+  // p_continueVideo.current = continueVideo
+  // p_videoOption.current = videoOption
+  // p_videoTimingConstant.current = videoTimingConstant
+  // p_videoTimingMin.current = videoTimingMin
+  // p_videoTimingMax.current = videoTimingMax
+  // p_downloadScene.current = downloadScene
+  // p_nextSceneAllImages.current = nextSceneAllImages
+  // p_nextSceneID.current = nextSceneID
+  // p_imageOrientation.current = imageOrientation
+  // p_gifOption.current = gifOption
+  // p_gifTimingConstant.current = gifTimingConstant
+  // p_gifTimingMin.current = gifTimingMin
+  // p_gifTimingMax.current = gifTimingMax
+  // p_imageTypeFilter.current = imageTypeFilter
+  // p_timingTF.current = timingTF
+  // p_timingDuration.current = timingDuration
+  // p_timingDurationMin.current = timingDurationMin
+  // p_timingDurationMax.current = timingDurationMax
+  // p_timingSinRate.current = timingSinRate
+  // p_timingBPMMulti.current = timingBPMMulti
+  // p_strobe.current = strobe
+  // p_bpm.current = bpm
+  // p_singleImage.current = singleImage
+  // r_hasStarted.current = _hasStarted.current
+  // r_allURLs.current = _allURLs.current
+  // r_allPosts.current = _allPosts.current
+  // r_state.current = state
+  // r_historyOffset.current = _historyOffset.current
+  // r_historyPaths.current = _historyPaths.current
+  // r_readyToDisplay.current = _readyToDisplay.current
+  // r_backForth.current = _backForth.current
+  // r_isMounted.current = _isMounted.current
+  // r_isLooping.current = _isLooping.current
+  // r_loadedSources.current = _loadedSources.current
+  // r_loadedURLs.current = _loadedURLs.current
+  // r_playedURLs.current = _playedURLs.current
+  // r_nextIndex.current = _nextIndex.current
+  // r_nextAdvIndex.current = _nextAdvIndex.current
+  // r_sourceComplete.current = _sourceComplete.current
+  // r_nextSourceIndex.current = _nextSourceIndex.current
+  // r_timeout.current = _timeout.current
+  // r_waitTimeouts.current = _waitTimeouts.current
+  // r_imgLoadTimeouts.current = _imgLoadTimeouts.current
+  // r_runFetchLoopCallRequests.current = _runFetchLoopCallRequests.current
+  // r_animationFrameHandle.current = _animationFrameHandle.current
+  // r_lastAdvance.current = _lastAdvance.current
+  // r_strictCheckCount.current = _strictCheckCount.current
+  // r_nextImageID.current = _nextImageID.current
+  // r_prevSceneID.current = _prevSceneID.current
+  // END LOG COMPONENT CHANGES
 
-  getHistoryOffset() {
-    return this.props.historyOffset + this.state.historyOffset;
-  }
-
-  _lastAdvance: number = null;
-  componentDidMount() {
-    this._runFetchLoopCallRequests = [];
-    this._isMounted = true;
-    this._isLooping = false;
-    this._loadedSources = new Array<string>();
-    this._loadedURLs = new Array<string>();
-    this._playedURLs = new Array<string>();
-    this._nextIndex = -1;
-    this._nextAdvIndex = 0;
-    this._sourceComplete = false;
-    this._count = 0;
-    this._nextSourceIndex = new Map<string, number>();
-    this._waitTimeouts = new Array<number>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
-    this._imgLoadTimeouts = new Array<number>(this.props.config.displaySettings.maxLoadingAtOnce).fill(null);
-    this._toggleStrobe = false;
-    this.props.advanceHack.listener = () => {
-      let delay = 100;
-      if (this.state.historyPaths.length > 0) {
-        const source = this.state.historyPaths[this.state.historyPaths.length - 1].getAttribute("source");
-        if (source && getSourceType(source) == ST.video) {
-          delay = 200;
+  useEffect(() => {
+    _isMounted.current = true
+    props.advanceHack.listener = () => {
+      let delay = 100
+      if (_historyPaths.current.length > 0) {
+        const source =
+          _historyPaths.current[_historyPaths.current.length - 1].getAttribute(
+            'source'
+          )
+        if (source && getSourceType(source) === ST.video) {
+          delay = 200
         }
       }
-      if (this._lastAdvance == null || new Date().getTime() - this._lastAdvance > delay) {
-        this._lastAdvance = new Date().getTime();
-        clearTimeout(this._timeout);
-        this.advance(true, true);
+      if (
+        _lastAdvance.current == null ||
+        new Date().getTime() - _lastAdvance.current > delay
+      ) {
+        _lastAdvance.current = new Date().getTime()
+        clearTimeout(_timeout.current)
+        _timeout.current = undefined
+        // console.log('ADVANCE 111')
+        advance(true, true)
       }
     }
-    if (this.props.deleteHack) {
-      this.props.deleteHack.listener = () => {
-        // delete current image from historyPaths and readyToDisplay
-        this.delete();
+    if (props.deleteHack) {
+      props.deleteHack.listener = () => {
+        // delete current image from historyPaths and _readyToDisplay
+        deleteImg()
       }
     }
-    this._animationFrameHandle = requestAnimationFrame(this.animationFrame);
-    this.startFetchLoops(this.props.config.displaySettings.maxLoadingAtOnce);
-    this.start();
+    _animationFrameHandle.current = requestAnimationFrame(animationFrame)
+    startFetchLoops(maxLoadingAtOnce)
+    // console.log('START MOUNT')
+    start()
+
+    return () => {
+      if (_animationFrameHandle.current) {
+        cancelAnimationFrame(_animationFrameHandle.current)
+      }
+
+      clearTimeout(_backForth.current)
+      clearTimeout(_timeout.current)
+      for (const timeout of _waitTimeouts.current) {
+        clearTimeout(timeout)
+      }
+      for (const timeout of _imgLoadTimeouts.current) {
+        clearTimeout(timeout)
+      }
+      _backForth.current = undefined
+      _timeout.current = undefined
+      _waitTimeouts.current = _waitTimeouts.current.fill(undefined)
+      _imgLoadTimeouts.current = _imgLoadTimeouts.current.fill(undefined)
+      _isMounted.current = false
+      _isLooping.current = false
+      _loadedSources.current = []
+      _loadedURLs.current = []
+      _playedURLs.current = []
+      _nextIndex.current = -1
+      _nextAdvIndex.current = 0
+      _sourceComplete.current = false
+      _nextSourceIndex.current = new Map<string, number>()
+      if (props.deleteHack) {
+        props.deleteHack.listener = undefined
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (
+      (props.isPlaying || _allURLs.current || _hasStarted.current) &&
+      !_isLooping.current
+    ) {
+      // console.log('START PLAYING')
+      start()
+    } else if (!props.isPlaying) {
+      _isLooping.current = false
+      clearTimeout(_timeout.current)
+      _timeout.current = undefined
+    }
+  }, [props.isPlaying, _allURLs.current, _hasStarted.current])
+
+  useEffect(() => {
+    if(_prevSceneID.current !== undefined) {
+      // console.log('SCENE CHANGE')
+      // reset internal state to transition to next scene
+      const wasLooping = _timeout.current !== undefined
+      if(wasLooping) {
+        _isLooping.current = false
+        clearTimeout(_timeout.current)
+        // _timeout.current = undefined
+      }
+      if (_animationFrameHandle.current) {
+        cancelAnimationFrame(_animationFrameHandle.current)
+      }
+
+      _readyToDisplay.current = []
+      _historyPaths.current = []
+      _loadedSources.current = []
+      _loadedURLs.current = []
+      _playedURLs.current = []
+      _nextIndex.current = -1
+      _nextAdvIndex.current = 0
+      _sourceComplete.current = false
+      _nextSourceIndex.current = new Map<string, number>()
+      _waitTimeouts.current.forEach(timeout => clearTimeout(timeout))
+      _waitTimeouts.current = _waitTimeouts.current.fill(undefined)
+      _imgLoadTimeouts.current.forEach(timeout => clearTimeout(timeout))
+      _imgLoadTimeouts.current = _imgLoadTimeouts.current.fill(undefined)
+      _runFetchLoopCallRequests.current = []
+      _strictCheckCount.current = 0
+  
+      props.setHistoryPaths(_historyPaths.current)
+      props.setHistoryOffset(0)
+      _historyOffset.current = 0
+
+      _animationFrameHandle.current = requestAnimationFrame(animationFrame)
+      startFetchLoops(maxLoadingAtOnce)
+      if(wasLooping) {
+        _isLooping.current = true
+        _timeout.current = window.setTimeout(() => {
+          // console.log('222 ADVANCE')
+          advance(false, true)
+        }, state.timeToNextFrame)
+      }
+    }
+
+    _prevSceneID.current = sceneID
+  }, [sceneID])
+
+  useEffect(() => {
+    _readyToDisplay.current = []
+  }, [orderFunction, sourceOrderFunction])
+
+  useEffect(() => {
+    // console.log('backForth: ' + backForth)
+    // console.log('props.isPlaying: ' + props.isPlaying)
+    // console.log('hasStarted: ' + _hasStarted.current)
+    if (
+      backForth &&
+      _backForth.current == null &&
+      props.isPlaying &&
+      _hasStarted.current
+    ) {
+      // console.log('SCHEDULE BACKFORTH')
+      _backForth.current = window.setTimeout(
+        doBackForth.bind(this, -1),
+        getBackForthTiming()
+      )
+    }
+  }, [backForth, props.isPlaying, _hasStarted.current])
+
+  useEffect(() => {
+    if (!backForth) {
+      clearTimeout(_backForth.current)
+      _backForth.current = undefined
+    }
+  }, [backForth])
+
+  const getHistoryOffset = () => {
+    return props.historyOffset + _historyOffset.current
   }
 
-  componentWillUnmount() {
-    cancelAnimationFrame(this._animationFrameHandle);
-    clearTimeout(this._backForth);
-    clearTimeout(this._timeout);
-    for (let timeout of this._waitTimeouts) {
-      clearTimeout(timeout);
-    }
-    for (let timeout of this._imgLoadTimeouts) {
-      clearTimeout(timeout);
-    }
-    this._backForth = null;
-    this._timeout = null;
-    this._waitTimeouts = null;
-    this._imgLoadTimeouts= null;
-    this._isMounted = null;
-    this._isLooping = null;
-    this._loadedSources = null;
-    this._loadedURLs = null;
-    this._playedURLs = null;
-    this._nextIndex = null;
-    this._nextAdvIndex = null;
-    this._sourceComplete = null;
-    this._count = null;
-    this._nextSourceIndex = null;
-    this._toggleStrobe = null;
-    this.props.advanceHack.listener = null;
-    if (this.props.deleteHack) {
-      this.props.deleteHack.listener = null;
-    }
-  }
+  const getBackForthTiming = (): number =>
+    getDuration(
+      {
+        timingFunction: backForthTF,
+        time: backForthDuration,
+        timeMin: backForthDurationMin,
+        timeMax: backForthDurationMax,
+        sinRate: backForthSinRate,
+        bpmMulti: backForthBPMMulti
+      },
+      state.timeToNextFrame,
+      bpm
+    )
 
-  shouldComponentUpdate(props: any, state: any): boolean {
-    return (state.historyPaths !== this.state.historyPaths ||
-            props.scene !== this.props.scene ||
-            props.isPlaying !== this.props.isPlaying ||
-            props.hasStarted !== this.props.hasStarted ||
-            props.allURLs !== this.props.allURLs ||
-            props.historyOffset !== this.props.historyOffset ||
-            state.historyOffset !== this.state.historyOffset ||
-            props.gridView !== this.props.gridView ||
-            props.strobeLayer !== this.props.strobeLayer);
-  }
+  const doBackForth = (newOffset: number) => {
+    if (props.isPlaying && _isMounted.current) {
+      _historyOffset.current = newOffset
 
-  componentDidUpdate(props: any, state: any) {
-    if (((!props.isPlaying && this.props.isPlaying) ||
-      (!props.allURLs && this.props.allURLs) ||
-      (!props.hasStarted && this.props.hasStarted)) && !this._isLooping) {
-      this.start();
-    } else if (!this.props.isPlaying) {
-      this._isLooping = false;
-      clearTimeout(this._timeout);
-    }
-    if (this.props.scene.orderFunction !== props.scene.orderFunction || this.props.scene.sourceOrderFunction !== props.scene.sourceOrderFunction) {
-      this.setState({readyToDisplay: []});
-    }
-    if (this.props.scene.backForth && this._backForth == null && this.props.isPlaying && this.props.hasStarted) {
-      clearTimeout(this._backForth);
-      this._backForth = null;
-      setTimeout(() => this.advance(true, false), 200);
-      this._backForth = setTimeout(this.backForth.bind(this, -1), this.getBackForthTiming());
-    } else if (props.scene.backForth && !this.props.scene.backForth) {
-      clearTimeout(this._backForth);
-      this._backForth = null;
-    }
-  }
-
-  getBackForthTiming(): number {
-    let delay;
-    switch (this.props.scene.backForthTF) {
-      case TF.constant:
-        delay = this.props.scene.backForthConstant;
-        break;
-      case TF.random:
-        delay = Math.floor(Math.random() * (this.props.scene.backForthMax - this.props.scene.backForthMin + 1)) + this.props.scene.backForthMin;
-        break;
-      case TF.sin:
-        const sinRate = (Math.abs(this.props.scene.backForthSinRate - 100) + 2) * 1000;
-        delay = Math.floor(Math.abs(Math.sin(Date.now() / sinRate)) * (this.props.scene.backForthMax - this.props.scene.backForthMin + 1)) + this.props.scene.backForthMin;
-        break;
-      case TF.bpm:
-        const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
-        delay = 60000 / (bpm * bpmMulti);
-        // If we cannot parse this, default to 1s
-        if (!delay) {
-          delay = 1000;
+      let newImage = undefined
+      if(_historyPaths.current.length > 0) {
+        let offset = props.historyOffset + newOffset;
+        if (offset <= -_historyPaths.current.length) {
+          offset = -_historyPaths.current.length + 1;
         }
-        break;
-    }
-    return delay;
-  }
 
-  backForth(newOffset: number) {
-    if (this.props.isPlaying && this._isMounted) {
-      this.setState({historyOffset: newOffset});
-      this._backForth = setTimeout(this.backForth.bind(this, newOffset == 0 ? -1 : 0), this.getBackForthTiming());
+        newImage = _historyPaths.current[(_historyPaths.current.length - 1) + offset]
+      }
+      // console.log('doBackForth: SET IMG')
+      setState({
+        ...state,
+        image: newImage
+      })
+
+      // console.log('RESCHEDULE BACKFORTH | ' + new Date().getTime())
+      _backForth.current = window.setTimeout(
+        doBackForth.bind(this, newOffset === 0 ? -1 : 0),
+        getBackForthTiming()
+      )
     } else {
-      if (this._isMounted && this.state.historyOffset != 0) {
-        this.setState({historyOffset: 0});
+      if (_isMounted.current && _historyOffset.current !== 0) {
+        _historyOffset.current = 0
       }
-      clearTimeout(this._backForth);
-      this._backForth = null;
+      clearTimeout(_backForth.current)
+      _backForth.current = undefined
     }
   }
 
-  delete() {
-    const img = this.state.historyPaths[(this.state.historyPaths.length - 1) + this.getHistoryOffset()];
-    const url = img.src;
-    let newHistoryPaths = [];
-    let newHistoryOffset = this.props.historyOffset;
-    for (let image of this.state.historyPaths) {
-      if (image.src != url) {
-        newHistoryPaths.push(image);
+  const deleteImg = () => {
+    const img =
+      _historyPaths.current[
+        _historyPaths.current.length - 1 + getHistoryOffset()
+      ]
+    const url = img.src
+    const newHistoryPaths = []
+    let newHistoryOffset = props.historyOffset
+    for (const image of _historyPaths.current) {
+      if (image.src !== url) {
+        newHistoryPaths.push(image)
       } else {
-        newHistoryOffset += 1;
+        newHistoryOffset += 1
       }
     }
     if (newHistoryOffset > 0) {
-      newHistoryOffset = 0;
-    }
-    this.props.setHistoryPaths(newHistoryPaths);
-    this.props.setHistoryOffset(newHistoryOffset);
-    this.setState({
-      historyPaths: newHistoryPaths,
-      historyOffset: newHistoryOffset,
-      readyToDisplay: this.state.readyToDisplay.filter((i) => i.src != url),
-    });
-  }
-
-  start() {
-    if (this.props.allURLs == null) {
-      return;
+      newHistoryOffset = 0
     }
 
-    this.advance(true, true);
+    props.setHistoryPaths(newHistoryPaths)
+    props.setHistoryOffset(newHistoryOffset)
+    _historyPaths.current = newHistoryPaths
+    _historyOffset.current = newHistoryOffset
+
+    _readyToDisplay.current = _readyToDisplay.current.filter(
+      (i) => i !== undefined && i.src !== url
+    )
   }
 
-  startFetchLoops(max: number, loop = 0) {
+  const start = () => {
+    if (_allURLs.current == null) {
+      return
+    }
+
+    // console.log('ADVANCE 444')
+    advance(true, true)
+  }
+
+  const startFetchLoops = (max: number, loop = 0) => {
     if (loop < max) {
-      this.runFetchLoop(loop);
+      runFetchLoop(loop)
       // Put a small delay between our loops
-      this._waitTimeouts[loop] = setTimeout(this.startFetchLoops.bind(this, max, loop+1), 10);
+      _waitTimeouts.current[loop] = window.setTimeout(
+        startFetchLoops.bind(this, max, loop + 1),
+        10
+      )
     }
   }
 
-  animationFrame = () => {
-    if (!this._isMounted || (this.props.singleImage)) {
-      cancelAnimationFrame(this._animationFrameHandle);
-      return;
+  const animationFrame = () => {
+    if (!_isMounted.current || singleImage) {
+      cancelAnimationFrame(_animationFrameHandle.current as number)
+      return
     }
-    let requestAnimation = false;
-    if (this.state.readyToDisplay.length < this.props.config.displaySettings.maxLoadingAtOnce && this.props.allURLs) {
-      while (this._runFetchLoopCallRequests.length > 0) {
-        requestAnimation = true;
-        this.runFetchLoop(this._runFetchLoopCallRequests.shift());
+    let requestAnimation = false
+    if (_readyToDisplay.current.length < maxLoadingAtOnce && _allURLs.current) {
+      const requests = _runFetchLoopCallRequests.current || []
+      while (requests.length > 0) {
+        requestAnimation = true
+        runFetchLoop(requests.shift() as number)
       }
     }
     if (requestAnimation) {
-      this._animationFrameHandle = requestAnimationFrame(this.animationFrame);
+      _animationFrameHandle.current = requestAnimationFrame(animationFrame)
     } else {
-      setTimeout(this.animationFrame, 100);
+      setTimeout(animationFrame, 100)
     }
   }
 
-  queueRunFetchLoop(i: number) {
-    this._runFetchLoopCallRequests.push(i);
+  const queueRunFetchLoop = (i: number) => {
+    if (_runFetchLoopCallRequests.current) {
+      _runFetchLoopCallRequests.current.push(i)
+    } else {
+      _runFetchLoopCallRequests.current = [i]
+    }
   }
 
-  runFetchLoop(i: number) {
-    if (!this._isMounted) return;
+  const runFetchLoop = async (i: number) => {
+    if (!_isMounted.current) return
 
-    if (this.state.readyToDisplay.length >= this.props.config.displaySettings.maxInMemory || !this.props.allURLs) {
+    if (_readyToDisplay.current.length >= maxInMemory || !_allURLs.current) {
       // Wait for the display loop to use an image
-      this._waitTimeouts[i] = setTimeout(() => this.queueRunFetchLoop(i), 100);
-      return;
+      _waitTimeouts.current[i] = window.setTimeout(() => {
+        queueRunFetchLoop(i)
+      }, 100)
+      return
     }
 
-    let source: string;
-    let collection: string[];
-    let url: string;
-    let urlIndex: number;
-    let sourceIndex: number = null;
-    let sourceLength: number;
-
+    let source: string
+    let collection: string[]
+    let url: string
+    let urlIndex = 0
+    let sourceIndex = 0
+    let sourceLength = 0
     // For source weighted
-    if (this.props.scene.weightFunction == WF.sources) {
-      let keys;
-      if (this.props.scene.useWeights) {
-        const validKeys = Array.from(this.props.allURLs.keys());
-        keys = [];
-        for (let source of this.props.scene.sources) {
-          if (validKeys.includes(source.url)) {
+    if (weightFunction === WF.sources) {
+      let keys: string[]
+      if (useWeights) {
+        const validKeys = Object.keys(_allURLs.current)
+        keys = []
+        for (const source of sources) {
+          if (validKeys.includes(source.url as string)) {
             for (let w = source.weight; w > 0; w--) {
-              keys.push(source.url);
+              keys.push(source.url as string)
             }
           }
         }
       } else {
-        keys = Array.from(this.props.allURLs.keys());
+        keys = Object.keys(_allURLs.current)
       }
 
       // If sorting randomly, get a random source
-      if (this.props.scene.sourceOrderFunction == SOF.random) {
+      if (sourceOrderFunction === SOF.random) {
         // If we're playing full sources
-        if (this.props.scene.fullSource) {
+        if (fullSource) {
           // If this is the first loop or source is done get next source
-          if (this._nextIndex == -1 || this._sourceComplete) {
-            if (this.props.scene.forceAllSource) {
+          if (_nextIndex.current === -1 || _sourceComplete.current) {
+            if (forceAllSource) {
               // Filter the available urls to those not played yet
-              keys = keys.filter((s) => !this._loadedSources.includes(s));
+              keys = keys.filter((s) => !_loadedSources.current.includes(s))
               // If there are no remaining urls for this source
-              if (!(keys && keys.length)) {
-                this._loadedSources = new Array<string>();
-                keys = Array.from(this.props.allURLs.keys());
+              if (!(keys && keys.length > 0)) {
+                _loadedSources.current = []
+                keys = Object.keys(_allURLs.current)
               }
             }
-            source = getRandomListItem(keys);
-            this._nextIndex = Array.from(this.props.allURLs.keys()).indexOf(source);
-            this._sourceComplete = false;
-            this._loadedSources.push(source);
-          } else { // Play same source
-            source = keys[this._nextIndex];
+
+            source = getRandomListItem(keys)
+            _nextIndex.current = keys.indexOf(source)
+            _sourceComplete.current = false
+            _loadedSources.current.push(source)
+          } else {
+            // Play same source
+            source = keys[_nextIndex.current]
           }
         } else {
-          source = getRandomListItem(keys);
-          this._loadedSources.push(source);
+          source = getRandomListItem(keys)
+          _loadedSources.current.push(source)
         }
-      } else { // Else get the next source
+      } else {
+        // Else get the next source
         // If we're playing full sources
-        if (this.props.scene.fullSource) {
+        if (fullSource) {
           // If this is the first loop or source is done get next source
-          if (this._nextIndex == -1 || this._sourceComplete) {
-            source = keys[++this._nextIndex % keys.length];
-            this._sourceComplete = false;
-          } else { // Play same source
-            source = keys[this._nextIndex % keys.length];
+          if (_nextIndex.current === -1 || _sourceComplete.current) {
+            source = keys[++_nextIndex.current % keys.length]
+            _sourceComplete.current = false
+          } else {
+            // Play same source
+            source = keys[_nextIndex.current % keys.length]
           }
         } else {
-          source = keys[++this._nextIndex % keys.length];
+          source = keys[++_nextIndex.current % keys.length]
         }
-        sourceIndex = this._nextIndex % keys.length;
+        sourceIndex = _nextIndex.current % keys.length
       }
       // Get the urls from the source
-      collection = this.props.allURLs.get(source);
+      collection = _allURLs.current[source] || []
 
       // If we have no urls, loop again
-      if (!(collection && collection.length)) {
-        this.queueRunFetchLoop(i);
-        return;
+      if (!(collection && collection.length > 0)) {
+        queueRunFetchLoop(i)
+        return
       }
 
       // If sorting randomly and forcing all
-      if (this.props.scene.orderFunction == OF.random && (this.props.scene.forceAll || this.props.scene.fullSource)) {
+      if (orderFunction === OF.random && (forceAll || fullSource)) {
         // Filter the available urls to those not played yet
-        collection = collection.filter((u) => !this._loadedURLs.includes(u));
+        collection = collection.filter((u) => !_loadedURLs.current.includes(u))
         // If there are no remaining urls for this source
-        if (!(collection && collection.length)) {
-          if (this.props.scene.fullSource) {
-            this._loadedURLs = new Array<string>();
-            this._sourceComplete = true;
-            this.queueRunFetchLoop(i);
-            return;
+        if (!(collection && collection.length > 0)) {
+          if (fullSource) {
+            _loadedURLs.current = []
+            _sourceComplete.current = true
+            queueRunFetchLoop(i)
+            return
           } else {
             // Make sure all the other sources are also extinguished
-            const remainingLibrary = flatten(Array.from(this.props.allURLs.values())).filter((u: string) => !this._loadedURLs.includes(u));
+            const remainingLibrary = flatten(
+              Object.values(_allURLs.current)
+            ).filter((u: string) => !_loadedURLs.current.includes(u))
             // If they are, clear loadedURLs
             if (remainingLibrary.length === 0) {
-              this._loadedURLs = new Array<string>();
-              collection = this.props.allURLs.get(source);
-            } else { // Else loop again
-              this.queueRunFetchLoop(i);
-              return;
+              _loadedURLs.current = []
+              collection = _allURLs.current[source] || []
+            } else {
+              // Else loop again
+              queueRunFetchLoop(i)
+              return
             }
           }
         }
       }
 
       // If sorting randomly, get a random URL
-      if (this.props.scene.orderFunction == OF.random) {
-        url = getRandomListItem(collection);
-      } else { // Else get the next index for this source
-        let index = this._nextSourceIndex.get(source);
+      if (orderFunction === OF.random) {
+        url = getRandomListItem(collection)
+      } else {
+        // Else get the next index for this source
+        let index = _nextSourceIndex.current.get(source)
         if (!index) {
-          if (this._nextSourceIndex.size > 0) {
-            index = Math.min(...this._nextSourceIndex.values());
+          if (_nextSourceIndex.current.size > 0) {
+            index = Math.min(..._nextSourceIndex.current.values())
           } else {
-            index = 0;
+            index = 0
           }
         }
-        if (this.props.scene.orderFunction == OF.strict) {
-          urlIndex = index;
-          sourceLength = collection.length;
+        if (orderFunction === OF.strict) {
+          urlIndex = index
+          sourceLength = collection.length
         }
-        if (this.props.scene.fullSource && index % collection.length == collection.length - 1) {
-          this._sourceComplete = true;
+        if (fullSource && index % collection.length === collection.length - 1) {
+          _sourceComplete.current = true
         }
-        url = collection[index%collection.length];
-        this._nextSourceIndex.set(source, index+1);
+        url = collection[index % collection.length]
+        _nextSourceIndex.current.set(source, index + 1)
       }
-    } else { // For image weighted
+    } else {
+      // For image weighted
 
       // Concat all images together
-      const urlKeys = flatten(Array.from(this.props.allURLs.keys()));
-      collection = urlKeys;
+      const urlKeys = flatten(Object.keys(_allURLs.current))
+      collection = urlKeys
       // If there are none, loop again
-      if (!(collection && collection.length)) {
-        this.queueRunFetchLoop(i);
-        return;
+      if (!(collection && collection.length > 0)) {
+        queueRunFetchLoop(i)
+        return
       }
 
       // If sorting randomly and forcing all
-      if (this.props.scene.orderFunction == OF.random && this.props.scene.forceAll) {
+      if (orderFunction === OF.random && forceAll) {
         // Filter the available ulls to those not played yet
-        collection = collection.filter((u: string) => !this._loadedURLs.includes(u));
+        collection = collection.filter(
+          (u: string) => !_loadedURLs.current.includes(u)
+        )
         // If there are no remaining urls, clear loadedURLs
-        if (!(collection && collection.length)) {
-          this._loadedURLs = new Array<string>();
-          collection = urlKeys;
+        if (!(collection && collection.length > 0)) {
+          _loadedURLs.current = []
+          collection = urlKeys
         }
       }
 
-      // If sorting randomly, get a random URL
-      if (this.props.scene.orderFunction == OF.random) {
-        url = getRandomListItem(collection);
-      } else { // Else get the next index
-        url = collection[++this._nextIndex%collection.length];
-        if (this.props.scene.orderFunction == OF.strict) {
-          urlIndex = this._nextIndex;
-          sourceLength = collection.length;
+      // If sorting randomly, get a random url
+      if (orderFunction === OF.random) {
+        url = getRandomListItem(collection)
+      } else {
+        // Else get the next index
+        url = collection[++_nextIndex.current % collection.length]
+        if (orderFunction === OF.strict) {
+          urlIndex = _nextIndex.current
+          sourceLength = collection.length
         }
       }
 
       // Get the source of this image from the map
-      source = this.props.allURLs.get(url)[0];
+      source = _allURLs.current[url][0]
     }
 
-    let post = this.props.allPosts.has(url) ? this.props.allPosts.get(url) : null;
+    const post = _allPosts.current[url]
 
-    if (this.props.scene.orderFunction == OF.random && (this.props.scene.forceAll || (this.props.scene.weightFunction == WF.sources && this.props.scene.fullSource))) {
-      this._loadedURLs.push(url);
+    if (
+      orderFunction === OF.random &&
+      (forceAll || (weightFunction === WF.sources && fullSource))
+    ) {
+      _loadedURLs.current.push(url)
     }
 
     // Don't bother loading files we've already cached locally
-    const fileType = getSourceType(url);
-    if (this.props.config.caching.enabled && url.startsWith("http")) {
-      if (fileType != ST.nimja && fileType != ST.hydrus && fileType != ST.piwigo && fileType != ST.video && fileType != ST.local && fileType != ST.playlist) {
-        const sourceCachePath = getCachePath(source, this.props.config);
-        const filePath = sourceCachePath + getFileName(url);
-        const cachedAlready = fs.existsSync(filePath);
+    const fileType = getSourceType(url)
+    if (cachingEnabled && url.startsWith('http')) {
+      if (
+        fileType !== ST.nimja &&
+        fileType !== ST.hydrus &&
+        fileType !== ST.piwigo &&
+        fileType !== ST.video &&
+        fileType !== ST.local &&
+        fileType !== ST.playlist
+      ) {
+        const sourceCachePath = await getCachePath(cachingDirectory, source)
+        const filePath = sourceCachePath + getFileName(url, pathSep)
+        const cachedAlready = await window.flipflip.api.pathExists(filePath)
         if (cachedAlready) {
-          url = filePath;
+          url = filePath
         }
       }
     }
 
-    if (fileType == ST.nimja) {
-      let iframe = document.createElement('iframe');
-      iframe.setAttribute("source", source);
-      if (!!post) {
-        iframe.setAttribute("post", post);
+    if (fileType === ST.nimja) {
+      const iframe = document.createElement('iframe')
+      iframe.setAttribute('source', source)
+      if (post) {
+        iframe.setAttribute('post', post)
       }
-      if (this.props.scene.orderFunction == OF.strict) {
-        iframe.setAttribute("index", urlIndex.toString());
-        iframe.setAttribute("length", sourceLength.toString());
+      if (orderFunction === OF.strict) {
+        iframe.setAttribute('index', urlIndex.toString())
+        iframe.setAttribute('length', sourceLength.toString())
         if (sourceIndex != null) {
-          iframe.setAttribute("sindex", sourceIndex.toString());
+          iframe.setAttribute('sindex', sourceIndex.toString())
         }
       }
 
       const successCallback = () => {
-        if (this._imgLoadTimeouts) {
-          clearTimeout(this._imgLoadTimeouts[i]);
+        if (_imgLoadTimeouts.current) {
+          clearTimeout(_imgLoadTimeouts.current[i])
         }
-        if (!this._isMounted) return;
-
-        (iframe as any).key = this.state.nextImageID;
-        this.setState({
-          readyToDisplay: this.state.readyToDisplay.concat([iframe]),
-          nextImageID: this.state.nextImageID + 1,
-        });
-        if (this.state.historyPaths.length === 0) {
-          this.advance(false, false);
+        if (!_isMounted.current) return
+        ;(iframe as any).key = _nextImageID.current++
+        _readyToDisplay.current.push(iframe)
+        if (_historyPaths.current.length === 0) {
+          // console.log('ADVANCE 555')
+          advance(false, false)
         }
-        this.queueRunFetchLoop(i);
-      };
+        queueRunFetchLoop(i)
+      }
 
-      iframe.oncontextmenu = () => {return false}
+      iframe.oncontextmenu = () => {
+        return false
+      }
 
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-      iframe.src = url;
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin')
+      iframe.src = url
 
-      clearTimeout(this._imgLoadTimeouts[i]);
-      successCallback();
+      clearTimeout(_imgLoadTimeouts.current[i])
+      successCallback()
     } else if (isVideo(url, false)) {
-      let video = document.createElement('video');
-      video.setAttribute("source", source);
-      if (!!post) {
-        video.setAttribute("post", post);
+      const video = document.createElement('video')
+      video.setAttribute('source', source)
+      if (post) {
+        video.setAttribute('post', post)
       }
-      if (this.props.scene.orderFunction == OF.strict) {
-        video.setAttribute("index", urlIndex.toString());
-        video.setAttribute("length", sourceLength.toString());
+      if (orderFunction === OF.strict) {
+        video.setAttribute('index', urlIndex.toString())
+        video.setAttribute('length', sourceLength.toString())
         if (sourceIndex != null) {
-          video.setAttribute("sindex", sourceIndex.toString());
+          video.setAttribute('sindex', sourceIndex.toString())
         }
       }
-      let subtitleSplit = url.split("|||");
+      const subtitleSplit = url.split('|||')
       if (subtitleSplit.length > 1) {
-        url = subtitleSplit[0];
-        video.setAttribute("subtitles", subtitleSplit[1]);
+        url = subtitleSplit[0]
+        video.setAttribute('subtitles', subtitleSplit[1])
       }
-      let clipRegex = /(.*):::(\d+):([\d-]+):::(\d+\.?\d*):(\d+\.?\d*)$/g.exec(url);
+      const clipRegex =
+        /(.*):::(\d+):([\d-]+):::(\d+\.?\d*):(\d+\.?\d*)$/g.exec(url)
       if (clipRegex != null) {
-        url = clipRegex[1];
-        video.setAttribute("clip", clipRegex[2]);
-        if (clipRegex[3] != "-") {
-          video.setAttribute("volume", clipRegex[3]);
+        url = clipRegex[1]
+        video.setAttribute('clip', clipRegex[2])
+        if (clipRegex[3] !== '-') {
+          video.setAttribute('volume', clipRegex[3])
         }
-        video.setAttribute("start", clipRegex[4]);
-        video.setAttribute("end", clipRegex[5]);
+        video.setAttribute('start', clipRegex[4])
+        video.setAttribute('end', clipRegex[5])
       }
 
       const successCallback = () => {
-        if (this._imgLoadTimeouts) {
-          clearTimeout(this._imgLoadTimeouts[i]);
+        if (_imgLoadTimeouts.current) {
+          clearTimeout(_imgLoadTimeouts.current[i])
         }
-        if (!this._isMounted) return;
-        this.props.cache(video);
+        if (!_isMounted.current) return
+        dispatch(cacheImage(video))
 
-        const width = video.videoWidth;
-        const height = video.videoHeight;
-        if ((this.props.scene.videoOrientation == OT.onlyLandscape && height > width) ||
-          (this.props.scene.videoOrientation == OT.onlyPortrait && height < width)) {
-          errorCallback();
-          return;
-        }
-
-        if (!video.hasAttribute("start") && !video.hasAttribute("end") &&
-          (this.props.scene.skipVideoStart > 0 || this.props.scene.skipVideoEnd > 0) &&
-          (video.duration - (this.props.scene.skipVideoStart / 1000) - (this.props.scene.skipVideoEnd / 1000)) > 0) {
-          video.setAttribute("start", (this.props.scene.skipVideoStart / 1000).toString());
-          video.setAttribute("end", (video.duration - (this.props.scene.skipVideoEnd / 1000)).toString());
+        const width = video.videoWidth
+        const height = video.videoHeight
+        if (
+          (videoOrientation === OT.onlyLandscape && height > width) ||
+          (videoOrientation === OT.onlyPortrait && height < width)
+        ) {
+          errorCallback()
+          return
         }
 
-        let speed = this.props.scene.videoSpeed;
-        if (this.props.scene.videoRandomSpeed) {
-          speed = Math.floor(Math.random() * (this.props.scene.videoSpeedMax - this.props.scene.videoSpeedMin + 1)) + this.props.scene.videoSpeedMin;
+        if (
+          !video.hasAttribute('start') &&
+          !video.hasAttribute('end') &&
+          (skipVideoStart > 0 || skipVideoEnd > 0) &&
+          video.duration - skipVideoStart / 1000 - skipVideoEnd / 1000 > 0
+        ) {
+          video.setAttribute('start', (skipVideoStart / 1000).toString())
+          video.setAttribute(
+            'end',
+            (video.duration - skipVideoEnd / 1000).toString()
+          )
         }
-        video.setAttribute("speed", speed.toString());
 
-        if (video.hasAttribute("start") && video.hasAttribute("end")) {
-          const start = parseFloat(video.getAttribute("start"));
-          const end = parseFloat(video.getAttribute("end"));
-          if (this.props.scene.randomVideoStart && (!this.props.scene.continueVideo || !video.currentTime)) {
-            video.currentTime = start + (Math.random() * (end - start));
+        let speed = videoSpeed
+        if (videoRandomSpeed) {
+          speed =
+            Math.floor(Math.random() * (videoSpeedMax - videoSpeedMin + 1)) +
+            videoSpeedMin
+        }
+        video.setAttribute('speed', speed.toString())
+
+        if (video.hasAttribute('start') && video.hasAttribute('end')) {
+          const start = parseFloat(video.getAttribute('start') as string)
+          const end = parseFloat(video.getAttribute('end') as string)
+          if (randomVideoStart && (!continueVideo || !video.currentTime)) {
+            video.currentTime = start + Math.random() * (end - start)
           } else if (video.currentTime < start || video.currentTime > end) {
-            video.currentTime = start;
+            video.currentTime = start
           }
-        } else if (this.props.scene.randomVideoStart && (!this.props.scene.continueVideo || !video.currentTime)) {
-          video.currentTime = Math.random() * video.duration;
+        } else if (randomVideoStart && (!continueVideo || !video.currentTime)) {
+          video.currentTime = Math.random() * video.duration
         }
 
-        switch(this.props.scene.videoOption) {
+        switch (videoOption) {
           case VO.full:
-            let duration;
-            if (video.hasAttribute("start") && video.hasAttribute("end")) {
-              const start = video.currentTime ? video.currentTime : parseFloat(video.getAttribute("start"));
-              const end = parseFloat(video.getAttribute("end"));
-              duration = end - start;
+            let duration
+            if (video.hasAttribute('start') && video.hasAttribute('end')) {
+              const start = video.currentTime
+                ? video.currentTime
+                : parseFloat(video.getAttribute('start') as string)
+              const end = parseFloat(video.getAttribute('end') as string)
+              duration = end - start
             } else {
-              duration = video.duration - video.currentTime;
+              duration = video.duration - video.currentTime
             }
-            duration = duration * 1000 / (speed / 10);
-            video.setAttribute("duration", duration.toString());
-            break;
+            duration = (duration * 1000) / (speed / 10)
+            video.setAttribute('duration', duration.toString())
+            break
           case VO.part:
-            video.setAttribute("duration", this.props.scene.videoTimingConstant.toString());
-            break;
+            video.setAttribute('duration', videoTimingConstant.toString())
+            break
           case VO.partr:
-            video.setAttribute("duration", getRandomNumber(this.props.scene.videoTimingMin, this.props.scene.videoTimingMax).toString());
-            break;
+            video.setAttribute(
+              'duration',
+              getRandomNumber(videoTimingMin, videoTimingMax).toString()
+            )
+            break
           case VO.atLeast:
-            let partDuration;
-            if (video.hasAttribute("start") && video.hasAttribute("end")) {
-              const start = parseFloat(video.getAttribute("start"));
-              const end = parseFloat(video.getAttribute("end"));
-              partDuration = end - start;
+            let partDuration
+            if (video.hasAttribute('start') && video.hasAttribute('end')) {
+              const start = parseFloat(video.getAttribute('start') as string)
+              const end = parseFloat(video.getAttribute('end') as string)
+              partDuration = end - start
             } else {
-              partDuration = video.duration;
+              partDuration = video.duration
             }
-            partDuration = partDuration * 1000 / (speed / 10);
-            let atLeastDuration = 0;
+            partDuration = (partDuration * 1000) / (speed / 10)
+            let atLeastDuration = 0
             do {
-              atLeastDuration += partDuration;
-            } while (atLeastDuration < this.props.scene.videoTimingConstant);
-            video.setAttribute("duration", atLeastDuration.toString())
-            break;
+              atLeastDuration += partDuration
+            } while (atLeastDuration < videoTimingConstant)
+            video.setAttribute('duration', atLeastDuration.toString())
+            break
         }
 
-        (video as any).key = this.state.nextImageID;
-        if (this.props.scene.orderFunction == OF.strict) {
-          const lastIndex = this.state.historyPaths.length ? parseInt(this.state.historyPaths[this.state.historyPaths.length - 1].getAttribute("index")) : -1;
-          let readyToDisplay = this.state.readyToDisplay;
-          let count = 0;
-          while (readyToDisplay.length < urlIndex - lastIndex) {
-            count++;
-            readyToDisplay = readyToDisplay.concat([null]);
+        ;(video as any).key = _nextImageID.current
+        if (orderFunction === OF.strict) {
+          const lastIndex =
+            _historyPaths.current.length > 0
+              ? parseInt(
+                  _historyPaths.current[
+                    _historyPaths.current.length - 1
+                  ].getAttribute('index') as string
+                )
+              : -1
+          let count = 0
+          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+            count++
+            _readyToDisplay.current.push(undefined)
           }
-          readyToDisplay[urlIndex - lastIndex - 1] = video;
-          this.setState({
-            readyToDisplay: readyToDisplay,
-            nextImageID: this.state.nextImageID + 1,
-          });
+          _readyToDisplay.current[urlIndex - lastIndex - 1] = video
+          _nextImageID.current++
         } else {
-          this.setState({
-            readyToDisplay: this.state.readyToDisplay.concat([video]),
-            nextImageID: this.state.nextImageID + 1,
-          });
+          _readyToDisplay.current.push(video)
+          _nextImageID.current++
         }
-        if (this.state.historyPaths.length === 0) {
-          this.advance(false, false);
+        if (_historyPaths.current.length === 0) {
+          // console.log('ADVANCE 666')
+          advance(false, false)
         }
-        this.queueRunFetchLoop(i);
-      };
+        queueRunFetchLoop(i)
+      }
 
       const errorCallback = () => {
-        if (this._imgLoadTimeouts) {
-          clearTimeout(this._imgLoadTimeouts[i]);
+        if (_imgLoadTimeouts.current) {
+          clearTimeout(_imgLoadTimeouts.current[i])
         }
-        if (!this._isMounted) return;
-        if (this.props.scene.downloadScene || (this.props.scene.nextSceneAllImages && this.props.scene.nextSceneID != 0 && this.props.playNextScene && video && video.src)) {
-          if (!this._playedURLs.includes(video.src)) {
-            this._playedURLs.push(video.src);
+        if (!_isMounted.current) return
+        if (
+          downloadScene ||
+          (nextSceneAllImages && nextSceneID !== 0 && video && video.src)
+        ) {
+          if (!_playedURLs.current.includes(video.src)) {
+            _playedURLs.current.push(video.src)
           }
         }
-        if (this.props.scene.orderFunction == OF.strict) {
-          const lastIndex = this.state.historyPaths.length ? parseInt(this.state.historyPaths[this.state.historyPaths.length - 1].getAttribute("index")) : -1;
+        if (orderFunction === OF.strict) {
+          const lastIndex =
+            _historyPaths.current.length > 0
+              ? parseInt(
+                  _historyPaths.current[
+                    _historyPaths.current.length - 1
+                  ].getAttribute('index') as string
+                )
+              : -1
 
-          let readyToDisplay = this.state.readyToDisplay;
-          let count = 0;
-          while (readyToDisplay.length < urlIndex - lastIndex) {
-            count++;
-            readyToDisplay = readyToDisplay.concat([null]);
+          let count = 0
+          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+            count++
+            _readyToDisplay.current.push(undefined)
           }
-          const errImage = new Image();
-          errImage.setAttribute("index", urlIndex.toString());
-          errImage.setAttribute("length", sourceLength.toString());
+          const errImage = new Image()
+          errImage.setAttribute('index', urlIndex.toString())
+          errImage.setAttribute('length', sourceLength.toString())
           if (sourceIndex != null) {
-            errImage.setAttribute("sindex", sourceIndex.toString());
+            errImage.setAttribute('sindex', sourceIndex.toString())
           }
-          errImage.src = "src/renderer/icons/flipflip_logo.png"
-          readyToDisplay[urlIndex - lastIndex - 1] = errImage;
-          this.setState({
-            readyToDisplay: readyToDisplay,
-            nextImageID: this.state.nextImageID + 1,
-          });
+          errImage.src = 'src/renderer/icons/flipflip_logo.png'
+          _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
+          _nextImageID.current++
         }
-        this.queueRunFetchLoop(i);
-      };
+        queueRunFetchLoop(i)
+      }
 
       video.onloadeddata = () => {
         // images may load immediately, but that messes up the setState()
         // lifecycle, so always load on the next event loop iteration.
         // Also, now  we know the image size, so we can finally filter it.
-        if (video.videoWidth < this.props.config.displaySettings.minVideoSize
-          || video.videoHeight < this.props.config.displaySettings.minVideoSize) {
-          console.warn("Video skipped due to minimum width/height: " + video.src);
-          errorCallback();
+        if (
+          video.videoWidth < minVideoSize ||
+          video.videoHeight < minVideoSize
+        ) {
+          console.warn(
+            'Video skipped due to minimum width/height: ' + video.src
+          )
+          errorCallback()
         } else {
-          successCallback();
+          successCallback()
         }
-      };
+      }
 
       video.onerror = video.onabort = () => {
-        errorCallback();
-      };
+        errorCallback()
+      }
 
       video.onended = () => {
-        if (this.props.scene.videoOption == VO.full) {
-          clearTimeout(this._timeout);
-          this.advance(true, true);
+        if (videoOption === VO.full) {
+          clearTimeout(_timeout.current)
+          _timeout.current = undefined
+          // console.log('ADVANCE 777')
+          advance(true, true)
         } else {
-          video.play();
+          video.play().catch((err) => console.warn(err))
         }
       }
 
-      video.src = url;
-      video.volume = 0;
-      video.preload = "auto";
+      video.src = url
+      video.volume = 0
+      video.preload = 'auto'
 
-      clearTimeout(this._imgLoadTimeouts[i]);
-      this._imgLoadTimeouts[i] = setTimeout(errorCallback, 15000);
+      clearTimeout(_imgLoadTimeouts.current[i])
+      _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 15000)
 
-      video.load();
+      video.load()
     } else {
-      const img = new Image();
-      img.setAttribute("source", source);
-      if (!!post) {
-        img.setAttribute("post", post);
+      const img = new Image()
+      img.setAttribute('source', source)
+      if (post) {
+        img.setAttribute('post', post)
       }
-      if (this.props.scene.orderFunction == OF.strict) {
-        img.setAttribute("index", urlIndex.toString());
-        img.setAttribute("length", sourceLength.toString());
+      if (orderFunction === OF.strict) {
+        img.setAttribute('index', urlIndex.toString())
+        img.setAttribute('length', sourceLength.toString())
         if (sourceIndex != null) {
-          img.setAttribute("sindex", sourceIndex.toString());
+          img.setAttribute('sindex', sourceIndex.toString())
         }
       }
 
       const successCallback = () => {
-        if (this._imgLoadTimeouts) {
-          clearTimeout(this._imgLoadTimeouts[i]);
+        if (_imgLoadTimeouts.current) {
+          clearTimeout(_imgLoadTimeouts.current[i])
         }
-        if (!this._isMounted) return;
-        this.props.cache(img);
+        if (!_isMounted.current) return
+        dispatch(cacheImage(img))
 
-        const width = img.width;
-        const height = img.height;
-        if ((this.props.scene.imageOrientation == OT.onlyLandscape && height > width) ||
-          (this.props.scene.imageOrientation == OT.onlyPortrait && height < width)) {
-          errorCallback();
-          return;
+        const width = img.width
+        const height = img.height
+        if (
+          (imageOrientation === OT.onlyLandscape && height > width) ||
+          (imageOrientation === OT.onlyPortrait && height < width)
+        ) {
+          errorCallback()
+          return
         }
 
-        (img as any).key = this.state.nextImageID;
-        if (this.props.scene.orderFunction == OF.strict) {
-          const lastIndex = this.state.historyPaths.length ? parseInt(this.state.historyPaths[this.state.historyPaths.length - 1].getAttribute("index")) : -1;
+        ;(img as any).key = _nextImageID.current
+        if (orderFunction === OF.strict) {
+          const lastIndex =
+            _historyPaths.current.length > 0
+              ? parseInt(
+                  _historyPaths.current[
+                    _historyPaths.current.length - 1
+                  ].getAttribute('index') as string
+                )
+              : -1
 
-          let readyToDisplay = this.state.readyToDisplay;
-          let count = 0;
-          while (readyToDisplay.length < urlIndex - lastIndex) {
-            count++;
-            readyToDisplay = readyToDisplay.concat([null]);
+          let count = 0
+          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+            count++
+            _readyToDisplay.current.push(undefined)
           }
-          readyToDisplay[urlIndex - lastIndex - 1] = img;
-          this.setState({
-            readyToDisplay: readyToDisplay,
-            nextImageID: this.state.nextImageID + 1,
-          });
+          _readyToDisplay.current[urlIndex - lastIndex - 1] = img
+          _nextImageID.current++
         } else {
-          this.setState({
-            readyToDisplay: this.state.readyToDisplay.concat([img]),
-            nextImageID: this.state.nextImageID + 1,
-          });
+          _readyToDisplay.current.push(img)
+          _nextImageID.current++
         }
-        if (this.state.historyPaths.length === 0) {
-          this.advance(false, false);
+        if (_historyPaths.current.length === 0 && _timeout.current == null) {
+          // console.log('ADVANCE 888')
+          advance(false, false)
         }
-        this.queueRunFetchLoop(i);
-      };
+        queueRunFetchLoop(i)
+      }
 
       const errorCallback = () => {
-        if (this._imgLoadTimeouts) {
-          clearTimeout(this._imgLoadTimeouts[i]);
+        if (_imgLoadTimeouts.current) {
+          clearTimeout(_imgLoadTimeouts.current[i])
         }
-        if (!this._isMounted) return;
-        if (this.props.scene.downloadScene || (this.props.scene.nextSceneAllImages && this.props.scene.nextSceneID != 0 && this.props.playNextScene && img && img.src)) {
-          if (!this._playedURLs.includes(img.src)) {
-            this._playedURLs.push(img.src);
+        if (!_isMounted.current) return
+        if (
+          downloadScene ||
+          (nextSceneAllImages && nextSceneID !== 0 && img && img.src)
+        ) {
+          if (!_playedURLs.current.includes(img.src)) {
+            _playedURLs.current.push(img.src)
           }
         }
-        if (this.props.scene.orderFunction == OF.strict) {
-          const lastIndex = this.state.historyPaths.length ? parseInt(this.state.historyPaths[this.state.historyPaths.length - 1].getAttribute("index")) : -1;
+        if (orderFunction === OF.strict) {
+          const lastIndex =
+            _historyPaths.current.length > 0
+              ? parseInt(
+                  _historyPaths.current[
+                    _historyPaths.current.length - 1
+                  ].getAttribute('index') as string
+                )
+              : -1
 
-          let readyToDisplay = this.state.readyToDisplay;
-          let count = 0;
-          while (readyToDisplay.length < urlIndex - lastIndex) {
-            count++;
-            readyToDisplay = readyToDisplay.concat([null]);
+          let count = 0
+          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+            count++
+            _readyToDisplay.current.push(undefined)
           }
-          const errImage = new Image();
-          errImage.setAttribute("index", urlIndex.toString());
-          errImage.setAttribute("length", sourceLength.toString());
+          const errImage = new Image()
+          errImage.setAttribute('index', urlIndex.toString())
+          errImage.setAttribute('length', sourceLength.toString())
           if (sourceIndex != null) {
-            errImage.setAttribute("sindex", sourceIndex.toString());
+            errImage.setAttribute('sindex', sourceIndex.toString())
           }
-          errImage.src = "src/renderer/icons/flipflip_logo.png"
-          readyToDisplay[urlIndex - lastIndex - 1] = errImage;
-          this.setState({
-            readyToDisplay: readyToDisplay,
-            nextImageID: this.state.nextImageID + 1,
-          });
+          errImage.src = 'src/renderer/icons/flipflip_logo.png'
+          _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
+          _nextImageID.current++
         }
-        this.queueRunFetchLoop(i);
-      };
+        queueRunFetchLoop(i)
+      }
 
       img.onload = () => {
         // images may load immediately, but that messes up the setState()
         // lifecycle, so always load on the next event loop iteration.
         // Also, now  we know the image size, so we can finally filter it.
-        if (img.width < this.props.config.displaySettings.minImageSize
-          || img.height < this.props.config.displaySettings.minImageSize) {
-          console.warn("Image skipped due to minimum width/height: " + img.src);
-          errorCallback();
+        if (img.width < minImageSize || img.height < minImageSize) {
+          console.warn('Image skipped due to minimum width/height: ' + img.src)
+          errorCallback()
         } else {
-          successCallback();
+          successCallback()
         }
-      };
+      }
 
       img.onerror = img.onabort = () => {
-        errorCallback();
-      };
+        errorCallback()
+      }
 
-      const processInfo = (info: GifInfo) => {
+      const processInfo = (info?: GifInfo) => {
         if (info == null) {
-          this.queueRunFetchLoop(i);
-          return;
+          queueRunFetchLoop(i)
+          return
         }
 
         // If gif is animated and we want to play entire length, store its duration
         if (info && info.animated) {
-          switch (this.props.scene.gifOption) {
+          switch (gifOption) {
             case GO.full:
-              img.setAttribute("duration", (!!info.durationChrome ? info.durationChrome : info.duration).toString());
-              break;
+              img.setAttribute(
+                'duration',
+                (info.durationChrome
+                  ? info.durationChrome
+                  : info.duration
+                ).toString()
+              )
+              break
             case GO.part:
-              img.setAttribute("duration", this.props.scene.gifTimingConstant.toString());
-              break;
+              img.setAttribute('duration', gifTimingConstant.toString())
+              break
             case GO.partr:
-              img.setAttribute("duration", getRandomNumber(this.props.scene.gifTimingMin, this.props.scene.gifTimingMax).toString());
-              break;
+              img.setAttribute(
+                'duration',
+                getRandomNumber(gifTimingMin, gifTimingMax).toString()
+              )
+              break
             case GO.atLeast:
-              let duration = 0;
+              let duration = 0
               do {
-                duration += (!!info.durationChrome ? info.durationChrome : info.duration);
-                if (duration == 0) {
-                  break;
+                duration += info.durationChrome
+                  ? info.durationChrome
+                  : info.duration
+                if (duration === 0) {
+                  break
                 }
-              } while (duration < this.props.scene.gifTimingConstant);
-              img.setAttribute("duration", duration.toString());
-              break;
+              } while (duration < gifTimingConstant)
+              img.setAttribute('duration', duration.toString())
+              break
           }
         }
 
         // Exclude non-animated gifs from gifs
-        if (this.props.scene.imageTypeFilter == IF.animated && info && !info.animated) {
-          this.queueRunFetchLoop(i);
-          return;
+        if (imageTypeFilter === IF.animated && info && !info.animated) {
+          queueRunFetchLoop(i)
+          return
           // Exclude animated gifs from stills
-        } else if (this.props.scene.imageTypeFilter == IF.stills && info && info.animated) {
-          this.queueRunFetchLoop(i);
-          return;
+        } else if (imageTypeFilter === IF.stills && info && info.animated) {
+          queueRunFetchLoop(i)
+          return
         }
 
-        img.src = url;
-        clearTimeout(this._imgLoadTimeouts[i]);
-        this._imgLoadTimeouts[i] = setTimeout(errorCallback, 5000);
-      };
+        img.src = url
+        clearTimeout(_imgLoadTimeouts.current[i])
+        _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
+      }
 
       // Get gifinfo if we need for imageFilter or playing full gif
-      if ((this.props.scene.imageTypeFilter == IF.animated || this.props.scene.imageTypeFilter == IF.stills || this.props.scene.gifOption != GO.none) && url.includes('.gif')) {
+      if (
+        (imageTypeFilter === IF.animated ||
+          imageTypeFilter === IF.stills ||
+          gifOption !== GO.none) &&
+        url.includes('.gif')
+      ) {
         // Get gif info. See https://github.com/Prinzhorn/gif-info
         try {
-          if (url.includes("file://")) {
-            processInfo(gifInfo(toArrayBuffer(fs.readFileSync(urlToPath(url)))));
+          if (url.includes('file://')) {
+            const arrayBuffer = await window.flipflip.api.readBinaryFile(
+              urlToPath(url, isWin32)
+            )
+            processInfo(gifInfo(arrayBuffer))
           } else {
-            request.get({url, encoding: null}, function (err: Error, res: IncomingMessage, body: Buffer) {
-              if (err) {
-                console.error(err);
-                processInfo(null);
-                return;
-              }
-              processInfo(gifInfo(toArrayBuffer(body)));
-            });
+            wretch(url)
+              .get()
+              .arrayBuffer((arrayBuffer) => {
+                processInfo(gifInfo(arrayBuffer))
+              })
+              .catch((err) => {
+                console.error(err)
+                processInfo()
+              })
           }
         } catch (e) {
-          console.error(e);
+          console.error(e)
         }
       } else {
-        img.src = url;
-        clearTimeout(this._imgLoadTimeouts[i]);
-        this._imgLoadTimeouts[i] = setTimeout(errorCallback, 5000);
+        img.src = url
+        clearTimeout(_imgLoadTimeouts.current[i])
+        _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
       }
     }
   }
 
-  _strictCheckCount = 0;
-  advance(force = false, schedule = true) {
+  const advance = (force = false, schedule = true) => {
+    // console.log('=== ADVANCE === ' + props.uuid)
+    // console.log('force: ' + force)
+    // console.log('props.isPlaying: ' + props.isPlaying)
+    // console.log('_isMounted.current: ' + _isMounted.current)
+    // console.log('hasStarted: ' + _hasStarted.current)
+    // console.log('_historyPaths.current.length === 0: ' + (_historyPaths.current.length === 0))
+    // console.log('===============')
     // bail if dead
-    if (!(force || (this.props.isPlaying && this._isMounted && (this.props.hasStarted || this.state.historyPaths.length == 0)))) {
-      this._isLooping = false;
-      return;
+    if (
+      !(
+        force ||
+        (props.isPlaying &&
+          _isMounted.current &&
+          (_hasStarted.current || _historyPaths.current.length === 0))
+      )
+    ) {
+      // console.log('$$$ DEAD $$$')
+      _isLooping.current = false
+      return
     }
-    this._isLooping = true;
+    _isLooping.current = true
 
-    let nextHistoryPaths = this.state.historyPaths;
-    let nextImg: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
-    if (this.props.historyOffset == 0) {
-      if (this.props.scene.downloadScene && this._playedURLs.length == this.props.scene.sources[0].count && this.props.hasStarted) {
-        this.props.onEndScene();
+    let nextHistoryPaths = _historyPaths.current
+    let nextImg:
+      | HTMLImageElement
+      | HTMLVideoElement
+      | HTMLIFrameElement
+      | undefined
+    if (props.historyOffset === 0) {
+      if (
+        downloadScene &&
+        _playedURLs.current.length === sources[0].count &&
+        _hasStarted.current
+      ) {
+        dispatch(setRouteGoBack())
       }
-      if (this.props.scene.nextSceneAllImages && this.props.scene.nextSceneID != 0 && this.props.playNextScene) {
-        let remainingLibrary;
-        if (this.props.scene.weightFunction == WF.sources) {
-          remainingLibrary = flatten(Array.from(this.props.allURLs.values())).filter((u: string) => !this._playedURLs.includes(u));
+      if (nextSceneAllImages && nextSceneID !== 0) {
+        let remainingLibrary
+        if (weightFunction === WF.sources) {
+          remainingLibrary = flatten(Object.values(_allURLs.current)).filter(
+            (u: string) => !_playedURLs.current.includes(u)
+          )
         } else {
-          remainingLibrary = flatten(Array.from(this.props.allURLs.keys())).filter((u: string) => !this._playedURLs.includes(u));
+          remainingLibrary = flatten(Object.keys(_allURLs.current)).filter(
+            (u: string) => !_playedURLs.current.includes(u)
+          )
         }
         if (remainingLibrary.length === 0) {
-          this._playedURLs = new Array<string>();
-          this.props.playNextScene();
-          return;
+          _playedURLs.current = new Array<string>()
+          dispatch(nextScene(sceneID))
+          return
         }
       }
 
       // Prevent playing same image again, if possible
       do {
-        if (this.state.readyToDisplay.length && this.state.readyToDisplay[0] != null) {
+        if (
+          _readyToDisplay.current.length > 0 &&
+          _readyToDisplay.current[0] != null
+        ) {
           // If there is an image ready, display the next image
-          nextImg = this.state.readyToDisplay.shift();
-          this._strictCheckCount = 0;
-        } else if (this.state.historyPaths.length && this.props.config.defaultScene.orderFunction == OF.random && !this.props.scene.forceAll) {
+          nextImg = _readyToDisplay.current.shift()
+          // console.log(`[${sceneID}] readyToDisplay: ${nextImg.src}`)
+          _strictCheckCount.current = 0
+        } else if (
+          _historyPaths.current.length > 0 &&
+          defaultSceneOrderFunction === OF.random &&
+          !forceAll
+        ) {
           // If no image is ready, we have a history to choose from, ordering is random, and NOT forcing all
           // Choose a random image from history to display
-          nextImg = getRandomListItem(this.state.historyPaths);
-        } else if (this.state.historyPaths.length) {
+          nextImg = getRandomListItem(_historyPaths.current)
+          // console.log('random historyPaths: ' + nextImg.src)
+        } else if (_historyPaths.current.length > 0) {
           // If no image is ready, we have a history to choose from, and ordering is not random
           // Show the next image from history
-          if (this.props.scene.orderFunction == OF.strict) {
+          if (orderFunction === OF.strict) {
             // If ordering strictly and next isn't ready yet, don't load any image
-            this._strictCheckCount++;
-            if (this._strictCheckCount >= 50) {
-              this.state.readyToDisplay.shift();
-              this._strictCheckCount = 0;
+            _strictCheckCount.current++
+            if (_strictCheckCount.current >= 50) {
+              _readyToDisplay.current.shift()
+              _strictCheckCount.current = 0
             }
-            nextImg = null;
+            nextImg = undefined
+            // console.log('nextImg = undefined')
           } else {
-            nextImg = this.state.historyPaths[this._nextAdvIndex++ % this.state.historyPaths.length];
+            nextImg =
+              _historyPaths.current[
+                _nextAdvIndex.current++ % _historyPaths.current.length
+              ]
+
+            // console.log('adv historyPaths: ' + nextImg.src)
           }
         }
-      } while (this.state.historyPaths.length > 0 && nextImg?.src == this.state.historyPaths[this.state.historyPaths.length - 1].src &&
-      (this.state.readyToDisplay.length > 0 || this.state.historyPaths.filter((s) => s.src != this.state.historyPaths[this.state.historyPaths.length - 1]?.src).length > 0))
+      } while (
+        _historyPaths.current.length > 0 &&
+        nextImg?.src ==
+          _historyPaths.current[_historyPaths.current.length - 1].src &&
+        (_readyToDisplay.current.length > 0 ||
+          _historyPaths.current.filter(
+            (s) =>
+              s.src !=
+              _historyPaths.current[_historyPaths.current.length - 1]?.src
+          ).length > 0)
+      )
 
       if (nextImg) {
-        if (this.props.scene.continueVideo && nextImg instanceof HTMLVideoElement) {
-          const videoFind = Array.from(this.state.historyPaths).reverse().find((i) => i.src == nextImg.src &&
-            i.getAttribute("start") == nextImg.getAttribute("start") &&
-            i.getAttribute("end") == nextImg.getAttribute("end"));
+        if (continueVideo && nextImg instanceof HTMLVideoElement) {
+          const videoFind = Array.from(_historyPaths.current)
+            .reverse()
+            .find(
+              (i) =>
+                i.src === nextImg!.src &&
+                i.getAttribute('start') === nextImg!.getAttribute('start') &&
+                i.getAttribute('end') === nextImg!.getAttribute('end')
+            )
           if (videoFind) {
-            nextImg = videoFind;
+            nextImg = videoFind
+            // console.log('videoFind: ' + nextImg.src)
           }
         }
-        nextHistoryPaths = nextHistoryPaths.concat([nextImg]);
+
+        nextHistoryPaths = nextHistoryPaths.concat([nextImg])
       }
 
-      while (nextHistoryPaths.length > this.props.config.displaySettings.maxInHistory) {
-        nextHistoryPaths.shift().remove();
+      while (nextHistoryPaths.length > maxInHistory) {
+        nextHistoryPaths.shift()!.remove()
       }
 
-      if (nextImg != null && (this.props.scene.downloadScene || (this.props.scene.nextSceneAllImages && this.props.scene.nextSceneID != 0 && this.props.playNextScene && nextImg && nextImg.src))) {
-        if (!this._playedURLs.includes(nextImg.src)) {
-          this._playedURLs.push(nextImg.src);
+      if (
+        nextImg != null &&
+        (downloadScene ||
+          (nextSceneAllImages && nextSceneID !== 0 && nextImg && nextImg.src))
+      ) {
+        if (!_playedURLs.current.includes(nextImg.src)) {
+          _playedURLs.current.push(nextImg.src)
         }
       }
     } else {
-      const newOffset = this.props.historyOffset + 1;
-      nextImg = this.state.historyPaths[(this.state.historyPaths.length - 1) + newOffset];
-      this.props.setHistoryOffset(newOffset);
+      const newOffset = props.historyOffset + 1
+      nextImg =
+        _historyPaths.current[_historyPaths.current.length - 1 + newOffset]
+      
+      // console.log('newOffset: ' + nextImg.src)
+      props.setHistoryOffset(newOffset)
     }
 
     if (!schedule) {
-      this.setState({
-        historyPaths: nextHistoryPaths,
-      });
-      this.props.setHistoryPaths(nextHistoryPaths);
+      _historyPaths.current = nextHistoryPaths
+      props.setHistoryPaths(nextHistoryPaths)
+      setState({
+        ...state,
+        image: nextImg
+      })
     } else {
-      let timeToNextFrame: number = 0;
-      switch (this.props.scene.timingFunction) {
-        case TF.random:
-          timeToNextFrame = Math.floor(Math.random() * (this.props.scene.timingMax - this.props.scene.timingMin + 1)) + this.props.scene.timingMin;
-          break;
-        case TF.sin:
-          const sinRate = (Math.abs(this.props.scene.timingSinRate - 100) + 2) * 1000;
-          timeToNextFrame = Math.floor(Math.abs(Math.sin(Date.now() / sinRate)) * (this.props.scene.timingMax - this.props.scene.timingMin + 1)) + this.props.scene.timingMin;
-          break;
-        case TF.constant:
-          timeToNextFrame = this.props.scene.timingConstant;
-          // If we cannot parse this, default to 1s
-          if (!timeToNextFrame && timeToNextFrame != 0) {
-            timeToNextFrame = 1000;
-          }
-          break;
-        case TF.bpm:
-          const bpmMulti = this.props.scene.timingBPMMulti / 10;
-          const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
-          timeToNextFrame = 60000 / (bpm * bpmMulti);
-          // If we cannot parse this, default to 1s
-          if (!timeToNextFrame) {
-            timeToNextFrame = 1000;
-          }
-          break;
+      let timeToNextFrame = getDuration(
+        {
+          timingFunction: timingTF,
+          time: timingDuration,
+          timeMin: timingDurationMin,
+          timeMax: timingDurationMax,
+          sinRate: timingSinRate,
+          bpmMulti: timingBPMMulti
+        },
+        0,
+        bpm
+      )
+
+      const durationAttr = nextImg?.getAttribute('duration')
+      if (durationAttr) {
+        timeToNextFrame = Math.max(timeToNextFrame, parseFloat(durationAttr))
       }
-      if (nextImg && nextImg.getAttribute("duration") && timeToNextFrame < parseFloat(nextImg.getAttribute("duration"))) {
-        timeToNextFrame = parseFloat(nextImg.getAttribute("duration"));
+      if (props.setTimeToNextFrame) {
+        props.setTimeToNextFrame(timeToNextFrame)
       }
-      if (this.props.setTimeToNextFrame) {
-        this.props.setTimeToNextFrame(timeToNextFrame);
-      }
-      this._toggleStrobe = !this._toggleStrobe;
-      this.props.setHistoryPaths(nextHistoryPaths);
-      this.setState({
-        historyPaths: nextHistoryPaths,
+
+      // props.setHistoryPaths(nextHistoryPaths)
+      _historyPaths.current = nextHistoryPaths
+      // console.log('IMAGE CHANGE')
+      // console.log(`timeToNextFrame: ${timeToNextFrame}`)
+      setState({
+        image: nextImg,
         timeToNextFrame,
-      });
-      this._count++;
-      if (!(nextImg instanceof HTMLVideoElement && this.props.scene.videoOption == VO.full) && !(this.props.singleImage && this.state.historyPaths.length > 0 && getSourceType(this.state.historyPaths[this.state.historyPaths.length - 1]?.getAttribute("source")) == ST.nimja)) {
-        this._timeout = setTimeout(this.advance.bind(this, false, true), timeToNextFrame);
+        toggleStrobe: strobe ? !state.toggleStrobe : state.toggleStrobe
+      })
+
+      if (
+        !(nextImg instanceof HTMLVideoElement && videoOption === VO.full) &&
+        !(
+          singleImage &&
+          _historyPaths.current.length > 0 &&
+          getSourceType(
+            _historyPaths.current[
+              _historyPaths.current.length - 1
+            ]!.getAttribute('source') as string
+          ) === ST.nimja
+        )
+      ) {
+        _timeout.current = window.setTimeout(() => {
+            // console.log('ADVANCE TIMEOUT ' + new Date().getTime())
+            advance(false, true)
+          },
+          timeToNextFrame
+        )
+
+        // _timeout.current = window.setTimeout(
+        //   advance.bind(this, false, true),
+        //   timeToNextFrame
+        // )
       }
     }
   }
-};
 
-(ImagePlayer as any).displayName="ImagePlayer";
+  const style: any = {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    position: props.gridView ? 'static' : 'fixed',
+    zIndex: props.isOverlay ? 4 : 'auto'
+  }
+
+  return (
+    <div style={style}>
+      {strobe && props.strobeLayer === SL.middle && (
+        <Strobe
+          sceneID={sceneID}
+          currentAudio={props.currentAudio}
+          zIndex={3}
+          toggleStrobe={state.toggleStrobe}
+          timeToNextFrame={state.timeToNextFrame}
+        />
+      )}
+      {downloadScene && (
+        <Container
+          maxWidth={false}
+          style={{
+            height: '100%',
+            zIndex: 3,
+            flexGrow: 1,
+            padding: 0,
+            position: 'relative',
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex'
+          }}
+        >
+          {sources[0].countComplete && (
+            <CircularProgress
+              size={300}
+              variant="determinate"
+              value={Math.round(
+                (_playedURLs.current.length / sources[0].count) * 100
+              )}
+            />
+          )}
+          {!sources[0].countComplete && <CircularProgress size={300} />}
+          <div
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              display: 'flex',
+              position: 'absolute',
+              flexDirection: 'column'
+            }}
+          >
+            <Typography
+              component="h1"
+              variant="h6"
+              color="inherit"
+              noWrap
+              style={{
+                paddingLeft: 8,
+                paddingRight: 8,
+                backgroundColor: '#2C2C2C'
+              }}
+            >
+              {_playedURLs.current.length} / {sources[0].count}
+              {sources[0].countComplete ? '' : '+'}
+            </Typography>
+          </div>
+        </Container>
+      )}
+      <ImageView
+        removeChild
+        gridCoordinates={props.gridCoordinates}
+        uuid={props.uuid}
+        isOverlay={props.isOverlay}
+        image={state.image}
+        currentAudio={props.currentAudio}
+        timeToNextFrame={state.timeToNextFrame}
+        toggleStrobe={state.toggleStrobe}
+        fitParent={props.gridView}
+        setSceneCopy={props.setSceneCopy}
+        setVideo={props.setVideo}
+      />
+    </div>
+  )
+}
+
+;(ImagePlayer as any).displayName = 'ImagePlayer'

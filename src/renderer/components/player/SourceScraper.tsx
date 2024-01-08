@@ -1,937 +1,210 @@
-import * as React from 'react';
-import * as fs from "fs";
-import * as path from "path";
-import worker from 'workerize-loader!./Scrapers';
-import recursiveReaddir from "recursive-readdir";
-import fileURL from "file-url";
-import wretch from "wretch";
-import uuidv4 from "uuid/v4";
+import React, { useState, useRef, useEffect } from 'react'
 
-import {Dialog, DialogContent} from "@mui/material";
+import { Dialog, DialogContent } from '@mui/material'
 
-import {CancelablePromise, flatten, getCachePath, randomizeList, urlToPath} from "../../data/utils";
-import {
-  filterPathsToJustPlayable, getFileName, getSourceType, isVideo, loadBDSMlr, loadDanbooru, loadDeviantArt, loadE621,
-  loadEHentai, loadGelbooru1, loadGelbooru2, loadHydrus, loadImageFap, loadImgur, loadInstagram, loadLuscious,
-  loadPiwigo, loadReddit, loadRedGifs, loadRemoteImageURLList, loadSexCom, loadTumblr, loadTwitter, processAllURLs
-} from "./Scrapers";
-import {IF, SOF, ST} from '../../data/const';
-import Config from "../../data/Config";
-import LibrarySource from "../../data/LibrarySource";
-import Scene from '../../data/Scene';
-import Audio from "../../data/Audio";
-import ChildCallbackHack from './ChildCallbackHack';
-import ImagePlayer from './ImagePlayer';
+import type ChildCallbackHack from './ChildCallbackHack'
+import ImagePlayer from './ImagePlayer'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { selectPlayerOverlayOpacity, selectPlayerCaptcha } from '../../../store/player/selectors'
+import { PlayerCaptcha, setPlayerCaptcha } from '../../../store/player/slice'
 
-let workerInstance: any = null;
-let workerListener: any = null;
-let nextWorkerInstance: any = null;
-let nextWorkerListener: any = null;
-
-// Returns true if array is empty, or only contains empty arrays
-function isEmpty(allURLs: any[]): boolean {
-  return Array.isArray(allURLs) && allURLs.every(isEmpty);
+export interface SourceScraperProps {
+  uuid?: string
+  overlayIndex?: number
+  opacity?: number
+  currentAudio: number
+  isPlaying: boolean
+  gridView: boolean
+  historyOffset: number
+  advanceHack: ChildCallbackHack
+  deleteHack?: ChildCallbackHack
+  gridCoordinates?: number[]
+  strobeLayer?: string
+  setHistoryOffset: (historyOffset: number) => void
+  setHistoryPaths: (
+    historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  ) => void
+  setVideo: (video: HTMLVideoElement) => void
+  setTimeToNextFrame?: (timeToNextFrame: number) => void
+  setSceneCopy?: (children: React.ReactNode) => void
 }
 
-// Determine what kind of source we have based on the URL and return associated Promise
-function scrapeFiles(worker: any, pm: Function, allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, returnPromise = false) {
-  const sourceType = getSourceType(source.url);
-  if (sourceType == ST.local) { // Local files
-    if (returnPromise) {
-      return new CancelablePromise((resolve) => {
-        loadLocalDirectory(resolve, allURLs, allPosts, config, source, filter, weight, helpers, null);
-      });
+export default function SourceScraper(props: SourceScraperProps) {
+  const dispatch = useAppDispatch()
+  const isOverlay = props.overlayIndex != null
+  const opacity = isOverlay ? useAppSelector(selectPlayerOverlayOpacity(props.overlayIndex, props.uuid)) / 100 : props.opacity
+
+  const captcha = useAppSelector(selectPlayerCaptcha(props.uuid))
+  const [load, setLoad] = useState(false)
+
+  // START LOG COMPONENT CHANGES
+  // const pr_uuid = useRef<string>()
+  // const pr_overlayIndex = useRef<number>()
+  // const pr_opacity = useRef<number>()
+  // const pr_currentAudio = useRef<number>()
+  // const pr_isPlaying = useRef<boolean>()
+  // const pr_gridView = useRef<boolean>()
+  // const pr_historyOffset = useRef<number>()
+  // const pr_advanceHack = useRef<ChildCallbackHack>()
+  // const pr_deleteHack = useRef<ChildCallbackHack>()
+  // const pr_gridCoordinates = useRef<number[]>()
+  // const pr_strobeLayer = useRef<string>()
+  // const pr_setHistoryOffset = useRef<(historyOffset: number) => void>()
+  // const pr_setHistoryPaths = useRef<(
+  //   historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  // ) => void>()
+  // const pr_setVideo = useRef<(video: HTMLVideoElement) => void>()
+  // const pr_setTimeToNextFrame = useRef<(timeToNextFrame: number) => void>()
+  // const pr_setSceneCopy = useRef<(children: React.ReactNode) => void>()
+  // const p_isOverlay = useRef<boolean>()
+  // const p_opacity = useRef<number>()
+  // const p_captcha = useRef<PlayerCaptcha>()
+  // const p_load = useRef<boolean>()
+
+  // console.log('22------------------------22')
+  // if(props.uuid !== pr_uuid.current){
+  //   console.log('UUID PROP CHANGED')
+  // }
+  // if(props.overlayIndex !== pr_overlayIndex.current){
+  //   console.log('OVERLAY_INDEX PROP CHANGED')
+  // }
+  // if(props.opacity !== pr_opacity.current){
+  //   console.log('OPACITY PROP CHANGED')
+  // }
+  // if(props.currentAudio !== pr_currentAudio.current){
+  //   console.log('CURRENT_AUDIO PROP CHANGED')
+  // }
+  // if(props.isPlaying !== pr_isPlaying.current){
+  //   console.log('IS_PLAYING PROP CHANGED')
+  // }
+  // if(props.gridView !== pr_gridView.current){
+  //   console.log('GRID_VIEW PROP CHANGED')
+  // }
+  // if(props.historyOffset !== pr_historyOffset.current){
+  //   console.log('HISTORY_OFFSET PROP CHANGED')
+  // }
+  // if(props.advanceHack !== pr_advanceHack.current){
+  //   console.log('ADVANCE_HACK PROP CHANGED')
+  // }
+  // if(props.deleteHack !== pr_deleteHack.current){
+  //   console.log('DELETE_HACK PROP CHANGED')
+  // }
+  // if(props.gridCoordinates !== pr_gridCoordinates.current){
+  //   console.log('GRID_COORDINATES PROP CHANGED')
+  // }
+  // if(props.strobeLayer !== pr_strobeLayer.current){
+  //   console.log('STROBE_LAYER PROP CHANGED')
+  // }
+  // if(props.setHistoryOffset !== pr_setHistoryOffset.current){
+  //   console.log('SET_HISTORY_OFFSET PROP CHANGED')
+  // }
+  // if(props.setHistoryPaths !== pr_setHistoryPaths.current){
+  //   console.log('SET_HISTORY_PATHS PROP CHANGED')
+  // }
+  // if(props.setVideo !== pr_setVideo.current){
+  //   console.log('SET_VIDEO PROP CHANGED')
+  // }
+  // if(props.setTimeToNextFrame !== pr_setTimeToNextFrame.current){
+  //   console.log('SET_TIME_TO_NEXT_FRAME PROP CHANGED')
+  // }
+  // if(props.setSceneCopy !== pr_setSceneCopy.current){
+  //   console.log('SET_SCENE_COPY PROP CHANGED')
+  // }
+  // if(p_isOverlay.current = isOverlay){
+  //   console.log('IS_OVERLAY CHANGED')
+  // }
+  // if(p_opacity.current = opacity){
+  //   console.log('OPACITY CHANGED')
+  // }
+  // if(p_captcha.current = captcha){
+  //   console.log('CAPTCHA CHANGED')
+  // }
+  // if(p_load.current = load){
+  //   console.log('LOAD CHANGED')
+  // }
+  // console.log('22------------------------22')
+
+  // pr_uuid.current = props.uuid
+  // pr_overlayIndex.current = props.overlayIndex
+  // pr_opacity.current = props.opacity
+  // pr_currentAudio.current = props.currentAudio
+  // pr_isPlaying.current = props.isPlaying
+  // pr_gridView.current = props.gridView
+  // pr_historyOffset.current = props.historyOffset
+  // pr_advanceHack.current = props.advanceHack
+  // pr_deleteHack.current = props.deleteHack
+  // pr_gridCoordinates.current = props.gridCoordinates
+  // pr_strobeLayer.current = props.strobeLayer
+  // pr_setHistoryOffset.current = props.setHistoryOffset
+  // pr_setHistoryPaths.current = props.setHistoryPaths
+  // pr_setVideo.current = props.setVideo
+  // pr_setTimeToNextFrame.current = props.setTimeToNextFrame
+  // pr_setSceneCopy.current = props.setSceneCopy
+  // p_isOverlay.current = isOverlay
+  // p_opacity.current = opacity
+  // p_captcha.current = captcha
+  // p_load.current = load
+  // END LOG COMPONENT CHANGES
+
+  const onIFrameLoad = () => {
+    if (!load) {
+      setLoad(true)
     } else {
-      loadLocalDirectory(pm, allURLs, allPosts, config, source, filter, weight, helpers, null);
-    }
-  } else if (sourceType == ST.list) { // Image List
-    helpers.next = null;
-    if (returnPromise) {
-      return new CancelablePromise((resolve) => {
-        loadRemoteImageURLListPromise(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-      });
-    } else {
-      worker.loadRemoteImageURLList(allURLs, allPosts, config, source, filter, weight, helpers);
-    }
-  } else if (sourceType == ST.video) {
-    const cachePath = getCachePath(source.url, config) + getFileName(source.url);
-    if (returnPromise) {
-      return new CancelablePromise((resolve) => {
-        loadVideo(resolve, allURLs, allPosts, config, source, filter, weight, helpers, config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null);
-      });
-    } else {
-      loadVideo(pm, allURLs, allPosts, config, source, filter, weight, helpers, config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null);
-    }
-  } else if (sourceType == ST.playlist) {
-    const cachePath = getCachePath(source.url, config) + getFileName(source.url);
-    if (returnPromise) {
-      return new CancelablePromise((resolve) => {
-        loadPlaylist(resolve, allURLs, allPosts, config, source, filter, weight, helpers, config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null);
-      });
-    } else {
-      loadPlaylist(pm, allURLs, allPosts, config, source, filter, weight, helpers, config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null);
-    }
-  } else if (sourceType == ST.nimja) {
-    if (returnPromise) {
-      return new CancelablePromise((resolve) => {
-        loadNimja(resolve, allURLs, allPosts, config, source, filter, weight, helpers, null);
-      });
-    } else {
-      loadNimja(pm, allURLs, allPosts, config, source, filter, weight, helpers, null);
-    }
-  } else { // Paging sources
-    let workerFunction: any;
-    if (sourceType == ST.tumblr) {
-      workerFunction = returnPromise ? loadTumblrPromise : worker.loadTumblr;
-    } else if (sourceType == ST.reddit) {
-      workerFunction = returnPromise ? loadRedditPromise : worker.loadReddit;
-    } else if (sourceType == ST.redgifs) {
-      workerFunction = returnPromise ? loadRedGifsPromise : worker.loadRedGifs;
-    } else if (sourceType == ST.imagefap) {
-      workerFunction = returnPromise ? loadImageFapPromise : worker.loadImageFap;
-    } else if (sourceType == ST.sexcom) {
-      workerFunction = returnPromise ? loadSexComPromise : worker.loadSexCom;
-    } else if (sourceType == ST.imgur) {
-      workerFunction = returnPromise ? loadImgurPromise : worker.loadImgur;
-    } else if (sourceType == ST.twitter) {
-      workerFunction = returnPromise ? loadTwitterPromise : worker.loadTwitter;
-    } else if (sourceType == ST.deviantart) {
-      workerFunction = returnPromise ? loadDeviantArtPromise : worker.loadDeviantArt;
-    } else if (sourceType == ST.instagram) {
-      workerFunction = returnPromise ? loadInstagramPromise : worker.loadInstagram;
-    } else if (sourceType == ST.danbooru) {
-      workerFunction = returnPromise ? loadDanbooruPromise : worker.loadDanbooru;
-    } else if (sourceType == ST.e621) {
-      workerFunction = returnPromise ? loadE621Promise : worker.loadE621;
-    } else if (sourceType == ST.luscious) {
-      workerFunction = returnPromise ? loadLusciousPromise : worker.loadLuscious;
-    } else if (sourceType == ST.gelbooru1) {
-      workerFunction = returnPromise ? loadGelbooru1Promise : worker.loadGelbooru1;
-    } else if (sourceType == ST.gelbooru2) {
-      workerFunction = returnPromise ? loadGelbooru2Promise : worker.loadGelbooru2;
-    } else if (sourceType == ST.ehentai) {
-      workerFunction = returnPromise ? loadEHentaiPromise : worker.loadEHentai;
-    } else if (sourceType == ST.bdsmlr) {
-      workerFunction = returnPromise ? loadBDSMlrPromise : worker.loadBDSMlr;
-    } else if (sourceType == ST.hydrus) {
-      workerFunction = returnPromise ? loadHydrusPromise : worker.loadHydrus;
-    } else if (sourceType == ST.piwigo) {
-      workerFunction = returnPromise ? loadPiwigoPromise : worker.loadPiwigo;
-    }
-    if (helpers.next == -1) {
-      helpers.next = 0;
-      const cachePath = getCachePath(source.url, config);
-      if (config.caching.enabled && fs.existsSync(cachePath) && fs.readdirSync(cachePath).length > 0) {
-        // If the cache directory exists, use it
-        if (returnPromise) {
-          return new CancelablePromise((resolve) => {
-            loadLocalDirectory(resolve, allURLs, allPosts, config, source, filter, weight, helpers, cachePath);
-          });
-        } else {
-          loadLocalDirectory(pm, allURLs, allPosts, config, source, filter, weight, helpers, cachePath);
-        }
-      } else {
-        if (returnPromise) {
-          return new CancelablePromise((resolve) => {
-            workerFunction(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-          });
-        } else {
-          workerFunction(allURLs, allPosts, config, source, filter, weight, helpers);
-        }
-      }
-    } else {
-      if (returnPromise) {
-        return new CancelablePromise((resolve) => {
-          workerFunction(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-        });
-      } else {
-        workerFunction(allURLs, allPosts, config, source, filter, weight, helpers);
-      }
-    }
-  }
-}
-
-const loadNimja = (pm: Function, allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, cachePath: string) => {
-  let sources = [source.url];
-  allURLs = processAllURLs(sources, allURLs, source, weight, helpers);
-  helpers.next = null;
-  pm({data: {
-      data: sources,
-      allURLs: allURLs, 
-      allPosts: allPosts,
-      weight: weight,
-      helpers: helpers,
-      source: source,
-      timeout: 0,
-    }});
-}
-
-const loadLocalDirectory = (pm: Function, allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, cachePath: string) => {
-  const blacklist = ['*.css', '*.html', 'avatar.png', '*.txt'];
-  const url = cachePath ? cachePath : source.url;
-
-  recursiveReaddir(url, blacklist, (err: any, rawFiles: Array<string>) => {
-    if (err) {
-      pm({data: {
-        error: err.message,
-        helpers: helpers,
-        source: source,
-        timeout: 0,
-      }});
-    } else {
-      const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-      let sources = filterPathsToJustPlayable(filter, rawFiles, true).map((p) => fileURL(p)).sort(collator.compare);
-
-      if (source.blacklist && source.blacklist.length > 0) {
-        sources = sources.filter((url: string) => !source.blacklist.includes(url) && !source.blacklist.includes(urlToPath(url)));
-      }
-      allURLs = processAllURLs(sources, allURLs, source, weight, helpers);
-      // If this is a local source (not a cacheDir call)
-      if (helpers.next == -1) {
-        helpers.count = filterPathsToJustPlayable(IF.any, rawFiles, true).length;
-        helpers.next = null;
-      }
-
-      pm({data: {
-        data: sources,
-        allURLs: allURLs, 
-        allPosts: allPosts,
-        weight: weight,
-        helpers: helpers,
-        source: source,
-        timeout: 0,
-      }});
-    }
-  });
-}
-
-export const loadVideo = (pm: Function, allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, cachePath: string) => {
-  const url = cachePath ? cachePath : source.url;
-  const missingVideo = () => {
-    pm({data: {
-      error: "Could not find " + source.url,
-      data: [],
-      allURLs: allURLs, 
-      allPosts: allPosts,
-      weight: weight,
-      helpers: helpers,
-      source: source,
-      timeout: 0,
-    }});
-  }
-  const ifExists = (url: string) => {
-    if (!url.startsWith("http")) {
-      url = fileURL(url);
-    }
-    helpers.count = 1;
-
-    let paths;
-    if (source.clips && source.clips.length > 0) {
-      const clipPaths = Array<string>();
-      for (let clip of source.clips) {
-        if (!source.disabledClips || !source.disabledClips.includes(clip.id)) {
-          let clipPath = url + ":::" + clip.id + ":" + (clip.volume != null ? clip.volume : "-") + ":::" + clip.start + ":" + clip.end;
-          if (source.subtitleFile != null && source.subtitleFile.length > 0) {
-            clipPath = clipPath + "|||" + source.subtitleFile;
-          }
-          clipPaths.push(clipPath);
-        }
-      }
-      paths = clipPaths;
-    } else {
-      if (source.subtitleFile != null && source.subtitleFile.length > 0) {
-        url = url + "|||" + source.subtitleFile;
-      }
-      paths = [url];
-    }
-
-    if (source.blacklist && source.blacklist.length > 0) {
-      paths = paths.filter((url: string) => !source.blacklist.includes(url));
-    }
-    allURLs = processAllURLs(paths, allURLs, source, weight, helpers);
-    helpers.next = null;
-
-    pm({data: {
-      data: paths,
-      allURLs: allURLs, 
-      allPosts: allPosts,
-      weight: weight,
-      helpers: helpers,
-      source: source,
-      timeout: 0,
-    }});
-  }
-
-  if (!isVideo(url, false)) {
-    missingVideo();
-  }
-  if (url.startsWith("http")) {
-    wretch(url)
-      .get()
-      .notFound((e) => {
-        missingVideo();
-      })
-      .res((r) => {
-        ifExists(url);
-      })
-  } else {
-    const exists = fs.existsSync(url);
-    if (exists) {
-      ifExists(url);
-    } else {
-      missingVideo();
-    }
-  }
-}
-
-export const loadPlaylist = (pm: Function, allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, cachePath: string) => {
-  const url = cachePath ? cachePath : source.url;
-  wretch(url)
-    .get()
-    .text(data => {
-      let urls = [];
-      if (url.endsWith(".asx")) {
-        const refs = new DOMParser().parseFromString(data, "text/xml").getElementsByTagName("Ref");
-        for (let r = 0; r < refs.length; r++) {
-          const l = refs[r];
-          urls.push(l.getAttribute("href"));
-        }
-      } else if (url.endsWith(".m3u8")) {
-        for (let l of data.split("\n")) {
-          if (l.length > 0 && !l.startsWith("#")) {
-            urls.push(l.trim());
-          }
-        }
-      } else if (url.endsWith(".pls")) {
-        for (let l of data.split("\n")) {
-          if (l.startsWith("File")) {
-            urls.push(l.split("=")[1].trim());
-          }
-        }
-      } else if (url.endsWith(".xspf")) {
-        const locations = new DOMParser().parseFromString(data, "text/xml").getElementsByTagName("location");
-        for (let r = 0; r < locations.length; r++) {
-          const l = locations[r];
-          urls.push(l.textContent);
-        }
-      }
-
-      if (urls.length > 0) {
-        helpers.count = urls.length;
-      }
-
-      urls = filterPathsToJustPlayable(filter, urls, true);
-
-      if (source.blacklist && source.blacklist.length > 0) {
-        urls = urls.filter((url: string) => !source.blacklist.includes(url));
-      }
-      allURLs = processAllURLs(urls, allURLs, source, weight, helpers);
-      helpers.next = null;
-
-      pm({data: {
-        data: urls,
-        allURLs: allURLs,
-        allPosts: allPosts,
-        weight: weight,
-        helpers: helpers,
-        source: source,
-        timeout: 0,
-      }});
-    })
-    .catch((e) => {
-      pm({data: {
-        error: e.message,
-        helpers: helpers,
-        source: source,
-        timeout: 0,
-      }});
-    });
-}
-
-const loadRemoteImageURLListPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadRemoteImageURLList(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadTumblrPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadTumblr(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadRedditPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadReddit(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadRedGifsPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadRedGifs(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadImageFapPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadImageFap(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadSexComPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadSexCom(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadImgurPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadImgur(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadTwitterPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadTwitter(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadDeviantArtPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadDeviantArt(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadInstagramPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadInstagram(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadDanbooruPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadDanbooru(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadE621Promise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadE621(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadGelbooru1Promise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadGelbooru1(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadGelbooru2Promise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadGelbooru2(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadEHentaiPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadEHentai(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadBDSMlrPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadBDSMlr(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadHydrusPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadHydrus(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadPiwigoPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadPiwigo(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-const loadLusciousPromise = (allURLs: Map<string, Array<string>>, allPosts: Map<string, string>, config: Config, source: LibrarySource, filter: string, weight: string, helpers: {next: any, count: number, retries: number, uuid: string}, resolve: Function) => {
-  loadLuscious(allURLs, allPosts, config, source, filter, weight, helpers, resolve);
-}
-
-export default class SourceScraper extends React.Component {
-  readonly props: {
-    config: Config,
-    scene: Scene,
-    currentAudio: Audio,
-    opacity: number,
-    isPlaying: boolean,
-    gridView: boolean,
-    hasStarted: boolean,
-    historyOffset: number,
-    advanceHack: ChildCallbackHack,
-    deleteHack?: ChildCallbackHack,
-    gridCoordinates?: Array<number>,
-    isOverlay?: boolean,
-    nextScene?: Scene,
-    strobeLayer?: string,
-    setHistoryOffset(historyOffset: number): void,
-    setHistoryPaths(historyPaths: Array<any>): void,
-    firstImageLoaded(): void,
-    finishedLoading(empty: boolean): void,
-    setProgress(total: number, current: number, message: string[]): void,
-    setVideo(video: HTMLVideoElement): void,
-    setCount(sourceURL: string, count: number, countComplete: boolean): void,
-    cache(i: HTMLImageElement | HTMLVideoElement): void,
-    systemMessage(message: string): void,
-    onEndScene?(): void,
-    setTimeToNextFrame?(timeToNextFrame: number): void,
-    setSceneCopy?(children: React.ReactNode): void,
-    playNextScene?(): void,
-  };
-
-  readonly state = {
-    allURLs: new Map<string, Array<string>>(),
-    allPosts: new Map<string, string>(),
-    restart: false,
-    preload: false,
-    videoVolume: this.props.scene.videoVolume,
-    captcha: null as any,
-    load: false,
-    singleImage: null as number,
-  };
-
-  _isMounted = false;
-  _backForth: number = null;
-  _promiseQueue: Array<{source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}> = null;
-  _nextPromiseQueue: Array<{source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}> = null;
-  _nextAllURLs: Map<string, Array<string>> = null;
-  _nextAllPosts: Map<string, string> = null;
-
-  render() {
-    let style: any = {opacity: this.props.opacity};
-    if (this.props.gridView) {
-      style = {
-        ...style,
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: this.props.isOverlay ? 4 : 'auto',
-      }
-    }
-    return (
-      <div style={style}>
-
-        {this.state.allURLs.size > 0 && this.state.restart == false && (
-          <ImagePlayer
-            config={this.props.config}
-            scene={this.props.scene}
-            currentAudio={this.props.currentAudio}
-            isOverlay={this.props.isOverlay}
-            isPlaying={this.props.isPlaying}
-            gridView={this.props.gridView}
-            historyOffset={this.props.historyOffset}
-            setHistoryOffset={this.props.setHistoryOffset}
-            setHistoryPaths={this.props.setHistoryPaths}
-            advanceHack={this.props.advanceHack}
-            deleteHack={this.props.deleteHack}
-            strobeLayer={this.props.strobeLayer}
-            hasStarted={this.props.hasStarted}
-            singleImage={this.state.singleImage}
-            allURLs={isEmpty(Array.from(this.state.allURLs.values())) ? null : this.state.allURLs}
-            allPosts={this.state.allPosts}
-            onLoaded={this.props.firstImageLoaded.bind(this)}
-            setVideo={this.props.setVideo}
-            cache={this.props.cache}
-            onEndScene={this.props.onEndScene}
-            playNextScene={this.props.playNextScene}
-            gridCoordinates={this.props.gridCoordinates}
-            setSceneCopy={this.props.setSceneCopy}
-            setTimeToNextFrame={this.props.setTimeToNextFrame}/>)}
-        {this.state.captcha != null && (
-          <Dialog
-            open={true}
-            onClose={this.onCloseDialog.bind(this)}>
-            <DialogContent style={{height: 600}}>
-              <iframe sandbox="allow-forms" src={this.state.captcha.captcha} height={"100%"} onLoad={this.onIFrameLoad.bind(this)}/>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    );
-  }
-
-  onIFrameLoad() {
-    if (!this.state.load) {
-      this.setState({load: true});
-    } else {
-      this.onCloseDialog();
+      onCloseDialog()
     }
   }
 
-  onCloseDialog() {
-    this.setState({captcha: null, load: false});
+  const onCloseDialog = () => {
+    dispatch(setPlayerCaptcha({uuid: props.uuid, value: undefined}))
+    setLoad(false)
   }
 
-  componentDidMount(restart = false) {
-    this._isMounted = true;
-    // Create an instance of your worker
-    const uuid = uuidv4();
-    workerInstance = worker();
-    if (!restart) {
-      workerInstance.reset();
-      this._promiseQueue = new Array<{ source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string} }>();
-      this._nextPromiseQueue = new Array<{ source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string} }>();
-      this._nextAllURLs = new Map<string, Array<string>>();
-      this._nextAllPosts = new Map<string, string>();
-    }
-    let n = 0;
-    let newAllURLs = new Map<string, Array<string>>();
-    if (this.state.allURLs.size > 0) {
-      newAllURLs = this.state.allURLs;
-    }
-    let newAllPosts = new Map<string, string>();
-    if (this.state.allPosts.size > 0) {
-      newAllPosts = this.state.allPosts;
-    }
-
-    let sceneSources = new Array<LibrarySource>();
-    for (let source of this.props.scene.sources) {
-      if (source.dirOfSources && getSourceType(source.url) == ST.local) {
-        try {
-          const directories = fs.readdirSync(source.url, {withFileTypes: true})
-            .filter(dirent => dirent.isDirectory())
-            .map(dirent => dirent.name);
-          for (let d of directories) {
-            sceneSources.push(new LibrarySource({url: source.url + path.sep + d}));
-          }
-        } catch (e) {
-          sceneSources.push(new LibrarySource({url: source.url}));
-          console.error(e);
-        }
-      } else {
-        sceneSources.push(source);
-      }
-    }
-
-    const sources = this.props.scene.sourceOrderFunction == SOF.random ?
-      randomizeList(JSON.parse(JSON.stringify(sceneSources))) :
-      JSON.parse(JSON.stringify(sceneSources));
-
-    let nextSources = new Array<LibrarySource>();
-    if (this.props.nextScene) {
-      let nextSceneSources = new Array<LibrarySource>();
-      for (let source of this.props.nextScene.sources) {
-        if (source.dirOfSources && getSourceType(source.url) == ST.local) {
-          try {
-            const directories = fs.readdirSync(source.url, {withFileTypes: true})
-              .filter(dirent => dirent.isDirectory())
-              .map(dirent => dirent.name);
-            for (let d of directories) {
-              nextSceneSources.push(new LibrarySource({url: source.url + path.sep + d}));
-            }
-          } catch (e) {
-            nextSceneSources.push(new LibrarySource({url: source.url}));
-            console.error(e);
-          }
-        } else {
-          nextSceneSources.push(source);
-        }
-      }
-      nextSources = this.props.nextScene.sourceOrderFunction == SOF.random ?
-        randomizeList(JSON.parse(JSON.stringify(nextSceneSources))) :
-        JSON.parse(JSON.stringify(nextSceneSources));
-    }
-
-    let sourceLoop = () => {
-      if (!this._isMounted || sceneSources.length == 0 || n >= sources.length) return;
-
-      const d = sources[n];
-
-      let message = d ? [d.url] : [""];
-      if (this.props.isOverlay) {
-        message = ["Loading '" + this.props.scene.name + "'...", message];
-      }
-      this.props.setProgress(sceneSources.length, n+1, message);
-
-      if (!this.props.scene.playVideoClips && d.clips) {
-        d.clips = [];
-      }
-
-      const receiveMessage = (message: any) => {
-        let object = message.data;
-        if (object?.type == "RPC" || (object?.helpers != null && object.helpers.uuid != uuid)) return;
-
-        if (object?.captcha != null && this.state.captcha == null) {
-          this.setState({captcha: {captcha: object.captcha, source: object?.source, helpers: object?.helpers}});
-        }
-
-        if (object?.error != null) {
-          console.error("Error retrieving " + object?.source?.url + (object?.helpers?.next > 0 ? " Page " + object.helpers.next : ""));
-          console.error(object.error);
-        }
-
-        if (object?.warning != null) {
-          console.warn(object.warning);
-        }
-
-        if (object?.systemMessage != null) {
-          this.props.systemMessage(object.systemMessage);
-        }
-
-        if (object?.source) {
-          n += 1;
-
-          // Just add the new urls to the end of the list
-          if (object?.data && object?.allURLs) {
-            const source = object.source;
-            newAllURLs = object.allURLs;
-            this.setState({allURLs: newAllURLs});
-            newAllPosts = object.allPosts;
-            this.setState({allPosts: newAllPosts});
-
-            // If this is a remote URL, queue up the next promise
-            if (object.helpers.next != null) {
-              this._promiseQueue.push({source: source, helpers: object.helpers});
-            }
-            this.props.setCount(source.url, object.helpers.count, object.helpers.next == null);
-          }
-
-          if (n < sceneSources.length) {
-            const timeout = object?.timeout != null ? object.timeout : 1000;
-            if (timeout == 0) {
-              setImmediate(sourceLoop);
-            } else {
-              setTimeout(sourceLoop, timeout);
-            }
-          } else {
-            const values = flatten(Array.from(newAllURLs.values()));
-            if (this._promiseQueue.length == 0) {
-              this.setState({singleImage: values.length == 1});
-            }
-            this.props.finishedLoading(isEmpty(values));
-            promiseLoop();
-            if (this.props.nextScene && this.props.playNextScene) {
-              n = 0;
-              nextWorkerInstance = worker();
-              nextSourceLoop();
-            }
-          }
-        }
-      }
-
-      if (this.props.config.generalSettings.prioritizePerformance) {
-        // Attach an event listener to receive calculations from your worker
-        if (workerListener != null) {
-          workerInstance?.removeEventListener('message', workerListener);
-        }
-        workerListener = receiveMessage.bind(this);
-        workerInstance.addEventListener('message', workerListener);
-        scrapeFiles(workerInstance, workerListener, this.state.allURLs, this.state.allPosts, this.props.config, d, this.props.scene.imageTypeFilter, this.props.scene.weightFunction, {next: -1, count: 0, retries: 0, uuid: uuid})
-      } else {
-        scrapeFiles(workerInstance, workerListener, this.state.allURLs, this.state.allPosts, this.props.config, d, this.props.scene.imageTypeFilter, this.props.scene.weightFunction, {next: -1, count: 0, retries: 0, uuid: uuid}, true).then((data) => {
-          receiveMessage(data);
-        })
-      }
-
-    };
-
-    let nextSourceLoop = () => {
-      if (!this._isMounted) return;
-
-      const d = nextSources[n];
-      if (!this.props.nextScene.playVideoClips && d.clips) {
-        d.clips = [];
-      }
-
-      const receiveMessage = (message: any) => {
-        let object = message.data;
-        if (object?.type == "RPC" || (object?.helpers != null && object.helpers.uuid != uuid)) return;
-
-        if (object?.error != null) {
-          console.error("Error retrieving " + object?.source?.url + (object?.helpers?.next > 0 ? " Page " + object.helpers.next : ""));
-          console.error(object.error);
-        }
-
-        if (object?.warning != null) {
-          console.warn(object.warning);
-        }
-
-        if (object?.systemMessage != null) {
-          this.props.systemMessage(object.systemMessage);
-        }
-
-        if (object?.source) {
-          n += 1;
-
-          // Just add the new urls to the end of the list
-          if (object?.data != null) {
-            const source = object.source;
-            this._nextAllURLs = object.allURLs;
-            this._nextAllPosts = object.allPosts;
-
-            // If this is a remote URL, queue up the next promise
-            if (object.helpers.next != null) {
-              this._nextPromiseQueue.push({source: source, helpers: object.helpers});
-            }
-            this.props.setCount(source.url, object.helpers.count, object.helpers.next == null);
-          }
-
-          if (n < nextSources.length) {
-            setTimeout(nextSourceLoop, object.timeout != null ? object.timeout : 1000);
-          }
-        }
-      }
-
-      if (this.props.config.generalSettings.prioritizePerformance) {
-        // Attach an event listener to receive calculations from your worker
-        if (nextWorkerListener != null) {
-          nextWorkerInstance?.removeEventListener('message', nextWorkerListener);
-        }
-        nextWorkerListener = receiveMessage.bind(this);
-        nextWorkerInstance.addEventListener('message', nextWorkerListener);
-        scrapeFiles(nextWorkerInstance, nextWorkerListener, this._nextAllURLs, this._nextAllPosts, this.props.config, d, this.props.nextScene.imageTypeFilter, this.props.nextScene.weightFunction, {next: -1, count: 0, retries: 0, uuid: uuid});
-      } else {
-        scrapeFiles(nextWorkerInstance, nextWorkerListener, this._nextAllURLs, this._nextAllPosts, this.props.config, d, this.props.nextScene.imageTypeFilter, this.props.nextScene.weightFunction, {next: -1, count: 0, retries: 0, uuid: uuid}, true).then((data) => {
-          receiveMessage(data);
-        });
-      }
-    };
-
-    let promiseLoop = () => {
-      if (this.state.captcha != null && this._promiseQueue.length == 0) {
-        setTimeout(promiseLoop, 2000);
-      }
-      // Process until queue is empty or player has been stopped
-      if (!this._isMounted || this._promiseQueue.length == 0)  {
-        if (workerListener != null) {
-          workerInstance?.removeEventListener('message', workerListener);
-        }
-        return;
-      }
-
-      const receiveMessage = (message: any) => {
-        let object = message.data;
-        if (object?.type == "RPC" || (object?.helpers != null && object.helpers.uuid != uuid)) return;
-
-        if (object?.captcha != null && this.state.captcha == null) {
-          this.setState({captcha: {captcha: object.captcha, source: object?.source, helpers: object?.helpers}});
-        }
-
-        if (object?.error != null) {
-          console.error("Error retrieving " + object?.source?.url + (object?.helpers?.next > 0 ? " Page " + object.helpers.next : ""));
-          console.error(object.error);
-        }
-
-        if (object?.warning != null) {
-          console.warn(object.warning);
-        }
-
-        if (object?.systemMessage != null) {
-          this.props.systemMessage(object.systemMessage);
-        }
-
-        // If we are not at the end of a source
-        if (object?.source) {
-          if (object?.data) {
-            const source = object.source;
-            let newAllURLs = object.allURLs;
-            this.setState({allURLs: newAllURLs});
-            let newAllPosts = object.allPosts;
-            this.setState({allPosts: newAllPosts});
-
-            // Add the next promise to the queue
-            if (object.helpers.next != null) {
-              this._promiseQueue.push({source: source, helpers: object.helpers});
-            }
-            this.props.setCount(source.url, object.helpers.count, object.helpers.next == null);
-          }
-
-          setTimeout(promiseLoop, object?.timeout != null ? object.timeout : 1000);
-        }
-      }
-
-      const promiseData = this._promiseQueue.shift();
-      if (this.props.config.generalSettings.prioritizePerformance) {
-        // Attach an event listener to receive calculations from your worker
-        if (workerListener != null) {
-          workerInstance?.removeEventListener('message', workerListener);
-        }
-        workerListener = receiveMessage.bind(this);
-        workerInstance.addEventListener('message', workerListener);
-        scrapeFiles(workerInstance, workerListener, this.state.allURLs, this.state.allPosts, this.props.config, promiseData.source, this.props.scene.imageTypeFilter, this.props.scene.weightFunction, promiseData.helpers);
-      } else {
-        scrapeFiles(workerInstance, workerListener, this.state.allURLs, this.state.allPosts, this.props.config, promiseData.source, this.props.scene.imageTypeFilter, this.props.scene.weightFunction, promiseData.helpers, true).then((data) => {
-          receiveMessage(data);
-        });
-      }
-    };
-
-    if (this.state.preload) {
-      this.setState({preload: false});
-      promiseLoop();
-      if (this.props.nextScene && isEmpty(Array.from(this._nextAllURLs.values()))) {
-        n = 0;
-        nextSourceLoop();
-      }
-    } else {
-      sourceLoop();
+  let style: any = { opacity }
+  if (props.gridView) {
+    style = {
+      ...style,
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: isOverlay ? 4 : 'auto'
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
-    return props.scene !== this.props.scene ||
-      (props.nextScene && this.props.nextScene &&
-      props.nextScene.id !== this.props.nextScene.id) ||
-      props.historyOffset !== this.props.historyOffset ||
-      props.isPlaying !== this.props.isPlaying ||
-      props.opacity !== this.props.opacity ||
-      props.strobeLayer !== this.props.strobeLayer ||
-      props.hasStarted !== this.props.hasStarted ||
-      props.gridView !== this.props.gridView ||
-      state.captcha !== this.state.captcha ||
-      state.restart !== this.state.restart ||
-      state.allURLs != this.state.allURLs ||
-      state.allPosts != this.state.allPosts;
-  }
-
-  componentDidUpdate(props: any, state: any) {
-    if (this.props.scene.videoVolume !== this.state.videoVolume) {
-      this.setState({videoVolume: this.props.scene.videoVolume});
-    }
-    if (props.scene.id !== this.props.scene.id) {
-      workerInstance?.removeEventListener('message', workerListener);
-      nextWorkerInstance?.removeEventListener('message', nextWorkerListener);
-      workerListener = null;
-      nextWorkerListener = null;
-      if (props.nextScene != null && this.props.scene.id === props.nextScene.id) { // If the next scene has been played
-        if (this.props.nextScene && this.props.nextScene.id === props.scene.id) { // Just swap values if we're coming back to this scene again
-          const newAllURLs = this._nextAllURLs;
-          const newAllPosts = this._nextAllPosts;
-          const temp = this._nextPromiseQueue;
-          this._nextPromiseQueue = this._promiseQueue;
-          this._promiseQueue = temp;
-          this._nextAllURLs = state.allURLs;
-          this._nextAllPosts = state.allPosts;
-          this.setState({
-            allURLs: newAllURLs,
-            allPosts: newAllPosts,
-            preload: true,
-            restart: true,
-            singleImage: null,
-          });
-        } else { // Replace values
-          this._promiseQueue = this._nextPromiseQueue;
-          this.setState({
-            allURLs: this._nextAllURLs,
-            allPosts: this._nextAllPosts,
-            preload: true,
-            restart: true,
-            singleImage: null,
-          });
-          this._nextPromiseQueue = Array<{source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}>();
-          this._nextAllURLs = new Map<string, Array<string>>();
-          this._nextAllPosts = new Map<string, string>();
-        }
-      } else {
-        this._promiseQueue = Array<{ source: LibrarySource, helpers: {next: any, count: number, retries: number, uuid: string}}>();
-        this.setState({
-          allURLs: new Map<string, Array<string>>(),
-          allPosts: new Map<string, string>(),
-          preload: false,
-          restart: true,
-          singleImage: null,
-        });
-      }
-    }
-    if (this.state.restart == true) {
-      this.setState({restart: false});
-      this.componentDidMount(true);
-    }
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    workerInstance?.removeEventListener('message', workerListener);
-    nextWorkerInstance?.removeEventListener('message', nextWorkerListener);
-    workerListener = null;
-    nextWorkerListener = null;
-    workerInstance = null;
-    nextWorkerInstance = null;
-    this._promiseQueue = null;
-    this._nextPromiseQueue = null;
-    this._nextAllURLs = null;
-    this._nextAllPosts = null;
-    clearTimeout(this._backForth);
-    this._backForth = null;
-  }
+  return (
+    <div style={style}>
+      <ImagePlayer
+        uuid={props.uuid}
+        currentAudio={props.currentAudio}
+        isOverlay={isOverlay}
+        isPlaying={props.isPlaying}
+        gridView={props.gridView}
+        historyOffset={props.historyOffset}
+        setHistoryOffset={props.setHistoryOffset}
+        setHistoryPaths={props.setHistoryPaths}
+        advanceHack={props.advanceHack}
+        deleteHack={props.deleteHack}
+        strobeLayer={props.strobeLayer}
+        setVideo={props.setVideo}
+        gridCoordinates={props.gridCoordinates}
+        setSceneCopy={props.setSceneCopy}
+        setTimeToNextFrame={props.setTimeToNextFrame}
+      />
+      {captcha != null && (
+        <Dialog open={true} onClose={onCloseDialog.bind(this)}>
+          <DialogContent style={{ height: 600 }}>
+            <iframe
+              sandbox="allow-forms"
+              src={captcha.captcha}
+              height={'100%'}
+              onLoad={onIFrameLoad.bind(this)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  )
 }
 
-(SourceScraper as any).displayName="SourceScraper";
+;(SourceScraper as any).displayName = 'SourceScraper'

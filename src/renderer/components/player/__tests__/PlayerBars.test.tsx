@@ -3,8 +3,9 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import PlayerBars from "../PlayerBars";
 import TestProvider from "../../../../../test/util/TestProvider";
-import Scene from "../../../data/Scene";
-import Config from "../../../data/Config";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../store/scene/Scene";
 
 jest.mock('../../configGroups/SceneOptionCard', () => 'SceneOptionCard');
 jest.mock('../../configGroups/ImageVideoCard', () => 'ImageVideoCard');
@@ -21,12 +22,12 @@ jest.mock('../../configGroups/PanningCard', () => 'PanningCard');
 
 describe("PlayerBars", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
-    const config = new Config();
+    const sceneID = 3
+    store.dispatch(setScene(newScene({id: sceneID})))
+
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <PlayerBars
-          config={config}
           hasStarted={false}
           historyPaths={[]}
           historyOffset={0}
@@ -39,19 +40,14 @@ describe("PlayerBars", () => {
           persistAudio={false}
           persistText={false}
           recentPictureGrid={false}
-          scene={scene}
-          scenes={[]}
-          sceneGrids={[]}
+          sceneID={sceneID}
           title={null}
           tutorial={null}
           goBack={() => {}}
           historyBack={() => {}}
           historyForward={() => {}}
           navigateTagging={(offset) => {}}
-          onGenerate={(scene, children, force) => {}}
           onRecentPictureGrid={() => {}}
-          onUpdateScene={(scene, fn) => {}}
-          playNextScene={() => {}}
           play={() => {}}
           pause={() => {}}
           setCurrentAudio={(audio) => {}}
