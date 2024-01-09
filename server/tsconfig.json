@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "target": "ES6",
+    "moduleResolution": "NodeNext",
+    "sourceMap": true,
+    "outDir": "dist"
+  },
+  "lib": ["es2015"],
+  "include": ["src/**/*.ts", "**/*.js", "**/*.cjs"]
+}
