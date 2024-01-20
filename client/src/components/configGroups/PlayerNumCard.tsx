@@ -7,8 +7,8 @@ import {
 } from '@mui/material'
 
 import LibrarySearch from '../library/LibrarySearch'
-import { type WithStyles, withStyles } from '@mui/styles'
-import createStyles from '@mui/styles/createStyles'
+
+import { makeStyles } from 'tss-react/mui'
 import BaseTextField from '../common/text/BaseTextField'
 import {
   setConfigDisplaySettingsIgnoredTags,
@@ -29,14 +29,13 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectLibrarySources } from '../../store/librarySource/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     grey: {
       color: theme.palette.text.secondary
     }
-  })
+  }))
 
-function PlayerNumCard(props: WithStyles<typeof styles>) {
+function PlayerNumCard() {
   const dispatch = useAppDispatch()
   const library = useAppSelector(selectLibrarySources())
   const ignoredTags = useAppSelector(
@@ -47,7 +46,7 @@ function PlayerNumCard(props: WithStyles<typeof styles>) {
     dispatch(setConfigDisplaySettingsIgnoredTags(selectedTags))
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={12}>
@@ -154,4 +153,4 @@ function PlayerNumCard(props: WithStyles<typeof styles>) {
 }
 
 ;(PlayerNumCard as any).displayName = 'PlayerNumCard'
-export default withStyles(styles)(PlayerNumCard as any)
+export default PlayerNumCard

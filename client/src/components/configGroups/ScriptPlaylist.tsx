@@ -13,8 +13,7 @@ import {
   Tooltip
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import BuildIcon from '@mui/icons-material/Build'
@@ -38,10 +37,9 @@ import {
 import { playScript } from '../../store/scene/thunks'
 import { selectSceneScriptPlaylist } from '../../store/scene/selectors'
 import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     scriptList: {
       paddingLeft: 0
     },
@@ -79,9 +77,9 @@ const styles = (theme: Theme) =>
     sourceIcon: {
       color: theme.palette.primary.contrastText
     }
-  })
+  }))
 
-export interface ScriptPlaylistItemProps extends WithStyles<typeof styles> {
+export interface ScriptPlaylistItemProps {
   sceneID: number
   scriptID: number
   scripts: number[]
@@ -90,7 +88,6 @@ export interface ScriptPlaylistItemProps extends WithStyles<typeof styles> {
 }
 
 export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
 
@@ -99,13 +96,13 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
     if (e.shiftKey && !e.ctrlKey) {
       window.open(url, '_blank')?.focus()
     } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip.api.showItemInFolder(sourceURL)
+      flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
       dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
     }
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <ListItem>
       <ListItemAvatar className={classes.listAvatar}>
@@ -151,7 +148,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
   )
 }
 
-export interface ScriptPlaylistProps extends WithStyles<typeof styles> {
+export interface ScriptPlaylistProps {
   sceneID: number
   playlistIndex: number
   onSourceOptions: (scriptID: number) => void
@@ -200,7 +197,7 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
     )
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <List disablePadding>
       <Sortable
@@ -228,7 +225,6 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
             scripts={playlist.scripts}
             scriptID={s}
             key={i}
-            classes={props.classes}
             onSourceOptions={props.onSourceOptions}
             removeScript={removeScript}
           />
@@ -285,4 +281,4 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
 }
 
 ;(ScriptPlaylist as any).displayName = 'ScriptPlaylist'
-export default withStyles(styles)(ScriptPlaylist as any)
+export default ScriptPlaylist

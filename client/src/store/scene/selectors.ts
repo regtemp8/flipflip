@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getActiveSceneID } from '../app/thunks'
 import { type RootState } from '../store'
-import { type EntryState } from '../EntryState'
-import { initialRootState } from '../RootState'
+import { type EntryState, getEntry } from '../EntryState'
+import { AppStorageImport, initialAppStorageImport } from '../AppStorageImport'
 import type TimingSettings from './TimingSettings'
 import type Scene from './Scene'
 import {
@@ -11,7 +11,7 @@ import {
   convertSceneIDToGridID,
   getEffects
 } from '../../data/utils'
-import { toLibrarySourceStorage } from '../app/data/App'
+import { toLibrarySourceStorage } from '../app/convert'
 import { getAppScenes } from '../app/selectors'
 import type SceneSettings from '../app/data/SceneSettings'
 import type AudioPlaylist from './AudioPlaylist'
@@ -25,16 +25,12 @@ import { getOverlayEntries } from '../overlay/selectors'
 import Overlay from '../overlay/Overlay'
 import { copy } from 'flipflip-common'
 
-export const getScene = (state: EntryState<Scene>, id: number): Scene => {
-  return state.entries[id]
-}
-
-export const getSceneOrSceneSettings = (
+const getSceneOrSceneSettings = (
   state: RootState,
   id?: number
 ): Scene | SceneSettings => {
-  return id !== undefined
-    ? getScene(state.scene, id)
+  return id != null
+    ? getEntry(state.scene, id)
     : state.app.config.defaultScene
 }
 
@@ -61,7 +57,7 @@ export const selectSceneHasBPM = (id?: number) => {
   return (state: RootState): boolean => {
     if (id === undefined) return false
 
-    const scene = getScene(state.scene, id)
+    const scene = getEntry(state.scene, id)
     const playlists = scene?.audioPlaylists
     return (
       playlists !== undefined &&
@@ -107,7 +103,7 @@ export const selectSceneFadeBPMMulti = (id?: number) => {
 }
 
 export const selectSceneFadeIOPulse = (id: number) => {
-  return (state: RootState): boolean => getScene(state.scene, id).fadeIOPulse
+  return (state: RootState): boolean => getEntry(state.scene, id).fadeIOPulse
 }
 
 export const selectSceneFadeIOStartAmp = (id?: number) => {
@@ -977,76 +973,76 @@ export const selectSceneCrossFadeAudio = (id?: number) => {
 }
 
 export const selectSceneAudioEnabled = (id: number) => {
-  return (state: RootState): boolean => getScene(state.scene, id).audioEnabled
+  return (state: RootState): boolean => getEntry(state.scene, id).audioEnabled
 }
 
 export const selectSceneAudioPlaylists = (id: number) => {
   return (state: RootState): AudioPlaylist[] =>
-    getScene(state.scene, id).audioPlaylists
+    getEntry(state.scene, id).audioPlaylists
 }
 
 export const selectSceneScriptPlaylist = (id: number, index: number) => {
   return (state: RootState): ScriptPlaylist =>
-    getScene(state.scene, id).scriptPlaylists[index]
+    getEntry(state.scene, id).scriptPlaylists[index]
 }
 
 export const selectSceneTextEnabled = (id: number) => {
-  return (state: RootState): boolean => getScene(state.scene, id).textEnabled
+  return (state: RootState): boolean => getEntry(state.scene, id).textEnabled
 }
 
 export const selectSceneScriptPlaylistLength = (id: number) => {
   return (state: RootState): number =>
-    getScene(state.scene, id).scriptPlaylists.length
+    getEntry(state.scene, id).scriptPlaylists.length
 }
 
 export const selectSceneOpenTab = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).openTab
+  return (state: RootState): number => getEntry(state.scene, id).openTab
 }
 
 export const selectSceneName = (id: number) => {
-  return (state: RootState): string => getScene(state.scene, id).name
+  return (state: RootState): string => getEntry(state.scene, id).name
 }
 
 export const selectSceneUseWeights = (id: number) => {
-  return (state: RootState): boolean => getScene(state.scene, id).useWeights
+  return (state: RootState): boolean => getEntry(state.scene, id).useWeights
 }
 
 export const selectSceneGeneratorWeights = (id: number) => {
   return (state: RootState): WeightGroup[] | undefined =>
-    getScene(state.scene, id).generatorWeights
+    getEntry(state.scene, id).generatorWeights
 }
 
 export const selectSceneOverrideIgnore = (id: number) => {
-  return (state: RootState): boolean => getScene(state.scene, id).overrideIgnore
+  return (state: RootState): boolean => getEntry(state.scene, id).overrideIgnore
 }
 
 export const selectSceneGeneratorMax = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).generatorMax
+  return (state: RootState): number => getEntry(state.scene, id).generatorMax
 }
 
 export const selectSceneIsGridScene = (id: number) => {
   return (state: RootState): boolean =>
-    getScene(state.scene, id).gridScene ?? false
+    getEntry(state.scene, id).gridScene ?? false
 }
 
 export const selectSceneIsAudioScene = (id: number) => {
   return (state: RootState): boolean =>
-    getScene(state.scene, id).audioScene ?? false
+    getEntry(state.scene, id).audioScene ?? false
 }
 
 export const selectSceneIsScriptScene = (id: number) => {
   return (state: RootState): boolean =>
-    getScene(state.scene, id).scriptScene ?? false
+    getEntry(state.scene, id).scriptScene ?? false
 }
 
 export const selectSceneIsDownloadScene = (id: number) => {
   return (state: RootState): boolean =>
-    getScene(state.scene, id).downloadScene ?? false
+    getEntry(state.scene, id).downloadScene ?? false
 }
 
 export const selectSceneScriptPlaylists = (id: number) => {
   return (state: RootState): ScriptPlaylist[] =>
-    getScene(state.scene, id).scriptPlaylists
+    getEntry(state.scene, id).scriptPlaylists
 }
 
 export interface EasingOptions {
@@ -1113,34 +1109,34 @@ export const selectSceneStrobeOptions = (id: number) => {
 }
 
 export const selectSceneFadeIODelayTF = (id: number) => {
-  return (state: RootState): string => getScene(state.scene, id).fadeIODelayTF
+  return (state: RootState): string => getEntry(state.scene, id).fadeIODelayTF
 }
 
 export const selectSceneFadeIODelay = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).fadeIODelay
+  return (state: RootState): number => getEntry(state.scene, id).fadeIODelay
 }
 
 export const selectSceneFadeIODelayMin = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).fadeIODelayMin
+  return (state: RootState): number => getEntry(state.scene, id).fadeIODelayMin
 }
 
 export const selectSceneFadeIODelayMax = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).fadeIODelayMax
+  return (state: RootState): number => getEntry(state.scene, id).fadeIODelayMax
 }
 
 export const selectSceneFadeIODelaySinRate = (id: number) => {
   return (state: RootState): number =>
-    getScene(state.scene, id).fadeIODelaySinRate
+    getEntry(state.scene, id).fadeIODelaySinRate
 }
 
 export const selectSceneFadeIODelayBPMMulti = (id: number) => {
   return (state: RootState): number =>
-    getScene(state.scene, id).fadeIODelayBPMMulti
+    getEntry(state.scene, id).fadeIODelayBPMMulti
 }
 
 export const selectSceneScriptStartIndex = (id: number) => {
   return (state: RootState): number =>
-    getScene(state.scene, id).scriptStartIndex
+    getEntry(state.scene, id).scriptStartIndex
 }
 
 export const selectSceneOtherSceneNames = (id: number) => {
@@ -1160,13 +1156,13 @@ export const selectSceneOtherSceneNames = (id: number) => {
 }
 
 export const selectSceneLibraryID = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).libraryID
+  return (state: RootState): number => getEntry(state.scene, id).libraryID
 }
 
 export const selectSceneDisableWeightOptions = (id?: number) => {
   return (state: RootState): boolean | undefined => {
     const sources =
-      id !== undefined ? getScene(state.scene, id).sources : undefined
+      id !== undefined ? getEntry(state.scene, id).sources : undefined
     return (
       sources === undefined ||
       sources.length === 0 ||
@@ -1177,19 +1173,19 @@ export const selectSceneDisableWeightOptions = (id?: number) => {
 }
 
 export const selectSceneAudioStartIndex = (id: number) => {
-  return (state: RootState): number => getScene(state.scene, id).audioStartIndex
+  return (state: RootState): number => getEntry(state.scene, id).audioStartIndex
 }
 
 export const getNextScene = (
   state: RootState,
   id: number
 ): Scene | undefined => {
-  const scene = getScene(state.scene, id)
+  const scene = getEntry(state.scene, id)
   if (scene === undefined) return undefined
   const nextID =
     scene.nextSceneID === -1 ? scene.nextSceneRandomID : scene.nextSceneID
 
-  return getScene(state.scene, nextID)
+  return getEntry(state.scene, nextID)
 }
 
 export const selectNextSceneId = (id: number) => {
@@ -1211,7 +1207,7 @@ export const selectNextSceneSourcesStorage = (id: number) => {
     (sources, sourceEntries, clipEntries, tagEntries) => {
       // create copy of state, so that selector only runs when
       // librarySources, clips or tags have changed
-      const state = copy<RootState>(initialRootState)
+      const state = copy<AppStorageImport>(initialAppStorageImport)
       state.librarySource.entries = sourceEntries
       state.clip.entries = clipEntries
       state.tag.entries = tagEntries
@@ -1331,7 +1327,7 @@ export const selectSceneAudioPlaylistDuration = (
   playlistIndex: number
 ) => {
   return (state: RootState): number => {
-    const scene = getScene(state.scene, id)
+    const scene = getEntry(state.scene, id)
     const playlist = scene.audioPlaylists[playlistIndex]
     return playlist.audios?.reduce(
       (total, audioID) => total + (state.audio.entries[audioID]?.duration ?? 0),
@@ -1342,14 +1338,14 @@ export const selectSceneAudioPlaylistDuration = (
 
 export const selectSceneGeneratorWeightsValid = (id: number) => {
   return (state: RootState): boolean => {
-    const scene = getScene(state.scene, id)
+    const scene = getEntry(state.scene, id)
     return areWeightsValid(scene)
   }
 }
 
 export const selectSceneEffectsBase64 = (id: number) => {
   return (state: RootState): string => {
-    const scene = getScene(state.scene, id)
+    const scene = getEntry(state.scene, id)
     return getEffects(scene)
   }
 }

@@ -1,31 +1,29 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { MultiValue } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import { type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 import { grey } from '@mui/material/colors'
 
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { selectScenePickerFilters } from '../store/scenePicker/selectors'
 import { setScenePickerFilters } from '../store/scenePicker/slice'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    searchSelect: {
-      minWidth: 200,
-      maxWidth: `calc(100% - ${theme.spacing(7)})`,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900]
-    },
-    select: {
-      color: grey[900]
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  searchSelect: {
+    minWidth: 200,
+    maxWidth: `calc(100% - ${theme.spacing(7)})`,
+    maxHeight: theme.mixins.toolbar.minHeight,
+    color: grey[900]
+  },
+  select: {
+    color: grey[900]
+  }
+}))
 
-export interface SceneSearchProps extends WithStyles<typeof styles> {
+export interface SceneSearchProps {
   placeholder: string
 }
 
@@ -63,10 +61,10 @@ function SceneSearch(props: SceneSearchProps) {
     dispatch(setScenePickerFilters(filters))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <CreatableSelect
-      className={clsx(classes.searchSelect, 'CreatableSelect')}
+      className={cx(classes.searchSelect, 'CreatableSelect')}
       components={{ DropdownIndicator: null }}
       value={options}
       options={options}
@@ -82,4 +80,4 @@ function SceneSearch(props: SceneSearchProps) {
 }
 
 ;(SceneSearch as any).displayName = 'SceneSearch'
-export default withStyles(styles)(SceneSearch as any)
+export default SceneSearch

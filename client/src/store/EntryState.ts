@@ -17,7 +17,7 @@ export function isEntry<T extends Identifiable>(
   state: EntryState<T>,
   id: number
 ) {
-  return state.entries[id]
+  return state.entries[id] != null
 }
 
 export function setNextID<T extends Identifiable>(
@@ -34,6 +34,13 @@ export function setEntrySlice<T extends Identifiable>(
   slice: EntryState<T>
 ) {
   Object.assign(state, slice)
+}
+
+export function getEntry<T extends Identifiable>(
+  state: EntryState<T>,
+  id: number
+): T {
+  return state.entries[id]
 }
 
 export function setEntry<T extends Identifiable>(

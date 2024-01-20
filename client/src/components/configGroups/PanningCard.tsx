@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { en, HTF, VTF } from 'flipflip-common'
 import TimingCard from '../common/TimingCard'
@@ -81,40 +80,39 @@ import MoveCard from '../common/MoveCard'
 import BaseSwitch from '../common/BaseSwitch'
 import { useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    noPadding: {
-      padding: '0 !important'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  noPadding: {
+    padding: '0 !important'
+  }
+}))
 
-export interface PanningCardProps extends WithStyles<typeof styles> {
+export interface PanningCardProps {
   sceneID?: number
 }
 
@@ -126,13 +124,13 @@ function PanningCard(props: PanningCardProps) {
     selectAppConfigDisplaySettingsEasingControls()
   )
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid
       container
       spacing={panning ? 2 : 0}
       alignItems="center"
-      className={clsx(tutorial != null && classes.disable)}
+      className={cx(tutorial != null && classes.disable)}
     >
       <Grid item xs={12}>
         <BaseSwitch
@@ -190,7 +188,7 @@ function PanningCard(props: PanningCardProps) {
           }}
         />
       </Grid>
-      <Grid item xs={12} className={clsx(!panning && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
         <Collapse in={panning} className={classes.fullWidth}>
           <Divider />
         </Collapse>
@@ -239,7 +237,7 @@ function PanningCard(props: PanningCardProps) {
           }}
         />
       </Grid>
-      <Grid item xs={12} className={clsx(!panning && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
         <Collapse in={panning} className={classes.fullWidth}>
           <Divider />
         </Collapse>
@@ -280,7 +278,7 @@ function PanningCard(props: PanningCardProps) {
       </Grid>
       {easingControls && (
         <React.Fragment>
-          <Grid item xs={12} className={clsx(!panning && classes.noPadding)}>
+          <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
             <Collapse in={panning} className={classes.fullWidth}>
               <Divider />
             </Collapse>
@@ -352,4 +350,4 @@ function PanningCard(props: PanningCardProps) {
 }
 
 ;(PanningCard as any).displayName = 'PanningCard'
-export default withStyles(styles)(PanningCard as any)
+export default PanningCard

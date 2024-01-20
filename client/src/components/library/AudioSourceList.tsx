@@ -14,8 +14,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import type Audio from '../../store/audio/Audio'
 import AudioSourceListItem from './AudioSourceListItem'
@@ -32,10 +31,9 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectAppAudioYOffset } from '../../store/app/selectors'
 import { selectAudio, selectAudioUrl } from '../../store/audio/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     emptyMessage: {
       textAlign: 'center',
       marginTop: '25%'
@@ -58,9 +56,9 @@ const styles = (theme: Theme) =>
       bottom: 260,
       right: 160
     }
-  })
+  }))
 
-export interface AudioSourceListProps extends WithStyles<typeof styles> {
+export interface AudioSourceListProps {
   cachePath: string
   isSelect: boolean
   selected: number[]
@@ -73,7 +71,6 @@ export interface AudioSourceListProps extends WithStyles<typeof styles> {
 }
 
 function AudioSourceList(props: AudioSourceListProps) {
-  const flipflip = FlipFlipService.getInstance()
   const [sourceOptions, setSourceOptions] = useState<number>()
   const [deleteDialog, setDeleteDialog] = useState<number>()
   const [sourceEditID, setSourceEditID] = useState<number>()
@@ -152,7 +149,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const onFinishDelete = async () => {
-    await flipflip.api.unlink(deleteDialogURL as string)
+    await flipflip().api.unlink(deleteDialogURL as string)
     onRemove(deleteDialog as number)
     onCloseDeleteDialog()
   }
@@ -283,7 +280,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     return <SortableItem index={index} value={props} />
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   if (props.audios.length === 0) {
     return (
       <React.Fragment>
@@ -377,4 +374,4 @@ function AudioSourceList(props: AudioSourceListProps) {
 }
 
 ;(AudioSourceList as any).displayName = 'AudioSourceList'
-export default withStyles(styles)(AudioSourceList as any)
+export default AudioSourceList

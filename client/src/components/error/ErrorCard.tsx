@@ -21,7 +21,7 @@ import {
   type SelectChangeEvent
 } from '@mui/material'
 
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { convertFromEpoch } from '../../data/utils'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectAppVersion } from '../../store/app/selectors'
@@ -38,7 +38,6 @@ export interface ErrorCardProps {
 }
 
 export default function ErrorCard(props: ErrorCardProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const { savePath, saveDir, pathSep } = useAppSelector(selectConstants())
   const version = useAppSelector(selectAppVersion())
@@ -75,7 +74,7 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const reset = async () => {
-    await flipflip.api.rimrafSync(savePath)
+    await flipflip().api.rimrafSync(savePath)
     window.location.reload()
   }
 
@@ -98,7 +97,7 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const getBackups = async () => {
-    const backups = await flipflip.api.getBackups()
+    const backups = await flipflip().api.getBackups()
     setBackupCheck(true)
     setBackups(backups)
     setBackup(backups.length > 0 ? backups[0] : undefined)

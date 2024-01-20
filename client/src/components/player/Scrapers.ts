@@ -2,7 +2,6 @@ import wretch from 'wretch'
 import FormUrlAddon from 'wretch/addons/formUrl'
 import AbortAddon from 'wretch/addons/abort'
 
-import FlipFlipService from '../../FlipFlipService'
 import {
   LibrarySource,
   filterPathsToJustPlayable,
@@ -14,6 +13,7 @@ import {
   WF
 } from 'flipflip-common'
 import type Config from '../../store/app/data/Config'
+import flipflip from '../../FlipFlipService'
 
 const pm = (object: any, resolve?: Function) => {
   if (
@@ -232,7 +232,6 @@ export const loadTumblr = async (
   pathSep: string,
   resolve?: Function
 ) => {
-  const flipflip = FlipFlipService.getInstance()
   const timeout = 3000
   const configured =
     config.remoteSettings.tumblrOAuthToken !== '' &&
@@ -256,7 +255,7 @@ export const loadTumblr = async (
     }
 
     try {
-      const images = await flipflip.api.tumblrBlogPosts(
+      const images = await flipflip().api.tumblrBlogPosts(
         config.remoteSettings.tumblrKey,
         config.remoteSettings.tumblrSecret,
         config.remoteSettings.tumblrOAuthToken,
@@ -418,7 +417,6 @@ export const loadReddit = async (
   pathSep: string,
   resolve?: Function
 ) => {
-  const flipflip = FlipFlipService.getInstance()
   const timeout = 3000
   const configured = config.remoteSettings.redditRefreshToken !== ''
   if (configured) {
@@ -523,7 +521,7 @@ export const loadReddit = async (
       }
 
       try {
-        const submissionListing = await flipflip.api.redditGetSubreddit(
+        const submissionListing = await flipflip().api.redditGetSubreddit(
           config.remoteSettings.redditUserAgent,
           config.remoteSettings.redditClientID,
           config.remoteSettings.redditRefreshToken,
@@ -539,7 +537,7 @@ export const loadReddit = async (
       }
     } else if (url.includes('/saved')) {
       try {
-        const submissionListing = await flipflip.api.redditGetSavedContent(
+        const submissionListing = await flipflip().api.redditGetSavedContent(
           config.remoteSettings.redditUserAgent,
           config.remoteSettings.redditClientID,
           config.remoteSettings.redditRefreshToken,
@@ -644,7 +642,7 @@ export const loadReddit = async (
       }
     } else if (url.includes('/user/') || url.includes('/u/')) {
       try {
-        const submissionListing = await flipflip.api.redditGetUser(
+        const submissionListing = await flipflip().api.redditGetUser(
           config.remoteSettings.redditUserAgent,
           config.remoteSettings.redditClientID,
           config.remoteSettings.redditRefreshToken,
@@ -1525,12 +1523,11 @@ export const loadImgur = async (
   pathSep: string,
   resolve?: Function
 ) => {
-  const flipflip = FlipFlipService.getInstance()
   const timeout = 3000
   const url = source.url
   try {
     const album = getFileGroup(url, pathSep) as string
-    const images = await flipflip.api.imgurAlbumImages(album)
+    const images = await flipflip().api.imgurAlbumImages(album)
     helpers.next = null
     helpers.count =
       helpers.count + filterPathsToJustPlayable(IF.any, images, true).length
@@ -1572,7 +1569,6 @@ export const loadTwitter = async (
   pathSep: string,
   resolve?: Function
 ) => {
-  const flipflip = FlipFlipService.getInstance()
   const timeout = 3000
   const configured =
     config.remoteSettings.twitterAccessTokenKey !== '' &&
@@ -1583,7 +1579,7 @@ export const loadTwitter = async (
     const url = source.url
 
     try {
-      const items = await flipflip.api.twitterLoadImages(
+      const items = await flipflip().api.twitterLoadImages(
         config.remoteSettings.twitterConsumerKey,
         config.remoteSettings.twitterConsumerSecret,
         config.remoteSettings.twitterAccessTokenKey,
@@ -1762,7 +1758,6 @@ export const loadInstagram = async (
   pathSep: string,
   resolve?: Function
 ) => {
-  const flipflip = FlipFlipService.getInstance()
   const timeout = 3000
   const configured =
     config.remoteSettings.instagramUsername !== '' &&
@@ -1807,7 +1802,7 @@ export const loadInstagram = async (
     if (initInstagram) {
       initInstagram = false
       try {
-        await flipflip.api.igLogin(
+        await flipflip().api.igLogin(
           config.remoteSettings.instagramUsername,
           config.remoteSettings.instagramPassword
         )
@@ -1830,7 +1825,7 @@ export const loadInstagram = async (
       }
 
       try {
-        session = await flipflip.api.igSerializeCookieJar()
+        session = await flipflip().api.igSerializeCookieJar()
       } catch (e: any) {
         pm(
           {
@@ -1846,7 +1841,7 @@ export const loadInstagram = async (
 
       if (url.endsWith('/saved')) {
         try {
-          const saved = await flipflip.api.igSavedItems()
+          const saved = await flipflip().api.igSavedItems()
           helpers.next = [null, saved.feed]
           processItems(saved.items, helpers)
         } catch (e: any) {
@@ -1864,7 +1859,7 @@ export const loadInstagram = async (
       } else {
         try {
           const username = getFileGroup(url, pathSep) as string
-          const userFeed = await flipflip.api.igUserFeedItems(username)
+          const userFeed = await flipflip().api.igUserFeedItems(username)
           helpers.next = [userFeed.userId, userFeed.feed]
           processItems(userFeed.items, helpers)
         } catch (e: any) {
@@ -1883,7 +1878,7 @@ export const loadInstagram = async (
     } else if (helpers.next === 0) {
       if (url.endsWith('/saved')) {
         try {
-          const saved = await flipflip.api.igSavedItems()
+          const saved = await flipflip().api.igSavedItems()
           helpers.next = [null, saved.feed]
           processItems(saved.items, helpers)
         } catch (e: any) {
@@ -1901,7 +1896,7 @@ export const loadInstagram = async (
       } else {
         try {
           const username = getFileGroup(url, pathSep) as string
-          const userFeed = await flipflip.api.igUserFeedItems(username)
+          const userFeed = await flipflip().api.igUserFeedItems(username)
           helpers.next = [userFeed.userId, userFeed.feed]
           processItems(userFeed.items, helpers)
         } catch (e: any) {
@@ -1919,7 +1914,7 @@ export const loadInstagram = async (
       }
     } else {
       try {
-        const nextFeed = await flipflip.api.igGetMore(
+        const nextFeed = await flipflip().api.igGetMore(
           session,
           helpers.next[0],
           helpers.next[1]
@@ -4033,9 +4028,8 @@ async function convertURL(url: string, pathSep: string): Promise<string[]> {
   // If this is imgur album, return album images
   const imgurAlbumMatch = url.match('^https?://imgur.com/a/([\\w\\d]{7})$')
   if (imgurAlbumMatch != null) {
-    const flipflip = FlipFlipService.getInstance()
     const album = getFileGroup(url, pathSep) as string
-    return await flipflip.api.imgurAlbumImages(album)
+    return await flipflip().api.imgurAlbumImages(album)
   }
 
   // If this is gfycat page, return gfycat image

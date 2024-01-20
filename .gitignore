@@ -102,6 +102,4 @@ coverage
 
 client/build/*
 common/build/*
-login/build/*
-server/dist/*
-server/pkg/*
+server-details/build/*

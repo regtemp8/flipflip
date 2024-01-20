@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, type ReactNode } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -11,8 +11,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
@@ -32,86 +31,85 @@ import {
 } from '../../store/sceneGrid/selectors'
 import { type PlayerOverlayState } from '../../store/player/slice'
 import { selectGridPlayerFirstNotLoaded } from '../../store/player/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { setFullScreen, toggleFullScreen } from '../../data/actions'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1,
-      height: theme.spacing(8),
-      marginTop: -theme.spacing(8) - 3,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    appBarHover: {
-      marginTop: 0,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    hoverBar: {
-      zIndex: theme.zIndex.drawer + 1,
-      position: 'absolute',
-      opacity: 0,
-      height: theme.spacing(5),
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    title: {
-      textAlign: 'center'
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh'
-    },
-    container: {
-      height: '100%',
-      padding: theme.spacing(0)
-    },
-    grid: {
-      flexGrow: 1,
-      display: 'grid',
-      height: '100%'
-    },
-    gridCell: {
-      height: '100%',
-      width: '100%',
-      display: 'grid',
-      overflow: 'hidden'
-    },
-    fill: {
-      flexGrow: 1
-    },
-    hidden: {
-      opacity: 0
-    },
-    hideCursor: {
-      cursor: 'none'
-    },
-    mirror: {
-      transform: 'scaleX(-1)'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex',
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    height: theme.spacing(8),
+    marginTop: -theme.spacing(8) - 3,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  appBarHover: {
+    marginTop: 0,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  hoverBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    position: 'absolute',
+    opacity: 0,
+    height: theme.spacing(5),
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  title: {
+    textAlign: 'center'
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh'
+  },
+  container: {
+    height: '100%',
+    padding: theme.spacing(0)
+  },
+  grid: {
+    flexGrow: 1,
+    display: 'grid',
+    height: '100%'
+  },
+  gridCell: {
+    height: '100%',
+    width: '100%',
+    display: 'grid',
+    overflow: 'hidden'
+  },
+  fill: {
+    flexGrow: 1
+  },
+  hidden: {
+    opacity: 0
+  },
+  hideCursor: {
+    cursor: 'none'
+  },
+  mirror: {
+    transform: 'scaleX(-1)'
+  }
+}))
 
-interface GridCellPlayerProps extends WithStyles<typeof styles> {
+interface GridCellPlayerProps {
   gridID: number
   row: number
   col: number
@@ -144,7 +142,7 @@ function GridCellPlayer(props: GridCellPlayerProps) {
     const sceneCopyGridCell = props.sceneCopyGrid[sceneCopy[0]][sceneCopy[1]]
     return (
       <div
-        className={clsx(
+        className={cx(
           classes.gridCell,
           !sceneCopyGridCell && classes.hidden,
           mirror && classes.mirror
@@ -189,7 +187,7 @@ function GridCellPlayer(props: GridCellPlayerProps) {
     )
   } else {
     return (
-      <div className={clsx(classes.gridCell, !sceneID && classes.hidden)}>
+      <div className={cx(classes.gridCell, !sceneID && classes.hidden)}>
         {sceneID && (
           <Player
             uuid={uuid}
@@ -215,7 +213,7 @@ function GridCellPlayer(props: GridCellPlayerProps) {
   }
 }
 
-export interface GridPlayerProps extends WithStyles<typeof styles> {
+export interface GridPlayerProps {
   parentUUID: string
   overlayIndex: number
   gridConfig: PlayerOverlayState
@@ -226,7 +224,6 @@ export interface GridPlayerProps extends WithStyles<typeof styles> {
 }
 
 function GridPlayer(props: GridPlayerProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const firstNotLoaded = useAppSelector(
     selectGridPlayerFirstNotLoaded(props.overlayIndex, props.parentUUID)
@@ -245,7 +242,7 @@ function GridPlayer(props: GridPlayerProps) {
   const _abortController = useRef(new AbortController())
 
   useEffect(() => {
-    flipflip.events.onGridNavigateBack(navigateBack, _abortController.current)
+    flipflip().events.onGridNavigateBack(navigateBack, _abortController.current)
 
     return () => {
       _abortController.current.abort()
@@ -297,7 +294,7 @@ function GridPlayer(props: GridPlayerProps) {
     dispatch(setRouteGoBack())
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const grid = props.gridConfig.grid
   const height = grid && grid.length > 0 && grid[0].length > 0 ? grid.length : 1
   const width =
@@ -329,7 +326,7 @@ function GridPlayer(props: GridPlayerProps) {
             position="absolute"
             onMouseEnter={onMouseEnterAppBar}
             onMouseLeave={onMouseLeaveAppBar}
-            className={clsx(classes.appBar, appBarHover && classes.appBarHover)}
+            className={cx(classes.appBar, appBarHover && classes.appBarHover)}
           >
             <Toolbar>
               <Tooltip disableInteractive title="Back" placement="right-end">
@@ -375,7 +372,7 @@ function GridPlayer(props: GridPlayerProps) {
       )}
 
       <main
-        className={clsx(classes.content, hideCursor && classes.hideCursor)}
+        className={cx(classes.content, hideCursor && classes.hideCursor)}
         ref={_idleTimerRef}
       >
         <IdleTimer
@@ -431,4 +428,4 @@ function GridPlayer(props: GridPlayerProps) {
 }
 
 ;(GridPlayer as any).displayName = 'GridPlayer'
-export default withStyles(styles)(GridPlayer as any)
+export default GridPlayer

@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react'
 import Draggable, { DraggableEvent, type DraggableData } from 'react-draggable'
 import { Button, Menu, type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import BaseSwitch from '../common/BaseSwitch'
 import SceneSelect from '../configGroups/SceneSelect'
@@ -20,8 +19,7 @@ import {
 } from '../../store/sceneGrid/slice'
 import { setSceneGridCellMirror } from '../../store/sceneGrid/actions'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     gridCell: {
       height: '100%',
       width: '100%',
@@ -34,9 +32,9 @@ const styles = (theme: Theme) =>
       minHeight: 365,
       minWidth: 250
     }
-  })
+  }))
 
-export interface GridCellSetupProps extends WithStyles<typeof styles> {
+export interface GridCellSetupProps {
   id: number
   row: number
   col: number
@@ -46,6 +44,7 @@ export interface GridCellSetupProps extends WithStyles<typeof styles> {
 }
 
 function GridCellSetup(props: GridCellSetupProps) {
+  const { classes } = useStyles()
   const dispatch = useAppDispatch()
   const color = useAppSelector(
     selectSceneGridCellColor(props.id, props.row, props.col)
@@ -137,7 +136,7 @@ function GridCellSetup(props: GridCellSetupProps) {
     return (
       <Button
         id={props.row + '-' + props.col}
-        className={props.classes.gridCell}
+        className={classes.gridCell}
         style={
           color == null
             ? {}
@@ -178,7 +177,7 @@ function GridCellSetup(props: GridCellSetupProps) {
         }}
         anchorEl={menuAnchorEl.current}
         keepMounted
-        classes={{ paper: props.classes.sceneMenu }}
+        classes={{ paper: classes.sceneMenu }}
         open={props.isEditing}
         onClose={onCloseMenu}
       >
@@ -197,4 +196,4 @@ function GridCellSetup(props: GridCellSetupProps) {
 }
 
 ;(GridCellSetup as any).displayName = 'GridCellSetup'
-export default withStyles(styles)(GridCellSetup as any)
+export default GridCellSetup

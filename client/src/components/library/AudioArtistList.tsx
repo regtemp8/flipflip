@@ -1,60 +1,58 @@
 import React, { useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Avatar, type Theme, Typography } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 
 import type Audio from '../../store/audio/Audio'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    media: {
-      height: 0,
-      paddingTop: '56.25%' // 16:9
-    },
-    mediaIcon: {
-      width: '100%',
-      height: 'auto'
-    },
-    underlineTitle: {
-      textDecoration: 'underline'
-    },
-    shadow: {
-      boxShadow: theme.shadows[10]
-    },
-    artistContainer: {
-      display: 'flex',
-      flexWrap: 'wrap'
-    },
-    artist: {
-      paddingTop: 0,
-      textAlign: 'center',
-      cursor: 'pointer'
-    },
-    trackArtist: {
-      maxWidth: theme.spacing(20)
-    },
-    large: {
-      width: theme.spacing(20),
-      height: theme.spacing(20),
-      borderStyle: 'double',
-      borderColor: theme.palette.text.primary,
-      borderWidth: 2
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  media: {
+    height: 0,
+    paddingTop: '56.25%' // 16:9
+  },
+  mediaIcon: {
+    width: '100%',
+    height: 'auto'
+  },
+  underlineTitle: {
+    textDecoration: 'underline'
+  },
+  shadow: {
+    boxShadow: theme.shadows[10]
+  },
+  artistContainer: {
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+  artist: {
+    paddingTop: 0,
+    textAlign: 'center',
+    cursor: 'pointer'
+  },
+  trackArtist: {
+    maxWidth: theme.spacing(20)
+  },
+  large: {
+    width: theme.spacing(20),
+    height: theme.spacing(20),
+    borderStyle: 'double',
+    borderColor: theme.palette.text.primary,
+    borderWidth: 2
+  }
+}))
 
-export interface AudioArtistListProps extends WithStyles<typeof styles> {
+export interface AudioArtistListProps {
   sources: Audio[]
   showHelp: boolean
   onClickArtist: (artist: string) => void
@@ -107,7 +105,7 @@ function AudioArtistList(props: AudioArtistListProps) {
     return artistsMap
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   if (artists.size === 0) {
     return (
       <React.Fragment>
@@ -166,7 +164,7 @@ function AudioArtistList(props: AudioArtistListProps) {
             <Avatar
               alt={a}
               src={thumb}
-              className={clsx(classes.large, hover === a && classes.shadow)}
+              className={cx(classes.large, hover === a && classes.shadow)}
             >
               {thumb == null && (
                 <AudiotrackIcon className={classes.mediaIcon} />
@@ -174,7 +172,7 @@ function AudioArtistList(props: AudioArtistListProps) {
             </Avatar>
             <Typography
               display={'block'}
-              className={clsx(
+              className={cx(
                 classes.trackArtist,
                 hover === a && classes.underlineTitle
               )}
@@ -190,4 +188,4 @@ function AudioArtistList(props: AudioArtistListProps) {
 }
 
 ;(AudioArtistList as any).displayName = 'AudioArtistList'
-export default withStyles(styles)(AudioArtistList as any)
+export default AudioArtistList

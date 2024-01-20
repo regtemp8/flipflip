@@ -9,8 +9,7 @@ import {
   Tooltip
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 
@@ -26,14 +25,13 @@ import { setSceneAddAudioPlaylist } from '../../store/scene/slice'
 import { setSceneAudioEnabled } from '../../store/scene/actions'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     addButton: {
       boxShadow: 'none'
     }
-  })
+  }))
 
-export interface AudioCardProps extends WithStyles<typeof styles> {
+export interface AudioCardProps {
   sceneID: number
   startPlaying: boolean
   persist?: boolean
@@ -70,7 +68,7 @@ function AudioCard(props: AudioCardProps) {
     )
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Grid container alignItems="center">
       <Grid item xs={12}>
@@ -143,4 +141,4 @@ function AudioCard(props: AudioCardProps) {
 }
 
 ;(AudioCard as any).displayName = 'AudioCard'
-export default withStyles(styles)(AudioCard as any)
+export default AudioCard

@@ -1,5 +1,5 @@
 import React, { useState, useRef, type ChangeEvent } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { v4 as uuidv4 } from 'uuid'
 import wretch from 'wretch'
 import FormUrlAddon from 'wretch/addons/formUrl'
@@ -34,10 +34,9 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { en, IG, MO, SS, ST } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import BaseSwitch from '../common/BaseSwitch'
@@ -92,48 +91,46 @@ import {
 } from '../../store/app/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    fab: {
-      boxShadow: 'none'
-    },
-    authorized: {
-      backgroundColor: theme.palette.primary.main
-    },
-    noAuth: {
-      backgroundColor: theme.palette.error.main
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    iconAvatar: {
-      float: 'right',
-      backgroundColor: theme.palette.primary.light
-    },
-    title: {
-      paddingBottom: theme.spacing(1)
-    },
-    tumblrFields: {
-      paddingTop: theme.spacing(2)
-    },
-    center: {
-      textAlign: 'center'
-    },
-    middleInput: {
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1)
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  fab: {
+    boxShadow: 'none'
+  },
+  authorized: {
+    backgroundColor: theme.palette.primary.main
+  },
+  noAuth: {
+    backgroundColor: theme.palette.error.main
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  iconAvatar: {
+    float: 'right',
+    backgroundColor: theme.palette.primary.light
+  },
+  title: {
+    paddingBottom: theme.spacing(1)
+  },
+  tumblrFields: {
+    paddingTop: theme.spacing(2)
+  },
+  center: {
+    textAlign: 'center'
+  },
+  middleInput: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1)
+  }
+}))
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />
 }
 
-function APICard(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function APICard() {
   const dispatch = useAppDispatch()
   const tumblrAuthorized = useAppSelector(
     selectAppConfigRemoteSettingsTumblrAuthorized()
@@ -409,7 +406,7 @@ function APICard(props: WithStyles<typeof styles>) {
     // Tumblr oauth
     let data: any | undefined
     try {
-      data = await flipflip.api.tumblrOAuth(
+      data = await flipflip().api.tumblrOAuth(
         requestTokenUrl,
         accessTokenUrl,
         tumblrKey,
@@ -452,7 +449,7 @@ function APICard(props: WithStyles<typeof styles>) {
 
     let data: any | undefined
     try {
-      data = await flipflip.api.redditOAuth(
+      data = await flipflip().api.redditOAuth(
         deviceID,
         redditUserAgent,
         redditClientID
@@ -482,7 +479,7 @@ function APICard(props: WithStyles<typeof styles>) {
     // Twitter OAuth
     let data: any | undefined
     try {
-      data = await flipflip.api.twitterOAuth(
+      data = await flipflip().api.twitterOAuth(
         requestTokenUrl,
         accessTokenUrl,
         twitterConsumerKey,
@@ -506,7 +503,7 @@ function APICard(props: WithStyles<typeof styles>) {
 
   const onFinishAuthInstagram = async () => {
     try {
-      await flipflip.api.igLogin(input1, input2)
+      await flipflip().api.igLogin(input1, input2)
       dispatch(setConfigRemoteSettingsInstagramUsername(input1))
       dispatch(setConfigRemoteSettingsInstagramPassword(input2))
       showSuccess('Instagram is activated')
@@ -517,7 +514,7 @@ function APICard(props: WithStyles<typeof styles>) {
         setInstagramMode(IG.tfa)
         _tfa.current = e.response.body.two_factor_info.two_factor_identifier
       } else if (e.name === 'IgCheckpointError') {
-        await flipflip.api.igChallenge()
+        await flipflip().api.igChallenge()
         setInstagramMode(IG.checkpoint)
       } else {
         onCloseDialog()
@@ -529,7 +526,7 @@ function APICard(props: WithStyles<typeof styles>) {
 
   const onTFAInstagram = async () => {
     try {
-      await flipflip.api.igTwoFactorLogin(
+      await flipflip().api.igTwoFactorLogin(
         _tfa.current,
         instagramUsername,
         input3
@@ -550,7 +547,7 @@ function APICard(props: WithStyles<typeof styles>) {
 
   const onCheckpointInstagram = async () => {
     try {
-      await flipflip.api.igSendSecurityCode(input3)
+      await flipflip().api.igSendSecurityCode(input3)
       dispatch(setConfigRemoteSettingsInstagramUsername(input1))
       dispatch(setConfigRemoteSettingsInstagramPassword(input2))
       showSuccess('Instagram is activated')
@@ -669,7 +666,7 @@ function APICard(props: WithStyles<typeof styles>) {
     return text ? text[0].toUpperCase() + text.slice(1) : ''
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const menuTypeText = getMenuTypeText(menuType)
   const menuTypeSignOut = getMenuTypeSignOut()
 
@@ -691,7 +688,7 @@ function APICard(props: WithStyles<typeof styles>) {
             placement="top-end"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.fab,
                 tumblrAuthorized ? classes.authorized : classes.noAuth
               )}
@@ -705,7 +702,7 @@ function APICard(props: WithStyles<typeof styles>) {
         {/* <Grid item>
           <Tooltip disableInteractive title={redditAuthorized ? "Authorized: Click to Sign Out of Reddit" : "Unauthorized: Click to Authorize Reddit"}  placement="top-end">
             <Fab
-              className={clsx(classes.fab, redditAuthorized ? classes.authorized : classes.noAuth)}
+              className={cx(classes.fab, redditAuthorized ? classes.authorized : classes.noAuth)}
               onClick={redditAuthorized ? onClearReddit : onAuthReddit}
               size="large">
               <SourceIcon className={classes.icon} type={ST.reddit}/>
@@ -715,7 +712,7 @@ function APICard(props: WithStyles<typeof styles>) {
         {/* <Grid item>
           <Tooltip disableInteractive title={twitterAuthorized ? "Authorized: Click to Sign Out of Twitter" : "Unauthorized: Click to Authorize Twitter"}  placement="top-end">
             <Fab
-              className={clsx(classes.fab, twitterAuthorized ? classes.authorized : classes.noAuth)}
+              className={cx(classes.fab, twitterAuthorized ? classes.authorized : classes.noAuth)}
               onClick={twitterAuthorized ? onClearTwitter : onAuthTwitter}
               size="large">
               <SourceIcon className={classes.icon} type={ST.twitter}/>
@@ -733,7 +730,7 @@ function APICard(props: WithStyles<typeof styles>) {
             placement="top-end"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.fab,
                 instagramConfigured ? classes.authorized : classes.noAuth
               )}
@@ -755,7 +752,7 @@ function APICard(props: WithStyles<typeof styles>) {
             placement="top-end"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.fab,
                 hydrusConfigured ? classes.authorized : classes.noAuth
               )}
@@ -777,7 +774,7 @@ function APICard(props: WithStyles<typeof styles>) {
             placement="top-end"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.fab,
                 piwigoConfigured ? classes.authorized : classes.noAuth
               )}
@@ -850,8 +847,8 @@ function APICard(props: WithStyles<typeof styles>) {
             >
               Tumblr.com
             </Link>{' '}
-            to authorize FlipFlip. You should only have to do this once. Tumblr
-            has no Read-Only mode, so read <i>and</i> write access are
+            to authorize flipflip(). You should only have to do this once.
+            Tumblr has no Read-Only mode, so read <i>and</i> write access are
             requested. FlipFlip does not store any user information or make any
             changes to your account.
           </DialogContentText>
@@ -978,7 +975,7 @@ function APICard(props: WithStyles<typeof styles>) {
             >
               Reddit.com
             </Link>{' '}
-            to authorize FlipFlip. You should only have to do this once.
+            to authorize flipflip(). You should only have to do this once.
             FlipFlip does not store any user information or make any changes to
             your account.
           </DialogContentText>
@@ -1017,7 +1014,7 @@ function APICard(props: WithStyles<typeof styles>) {
             >
               Twitter.com
             </Link>{' '}
-            to authorize FlipFlip. You should only have to do this once.
+            to authorize flipflip(). You should only have to do this once.
             FlipFlip does not store any user information or make any changes to
             your account.
           </DialogContentText>
@@ -1290,4 +1287,4 @@ function APICard(props: WithStyles<typeof styles>) {
 }
 
 ;(APICard as any).displayName = 'APICard'
-export default withStyles(styles)(APICard as any)
+export default APICard

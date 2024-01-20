@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { PT } from 'flipflip-common'
 import { setRoute, addRoutes, setTutorial } from '../app/slice'
 import { setScene } from '../scene/slice'
-import { getScene } from '../scene/selectors'
 import { type AppDispatch, type RootState } from '../store'
 import { newOverlay } from '../overlay/Overlay'
 import { newRoute } from '../app/data/Route'
@@ -24,7 +23,7 @@ import {
   getRandomListItem,
   isSceneIDAGridID
 } from '../../data/utils'
-import { type EntryState } from '../EntryState'
+import { type EntryState, getEntry } from '../EntryState'
 import { setOverlay } from '../overlay/slice'
 import { scrapeSources } from '../sourceScraper/thunks'
 
@@ -96,7 +95,7 @@ export function startPlaying(sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const uuid = 'root'
     const state = getState()
-    const scene = getScene(state.scene, sceneID)
+    const scene = getEntry(state.scene, sceneID)
     const playersState: PlayersState = {}
     createPlayerState(uuid, scene, playersState, state)
     dispatch(setPlayersState(playersState))
@@ -178,7 +177,7 @@ export function playGrid(gridID: number) {
 export function playScene(id: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    const scene = getScene(state.scene, id) as Scene
+    const scene = getEntry(state.scene, id) as Scene
     const tutorial =
       state.app.config.tutorials.player == null ? PT.welcome : undefined
 

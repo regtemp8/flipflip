@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import Select, { MultiValue, components } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import { Checkbox, type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import { grey } from '@mui/material/colors'
 
 import type Audio from '../../store/audio/Audio'
@@ -13,20 +13,19 @@ import type LibrarySource from '../../store/librarySource/LibrarySource'
 import { useAppSelector } from '../../store/hooks'
 import { selectAppLibrarySearchOptions } from '../../store/app/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    searchSelect: {
-      minWidth: 200,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900]
-    },
-    limitWidth: {
-      maxWidth: `calc(100% - ${theme.spacing(7)})`
-    },
-    select: {
-      color: grey[900]
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  searchSelect: {
+    minWidth: 200,
+    maxHeight: theme.mixins.toolbar.minHeight,
+    color: grey[900]
+  },
+  limitWidth: {
+    maxWidth: `calc(100% - ${theme.spacing(7)})`
+  },
+  select: {
+    color: grey[900]
+  }
+}))
 
 function Option(props: any) {
   return (
@@ -53,7 +52,7 @@ function MultiValueComponent(props: any) {
   )
 }
 
-export interface LibrarySearchProps extends WithStyles<typeof styles> {
+export interface LibrarySearchProps {
   filters: string[]
   placeholder: string
   displaySources: Array<LibrarySource | Audio>
@@ -127,11 +126,11 @@ function LibrarySearch(props: LibrarySearchProps) {
     setSearchInput(searchInput)
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   if (props.isCreatable) {
     return (
       <CreatableSelect
-        className={clsx(
+        className={cx(
           classes.searchSelect,
           'CreatableSelect',
           !props.fullWidth && classes.limitWidth
@@ -174,4 +173,4 @@ function LibrarySearch(props: LibrarySearchProps) {
 }
 
 ;(LibrarySearch as any).displayName = 'LibrarySearch'
-export default withStyles(styles)(LibrarySearch as any)
+export default LibrarySearch

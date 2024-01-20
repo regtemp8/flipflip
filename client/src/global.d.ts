@@ -1,3 +1,5 @@
+import { AppStorage, SystemConstants } from 'flipflip-common'
+
 declare global {
   interface Document {
     mozCancelFullScreen?: () => Promise<void>
@@ -12,5 +14,10 @@ declare global {
     msRequestFullscreen?: () => Promise<void>
     mozRequestFullscreen?: () => Promise<void>
     webkitRequestFullscreen?: () => Promise<void>
+  }
+
+  interface Window {
+    flipflipAppStorage?: AppStorage
+    flipflipConstants?: SystemConstants
   }
 }

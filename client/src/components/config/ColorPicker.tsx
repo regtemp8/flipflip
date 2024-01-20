@@ -3,13 +3,11 @@ import { SketchPicker } from 'react-color'
 
 import { Fab, Grid, Menu, TextField, type Theme, Tooltip } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 import type ReduxProps from '../common/ReduxProps'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     colorGrid: {
       width: 170
     },
@@ -32,7 +30,7 @@ const styles = (theme: Theme) =>
     colorField: {
       width: 100
     }
-  })
+  }))
 
 const COLORS = [
   '#f44336',
@@ -58,9 +56,7 @@ const COLORS = [
   '#000'
 ]
 
-export interface ColorPickerProps
-  extends ReduxProps<string>,
-    WithStyles<typeof styles> {}
+export interface ColorPickerProps extends ReduxProps<string> {}
 
 function ColorPicker(props: ColorPickerProps) {
   const dispatch = useAppDispatch()
@@ -88,7 +84,7 @@ function ColorPicker(props: ColorPickerProps) {
     dispatch(props.action(color.hex))
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Grid container alignItems="center">
       <Grid item className={classes.colorGrid}>
@@ -171,4 +167,4 @@ function ColorPicker(props: ColorPickerProps) {
 }
 
 ;(ColorPicker as any).displayName = 'ColorPicker'
-export default withStyles(styles)(ColorPicker as any)
+export default ColorPicker

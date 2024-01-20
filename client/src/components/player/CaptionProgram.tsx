@@ -12,7 +12,7 @@ import captionProgramDefaults, {
 } from '../../data/utils'
 import { RP, TF } from 'flipflip-common'
 import type ChildCallbackHack from './ChildCallbackHack'
-import { CircularProgress } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import { setRouteGoBack } from '../../store/app/thunks'
 import { nextScene } from '../../store/scene/thunks'
 import { selectCurrentImageTags } from '../../store/librarySource/selectors'
@@ -30,8 +30,7 @@ import {
   selectCaptionScriptOpacity
 } from '../../store/captionScript/selectors'
 import { selectAudioBPM } from '../../store/audio/selectors'
-import { Box } from '@mui/system'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { RootState } from '../../store/store'
 
 const splitFirstWord = function (s: string) {
@@ -72,7 +71,6 @@ export interface CaptionProgramProps {
 
 export default function CaptionProgram(props: CaptionProgramProps) {
   const timeToNextFrame = props.timeToNextFrame ?? 0
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const currentImageTags = useAppSelector(
     selectCurrentImageTags(props.currentImage)
@@ -500,7 +498,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             }
             if (
               !file.startsWith('http') &&
-              !(await flipflip.api.pathExists(file))
+              !(await flipflip().api.pathExists(file))
             ) {
               error =
                 'Error: {' +

@@ -1,9 +1,8 @@
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Card, CardContent, Grid, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { SDT } from 'flipflip-common'
 import CrossFadeCard from '../configGroups/CrossFadeCard'
@@ -15,22 +14,21 @@ import PanningCard from '../configGroups/PanningCard'
 import { useAppSelector } from '../../store/hooks'
 import { selectAppTutorial } from '../../store/app/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface SceneEffectsProps extends WithStyles<typeof styles> {
+export interface SceneEffectsProps {
   sceneID?: number
 }
 
@@ -42,7 +40,7 @@ function SceneEffects(props: SceneEffectsProps) {
     tutorial === SDT.zoom3 ||
     tutorial === SDT.zoom4
   const tutorialFade = tutorial === SDT.fade1 || tutorial === SDT.fade2
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2}>
       <Grid
@@ -50,7 +48,7 @@ function SceneEffects(props: SceneEffectsProps) {
         xs={12}
         md={6}
         lg={4}
-        className={clsx(tutorialZoom && classes.backdropTop)}
+        className={cx(tutorialZoom && classes.backdropTop)}
       >
         <Card>
           <CardContent>
@@ -63,7 +61,7 @@ function SceneEffects(props: SceneEffectsProps) {
         xs={12}
         md={6}
         lg={4}
-        className={clsx(tutorialFade && classes.backdropTop)}
+        className={cx(tutorialFade && classes.backdropTop)}
       >
         <Card>
           <CardContent>
@@ -104,4 +102,4 @@ function SceneEffects(props: SceneEffectsProps) {
 }
 
 ;(SceneEffects as any).displayName = 'SceneEffects'
-export default withStyles(styles)(SceneEffects as any)
+export default SceneEffects

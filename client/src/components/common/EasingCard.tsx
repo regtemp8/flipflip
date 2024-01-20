@@ -1,6 +1,5 @@
 import { Grid, MenuItem, Collapse, type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 import { en, EA } from 'flipflip-common'
 import BaseSlider from './slider/BaseSlider'
 import type CommonSliderProps from './slider/CommonSliderProps'
@@ -8,14 +7,13 @@ import type ReduxProps from './ReduxProps'
 import { useAppSelector } from '../../store/hooks'
 import BaseSelect from './BaseSelect'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  }
+}))
 
-export interface EasingCardProps extends WithStyles<typeof styles> {
+export interface EasingCardProps {
   label?: string
   sidebar: boolean
   easing: ReduxProps<string>
@@ -26,7 +24,7 @@ export interface EasingCardProps extends WithStyles<typeof styles> {
 }
 
 function EasingCard(props: EasingCardProps) {
-  const classes = props.classes
+  const {classes} = useStyles()
   const easing = useAppSelector(props.easing.selector)
 
   return (
@@ -127,4 +125,4 @@ function EasingCard(props: EasingCardProps) {
   )
 }
 
-export default withStyles(styles)(EasingCard as any)
+export default EasingCard

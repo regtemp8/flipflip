@@ -1,5 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Badge,
@@ -18,8 +18,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -59,105 +58,104 @@ import {
   selectLibrarySourceDisabledClips,
   selectLibrarySourceBlacklist
 } from '../../store/librarySource/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    oddChild: {
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  oddChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['100']
+        : grey[900],
+    '&:hover': {
       backgroundColor:
         theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['100']
-          : grey[900],
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    evenChild: {
-      backgroundColor:
-        theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['50']
-          : theme.palette.background.default,
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    avatar: {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: 'none'
-    },
-    markedSource: {
-      backgroundColor: theme.palette.secondary.main
-    },
-    sourceIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    sourceMarkedIcon: {
-      color: theme.palette.secondary.contrastText
-    },
-    deleteButton: {
-      backgroundColor: theme.palette.error.main
-    },
-    deleteIcon: {
-      color: theme.palette.error.contrastText
-    },
-    errorIcon: {
-      color: theme.palette.error.main,
-      backgroundColor: theme.palette.error.contrastText,
-      borderRadius: '50%'
-    },
-    importBadge: {
-      zIndex: theme.zIndex.fab + 1
-    },
-    actionButton: {
-      marginLeft: theme.spacing(1)
-    },
-    countChip: {
-      userSelect: 'none',
-      marginRight: theme.spacing(1),
-      [theme.breakpoints.down('sm')]: {
-        display: 'none'
-      }
-    },
-    fullTag: {
-      [theme.breakpoints.down('md')]: {
-        display: 'none'
-      }
-    },
-    simpleTag: {
-      [theme.breakpoints.up('md')]: {
-        display: 'none'
-      },
-      [theme.breakpoints.down('sm')]: {
-        display: 'none'
-      }
-    },
-    urlField: {
-      width: '100%',
-      margin: 0
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    noUserSelect: {
-      userSelect: 'none'
+          ? (theme.palette.primary as any)['200']
+          : '#080808'
     }
-  })
+  },
+  evenChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['50']
+        : theme.palette.background.default,
+    '&:hover': {
+      backgroundColor:
+        theme.palette.mode === 'light'
+          ? (theme.palette.primary as any)['200']
+          : '#080808'
+    }
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: 'none'
+  },
+  markedSource: {
+    backgroundColor: theme.palette.secondary.main
+  },
+  sourceIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  sourceMarkedIcon: {
+    color: theme.palette.secondary.contrastText
+  },
+  deleteButton: {
+    backgroundColor: theme.palette.error.main
+  },
+  deleteIcon: {
+    color: theme.palette.error.contrastText
+  },
+  errorIcon: {
+    color: theme.palette.error.main,
+    backgroundColor: theme.palette.error.contrastText,
+    borderRadius: '50%'
+  },
+  importBadge: {
+    zIndex: theme.zIndex.fab + 1
+  },
+  actionButton: {
+    marginLeft: theme.spacing(1)
+  },
+  countChip: {
+    userSelect: 'none',
+    marginRight: theme.spacing(1),
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
+    }
+  },
+  fullTag: {
+    [theme.breakpoints.down('md')]: {
+      display: 'none'
+    }
+  },
+  simpleTag: {
+    [theme.breakpoints.up('md')]: {
+      display: 'none'
+    },
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
+    }
+  },
+  urlField: {
+    width: '100%',
+    margin: 0
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  noUserSelect: {
+    userSelect: 'none'
+  }
+}))
 
-export interface SourceListItemProps extends WithStyles<typeof styles> {
+export interface SourceListItemProps {
   checked: boolean
   index: number
   isEditing: number
@@ -181,7 +179,6 @@ export interface SourceListItemProps extends WithStyles<typeof styles> {
 }
 
 function SourceListItem(props: SourceListItemProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const { isWin32, pathSep } = useAppSelector(selectConstants())
   const tutorial = useAppSelector(selectAppTutorial())
@@ -220,7 +217,7 @@ function SourceListItem(props: SourceListItemProps) {
         sourceType === ST.playlist ||
         sourceType === ST.list
       ) {
-        const exists = await flipflip.api.pathExists(sourceURL)
+        const exists = await flipflip().api.pathExists(sourceURL)
         if (exists) {
           props.onDelete(props.source)
         }
@@ -243,12 +240,12 @@ function SourceListItem(props: SourceListItemProps) {
       let cachePath = await getCachePath(cachingDirectory, sourceURL)
       if (fileType === ST.video || fileType === ST.playlist) {
         if (
-          !(await flipflip.api.pathExists(
+          !(await flipflip().api.pathExists(
             cachePath + getFileName(sourceURL, pathSep)
           ))
         ) {
           cachePath = undefined
-          flipflip.api.showItemInFolder(sourceURL)
+          flipflip().api.showItemInFolder(sourceURL)
         }
       }
       if (cachePath) {
@@ -305,12 +302,12 @@ function SourceListItem(props: SourceListItemProps) {
     window.open(url, '_blank')?.focus()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const sourceType = url && getSourceType(url)
   return (
     <div
       style={props.style}
-      className={clsx(
+      className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
         tutorial === SDT.source && classes.highlight,
         tutorial && classes.disable
@@ -364,7 +361,7 @@ function SourceListItem(props: SourceListItemProps) {
               <Fab
                 size="small"
                 onClick={onSourceIconClick}
-                className={clsx(
+                className={cx(
                   classes.avatar,
                   marked && classes.markedSource,
                   tutorial === SDT.sourceAvatar && classes.highlight
@@ -372,7 +369,7 @@ function SourceListItem(props: SourceListItemProps) {
               >
                 <SourceIcon
                   url={url}
-                  className={clsx(
+                  className={cx(
                     classes.sourceIcon,
                     marked && classes.sourceMarkedIcon
                   )}
@@ -401,7 +398,7 @@ function SourceListItem(props: SourceListItemProps) {
             <React.Fragment>
               <Typography
                 noWrap
-                className={clsx(
+                className={cx(
                   classes.noUserSelect,
                   tutorial === SDT.sourceTitle && classes.highlight
                 )}
@@ -414,7 +411,7 @@ function SourceListItem(props: SourceListItemProps) {
                   <React.Fragment key={tagID}>
                     <TagChip
                       tagID={tagID}
-                      className={clsx(
+                      className={cx(
                         classes.noUserSelect,
                         classes.actionButton,
                         classes.fullTag,
@@ -424,7 +421,7 @@ function SourceListItem(props: SourceListItemProps) {
                     />
                     <TagChip
                       tagID={tagID}
-                      className={clsx(
+                      className={cx(
                         classes.noUserSelect,
                         classes.actionButton,
                         classes.simpleTag,
@@ -441,9 +438,7 @@ function SourceListItem(props: SourceListItemProps) {
 
         {props.isEditing !== props.source && (
           <ListItemSecondaryAction
-            className={clsx(
-              tutorial === SDT.sourceButtons && classes.highlight
-            )}
+            className={cx(tutorial === SDT.sourceButtons && classes.highlight)}
           >
             {props.useWeights && (
               <React.Fragment>
@@ -475,7 +470,7 @@ function SourceListItem(props: SourceListItemProps) {
             )}
             {count > 0 && sourceType !== ST.video && (
               <Chip
-                className={clsx(
+                className={cx(
                   classes.countChip,
                   tutorial === SDT.sourceCount && classes.highlight
                 )}
@@ -594,7 +589,7 @@ function SourceListItem(props: SourceListItemProps) {
               )}
             <IconButton
               onClick={() => props.onRemove(props.source)}
-              className={clsx(classes.deleteButton, classes.actionButton)}
+              className={cx(classes.deleteButton, classes.actionButton)}
               edge="end"
               size="small"
               aria-label="delete"
@@ -609,4 +604,4 @@ function SourceListItem(props: SourceListItemProps) {
 }
 
 ;(SourceListItem as any).displayName = 'SourceListItem'
-export default withStyles(styles)(SourceListItem as any)
+export default SourceListItem

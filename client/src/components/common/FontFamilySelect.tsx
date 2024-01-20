@@ -4,7 +4,7 @@ import { CancelablePromise } from '../../data/utils'
 import BaseSelect from './BaseSelect'
 import { useAppSelector } from '../../store/hooks'
 import type ReduxProps from './ReduxProps'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 export interface FontFamilySelectProps extends ReduxProps<string> {
   label: string
@@ -12,16 +12,16 @@ export interface FontFamilySelectProps extends ReduxProps<string> {
 }
 
 export default function FontFamilySelect(props: FontFamilySelectProps) {
-  const flipflip = FlipFlipService.getInstance()
   const _promise = useRef<CancelablePromise>()
   const [systemFonts, setSystemFonts] = useState<string[]>([])
 
   useEffect(() => {
     // Define system fonts
     _promise.current = new CancelablePromise((resolve, reject) => {
-      flipflip.api.getSystemFonts().then(
+      flipflip().api.getSystemFonts().then(
         (res: string[]) => {
           if (!_promise.current?.hasCanceled) {
+            console.log(res)
             setSystemFonts(res)
           }
         },

@@ -1,5 +1,5 @@
 import React, { type MouseEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -31,8 +31,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -87,267 +86,265 @@ import {
   setCaptionScriptsRemoveTags,
   setCaptionScriptsToggleMarked
 } from '../../store/captionScript/thunks'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 0,
+    minHeight: 64
+  },
+  appBarSpacerCollapse: {
+    width: '100%'
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  backButton: {
+    float: 'left'
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '20%'
+  },
+  headerRight: {
+    flexBasis: '20%',
+    justifyContent: 'flex-end',
+    display: 'flex'
+  },
+  searchBar: {
+    float: 'right',
+    display: 'flex',
+    maxWidth: '100%'
+  },
+  searchCount: {
+    color: theme.palette.primary.contrastText,
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  displayCount: {
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperClose: {
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
     },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacerWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: 0,
-      minHeight: 64
-    },
-    appBarSpacerCollapse: {
-      width: '100%'
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    backButton: {
-      float: 'left'
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '20%'
-    },
-    headerRight: {
-      flexBasis: '20%',
-      justifyContent: 'flex-end',
-      display: 'flex'
-    },
-    searchBar: {
-      float: 'right',
-      display: 'flex',
-      maxWidth: '100%'
-    },
-    searchCount: {
-      color: theme.palette.primary.contrastText,
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    displayCount: {
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerPaperClose: {
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      },
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawerPaperHidden: {
-      width: 0,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawer: {
-      position: 'absolute'
-    },
-    drawerSpacer: {
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down('sm')]: {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    chip: {
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    chipClose: {
-      opacity: 0,
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      padding: theme.spacing(0),
-      overflow: 'hidden',
-      flexGrow: 1
-    },
-    containerNotEmpty: {
-      display: 'flex'
-    },
-    addMenuButton: {
-      backgroundColor: theme.palette.primary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    sortMenuButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 80,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectAllButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectNoneButton: {
-      backgroundColor: theme.palette.secondary.light,
-      margin: 0,
-      top: 'auto',
-      right: 180,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    importBadge: {
-      top: 'auto',
-      right: 30,
-      bottom: 50,
-      left: 'auto',
-      position: 'fixed',
-      zIndex: theme.zIndex.fab + 1
-    },
-    addButton: {
-      backgroundColor: theme.palette.primary.main,
-      margin: 0,
-      top: 'auto',
-      right: 28,
-      bottom: 25,
-      left: 'auto',
-      position: 'fixed',
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    addURLButton: {
-      marginBottom: 60
-    },
-    addLocalButton: {
-      marginBottom: 115
-    },
-    removeAllButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    addButtonClose: {
-      marginBottom: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration:
-          theme.transitions.duration.leavingScreen +
-          theme.transitions.duration.standard
-      })
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    sortMenu: {
-      width: 200
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdrop: {
-      zIndex: theme.zIndex.modal,
-      height: '100%',
-      width: '100%'
-    },
-    hidden: {
-      opacity: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: 100
-      })
-    },
-    noScroll: {
-      overflow: 'visible'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawerPaperHidden: {
+    width: 0,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawer: {
+    position: 'absolute'
+  },
+  drawerSpacer: {
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
     }
-  })
+  },
+  drawerButton: {
+    backgroundColor: theme.palette.primary.main,
+    minHeight: theme.spacing(6),
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+  drawerIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  chip: {
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  chipClose: {
+    opacity: 0,
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    padding: theme.spacing(0),
+    overflow: 'hidden',
+    flexGrow: 1
+  },
+  containerNotEmpty: {
+    display: 'flex'
+  },
+  addMenuButton: {
+    backgroundColor: theme.palette.primary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  sortMenuButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 80,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectAllButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectNoneButton: {
+    backgroundColor: theme.palette.secondary.light,
+    margin: 0,
+    top: 'auto',
+    right: 180,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  importBadge: {
+    top: 'auto',
+    right: 30,
+    bottom: 50,
+    left: 'auto',
+    position: 'fixed',
+    zIndex: theme.zIndex.fab + 1
+  },
+  addButton: {
+    backgroundColor: theme.palette.primary.main,
+    margin: 0,
+    top: 'auto',
+    right: 28,
+    bottom: 25,
+    left: 'auto',
+    position: 'fixed',
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  addURLButton: {
+    marginBottom: 60
+  },
+  addLocalButton: {
+    marginBottom: 115
+  },
+  removeAllButton: {
+    backgroundColor: theme.palette.error.main,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  addButtonClose: {
+    marginBottom: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration:
+        theme.transitions.duration.leavingScreen +
+        theme.transitions.duration.standard
+    })
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  sortMenu: {
+    width: 200
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    height: '100%',
+    width: '100%'
+  },
+  hidden: {
+    opacity: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: 100
+    })
+  },
+  noScroll: {
+    overflow: 'visible'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-function ScriptLibrary(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function ScriptLibrary() {
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
   const scripts = useAppSelector(selectAppScripts())
@@ -416,7 +413,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
         dispatch(setScriptsAddAtStart())
         break
       case AF.script:
-        const scriptSources = await flipflip.api.loadScriptSources(e.shiftKey)
+        const scriptSources = await flipflip().api.loadScriptSources(e.shiftKey)
         if (scriptSources) {
           await addScriptSources(scriptSources)
         }
@@ -519,7 +516,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
     onCloseDialog()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const open = drawerOpen
 
   return (
@@ -527,9 +524,9 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
-          tutorial === SLT.toolbar && clsx(classes.backdropTop, classes.disable)
+          tutorial === SLT.toolbar && cx(classes.backdropTop, classes.disable)
         )}
       >
         <Toolbar className={classes.headerBar}>
@@ -568,7 +565,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
 
           <div className={classes.headerRight}>
             <div
-              className={clsx(
+              className={cx(
                 classes.searchBar,
                 tutorial === SLT.toolbar && classes.highlight
               )}
@@ -603,7 +600,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
       </AppBar>
 
       <Drawer
-        className={clsx(
+        className={cx(
           classes.drawer,
           (tutorial === SLT.sidebar1 ||
             tutorial === SLT.sidebar2 ||
@@ -613,7 +610,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
         )}
         variant="permanent"
         classes={{
-          paper: clsx(
+          paper: cx(
             classes.drawerPaper,
             !open && classes.drawerPaperClose,
             specialMode && classes.drawerPaperHidden
@@ -621,7 +618,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
         }}
         open={drawerOpen}
       >
-        <div className={clsx(!open && classes.appBarSpacerWrapper)}>
+        <div className={cx(!open && classes.appBarSpacerWrapper)}>
           <Collapse in={!open} className={classes.appBarSpacerCollapse}>
             <div className={classes.appBarSpacer} />
           </Collapse>
@@ -629,7 +626,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
 
         <ListItem className={classes.drawerButton}>
           <IconButton
-            className={clsx(tutorial === SLT.sidebar1 && classes.highlight)}
+            className={cx(tutorial === SLT.sidebar1 && classes.highlight)}
             onClick={onToggleDrawer}
             size="large"
           >
@@ -639,7 +636,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
 
         <Divider />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
             <ListItemButton onClick={() => dispatch(manageTags())}>
               <ListItemIcon>
@@ -648,7 +645,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
               <ListItemText primary="Manage Tags" />
               {tagsCount > 0 && (
                 <Chip
-                  className={clsx(classes.chip, !open && classes.chipClose)}
+                  className={cx(classes.chip, !open && classes.chipClose)}
                   label={tagsCount}
                   color="primary"
                   size="small"
@@ -670,11 +667,11 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
 
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        <div className={clsx(classes.root, classes.fill)}>
+        <div className={cx(classes.root, classes.fill)}>
           {!specialMode && <div className={classes.drawerSpacer} />}
           <Container
             maxWidth={false}
-            className={clsx(
+            className={cx(
               classes.container,
               displaySources.length > 0 && classes.containerNotEmpty
             )}
@@ -828,7 +825,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addLocalButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -848,7 +845,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addURLButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -863,7 +860,7 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
             </Fab>
           </Tooltip>
           <Fab
-            className={clsx(
+            className={cx(
               classes.addMenuButton,
               openMenu === MO.new && classes.backdropTop
             )}
@@ -995,4 +992,4 @@ function ScriptLibrary(props: WithStyles<typeof styles>) {
 }
 
 ;(ScriptLibrary as any).displayName = 'ScriptLibrary'
-export default withStyles(styles)(ScriptLibrary as any)
+export default ScriptLibrary

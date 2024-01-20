@@ -6,4 +6,6 @@ export type SystemConstants = {
   savePath: string;
   portablePath: string;
   portablePathExists: boolean;
+  masonryDefaultHeight: number;
+  masonryDefaultColumns: number;
 };

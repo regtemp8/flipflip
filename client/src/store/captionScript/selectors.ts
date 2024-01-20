@@ -1,52 +1,45 @@
 import { type RootState } from '../store'
-import { type EntryState } from '../EntryState'
+import { type EntryState, getEntry } from '../EntryState'
 import type CaptionScript from './CaptionScript'
 import { type FontSettingsType } from './FontSettings'
 
-export const getCaptionScript = (
-  state: EntryState<CaptionScript>,
-  id: number
-) => {
-  return state.entries[id]
-}
-
 export const selectCaptionScript = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id)
+  return (state: RootState) => getEntry(state.captionScript, id)
 }
 
 export const selectCaptionScriptUrl = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id)?.url
+  return (state: RootState) => getEntry(state.captionScript, id)?.url
 }
 
 export const selectCaptionScriptScript = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id).script
+  return (state: RootState) => getEntry(state.captionScript, id).script
 }
 
 export const selectCaptionScriptStopAtEnd = (id: number) => {
   return (state: RootState) =>
-    getCaptionScript(state.captionScript, id).stopAtEnd
+    getEntry(state.captionScript, id).stopAtEnd
 }
 
 export const selectCaptionScriptNextSceneAtEnd = (id: number) => {
   return (state: RootState) =>
-    getCaptionScript(state.captionScript, id).nextSceneAtEnd
+    getEntry(state.captionScript, id).nextSceneAtEnd
 }
 
 export const selectCaptionScriptSyncWithAudio = (id: number) => {
   return (state: RootState) =>
-    getCaptionScript(state.captionScript, id).syncWithAudio
+    getEntry(state.captionScript, id).syncWithAudio
 }
 
 export const selectCaptionScriptOpacity = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id).opacity
+  return (state: RootState) => getEntry(state.captionScript, id).opacity
 }
 
 export const selectCaptionScriptMarked = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id).marked
+  return (state: RootState) => getEntry(state.captionScript, id).marked
 }
 
 export const selectCaptionScriptTags = (id: number) => {
-  return (state: RootState) => getCaptionScript(state.captionScript, id).tags
+  return (state: RootState) => getEntry(state.captionScript, id).tags
 }
 
 export const getCaptionScriptFontSettings = (
@@ -54,7 +47,7 @@ export const getCaptionScriptFontSettings = (
   id: number,
   type: FontSettingsType
 ) => {
-  return getCaptionScript(state, id)[type]
+  return getEntry(state, id)[type]
 }
 
 export const selectCaptionScriptFontSettingsBlink = (id: number) => {

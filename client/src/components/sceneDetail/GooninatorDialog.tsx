@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState } from 'react'
 
 import {
   Button,
@@ -14,33 +14,31 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Theme,
-} from "@mui/material";
+  Theme
+} from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles';
-import withStyles, { WithStyles } from '@mui/styles/withStyles';
+import { makeStyles } from 'tss-react/mui'
 
-import {GT} from "flipflip-common";
-import FlipFlipService from "../../FlipFlipService";
+import { GT } from 'flipflip-common'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) => createStyles({
-  root: {
-    display: 'flex',
-  },
-  rootInput: {
-    marginLeft: theme.spacing(2),
-    flexGrow: 1,
-  },
-});
+const useStyles = makeStyles()((theme: Theme) => ({
+    root: {
+      display: 'flex'
+    },
+    rootInput: {
+      marginLeft: theme.spacing(2),
+      flexGrow: 1
+    }
+  }))
 
-export interface GooninatorDialogProps extends WithStyles<typeof styles> {
-  open: boolean,
-  onClose: () => void,
+export interface GooninatorDialogProps {
+  open: boolean
+  onClose: () => void
   onImportURL: (type: string, e: MouseEvent, ...args: any[]) => void
 }
 
 function GooninatorDialog(props: GooninatorDialogProps) {
-  const flipflip = FlipFlipService.getInstance()
   const [importType, setImportType] = useState(GT.tumblr)
   const [importURL, setImportURL] = useState('')
   const [rootDir, setRootDir] = useState('')
@@ -49,28 +47,31 @@ function GooninatorDialog(props: GooninatorDialogProps) {
     setImportType(e.target.value)
   }
 
-  const onURLChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const onURLChange = (
+    e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     setImportURL(e.target.value)
   }
 
   const onRootChange = async () => {
-    let result = await flipflip.api.openDirectory()
-    if (!result || !result.length) return;
+    let result = await flipflip().api.openDirectory()
+    if (!result || !result.length) return
     setRootDir(result[0])
   }
 
   const onImportURL = () => {
-    props.onImportURL(importType, new MouseEvent(''), importURL, rootDir);
-    props.onClose();
+    props.onImportURL(importType, new MouseEvent(''), importURL, rootDir)
+    props.onClose()
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Dialog
       open={props.open}
       onClose={props.onClose}
       aria-labelledby="url-import-title"
-      aria-describedby="url-import-description">
+      aria-describedby="url-import-description"
+    >
       <DialogTitle id="url-import-title">Import URL</DialogTitle>
       <DialogContent>
         <DialogContentText id="remove-all-description">
@@ -83,14 +84,16 @@ function GooninatorDialog(props: GooninatorDialogProps) {
           placeholder="Paste URL Here"
           margin="dense"
           value={importURL}
-          onChange={onURLChange} />
+          onChange={onURLChange}
+        />
         <div className={classes.root}>
           <FormControl variant="standard">
             <InputLabel>Import as</InputLabel>
             <Select
               variant="standard"
               value={importType}
-              onChange={onTypeChange}>
+              onChange={onTypeChange}
+            >
               <MenuItem value={GT.tumblr}>Tumblr Blogs</MenuItem>
               <MenuItem value={GT.local}>Local Directories</MenuItem>
             </Select>
@@ -101,8 +104,9 @@ function GooninatorDialog(props: GooninatorDialogProps) {
               fullWidth
               label="Parent Directory"
               value={rootDir}
-              InputProps={{readOnly: true}}
-              onClick={onRootChange} />
+              InputProps={{ readOnly: true }}
+              onClick={onRootChange}
+            />
           </Collapse>
         </div>
       </DialogContent>
@@ -111,15 +115,19 @@ function GooninatorDialog(props: GooninatorDialogProps) {
           Cancel
         </Button>
         <Button
-          disabled={!importURL.match("^https?://") || (importType == GT.local && rootDir.length == 0)}
+          disabled={
+            !importURL.match('^https?://') ||
+            (importType == GT.local && rootDir.length == 0)
+          }
           onClick={onImportURL}
-          color="primary">
+          color="primary"
+        >
           Import
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }
 
-(GooninatorDialog as any).displayName="GooninatorDialog";
-export default withStyles(styles)(GooninatorDialog as any);
+;(GooninatorDialog as any).displayName = 'GooninatorDialog'
+export default GooninatorDialog

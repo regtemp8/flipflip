@@ -1,7 +1,7 @@
 import React from 'react'
-import clsx from 'clsx'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { cx } from '@emotion/css'
+import { makeStyles } from 'tss-react/mui'
+
 import {
   Grid,
   Collapse,
@@ -25,20 +25,19 @@ import { selectAppLastRouteIsPlayer } from '../../store/app/selectors'
 import { setOverlayOpacity } from '../../store/overlay/slice'
 import { changeOverlaySceneID } from '../../store/overlay/thunks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    noPadding: {
-      padding: '0 !important'
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    selectText: {
-      color: theme.palette.text.secondary
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  noPadding: {
+    padding: '0 !important'
+  },
+  fullWidth: {
+    width: '100%'
+  },
+  selectText: {
+    color: theme.palette.text.secondary
+  }
+}))
 
-export interface OverlayCardProps extends WithStyles<typeof styles> {
+export interface OverlayCardProps {
   overlayID: number
   enabled: boolean
   onRemove: () => void
@@ -51,10 +50,10 @@ function OverlayCard(props: OverlayCardProps) {
   const regenerate = useAppSelector(selectOverlayRegenerate(props.overlayID))
   const invalid = useAppSelector(selectOverlayIsInvalid(props.overlayID))
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <React.Fragment key={props.overlayID}>
-      <Grid item xs={12} className={clsx(!props.enabled && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!props.enabled && classes.noPadding)}>
         <Collapse in={props.enabled} className={classes.fullWidth}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} sm={sidebar ? 12 : 5}>
@@ -94,7 +93,7 @@ function OverlayCard(props: OverlayCardProps) {
           </Grid>
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(!props.enabled && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!props.enabled && classes.noPadding)}>
         <Collapse in={props.enabled} className={classes.fullWidth}>
           <Divider />
         </Collapse>
@@ -104,4 +103,4 @@ function OverlayCard(props: OverlayCardProps) {
 }
 
 ;(OverlayCard as any).displayName = 'OverlayCard'
-export default withStyles(styles)(OverlayCard as any)
+export default OverlayCard

@@ -37,7 +37,7 @@ import {
   selectScenePanning,
   selectSceneFadeInOut
 } from '../../store/scene/selectors'
-import { Box } from '@mui/system'
+import { Box } from '@mui/material'
 import {
   selectPlayerFirstImageLoaded,
   selectPlayerHasStarted,

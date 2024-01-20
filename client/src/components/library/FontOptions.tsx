@@ -1,7 +1,6 @@
 import { Collapse, Grid, InputAdornment, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { type FontSettingsType } from '../../store/captionScript/FontSettings'
 import ColorPicker from '../config/ColorPicker'
@@ -27,8 +26,7 @@ import {
 } from '../../store/captionScript/selectors'
 import { useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     fullWidth: {
       width: '100%'
     },
@@ -46,16 +44,16 @@ const styles = (theme: Theme) =>
     fontProgress: {
       position: 'absolute'
     }
-  })
+  }))
 
-export interface FontOptionsProps extends WithStyles<typeof styles> {
+export interface FontOptionsProps {
   name: string
   captionScriptID: number
   type: FontSettingsType
 }
 
 function FontOptions(props: FontOptionsProps) {
-  const classes = props.classes
+  const {classes} = useStyles()
   const border = useAppSelector(
     selectCaptionScriptFontSettingsBorder(props.captionScriptID, props.type)
   )
@@ -167,4 +165,4 @@ function FontOptions(props: FontOptionsProps) {
 }
 
 ;(FontOptions as any).displayName = 'FontOptions'
-export default withStyles(styles)(FontOptions as any)
+export default FontOptions
