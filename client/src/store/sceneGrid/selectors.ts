@@ -1,15 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { type RootState } from '../store'
-import { type EntryState } from '../EntryState'
+import { getEntry } from '../EntryState'
 import type SceneGrid from './SceneGrid'
 import { getAppGrids } from '../app/selectors'
 
-export const getSceneGrid = (state: EntryState<SceneGrid>, id: number) => {
-  return state.entries[id]
-}
-
 export const selectSceneGridName = (id: number) => {
-  return (state: RootState) => getSceneGrid(state.sceneGrid, id).name || ''
+  return (state: RootState) => getEntry(state.sceneGrid, id).name || ''
 }
 
 export const selectSceneGridCellSceneID = (
@@ -18,7 +14,7 @@ export const selectSceneGridCellSceneID = (
   col: number
 ) => {
   return (state: RootState) => {
-    const grid = getSceneGrid(state.sceneGrid, id).grid
+    const grid = getEntry(state.sceneGrid, id).grid
     let cell = grid[row][col]
     const isSceneCopy = cell.sceneCopy && cell.sceneCopy.length > 0
     if (isSceneCopy) {
@@ -35,7 +31,7 @@ export const selectSceneGridCellMirror = (
   col: number
 ) => {
   return (state: RootState) =>
-    getSceneGrid(state.sceneGrid, id).grid[row][col].mirror
+    getEntry(state.sceneGrid, id).grid[row][col].mirror
 }
 
 export const selectSceneGridCellSceneCopy = (
@@ -44,7 +40,7 @@ export const selectSceneGridCellSceneCopy = (
   col: number
 ) => {
   return (state: RootState) => {
-    return getSceneGrid(state.sceneGrid, id).grid[row][col].sceneCopy
+    return getEntry(state.sceneGrid, id).grid[row][col].sceneCopy
   }
 }
 
@@ -54,7 +50,7 @@ export const selectSceneGridCellIsSceneCopy = (
   col: number
 ) => {
   return (state: RootState) => {
-    const sceneCopy = getSceneGrid(state.sceneGrid, id).grid[row][col].sceneCopy
+    const sceneCopy = getEntry(state.sceneGrid, id).grid[row][col].sceneCopy
     return sceneCopy && sceneCopy.length > 0
   }
 }
@@ -64,7 +60,7 @@ export const selectSceneGridCellMatchesSceneCopy = (
   sceneCopy: number[]
 ) => {
   return (state: RootState) => {
-    return getSceneGrid(state.sceneGrid, id).grid.find((r) =>
+    return getEntry(state.sceneGrid, id).grid.find((r) =>
       r.find(
         (c) =>
           c.sceneCopy[0] === sceneCopy[0] && c.sceneCopy[1] === sceneCopy[1]
@@ -79,7 +75,7 @@ export const selectSceneGridCellSceneName = (
   col: number
 ) => {
   return (state: RootState) => {
-    const grid = getSceneGrid(state.sceneGrid, id).grid
+    const grid = getEntry(state.sceneGrid, id).grid
     let cell = grid[row][col]
     const isSceneCopy = cell.sceneCopy && cell.sceneCopy.length > 0
     if (isSceneCopy) {
@@ -154,14 +150,14 @@ export const selectSceneGridCellColor = (
 
 export const selectSceneGridHeight = (id: number) => {
   return (state: RootState) => {
-    const grid = getSceneGrid(state.sceneGrid, id).grid
+    const grid = getEntry(state.sceneGrid, id).grid
     return grid && grid.length > 0 && grid[0].length > 0 ? grid.length : 1
   }
 }
 
 export const selectSceneGridWidth = (id: number) => {
   return (state: RootState) => {
-    const grid = getSceneGrid(state.sceneGrid, id).grid
+    const grid = getEntry(state.sceneGrid, id).grid
     return grid && grid.length > 0 && grid[0].length > 0 ? grid[0].length : 1
   }
 }

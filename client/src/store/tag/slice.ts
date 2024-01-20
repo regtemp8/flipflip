@@ -7,31 +7,37 @@ export const initialTagState: EntryState<Tag> = {
   nextID: 1,
   entries: {}
 }
-export const tagSlice = createSlice({
-  name: 'tags',
-  // `createSlice` will infer the state type from the `initialState` argument
-  initialState: initialTagState,
-  reducers: {
-    setTagSlice: (state, action: PayloadAction<EntryState<Tag>>) => {
-      setEntrySlice(state, action.payload)
-    },
-    setTag: (state, action: PayloadAction<Tag>) => {
-      if (!action.payload.name) {
-        throw new Error('tagSlice: tag must have a name')
-      }
 
-      setEntry(state, action.payload)
-    },
-    setTags: (state, action: PayloadAction<Tag[]>) => {
-      if (action.payload.find((s) => s.name === undefined) != null) {
-        throw new Error('tagSlice: tag must have a name')
-      }
+export default function createTagReducer(tagState?: EntryState<Tag>) {
+  return createTagSlice(tagState).reducer
+}
 
-      action.payload.forEach((s) => setEntry(state, s))
+function createTagSlice(tagState?: EntryState<Tag>) {
+  const initialState = tagState ?? initialTagState
+  return createSlice({
+    name: 'tags',
+    // `createSlice` will infer the state type from the `initialState` argument
+    initialState,
+    reducers: {
+      setTagSlice: (state, action: PayloadAction<EntryState<Tag>>) => {
+        setEntrySlice(state, action.payload)
+      },
+      setTag: (state, action: PayloadAction<Tag>) => {
+        if (!action.payload.name) {
+          throw new Error('tagSlice: tag must have a name')
+        }
+  
+        setEntry(state, action.payload)
+      },
+      setTags: (state, action: PayloadAction<Tag[]>) => {
+        if (action.payload.find((s) => s.name === undefined) != null) {
+          throw new Error('tagSlice: tag must have a name')
+        }
+  
+        action.payload.forEach((s) => setEntry(state, s))
+      }
     }
-  }
-})
+  })
+}
 
-export const { setTagSlice, setTag, setTags } = tagSlice.actions
-
-export default tagSlice.reducer
+export const { setTagSlice, setTag, setTags } = createTagSlice().actions

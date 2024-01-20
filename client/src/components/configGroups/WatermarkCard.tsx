@@ -7,8 +7,7 @@ import {
   type Theme
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { en, WC } from 'flipflip-common'
 import ColorPicker from '../config/ColorPicker'
@@ -36,17 +35,16 @@ import BaseSwitch from '../common/BaseSwitch'
 import BaseTextField from '../common/text/BaseTextField'
 import FontFamilySelect from '../common/FontFamilySelect'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     fullWidth: {
       width: '100%'
     }
-  })
+  }))
 
-function WatermarkCard(props: WithStyles<typeof styles>) {
+function WatermarkCard() {
   const watermark = useAppSelector(selectAppConfigGeneralSettingsWatermark())
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Grid container spacing={watermark ? 2 : 0} alignItems="center">
       <Grid item xs={12}>
@@ -178,4 +176,4 @@ function WatermarkCard(props: WithStyles<typeof styles>) {
 }
 
 ;(WatermarkCard as any).displayName = 'WatermarkCard'
-export default withStyles(styles)(WatermarkCard as any)
+export default WatermarkCard

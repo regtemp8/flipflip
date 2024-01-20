@@ -1,6 +1,6 @@
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { Grid, Collapse, MenuItem, type Theme } from '@mui/material'
-import { type WithStyles, createStyles, withStyles } from '@mui/styles'
+import { makeStyles } from 'tss-react/mui'
 import type ReduxProps from './ReduxProps'
 import { useAppSelector } from '../../store/hooks'
 import BaseSlider from './slider/BaseSlider'
@@ -8,29 +8,28 @@ import BaseSelect from './BaseSelect'
 import BaseSwitch from './BaseSwitch'
 import { RootState } from '../../store/store'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    noPadding: {
-      padding: '0 !important'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  noPadding: {
+    padding: '0 !important'
+  }
+}))
 
-export interface MoveCardProps extends WithStyles<typeof styles> {
+export interface MoveCardProps {
   sidebar: boolean
   enabled: boolean
   values: any
@@ -50,7 +49,7 @@ function MoveCard(props: MoveCardProps) {
   const imageWidthSelector: (state: RootState) => boolean =
     props.imageWidth?.selector ?? ((state) => false)
   const imageWidth = useAppSelector(imageWidthSelector)
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid
@@ -60,7 +59,7 @@ function MoveCard(props: MoveCardProps) {
       >
         <Collapse
           in={props.enabled}
-          className={clsx(classes.fullWidth, classes.paddingLeft)}
+          className={cx(classes.fullWidth, classes.paddingLeft)}
         >
           <BaseSelect
             label={props.label}
@@ -82,13 +81,13 @@ function MoveCard(props: MoveCardProps) {
         item
         xs={12}
         sm={!props.sidebar && type !== props.values.none ? 7 : 12}
-        className={clsx(
+        className={cx(
           (!props.enabled || type === props.values.none) && classes.noPadding
         )}
       >
         <Collapse
           in={props.enabled && !imageWidth && type !== props.values.none}
-          className={clsx(classes.fullWidth, classes.paddingLeft)}
+          className={cx(classes.fullWidth, classes.paddingLeft)}
         >
           <BaseSwitch
             label="Randomize"
@@ -100,7 +99,7 @@ function MoveCard(props: MoveCardProps) {
         {props.imageWidth ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
-            className={clsx(classes.fullWidth, classes.paddingLeft)}
+            className={cx(classes.fullWidth, classes.paddingLeft)}
           >
             <BaseSwitch
               label="Use Img Width"
@@ -114,7 +113,7 @@ function MoveCard(props: MoveCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           (!props.enabled || type === props.values.none) && classes.noPadding
         )}
       >
@@ -188,4 +187,4 @@ function MoveCard(props: MoveCardProps) {
   )
 }
 
-export default withStyles(styles)(MoveCard as any)
+export default MoveCard

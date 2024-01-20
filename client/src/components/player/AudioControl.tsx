@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Sound from 'react-sound'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Collapse,
@@ -12,8 +12,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import Forward10Icon from '@mui/icons-material/Forward10'
 import Forward5Icon from '@mui/icons-material/Forward5'
@@ -49,20 +48,19 @@ import {
   selectAudioNextSceneAtEnd
 } from '../../store/audio/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    noTransition: {
-      transition: 'unset'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  noTransition: {
+    transition: 'unset'
+  }
+}))
 
-export interface AudioControlProps extends WithStyles<typeof styles> {
+export interface AudioControlProps {
   sceneID: number
   audioID: number
   audioEnabled: boolean
@@ -279,7 +277,7 @@ function AudioControl(props: AudioControlProps) {
     setPosition(Math.min(position + amount, duration))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const playStatus = playing
     ? (Sound as any).status.PLAYING
     : (Sound as any).status.PAUSED
@@ -321,7 +319,7 @@ function AudioControl(props: AudioControlProps) {
       <Grid
         item
         xs={12}
-        className={clsx(!props.audioEnabled && classes.noPadding)}
+        className={cx(!props.audioEnabled && classes.noPadding)}
       >
         <Collapse in={props.audioEnabled} className={classes.fullWidth}>
           <Grid container spacing={2} alignItems="center">
@@ -431,4 +429,4 @@ function AudioControl(props: AudioControlProps) {
 }
 
 ;(AudioControl as any).displayName = 'AudioControl'
-export default withStyles(styles)(AudioControl as any)
+export default AudioControl

@@ -4,7 +4,7 @@ import React, {
   type MouseEvent,
   type ChangeEvent
 } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import wretch from 'wretch'
 
 import {
@@ -42,8 +42,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -67,7 +66,7 @@ import SelectAllIcon from '@mui/icons-material/SelectAll'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { getSourceType, en, AF, LT, MO, PR, SF, SP, ST } from 'flipflip-common'
 import { getCachePath, getLocalPath } from '../../data/utils'
 import BatchClipDialog from './BatchClipDialog'
@@ -135,269 +134,267 @@ import { selectLibrarySources } from '../../store/librarySource/selectors'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 0,
+    minHeight: 64
+  },
+  appBarSpacerCollapse: {
+    width: '100%'
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  backButton: {
+    float: 'left'
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '20%'
+  },
+  headerRight: {
+    flexBasis: '20%',
+    justifyContent: 'flex-end',
+    display: 'flex'
+  },
+  searchBar: {
+    float: 'right',
+    display: 'flex',
+    maxWidth: '100%'
+  },
+  searchCount: {
+    color: theme.palette.primary.contrastText,
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  displayCount: {
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperClose: {
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
     },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacerWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: 0,
-      minHeight: 64
-    },
-    appBarSpacerCollapse: {
-      width: '100%'
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    backButton: {
-      float: 'left'
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '20%'
-    },
-    headerRight: {
-      flexBasis: '20%',
-      justifyContent: 'flex-end',
-      display: 'flex'
-    },
-    searchBar: {
-      float: 'right',
-      display: 'flex',
-      maxWidth: '100%'
-    },
-    searchCount: {
-      color: theme.palette.primary.contrastText,
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    displayCount: {
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerPaperClose: {
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      },
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawerPaperHidden: {
-      width: 0,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawer: {
-      position: 'absolute'
-    },
-    drawerSpacer: {
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down('sm')]: {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    chip: {
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    chipClose: {
-      opacity: 0,
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      padding: theme.spacing(0),
-      overflow: 'hidden',
-      flexGrow: 1
-    },
-    containerNotEmpty: {
-      display: 'flex'
-    },
-    addMenuButton: {
-      backgroundColor: theme.palette.primary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    sortMenuButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 80,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectAllButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectNoneButton: {
-      backgroundColor: theme.palette.secondary.light,
-      margin: 0,
-      top: 'auto',
-      right: 180,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    importBadge: {
-      top: 'auto',
-      right: 30,
-      bottom: 50,
-      left: 'auto',
-      position: 'fixed',
-      zIndex: theme.zIndex.fab + 1
-    },
-    addButton: {
-      backgroundColor: theme.palette.primary.main,
-      margin: 0,
-      top: 'auto',
-      right: 28,
-      bottom: 25,
-      left: 'auto',
-      position: 'fixed',
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    addURLButton: {
-      marginBottom: 60
-    },
-    addDirectoryButton: {
-      marginBottom: 115
-    },
-    addVideoButton: {
-      marginBottom: 170
-    },
-    addPiwigoButton: {
-      marginBottom: 225
-    },
-    removeAllButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    addButtonClose: {
-      marginBottom: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration:
-          theme.transitions.duration.leavingScreen +
-          theme.transitions.duration.standard
-      })
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    sortMenu: {
-      width: 200
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdrop: {
-      zIndex: theme.zIndex.modal,
-      height: '100%',
-      width: '100%'
-    },
-    hidden: {
-      opacity: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: 100
-      })
-    },
-    noScroll: {
-      overflow: 'visible'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawerPaperHidden: {
+    width: 0,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawer: {
+    position: 'absolute'
+  },
+  drawerSpacer: {
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
     }
-  })
+  },
+  drawerButton: {
+    backgroundColor: theme.palette.primary.main,
+    minHeight: theme.spacing(6),
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+  drawerIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  chip: {
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  chipClose: {
+    opacity: 0,
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    padding: theme.spacing(0),
+    overflow: 'hidden',
+    flexGrow: 1
+  },
+  containerNotEmpty: {
+    display: 'flex'
+  },
+  addMenuButton: {
+    backgroundColor: theme.palette.primary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  sortMenuButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 80,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectAllButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectNoneButton: {
+    backgroundColor: theme.palette.secondary.light,
+    margin: 0,
+    top: 'auto',
+    right: 180,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  importBadge: {
+    top: 'auto',
+    right: 30,
+    bottom: 50,
+    left: 'auto',
+    position: 'fixed',
+    zIndex: theme.zIndex.fab + 1
+  },
+  addButton: {
+    backgroundColor: theme.palette.primary.main,
+    margin: 0,
+    top: 'auto',
+    right: 28,
+    bottom: 25,
+    left: 'auto',
+    position: 'fixed',
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  addURLButton: {
+    marginBottom: 60
+  },
+  addDirectoryButton: {
+    marginBottom: 115
+  },
+  addVideoButton: {
+    marginBottom: 170
+  },
+  addPiwigoButton: {
+    marginBottom: 225
+  },
+  removeAllButton: {
+    backgroundColor: theme.palette.error.main,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  addButtonClose: {
+    marginBottom: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration:
+        theme.transitions.duration.leavingScreen +
+        theme.transitions.duration.standard
+    })
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  sortMenu: {
+    width: 200
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    height: '100%',
+    width: '100%'
+  },
+  hidden: {
+    opacity: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: 100
+    })
+  },
+  noScroll: {
+    overflow: 'visible'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-function Library(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function Library() {
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
   const library = useAppSelector(selectLibrarySources())
@@ -457,7 +454,9 @@ function Library(props: WithStyles<typeof styles>) {
       e.altKey &&
       (e.key === 'p' || e.key === 'π')
     ) {
-      setOpenMenu(openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport)
+      setOpenMenu(
+        openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport
+      )
     } else if (
       !e.shiftKey &&
       !e.ctrlKey &&
@@ -495,7 +494,7 @@ function Library(props: WithStyles<typeof styles>) {
         let files = []
         let error: NodeJS.ErrnoException | undefined
         try {
-          files = await flipflip.api.readdir(cachePath)
+          files = await flipflip().api.readdir(cachePath)
         } catch (err: any) {
           // TODO does catch still work?
           error = err
@@ -508,7 +507,7 @@ function Library(props: WithStyles<typeof styles>) {
             cachingDirectory,
             source.url as string
           )) as string
-          await flipflip.api.move(cachePath, localPath)
+          await flipflip().api.move(cachePath, localPath)
           dispatch(
             setLibrarySourceMove({
               id: source.id,
@@ -632,13 +631,13 @@ function Library(props: WithStyles<typeof styles>) {
       const fileType = getSourceType(url)
       try {
         if (fileType === ST.local) {
-          flipflip.api.rimrafSync(url)
+          flipflip().api.rimrafSync(url)
         } else if (
           fileType === ST.video ||
           fileType === ST.playlist ||
           fileType === ST.list
         ) {
-          await flipflip.api.unlink(url)
+          await flipflip().api.unlink(url)
         }
       } catch (e) {
         console.error(e)
@@ -656,7 +655,7 @@ function Library(props: WithStyles<typeof styles>) {
   }
 
   const onOpenImportFile = async () => {
-    const filePath = await flipflip.api.openJsonFile()
+    const filePath = await flipflip().api.openJsonFile()
     if (filePath) {
       setImportFile(filePath)
     }
@@ -687,7 +686,7 @@ function Library(props: WithStyles<typeof styles>) {
           dispatch(systemMessage('Error accessing URL'))
         })
     } else {
-      const text = await flipflip.api.readTextFile(importFile)
+      const text = await flipflip().api.readTextFile(importFile)
       dispatch(importLibrary(JSON.parse(text)))
       onCloseDialog()
     }
@@ -760,7 +759,7 @@ function Library(props: WithStyles<typeof styles>) {
     redditAuthorized ||
     twitterAuthorized ||
     instagramConfigured
-  const classes = props.classes
+  const { classes } = useStyles()
   const open = drawerOpen
   const cancelProgressMessage = getCancelProgressMessage()
 
@@ -769,9 +768,9 @@ function Library(props: WithStyles<typeof styles>) {
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
-          tutorial === LT.toolbar && clsx(classes.backdropTop, classes.disable)
+          tutorial === LT.toolbar && cx(classes.backdropTop, classes.disable)
         )}
       >
         <Toolbar className={classes.headerBar}>
@@ -806,7 +805,7 @@ function Library(props: WithStyles<typeof styles>) {
 
           <div className={classes.headerRight}>
             <div
-              className={clsx(
+              className={cx(
                 classes.searchBar,
                 tutorial === LT.toolbar && classes.highlight
               )}
@@ -840,7 +839,7 @@ function Library(props: WithStyles<typeof styles>) {
       </AppBar>
 
       <Drawer
-        className={clsx(
+        className={cx(
           classes.drawer,
           (tutorial === LT.sidebar1 ||
             tutorial === LT.sidebar2 ||
@@ -850,7 +849,7 @@ function Library(props: WithStyles<typeof styles>) {
         )}
         variant="permanent"
         classes={{
-          paper: clsx(
+          paper: cx(
             classes.drawerPaper,
             !open && classes.drawerPaperClose,
             specialMode && classes.drawerPaperHidden
@@ -858,7 +857,7 @@ function Library(props: WithStyles<typeof styles>) {
         }}
         open={drawerOpen}
       >
-        <div className={clsx(!open && classes.appBarSpacerWrapper)}>
+        <div className={cx(!open && classes.appBarSpacerWrapper)}>
           <Collapse in={!open} className={classes.appBarSpacerCollapse}>
             <div className={classes.appBarSpacer} />
           </Collapse>
@@ -866,7 +865,7 @@ function Library(props: WithStyles<typeof styles>) {
 
         <ListItem className={classes.drawerButton}>
           <IconButton
-            className={clsx(tutorial === LT.sidebar1 && classes.highlight)}
+            className={cx(tutorial === LT.sidebar1 && classes.highlight)}
             onClick={onToggleDrawer}
             size="large"
           >
@@ -876,7 +875,7 @@ function Library(props: WithStyles<typeof styles>) {
 
         <Divider />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
             <ListItemButton onClick={() => dispatch(manageTags())}>
               <ListItemIcon>
@@ -885,7 +884,7 @@ function Library(props: WithStyles<typeof styles>) {
               <ListItemText primary="Manage Tags" />
               {tags.length > 0 && (
                 <Chip
-                  className={clsx(classes.chip, !open && classes.chipClose)}
+                  className={cx(classes.chip, !open && classes.chipClose)}
                   label={tags.length}
                   color="primary"
                   size="small"
@@ -939,7 +938,7 @@ function Library(props: WithStyles<typeof styles>) {
           <React.Fragment>
             <Divider />
 
-            <div className={clsx(tutorial != null && classes.disable)}>
+            <div className={cx(tutorial != null && classes.disable)}>
               <Collapse in={open}>
                 <ListSubheader inset>Import Remote Sources</ListSubheader>
               </Collapse>
@@ -1005,7 +1004,7 @@ function Library(props: WithStyles<typeof styles>) {
 
         <Divider />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip
             disableInteractive
             title={'Identify sources which are not accessible'}
@@ -1081,7 +1080,7 @@ function Library(props: WithStyles<typeof styles>) {
 
         <div className={classes.fill} />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip
             disableInteractive
             title={drawerOpen ? '' : 'Export Library'}
@@ -1113,11 +1112,11 @@ function Library(props: WithStyles<typeof styles>) {
 
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        <div className={clsx(classes.root, classes.fill)}>
+        <div className={cx(classes.root, classes.fill)}>
           {!specialMode && <div className={classes.drawerSpacer} />}
           <Container
             maxWidth={false}
-            className={clsx(
+            className={cx(
               classes.container,
               displaySources.length > 0 && classes.containerNotEmpty
             )}
@@ -1389,7 +1388,7 @@ function Library(props: WithStyles<typeof styles>) {
               placement="left"
             >
               <Fab
-                className={clsx(
+                className={cx(
                   classes.addButton,
                   classes.addPiwigoButton,
                   openMenu !== MO.new && classes.addButtonClose,
@@ -1410,7 +1409,7 @@ function Library(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addVideoButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1432,7 +1431,7 @@ function Library(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addDirectoryButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1454,7 +1453,7 @@ function Library(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addURLButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1471,7 +1470,7 @@ function Library(props: WithStyles<typeof styles>) {
             </Fab>
           </Tooltip>
           <Fab
-            className={clsx(
+            className={cx(
               classes.addMenuButton,
               openMenu === MO.new && classes.backdropTop
             )}
@@ -1648,4 +1647,4 @@ function Library(props: WithStyles<typeof styles>) {
 }
 
 ;(Library as any).displayName = 'Library'
-export default withStyles(styles)(Library as any)
+export default Library

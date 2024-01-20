@@ -1,15 +1,23 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "target": "ESNext",
+    "strict": false,
     "allowJs": true,
-    "checkJs": false,
-    "module": "NodeNext",
+    "module": "commonjs",
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "target": "ES6",
-    "moduleResolution": "NodeNext",
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
     "sourceMap": true,
-    "outDir": "dist"
+    "baseUrl": ".",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+    "types": []
   },
-  "lib": ["es2015"],
-  "include": ["src/**/*.ts", "**/*.js", "**/*.cjs"]
+  "include": ["src/**/*"]
 }

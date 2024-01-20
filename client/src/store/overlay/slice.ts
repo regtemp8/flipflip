@@ -1,14 +1,14 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type Overlay from './Overlay'
 import { newOverlay } from './Overlay'
-import { getOverlay } from './selectors'
 import {
   type EntryState,
   type EntryUpdate,
   createEntry,
   deleteEntry,
+  getEntry,
   setEntry,
-  setEntrySlice
+  setEntrySlice,
 } from '../EntryState'
 
 export const initialOverlayState: EntryState<Overlay> = {
@@ -16,34 +16,43 @@ export const initialOverlayState: EntryState<Overlay> = {
   nextID: 1,
   entries: {}
 }
-export const overlaySlice = createSlice({
-  name: 'overlays',
-  // `createSlice` will infer the state type from the `initialState` argument
-  initialState: initialOverlayState,
-  reducers: {
-    setOverlaySlice: (state, action: PayloadAction<EntryState<Overlay>>) => {
-      setEntrySlice(state, action.payload)
-    },
-    setOverlay: (state, action: PayloadAction<Overlay>) => {
-      setEntry(state, action.payload)
-    },
-    createOverlay: (state, action: PayloadAction<number>) => {
-      createEntry(state, newOverlay({ id: action.payload }))
-    },
-    deleteOverlay: (state, action: PayloadAction<number>) => {
-      deleteEntry(state, action.payload)
-    },
-    setOverlayOpacity: (state, action: PayloadAction<EntryUpdate<number>>) => {
-      getOverlay(state, action.payload.id).opacity = action.payload.value
-    },
-    setOverlaySceneID: (state, action: PayloadAction<EntryUpdate<number>>) => {
-      getOverlay(state, action.payload.id).sceneID = action.payload.value
-    }
-  }
-})
 
+export default function createOverlayReducer(overlayState?: EntryState<Overlay>) {
+  return createOverlaySlice(overlayState).reducer
+}
+
+function createOverlaySlice(overlayState?: EntryState<Overlay>) {
+  const initialState = overlayState ?? initialOverlayState
+  return createSlice({
+    name: 'overlays',
+    // `createSlice` will infer the state type from the `initialState` argument
+    initialState,
+    reducers: {
+      setOverlaySlice: (state, action: PayloadAction<EntryState<Overlay>>) => {
+        setEntrySlice(state, action.payload)
+      },
+      setOverlay: (state, action: PayloadAction<Overlay>) => {
+        setEntry(state, action.payload)
+      },
+      createOverlay: (state, action: PayloadAction<number>) => {
+        createEntry(state, newOverlay({ id: action.payload }))
+      },
+      deleteOverlay: (state, action: PayloadAction<number>) => {
+        deleteEntry(state, action.payload)
+      },
+      setOverlayOpacity: (state, action: PayloadAction<EntryUpdate<number>>) => {
+        getEntry(state, action.payload.id).opacity = action.payload.value
+      },
+      setOverlaySceneID: (state, action: PayloadAction<EntryUpdate<number>>) => {
+        getEntry(state, action.payload.id).sceneID = action.payload.value
+      }
+    }
+  })
+}
+
+const slice = createOverlaySlice()
 export const setOverlayOpacity = (id: number) => (value: number) =>
-  overlaySlice.actions.setOverlayOpacity({ id, value })
+  slice.actions.setOverlayOpacity({ id, value })
 
 export const {
   setOverlaySlice,
@@ -51,6 +60,4 @@ export const {
   createOverlay,
   deleteOverlay,
   setOverlaySceneID
-} = overlaySlice.actions
-
-export default overlaySlice.reducer
+} = slice.actions

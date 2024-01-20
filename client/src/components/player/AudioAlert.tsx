@@ -13,14 +13,13 @@ import {
 } from 'react-spring'
 
 import { type Theme, Typography } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import { grey } from '@mui/material/colors'
 
 import type Audio from '../../store/audio/Audio'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     alert: {
       float: 'left',
       margin: theme.spacing(5),
@@ -55,7 +54,7 @@ const styles = (theme: Theme) =>
         paddingTop: theme.spacing(4)
       }
     }
-  })
+  }))
 
 interface AudioAlertLayerProps {
   visible: boolean
@@ -104,7 +103,7 @@ function AudioAlertLayer(props: PropsWithChildren<AudioAlertLayerProps>) {
   )
 }
 
-export interface AudioAlertProps extends WithStyles<typeof styles> {
+export interface AudioAlertProps {
   audio: Audio
 }
 
@@ -138,7 +137,7 @@ function AudioAlert(props: AudioAlertProps) {
     setVisible(false)
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   if (!props.audio) return <React.Fragment />
 
   return (
@@ -167,4 +166,4 @@ function AudioAlert(props: AudioAlertProps) {
 }
 
 ;(AudioAlert as any).displayName = 'AudioAlert'
-export default withStyles(styles)(AudioAlert as any)
+export default AudioAlert

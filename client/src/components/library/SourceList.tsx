@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Button,
@@ -24,8 +24,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import FolderIcon from '@mui/icons-material/Folder'
 
@@ -92,54 +91,53 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSelect from '../common/BaseSelect'
 import { RootState } from '../../store/store'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    marginRight: {
-      marginRight: theme.spacing(1)
-    },
-    blacklistInput: {
-      minWidth: 550,
-      minHeight: 300,
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      overflowY: 'auto !important' as any
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    wordWrap: {
-      wordWrap: 'break-word'
-    },
-    arrow: {
-      position: 'absolute',
-      bottom: 20,
-      right: 35,
-      fontSize: 220,
-      transform: 'rotateY(0deg) rotate(45deg)'
-    },
-    arrowMessage: {
-      position: 'absolute',
-      bottom: 260,
-      right: 160
-    },
-    weightMenu: {
-      width: theme.spacing(10)
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  marginRight: {
+    marginRight: theme.spacing(1)
+  },
+  blacklistInput: {
+    minWidth: 550,
+    minHeight: 300,
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    overflowY: 'auto !important' as any
+  },
+  fullWidth: {
+    width: '100%'
+  },
+  wordWrap: {
+    wordWrap: 'break-word'
+  },
+  arrow: {
+    position: 'absolute',
+    bottom: 20,
+    right: 35,
+    fontSize: 220,
+    transform: 'rotateY(0deg) rotate(45deg)'
+  },
+  arrowMessage: {
+    position: 'absolute',
+    bottom: 260,
+    right: 160
+  },
+  weightMenu: {
+    width: theme.spacing(10)
+  }
+}))
 
-interface BlacklistDialogProps extends WithStyles<typeof styles> {
+interface BlacklistDialogProps {
   sourceID: number
   onClose: () => void
   onFinish: (url: string, blacklist: string) => void
@@ -253,7 +251,7 @@ function DeleteDialog(props: DeleteDialogProps) {
   )
 }
 
-interface ClipMenuProps extends WithStyles<typeof styles> {
+interface ClipMenuProps {
   sourceID: number
 }
 
@@ -275,7 +273,7 @@ function ClipMenu(props: ClipMenuProps) {
   )
 }
 
-interface ClipMenuItemProps extends WithStyles<typeof styles> {
+interface ClipMenuItemProps {
   sourceID: number
   clipID: number
   index: number
@@ -315,13 +313,12 @@ function ClipMenuItem(props: ClipMenuItemProps) {
   )
 }
 
-interface SourceOptionsDialogProps extends WithStyles<typeof styles> {
+interface SourceOptionsDialogProps {
   sourceID: number
   onClose: () => void
 }
 
 function SourceOptionsDialog(props: SourceOptionsDialogProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const redditFunc = useAppSelector(
     selectLibrarySourceRedditFunc(props.sourceID)
@@ -330,7 +327,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
   const type = url && getSourceType(url)
 
   const onOpenSubtitleFile = async () => {
-    const subtitleFile = await flipflip.api.openSubtitleFile()
+    const subtitleFile = await flipflip().api.openSubtitleFile()
     if (!subtitleFile) return
     dispatch(setLibrarySourceSubtitleFile(props.sourceID)(subtitleFile))
   }
@@ -471,7 +468,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
   )
 }
 
-export interface SourceListProps extends WithStyles<typeof styles> {
+export interface SourceListProps {
   isLibrary?: boolean
   showHelp: boolean
   sources: number[]
@@ -481,7 +478,6 @@ export interface SourceListProps extends WithStyles<typeof styles> {
 }
 
 function SourceList(props: SourceListProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const { isWin32, pathSep } = useAppSelector(selectConstants())
   const cachingDirectory = useAppSelector(selectAppConfigCachingDirectory())
@@ -572,13 +568,13 @@ function SourceList(props: SourceListProps) {
   const onFinishDelete = async (sourceID: number, sourceURL: string) => {
     const fileType = getSourceType(sourceURL)
     if (fileType === ST.local) {
-      flipflip.api.rimrafSync(sourceURL)
+      flipflip().api.rimrafSync(sourceURL)
     } else if (
       fileType === ST.video ||
       fileType === ST.playlist ||
       fileType === ST.list
     ) {
-      await flipflip.api.unlink(sourceURL)
+      await flipflip().api.unlink(sourceURL)
     }
     onRemove(sourceID)
     onCloseDeleteDialog()
@@ -651,7 +647,7 @@ function SourceList(props: SourceListProps) {
   }
 
   const onFinishClean = () => {
-    flipflip.api.rimrafSync(cachePath as string)
+    flipflip().api.rimrafSync(cachePath as string)
     onCloseClean()
   }
 
@@ -769,7 +765,7 @@ function SourceList(props: SourceListProps) {
     return <SortableItem index={index} value={props} />
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   console.log('SOURCES UNDEFINED: ' + (props.sources === undefined))
   if (props.sources.length === 0) {
     return (
@@ -817,7 +813,7 @@ function SourceList(props: SourceListProps) {
           <List
             id="sortable-list"
             disablePadding
-            className={clsx(
+            className={cx(
               (tutorial === SDT.source ||
                 tutorial === SDT.sourceAvatar ||
                 tutorial === SDT.sourceTitle ||
@@ -949,4 +945,4 @@ function SourceList(props: SourceListProps) {
 }
 
 ;(SourceList as any).displayName = 'SourceList'
-export default withStyles(styles)(SourceList as any)
+export default SourceList

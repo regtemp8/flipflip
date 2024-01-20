@@ -1,5 +1,5 @@
 import { type MouseEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Button,
@@ -18,8 +18,7 @@ import {
   Tooltip
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ClearIcon from '@mui/icons-material/Clear'
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
@@ -40,22 +39,20 @@ import {
   selectAppConfigCachingDirectory,
   selectAppConfigCachingMaxSize
 } from '../../store/app/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  }
+}))
 
-function CacheCard(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function CacheCard() {
   const dispatch = useAppDispatch()
   const { isWin32 } = useAppSelector(selectConstants())
   const maxSize = useAppSelector(selectAppConfigCachingMaxSize())
@@ -73,8 +70,8 @@ function CacheCard(props: WithStyles<typeof styles>) {
   const calculateCacheSize = async () => {
     const cachePath = (await getCachePath(directory)) as string
     if (maxSize !== 0) {
-      if (await flipflip.api.pathExists(cachePath)) {
-        const size = await flipflip.api.getFolderSize(cachePath)
+      if (await flipflip().api.pathExists(cachePath)) {
+        const size = await flipflip().api.getFolderSize(cachePath)
         const mbSize = size / 1024 / 1024
         setCacheSize(mbSize.toFixed(2))
       }
@@ -92,7 +89,7 @@ function CacheCard(props: WithStyles<typeof styles>) {
   }
 
   const onFinishClearCache = async () => {
-    await flipflip.api.rimrafSync(cachePath)
+    await flipflip().api.rimrafSync(cachePath)
     setCacheSize('--')
     await calculateCacheSize()
   }
@@ -114,7 +111,7 @@ function CacheCard(props: WithStyles<typeof styles>) {
     window.open(url, '_blank')?.focus()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container spacing={enabled ? 2 : 0} alignItems="center">
       <Grid item xs={12}>
@@ -130,7 +127,7 @@ function CacheCard(props: WithStyles<typeof styles>) {
           <Grid item>
             <Collapse
               in={enabled}
-              className={clsx(classes.fullWidth, classes.paddingLeft)}
+              className={cx(classes.fullWidth, classes.paddingLeft)}
             >
               <Tooltip disableInteractive title="Clear Cache">
                 <IconButton
@@ -233,4 +230,4 @@ function CacheCard(props: WithStyles<typeof styles>) {
 }
 
 ;(CacheCard as any).displayName = 'CacheCard'
-export default withStyles(styles)(CacheCard as any)
+export default CacheCard

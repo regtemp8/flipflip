@@ -14,15 +14,13 @@ import {
   type Theme
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { getSourceType, ST } from 'flipflip-common'
 import { useAppDispatch } from '../../store/hooks'
 import { clipLibrarySource } from '../../store/app/thunks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     noScroll: {
       overflow: 'visible'
     },
@@ -30,9 +28,9 @@ const styles = (theme: Theme) =>
       position: 'absolute',
       right: 20
     }
-  })
+  }))
 
-export interface BatchClipDialogProps extends WithStyles<typeof styles> {
+export interface BatchClipDialogProps {
   open: boolean
   selected: string[]
   onCloseDialog: () => void
@@ -112,7 +110,7 @@ function BatchClipDialog(props: BatchClipDialogProps) {
     props.onCloseDialog()
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Dialog
       open={props.open}
@@ -192,4 +190,4 @@ function BatchClipDialog(props: BatchClipDialogProps) {
 }
 
 ;(BatchClipDialog as any).displayName = 'BatchClipDialog'
-export default withStyles(styles)(BatchClipDialog as any)
+export default BatchClipDialog

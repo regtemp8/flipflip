@@ -100,7 +100,7 @@ import {
   selectSourceScraperAllURLs,
   selectSourceScraperSingleImage
 } from '../../store/sourceScraper/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 interface GifInfo {
   animated: boolean
@@ -135,7 +135,6 @@ interface ImagePlayerState {
 }
 
 export default function ImagePlayer(props: ImagePlayerProps) {
-  const flipflip = FlipFlipService.getInstance()
   const _hasStarted = useRef<boolean>(false)
   const _allURLs = useRef<Record<string, string[]>>()
   const _allPosts = useRef<Record<string, string>>()
@@ -1269,7 +1268,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       ) {
         const sourceCachePath = await getCachePath(cachingDirectory, source)
         const filePath = sourceCachePath + getFileName(url, pathSep)
-        const cachedAlready = await flipflip.api.pathExists(filePath)
+        const cachedAlready = await flipflip().api.pathExists(filePath)
         if (cachedAlready) {
           url = filePath
         }
@@ -1728,7 +1727,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
         // Get gif info. See https://github.com/Prinzhorn/gif-info
         try {
           if (url.includes('file://')) {
-            const arrayBuffer = await flipflip.api.readBinaryFile(
+            const arrayBuffer = await flipflip().api.readBinaryFile(
               urlToPath(url, isWin32)
             )
             processInfo(gifInfo(arrayBuffer))

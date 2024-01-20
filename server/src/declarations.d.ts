@@ -1,4 +1,4 @@
-import type AppStorage from './ipc/data/AppStorage'
+import type AppStorage from './data/AppStorage'
 
 declare module 'ws' {
   class _WS extends WebSocket {}

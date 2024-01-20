@@ -1,15 +1,14 @@
 import Select, { SingleValue } from 'react-select'
 
 import { type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import { grey } from '@mui/material/colors'
 
 import { useAppSelector } from '../../store/hooks'
 import { selectAppPlaylistOptions } from '../../store/playlist/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     searchSelect: {
       minWidth: 200,
       maxWidth: `calc(100% - ${theme.spacing(7)})`,
@@ -19,9 +18,9 @@ const styles = (theme: Theme) =>
     select: {
       color: grey[900]
     }
-  })
+  }))
 
-interface PlaylistSelectProps extends WithStyles<typeof styles> {
+interface PlaylistSelectProps {
   menuIsOpen?: boolean
   autoFocus?: boolean
   onChange: (sceneID: number) => void
@@ -33,7 +32,7 @@ function PlaylistSelect(props: PlaylistSelectProps) {
     props.onChange(e?.value)
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   playlists['-1'] = '+ New Playlist'
   const options = Object.keys(playlists).map((key) => {
     return { label: playlists[key], value: key }
@@ -52,4 +51,4 @@ function PlaylistSelect(props: PlaylistSelectProps) {
 }
 
 ;(PlaylistSelect as any).displayName = 'PlaylistSelect'
-export default withStyles(styles)(PlaylistSelect as any)
+export default PlaylistSelect

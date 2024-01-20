@@ -1,5 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Checkbox,
@@ -16,8 +16,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -36,88 +35,87 @@ import {
   selectCaptionScriptMarked,
   selectCaptionScriptTags
 } from '../../store/captionScript/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    oddChild: {
-      backgroundColor:
-        theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['100']
-          : grey[900],
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    evenChild: {
-      backgroundColor:
-        theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['50']
-          : theme.palette.background.default,
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    lastSelected: {
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  oddChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['100']
+        : grey[900],
+    '&:hover': {
       backgroundColor:
         theme.palette.mode === 'light'
           ? (theme.palette.primary as any)['200']
-          : '#0F0F0F'
-    },
-    avatar: {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: 'none'
-    },
-    markedSource: {
-      backgroundColor: theme.palette.secondary.main
-    },
-    sourceIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    sourceMarkedIcon: {
-      color: theme.palette.secondary.contrastText
-    },
-    deleteButton: {
-      backgroundColor: theme.palette.error.main
-    },
-    deleteIcon: {
-      color: theme.palette.error.contrastText
-    },
-    actionButton: {
-      marginLeft: theme.spacing(1)
-    },
-    fullTag: {
-      [theme.breakpoints.down('md')]: {
-        display: 'none'
-      }
-    },
-    simpleTag: {
-      [theme.breakpoints.up('md')]: {
-        display: 'none'
-      },
-      [theme.breakpoints.down('sm')]: {
-        display: 'none'
-      }
-    },
-    urlField: {
-      width: '100%',
-      margin: 0
-    },
-    noUserSelect: {
-      userSelect: 'none'
+          : '#080808'
     }
-  })
+  },
+  evenChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['50']
+        : theme.palette.background.default,
+    '&:hover': {
+      backgroundColor:
+        theme.palette.mode === 'light'
+          ? (theme.palette.primary as any)['200']
+          : '#080808'
+    }
+  },
+  lastSelected: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['200']
+        : '#0F0F0F'
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: 'none'
+  },
+  markedSource: {
+    backgroundColor: theme.palette.secondary.main
+  },
+  sourceIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  sourceMarkedIcon: {
+    color: theme.palette.secondary.contrastText
+  },
+  deleteButton: {
+    backgroundColor: theme.palette.error.main
+  },
+  deleteIcon: {
+    color: theme.palette.error.contrastText
+  },
+  actionButton: {
+    marginLeft: theme.spacing(1)
+  },
+  fullTag: {
+    [theme.breakpoints.down('md')]: {
+      display: 'none'
+    }
+  },
+  simpleTag: {
+    [theme.breakpoints.up('md')]: {
+      display: 'none'
+    },
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
+    }
+  },
+  urlField: {
+    width: '100%',
+    margin: 0
+  },
+  noUserSelect: {
+    userSelect: 'none'
+  }
+}))
 
-export interface ScriptSourceListItemProps extends WithStyles<typeof styles> {
+export interface ScriptSourceListItemProps {
   checked: boolean
   index: number
   isEditing: number
@@ -135,7 +133,6 @@ export interface ScriptSourceListItemProps extends WithStyles<typeof styles> {
 }
 
 function ScriptSourceListItem(props: ScriptSourceListItemProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const specialMode = useAppSelector(selectAppSpecialMode())
   const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
@@ -155,7 +152,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
     } else if (e.shiftKey && !e.ctrlKey) {
       openExternalURL(sourceURL)
     } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip.api.showItemInFolder(sourceURL)
+      flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
       props.savePosition()
       props.onPlay(props.scriptID)
@@ -174,11 +171,11 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
     window.open(url, '_blank')?.focus()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <div
       style={props.style}
-      className={clsx(
+      className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
         props.lastSelected && classes.lastSelected
       )}
@@ -215,11 +212,11 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
             <Fab
               size="small"
               onClick={onSourceIconClick}
-              className={clsx(classes.avatar, marked && classes.markedSource)}
+              className={cx(classes.avatar, marked && classes.markedSource)}
             >
               <SourceIcon
                 url={url}
-                className={clsx(
+                className={cx(
                   classes.sourceIcon,
                   marked && classes.sourceMarkedIcon
                 )}
@@ -257,7 +254,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                   <React.Fragment key={tagID}>
                     <TagChip
                       tagID={tagID}
-                      className={clsx(
+                      className={cx(
                         classes.noUserSelect,
                         classes.actionButton,
                         classes.fullTag
@@ -266,7 +263,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                     />
                     <TagChip
                       tagID={tagID}
-                      className={clsx(
+                      className={cx(
                         classes.noUserSelect,
                         classes.actionButton,
                         classes.simpleTag
@@ -306,7 +303,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
             </IconButton>
             <IconButton
               onClick={() => props.onRemove(props.scriptID)}
-              className={clsx(classes.deleteButton, classes.actionButton)}
+              className={cx(classes.deleteButton, classes.actionButton)}
               edge="end"
               size="small"
               aria-label="delete"
@@ -321,4 +318,4 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
 }
 
 ;(ScriptSourceListItem as any).displayName = 'ScriptSourceListItem'
-export default withStyles(styles)(ScriptSourceListItem as any)
+export default ScriptSourceListItem

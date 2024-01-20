@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { green, red } from '@mui/material/colors'
 
 import {
@@ -23,8 +23,7 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -85,147 +84,146 @@ import {
 } from '../../store/videoClipper/thunks'
 import { setPlayerState } from '../../store/player/slice'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    videoContent: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.common.black
-    },
-    container: {
-      flexGrow: 1,
-      padding: theme.spacing(0),
-      position: 'relative'
-    },
-    progress: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      display: 'flex'
-    },
-    appBar: {
-      height: theme.spacing(8)
-    },
-    drawerSpacer: {
-      height: theme.spacing(21)
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '3%'
-    },
-    clipDrawerPaper: {
-      backgroundColor: theme.palette.background.default,
-      height: theme.spacing(21),
-      padding: theme.spacing(1),
-      justifyContent: 'flex-end'
-    },
-    clipTagDrawerPaper: {
-      backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(1),
-      justifyContent: 'flex-end'
-    },
-    tagList: {
-      padding: theme.spacing(1),
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center'
-    },
-    tag: {
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1)
-    },
-    tagContent: {
-      padding: theme.spacing(1)
-    },
-    selectedTag: {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.contrastText
-    },
-    tagButtons: {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    timeSlider: {
-      marginLeft: theme.spacing(2),
-      marginRight: theme.spacing(3),
-      marginTop: theme.spacing(2)
-    },
-    clipField: {
-      maxWidth: theme.spacing(8)
-    },
-    fab: {
-      boxShadow: 'none'
-    },
-    addFab: {
-      marginLeft: theme.spacing(1)
-    },
-    removeFab: {
-      backgroundColor: theme.palette.error.main,
-      color: theme.palette.error.contrastText
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    enabledClip: {
-      backgroundColor: green[500],
-      '&:hover': {
-        backgroundColor: green[700]
-      }
-    },
-    disabledClip: {
-      backgroundColor: red[500],
-      '&:hover': {
-        backgroundColor: red[700]
-      }
-    },
-    valueLabel: {
-      backgroundColor: 'transparent',
-      top: 2
-    },
-    noTransition: {
-      transition: 'unset'
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  videoContent: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.common.black
+  },
+  container: {
+    flexGrow: 1,
+    padding: theme.spacing(0),
+    position: 'relative'
+  },
+  progress: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex'
+  },
+  appBar: {
+    height: theme.spacing(8)
+  },
+  drawerSpacer: {
+    height: theme.spacing(21)
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '3%'
+  },
+  clipDrawerPaper: {
+    backgroundColor: theme.palette.background.default,
+    height: theme.spacing(21),
+    padding: theme.spacing(1),
+    justifyContent: 'flex-end'
+  },
+  clipTagDrawerPaper: {
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(1),
+    justifyContent: 'flex-end'
+  },
+  tagList: {
+    padding: theme.spacing(1),
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center'
+  },
+  tag: {
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1)
+  },
+  tagContent: {
+    padding: theme.spacing(1)
+  },
+  selectedTag: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.contrastText
+  },
+  tagButtons: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  timeSlider: {
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(3),
+    marginTop: theme.spacing(2)
+  },
+  clipField: {
+    maxWidth: theme.spacing(8)
+  },
+  fab: {
+    boxShadow: 'none'
+  },
+  addFab: {
+    marginLeft: theme.spacing(1)
+  },
+  removeFab: {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  enabledClip: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700]
     }
-  })
+  },
+  disabledClip: {
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700]
+    }
+  },
+  valueLabel: {
+    backgroundColor: 'transparent',
+    top: 2
+  },
+  noTransition: {
+    transition: 'unset'
+  }
+}))
 
-interface TagCardProps extends WithStyles<typeof styles> {
+interface TagCardProps {
   clipID: number
   tagID: number
 }
@@ -241,10 +239,10 @@ function TagCard(props: TagCardProps) {
     dispatch(setClipToggleTag({ id: props.clipID, value: props.tagID }))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Card
-      className={clsx(classes.tag, isClipTag && classes.selectedTag)}
+      className={cx(classes.tag, isClipTag && classes.selectedTag)}
       key={props.tagID}
     >
       <CardActionArea onClick={toggleTag}>
@@ -258,7 +256,7 @@ function TagCard(props: TagCardProps) {
   )
 }
 
-function VideoClipper(props: WithStyles<typeof styles>) {
+function VideoClipper() {
   const [video, setVideo] = useState<HTMLVideoElement>()
   const [empty, setEmpty] = useState(false)
   const [isTagging, setIsTagging] = useState(false)
@@ -566,13 +564,13 @@ function VideoClipper(props: WithStyles<typeof styles>) {
     dispatch(navigateClipping(1))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   if (video) {
     video.volume = videoVolume / 100
   }
 
   return (
-    <div className={clsx(classes.root, 'VideoClipper')}>
+    <div className={cx(classes.root, 'VideoClipper')}>
       <AppBar enableColorOnDark className={classes.appBar}>
         <Toolbar className={classes.headerBar}>
           <div className={classes.headerLeft}>
@@ -610,7 +608,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
           <div className={classes.appBar} />
           <Container
             maxWidth={false}
-            className={clsx(classes.container, classes.progress)}
+            className={cx(classes.container, classes.progress)}
           >
             <CircularProgress size={200} />
           </Container>
@@ -665,11 +663,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                 <Grid item xs>
                   <div className={classes.tagList}>
                     {tags.map((tagID) => (
-                      <TagCard
-                        clipID={editingClipID as number}
-                        tagID={tagID}
-                        classes={classes}
-                      />
+                      <TagCard clipID={editingClipID as number} tagID={tagID} />
                     ))}
                   </div>
                 </Grid>
@@ -692,9 +686,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                 <Grid
                   item
                   xs={12}
-                  className={clsx(
-                    tutorial === VCT.controls && classes.highlight
-                  )}
+                  className={cx(tutorial === VCT.controls && classes.highlight)}
                 >
                   <VideoControl
                     video={video}
@@ -713,7 +705,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
             <Drawer
               variant="permanent"
               anchor="bottom"
-              className={clsx(
+              className={cx(
                 (tutorial === VCT.controls ||
                   tutorial === VCT.clips ||
                   tutorial === VCT.clip) &&
@@ -729,7 +721,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                       container
                       spacing={1}
                       alignItems="center"
-                      className={clsx(
+                      className={cx(
                         tutorial === VCT.controls && classes.disable,
                         tutorial === VCT.clips && classes.highlight
                       )}
@@ -743,7 +735,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           <Fab
                             color="primary"
                             size="small"
-                            className={clsx(
+                            className={cx(
                               classes.fab,
                               classes.addFab,
                               tutorial === VCT.clips && classes.highlight
@@ -760,7 +752,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                             variant="contained"
                             color="secondary"
                             size="large"
-                            className={clsx(
+                            className={cx(
                               tutorial === VCT.clips && classes.disable
                             )}
                             onClick={() => onEdit(clipID)}
@@ -776,9 +768,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                       container
                       spacing={1}
                       alignItems="center"
-                      className={clsx(
-                        tutorial === VCT.clip && classes.highlight
-                      )}
+                      className={cx(tutorial === VCT.clip && classes.highlight)}
                     >
                       {!isLibrary && editingClipID && isSourceClip && (
                         <Grid item>
@@ -791,7 +781,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           >
                             <Fab
                               size="small"
-                              className={clsx(
+                              className={cx(
                                 classes.fab,
                                 !isSourceDisabledClip && classes.enabledClip,
                                 isSourceDisabledClip && classes.disabledClip
@@ -865,7 +855,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           <Fab
                             color="primary"
                             size="small"
-                            className={clsx(
+                            className={cx(
                               classes.fab,
                               tutorial === VCT.clip && classes.highlight
                             )}
@@ -884,7 +874,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           <Fab
                             color="secondary"
                             size="small"
-                            className={clsx(
+                            className={cx(
                               classes.fab,
                               tutorial === VCT.clip && classes.disable
                             )}
@@ -903,7 +893,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           <Fab
                             color="secondary"
                             size="small"
-                            className={clsx(
+                            className={cx(
                               classes.fab,
                               tutorial === VCT.clip && classes.disable
                             )}
@@ -925,7 +915,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           >
                             <Fab
                               size="small"
-                              className={clsx(
+                              className={cx(
                                 classes.fab,
                                 classes.removeFab,
                                 tutorial === VCT.clip && classes.disable
@@ -944,7 +934,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                           placement="top"
                         >
                           <IconButton
-                            className={clsx(
+                            className={cx(
                               tutorial === VCT.clip && classes.disable
                             )}
                             onClick={onCancel}
@@ -960,9 +950,7 @@ function VideoClipper(props: WithStyles<typeof styles>) {
                 <Grid
                   item
                   xs={12}
-                  className={clsx(
-                    tutorial === VCT.controls && classes.highlight
-                  )}
+                  className={cx(tutorial === VCT.controls && classes.highlight)}
                 >
                   <VideoControl
                     video={video}
@@ -984,4 +972,4 @@ function VideoClipper(props: WithStyles<typeof styles>) {
 }
 
 ;(VideoClipper as any).displayName = 'VideoClipper'
-export default withStyles(styles)(VideoClipper as any)
+export default VideoClipper

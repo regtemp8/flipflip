@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { Box, createTheme, CssBaseline } from '@mui/material'
-import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 
 import ErrorBoundary from './error/ErrorBoundary'
 import ScenePicker from './ScenePicker'
@@ -20,16 +20,19 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   selectAppLastRoute,
   selectAppTutorial,
-  selectAppTheme,
-  selectAppIsInitialized
+  selectAppTheme
 } from '../store/app/selectors'
 import type Route from '../store/app/data/Route'
-import { fetchAppStorage, saveAppStorageInterval } from '../store/app/thunks'
-import { fetchConstants } from '../store/constants/thunks'
+import { saveAppStorageInterval } from '../store/app/thunks'
 import { startFromScene } from '../store/scene/thunks'
 import SystemMessageDialog from './SystemMessageDialog'
 import SystemSnack from './SystemSnack'
-import FlipFlipService from '../FlipFlipService'
+import flipflip from '../FlipFlipService'
+import { CacheProvider, EmotionCache } from '@emotion/react'
+
+export interface MetaProps {
+  cache: EmotionCache
+}
 
 // TODO Be able to change audio/script playlists during playback
 //      Be able to right click on grid scenes as overlay
@@ -37,10 +40,8 @@ import FlipFlipService from '../FlipFlipService'
 //      Generate different sources even for same scenes in grid
 //      Add configurable privacy screen with shortcut and ability to set image
 //      Add minimize shortcut key in same vain?
-export default function Meta() {
-  const flipflip = FlipFlipService.getInstance()
+export default function Meta(props: MetaProps) {
   const dispatch = useAppDispatch()
-  const initialized = useAppSelector(selectAppIsInitialized())
   const theme = useAppSelector(selectAppTheme())
   const tutorial = useAppSelector(selectAppTutorial())
   const route = useAppSelector(selectAppLastRoute())
@@ -75,19 +76,19 @@ export default function Meta() {
   // END LOG COMPONENT CHANGES
 
   useEffect(() => {
-    dispatch(fetchAppStorage())
-    dispatch(fetchConstants())
-    flipflip.events.onStartScene(startScene, _abortController.current)
+    flipflip().events.onStartScene(startScene, _abortController.current)
 
     // Disable react-sound's verbose console output
     ;(window as any).soundManager.setup({ debugMode: false })
-    flipflip.api.getWindowId().then((id) => {
-      if (id === 1) {
-        dispatch(saveAppStorageInterval())
-      } else {
-        document.title += '*'
-      }
-    })
+    flipflip()
+      .api.getWindowId()
+      .then((id) => {
+        if (id === 1) {
+          dispatch(saveAppStorageInterval())
+        } else {
+          document.title += '*'
+        }
+      })
 
     return () => {
       _abortController.current.abort()
@@ -101,21 +102,6 @@ export default function Meta() {
 
   const startScene = (sceneName: string) => {
     dispatch(startFromScene(sceneName))
-  }
-
-  if (!initialized) {
-    return (
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={createTheme(theme)}>
-          <ErrorBoundary>
-            <Box className="Meta">
-              <CssBaseline />
-              <h1>LOADING...</h1>
-            </Box>
-          </ErrorBoundary>
-        </ThemeProvider>
-      </StyledEngineProvider>
-    )
   }
 
   const renderRoute = (route?: Route) => {
@@ -151,7 +137,7 @@ export default function Meta() {
   }
 
   return (
-    <StyledEngineProvider injectFirst>
+    <CacheProvider value={props.cache}>
       <ThemeProvider theme={createTheme(theme)}>
         <ErrorBoundary>
           <Box className="Meta">
@@ -176,7 +162,7 @@ export default function Meta() {
           </Box>
         </ErrorBoundary>
       </ThemeProvider>
-    </StyledEngineProvider>
+    </CacheProvider>
   )
 }
 

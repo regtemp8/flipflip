@@ -7,5 +7,7 @@ export const initialSystemConstants: SystemConstants = {
   saveDir: '',
   savePath: '',
   portablePath: '',
-  portablePathExists: false
+  portablePathExists: false,
+  masonryDefaultColumns: 1,
+  masonryDefaultHeight: 800
 }

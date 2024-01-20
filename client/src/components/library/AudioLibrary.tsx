@@ -5,7 +5,7 @@ import React, {
   useState,
   useRef
 } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -44,8 +44,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import AlbumIcon from '@mui/icons-material/Album'
@@ -150,341 +149,339 @@ import {
   closeDialog,
   goBack
 } from '../../store/audioLibrary/thunks'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 0,
+    minHeight: 64
+  },
+  appBarSpacerCollapse: {
+    width: '100%'
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  backButton: {
+    float: 'left'
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '20%'
+  },
+  headerRight: {
+    flexBasis: '20%',
+    justifyContent: 'flex-end',
+    display: 'flex'
+  },
+  searchBar: {
+    float: 'right',
+    display: 'flex',
+    maxWidth: '100%'
+  },
+  searchCount: {
+    color: theme.palette.primary.contrastText,
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  displayCount: {
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperClose: {
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
     },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacerWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: 0,
-      minHeight: 64
-    },
-    appBarSpacerCollapse: {
-      width: '100%'
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    backButton: {
-      float: 'left'
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '20%'
-    },
-    headerRight: {
-      flexBasis: '20%',
-      justifyContent: 'flex-end',
-      display: 'flex'
-    },
-    searchBar: {
-      float: 'right',
-      display: 'flex',
-      maxWidth: '100%'
-    },
-    searchCount: {
-      color: theme.palette.primary.contrastText,
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    displayCount: {
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerPaperClose: {
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      },
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawerPaperHidden: {
-      width: 0,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawer: {
-      position: 'absolute'
-    },
-    drawerSpacer: {
-      width: theme.spacing(7),
-      minWidth: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9),
-        minWidth: theme.spacing(9)
-      }
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down('sm')]: {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    chip: {
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    chipClose: {
-      opacity: 0,
-      transition: theme.transitions.create(['opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    tabs: {
-      borderRight: `1px solid ${theme.palette.divider}`
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      height: '100%',
-      padding: theme.spacing(0),
-      overflowY: 'auto'
-    },
-    addMenuButton: {
-      backgroundColor: theme.palette.primary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    sortMenuButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 80,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectAllButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    selectNoneButton: {
-      backgroundColor: theme.palette.secondary.light,
-      margin: 0,
-      top: 'auto',
-      right: 180,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    importBadge: {
-      top: 'auto',
-      right: 30,
-      bottom: 50,
-      left: 'auto',
-      position: 'fixed',
-      zIndex: theme.zIndex.fab + 1
-    },
-    addButton: {
-      backgroundColor: theme.palette.primary.main,
-      margin: 0,
-      top: 'auto',
-      right: 28,
-      bottom: 25,
-      left: 'auto',
-      position: 'fixed',
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    addURLButton: {
-      marginBottom: 60
-    },
-    addLocalButton: {
-      marginBottom: 115
-    },
-    removeAllButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    addButtonClose: {
-      marginBottom: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration:
-          theme.transitions.duration.leavingScreen +
-          theme.transitions.duration.standard
-      })
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    sortMenu: {
-      width: 200
-    },
-    playlistMenu: {
-      minHeight: 365,
-      minWidth: 250
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdrop: {
-      zIndex: theme.zIndex.modal,
-      height: '100%',
-      width: '100%'
-    },
-    hidden: {
-      opacity: 0,
-      transition: theme.transitions.create(['margin', 'opacity'], {
-        easing: theme.transitions.easing.sharp,
-        duration: 100
-      })
-    },
-    noScroll: {
-      overflow: 'visible'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    urlDialog: {
-      width: '100%'
-    },
-    progress: {
-      position: 'absolute',
-      right: 20
-    },
-    error: {
-      backgroundColor: red[500],
-      '&:hover': {
-        backgroundColor: red[700]
-      }
-    },
-    tabSection: {
-      height: '100%'
-    },
-    tabPanel: {
-      display: 'flex',
-      height: '100%'
-    },
-    tab: {
-      width: drawerWidth,
-      height: theme.spacing(12),
-      transition: theme.transitions.create(
-        ['width', 'margin', 'background', 'opacity'],
-        {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen
-        }
-      ),
-      '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        opacity: 1,
-        transition: theme.transitions.create(['background', 'opacity'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen
-        })
-      }
-    },
-    tabClose: {
-      minWidth: 0,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    playlistsTab: {
-      ariaControls: 'vertical-tabpanel-0'
-    },
-    artistsTab: {
-      ariaControls: 'vertical-tabpanel-1'
-    },
-    albumsTab: {
-      ariaControls: 'vertical-tabpanel-2'
-    },
-    songsTab: {
-      ariaControls: 'vertical-tabpanel-3'
-    },
-    addProgress: {
-      position: 'absolute',
-      bottom: 18,
-      right: 18,
-      zIndex: 1
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawerPaperHidden: {
+    width: 0,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawer: {
+    position: 'absolute'
+  },
+  drawerSpacer: {
+    width: theme.spacing(7),
+    minWidth: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9),
+      minWidth: theme.spacing(9)
     }
-  })
+  },
+  drawerButton: {
+    backgroundColor: theme.palette.primary.main,
+    minHeight: theme.spacing(6),
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+  drawerIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  chip: {
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  chipClose: {
+    opacity: 0,
+    transition: theme.transitions.create(['opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  tabs: {
+    borderRight: `1px solid ${theme.palette.divider}`
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    height: '100%',
+    padding: theme.spacing(0),
+    overflowY: 'auto'
+  },
+  addMenuButton: {
+    backgroundColor: theme.palette.primary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  sortMenuButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 80,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectAllButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  selectNoneButton: {
+    backgroundColor: theme.palette.secondary.light,
+    margin: 0,
+    top: 'auto',
+    right: 180,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  importBadge: {
+    top: 'auto',
+    right: 30,
+    bottom: 50,
+    left: 'auto',
+    position: 'fixed',
+    zIndex: theme.zIndex.fab + 1
+  },
+  addButton: {
+    backgroundColor: theme.palette.primary.main,
+    margin: 0,
+    top: 'auto',
+    right: 28,
+    bottom: 25,
+    left: 'auto',
+    position: 'fixed',
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  addURLButton: {
+    marginBottom: 60
+  },
+  addLocalButton: {
+    marginBottom: 115
+  },
+  removeAllButton: {
+    backgroundColor: theme.palette.error.main,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  addButtonClose: {
+    marginBottom: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration:
+        theme.transitions.duration.leavingScreen +
+        theme.transitions.duration.standard
+    })
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  sortMenu: {
+    width: 200
+  },
+  playlistMenu: {
+    minHeight: 365,
+    minWidth: 250
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    height: '100%',
+    width: '100%'
+  },
+  hidden: {
+    opacity: 0,
+    transition: theme.transitions.create(['margin', 'opacity'], {
+      easing: theme.transitions.easing.sharp,
+      duration: 100
+    })
+  },
+  noScroll: {
+    overflow: 'visible'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  urlDialog: {
+    width: '100%'
+  },
+  progress: {
+    position: 'absolute',
+    right: 20
+  },
+  error: {
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700]
+    }
+  },
+  tabSection: {
+    height: '100%'
+  },
+  tabPanel: {
+    display: 'flex',
+    height: '100%'
+  },
+  tab: {
+    width: drawerWidth,
+    height: theme.spacing(12),
+    transition: theme.transitions.create(
+      ['width', 'margin', 'background', 'opacity'],
+      {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen
+      }
+    ),
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.08)',
+      opacity: 1,
+      transition: theme.transitions.create(['background', 'opacity'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      })
+    }
+  },
+  tabClose: {
+    minWidth: 0,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
+    }
+  },
+  playlistsTab: {
+    ariaControls: 'vertical-tabpanel-0'
+  },
+  artistsTab: {
+    ariaControls: 'vertical-tabpanel-1'
+  },
+  albumsTab: {
+    ariaControls: 'vertical-tabpanel-2'
+  },
+  songsTab: {
+    ariaControls: 'vertical-tabpanel-3'
+  },
+  addProgress: {
+    position: 'absolute',
+    bottom: 18,
+    right: 18,
+    zIndex: 1
+  }
+}))
 
-function AudioLibrary(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function AudioLibrary() {
   const dispatch = useAppDispatch()
   const tagsCount = useAppSelector(selectAppTagsCount())
   const tutorial = useAppSelector(selectAppTutorial())
@@ -610,7 +607,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
         setImportURL('')
         break
       case AF.audios:
-        const audioSources = await flipflip.api.loadAudioSources(e.shiftKey)
+        const audioSources = await flipflip().api.loadAudioSources(e.shiftKey)
         if (audioSources) {
           dispatch(setLoadingSources(true))
           addAudioSources(audioSources)
@@ -762,7 +759,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
     onCloseDialog()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const open = drawerOpen
   const playlist = filters
     .find((f) => f.startsWith('playlist:'))
@@ -772,9 +769,9 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
-          tutorial === ALT.toolbar && clsx(classes.backdropTop, classes.disable)
+          tutorial === ALT.toolbar && cx(classes.backdropTop, classes.disable)
         )}
       >
         <Toolbar className={classes.headerBar}>
@@ -811,7 +808,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
           <div className={classes.headerRight}>
             <div
-              className={clsx(
+              className={cx(
                 classes.searchBar,
                 tutorial === ALT.toolbar && classes.highlight
               )}
@@ -846,7 +843,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
       </AppBar>
 
       <Drawer
-        className={clsx(
+        className={cx(
           classes.drawer,
           (tutorial === ALT.sidebar1 ||
             tutorial === ALT.sidebar2 ||
@@ -856,11 +853,11 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
         )}
         variant="permanent"
         classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose)
+          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
         }}
         open={drawerOpen}
       >
-        <div className={clsx(!open && classes.appBarSpacerWrapper)}>
+        <div className={cx(!open && classes.appBarSpacerWrapper)}>
           <Collapse in={!open} className={classes.appBarSpacerCollapse}>
             <div className={classes.appBarSpacer} />
           </Collapse>
@@ -868,7 +865,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
         <ListItem className={classes.drawerButton}>
           <IconButton
-            className={clsx(tutorial === ALT.sidebar1 && classes.highlight)}
+            className={cx(tutorial === ALT.sidebar1 && classes.highlight)}
             onClick={onToggleDrawer}
             size="large"
           >
@@ -891,7 +888,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-0"
               icon={<QueueMusicIcon />}
               label={open ? 'Playlists' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.playlistsTab,
                 !open && classes.tabClose
@@ -902,7 +899,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-1"
               icon={<PersonIcon />}
               label={open ? 'Artists' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.artistsTab,
                 !open && classes.tabClose
@@ -913,7 +910,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-2"
               icon={<AlbumIcon />}
               label={open ? 'Albums' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.albumsTab,
                 !open && classes.tabClose
@@ -924,7 +921,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-3"
               icon={<AudiotrackIcon />}
               label={open ? 'Songs' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.songsTab,
                 !open && classes.tabClose
@@ -935,7 +932,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
         <Divider />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
             <ListItemButton
               onClick={() => dispatch(manageTags())}
@@ -947,7 +944,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               <ListItemText primary="Manage Tags" />
               {tagsCount > 0 && (
                 <Chip
-                  className={clsx(classes.chip, !open && classes.chipClose)}
+                  className={cx(classes.chip, !open && classes.chipClose)}
                   label={tagsCount}
                   color="primary"
                   size="small"
@@ -993,7 +990,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
         <Divider />
 
-        <div className={clsx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={'BPM Detection'}>
             <ListItemButton
               disabled={progressMode != null}
@@ -1330,7 +1327,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addLocalButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1350,7 +1347,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addURLButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1372,7 +1369,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
             />
           )}
           <Fab
-            className={clsx(
+            className={cx(
               classes.addMenuButton,
               openMenu === MO.new && classes.backdropTop
             )}
@@ -1468,7 +1465,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
       {openMenu === MO.urlImport && (
         <Dialog
-          classes={{ paper: clsx(classes.noScroll, classes.urlDialog) }}
+          classes={{ paper: cx(classes.noScroll, classes.urlDialog) }}
           open={openMenu === MO.urlImport}
           onClose={onCloseDialog}
           aria-labelledby="add-url-title"
@@ -1493,7 +1490,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
               <CircularProgress size={34} className={classes.progress} />
             )}
             <Button
-              className={clsx(error && classes.error)}
+              className={cx(error && classes.error)}
               onClick={onAddURL}
               color="primary"
             >
@@ -1526,7 +1523,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
       {openMenu === MO.newPlaylist && (
         <Dialog
-          classes={{ paper: clsx(classes.noScroll, classes.urlDialog) }}
+          classes={{ paper: cx(classes.noScroll, classes.urlDialog) }}
           open={true}
           onClose={onCloseDialog}
           aria-labelledby="add-playlist-title"
@@ -1556,7 +1553,7 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 
       {openMenu === MO.playlistDuplicates && (
         <Dialog
-          classes={{ paper: clsx(classes.noScroll, classes.urlDialog) }}
+          classes={{ paper: cx(classes.noScroll, classes.urlDialog) }}
           open={true}
           onClose={onCloseDialog}
           aria-labelledby="duplicate-title"
@@ -1638,4 +1635,4 @@ function AudioLibrary(props: WithStyles<typeof styles>) {
 }
 
 ;(AudioLibrary as any).displayName = 'AudioLibrary'
-export default withStyles(styles)(AudioLibrary as any)
+export default AudioLibrary

@@ -1,5 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Button,
@@ -12,8 +12,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -21,55 +20,54 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { extractMusicMetadata } from '../../data/utils'
 import type Audio from '../../store/audio/Audio'
 import { newAudio } from '../../store/audio/Audio'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    input: {
-      width: '100%',
-      maxWidth: 365,
-      marginRight: theme.spacing(4)
-    },
-    inputShort: {
-      width: 75
-    },
-    inputFull: {
-      width: '100%',
-      maxWidth: 530
-    },
-    pointer: {
-      cursor: 'pointer'
-    },
-    trackThumb: {
-      height: 140,
-      width: 140,
-      overflow: 'hidden',
-      display: 'inline-flex',
-      justifyContent: 'center',
-      position: 'absolute'
-    },
-    thumbImage: {
-      height: '100%'
-    },
-    deleteThumbButton: {
-      backgroundColor: theme.palette.error.main,
-      position: 'absolute',
-      bottom: '3%',
-      right: '6%'
-    },
-    deleteIcon: {
-      color: theme.palette.error.contrastText
-    },
-    audioIcon: {
-      height: '100%',
-      width: '100%'
-    },
-    actions: {
-      marginRight: theme.spacing(3)
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  input: {
+    width: '100%',
+    maxWidth: 365,
+    marginRight: theme.spacing(4)
+  },
+  inputShort: {
+    width: 75
+  },
+  inputFull: {
+    width: '100%',
+    maxWidth: 530
+  },
+  pointer: {
+    cursor: 'pointer'
+  },
+  trackThumb: {
+    height: 140,
+    width: 140,
+    overflow: 'hidden',
+    display: 'inline-flex',
+    justifyContent: 'center',
+    position: 'absolute'
+  },
+  thumbImage: {
+    height: '100%'
+  },
+  deleteThumbButton: {
+    backgroundColor: theme.palette.error.main,
+    position: 'absolute',
+    bottom: '3%',
+    right: '6%'
+  },
+  deleteIcon: {
+    color: theme.palette.error.contrastText
+  },
+  audioIcon: {
+    height: '100%',
+    width: '100%'
+  },
+  actions: {
+    marginRight: theme.spacing(3)
+  }
+}))
 
-export interface AudioEditProps extends WithStyles<typeof styles> {
+export interface AudioEditProps {
   audio: Audio
   cachePath: string
   title: string
@@ -79,7 +77,6 @@ export interface AudioEditProps extends WithStyles<typeof styles> {
 }
 
 function AudioEdit(props: AudioEditProps) {
-  const flipflip = FlipFlipService.getInstance()
   const [audio, setAudio] = useState(props.audio)
 
   const nop = () => {}
@@ -104,7 +101,7 @@ function AudioEdit(props: AudioEditProps) {
   }
 
   const loadThumb = async () => {
-    const thumb = await flipflip.api.loadThumb(props.cachePath)
+    const thumb = await flipflip().api.loadThumb(props.cachePath)
     if (thumb) {
       const audioCopy = newAudio(audio)
       audioCopy.thumb = thumb
@@ -114,8 +111,8 @@ function AudioEdit(props: AudioEditProps) {
 
   const loadSuggestions = () => {
     const url = audio.url as string
-    flipflip.api
-      .parseMusicMetadataFile(url, props.cachePath)
+    flipflip()
+      .api.parseMusicMetadataFile(url, props.cachePath)
       .then(async (metadata: any) => {
         return await extractMusicMetadata(newAudio(audio), newAudio(metadata))
       })
@@ -127,7 +124,7 @@ function AudioEdit(props: AudioEditProps) {
       })
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Dialog
       open={true}
@@ -145,7 +142,7 @@ function AudioEdit(props: AudioEditProps) {
           onChange={(e: ChangeEvent<HTMLInputElement>) => onEdit('name', e)}
         />
         <div
-          className={clsx(
+          className={cx(
             classes.trackThumb,
             audio.thumb == null && classes.pointer
           )}
@@ -225,4 +222,4 @@ function AudioEdit(props: AudioEditProps) {
 }
 
 ;(AudioEdit as any).displayName = 'AudioEdit'
-export default withStyles(styles)(AudioEdit as any)
+export default AudioEdit

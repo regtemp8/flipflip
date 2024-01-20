@@ -11,13 +11,11 @@ import {
   type Theme
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { AF } from 'flipflip-common'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     root: {
       display: 'flex'
     },
@@ -32,9 +30,9 @@ const styles = (theme: Theme) =>
       overflowX: 'hidden',
       overflowY: 'auto !important' as any
     }
-  })
+  }))
 
-export interface URLDialogProps extends WithStyles<typeof styles> {
+export interface URLDialogProps {
   open: boolean
   onClose: () => void
   onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
@@ -48,12 +46,12 @@ function URLDialog(props: URLDialogProps) {
   }
 
   const onImportURL = () => {
-    props.onImportURL(AF.list, undefined, importURLs);
+    props.onImportURL(AF.list, undefined, importURLs)
     setImportURLs('')
     props.onClose()
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Dialog
       open={props.open}
@@ -73,7 +71,7 @@ function URLDialog(props: URLDialogProps) {
           multiline
           margin="dense"
           value={importURLs}
-          inputProps={{className: classes.urlInput}}
+          inputProps={{ className: classes.urlInput }}
           onChange={onURLChange}
         />
       </DialogContent>
@@ -81,10 +79,7 @@ function URLDialog(props: URLDialogProps) {
         <Button onClick={props.onClose} color="secondary">
           Cancel
         </Button>
-        <Button
-          onClick={onImportURL}
-          color="primary"
-        >
+        <Button onClick={onImportURL} color="primary">
           Add Sources
         </Button>
       </DialogActions>
@@ -93,4 +88,4 @@ function URLDialog(props: URLDialogProps) {
 }
 
 ;(URLDialog as any).displayName = 'URLDialog'
-export default withStyles(styles)(URLDialog as any)
+export default URLDialog

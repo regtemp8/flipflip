@@ -1,5 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -27,8 +27,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -52,101 +51,100 @@ import { newTag } from '../../store/tag/Tag'
 import { selectAppTags } from '../../store/app/selectors'
 import { selectTagName, selectTagNextID } from '../../store/tag/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    backButton: {
-      float: 'left'
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '3%'
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      padding: theme.spacing(0),
-      overflowY: 'auto'
-    },
-    tagList: {
-      padding: theme.spacing(1),
-      display: 'flex',
-      flexWrap: 'wrap'
-    },
-    tag: {
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1)
-    },
-    addMenuButton: {
-      backgroundColor: theme.palette.primary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    sortMenuButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 80,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    removeAllButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 130,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    sortMenu: {
-      width: 200
-    },
-    fill: {
-      flexGrow: 1
-    },
-    phraseInput: {
-      minWidth: 200,
-      minHeight: 100
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  backButton: {
+    float: 'left'
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '3%'
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    padding: theme.spacing(0),
+    overflowY: 'auto'
+  },
+  tagList: {
+    padding: theme.spacing(1),
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+  tag: {
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1)
+  },
+  addMenuButton: {
+    backgroundColor: theme.palette.primary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  sortMenuButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 80,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  removeAllButton: {
+    backgroundColor: theme.palette.error.main,
+    margin: 0,
+    top: 'auto',
+    right: 130,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  sortMenu: {
+    width: 200
+  },
+  fill: {
+    flexGrow: 1
+  },
+  phraseInput: {
+    minWidth: 200,
+    minHeight: 100
+  }
+}))
 
-interface TagEditDialogProps extends WithStyles<typeof styles> {
+interface TagEditDialogProps {
   tagID: number
   onClose: () => void
 }
@@ -241,7 +239,7 @@ function TagEditDialog(props: TagEditDialogProps) {
   )
 }
 
-interface TagCardProps extends WithStyles<typeof styles> {
+interface TagCardProps {
   tagID: number
   onEdit: (id: number) => void
 }
@@ -264,7 +262,7 @@ function TagCard(props: TagCardProps) {
   )
 }
 
-function TagManager(props: WithStyles<typeof styles>) {
+function TagManager() {
   const dispatch = useAppDispatch()
   const tagNextID = useAppSelector(selectTagNextID())
   const tags = useAppSelector(selectAppTags())
@@ -304,7 +302,7 @@ function TagManager(props: WithStyles<typeof styles>) {
     onCloseDialog()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <div className={classes.root}>
       <AppBar enableColorOnDark position="absolute" className={classes.appBar}>
@@ -341,7 +339,7 @@ function TagManager(props: WithStyles<typeof styles>) {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
 
-        <div className={clsx(classes.root, classes.fill)}>
+        <div className={cx(classes.root, classes.fill)}>
           <Container maxWidth={false} className={classes.container}>
             <Sortable
               className={classes.tagList}
@@ -468,4 +466,4 @@ function TagManager(props: WithStyles<typeof styles>) {
 }
 
 ;(TagManager as any).displayName = 'TagManager'
-export default withStyles(styles)(TagManager as any)
+export default TagManager

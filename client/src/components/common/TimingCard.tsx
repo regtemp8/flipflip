@@ -1,6 +1,5 @@
 import { Grid, MenuItem, Tooltip, Collapse, type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import type ReduxProps from './ReduxProps'
 import { en, TF } from 'flipflip-common'
@@ -11,8 +10,7 @@ import BaseSlider from './slider/BaseSlider'
 import MillisTextField from './text/MillisTextField'
 import { type RootState } from '../../store/store'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     endInput: {
       paddingLeft: theme.spacing(1),
       paddingTop: 0
@@ -29,7 +27,7 @@ const styles = (theme: Theme) =>
         alignItems: 'center'
       }
     }
-  })
+  }))
 
 export interface BPMSliderProps extends CommonSliderProps {
   min?: number
@@ -37,7 +35,7 @@ export interface BPMSliderProps extends CommonSliderProps {
   format?: 'times' | 'percent' | 'tick-bpm'
 }
 
-export interface TimingCardProps extends WithStyles<typeof styles> {
+export interface TimingCardProps {
   label?: string
   excludeScene?: boolean
   sidebar: boolean
@@ -53,14 +51,14 @@ export interface TimingCardProps extends WithStyles<typeof styles> {
 function TimingCard(props: TimingCardProps) {
   const hasBPM = useAppSelector(props.hasBPMSelector)
   const timingFunction = useAppSelector(props.timing.selector)
-
+  const {classes} = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={12} sm={props.sidebar ? 12 : 4} style={{ paddingTop: 10 }}>
         <BaseSelect
           label={props.label ?? 'Timing'}
-          controlClassName={props.classes.fullWidth}
-          selectClassName={props.classes.select}
+          controlClassName={classes.fullWidth}
+          selectClassName={classes.select}
           selector={props.timing.selector}
           action={props.timing.action}
         >
@@ -76,7 +74,7 @@ function TimingCard(props: TimingCardProps) {
                     >
                       <ErrorOutlineIcon
                         color={'error'}
-                        className={props.classes.noBPM}
+                        className={classes.noBPM}
                       />
                     </Tooltip>
                   )}
@@ -97,7 +95,7 @@ function TimingCard(props: TimingCardProps) {
       <Grid item xs={12} sm={props.sidebar ? 12 : 8}>
         <Collapse
           in={timingFunction === TF.sin}
-          className={props.classes.fullWidth}
+          className={classes.fullWidth}
         >
           <BaseSlider
             min={1}
@@ -107,7 +105,7 @@ function TimingCard(props: TimingCardProps) {
             labelledBy={props.wave.labelledBy}
             label={{ text: 'Wave Rate' }}
             textField={{
-              className: props.classes.endInput,
+              className: classes.endInput,
               min: 0,
               step: 5
             }}
@@ -115,7 +113,7 @@ function TimingCard(props: TimingCardProps) {
         </Collapse>
         <Collapse
           in={timingFunction === TF.bpm}
-          className={props.classes.fullWidth}
+          className={classes.fullWidth}
         >
           <BaseSlider
             min={props.bpm.min ?? 1}
@@ -133,7 +131,7 @@ function TimingCard(props: TimingCardProps) {
         </Collapse>
         <Collapse
           in={timingFunction === TF.constant}
-          className={props.classes.fullWidth}
+          className={classes.fullWidth}
         >
           <MillisTextField
             label="For"
@@ -145,7 +143,7 @@ function TimingCard(props: TimingCardProps) {
       <Grid item xs={12}>
         <Collapse
           in={timingFunction === TF.random || timingFunction === TF.sin}
-          className={props.classes.fullWidth}
+          className={classes.fullWidth}
         >
           <Grid container alignItems="center">
             <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
@@ -169,4 +167,4 @@ function TimingCard(props: TimingCardProps) {
   )
 }
 
-export default withStyles(styles)(TimingCard as any)
+export default TimingCard

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Button,
@@ -13,8 +13,7 @@ import {
   type Theme
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
@@ -65,38 +64,36 @@ import {
   setSceneCrossFade
 } from '../store/scene/slice'
 import { setSceneGridGrid } from '../store/sceneGrid/slice'
-import FlipFlipService from '../FlipFlipService'
+import flipflip from '../FlipFlipService'
 import { RootState } from '../store/store'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    deleteIcon: {
-      color: theme.palette.error.main
-    },
-    leftDialog: {
-      justifyContent: 'flex-start'
-    },
-    rightDialog: {
-      justifyContent: 'flex-end'
-    },
-    topDialog: {
-      alignItems: 'flex-start'
-    },
-    bottomDialog: {
-      alignItems: 'flex-end'
-    },
-    extraTop: {
-      zIndex: theme.zIndex.modal + 2
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  deleteIcon: {
+    color: theme.palette.error.main
+  },
+  leftDialog: {
+    justifyContent: 'flex-start'
+  },
+  rightDialog: {
+    justifyContent: 'flex-end'
+  },
+  topDialog: {
+    alignItems: 'flex-start'
+  },
+  bottomDialog: {
+    alignItems: 'flex-end'
+  },
+  extraTop: {
+    zIndex: theme.zIndex.modal + 2
+  }
+}))
 
-export interface TutorialProps extends WithStyles<typeof styles> {
+export interface TutorialProps {
   sceneID?: number
   gridID?: number
 }
 
 function Tutorial(props: TutorialProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const route = useAppSelector(selectAppLastRoute())
   const tutorial = useAppSelector(selectAppTutorial())
@@ -536,7 +533,7 @@ function Tutorial(props: TutorialProps) {
     window.open(url, '_blank')?.focus()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   let left = false
   let right = false
   let top = false
@@ -2226,7 +2223,7 @@ function Tutorial(props: TutorialProps) {
           <DialogContent>
             <DialogContentText id="tutorial-description">
               This is a list of all the <b>commands</b> that can be used in
-              FlipFlip. Click one to insert it at the current cursor position.
+              flipflip(). Click one to insert it at the current cursor position.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -2658,7 +2655,7 @@ function Tutorial(props: TutorialProps) {
       maxWidth={maxWidth as any}
       open={!!tutorial}
       classes={{
-        container: clsx(
+        container: cx(
           left && classes.leftDialog,
           right && classes.rightDialog,
           top && classes.topDialog,
@@ -2674,4 +2671,4 @@ function Tutorial(props: TutorialProps) {
 }
 
 ;(Tutorial as any).displayName = 'Tutorial'
-export default withStyles(styles)(Tutorial as any)
+export default Tutorial

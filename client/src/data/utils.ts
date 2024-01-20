@@ -29,7 +29,7 @@ import type Clip from '../store/clip/Clip'
 import type Audio from '../store/audio/Audio'
 import type TimingSettings from '../store/scene/TimingSettings'
 import Tag from '../store/tag/Tag'
-import FlipFlipService from '../FlipFlipService'
+import flipflip from '../FlipFlipService'
 
 const gridIDPrefix = '999'
 export function convertGridIDToSceneID(gridID: number): number {
@@ -248,8 +248,7 @@ export async function extractMusicMetadata(
   }
 
   if (!newAudio.duration) {
-    const flipflip = FlipFlipService.getInstance()
-    const arrayBuffer = await flipflip.api.readBinaryFile(audio.url as string)
+    const arrayBuffer = await flipflip().api.readBinaryFile(audio.url as string)
     const context = new AudioContext()
     const audioBuffer = await context.decodeAudioData(arrayBuffer)
     newAudio.duration = audioBuffer.duration
@@ -259,13 +258,11 @@ export async function extractMusicMetadata(
 }
 
 export async function getLocalPath(cachingDirectory: string, source: string) {
-  const flipflip = FlipFlipService.getInstance()
-  return await flipflip.api.cachePath(cachingDirectory, source, 'local')
+  return await flipflip().api.cachePath(cachingDirectory, source, 'local')
 }
 
 export async function getCachePath(directory: string, source?: string) {
-  const flipflip = FlipFlipService.getInstance()
-  return await flipflip.api.cachePath(directory, source)
+  return await flipflip().api.cachePath(directory, source)
 }
 
 export function htmlEntities(str: string): string {

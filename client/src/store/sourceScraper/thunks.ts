@@ -51,8 +51,8 @@ import {
 import { setPlayerCaptcha } from '../player/slice'
 import { systemMessage } from '../app/slice'
 import { setCount } from '../app/thunks'
-import { toLibrarySourceStorage } from '../app/data/App'
-import FlipFlipService from '../../FlipFlipService'
+import { toLibrarySourceStorage } from '../app/convert'
+import flipflip from '../../FlipFlipService'
 
 function convertMapToRecord<V>(map: Map<string, V>): Record<string, V> {
   const record: Record<string, V> = {}
@@ -245,8 +245,7 @@ function promiseLoop(
     const { imageTypeFilter, weightFunction } = state.scene.entries[sceneID]
     const workerListener = receiveMessage
     if (config.generalSettings.prioritizePerformance) {
-      const flipflip = FlipFlipService.getInstance()
-      flipflip.events.onWorkerResponse(workerUUID, workerListener)
+      flipflip().events.onWorkerResponse(workerUUID, workerListener)
       scrapeFiles(
         workerListener,
         convertRecordToMap(sources.allURLs as Record<string, string[]>),
@@ -417,8 +416,7 @@ function sourceLoop(
     const { imageTypeFilter, weightFunction } = state.scene.entries[sceneID]
     const workerListener = receiveMessage
     if (config.generalSettings.prioritizePerformance) {
-      const flipflip = FlipFlipService.getInstance()
-      flipflip.events.onWorkerResponse(workerUUID, workerListener)
+      flipflip().events.onWorkerResponse(workerUUID, workerListener)
       scrapeFiles(
         workerListener,
         allURLs,
@@ -463,8 +461,7 @@ function startScrape(
     for (const source of sources) {
       if (source.dirOfSources && getSourceType(source.url) === ST.local) {
         try {
-          const flipflip = FlipFlipService.getInstance()
-          const directories = await flipflip.api.getDirectories(source.url)
+          const directories = await flipflip().api.getDirectories(source.url)
           for (const d of directories) {
             sceneSources.push(
               newLibrarySource({ url: source.url + pathSep + d })
@@ -609,8 +606,7 @@ async function cachePath(
   const cachePath =
     (await getCachePath(config.caching.directory, source.url)) +
     getFileName(source.url, pathSep)
-  const flipflip = FlipFlipService.getInstance()
-  return config.caching.enabled && (await flipflip.api.pathExists(cachePath))
+  return config.caching.enabled && (await flipflip().api.pathExists(cachePath))
     ? cachePath
     : null
 }
@@ -678,8 +674,7 @@ async function scrapeFiles(
         )
       })
     } else {
-      const flipflip = FlipFlipService.getInstance()
-      flipflip.api.loadInWorker('loadRemoteImageURLList', [
+      flipflip().api.loadInWorker('loadRemoteImageURLList', [
         allURLs,
         allPosts,
         config,
@@ -867,8 +862,7 @@ async function scrapeFiles(
         source.url
       )) as string
 
-      const flipflip = FlipFlipService.getInstance()
-      if (config.caching.enabled && (await flipflip.api.hasFiles(cachePath))) {
+      if (config.caching.enabled && (await flipflip().api.hasFiles(cachePath))) {
         // If the cache directory exists, use it
         if (returnPromise) {
           return await new CancelablePromise((resolve) => {
@@ -1003,10 +997,9 @@ const loadLocalDirectory = async (
   const url = cachePath || source.url
   const localSource = helpers.next === -1
   let data: any | undefined
-  const flipflip = FlipFlipService.getInstance()
   try {
     data = url
-      ? await flipflip.api.recursiveReaddir(
+      ? await flipflip().api.recursiveReaddir(
           url,
           blacklist,
           source.blacklist,
@@ -1086,8 +1079,7 @@ export const loadVideo = async (
   }
   const ifExists = async (url: string) => {
     if (!url.startsWith('http')) {
-      const flipflip = FlipFlipService.getInstance()
-      url = await flipflip.api.getFileUrl(url)
+      url = await flipflip().api.getFileUrl(url)
     }
     helpers.count = 1
 
@@ -1153,8 +1145,7 @@ export const loadVideo = async (
         ifExists(url)
       })
   } else {
-    const flipflip = FlipFlipService.getInstance()
-    const exists = await flipflip.api.pathExists(url)
+    const exists = await flipflip().api.pathExists(url)
     if (exists) {
       ifExists(url)
     } else {
@@ -1283,8 +1274,7 @@ const loadInWorker = (event: string) => {
     helpers: { next: any; count: number; retries: number; uuid: string },
     pathSep: string
   ) => {
-    const flipflip = FlipFlipService.getInstance()
-    flipflip.api.loadInWorker(event, [
+    flipflip().api.loadInWorker(event, [
       allURLs,
       allPosts,
       config,

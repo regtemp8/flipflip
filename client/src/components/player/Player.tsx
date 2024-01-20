@@ -8,8 +8,7 @@ import {
   type Theme,
   Typography
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { getFileGroup, urlToPath, SL, WC } from 'flipflip-common'
 import { getFileName } from './Scrapers'
@@ -80,11 +79,9 @@ import {
   setPlayerMainLoaded
 } from '../../store/player/slice'
 import { selectSourceScraperProgress } from '../../store/sourceScraper/selectors'
-import FlipFlipService from '../../FlipFlipService'
 import { setFullScreen } from '../../data/actions'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     progressMain: {
       display: 'flex',
       flexGrow: 1,
@@ -115,9 +112,9 @@ const styles = (theme: Theme) =>
     startNowBtn: {
       marginTop: theme.spacing(1)
     }
-  })
+  }))
 
-interface ProgressCardProps extends WithStyles<typeof styles> {
+interface ProgressCardProps {
   sceneID: number
   start?: () => void
 }
@@ -178,7 +175,7 @@ function ProgressCard(props: ProgressCardProps) {
   )
 }
 
-export interface PlayerProps extends WithStyles<typeof styles> {
+export interface PlayerProps {
   uuid: string
   advanceHack?: ChildCallbackHack
   allLoaded?: boolean
@@ -196,7 +193,6 @@ export interface PlayerProps extends WithStyles<typeof styles> {
 }
 
 function Player(props: PlayerProps) {
-  const flipflip = FlipFlipService.getInstance()
   const [currentAudio, setCurrentAudio] = useState<number>()
 
   const dispatch = useAppDispatch()
@@ -1342,4 +1338,4 @@ function Player(props: PlayerProps) {
 }
 
 ;(Player as any).displayName = 'Player'
-export default withStyles(styles)(Player as any)
+export default Player

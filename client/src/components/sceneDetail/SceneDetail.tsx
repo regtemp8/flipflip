@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState
 } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Alert,
@@ -44,8 +44,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -154,340 +153,338 @@ import {
   selectSceneDetailDisplaySources
 } from '../../store/sceneDetail/selectors'
 import { selectLibrarySources } from '../../store/librarySource/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacerWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: 0,
-      minHeight: 64
-    },
-    appBarSpacerCollapse: {
-      width: '100%'
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    title: {
-      textAlign: 'center'
-    },
-    titleField: {
-      width: '100%',
-      margin: 0
-    },
-    titleInput: {
-      color: theme.palette.primary.contrastText,
-      textAlign: 'center',
-      fontSize: theme.typography.h4.fontSize
-    },
-    noTitle: {
-      width: '33%',
-      height: theme.spacing(7)
-    },
-    drawer: {
-      position: 'absolute'
-    },
-    drawerSpacer: {
-      minWidth: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        minWidth: theme.spacing(9)
-      }
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down('xs')]: {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerPaperClose: {
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    tabs: {
-      borderRight: `1px solid ${theme.palette.divider}`
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      height: '100%',
-      padding: theme.spacing(0),
-      overflowY: 'auto'
-    },
-    sourcesSection: {
-      height: '100%'
-    },
-    tabPanel: {
-      display: 'flex',
-      height: '100%'
-    },
-    tab: {
-      width: drawerWidth,
-      height: theme.spacing(12),
-      transition: theme.transitions.create(
-        ['width', 'margin', 'background', 'opacity'],
-        {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen
-        }
-      ),
-      '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        opacity: 1,
-        transition: theme.transitions.create(['background', 'opacity'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen
-        })
-      }
-    },
-    tabClose: {
-      minWidth: 0,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    optionsTab: {
-      ariaControls: 'vertical-tabpanel-0'
-    },
-    effectsTab: {
-      ariaControls: 'vertical-tabpanel-1'
-    },
-    audioTextTab: {
-      ariaControls: 'vertical-tabpanel-2'
-    },
-    sourcesTab: {
-      ariaControls: 'vertical-tabpanel-3'
-    },
-    generateTab: {
-      ariaControls: 'vertical-tabpanel-4'
-    },
-    deleteItem: {
-      color: theme.palette.error.main
-    },
-    removeAllWGButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 190,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    overrideOn: {
-      backgroundColor: theme.palette.primary.dark
-    },
-    overrideOff: {
-      backgroundColor: theme.palette.secondary.dark
-    },
-    overrideIgnoreWGButton: {
-      margin: 0,
-      top: 'auto',
-      right: 135,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed',
-      transition: theme.transitions.create('height', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    generateTooltip: {
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed',
-      borderRadius: '50%',
-      width: theme.spacing(7),
-      height: theme.spacing(7)
-    },
-    addMenuButton: {
-      backgroundColor: theme.palette.primary.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    weightButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      color: theme.palette.secondary.contrastText,
-      margin: 0,
-      top: 'auto',
-      right: 135,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    sortMenuButton: {
-      backgroundColor: theme.palette.secondary.dark,
-      color: theme.palette.secondary.contrastText,
-      margin: 0,
-      top: 'auto',
-      right: 80,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
-    addButton: {
-      backgroundColor: theme.palette.primary.main,
-      margin: 0,
-      top: 'auto',
-      right: 28,
-      bottom: 25,
-      left: 'auto',
-      position: 'fixed',
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    addURLButton: {
-      marginBottom: 60
-    },
-    addDirectoryButton: {
-      marginBottom: 115
-    },
-    addVideoButton: {
-      marginBottom: 170
-    },
-    libraryImportButton: {
-      marginBottom: 225
-    },
-    piwigoImportButton: {
-      marginBottom: 280
-    },
-    removeAllButton: {
-      backgroundColor: theme.palette.error.main,
-      marginBottom: 280
-    },
-    removeAllButtonAlt: {
-      marginBottom: 335
-    },
-    addButtonClose: {
-      marginBottom: 0,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    importBadge: {
-      top: 'auto',
-      right: 30,
-      bottom: 50,
-      left: 'auto',
-      position: 'fixed',
-      zIndex: theme.zIndex.fab + 1
-    },
-    icon: {
-      color: theme.palette.primary.contrastText
-    },
-    playButton: {
-      boxShadow: 'none'
-    },
-    maxMenu: {
-      paddingLeft: theme.spacing(1),
-      paddingRight: theme.spacing(2),
-      width: 100
-    },
-    sortMenu: {
-      width: 200
-    },
-    tagMenu: {
-      minHeight: 365,
-      minWidth: 250
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdrop: {
-      zIndex: theme.zIndex.modal,
-      height: '100%',
-      width: '100%'
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    phraseInput: {
-      minWidth: 550,
-      minHeight: 100
-    },
-    confirmCopy: {
-      color: theme.palette.success.main,
-      position: 'absolute'
-    },
-    librarySearch: {
-      position: 'absolute',
-      right: 95
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 0,
+    minHeight: 64
+  },
+  appBarSpacerCollapse: {
+    width: '100%'
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  title: {
+    textAlign: 'center'
+  },
+  titleField: {
+    width: '100%',
+    margin: 0
+  },
+  titleInput: {
+    color: theme.palette.primary.contrastText,
+    textAlign: 'center',
+    fontSize: theme.typography.h4.fontSize
+  },
+  noTitle: {
+    width: '33%',
+    height: theme.spacing(7)
+  },
+  drawer: {
+    position: 'absolute'
+  },
+  drawerSpacer: {
+    minWidth: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      minWidth: theme.spacing(9)
     }
-  })
+  },
+  drawerButton: {
+    backgroundColor: theme.palette.primary.main,
+    minHeight: theme.spacing(6),
+    [theme.breakpoints.down('xs')]: {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+  drawerIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperClose: {
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
+    }
+  },
+  tabs: {
+    borderRight: `1px solid ${theme.palette.divider}`
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    height: '100%',
+    padding: theme.spacing(0),
+    overflowY: 'auto'
+  },
+  sourcesSection: {
+    height: '100%'
+  },
+  tabPanel: {
+    display: 'flex',
+    height: '100%'
+  },
+  tab: {
+    width: drawerWidth,
+    height: theme.spacing(12),
+    transition: theme.transitions.create(
+      ['width', 'margin', 'background', 'opacity'],
+      {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen
+      }
+    ),
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.08)',
+      opacity: 1,
+      transition: theme.transitions.create(['background', 'opacity'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      })
+    }
+  },
+  tabClose: {
+    minWidth: 0,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
+    }
+  },
+  optionsTab: {
+    ariaControls: 'vertical-tabpanel-0'
+  },
+  effectsTab: {
+    ariaControls: 'vertical-tabpanel-1'
+  },
+  audioTextTab: {
+    ariaControls: 'vertical-tabpanel-2'
+  },
+  sourcesTab: {
+    ariaControls: 'vertical-tabpanel-3'
+  },
+  generateTab: {
+    ariaControls: 'vertical-tabpanel-4'
+  },
+  deleteItem: {
+    color: theme.palette.error.main
+  },
+  removeAllWGButton: {
+    backgroundColor: theme.palette.error.main,
+    margin: 0,
+    top: 'auto',
+    right: 190,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  overrideOn: {
+    backgroundColor: theme.palette.primary.dark
+  },
+  overrideOff: {
+    backgroundColor: theme.palette.secondary.dark
+  },
+  overrideIgnoreWGButton: {
+    margin: 0,
+    top: 'auto',
+    right: 135,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed',
+    transition: theme.transitions.create('height', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  generateTooltip: {
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed',
+    borderRadius: '50%',
+    width: theme.spacing(7),
+    height: theme.spacing(7)
+  },
+  addMenuButton: {
+    backgroundColor: theme.palette.primary.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  weightButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.secondary.contrastText,
+    margin: 0,
+    top: 'auto',
+    right: 135,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  sortMenuButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.secondary.contrastText,
+    margin: 0,
+    top: 'auto',
+    right: 80,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed'
+  },
+  addButton: {
+    backgroundColor: theme.palette.primary.main,
+    margin: 0,
+    top: 'auto',
+    right: 28,
+    bottom: 25,
+    left: 'auto',
+    position: 'fixed',
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  addURLButton: {
+    marginBottom: 60
+  },
+  addDirectoryButton: {
+    marginBottom: 115
+  },
+  addVideoButton: {
+    marginBottom: 170
+  },
+  libraryImportButton: {
+    marginBottom: 225
+  },
+  piwigoImportButton: {
+    marginBottom: 280
+  },
+  removeAllButton: {
+    backgroundColor: theme.palette.error.main,
+    marginBottom: 280
+  },
+  removeAllButtonAlt: {
+    marginBottom: 335
+  },
+  addButtonClose: {
+    marginBottom: 0,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  importBadge: {
+    top: 'auto',
+    right: 30,
+    bottom: 50,
+    left: 'auto',
+    position: 'fixed',
+    zIndex: theme.zIndex.fab + 1
+  },
+  icon: {
+    color: theme.palette.primary.contrastText
+  },
+  playButton: {
+    boxShadow: 'none'
+  },
+  maxMenu: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(2),
+    width: 100
+  },
+  sortMenu: {
+    width: 200
+  },
+  tagMenu: {
+    minHeight: 365,
+    minWidth: 250
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    height: '100%',
+    width: '100%'
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  phraseInput: {
+    minWidth: 550,
+    minHeight: 100
+  },
+  confirmCopy: {
+    color: theme.palette.success.main,
+    position: 'absolute'
+  },
+  librarySearch: {
+    position: 'absolute',
+    right: 95
+  }
+}))
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />
 }
 
-export interface SceneDetailProps extends WithStyles<typeof styles> {
+export interface SceneDetailProps {
   sceneID: number
 }
 
 function SceneDetail(props: SceneDetailProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
   const piwigoConfigured = useAppSelector(
@@ -561,7 +558,9 @@ function SceneDetail(props: SceneDetailProps) {
       e.altKey &&
       (e.key === 'p' || e.key === 'π')
     ) {
-      setOpenMenu(openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport)
+      setOpenMenu(
+        openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport
+      )
     }
   }
 
@@ -713,7 +712,7 @@ function SceneDetail(props: SceneDetailProps) {
   }
 
   const onCopySceneEffects = () => {
-    flipflip.clipboard.copyTextToClipboard(sceneEffects)
+    flipflip().clipboard.copyTextToClipboard(sceneEffects)
     setConfirmCopy(true)
     setTimeout(() => {
       setConfirmCopy(false)
@@ -792,14 +791,14 @@ function SceneDetail(props: SceneDetailProps) {
     onCloseDialog()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const open = drawerOpen
   return (
     <div className={classes.root}>
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
           (tutorial === SDT.title || tutorial === SDT.play) &&
             classes.backdropTop
@@ -843,7 +842,7 @@ function SceneDetail(props: SceneDetailProps) {
                 variant="h4"
                 color="inherit"
                 noWrap
-                className={clsx(
+                className={cx(
                   classes.title,
                   name.length === 0 && classes.noTitle,
                   tutorial === SDT.title && classes.highlight
@@ -870,7 +869,7 @@ function SceneDetail(props: SceneDetailProps) {
           )}
 
           <Fab
-            className={clsx(
+            className={cx(
               classes.playButton,
               tutorial === SDT.play && classes.highlight
             )}
@@ -887,7 +886,7 @@ function SceneDetail(props: SceneDetailProps) {
       </AppBar>
 
       <Drawer
-        className={clsx(
+        className={cx(
           classes.drawer,
           (drawerOpen ||
             tutorial === SDT.options1 ||
@@ -896,11 +895,11 @@ function SceneDetail(props: SceneDetailProps) {
         )}
         variant="permanent"
         classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose)
+          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
         }}
         open={drawerOpen}
       >
-        <div className={clsx(!open && classes.appBarSpacerWrapper)}>
+        <div className={cx(!open && classes.appBarSpacerWrapper)}>
           <Collapse in={!open} className={classes.appBarSpacerCollapse}>
             <div className={classes.appBarSpacer} />
           </Collapse>
@@ -927,7 +926,7 @@ function SceneDetail(props: SceneDetailProps) {
               aria-controls="vertical-tabpanel-0"
               icon={<BuildIcon />}
               label={open ? 'Options' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.optionsTab,
                 !open && classes.tabClose,
@@ -940,7 +939,7 @@ function SceneDetail(props: SceneDetailProps) {
               aria-controls="vertical-tabpanel-1"
               icon={<PhotoFilterIcon />}
               label={open ? 'Effects' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.effectsTab,
                 !open && classes.tabClose,
@@ -953,7 +952,7 @@ function SceneDetail(props: SceneDetailProps) {
               aria-controls="vertical-tabpanel-2"
               icon={<AudiotrackIcon />}
               label={open ? 'Audio/Text' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.audioTextTab,
                 !open && classes.tabClose,
@@ -967,7 +966,7 @@ function SceneDetail(props: SceneDetailProps) {
               aria-controls="vertical-tabpanel-3"
               icon={<CollectionsIcon />}
               label={open ? `Sources (${sources.length})` : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.sourcesTab,
                 !open && classes.tabClose,
@@ -981,7 +980,7 @@ function SceneDetail(props: SceneDetailProps) {
                 aria-controls="vertical-tabpanel-4"
                 icon={<LocalOfferIcon />}
                 label={open ? `Generate (${generatorWeights.length})` : ''}
-                className={clsx(
+                className={cx(
                   classes.tab,
                   classes.generateTab,
                   !open && classes.tabClose
@@ -998,7 +997,7 @@ function SceneDetail(props: SceneDetailProps) {
               onClick={() => {
                 dispatch(saveAsScene(props.sceneID))
               }}
-              className={clsx(
+              className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
@@ -1021,7 +1020,7 @@ function SceneDetail(props: SceneDetailProps) {
               onClick={() => {
                 dispatch(cloneScene(props.sceneID))
               }}
-              className={clsx(
+              className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
@@ -1041,7 +1040,7 @@ function SceneDetail(props: SceneDetailProps) {
             <ListItem
               button
               onClick={onOpenSceneEffectsMenu}
-              className={clsx(
+              className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
@@ -1062,7 +1061,7 @@ function SceneDetail(props: SceneDetailProps) {
               onClick={() => {
                 dispatch(exportScene(props.sceneID))
               }}
-              className={clsx(
+              className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
@@ -1081,7 +1080,7 @@ function SceneDetail(props: SceneDetailProps) {
               onClick={() => {
                 dispatch(resetScene(props.sceneID))
               }}
-              className={clsx(
+              className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
@@ -1095,7 +1094,7 @@ function SceneDetail(props: SceneDetailProps) {
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Delete Scene'}>
             <ListItemButton
               onClick={onDeleteScene}
-              className={clsx(
+              className={cx(
                 classes.deleteItem,
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
@@ -1170,7 +1169,7 @@ function SceneDetail(props: SceneDetailProps) {
 
           {openTab === 3 && (
             <Typography
-              className={clsx(openTab === 3 && classes.sourcesSection)}
+              className={cx(openTab === 3 && classes.sourcesSection)}
               component="div"
             >
               <div className={classes.tabPanel}>
@@ -1251,7 +1250,7 @@ function SceneDetail(props: SceneDetailProps) {
               placement="left"
             >
               <Fab
-                className={clsx(
+                className={cx(
                   classes.addButton,
                   !piwigoConfigured && classes.removeAllButton,
                   piwigoConfigured && classes.removeAllButtonAlt,
@@ -1315,7 +1314,7 @@ function SceneDetail(props: SceneDetailProps) {
           {piwigoConfigured && (
             <Tooltip disableInteractive title="From Piwigo" placement="left">
               <Fab
-                className={clsx(
+                className={cx(
                   classes.addButton,
                   classes.piwigoImportButton,
                   openMenu !== MO.new && classes.addButtonClose,
@@ -1331,7 +1330,7 @@ function SceneDetail(props: SceneDetailProps) {
           )}
           <Tooltip disableInteractive title="From Library" placement="left">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.libraryImportButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1350,7 +1349,7 @@ function SceneDetail(props: SceneDetailProps) {
             placement="left"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addVideoButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1365,7 +1364,7 @@ function SceneDetail(props: SceneDetailProps) {
           </Tooltip>
           <Tooltip disableInteractive title="Local Directory" placement="left">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addDirectoryButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1380,7 +1379,7 @@ function SceneDetail(props: SceneDetailProps) {
           </Tooltip>
           <Tooltip disableInteractive title="URL" placement="left">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addURLButton,
                 openMenu !== MO.new && classes.addButtonClose,
@@ -1395,7 +1394,7 @@ function SceneDetail(props: SceneDetailProps) {
             </Fab>
           </Tooltip>
           <Fab
-            className={clsx(
+            className={cx(
               classes.addMenuButton,
               openMenu === MO.new && classes.backdropTop,
               (tutorial === SDT.add1 || tutorial === SDT.add2) &&
@@ -1572,7 +1571,7 @@ function SceneDetail(props: SceneDetailProps) {
             placement="top-end"
           >
             <Fab
-              className={clsx(
+              className={cx(
                 classes.overrideIgnoreWGButton,
                 overrideIgnore && classes.overrideOn,
                 !overrideIgnore && classes.overrideOff
@@ -1586,10 +1585,10 @@ function SceneDetail(props: SceneDetailProps) {
           </Tooltip>
           <Tooltip disableInteractive title="Max" placement="top">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.sortMenuButton,
                 tutorial === SDGT.buttons &&
-                  clsx(classes.backdropTop, classes.disable)
+                  cx(classes.backdropTop, classes.disable)
               )}
               onClick={onOpenMaxMenu}
               size="medium"
@@ -1628,11 +1627,11 @@ function SceneDetail(props: SceneDetailProps) {
           </Menu>
           <Tooltip disableInteractive title="Adv Rule" placement="left">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addDirectoryButton,
                 tutorial === SDGT.buttons &&
-                  clsx(classes.backdropTop, classes.disable)
+                  cx(classes.backdropTop, classes.disable)
               )}
               onClick={onAddAdvRule}
               size="small"
@@ -1642,11 +1641,11 @@ function SceneDetail(props: SceneDetailProps) {
           </Tooltip>
           <Tooltip disableInteractive title="Simple Rule" placement="left">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.addButton,
                 classes.addURLButton,
                 tutorial === SDGT.buttons &&
-                  clsx(classes.backdropTop, classes.highlight)
+                  cx(classes.backdropTop, classes.highlight)
               )}
               onClick={onOpenTagMenu}
               size="small"
@@ -1660,17 +1659,17 @@ function SceneDetail(props: SceneDetailProps) {
             placement="top-end"
           >
             <span
-              className={clsx(
+              className={cx(
                 classes.generateTooltip,
                 tutorial === SDGT.buttons &&
-                  clsx(classes.backdropTop, classes.disable),
+                  cx(classes.backdropTop, classes.disable),
                 tutorial === SDGT.generate && classes.backdropTop
               )}
               style={!generatorWeightsValid ? { pointerEvents: 'none' } : {}}
             >
               <Fab
                 disabled={!generatorWeightsValid}
-                className={clsx(
+                className={cx(
                   classes.addMenuButton,
                   tutorial === SDGT.generate && classes.highlight
                 )}
@@ -1704,12 +1703,12 @@ function SceneDetail(props: SceneDetailProps) {
             }}
             anchorEl={menuAnchorEl}
             keepMounted
-            className={clsx(tutorial === SDGT.buttons && classes.backdropTop)}
+            className={cx(tutorial === SDGT.buttons && classes.backdropTop)}
             classes={{
-              paper: clsx(
+              paper: cx(
                 classes.tagMenu,
                 tutorial === SDGT.buttons &&
-                  clsx(classes.backdropTop, classes.highlight)
+                  cx(classes.backdropTop, classes.highlight)
               )
             }}
             open={openMenu === MO.simpleRule}
@@ -1750,4 +1749,4 @@ function SceneDetail(props: SceneDetailProps) {
 }
 
 ;(SceneDetail as any).displayName = 'SceneDetail'
-export default withStyles(styles)(SceneDetail as any)
+export default SceneDetail

@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { en, SC, SL } from 'flipflip-common'
 import ColorPicker from '../config/ColorPicker'
@@ -73,34 +72,33 @@ import {
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  }
+}))
 
-export interface StrobeCardProps extends WithStyles<typeof styles> {
+export interface StrobeCardProps {
   sceneID?: number
 }
 
 function StrobeCard(props: StrobeCardProps) {
-  const classes = props.classes
+  const { classes } = useStyles()
   const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
   const strobe = useAppSelector(selectSceneStrobe(props.sceneID))
   const strobePulse = useAppSelector(selectSceneStrobePulse(props.sceneID))
@@ -126,7 +124,7 @@ function StrobeCard(props: StrobeCardProps) {
           <Grid item xs={12} sm={sidebar ? 12 : 7}>
             <Collapse
               in={strobe}
-              className={clsx(classes.fullWidth, classes.paddingLeft)}
+              className={cx(classes.fullWidth, classes.paddingLeft)}
             >
               <BaseSwitch
                 label="Add Delay"
@@ -141,7 +139,7 @@ function StrobeCard(props: StrobeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           (!strobe || strobeLayer === SL.image) && classes.noPadding
         )}
       >
@@ -174,7 +172,7 @@ function StrobeCard(props: StrobeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           (!strobe || strobeLayer === SL.image) && classes.noPadding
         )}
       >
@@ -204,7 +202,7 @@ function StrobeCard(props: StrobeCardProps) {
             )}
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(!strobe && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
         <Collapse in={strobe} className={classes.fullWidth}>
           <Grid container spacing={2} alignItems="center">
             <Grid
@@ -229,7 +227,7 @@ function StrobeCard(props: StrobeCardProps) {
               item
               xs={12}
               sm={sidebar ? 12 : true}
-              className={clsx(strobeLayer !== SL.bottom && classes.noPadding)}
+              className={cx(strobeLayer !== SL.bottom && classes.noPadding)}
             >
               <Collapse
                 in={strobeLayer === SL.bottom}
@@ -251,12 +249,12 @@ function StrobeCard(props: StrobeCardProps) {
           </Grid>
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(!strobe && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
         <Collapse in={strobe} className={classes.fullWidth}>
           <Divider />
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(!strobe && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
         <Collapse in={strobe} className={classes.fullWidth}>
           <TimingCard
             sidebar={sidebar}
@@ -293,7 +291,7 @@ function StrobeCard(props: StrobeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx((!strobe || !strobePulse) && classes.noPadding)}
+        className={cx((!strobe || !strobePulse) && classes.noPadding)}
       >
         <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
           <Divider />
@@ -302,7 +300,7 @@ function StrobeCard(props: StrobeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx((!strobe || !strobePulse) && classes.noPadding)}
+        className={cx((!strobe || !strobePulse) && classes.noPadding)}
       >
         <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
           <TimingCard
@@ -340,12 +338,12 @@ function StrobeCard(props: StrobeCardProps) {
       </Grid>
       {easingControls && (
         <React.Fragment>
-          <Grid item xs={12} className={clsx(!strobe && classes.noPadding)}>
+          <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
             <Collapse in={strobe} className={classes.fullWidth}>
               <Divider />
             </Collapse>
           </Grid>
-          <Grid item xs={12} className={clsx(!strobe && classes.noPadding)}>
+          <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
             <Collapse in={strobe} className={classes.fullWidth}>
               <EasingCard
                 sidebar={sidebar}
@@ -383,4 +381,4 @@ function StrobeCard(props: StrobeCardProps) {
 }
 
 ;(StrobeCard as any).displayName = 'StrobeCard'
-export default withStyles(styles)(StrobeCard as any)
+export default StrobeCard

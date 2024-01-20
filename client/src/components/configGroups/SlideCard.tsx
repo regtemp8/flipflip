@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { en, STF } from 'flipflip-common'
 import TimingCard from '../common/TimingCard'
@@ -52,42 +51,41 @@ import { useAppSelector } from '../../store/hooks'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface SlideCardProps extends WithStyles<typeof styles> {
+export interface SlideCardProps {
   sceneID?: number
 }
 
 function SlideCard(props: SlideCardProps) {
-  const classes = props.classes
+  const { classes } = useStyles()
   const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
   const slide = useAppSelector(selectSceneSlide(props.sceneID))
   const tutorial = useAppSelector(selectAppTutorial())
@@ -100,7 +98,7 @@ function SlideCard(props: SlideCardProps) {
       container
       spacing={slide ? 2 : 0}
       alignItems="center"
-      className={clsx(tutorial != null && classes.disable)}
+      className={cx(tutorial != null && classes.disable)}
     >
       <Grid item xs={12}>
         <BaseSwitch
@@ -220,4 +218,4 @@ function SlideCard(props: SlideCardProps) {
 }
 
 ;(SlideCard as any).displayName = 'SlideCard'
-export default withStyles(styles)(SlideCard as any)
+export default SlideCard

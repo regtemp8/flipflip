@@ -1,7 +1,7 @@
 import wretch from 'wretch'
 import { type AppDispatch, type RootState } from '../store'
-import { type EntryState } from '../EntryState'
-import { initialRootState } from '../RootState'
+import { type EntryState, getEntry } from '../EntryState'
+import { AppStorageImport, initialAppStorageImport } from '../AppStorageImport'
 import {
   audioSortFunction,
   getSourceUrl,
@@ -69,7 +69,7 @@ import {
   fromSceneGridStorage,
   fromLibrarySourceStorage,
   toConfigStorage
-} from './data/App'
+} from './convert'
 import type Route from '../app/data/Route'
 import type Audio from '../audio/Audio'
 import { setAudioSlice, setAudioTags, setAudioToggleTag } from '../audio/slice'
@@ -83,7 +83,7 @@ import {
 } from '../playlist/slice'
 import type Scene from '../scene/Scene'
 import { newScene } from '../scene/Scene'
-import { getScene, videoClipperSceneName } from '../scene/selectors'
+import { videoClipperSceneName } from '../scene/selectors'
 import {
   deleteScene,
   setScene,
@@ -194,21 +194,20 @@ import { setVideoClipperSourceID } from '../videoClipper/slice'
 import { setCaptionScriptorCaptionScriptID } from '../captionScriptor/slice'
 import { setPlayersState } from '../player/slice'
 import { setSourceScraperState } from '../sourceScraper/slice'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 export function fetchAppStorage() {
   return async function fetchAppStorageThunk(
     dispatch: AppDispatch,
     getState: () => RootState
   ) {
-    const flipflip = FlipFlipService.getInstance()
     const appStorage: AppStorage =
-      await flipflip.api.getAppStorageInitialState()
+      await flipflip().api.getAppStorageInitialState()
     setAppStorage(appStorage, dispatch)
   }
 }
 
-function setAppStorage(appStorage: AppStorage, dispatch: AppDispatch) {
+export function setAppStorage(appStorage: AppStorage, dispatch: AppDispatch) {
   const state = fromAppStorage(appStorage)
   dispatch(setAppSlice(state.app))
   dispatch(setAudioSlice(state.audio))
@@ -254,8 +253,7 @@ export function saveAppStorageInterval() {
       if (shouldSaveState(oldState, newState) && now - lastSaved > 3000) {
         lastSaved = now
         oldState = newState
-        const flipflip = FlipFlipService.getInstance()
-        flipflip.api.saveAppStorage(toAppStorage(newState))
+        flipflip().api.saveAppStorage(toAppStorage(newState))
       }
     }, 500)
   }
@@ -715,8 +713,7 @@ export function cleanBackups() {
     getState: () => RootState
   ): Promise<void> => {
     const state = getState()
-    const flipflip = FlipFlipService.getInstance()
-    await flipflip.api.cleanBackups(toConfigStorage(state.app.config, state))
+    await flipflip().api.cleanBackups(toConfigStorage(state.app.config, state))
   }
 }
 
@@ -726,8 +723,7 @@ export function restoreAppStorageFromBackup(backupFile: string) {
     getState: () => RootState
   ): Promise<void> => {
     const state = getState()
-    const flipflip = FlipFlipService.getInstance()
-    const text = await flipflip.api.readTextFile(backupFile)
+    const text = await flipflip().api.readTextFile(backupFile)
     const data = JSON.parse(text)
     const backupState = copy<AppStorage>(initialAppStorage)
     backupState.version = data.version
@@ -880,10 +876,9 @@ export function blacklistFile(sourceURL: string, fileToBlacklist?: string) {
         (await getCachePath(cachingDirectory, sourceURL)) +
         getFileName(fileToBlacklist, pathSep)
 
-      const flipflip = FlipFlipService.getInstance()
-      if (await flipflip.api.pathExists(cachePath)) {
+      if (await flipflip().api.pathExists(cachePath)) {
         try {
-          await flipflip.api.unlink(cachePath)
+          await flipflip().api.unlink(cachePath)
         } catch (err) {
           console.error(err)
         }
@@ -1106,26 +1101,25 @@ export function cacheImage(i: HTMLImageElement | HTMLVideoElement) {
 
       if (fileType !== ST.local && i.src.startsWith('http')) {
         const cachePath = (await getCachePath(caching.directory)) as string
-        const flipflip = FlipFlipService.getInstance()
-        if (!(await flipflip.api.pathExists(cachePath))) {
-          await flipflip.api.mkdir(cachePath)
+        if (!(await flipflip().api.pathExists(cachePath))) {
+          await flipflip().api.mkdir(cachePath)
         }
         const maxSize = caching.maxSize
         const sourceCachePath = await getCachePath(caching.directory, source)
         const filePath = sourceCachePath + getFileName(i.src, pathSep)
         const downloadImage = async () => {
-          if (!(await flipflip.api.pathExists(filePath))) {
+          if (!(await flipflip().api.pathExists(filePath))) {
             wretch(i.src)
               .get()
               .arrayBuffer((arrayBuffer: ArrayBuffer) => {
-                flipflip.api.outputFile(filePath, arrayBuffer)
+                flipflip().api.outputFile(filePath, arrayBuffer)
               })
           }
         }
         if (maxSize === 0) {
           await downloadImage()
         } else {
-          const size = await flipflip.api.getFolderSize(cachePath)
+          const size = await flipflip().api.getFolderSize(cachePath)
           const mbSize = size / 1024 / 1024
           if (mbSize < maxSize) {
             await downloadImage()
@@ -1149,7 +1143,7 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
 
     // map to redux state
     const state = getState()
-    const slice = copy<RootState>(initialRootState)
+    const slice = copy<AppStorageImport>(initialAppStorageImport)
     for (let i = 0; i < scenesToImport.length; i++) {
       if (scenesToImport[i].grid) {
         const grid = newSceneGridStorage(scenesToImport[i])
@@ -1419,7 +1413,7 @@ export function sortSources(
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const pathSep = state.constants.pathSep
-    const scene = sceneID ? getScene(state.scene, sceneID) : null
+    const scene = sceneID ? getEntry(state.scene, sceneID) : null
     if (algorithm === SF.random) {
       if (scene != null) {
         dispatch(
@@ -1686,9 +1680,8 @@ export function swapScripts(oldSourceId: number, newSourceId: number) {
 export function detectBPMs() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     let progress: Progress = { current: 0, total: 0 }
-    const flipflip = FlipFlipService.getInstance()
     const readMetadata = (audio: Audio) => {
-      flipflip.api
+      flipflip().api
         .parseMusicMetadataBpm(audio.url as string)
         .then((bpm: number | undefined) => {
           if (bpm) {
@@ -1697,7 +1690,7 @@ export function detectBPMs() {
             const total = progress.total as number
             progress.current = current + 1
             dispatch(setProgress(progress))
-            flipflip.api.setProgressBar(progress.current / total)
+            flipflip().api.setProgressBar(progress.current / total)
             setTimeout(detectBPMLoop, 100)
           } else {
             detectBPM(audio)
@@ -1718,7 +1711,7 @@ export function detectBPMs() {
         const total = progress.total as number
         progress.current = current + 1
         dispatch(setProgress(progress))
-        flipflip.api.setProgressBar(progress.current / total)
+        flipflip().api.setProgressBar(progress.current / total)
         setTimeout(detectBPMLoop, 100)
       }
 
@@ -1736,7 +1729,7 @@ export function detectBPMs() {
                   const total = progress.total as number
                   progress.current = current + 1
                   dispatch(setProgress(progress))
-                  flipflip.api.setProgressBar(progress.current / total)
+                  flipflip().api.setProgressBar(progress.current / total)
                   setTimeout(detectBPMLoop, 100)
                 })
                 .catch((e: any) => {
@@ -1754,8 +1747,8 @@ export function detectBPMs() {
 
       try {
         const url = audio.url as string
-        if (await flipflip.api.pathExists(url)) {
-          const arrayBuffer = await flipflip.api.readBinaryFile(url)
+        if (await flipflip().api.pathExists(url)) {
+          const arrayBuffer = await flipflip().api.readBinaryFile(url)
           detectBPM(arrayBuffer)
         } else {
           wretch(url).get().arrayBuffer(detectBPM).catch(bpmError)
@@ -1768,11 +1761,11 @@ export function detectBPMs() {
     const detectBPMLoop = () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0, total: 0, title: '' }
         dispatch(setProgress(progress))
       } else if (actionableLibrary.length === progress.current) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         dispatch(
           setSystemSnack({
             message: 'BPM Detection has completed.',
@@ -1797,7 +1790,7 @@ export function detectBPMs() {
           const total = progress.total as number
           progress.current = current + 1
           dispatch(setProgress(progress))
-          flipflip.api.setProgressBar(progress.current / total)
+          flipflip().api.setProgressBar(progress.current / total)
           detectBPMLoop()
         }
       }
@@ -1814,7 +1807,7 @@ export function detectBPMs() {
       progress.current = 0
       progress.total = actionableLibrary.length
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(progress.current / progress.total)
+      flipflip().api.setProgressBar(progress.current / progress.total)
       detectBPMLoop()
     }
   }
@@ -1877,14 +1870,13 @@ export function setScriptsAddAllAtStart(newURLs: string[]) {
   ): Promise<void> => {
     const state = getState()
     const scripts = state.app.scripts
-    const flipflip = FlipFlipService.getInstance()
 
     // dedup
     const sourceURLs = scripts.map((id) => state.captionScript.entries[id].url)
     const newSources = newURLs.filter((s) => !sourceURLs.includes(s))
     let id = state.captionScript.nextID
     for (const url of newSources) {
-      if (await flipflip.api.pathExists(url)) {
+      if (await flipflip().api.pathExists(url)) {
         dispatch(
           setCaptionScript(
             newCaptionScript({
@@ -1908,7 +1900,6 @@ export function importInstagram() {
     let igLogin = true
     let session: any = null
     let progress: Progress = {}
-    const flipflip = FlipFlipService.getInstance()
 
     const processItems = (items: any, next: any) => {
       let following = []
@@ -1945,11 +1936,11 @@ export function importInstagram() {
       progress.next = next
       progress.current = (progress.current as number) + 1
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(2)
+      flipflip().api.setProgressBar(2)
     }
 
     const error = (error: string) => {
-      flipflip.api.setProgressBar(-1)
+      flipflip().api.setProgressBar(-1)
       dispatch(systemMessage(error))
       progress = { current: 0 }
       dispatch(setProgress(progress))
@@ -1961,19 +1952,19 @@ export function importInstagram() {
     const instagramImportLoop = async () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0 }
         dispatch(setProgress(progress))
         return
       }
       if (igLogin) {
         try {
-          const userPk = await flipflip.api.igLogin(
+          const userPk = await flipflip().api.igLogin(
             state.app.config.remoteSettings.instagramUsername,
             state.app.config.remoteSettings.instagramPassword
           )
-          session = await flipflip.api.igSerializeCookieJar()
-          const followingItems = await flipflip.api.igFollowingFeed(userPk)
+          session = await flipflip().api.igSerializeCookieJar()
+          const followingItems = await flipflip().api.igFollowingFeed(userPk)
           processItems(followingItems.items, userPk + '~' + followingItems.feed)
         } catch (e: any) {
           error(e)
@@ -1982,7 +1973,7 @@ export function importInstagram() {
         const next = (progress.next as string).split('~')
         const id = Number(next[0])
         const feedSession = next[1]
-        const followingItems = await flipflip.api.igGetMoreFollowingFeed(
+        const followingItems = await flipflip().api.igGetMoreFollowingFeed(
           session,
           id,
           feedSession
@@ -1991,7 +1982,7 @@ export function importInstagram() {
           processItems(followingItems.items, id + '~' + followingItems.feed)
         } else {
           igLogin = true
-          flipflip.api.setProgressBar(-1)
+          flipflip().api.setProgressBar(-1)
           dispatch(
             setSystemSnack({
               message: 'Instagram Following Import has completed',
@@ -2013,7 +2004,7 @@ export function importInstagram() {
       progress.mode = PR.instagram
       progress.current = 0
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(2)
+      flipflip().api.setProgressBar(2)
       instagramImportLoop()
     }
   }
@@ -2022,19 +2013,18 @@ export function importInstagram() {
 export function importReddit() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     let progress: Progress = { current: 0 }
-    const flipflip = FlipFlipService.getInstance()
 
     const redditImportLoop = async () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0 }
         dispatch(setProgress(progress))
         return
       }
 
       try {
-        const subscriptionListing = await flipflip.api.redditGetSubscriptions(
+        const subscriptionListing = await flipflip().api.redditGetSubscriptions(
           state.app.config.remoteSettings.redditUserAgent,
           state.app.config.remoteSettings.redditClientID,
           state.app.config.remoteSettings.redditRefreshToken,
@@ -2042,7 +2032,7 @@ export function importReddit() {
         )
 
         if (subscriptionListing.length === 0) {
-          flipflip.api.setProgressBar(-1)
+          flipflip().api.setProgressBar(-1)
           dispatch(
             setSystemSnack({
               message: 'Reddit Subscription Import has completed',
@@ -2085,14 +2075,14 @@ export function importReddit() {
             subscriptionListing[subscriptionListing.length - 1].name
           progress.current = (progress.current as number) + 1
           dispatch(setProgress(progress))
-          flipflip.api.setProgressBar(2)
+          flipflip().api.setProgressBar(2)
 
           // Loop until we run out of blogs
           setTimeout(redditImportLoop, 1500)
         }
       } catch (err) {
         console.error(err)
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         dispatch(
           setSystemSnack({
             message: 'Error retrieving subscriptions: ' + err,
@@ -2114,7 +2104,7 @@ export function importReddit() {
       progress.mode = PR.reddit
       progress.current = 0
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(2)
+      flipflip().api.setProgressBar(2)
       redditImportLoop()
     }
   }
@@ -2126,20 +2116,19 @@ export function importTumblr() {
     getState: () => RootState
   ): Promise<void> => {
     let progress: Progress = {}
-    const flipflip = FlipFlipService.getInstance()
 
     // Define our loop
     const tumblrImportLoop = async () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0, total: 0 }
         dispatch(setProgress(progress))
         return
       }
       // Get the next page of blogs
       try {
-        let following = await flipflip.api.tumblrBlogs(
+        let following = await flipflip().api.tumblrBlogs(
           state.app.config.remoteSettings.tumblrKey,
           state.app.config.remoteSettings.tumblrSecret,
           state.app.config.remoteSettings.tumblrOAuthToken,
@@ -2176,7 +2165,7 @@ export function importTumblr() {
 
         // Update progress
         dispatch(setProgress(progress))
-        flipflip.api.setProgressBar(
+        flipflip().api.setProgressBar(
           progress.current / (progress.total as number)
         )
 
@@ -2184,7 +2173,7 @@ export function importTumblr() {
         if (progress.current < state.app.progressTotal) {
           setTimeout(tumblrImportLoop, 1500)
         } else {
-          flipflip.api.setProgressBar(-1)
+          flipflip().api.setProgressBar(-1)
           dispatch(
             setSystemSnack({
               message: 'Tumblr Following Import has completed',
@@ -2195,7 +2184,7 @@ export function importTumblr() {
           dispatch(setProgress(progress))
         }
       } catch (err) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         dispatch(
           setSystemSnack({
             message: 'Error retrieving following: ' + err,
@@ -2212,7 +2201,7 @@ export function importTumblr() {
     const state = getState()
     if (!state.app.progressMode) {
       try {
-        const totalBlogs = await flipflip.api.tumblrTotalBlogs(
+        const totalBlogs = await flipflip().api.tumblrTotalBlogs(
           state.app.config.remoteSettings.tumblrKey,
           state.app.config.remoteSettings.tumblrSecret,
           state.app.config.remoteSettings.tumblrOAuthToken,
@@ -2223,12 +2212,12 @@ export function importTumblr() {
         progress.current = 0
         progress.total = totalBlogs
         dispatch(setProgress(progress))
-        flipflip.api.setProgressBar(
+        flipflip().api.setProgressBar(
           progress.current / (progress.total as number)
         )
         tumblrImportLoop()
       } catch (err) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         dispatch(systemMessage('Error retrieving following: ' + err))
         progress = { current: 0, total: 0 }
         dispatch(setProgress(progress))
@@ -2241,19 +2230,18 @@ export function importTumblr() {
 export function importTwitter() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     let progress: Progress = {}
-    const flipflip = FlipFlipService.getInstance()
 
     const twitterImportLoop = async () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0 }
         dispatch(setProgress(progress))
         return
       }
 
       try {
-        const friends = await flipflip.api.twitterFriendsList(
+        const friends = await flipflip().api.twitterFriendsList(
           state.app.config.remoteSettings.twitterConsumerKey,
           state.app.config.remoteSettings.twitterConsumerSecret,
           state.app.config.remoteSettings.twitterAccessTokenKey,
@@ -2286,7 +2274,7 @@ export function importTwitter() {
 
         if (friends.cursor === 0) {
           // We're done
-          flipflip.api.setProgressBar(-1)
+          flipflip().api.setProgressBar(-1)
           dispatch(
             setSystemSnack({
               message: 'Twitter Following Import has completed',
@@ -2301,7 +2289,7 @@ export function importTwitter() {
           progress.next = friends.cursor?.toString()
           progress.current = (progress.current as number) + 1
           dispatch(setProgress(progress))
-          flipflip.api.setProgressBar(2)
+          flipflip().api.setProgressBar(2)
         }
       } catch (error: any) {
         let message = 'Error retrieving following:'
@@ -2311,7 +2299,7 @@ export function importTwitter() {
             'Error retrieving following: ' + e.code + ' - ' + e.message
           )
         }
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
 
         dispatch(systemMessage(message))
         progress = { current: 0 }
@@ -2330,7 +2318,7 @@ export function importTwitter() {
       progress.current = 0
       dispatch(setProgress(progress))
 
-      flipflip.api.setProgressBar(2)
+      flipflip().api.setProgressBar(2)
       twitterImportLoop()
     }
   }
@@ -2340,7 +2328,6 @@ export function markOffline() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     let progress: Progress = {}
-    const flipflip = FlipFlipService.getInstance()
 
     const actionableLibrary = state.app.library
       .map((id) => state.librarySource.entries[id])
@@ -2355,11 +2342,11 @@ export function markOffline() {
     const offlineLoop = async () => {
       const state = getState()
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { title: '', current: 0, total: 0 }
         dispatch(setProgress(progress))
       } else if (actionableLibrary.length === progress.current) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         const message =
           'Offline Check has completed. Sources not available are now marked.'
         dispatch(setSystemSnack({ message, severity: SS.success }))
@@ -2395,7 +2382,7 @@ export function markOffline() {
               const total = progress.total as number
               progress.current = current + 1
               dispatch(setProgress(progress))
-              flipflip.api.setProgressBar(progress.current / total)
+              flipflip().api.setProgressBar(progress.current / total)
               setTimeout(offlineLoop, 1000)
             })
             .res((res) => {
@@ -2406,7 +2393,7 @@ export function markOffline() {
               const total = progress.total as number
               progress.current = current + 1
               dispatch(setProgress(progress))
-              flipflip.api.setProgressBar(progress.current / total)
+              flipflip().api.setProgressBar(progress.current / total)
               setTimeout(offlineLoop, 1000)
             })
             .catch((e) => {
@@ -2421,7 +2408,7 @@ export function markOffline() {
               const total = progress.total as number
               progress.current = current + 1
               dispatch(setProgress(progress))
-              flipflip.api.setProgressBar(progress.current / total)
+              flipflip().api.setProgressBar(progress.current / total)
               setTimeout(offlineLoop, 100)
             })
         } else {
@@ -2430,7 +2417,7 @@ export function markOffline() {
           const total = progress.total as number
           progress.current = current + 1
           dispatch(setProgress(progress))
-          flipflip.api.setProgressBar(progress.current / total)
+          flipflip().api.setProgressBar(progress.current / total)
           setTimeout(offlineLoop, 100)
         }
       } else {
@@ -2440,14 +2427,14 @@ export function markOffline() {
         progress.title = actionSource.url
         progress.current = current + 1
         dispatch(setProgress(progress))
-        flipflip.api.setProgressBar(progress.current / total)
+        flipflip().api.setProgressBar(progress.current / total)
         dispatch(
           setLibrarySourceLastCheck({
             id: actionSource.id,
             value: new Date().getTime()
           })
         )
-        const exists = await flipflip.api.pathExists(actionSource.url)
+        const exists = await flipflip().api.pathExists(actionSource.url)
         if (!exists) {
           dispatch(
             setLibrarySourceOffline({ id: actionSource.id, value: true })
@@ -2463,7 +2450,7 @@ export function markOffline() {
       progress.current = 0
       progress.total = actionableLibrary.length
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(progress.current / progress.total)
+      flipflip().api.setProgressBar(progress.current / progress.total)
       offlineLoop()
     }
   }
@@ -2476,7 +2463,6 @@ export function updateVideoMetadata() {
   ) {
     let progress: Progress = {}
     const state = getState()
-    const flipflip = FlipFlipService.getInstance()
 
     const actionableLibrary = state.app.library
       .map((id) => state.librarySource.entries[id])
@@ -2490,11 +2476,11 @@ export function updateVideoMetadata() {
       const state = getState()
       const offset = state.app.progressCurrent
       if (state.app.progressMode === PR.cancel) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         progress = { current: 0, total: 0, title: '' }
         dispatch(setProgress(progress))
       } else if (actionableLibrary.length === offset) {
-        flipflip.api.setProgressBar(-1)
+        flipflip().api.setProgressBar(-1)
         dispatch(
           setSystemSnack({
             message: 'Video Metadata update has completed.',
@@ -2526,7 +2512,7 @@ export function updateVideoMetadata() {
             const total = progress.total as number
             progress.current = current + 1
             dispatch(setProgress(progress))
-            flipflip.api.setProgressBar(progress.current / total)
+            flipflip().api.setProgressBar(progress.current / total)
             setTimeout(videoMetadataLoop, 100)
           }
           video.onerror = () => {
@@ -2535,7 +2521,7 @@ export function updateVideoMetadata() {
             const total = progress.total as number
             progress.current = current + 1
             dispatch(setProgress(progress))
-            flipflip.api.setProgressBar(progress.current / total)
+            flipflip().api.setProgressBar(progress.current / total)
             setTimeout(videoMetadataLoop, 100)
           }
 
@@ -2546,7 +2532,7 @@ export function updateVideoMetadata() {
           const total = progress.total as number
           progress.current = current + 1
           dispatch(setProgress(progress))
-          flipflip.api.setProgressBar(progress.current / total)
+          flipflip().api.setProgressBar(progress.current / total)
           videoMetadataLoop()
         }
       }
@@ -2558,7 +2544,7 @@ export function updateVideoMetadata() {
       progress.current = 0
       progress.total = actionableLibrary.length
       dispatch(setProgress(progress))
-      flipflip.api.setProgressBar(progress.current / progress.total)
+      flipflip().api.setProgressBar(progress.current / progress.total)
       videoMetadataLoop()
     }
   }
@@ -2571,8 +2557,7 @@ export function exportLibrary() {
       toLibrarySourceStorage(id, state)
     )
     const fileName = 'library_export-' + new Date().getTime() + '.json'
-    const flipflip = FlipFlipService.getInstance()
-    flipflip.api.saveJsonFile(fileName, JSON.stringify(sources))
+    flipflip().api.saveJsonFile(fileName, JSON.stringify(sources))
   }
 }
 
@@ -2583,8 +2568,7 @@ export function importLibrary(libraryImport: LibrarySourceStorage[]) {
   ): Promise<void> => {
     if (!libraryImport?.length) return
 
-    const flipflip = FlipFlipService.getInstance()
-    await flipflip.api.backupAppStorage()
+    await flipflip().api.backupAppStorage()
     const state = getState()
     const existingSources = new Map<string, number>()
     state.app.library
@@ -2600,7 +2584,7 @@ export function importLibrary(libraryImport: LibrarySourceStorage[]) {
         existingTags.set(s.name as string, s.id)
       })
 
-    const slice = copy<RootState>(initialRootState)
+    const slice = copy<AppStorageImport>(initialAppStorageImport)
     libraryImport.forEach((s) =>
       fromLibrarySourceStorage(s, slice.librarySource, slice.tag, slice.clip)
     )
@@ -2756,18 +2740,17 @@ export function setLibraryRemoveVisible(displayIDs: number[]) {
       .map((id) => state.librarySource.entries[id])
       .map((s) => s.url)
 
-    const flipflip = FlipFlipService.getInstance()
     for (const url of sourceURLs) {
       const fileType = getSourceType(url)
       try {
         if (fileType === ST.local) {
-          flipflip.api.rimrafSync(url)
+          flipflip().api.rimrafSync(url)
         } else if (
           fileType === ST.video ||
           fileType === ST.playlist ||
           fileType === ST.list
         ) {
-          await flipflip.api.unlink(url)
+          await flipflip().api.unlink(url)
         }
       } catch (e) {
         console.error(e)
