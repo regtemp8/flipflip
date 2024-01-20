@@ -11,7 +11,7 @@ import {
 } from 'flipflip-common'
 import { initialSystemConstants } from './store/constants/SystemConstants'
 
-export default class FlipFlipService {
+class FlipFlipService {
   private static instance: FlipFlipService
   private readonly ws: WebSocket
 
@@ -507,7 +507,7 @@ class FlipFlipAPI {
 
   public async getSystemFonts(): Promise<string[]> {
     return await this.invoke(IPC.getSystemFonts).then(
-      (args: any[] | undefined) => (args != null ? (args[0] as string[]) : [])
+      (args: any[] | undefined) => args != null ? (args[0] as string[]) : []
     )
   }
 
@@ -531,9 +531,10 @@ class FlipFlipAPI {
     arrayBuffer: ArrayBuffer,
     cachePath: string
   ): Promise<any> {
+    const buffer = Buffer.from(arrayBuffer)
     return await this.invoke(
       IPC.parseMusicMetadataBuffer,
-      arrayBuffer,
+      buffer.toJSON(),
       cachePath
     ).then((args: any[] | undefined) => (args != null ? args[0] : {}))
   }
@@ -831,4 +832,8 @@ class ClipboardService {
         window.navigator.clipboard.write([new ClipboardItem(item)])
       })
   }
+}
+
+export default function flipflip() {
+  return FlipFlipService.getInstance()
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -27,8 +27,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BuildIcon from '@mui/icons-material/Build'
@@ -50,145 +49,144 @@ import { selectAppConfigTutorials } from '../../store/app/selectors'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacerWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: 0,
-      minHeight: 64
-    },
-    appBarSpacerCollapse: {
-      width: '100%'
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    title: {
-      textAlign: 'center'
-    },
-    drawer: {
-      position: 'absolute'
-    },
-    drawerSpacer: {
-      minWidth: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        minWidth: theme.spacing(9)
-      }
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: drawerWidth,
-      zIndex: theme.zIndex.drawer + 2,
-      transition: theme.transitions.create('width', {
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 0,
+    minHeight: 64
+  },
+  appBarSpacerCollapse: {
+    width: '100%'
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  title: {
+    textAlign: 'center'
+  },
+  drawer: {
+    position: 'absolute'
+  },
+  drawerSpacer: {
+    minWidth: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      minWidth: theme.spacing(9)
+    }
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: drawerWidth,
+    zIndex: theme.zIndex.drawer + 2,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperClose: {
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    zIndex: theme.zIndex.drawer,
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
+    }
+  },
+  drawerButton: {
+    backgroundColor: theme.palette.primary.main,
+    minHeight: theme.spacing(6),
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+  drawerIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  tabs: {
+    borderRight: `1px solid ${theme.palette.divider}`
+  },
+  tab: {
+    width: drawerWidth,
+    height: theme.spacing(12),
+    transition: theme.transitions.create(
+      ['width', 'margin', 'background', 'opacity'],
+      {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen
+      }
+    ),
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.08)',
+      opacity: 1,
+      transition: theme.transitions.create(['background', 'opacity'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
       })
-    },
-    drawerPaperClose: {
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      zIndex: theme.zIndex.drawer,
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down('sm')]: {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    tabs: {
-      borderRight: `1px solid ${theme.palette.divider}`
-    },
-    tab: {
-      width: drawerWidth,
-      height: theme.spacing(12),
-      transition: theme.transitions.create(
-        ['width', 'margin', 'background', 'opacity'],
-        {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen
-        }
-      ),
-      '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        opacity: 1,
-        transition: theme.transitions.create(['background', 'opacity'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen
-        })
-      }
-    },
-    tabClose: {
-      minWidth: 0,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9)
-      }
-    },
-    optionsTab: {
-      ariaControls: 'vertical-tabpanel-0'
-    },
-    effectsTab: {
-      ariaControls: 'vertical-tabpanel-1'
-    },
-    sourcesTab: {
-      ariaControls: 'vertical-tabpanel-2'
-    },
-    tabPanel: {
-      display: 'flex',
-      height: '100%'
-    },
-    deleteItem: {
-      color: theme.palette.error.main
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      height: '100%',
-      padding: theme.spacing(0),
-      overflowY: 'auto'
-    },
-    fill: {
-      flexGrow: 1
     }
-  })
+  },
+  tabClose: {
+    minWidth: 0,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9)
+    }
+  },
+  optionsTab: {
+    ariaControls: 'vertical-tabpanel-0'
+  },
+  effectsTab: {
+    ariaControls: 'vertical-tabpanel-1'
+  },
+  sourcesTab: {
+    ariaControls: 'vertical-tabpanel-2'
+  },
+  tabPanel: {
+    display: 'flex',
+    height: '100%'
+  },
+  deleteItem: {
+    color: theme.palette.error.main
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    height: '100%',
+    padding: theme.spacing(0),
+    overflowY: 'auto'
+  },
+  fill: {
+    flexGrow: 1
+  }
+}))
 
-function ConfigForm(props: WithStyles<typeof styles>) {
+function ConfigForm() {
   const dispatch = useAppDispatch()
   const tutorials = useAppSelector(selectAppConfigTutorials())
 
@@ -212,7 +210,7 @@ function ConfigForm(props: WithStyles<typeof styles>) {
     setDrawerOpen(false)
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <div className={classes.root}>
       <AppBar enableColorOnDark position="absolute" className={classes.appBar}>
@@ -249,14 +247,14 @@ function ConfigForm(props: WithStyles<typeof styles>) {
         className={classes.drawer}
         variant="permanent"
         classes={{
-          paper: clsx(
+          paper: cx(
             classes.drawerPaper,
             !drawerOpen && classes.drawerPaperClose
           )
         }}
         open={drawerOpen}
       >
-        <div className={clsx(!drawerOpen && classes.appBarSpacerWrapper)}>
+        <div className={cx(!drawerOpen && classes.appBarSpacerWrapper)}>
           <Collapse in={!drawerOpen} className={classes.appBarSpacerCollapse}>
             <div className={classes.appBarSpacer} />
           </Collapse>
@@ -283,7 +281,7 @@ function ConfigForm(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-0"
               icon={<BuildIcon />}
               label={drawerOpen ? 'Default Options' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.optionsTab,
                 !drawerOpen && classes.tabClose
@@ -294,7 +292,7 @@ function ConfigForm(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-1"
               icon={<PhotoFilterIcon />}
               label={drawerOpen ? 'Default Effects' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.effectsTab,
                 !drawerOpen && classes.tabClose
@@ -305,7 +303,7 @@ function ConfigForm(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-2"
               icon={<SettingsIcon />}
               label={drawerOpen ? 'General Settings' : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.sourcesTab,
                 !drawerOpen && classes.tabClose
@@ -423,4 +421,4 @@ function ConfigForm(props: WithStyles<typeof styles>) {
 }
 
 ;(ConfigForm as any).displayName = 'ConfigForm'
-export default withStyles(styles)(ConfigForm as any)
+export default ConfigForm

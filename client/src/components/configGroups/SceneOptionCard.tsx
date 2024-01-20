@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import AddIcon from '@mui/icons-material/Add'
 import ListIcon from '@mui/icons-material/List'
 import {
@@ -18,8 +18,8 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import { addOverlay, removeOverlay } from '../../store/overlay/thunks'
 import {
   setSceneBackForth,
@@ -95,69 +95,68 @@ import MultiSceneSelect from './MultiSceneSelect'
 import SceneSelect from './SceneSelect'
 import OverlayCard from './OverlayCard'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    noTopPadding: {
-      paddingTop: '0 !important'
-    },
-    selectOffset: {
-      paddingTop: '10px !important',
-      paddingBottom: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    addButton: {
-      boxShadow: 'none'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    randomScene: {
-      display: 'block'
-    },
-    selectText: {
-      color: theme.palette.text.secondary
-    },
-    error: {
-      color: theme.palette.error.main
-    },
-    noScroll: {
-      overflow: 'visible'
-    },
-    randomSceneDialog: {
-      minWidth: 400,
-      overflow: 'visible'
-    },
-    noBPM: {
-      float: 'right'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  noTopPadding: {
+    paddingTop: '0 !important'
+  },
+  selectOffset: {
+    paddingTop: '10px !important',
+    paddingBottom: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  addButton: {
+    boxShadow: 'none'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  randomScene: {
+    display: 'block'
+  },
+  selectText: {
+    color: theme.palette.text.secondary
+  },
+  error: {
+    color: theme.palette.error.main
+  },
+  noScroll: {
+    overflow: 'visible'
+  },
+  randomSceneDialog: {
+    minWidth: 400,
+    overflow: 'visible'
+  },
+  noBPM: {
+    float: 'right'
+  }
+}))
 
-export interface SceneOptionCardProps extends WithStyles<typeof styles> {
+export interface SceneOptionCardProps {
   isTagging?: boolean
   sceneID?: number
 }
@@ -214,13 +213,13 @@ function SceneOptionCard(props: SceneOptionCardProps) {
     onRandomSceneDialog()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid
         item
         xs={12}
-        className={clsx(tutorial === SDT.timing && classes.highlight)}
+        className={cx(tutorial === SDT.timing && classes.highlight)}
       >
         <TimingCard
           excludeScene={true}
@@ -260,7 +259,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(tutorial === SDT.backForth && classes.highlight)}
+        className={cx(tutorial === SDT.backForth && classes.highlight)}
       >
         <Grid container alignItems="center">
           <Grid item xs={12}>
@@ -313,7 +312,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(tutorial === SDT.imageSizing && classes.highlight)}
+        className={cx(tutorial === SDT.imageSizing && classes.highlight)}
       >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={sidebar ? 8 : 12} sm={sidebar ? 8 : 6}>
@@ -393,7 +392,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
           <Grid
             item
             xs={12}
-            className={clsx(tutorial === SDT.nextScene && classes.highlight)}
+            className={cx(tutorial === SDT.nextScene && classes.highlight)}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid
@@ -452,7 +451,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
                     }
                   >
                     <IconButton
-                      className={clsx(
+                      className={cx(
                         nextSceneRandoms.length === 0 && classes.error
                       )}
                       onClick={onRandomSceneDialog}
@@ -518,7 +517,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(tutorial === SDT.overlays && classes.highlight)}
+        className={cx(tutorial === SDT.overlays && classes.highlight)}
       >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs>
@@ -558,4 +557,4 @@ function SceneOptionCard(props: SceneOptionCardProps) {
 }
 
 ;(SceneOptionCard as any).displayName = 'SceneOptionCard'
-export default withStyles(styles)(SceneOptionCard as any)
+export default SceneOptionCard

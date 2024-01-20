@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react'
-import * as CodeMirrorComp from 'react-codemirror2'
-import type * as codemirror from 'codemirror'
-
 import { getTimingFromString } from '../../data/utils'
 import type ChildCallbackHack from '../player/ChildCallbackHack'
+import {type Mode, type Editor, type EditorChange} from 'codemirror'
+
+const { registerHelper } = typeof window !== 'undefined' ? require('codemirror') : { registerHelper: (namespace: string, name: string, helper: any) => {}}
+const { Controlled } = typeof window !== 'undefined' ? require('react-codemirror2') : { Controlled: null };
 
 const actions = [
   'blink',
@@ -74,10 +75,79 @@ const storers = ['storephrase', 'storePhrase', 'storeAudio']
 const keywords = ['$RANDOM_PHRASE', '$TAG_PHRASE']
 export const timestampRegex =
   /^((\d?\d:)?\d?\d:\d\d(\.\d\d?\d?)?|\d?\d(\.\d\d?\d?)?)$/
-;(function (mod) {
-  mod(require('codemirror/lib/codemirror'))
-})(function (CodeMirror: any) {
-  CodeMirror.defineMode('flipflip', function () {
+
+export interface CodeMirrorProps {
+  onGutterClick: (editor: any, clickedLine: number) => void
+  onUpdateScript: (text: string, changed?: boolean) => void
+  addHack?: ChildCallbackHack
+  className?: string
+  overwriteHack?: ChildCallbackHack
+}
+
+export default function CodeMirror(props: CodeMirrorProps) {
+  const [scriptText, setScriptText] = useState('')
+  const [cursor, setCursor] = useState<{ line: number; ch: number }>({
+    line: 0,
+    ch: 0
+  })
+
+  const _sendUpdate = useRef<number>()
+
+  useEffect(() => {
+    if (props.addHack) {
+      props.addHack.listener = (args) => {
+        const string: string = args![0]
+        const newLine: boolean = args![1]
+        let newValue = ''
+        if (newLine) {
+          const lines = scriptText.split('\n')
+          for (let l = 0; l < lines.length; l++) {
+            if (l === cursor.line + 1) {
+              if (lines[l].length > 0) {
+                newValue += '\n'
+              }
+              newValue += string + '\n' + lines[l]
+            } else if (l === lines.length - 1) {
+              newValue += '\n' + lines[l] + '\n' + string
+            } else {
+              newValue += '\n' + lines[l]
+            }
+          }
+        } else {
+          const lines = scriptText.split('\n')
+          for (let l = 0; l < lines.length; l++) {
+            if (l === cursor.line) {
+              let newLine = lines[l]
+              newLine =
+                newLine.slice(0, cursor.ch) + string + newLine.slice(cursor.ch)
+              newValue += '\n' + newLine
+            } else {
+              newValue += '\n' + lines[l]
+            }
+          }
+        }
+        newValue = newValue.trim()
+        onUpdateScript(newValue)
+      }
+    }
+
+    if (props.overwriteHack) {
+      props.overwriteHack.listener = (args) => {
+        onUpdateScript(args![0])
+      }
+    }
+
+    return () => {
+      if (props.addHack) {
+        props.addHack.listener = undefined
+      }
+      if (props.overwriteHack) {
+        props.overwriteHack.listener = undefined
+      }
+    }
+  }, [])
+
+  const defineFlipFlipMode = (): Mode<any> => {
     const words: any = {}
     function define(style: any, dict: any) {
       for (let i = 0; i < dict.length; i++) {
@@ -85,7 +155,7 @@ export const timestampRegex =
       }
     }
 
-    CodeMirror.registerHelper(
+    registerHelper(
       'hintWords',
       'flipflip',
       actions.concat(
@@ -370,83 +440,11 @@ export const timestampRegex =
         return parse(stream, state)
       }
     }
-  })
-})
-
-export interface CodeMirrorProps {
-  onGutterClick: (editor: any, clickedLine: number) => void
-  onUpdateScript: (text: string, changed?: boolean) => void
-  addHack?: ChildCallbackHack
-  className?: string
-  overwriteHack?: ChildCallbackHack
-}
-
-export default function CodeMirror(props: CodeMirrorProps) {
-  const [scriptText, setScriptText] = useState('')
-  const [cursor, setCursor] = useState<{ line: number; ch: number }>({
-    line: 0,
-    ch: 0
-  })
-
-  const _sendUpdate = useRef<number>()
-
-  useEffect(() => {
-    if (props.addHack) {
-      props.addHack.listener = (args) => {
-        const string: string = args![0]
-        const newLine: boolean = args![1]
-        let newValue = ''
-        if (newLine) {
-          const lines = scriptText.split('\n')
-          for (let l = 0; l < lines.length; l++) {
-            if (l === cursor.line + 1) {
-              if (lines[l].length > 0) {
-                newValue += '\n'
-              }
-              newValue += string + '\n' + lines[l]
-            } else if (l === lines.length - 1) {
-              newValue += '\n' + lines[l] + '\n' + string
-            } else {
-              newValue += '\n' + lines[l]
-            }
-          }
-        } else {
-          const lines = scriptText.split('\n')
-          for (let l = 0; l < lines.length; l++) {
-            if (l === cursor.line) {
-              let newLine = lines[l]
-              newLine =
-                newLine.slice(0, cursor.ch) + string + newLine.slice(cursor.ch)
-              newValue += '\n' + newLine
-            } else {
-              newValue += '\n' + lines[l]
-            }
-          }
-        }
-        newValue = newValue.trim()
-        onUpdateScript(newValue)
-      }
-    }
-
-    if (props.overwriteHack) {
-      props.overwriteHack.listener = (args) => {
-        onUpdateScript(args![0])
-      }
-    }
-
-    return () => {
-      if (props.addHack) {
-        props.addHack.listener = undefined
-      }
-      if (props.overwriteHack) {
-        props.overwriteHack.listener = undefined
-      }
-    }
-  }, [])
+  }
 
   const onBeforeChangeScript = (
-    editor: codemirror.Editor,
-    data: codemirror.EditorChange,
+    editor: Editor,
+    data: EditorChange,
     value: string
   ) => {
     if (scriptText !== value) {
@@ -454,13 +452,13 @@ export default function CodeMirror(props: CodeMirrorProps) {
     }
   }
 
-  const onCursorActivity = (editor: codemirror.Editor) => {
+  const onCursorActivity = (editor: Editor) => {
     setCursor(editor.getDoc().getCursor())
   }
 
   const onUpdateScript = (
     scriptText: string,
-    editor?: codemirror.Editor,
+    editor?: Editor,
     changed = false
   ) => {
     setScriptText(scriptText)
@@ -476,16 +474,17 @@ export default function CodeMirror(props: CodeMirrorProps) {
   }
 
   return (
-    <CodeMirrorComp.Controlled
+    <Controlled
       className={props.className}
       value={scriptText}
       autoScroll={false}
+      defineMode={{name: 'flipflip', fn: defineFlipFlipMode}}
       options={{
         mode: 'flipflip',
         theme: 'material',
         lineNumbers: true,
         lineWrapping: true,
-        viewportMargin: Infinity
+        viewportMargin: Infinity,
       }}
       onBeforeChange={onBeforeChangeScript}
       onCursorActivity={onCursorActivity}

@@ -14,8 +14,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ScriptSourceListItem from './ScriptSourceListItem'
 import SceneSelect from '../configGroups/SceneSelect'
@@ -35,10 +34,9 @@ import {
   selectUndefined
 } from '../../store/app/selectors'
 import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     emptyMessage: {
       textAlign: 'center',
       marginTop: '25%'
@@ -64,9 +62,9 @@ const styles = (theme: Theme) =>
     scenePick: {
       height: 410
     }
-  })
+  }))
 
-export interface ScriptSourceListProps extends WithStyles<typeof styles> {
+export interface ScriptSourceListProps {
   showHelp: boolean
   sources: number[]
   tutorial: string
@@ -75,7 +73,6 @@ export interface ScriptSourceListProps extends WithStyles<typeof styles> {
 }
 
 function ScriptSourceList(props: ScriptSourceListProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const [sourceOptions, setSourceOptions] = useState<number>()
   const [lastSelected, setLastSelected] = useState<number>()
@@ -175,7 +172,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }
 
   const onFinishDelete = async () => {
-    await flipflip.api.unlink(deleteDialogURL as string)
+    await flipflip().api.unlink(deleteDialogURL as string)
     onRemove(deleteDialog as number)
     onCloseDeleteDialog()
   }
@@ -312,7 +309,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     return <SortableItem index={index} value={props} />
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   if (props.sources.length === 0) {
     return (
       <React.Fragment>
@@ -432,4 +429,4 @@ function ScriptSourceList(props: ScriptSourceListProps) {
 }
 
 ;(ScriptSourceList as any).displayName = 'ScriptSourceList'
-export default withStyles(styles)(ScriptSourceList as any)
+export default ScriptSourceList

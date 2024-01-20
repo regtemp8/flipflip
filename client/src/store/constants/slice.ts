@@ -1,18 +1,17 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { type SystemConstants } from 'flipflip-common'
+import { createSlice } from '@reduxjs/toolkit'
 import { initialSystemConstants } from './SystemConstants'
+import { SystemConstants, copy } from 'flipflip-common'
 
-export const constantsSlice = createSlice({
-  name: 'constants',
-  // `createSlice` will infer the state type from the `initialState` argument
-  initialState: initialSystemConstants,
-  reducers: {
-    setConstants: (state, action: PayloadAction<SystemConstants>) => {
-      Object.assign(state, action.payload)
-    }
+export default function createConstantsReducer(constants?: SystemConstants) {
+  let initialState = copy<SystemConstants>(initialSystemConstants)
+  if(constants != null) {
+    initialState = Object.assign(initialState, constants)
   }
-})
 
-export const { setConstants } = constantsSlice.actions
-
-export default constantsSlice.reducer
+  return createSlice({
+    name: 'constants',
+    // `createSlice` will infer the state type from the `initialState` argument
+    initialState,
+    reducers: {}
+  }).reducer
+}

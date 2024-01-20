@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Card,
@@ -10,52 +10,50 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import { useAppSelector } from '../../store/hooks'
 import { selectAppPlaylistThumbs } from '../../store/playlist/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    media: {
-      height: 0,
-      paddingTop: '100%' // 16:9  = 56.25%
-    },
-    mediaIcon: {
-      width: '100%',
-      height: 'auto'
-    },
-    underlineTitle: {
-      textDecoration: 'underline'
-    },
-    pointer: {
-      cursor: 'pointer'
-    },
-    root: {
-      borderRadius: 1
-    },
-    cardContent: {
-      '&:last-child': {
-        paddingBottom: theme.spacing(2)
-      }
-    },
-    artist: {
-      '&:hover': {
-        textDecoration: 'underline'
-      }
+const useStyles = makeStyles()((theme: Theme) => ({
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  media: {
+    height: 0,
+    paddingTop: '100%' // 16:9  = 56.25%
+  },
+  mediaIcon: {
+    width: '100%',
+    height: 'auto'
+  },
+  underlineTitle: {
+    textDecoration: 'underline'
+  },
+  pointer: {
+    cursor: 'pointer'
+  },
+  root: {
+    borderRadius: 1
+  },
+  cardContent: {
+    '&:last-child': {
+      paddingBottom: theme.spacing(2)
     }
-  })
+  },
+  artist: {
+    '&:hover': {
+      textDecoration: 'underline'
+    }
+  }
+}))
 
-export interface PlaylistListProps extends WithStyles<typeof styles> {
+export interface PlaylistListProps {
   showHelp: boolean
   onClickPlaylist: (playlist: string) => void
 }
@@ -72,7 +70,7 @@ function PlaylistList(props: PlaylistListProps) {
     setHover(null)
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   if (Object.keys(playlistThumbs).length === 0) {
     return (
       <React.Fragment>
@@ -149,7 +147,7 @@ function PlaylistList(props: PlaylistListProps) {
               </Grid>
               <CardContent classes={{ root: classes.cardContent }}>
                 <Typography
-                  className={clsx(hover === p && classes.underlineTitle)}
+                  className={cx(hover === p && classes.underlineTitle)}
                   noWrap
                   variant="body1"
                 >
@@ -165,4 +163,4 @@ function PlaylistList(props: PlaylistListProps) {
 }
 
 ;(PlaylistList as any).displayName = 'PlaylistList'
-export default withStyles(styles)(PlaylistList as any)
+export default PlaylistList

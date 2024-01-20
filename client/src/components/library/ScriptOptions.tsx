@@ -10,8 +10,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { green, red } from '@mui/material/colors'
 
@@ -34,8 +33,7 @@ import {
 import BaseSlider from '../common/slider/BaseSlider'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     bpmProgress: {
       position: 'absolute',
       right: 67
@@ -82,9 +80,9 @@ const styles = (theme: Theme) =>
     fontProgress: {
       position: 'absolute'
     }
-  })
+  }))
 
-export interface ScriptOptionsProps extends WithStyles<typeof styles> {
+export interface ScriptOptionsProps {
   scriptID: number
   onDone: () => void
 }
@@ -105,7 +103,7 @@ function ScriptOptions(props: ScriptOptionsProps) {
     props.onDone()
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Dialog open={true} onClose={onCancel} aria-describedby="edit-description">
       <DialogContent>
@@ -190,4 +188,4 @@ function ScriptOptions(props: ScriptOptionsProps) {
 }
 
 ;(ScriptOptions as any).displayName = 'ScriptOptions'
-export default withStyles(styles)(ScriptOptions as any)
+export default ScriptOptions

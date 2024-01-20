@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { type Theme, Typography } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ThemeColorPicker from '../config/ThemeColorPicker'
 
@@ -20,20 +19,19 @@ import {
   selectAppThemePaletteSecondaryMain
 } from '../../store/app/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    themePicker: {
-      [theme.breakpoints.up('sm')]: {
-        maxWidth: theme.spacing(47)
-      }
-    },
-    gutterBottom: {
-      marginBottom: theme.spacing(2)
+const useStyles = makeStyles()((theme: Theme) => ({
+  themePicker: {
+    [theme.breakpoints.up('sm')]: {
+      maxWidth: theme.spacing(47)
     }
-  })
+  },
+  gutterBottom: {
+    marginBottom: theme.spacing(2)
+  }
+}))
 
-function ThemeCard(props: WithStyles<typeof styles>) {
-  const classes = props.classes
+function ThemeCard() {
+  const { classes } = useStyles()
   return (
     <React.Fragment>
       <div>
@@ -43,7 +41,7 @@ function ThemeCard(props: WithStyles<typeof styles>) {
           action={setThemeMode}
         />
       </div>
-      <div className={clsx(classes.themePicker, classes.gutterBottom)}>
+      <div className={cx(classes.themePicker, classes.gutterBottom)}>
         <Typography>Primary Color</Typography>
         <ThemeColorPicker
           selector={selectAppThemePalettePrimaryMain()}
@@ -62,4 +60,4 @@ function ThemeCard(props: WithStyles<typeof styles>) {
 }
 
 ;(ThemeCard as any).displayName = 'ThemeCard'
-export default withStyles(styles)(ThemeCard as any)
+export default ThemeCard

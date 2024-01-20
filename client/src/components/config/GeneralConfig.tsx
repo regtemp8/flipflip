@@ -9,12 +9,23 @@ import BackupCard from '../configGroups/BackupCard'
 import APICard from '../configGroups/APICard'
 import ThemeCard from '../configGroups/ThemeCard'
 import WatermarkCard from '../configGroups/WatermarkCard'
+import { useAppSelector } from '../../store/hooks'
+import { selectConstants } from '../../store/constants/selectors'
 
 export default function GeneralConfig() {
+  const { masonryDefaultHeight, masonryDefaultColumns } =
+    useAppSelector(selectConstants())
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Masonry columns={[1, 2, 3, 4]} spacing={2}>
+        <Masonry
+          columns={[1, 2, 3, 4]}
+          spacing={2}
+          defaultSpacing={2}
+          defaultColumns={masonryDefaultColumns}
+          defaultHeight={masonryDefaultHeight}
+        >
           <Card>
             <CardContent>
               <PlayerBoolCard />

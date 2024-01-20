@@ -1,4 +1,5 @@
 import { type AppDispatch, type RootState } from '../store'
+import { getEntry } from '../EntryState'
 import { newCaptionScript } from '../captionScript/CaptionScript'
 import type Scene from './Scene'
 import { newScene } from './Scene'
@@ -63,14 +64,14 @@ import { newTag } from '../tag/Tag'
 import { setTag } from '../tag/slice'
 import { setSceneGrid } from '../sceneGrid/slice'
 import { newSceneGridCell } from '../sceneGrid/SceneGridCell'
-import { toSceneGridStorage, toSceneStorage } from '../app/data/App'
+import { toSceneGridStorage, toSceneStorage } from '../app/convert'
 import {
   type Scene as SceneStorage,
   type SceneGrid as SceneGridStorage
 } from 'flipflip-common'
-import { getScene, getVideoClipperScene } from './selectors'
+import { getVideoClipperScene } from './selectors'
 import { getActiveScene } from '../app/thunks'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
 export function startFromScene(sceneName: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
@@ -1011,7 +1012,6 @@ export function addSource(type: string, sceneID?: number, ...args: any[]) {
       dispatch(openLibraryImport())
     } else {
       let newSources: string[] | undefined
-      const flipflip = FlipFlipService.getInstance()
       switch (type) {
         case AF.url:
           if (!args || args.length !== 1) {
@@ -1024,13 +1024,13 @@ export function addSource(type: string, sceneID?: number, ...args: any[]) {
           newSources = Array.from((args[0] as string).trim().split("\n")).filter((s: string) => s.length > 0)
           break
         case AF.directory:
-          newSources = await flipflip.api.openDirectories()
+          newSources = await flipflip().api.openDirectories()
           break
         case AF.videos:
-          newSources = await flipflip.api.openVideos()
+          newSources = await flipflip().api.openVideos()
           break
         case AF.videoDir:
-          newSources = await flipflip.api.loadVideoSources()
+          newSources = await flipflip().api.loadVideoSources()
           break
         case GT.local:
           if (!args || args.length < 2) {
@@ -1201,14 +1201,13 @@ export function exportScene(sceneID: number) {
     const allExports = (scenesToExport as any[]).concat(gridsToExport)
     const sceneExport = JSON.stringify(allExports)
     const fileName = sceneCopy.name + '_export.json'
-    const flipflip = FlipFlipService.getInstance()
-    flipflip.api.saveJsonFile(fileName, sceneExport)
+    flipflip().api.saveJsonFile(fileName, sceneExport)
   }
 }
 
 export function applyEffectsToScene(sceneID: number, effects: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const scene = getScene(getState().scene, sceneID)
+    const scene = getEntry(getState().scene, sceneID)
     dispatch(setScene(applyEffects(scene, effects)))
   }
 }
@@ -1256,7 +1255,7 @@ export function saveAsScene(sceneID: number) {
 export function resetScene(sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    const scene = getScene(state.scene, sceneID) as Scene
+    const scene = getEntry(state.scene, sceneID) as Scene
     Object.keys(state.app.config.defaultScene)
       .filter((key) => key !== 'sources')
       .forEach(

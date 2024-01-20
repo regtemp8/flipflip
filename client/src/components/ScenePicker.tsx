@@ -7,7 +7,7 @@ import React, {
   ChangeEvent
 } from 'react'
 import wretch from 'wretch'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -47,8 +47,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
@@ -143,12 +142,12 @@ import {
   onScenePickerChangeUngroupedSort,
   routeToRandomScene
 } from '../store/scenePicker/thunks'
-import FlipFlipService from '../FlipFlipService'
+import flipflip from '../FlipFlipService'
 
 const drawerWidth = 240
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => {
+  return {
     root: {
       display: 'flex'
     },
@@ -461,9 +460,10 @@ const styles = (theme: Theme) =>
       margin: theme.spacing(1),
       cursor: 'move'
     }
-  })
+  }
+})
 
-interface SceneCardProps extends WithStyles<typeof styles> {
+interface SceneCardProps {
   sceneID: number
   toDelete: boolean
   action: (id: number) => void
@@ -471,7 +471,8 @@ interface SceneCardProps extends WithStyles<typeof styles> {
 }
 
 function SceneCard(props: SceneCardProps) {
-  const { sceneID, grid, toDelete, classes, action } = props
+  const { sceneID, grid, toDelete, action } = props
+  const { classes } = useStyles()
   const nameSelector = grid ? selectSceneGridName : selectSceneName
   const name = useAppSelector(nameSelector(sceneID))
   return (
@@ -481,7 +482,7 @@ function SceneCard(props: SceneCardProps) {
       disable={toDelete}
       className={classes.scene}
     >
-      <Card className={clsx(toDelete && classes.deleteScene)}>
+      <Card className={cx(toDelete && classes.deleteScene)}>
         <CardActionArea
           onClick={() => {
             action(sceneID)
@@ -498,7 +499,7 @@ function SceneCard(props: SceneCardProps) {
   )
 }
 
-interface SceneGroupProps extends WithStyles<typeof styles> {
+interface SceneGroupProps {
   id: number
   isEditingName: boolean
 
@@ -508,14 +509,9 @@ interface SceneGroupProps extends WithStyles<typeof styles> {
 }
 
 function SceneGroup(props: SceneGroupProps) {
-  const {
-    id,
-    isEditingName,
-    classes,
-    beginEditingName,
-    endEditingName,
-    renderCard
-  } = props
+  const { id, isEditingName, beginEditingName, endEditingName, renderCard } =
+    props
+  const { classes } = useStyles()
   const dispatch = useAppDispatch()
   const name = useAppSelector(selectSceneGroupName(id))
   const type = useAppSelector(selectSceneGroupType(id))
@@ -524,7 +520,7 @@ function SceneGroup(props: SceneGroupProps) {
   return (
     <>
       <div className={classes.root}>
-        <DragHandleIcon className={clsx('group-handle', classes.groupHandle)} />
+        <DragHandleIcon className={cx('group-handle', classes.groupHandle)} />
         {isEditingName && (
           <form onSubmit={endEditingName} className={classes.groupTitle}>
             <BaseTextField
@@ -593,8 +589,8 @@ function SceneGroup(props: SceneGroupProps) {
   )
 }
 
-function ScenePicker(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function ScenePicker() {
+  const { classes } = useStyles()
   const dispatch = useAppDispatch()
   const canGenerate = useAppSelector(selectAppCanGenerate())
   const canGrid = useAppSelector(selectAppCanGrid())
@@ -631,61 +627,65 @@ function ScenePicker(props: WithStyles<typeof styles>) {
 
   useEffect(() => {
     dispatch(setTutorialStart())
-    flipflip.api.getWindowId().then((id) => {
-      if (id === 1) {
-        setIsFirstWindow(true)
-        wretch('https://api.github.com/repos/regtemp8/flipflip/releases/latest')
-          .get()
-          .json((json) => {
-            const newestReleaseTag = json.tag_name
-            const newestReleaseURL = json.html_url
-            let releaseVersion = newestReleaseTag
-              .replace('v', '')
-              .replace('.', '')
-              .replace('.', '')
-            let releaseBetaVersion = -1
-            if (releaseVersion.includes('-')) {
-              const releaseSplit = releaseVersion.split('-')
-              releaseVersion = releaseSplit[0]
-              const betaString = releaseSplit[1]
-              const betaNumber = betaString.replace('beta', '')
-              if (betaNumber === '') {
-                releaseBetaVersion = 0
-              } else {
-                releaseBetaVersion = parseInt(betaNumber)
+    flipflip()
+      .api.getWindowId()
+      .then((id) => {
+        if (id === 1) {
+          setIsFirstWindow(true)
+          wretch(
+            'https://api.github.com/repos/regtemp8/flipflip/releases/latest'
+          )
+            .get()
+            .json((json) => {
+              const newestReleaseTag = json.tag_name
+              const newestReleaseURL = json.html_url
+              let releaseVersion = newestReleaseTag
+                .replace('v', '')
+                .replace('.', '')
+                .replace('.', '')
+              let releaseBetaVersion = -1
+              if (releaseVersion.includes('-')) {
+                const releaseSplit = releaseVersion.split('-')
+                releaseVersion = releaseSplit[0]
+                const betaString = releaseSplit[1]
+                const betaNumber = betaString.replace('beta', '')
+                if (betaNumber === '') {
+                  releaseBetaVersion = 0
+                } else {
+                  releaseBetaVersion = parseInt(betaNumber)
+                }
               }
-            }
-            let thisVersion = version.replace('.', '').replace('.', '')
-            let thisBetaVersion = -1
-            if (thisVersion.includes('-')) {
-              const releaseSplit = thisVersion.split('-')
-              thisVersion = releaseSplit[0]
-              const betaString = releaseSplit[1]
-              const betaNumber = betaString.replace('beta', '')
-              if (betaNumber === '') {
-                thisBetaVersion = 0
-              } else {
-                thisBetaVersion = parseInt(betaNumber)
+              let thisVersion = version.replace('.', '').replace('.', '')
+              let thisBetaVersion = -1
+              if (thisVersion.includes('-')) {
+                const releaseSplit = thisVersion.split('-')
+                thisVersion = releaseSplit[0]
+                const betaString = releaseSplit[1]
+                const betaNumber = betaString.replace('beta', '')
+                if (betaNumber === '') {
+                  thisBetaVersion = 0
+                } else {
+                  thisBetaVersion = parseInt(betaNumber)
+                }
               }
-            }
-            if (parseInt(releaseVersion) > parseInt(thisVersion)) {
-              setNewVersion(newestReleaseTag)
-              setNewVersionLink(newestReleaseURL)
-            } else if (parseInt(releaseVersion) === parseInt(thisVersion)) {
-              if (
-                (releaseBetaVersion === -1 && thisBetaVersion >= 0) ||
-                releaseBetaVersion > thisBetaVersion
-              ) {
+              if (parseInt(releaseVersion) > parseInt(thisVersion)) {
                 setNewVersion(newestReleaseTag)
                 setNewVersionLink(newestReleaseURL)
+              } else if (parseInt(releaseVersion) === parseInt(thisVersion)) {
+                if (
+                  (releaseBetaVersion === -1 && thisBetaVersion >= 0) ||
+                  releaseBetaVersion > thisBetaVersion
+                ) {
+                  setNewVersion(newestReleaseTag)
+                  setNewVersionLink(newestReleaseURL)
+                }
               }
-            }
-          })
-          .catch((e) => {
-            console.error(e)
-          })
-      }
-    })
+            })
+            .catch((e) => {
+              console.error(e)
+            })
+        }
+      })
   }, [])
 
   const onImportScene = () => {
@@ -735,15 +735,17 @@ function ScenePicker(props: WithStyles<typeof styles>) {
           dispatch(systemMessage('Error accessing URL'))
         })
     } else {
-      flipflip.api.readTextFile(importFile).then((text) => {
-        try {
-          const json = JSON.parse(text)
-          dispatch(importScenes(json, importSources))
-          onCloseDialog()
-        } catch (e) {
-          dispatch(systemMessage('This is not a valid JSON file'))
-        }
-      })
+      flipflip()
+        .api.readTextFile(importFile)
+        .then((text) => {
+          try {
+            const json = JSON.parse(text)
+            dispatch(importScenes(json, importSources))
+            onCloseDialog()
+          } catch (e) {
+            dispatch(systemMessage('This is not a valid JSON file'))
+          }
+        })
     }
   }
 
@@ -840,7 +842,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
   }
 
   const onOpenImportFile = async () => {
-    const filePath = await flipflip.api.openJsonFile()
+    const filePath = await flipflip().api.openJsonFile()
     if (filePath) {
       setImportFile(filePath)
     }
@@ -879,7 +881,6 @@ function ScenePicker(props: WithStyles<typeof styles>) {
         key={sceneID}
         sceneID={sceneID}
         toDelete={scenesToDelete != null && scenesToDelete.includes(sceneID)}
-        classes={props.classes}
         action={
           scenesToDelete == null
             ? () => dispatch(routeToScene(sceneID))
@@ -902,7 +903,6 @@ function ScenePicker(props: WithStyles<typeof styles>) {
             ? () => dispatch(routeToGrid(gridID))
             : () => onToggleDelete(sceneID)
         }
-        classes={classes}
       />
     )
   }
@@ -965,7 +965,6 @@ function ScenePicker(props: WithStyles<typeof styles>) {
             key={id}
             id={id}
             isEditingName={isEditing === id}
-            classes={classes}
             endEditingName={endEditingName}
             beginEditingName={beginEditingName}
             renderCard={renderCard}
@@ -975,14 +974,13 @@ function ScenePicker(props: WithStyles<typeof styles>) {
     )
   }
 
-  const classes = props.classes
   const open = drawerOpen
   return (
     <div className={classes.root} onClick={onClickCloseMenu}>
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
           open && classes.appBarShift,
           tutorial === SPT.scenePicker && classes.backdropTop
@@ -993,7 +991,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
             edge="start"
             color="inherit"
             aria-label="Toggle Drawer"
-            className={clsx(tutorial === SPT.scenePicker && classes.highlight)}
+            className={cx(tutorial === SPT.scenePicker && classes.highlight)}
             onClick={onToggleDrawer}
             size="large"
           >
@@ -1042,11 +1040,11 @@ function ScenePicker(props: WithStyles<typeof styles>) {
         variant="permanent"
         className={
           tutorial === SPT.drawer
-            ? clsx(classes.backdropTop, classes.disable, classes.highlight)
+            ? cx(classes.backdropTop, classes.disable, classes.highlight)
             : ''
         }
         classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose)
+          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
         }}
         open={open}
       >
@@ -1061,7 +1059,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
             <MenuIcon />
           </IconButton>
           <VSpin>
-            <div className={clsx(classes.logo, classes.drawerLogo)} />
+            <div className={cx(classes.logo, classes.drawerLogo)} />
           </VSpin>
           <Typography component="h1" variant="h6" color="inherit" noWrap>
             FlipFlip
@@ -1083,7 +1081,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-0"
               icon={<MovieIcon />}
               label={open ? `Scenes (${sceneCount})` : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.sceneTab,
                 !open && classes.tabClose
@@ -1094,7 +1092,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-1"
               icon={<MovieFilterIcon />}
               label={open ? `Scene Generators (${generatorCount})` : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.generatorTab,
                 !open && classes.tabClose
@@ -1105,7 +1103,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               aria-controls="vertical-tabpanel-2"
               icon={<GridOnIcon />}
               label={open ? `Scene Grids (${gridCount})` : ''}
-              className={clsx(
+              className={cx(
                 classes.tab,
                 classes.gridTab,
                 !open && classes.tabClose
@@ -1131,7 +1129,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   <ListItemText primary="Library" />
                   {libraryCount > 0 && (
                     <Chip
-                      className={clsx(classes.chip, !open && classes.chipClose)}
+                      className={cx(classes.chip, !open && classes.chipClose)}
                       label={libraryCount}
                       color="primary"
                       size="small"
@@ -1155,7 +1153,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   <ListItemText primary="Audio Library" />
                   {audioLibraryCount > 0 && (
                     <Chip
-                      className={clsx(classes.chip, !open && classes.chipClose)}
+                      className={cx(classes.chip, !open && classes.chipClose)}
                       label={audioLibraryCount}
                       color="primary"
                       size="small"
@@ -1179,7 +1177,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   <ListItemText primary="Script Library" />
                   {scriptLibraryCount > 0 && (
                     <Chip
-                      className={clsx(classes.chip, !open && classes.chipClose)}
+                      className={cx(classes.chip, !open && classes.chipClose)}
                       label={scriptLibraryCount}
                       color="primary"
                       size="small"
@@ -1282,7 +1280,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
         <div className={classes.fill} />
 
         <div
-          className={clsx(
+          className={cx(
             classes.drawerBottom,
             !open && classes.drawerBottomClose
           )}
@@ -1368,7 +1366,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   placement="left"
                 >
                   <Fab
-                    className={clsx(
+                    className={cx(
                       classes.addButton,
                       classes.deleteScenesButton,
                       openMenu !== MO.new && classes.addButtonClose
@@ -1382,7 +1380,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               )}
               <Tooltip disableInteractive title="Import Scene" placement="left">
                 <Fab
-                  className={clsx(
+                  className={cx(
                     classes.addButton,
                     classes.importSceneButton,
                     openMenu !== MO.new && classes.addButtonClose
@@ -1395,12 +1393,12 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               </Tooltip>
               <Tooltip disableInteractive title="Add Scene" placement="left">
                 <Fab
-                  className={clsx(
+                  className={cx(
                     classes.addButton,
                     classes.addSceneButton,
                     openMenu !== MO.new && classes.addButtonClose,
                     tutorial === SPT.add2 &&
-                      clsx(classes.backdropTop, classes.highlight)
+                      cx(classes.backdropTop, classes.highlight)
                   )}
                   onClick={onAddScene}
                   size="small"
@@ -1418,7 +1416,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   style={!canGenerate ? { pointerEvents: 'none' } : {}}
                 >
                   <Fab
-                    className={clsx(
+                    className={cx(
                       classes.addButton,
                       classes.addGeneratorButton,
                       openMenu !== MO.new && classes.addButtonClose
@@ -1443,7 +1441,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                   style={!canGrid ? { pointerEvents: 'none' } : {}}
                 >
                   <Fab
-                    className={clsx(
+                    className={cx(
                       classes.addButton,
                       classes.addGridButton,
                       openMenu !== MO.new && classes.addButtonClose
@@ -1460,7 +1458,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
               </Tooltip>
               <Tooltip disableInteractive title="Add Group" placement="left">
                 <Fab
-                  className={clsx(
+                  className={cx(
                     classes.addButton,
                     classes.addGridButton,
                     openMenu === MO.new && classes.addButtonClose
@@ -1472,7 +1470,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
                 </Fab>
               </Tooltip>
               <Fab
-                className={clsx(
+                className={cx(
                   classes.addMenuButton,
                   (tutorial === SPT.add1 || tutorial === SPT.add2) &&
                     classes.backdropTop,
@@ -1559,7 +1557,7 @@ function ScenePicker(props: WithStyles<typeof styles>) {
           )}
           <Tooltip disableInteractive title="Random Scene">
             <Fab
-              className={clsx(
+              className={cx(
                 classes.randomButton,
                 !isFirstWindow && classes.extraWindowRandomButton
               )}
@@ -1631,4 +1629,4 @@ function ScenePicker(props: WithStyles<typeof styles>) {
 }
 
 ;(ScenePicker as any).displayName = 'ScenePicker'
-export default withStyles(styles)(ScenePicker as any)
+export default ScenePicker

@@ -1,12 +1,15 @@
-import * as ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
-import Meta from './components/Meta'
+import * as ReactDOM from 'react-dom/client'
 import './style.scss'
 import store from './store/store'
+import { createEmotionCache } from './server/renderer'
+import App from './App'
 
-ReactDOM.render(
-  <Provider store={store}>
-    <Meta />
-  </Provider>,
-  document.getElementById('app')
+const cache = createEmotionCache()
+ReactDOM.hydrateRoot(
+  document.getElementById('app') as Element,
+  <App store={store} cache={cache} />
 )
+
+// ReactDOM.createRoot(
+//   document.getElementById('app') as Element
+// ).render(<App store={store} cache={cache} />)

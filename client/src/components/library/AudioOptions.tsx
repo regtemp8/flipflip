@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { analyze } from 'web-audio-beat-detector'
 import wretch from 'wretch'
 
@@ -20,8 +20,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import CheckIcon from '@mui/icons-material/Check'
@@ -68,56 +67,54 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import { setAudio } from '../../store/audio/slice'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    bpmProgress: {
-      position: 'absolute',
-      right: 67
-    },
-    tagProgress: {
-      position: 'absolute',
-      right: 20
-    },
-    success: {
-      backgroundColor: green[500],
-      '&:hover': {
-        backgroundColor: green[700]
-      }
-    },
-    failure: {
-      backgroundColor: red[500],
-      '&:hover': {
-        backgroundColor: red[700]
-      }
-    },
-    actions: {
-      marginRight: theme.spacing(3)
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
+const useStyles = makeStyles()((theme: Theme) => ({
+  bpmProgress: {
+    position: 'absolute',
+    right: 67
+  },
+  tagProgress: {
+    position: 'absolute',
+    right: 20
+  },
+  success: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700]
     }
-  })
+  },
+  failure: {
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700]
+    }
+  },
+  actions: {
+    marginRight: theme.spacing(3)
+  },
+  fullWidth: {
+    width: '100%'
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  }
+}))
 
-export interface AudioOptionsProps extends WithStyles<typeof styles> {
+export interface AudioOptionsProps {
   sceneID?: number
   audioID: number
   onDone: () => void
 }
 
 function AudioOptions(props: AudioOptionsProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const originalAudio = useAppSelector(selectAudio(props.audioID), () => true)
   const url = useAppSelector(selectAudioUrl(props.audioID))
@@ -141,8 +138,8 @@ function AudioOptions(props: AudioOptionsProps) {
   const onReadBPMTag = () => {
     if (url && !loadingTag) {
       setLoadingTag(true)
-      flipflip.api
-        .parseMusicMetadataBpm(url)
+      flipflip()
+        .api.parseMusicMetadataBpm(url)
         .then((bpm: number | undefined) => {
           if (bpm) {
             dispatch(setAudioBPM(props.audioID)(bpm))
@@ -215,8 +212,8 @@ function AudioOptions(props: AudioOptionsProps) {
     if (url && !loadingBPM) {
       setLoadingBPM(true)
       try {
-        if (await flipflip.api.pathExists(url)) {
-          const arrayBuffer = await flipflip.api.readBinaryFile(url)
+        if (await flipflip().api.pathExists(url)) {
+          const arrayBuffer = await flipflip().api.readBinaryFile(url)
           detectBPM(arrayBuffer)
         } else {
           wretch(url)
@@ -234,7 +231,7 @@ function AudioOptions(props: AudioOptionsProps) {
     }
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Dialog open={true} onClose={onCancel} aria-describedby="edit-description">
       <DialogContent>
@@ -311,7 +308,7 @@ function AudioOptions(props: AudioOptionsProps) {
                           <InputAdornment position="end">
                             <Tooltip disableInteractive title="Detect BPM">
                               <IconButton
-                                className={clsx(
+                                className={cx(
                                   successBPM && classes.success,
                                   errorBPM && classes.failure
                                 )}
@@ -340,7 +337,7 @@ function AudioOptions(props: AudioOptionsProps) {
                               title="Read BPM Metadata"
                             >
                               <IconButton
-                                className={clsx(
+                                className={cx(
                                   successTag && classes.success,
                                   errorTag && classes.failure
                                 )}
@@ -386,7 +383,7 @@ function AudioOptions(props: AudioOptionsProps) {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} className={clsx(!tick && classes.noPadding)}>
+          <Grid item xs={12} className={cx(!tick && classes.noPadding)}>
             <Collapse in={tick} className={classes.fullWidth}>
               <TimingCard
                 sidebar={false}
@@ -438,4 +435,4 @@ function AudioOptions(props: AudioOptionsProps) {
 }
 
 ;(AudioOptions as any).displayName = 'AudioOptions'
-export default withStyles(styles)(AudioOptions as any)
+export default AudioOptions

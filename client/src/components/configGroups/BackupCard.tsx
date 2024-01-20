@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Alert,
@@ -23,8 +23,7 @@ import {
   Tooltip
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -58,46 +57,44 @@ import {
   restoreAppStorageFromBackup
 } from '../../store/app/thunks'
 import BaseTextField from '../common/text/BaseTextField'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    buttonGrid: {
-      textAlign: 'center'
-    },
-    chipGrid: {
-      paddingTop: theme.spacing(1)
-    },
-    hideXS: {
-      [theme.breakpoints.down('sm')]: {
-        display: 'none'
-      }
-    },
-    showXS: {
-      [theme.breakpoints.up('sm')]: {
-        display: 'none'
-      }
-    },
-    snackbarIcon: {
-      fontSize: 20,
-      opacity: 0.9,
-      marginRight: theme.spacing(1)
-    },
-    snackbarMessage: {
-      display: 'flex',
-      alignItems: 'center'
-    },
-    backupDays: {
-      width: theme.spacing(16)
+const useStyles = makeStyles()((theme: Theme) => ({
+  buttonGrid: {
+    textAlign: 'center'
+  },
+  chipGrid: {
+    paddingTop: theme.spacing(1)
+  },
+  hideXS: {
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
     }
-  })
+  },
+  showXS: {
+    [theme.breakpoints.up('sm')]: {
+      display: 'none'
+    }
+  },
+  snackbarIcon: {
+    fontSize: 20,
+    opacity: 0.9,
+    marginRight: theme.spacing(1)
+  },
+  snackbarMessage: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  backupDays: {
+    width: theme.spacing(16)
+  }
+}))
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />
 }
 
-function BackupCard(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function BackupCard() {
   const dispatch = useAppDispatch()
   const { saveDir, pathSep } = useAppSelector(selectConstants())
   const autoBackup = useAppSelector(selectAppConfigGeneralSettingsAutoBackup())
@@ -131,9 +128,11 @@ function BackupCard(props: WithStyles<typeof styles>) {
   }, [])
 
   const refreshBackups = () => {
-    flipflip.api.getBackups().then((backups) => {
-      setBackups(backups)
-    })
+    flipflip()
+      .api.getBackups()
+      .then((backups) => {
+        setBackups(backups)
+      })
   }
 
   const onChangeBackup = (e: SelectChangeEvent) => {
@@ -142,7 +141,7 @@ function BackupCard(props: WithStyles<typeof styles>) {
 
   const onBackup = async () => {
     try {
-      await flipflip.api.backupAppStorage()
+      await flipflip().api.backupAppStorage()
       setSnackbarOpen(true)
       setSnackbar('Backup success!')
       setSnackbarSeverity(SS.success)
@@ -204,7 +203,7 @@ function BackupCard(props: WithStyles<typeof styles>) {
     setSnackbarOpen(false)
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const hasBackup = backups && backups.length > 0
   return (
     <React.Fragment>
@@ -374,7 +373,7 @@ function BackupCard(props: WithStyles<typeof styles>) {
         <Grid
           item
           xs={'auto'}
-          className={clsx(classes.buttonGrid, classes.hideXS)}
+          className={cx(classes.buttonGrid, classes.hideXS)}
         >
           <Chip
             label={`Latest: ${
@@ -392,7 +391,7 @@ function BackupCard(props: WithStyles<typeof styles>) {
         <Grid
           item
           xs={'auto'}
-          className={clsx(classes.buttonGrid, classes.showXS)}
+          className={cx(classes.buttonGrid, classes.showXS)}
         >
           <Chip
             label={`Latest: ${
@@ -510,4 +509,4 @@ function BackupCard(props: WithStyles<typeof styles>) {
 }
 
 ;(BackupCard as any).displayName = 'BackupCard'
-export default withStyles(styles)(BackupCard as any)
+export default BackupCard

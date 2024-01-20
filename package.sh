@@ -1,11 +1,14 @@
 #!/bin/bash
 
+echo 'Build client'
 cd client
 yarn build
 
+echo 'Build login'
 cd ../login
 yarn build
 
+echo 'Package server'
 cd ../server
 rm -rf public
 cp -r ../client/build public

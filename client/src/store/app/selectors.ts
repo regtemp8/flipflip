@@ -1,9 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { type RootState } from '../store'
+import { getEntry } from '../EntryState'
 import type App from './data/App'
 import type Route from './data/Route'
 import { getActiveScene } from './thunks'
-import { getScene, selectSceneSources } from '../scene/selectors'
+import { selectSceneSources } from '../scene/selectors'
 import type LibrarySource from '../librarySource/LibrarySource'
 import type CaptionScript from '../captionScript/CaptionScript'
 import { getCaptionScriptEntries } from '../captionScript/selectors'
@@ -807,7 +808,7 @@ export const selectAppPlayerTags =
       return undefined
     }
 
-    const scene = getScene(state.scene, sceneID)
+    const scene = getEntry(state.scene, sceneID)
     if (scene?.audioScene === true) {
       return getAudioSource(state)?.tags
     } else if (scene?.scriptScene === true) {

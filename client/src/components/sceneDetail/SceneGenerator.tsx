@@ -1,5 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Avatar,
@@ -26,8 +26,7 @@ import {
   type Theme,
   Typography
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import AdjustIcon from '@mui/icons-material/Adjust'
@@ -49,91 +48,90 @@ import { selectSceneGeneratorWeights } from '../../store/scene/selectors'
 import { setSceneGeneratorWeights } from '../../store/scene/slice'
 import { selectLibrarySources } from '../../store/librarySource/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    listElement: {
-      paddingTop: 0,
-      paddingBottom: '0 !important'
-    },
-    cardAvatar: {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.contrastText
-    },
-    cardAvatarButton: {
-      padding: 0,
-      fontSize: '1.125rem'
-    },
-    cardAvatarError: {
-      backgroundColor: theme.palette.error.main,
-      color: theme.palette.error.contrastText
-    },
-    editSlider: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(1),
-      height: '100%'
-    },
-    editRadios: {
-      paddingLeft: theme.spacing(1),
-      paddingRight: theme.spacing(2)
-    },
-    editList: {
-      display: 'flex',
-      padding: theme.spacing(1),
-      overflow: 'hidden'
-    },
-    fullHeight: {
-      height: '100%'
-    },
-    slider: {
-      height: 'auto',
-      transform: 'scaleY(1)',
-      zIndex: theme.zIndex.modal + 1,
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    sliderClose: {
-      transform: 'scaleY(0)',
-      zIndex: 'auto',
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    editDialogPaper: {
-      width: 400
-    },
-    noAlignSelf: {
-      alignSelf: 'unset'
-    },
-    tagMenu: {
-      minHeight: 365,
-      minWidth: 250
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    valueLabel: {
-      top: theme.spacing(2.75),
-      right: 'unset',
-      left: theme.spacing(4),
-      '&:before': {
-        left: '0%',
-        right: 'unset'
-      }
+const useStyles = makeStyles()((theme: Theme) => ({
+  listElement: {
+    paddingTop: 0,
+    paddingBottom: '0 !important'
+  },
+  cardAvatar: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.contrastText
+  },
+  cardAvatarButton: {
+    padding: 0,
+    fontSize: '1.125rem'
+  },
+  cardAvatarError: {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText
+  },
+  editSlider: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(1),
+    height: '100%'
+  },
+  editRadios: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(2)
+  },
+  editList: {
+    display: 'flex',
+    padding: theme.spacing(1),
+    overflow: 'hidden'
+  },
+  fullHeight: {
+    height: '100%'
+  },
+  slider: {
+    height: 'auto',
+    transform: 'scaleY(1)',
+    zIndex: theme.zIndex.modal + 1,
+    transition: theme.transitions.create('transform', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  sliderClose: {
+    transform: 'scaleY(0)',
+    zIndex: 'auto',
+    transition: theme.transitions.create('transform', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  editDialogPaper: {
+    width: 400
+  },
+  noAlignSelf: {
+    alignSelf: 'unset'
+  },
+  tagMenu: {
+    minHeight: 365,
+    minWidth: 250
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  valueLabel: {
+    top: theme.spacing(2.75),
+    right: 'unset',
+    left: theme.spacing(4),
+    '&:before': {
+      left: '0%',
+      right: 'unset'
     }
-  })
+  }
+}))
 
-export interface SceneGeneratorProps extends WithStyles<typeof styles> {
+export interface SceneGeneratorProps {
   sceneID: number
 }
 
@@ -407,7 +405,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
     dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const weights = generatorWeights as WeightGroup[]
   const isWeighing: WeightGroup | undefined =
     isWeighingIndex === -1
@@ -435,7 +433,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
           sm={6}
           md={4}
           lg={3}
-          className={clsx(
+          className={cx(
             (tutorial === SDGT.edit1 || tutorial === SDGT.edit2) &&
               classes.backdropTop
           )}
@@ -448,7 +446,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                     classes={{ action: classes.noAlignSelf }}
                     avatar={
                       <IconButton
-                        className={clsx(
+                        className={cx(
                           classes.cardAvatarButton,
                           tutorial === SDGT.edit1 && classes.highlight
                         )}
@@ -457,7 +455,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                       >
                         {wg.type === TT.weight && (
                           <Avatar
-                            className={clsx(
+                            className={cx(
                               classes.cardAvatar,
                               wg.rules &&
                                 !areRulesValid(wg) &&
@@ -469,7 +467,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                         )}
                         {wg.type === TT.all && (
                           <Avatar
-                            className={clsx(
+                            className={cx(
                               classes.cardAvatar,
                               wg.rules &&
                                 !areRulesValid(wg) &&
@@ -481,7 +479,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                         )}
                         {wg.type === TT.none && (
                           <Avatar
-                            className={clsx(
+                            className={cx(
                               classes.cardAvatar,
                               wg.rules &&
                                 !areRulesValid(wg) &&
@@ -526,7 +524,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                         </IconButton>
                         <IconButton
                           size="small"
-                          className={clsx(
+                          className={cx(
                             (tutorial === SDGT.edit1 ||
                               tutorial === SDGT.edit2) &&
                               classes.disable
@@ -596,13 +594,13 @@ function SceneGenerator(props: SceneGeneratorProps) {
         }}
         anchorEl={menuAnchorEl}
         keepMounted
-        className={clsx(
+        className={cx(
           (isEditingIndex !== -1 || tutorial === SDGT.edit2) &&
             classes.backdropTop
         )}
         classes={{
           list: classes.editList,
-          paper: clsx(
+          paper: cx(
             isEditingIndex !== -1 && classes.backdropTop,
             tutorial === SDGT.edit2 && classes.highlight
           )
@@ -612,7 +610,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
       >
         {isWeighingIndex !== -1 && (
           <div
-            className={clsx(
+            className={cx(
               classes.slider,
               weights[isWeighingIndex].type !== TT.weight && classes.sliderClose
             )}
@@ -652,7 +650,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                   value={tt}
                   control={
                     <Radio
-                      className={clsx(
+                      className={cx(
                         tutorial === SDGT.edit2 &&
                           tt === TT.all &&
                           classes.highlight
@@ -770,4 +768,4 @@ function SceneGenerator(props: SceneGeneratorProps) {
 }
 
 ;(SceneGenerator as any).displayName = 'SceneGenerator'
-export default withStyles(styles)(SceneGenerator as any)
+export default SceneGenerator

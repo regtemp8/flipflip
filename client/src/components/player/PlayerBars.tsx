@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import wretch from 'wretch'
 
 import {
@@ -28,8 +28,7 @@ import {
   Fab
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -91,7 +90,7 @@ import {
 } from '../../store/app/thunks'
 import { setSceneVideoVolume } from '../../store/scene/slice'
 import { inheritTagsFromClips } from '../../store/librarySource/thunks'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { setFullScreen, toggleFullScreen } from '../../data/actions'
 
 const drawerWidth = 340
@@ -117,168 +116,167 @@ const hexToRGB = (h: string) => {
   return 'rgb(' + +r + ',' + +g + ',' + +b + ', 0.6)'
 }
 
-const styles = (theme: Theme) =>
-  createStyles({
-    hoverBar: {
-      zIndex: theme.zIndex.drawer + 1,
-      position: 'absolute',
-      opacity: 0,
-      height: theme.spacing(5),
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1,
-      height: theme.spacing(8),
-      marginTop: theme.spacing(-8.5),
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    appBarHover: {
-      marginTop: 0,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '20%'
-    },
-    headerRight: {
-      flexBasis: '20%',
-      justifyContent: 'flex-end',
-      display: 'flex'
-    },
-    drawerToolbar: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: theme.palette.background.default,
-      padding: '0 8px',
-      minHeight: 64
-    },
-    drawer: {
-      zIndex: theme.zIndex.drawer,
-      width: drawerWidth,
-      marginLeft: -drawerWidth - 3,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    drawerHover: {
-      marginLeft: 0,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    hoverDrawer: {
-      zIndex: theme.zIndex.drawer,
-      position: 'absolute',
-      opacity: 0,
-      width: theme.spacing(5),
-      height: '100%'
-    },
-    drawerPaper: {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      height: '100vh',
-      width: 0,
-      backgroundColor: theme.palette.background.default,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerPaperHover: {
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    tagDrawer: {
-      zIndex: theme.zIndex.drawer + 1,
-      position: 'absolute'
-    },
-    tagDrawerPaper: {
-      overflow: 'hidden',
-      transform: 'scale(0)',
-      transformOrigin: 'bottom left',
-      backgroundColor: hexToRGB(theme.palette.background.default),
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    tagDrawerPaperHover: {
-      transform: 'scale(1)',
-      transition: theme.transitions.create('transform', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    hoverTagDrawer: {
-      zIndex: theme.zIndex.drawer + 1,
-      position: 'absolute',
-      bottom: 0,
-      opacity: 0,
-      width: '100%',
-      height: theme.spacing(5)
-    },
-    tagList: {
-      padding: theme.spacing(1),
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      width: '100%'
-    },
-    tag: {
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1)
-    },
-    tagContent: {
-      padding: theme.spacing(1)
-    },
-    selectedTag: {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.contrastText
-    },
-    wordWrap: {
-      wordWrap: 'break-word'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  hoverBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    position: 'absolute',
+    opacity: 0,
+    height: theme.spacing(5),
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    height: theme.spacing(8),
+    marginTop: theme.spacing(-8.5),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  appBarHover: {
+    marginTop: 0,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '20%'
+  },
+  headerRight: {
+    flexBasis: '20%',
+    justifyContent: 'flex-end',
+    display: 'flex'
+  },
+  drawerToolbar: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.palette.background.default,
+    padding: '0 8px',
+    minHeight: 64
+  },
+  drawer: {
+    zIndex: theme.zIndex.drawer,
+    width: drawerWidth,
+    marginLeft: -drawerWidth - 3,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  drawerHover: {
+    marginLeft: 0,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  hoverDrawer: {
+    zIndex: theme.zIndex.drawer,
+    position: 'absolute',
+    opacity: 0,
+    width: theme.spacing(5),
+    height: '100%'
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    height: '100vh',
+    width: 0,
+    backgroundColor: theme.palette.background.default,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  drawerPaperHover: {
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  tagDrawer: {
+    zIndex: theme.zIndex.drawer + 1,
+    position: 'absolute'
+  },
+  tagDrawerPaper: {
+    overflow: 'hidden',
+    transform: 'scale(0)',
+    transformOrigin: 'bottom left',
+    backgroundColor: hexToRGB(theme.palette.background.default),
+    transition: theme.transitions.create('transform', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
+  },
+  tagDrawerPaperHover: {
+    transform: 'scale(1)',
+    transition: theme.transitions.create('transform', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  hoverTagDrawer: {
+    zIndex: theme.zIndex.drawer + 1,
+    position: 'absolute',
+    bottom: 0,
+    opacity: 0,
+    width: '100%',
+    height: theme.spacing(5)
+  },
+  tagList: {
+    padding: theme.spacing(1),
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    width: '100%'
+  },
+  tag: {
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1)
+  },
+  tagContent: {
+    padding: theme.spacing(1)
+  },
+  selectedTag: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.contrastText
+  },
+  wordWrap: {
+    wordWrap: 'break-word'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-interface TagCardProps extends WithStyles<typeof styles> {
+interface TagCardProps {
   tagID: number
   libraryID: number
   sceneID: number
@@ -295,10 +293,10 @@ function TagCard(props: TagCardProps) {
     dispatch(playerToggleTag(props.sceneID, props.libraryID, props.tagID))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Card
-      className={clsx(classes.tag, isPlayerTag && classes.selectedTag)}
+      className={cx(classes.tag, isPlayerTag && classes.selectedTag)}
       key={props.tagID}
     >
       <CardActionArea
@@ -316,7 +314,7 @@ function TagCard(props: TagCardProps) {
   )
 }
 
-export interface PlayerBarsProps extends WithStyles<typeof styles> {
+export interface PlayerBarsProps {
   hasStarted: boolean
   historyPaths: any[]
   historyOffset: number
@@ -343,7 +341,6 @@ export interface PlayerBarsProps extends WithStyles<typeof styles> {
 }
 
 function PlayerBars(props: PlayerBarsProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const { isWin32 } = useAppSelector(selectConstants())
   const allTags = useAppSelector(selectPlayerAllTags())
@@ -396,26 +393,29 @@ function PlayerBars(props: PlayerBarsProps) {
   const _abortController = useRef(new AbortController())
 
   useEffect(() => {
-    flipflip.events.onPlayerPlayPause(playPause, _abortController.current)
-    flipflip.events.onPlayerHistoryBack(historyBack, _abortController.current)
-    flipflip.events.onPlayerHistoryForward(
+    flipflip().events.onPlayerPlayPause(playPause, _abortController.current)
+    flipflip().events.onPlayerHistoryBack(historyBack, _abortController.current)
+    flipflip().events.onPlayerHistoryForward(
       historyForward,
       _abortController.current
     )
-    flipflip.events.onPlayerNavigateBack(navigateBack, _abortController.current)
-    flipflip.events.onPlayerDelete(doDelete, _abortController.current)
-    flipflip.events.onPlayerPrevSource(prevSource, _abortController.current)
-    flipflip.events.onPlayerNextSource(nextSource, _abortController.current)
-    flipflip.events.onBlackListFile(async (source: string, file: string) => {
+    flipflip().events.onPlayerNavigateBack(
+      navigateBack,
+      _abortController.current
+    )
+    flipflip().events.onPlayerDelete(doDelete, _abortController.current)
+    flipflip().events.onPlayerPrevSource(prevSource, _abortController.current)
+    flipflip().events.onPlayerNextSource(nextSource, _abortController.current)
+    flipflip().events.onBlackListFile(async (source: string, file: string) => {
       await dispatch(blacklistFile(source, file))
     }, _abortController.current)
-    flipflip.events.onGotoTagSource(async (sourceURL: string) => {
+    flipflip().events.onGotoTagSource(async (sourceURL: string) => {
       await dispatch(playSceneFromLibrary(sourceURL, []))
     }, _abortController.current)
-    flipflip.events.onGotoClipSource((sourceURL: string) => {
+    flipflip().events.onGotoClipSource((sourceURL: string) => {
       dispatch(clipVideo(sourceURL, []))
     }, _abortController.current)
-    flipflip.events.onRecentPictureGrid(
+    flipflip().events.onRecentPictureGrid(
       props.onRecentPictureGrid,
       _abortController.current
     )
@@ -555,7 +555,7 @@ function PlayerBars(props: PlayerBarsProps) {
   }
 
   const onDeletePath = async (path: string) => {
-    const exists = await flipflip.api.pathExists(path)
+    const exists = await flipflip().api.pathExists(path)
     if (exists) {
       if (confirmFileDeletion) {
         setDeletePath(path)
@@ -569,7 +569,7 @@ function PlayerBars(props: PlayerBarsProps) {
   }
 
   const doDelete = async (path: string) => {
-    const errorMessage = await flipflip.api.deletePath(path)
+    const errorMessage = await flipflip().api.deletePath(path)
     if (errorMessage != null) {
       setDeletePath(undefined)
       setDeleteError(
@@ -648,7 +648,7 @@ function PlayerBars(props: PlayerBarsProps) {
     const post = img.hasAttribute('post') ? img.getAttribute('post') : null
     const literalSource = source
     if (/^https?:\/\//g.exec(source) == null) {
-      const fileUrl = await flipflip.api.getFileUrl(source)
+      const fileUrl = await flipflip().api.getFileUrl(source)
       source = urlToPath(fileUrl, isWin32)
     }
     const isFile = url.startsWith('file://')
@@ -752,9 +752,9 @@ function PlayerBars(props: PlayerBarsProps) {
       imagePath.toLocaleLowerCase().endsWith('.jpg') ||
       imagePath.toLocaleLowerCase().endsWith('.jpeg')
     ) {
-      flipflip.clipboard.copyImageToClipboard(imagePath)
+      flipflip().clipboard.copyImageToClipboard(imagePath)
     } else {
-      flipflip.clipboard.copyTextToClipboard(imagePath)
+      flipflip().clipboard.copyTextToClipboard(imagePath)
     }
   }
 
@@ -817,7 +817,7 @@ function PlayerBars(props: PlayerBarsProps) {
           dispatch(inheritTagsFromClips(libraryID))
         }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const canGoBack = props.historyOffset > -(props.historyPaths.length - 1)
   const canGoForward = props.historyOffset < 0
   let clipValue: number[] | undefined
@@ -855,15 +855,14 @@ function PlayerBars(props: PlayerBarsProps) {
         position="absolute"
         onMouseEnter={onMouseEnterAppBar}
         onMouseLeave={onMouseLeaveAppBar}
-        className={clsx(
+        className={cx(
           classes.appBar,
           (tutorial === PT.toolbar ||
             !props.hasStarted ||
             props.isEmpty ||
             appBarHover) &&
             classes.appBarHover,
-          tutorial === PT.toolbar &&
-            clsx(classes.backdropTop, classes.highlight)
+          tutorial === PT.toolbar && cx(classes.backdropTop, classes.highlight)
         )}
       >
         <Toolbar className={classes.headerBar}>
@@ -976,17 +975,17 @@ function PlayerBars(props: PlayerBarsProps) {
 
             <Drawer
               variant="permanent"
-              className={clsx(
+              className={cx(
                 classes.drawer,
                 (tutorial === PT.sidebar || drawerHover) && classes.drawerHover
               )}
               classes={{
-                paper: clsx(
+                paper: cx(
                   classes.drawerPaper,
                   (tutorial === PT.sidebar || drawerHover) &&
                     classes.drawerPaperHover,
                   tutorial === PT.toolbar &&
-                    clsx(classes.backdropTop, classes.highlight)
+                    cx(classes.backdropTop, classes.highlight)
                 )
               }}
               open={tutorial === PT.sidebar || drawerHover}
@@ -1147,7 +1146,7 @@ function PlayerBars(props: PlayerBarsProps) {
             anchor="bottom"
             className={classes.tagDrawer}
             classes={{
-              paper: clsx(
+              paper: cx(
                 classes.tagDrawerPaper,
                 tagDrawerHover && classes.tagDrawerPaperHover
               )
@@ -1288,4 +1287,4 @@ function PlayerBars(props: PlayerBarsProps) {
 }
 
 ;(PlayerBars as any).displayName = 'PlayerBars'
-export default withStyles(styles)(PlayerBars as any)
+export default PlayerBars

@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import TimingCard from '../common/TimingCard'
 import { useAppSelector } from '../../store/hooks'
@@ -55,37 +54,36 @@ import {
 import EasingCard from '../common/EasingCard'
 import BaseSwitch from '../common/BaseSwitch'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface FadeIOCardProps extends WithStyles<typeof styles> {
+export interface FadeIOCardProps {
   sceneID?: number
 }
 
@@ -97,13 +95,13 @@ function FadeIOCard(props: FadeIOCardProps) {
     selectAppConfigDisplaySettingsEasingControls()
   )
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid
       container
       spacing={fadeInOut ? 2 : 0}
       alignItems="center"
-      className={clsx(tutorial != null && classes.disable)}
+      className={cx(tutorial != null && classes.disable)}
     >
       <Grid item xs={12}>
         <BaseSwitch
@@ -225,4 +223,4 @@ function FadeIOCard(props: FadeIOCardProps) {
 }
 
 ;(FadeIOCard as any).displayName = 'FadeIOCard'
-export default withStyles(styles)(FadeIOCard as any)
+export default FadeIOCard

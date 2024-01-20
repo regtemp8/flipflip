@@ -1,10 +1,9 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import { SDT } from 'flipflip-common'
 import {
@@ -48,42 +47,41 @@ import TimingCard from '../common/TimingCard'
 import EasingCard from '../common/EasingCard'
 import { useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface CrossFadeCardProps extends WithStyles<typeof styles> {
+export interface CrossFadeCardProps {
   sceneID?: number
 }
 
 function CrossFadeCard(props: CrossFadeCardProps) {
-  const classes = props.classes
+  const { classes } = useStyles()
   const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
   const tutorial = useAppSelector(selectAppTutorial())
   const easingControls = useAppSelector(
@@ -96,7 +94,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           tutorial != null && tutorial !== SDT.fade1 && classes.disable
         )}
       >
@@ -111,7 +109,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
           <Grid item xs={12} sm={sidebar ? 12 : 7}>
             <Collapse
               in={crossFade}
-              className={clsx(classes.fullWidth, classes.paddingLeft)}
+              className={cx(classes.fullWidth, classes.paddingLeft)}
             >
               <BaseSwitch
                 label="Cross-Fade Audio"
@@ -131,7 +129,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           tutorial != null && classes.disable,
           tutorial === SDT.fade2 && classes.highlight
         )}
@@ -214,4 +212,4 @@ function CrossFadeCard(props: CrossFadeCardProps) {
 }
 
 ;(CrossFadeCard as any).displayName = 'CrossFadeCard'
-export default withStyles(styles)(CrossFadeCard as any)
+export default CrossFadeCard

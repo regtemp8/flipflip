@@ -1,6 +1,6 @@
 import { type Theme } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import Masonry from '@mui/lab/Masonry'
 
 import ImageView from './ImageView'
@@ -8,33 +8,33 @@ import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { setPlayerState } from '../../store/player/slice'
 import { selectAppConfigDisplaySettingsMaxInHistory } from '../../store/app/selectors'
+import { selectConstants } from '../../store/constants/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    content: {
-      position: 'absolute',
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      width: '100%',
-      zIndex: theme.zIndex.appBar - 1,
-      backgroundColor: theme.palette.background.default
-    },
-    masonry: {
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      minHeight: 'calc(100% - ' + theme.mixins.toolbar.minHeight + 'px)'
-    },
-    image: {
-      marginBottom: 0,
-      '&:hover': {
-        opacity: 0.7
-      }
+const useStyles = makeStyles()((theme: Theme) => ({
+  content: {
+    position: 'absolute',
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    width: '100%',
+    zIndex: theme.zIndex.appBar - 1,
+    backgroundColor: theme.palette.background.default
+  },
+  masonry: {
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    minHeight: 'calc(100% - ' + theme.mixins.toolbar.minHeight + 'px)'
+  },
+  image: {
+    marginBottom: 0,
+    '&:hover': {
+      opacity: 0.7
     }
-  })
+  }
+}))
 
-export interface PictureGridProps extends WithStyles<typeof styles> {
+export interface PictureGridProps {
   pictures: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
 }
 
@@ -43,6 +43,8 @@ function PictureGrid(props: PictureGridProps) {
   const maxPictures = useAppSelector(
     selectAppConfigDisplaySettingsMaxInHistory()
   )
+  const { masonryDefaultHeight, masonryDefaultColumns } =
+    useAppSelector(selectConstants())
 
   useEffect(() => {
     for (let i = 0; i < maxPictures; i++) {
@@ -63,12 +65,18 @@ function PictureGrid(props: PictureGridProps) {
     }
   }, [maxPictures])
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const pictures = Array.from(props.pictures).reverse()
   return (
     <div className={classes.content}>
       <div className={classes.masonry}>
-        <Masonry columns={[1, 2, 3, 4]} spacing={1}>
+        <Masonry
+          columns={[1, 2, 3, 4]}
+          spacing={1}
+          defaultSpacing={1}
+          defaultColumns={masonryDefaultColumns}
+          defaultHeight={masonryDefaultHeight}
+        >
           {pictures.map((p, x) => (
             <ImageView
               key={x}
@@ -87,4 +95,4 @@ function PictureGrid(props: PictureGridProps) {
 }
 
 ;(PictureGrid as any).displayName = 'PictureGrid'
-export default withStyles(styles)(PictureGrid as any)
+export default PictureGrid

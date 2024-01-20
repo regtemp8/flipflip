@@ -1,6 +1,6 @@
 import React, { MouseEvent, useEffect, useState, useRef } from 'react'
 import wretch from 'wretch'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -27,8 +27,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -82,190 +81,191 @@ import {
   selectCaptionScriptorSceneScripts
 } from '../../store/captionScriptor/selectors'
 import { selectSceneAudioEnabled } from '../../store/scene/selectors'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import { RootState } from '../../store/store'
 
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/material.css')
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    fill: {
-      flexGrow: 1
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    backButton: {
-      float: 'left'
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '3%'
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      padding: theme.spacing(0),
-      display: 'grid',
-      gridTemplateColumns: '40% 20% 40%',
-      gridTemplateRows: '50% 50%'
-    },
-    scriptGrid: {
-      gridRowStart: 1,
-      gridRowEnd: 3,
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    scriptArea: {
-      alignItems: 'start'
-    },
-    menuGrid: {
-      gridRowStart: 1,
-      gridRowEnd: 3,
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    menuCard: {
-      height: '100%',
-      overflowY: 'auto'
-    },
-    playerGrid: {
-      overflow: 'hidden',
-      display: 'grid'
-    },
-    fontGrid: {
-      borderWidth: 1,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'none none none solid'
-    },
-    fontCard: {
-      height: '100%',
-      overflowY: 'auto'
-    },
-    menuCardContent: {
-      paddingTop: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%'
-    },
-    menuGridButtons: {
-      display: 'flex',
-      padding: '0 !important',
-      marginTop: theme.spacing(1)
-    },
-    noPaddingTop: {
-      paddingTop: '0 !important'
-    },
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    errorIcon: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      margin: 'auto',
-      width: '10em',
-      height: '10em',
-      zIndex: 3
-    },
-    statusMessage: {
-      display: 'flex',
-      marginLeft: theme.spacing(1)
-    },
-    errorMessageIcon: {
-      marginTop: 3,
-      marginRight: theme.spacing(1)
-    },
-    okIcon: {
-      marginTop: 3,
-      color: theme.palette.success.main
-    },
-    hidden: {
-      opacity: 0
-    },
-    openFileName: {
-      marginLeft: 'auto',
-      marginTop: theme.spacing(1.5),
-      color: (theme.palette.text as any).hint
-    },
-    menuDivider: {
-      marginLeft: 'auto'
-    },
-    actionButton: {
-      color: '#FFCB6B'
-    },
-    setterButton: {
-      color: '#F78C6C'
-    },
-    storeButton: {
-      color: '#DECB6B'
-    },
-    keywordButton: {
-      color: '#F07178'
-    },
-    codeMirrorWrapper: {
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      height: '100%'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    backdropTopHighlight: {
-      zIndex: theme.zIndex.modal + 1,
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    relative: {
-      position: 'relative'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  fill: {
+    flexGrow: 1
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  backButton: {
+    float: 'left'
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '3%'
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    padding: theme.spacing(0),
+    display: 'grid',
+    gridTemplateColumns: '40% 20% 40%',
+    gridTemplateRows: '50% 50%'
+  },
+  scriptGrid: {
+    gridRowStart: 1,
+    gridRowEnd: 3,
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  scriptArea: {
+    alignItems: 'start'
+  },
+  menuGrid: {
+    gridRowStart: 1,
+    gridRowEnd: 3,
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  menuCard: {
+    height: '100%',
+    overflowY: 'auto'
+  },
+  playerGrid: {
+    overflow: 'hidden',
+    display: 'grid'
+  },
+  fontGrid: {
+    borderWidth: 1,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'none none none solid'
+  },
+  fontCard: {
+    height: '100%',
+    overflowY: 'auto'
+  },
+  menuCardContent: {
+    paddingTop: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%'
+  },
+  menuGridButtons: {
+    display: 'flex',
+    padding: '0 !important',
+    marginTop: theme.spacing(1)
+  },
+  noPaddingTop: {
+    paddingTop: '0 !important'
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  errorIcon: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    margin: 'auto',
+    width: '10em',
+    height: '10em',
+    zIndex: 3
+  },
+  statusMessage: {
+    display: 'flex',
+    marginLeft: theme.spacing(1)
+  },
+  errorMessageIcon: {
+    marginTop: 3,
+    marginRight: theme.spacing(1)
+  },
+  okIcon: {
+    marginTop: 3,
+    color: theme.palette.success.main
+  },
+  hidden: {
+    opacity: 0
+  },
+  openFileName: {
+    marginLeft: 'auto',
+    marginTop: theme.spacing(1.5),
+    color: (theme.palette.text as any).hint
+  },
+  menuDivider: {
+    marginLeft: 'auto'
+  },
+  actionButton: {
+    color: '#FFCB6B'
+  },
+  setterButton: {
+    color: '#F78C6C'
+  },
+  storeButton: {
+    color: '#DECB6B'
+  },
+  keywordButton: {
+    color: '#F07178'
+  },
+  codeMirrorWrapper: {
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    height: '100%'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  backdropTopHighlight: {
+    zIndex: theme.zIndex.modal + 1,
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  relative: {
+    position: 'relative'
+  }
+}))
 
-function CaptionScriptor(props: WithStyles<typeof styles>) {
-  const flipflip = FlipFlipService.getInstance()
+function CaptionScriptor() {
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())
   const sceneScripts = useAppSelector(selectCaptionScriptorSceneScripts())
   const captionScriptID = useAppSelector(selectCaptionScriptorCaptionScriptID())
 
-  const audioEnabledSelector = sceneID !== 0 ? selectSceneAudioEnabled(sceneID) : (state: RootState) => false
+  const audioEnabledSelector =
+    sceneID !== 0
+      ? selectSceneAudioEnabled(sceneID)
+      : (state: RootState) => false
   const audioEnabled = useAppSelector(audioEnabledSelector)
   const url = useAppSelector(selectCaptionScriptUrl(captionScriptID))
   const script = useAppSelector(selectCaptionScriptScript(captionScriptID))
@@ -355,7 +355,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
 
   const onConfirmOpen = async () => {
     onCloseDialog()
-    const url = await flipflip.api.openTextFile()
+    const url = await flipflip().api.openTextFile()
     if (!url) return
     dispatch(onCaptionScriptorOpenScript(url))
   }
@@ -392,7 +392,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
       await onSaveAs()
     } else {
       if (!url.startsWith('http')) {
-        await flipflip.api.writeFile(url, script as string)
+        await flipflip().api.writeFile(url, script as string)
         setScriptChanged(false)
         return true
       } else {
@@ -403,7 +403,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
 
   const onSaveAs = async () => {
     onCloseDialog()
-    const filePath = await flipflip.api.saveTextFile(
+    const filePath = await flipflip().api.saveTextFile(
       url as string,
       script as string
     )
@@ -642,7 +642,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
     return { menuName, menuThen }
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const { menuName, menuThen } = getMenu()
   const getTimestamp = audioEnabled
     ? () => _currentTimestamp.current
@@ -704,10 +704,10 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
 
-        <div className={clsx(classes.root, classes.fill)}>
+        <div className={cx(classes.root, classes.fill)}>
           <Container maxWidth={false} className={classes.container}>
             <div
-              className={clsx(classes.scriptGrid, fullscreen && classes.hidden)}
+              className={cx(classes.scriptGrid, fullscreen && classes.hidden)}
               id={'script-field'}
             >
               {error != null && (
@@ -749,16 +749,14 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                 overwriteHack={_codeMirrorOverwriteHack.current}
               />
             </div>
-            <div
-              className={clsx(classes.menuGrid, fullscreen && classes.hidden)}
-            >
+            <div className={cx(classes.menuGrid, fullscreen && classes.hidden)}>
               <Card className={classes.menuCard}>
                 <CardContent className={classes.menuCardContent}>
                   <Grid container spacing={2}>
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         classes.menuGridButtons,
                         tutorial === CST.menu && classes.backdropTopHighlight,
                         tutorial === CST.menu && classes.disable
@@ -860,7 +858,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         classes.noPaddingTop,
                         tutorial === CST.menu && classes.backdropTop
                       )}
@@ -870,7 +868,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.menu && classes.backdropTopHighlight,
                         tutorial === CST.menu && classes.disable
                       )}
@@ -899,7 +897,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.actions &&
                           classes.backdropTopHighlight,
                         tutorial === CST.actions && classes.disable
@@ -1020,7 +1018,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.actions && classes.backdropTop
                       )}
                     >
@@ -1029,7 +1027,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.actions &&
                           classes.backdropTopHighlight,
                         tutorial === CST.actions && classes.disable
@@ -1105,7 +1103,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.actions && classes.backdropTop
                       )}
                     >
@@ -1114,7 +1112,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                     <Grid
                       item
                       xs={12}
-                      className={clsx(
+                      className={cx(
                         tutorial === CST.actions &&
                           classes.backdropTopHighlight,
                         tutorial === CST.actions && classes.disable
@@ -1235,7 +1233,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
               </Card>
             </div>
             <div
-              className={clsx(
+              className={cx(
                 classes.playerGrid,
                 tutorial === CST.player && classes.backdropTopHighlight
               )}
@@ -1257,7 +1255,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
                 <ErrorOutlineIcon className={classes.errorIcon} color="error" />
               )}
               {sceneID !== 0 && script && script.length > 0 && (
-                <div className={clsx(!fullscreen && classes.relative)}>
+                <div className={cx(!fullscreen && classes.relative)}>
                   <CaptionProgram
                     sceneID={sceneID}
                     captionScriptID={captionScriptID}
@@ -1272,7 +1270,7 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
               )}
             </div>
             <div
-              className={clsx(
+              className={cx(
                 classes.fontGrid,
                 fullscreen && classes.hidden,
                 tutorial === CST.fonts && classes.backdropTopHighlight
@@ -1380,4 +1378,4 @@ function CaptionScriptor(props: WithStyles<typeof styles>) {
 }
 
 ;(CaptionScriptor as any).displayName = 'CaptionScriptor'
-export default withStyles(styles)(CaptionScriptor as any)
+export default CaptionScriptor

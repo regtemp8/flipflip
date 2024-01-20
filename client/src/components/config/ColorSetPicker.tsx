@@ -1,46 +1,42 @@
 import React, { useState, type MouseEvent } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 import { SketchPicker } from 'react-color'
 
 import { Fab, Grid, IconButton, Menu, type Theme, Tooltip } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import type ReduxProps from '../common/ReduxProps'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    colorGrid: {
-      width: 64
-    },
-    colorButton: {
-      backgroundColor: theme.palette.common.white,
-      marginTop: 0,
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      boxShadow: 'none'
-    },
-    colorPickerButton: {
-      backgroundColor: theme.palette.common.white,
-      marginRight: theme.spacing(0.25),
-      width: theme.spacing(2),
-      height: theme.spacing(2),
-      minHeight: theme.spacing(2),
-      boxShadow: 'none'
-    },
-    pickedColor: {
-      border: 'black solid 3px'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  colorGrid: {
+    width: 64
+  },
+  colorButton: {
+    backgroundColor: theme.palette.common.white,
+    marginTop: 0,
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+    boxShadow: 'none'
+  },
+  colorPickerButton: {
+    backgroundColor: theme.palette.common.white,
+    marginRight: theme.spacing(0.25),
+    width: theme.spacing(2),
+    height: theme.spacing(2),
+    minHeight: theme.spacing(2),
+    boxShadow: 'none'
+  },
+  pickedColor: {
+    border: 'black solid 3px'
+  }
+}))
 
-export interface ColorSetPickerProps
-  extends ReduxProps<string[]>,
-    WithStyles<typeof styles> {}
+export interface ColorSetPickerProps extends ReduxProps<string[]> {}
 
 function ColorSetPicker(props: ColorSetPickerProps) {
   const dispatch = useAppDispatch()
@@ -87,7 +83,7 @@ function ColorSetPicker(props: ColorSetPickerProps) {
     dispatch(props.action([]))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container>
       <Grid item className={classes.colorGrid}>
@@ -133,7 +129,7 @@ function ColorSetPicker(props: ColorSetPickerProps) {
             <Grid key={c + index} item>
               <Fab
                 id={'color-' + index}
-                className={clsx(
+                className={cx(
                   classes.colorPickerButton,
                   index === pickerIndex && classes.pickedColor
                 )}
@@ -160,4 +156,4 @@ function ColorSetPicker(props: ColorSetPickerProps) {
 }
 
 ;(ColorSetPicker as any).displayName = 'ColorSetPicker'
-export default withStyles(styles)(ColorSetPicker as any)
+export default ColorSetPicker

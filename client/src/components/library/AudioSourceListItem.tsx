@@ -1,5 +1,5 @@
 import React, { MouseEvent } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Badge,
@@ -16,8 +16,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -30,7 +29,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { systemMessage } from '../../store/app/slice'
 import { playAudio } from '../../store/scene/thunks'
 import TagChip from './TagChip'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 import {
   selectAudioAlbum,
   selectAudioArtist,
@@ -45,148 +44,147 @@ import {
   selectAudioPlayedCount
 } from '../../store/audio/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex'
-    },
-    oddChild: {
-      backgroundColor:
-        theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['100']
-          : grey[900],
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    evenChild: {
-      backgroundColor:
-        theme.palette.mode === 'light'
-          ? (theme.palette.primary as any)['50']
-          : theme.palette.background.default,
-      '&:hover': {
-        backgroundColor:
-          theme.palette.mode === 'light'
-            ? (theme.palette.primary as any)['200']
-            : '#080808'
-      }
-    },
-    lastSelected: {
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex'
+  },
+  oddChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['100']
+        : grey[900],
+    '&:hover': {
       backgroundColor:
         theme.palette.mode === 'light'
           ? (theme.palette.primary as any)['200']
-          : '#0F0F0F'
-    },
-    avatar: {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: 'none'
-    },
-    listAvatar: {
-      width: 56
-    },
-    markedSource: {
-      backgroundColor: theme.palette.secondary.main
-    },
-    sourceIcon: {
-      color: theme.palette.primary.contrastText
-    },
-    sourceMarkedIcon: {
-      color: theme.palette.secondary.contrastText
-    },
-    deleteButton: {
-      backgroundColor: theme.palette.error.main
-    },
-    deleteIcon: {
-      color: theme.palette.error.contrastText
-    },
-    errorIcon: {
-      color: theme.palette.error.main,
-      backgroundColor: theme.palette.error.contrastText,
-      borderRadius: '50%'
-    },
-    actionButton: {
-      marginLeft: theme.spacing(1)
-    },
-    urlField: {
-      width: '100%',
-      margin: 0
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    },
-    trackThumb: {
-      height: 40,
-      width: 40,
-      overflow: 'hidden',
-      display: 'flex',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      userSelect: 'none'
-    },
-    thumbImage: {
-      height: '100%'
-    },
-    trackName: {
-      maxWidth: 500,
-      minWidth: 250,
-      width: '100%',
-      userSelect: 'none'
-    },
-    trackDuration: {
-      width: 75,
-      textAign: 'end',
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(3),
-      userSelect: 'none'
-    },
-    artistContainer: {
-      minWidth: 225
-    },
-    trackArtist: {
-      display: 'inline-block',
-      userSelect: 'none',
-      cursor: 'pointer',
-      '&:hover': {
-        textDecoration: 'underline'
-      }
-    },
-    albumContainer: {
-      minWidth: 225
-    },
-    trackAlbum: {
-      userSelect: 'none',
-      cursor: 'pointer',
-      '&:hover': {
-        textDecoration: 'underline'
-      },
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
-    },
-    bigTooltip: {
-      fontSize: 'medium',
-      maxWidth: 500
-    },
-    tagChips: {
-      textAlign: 'center'
-    },
-    listItem: {
-      paddingRight: 110
-    },
-    preLine: {
-      whiteSpace: 'pre-line'
+          : '#080808'
     }
-  })
+  },
+  evenChild: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['50']
+        : theme.palette.background.default,
+    '&:hover': {
+      backgroundColor:
+        theme.palette.mode === 'light'
+          ? (theme.palette.primary as any)['200']
+          : '#080808'
+    }
+  },
+  lastSelected: {
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? (theme.palette.primary as any)['200']
+        : '#0F0F0F'
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: 'none'
+  },
+  listAvatar: {
+    width: 56
+  },
+  markedSource: {
+    backgroundColor: theme.palette.secondary.main
+  },
+  sourceIcon: {
+    color: theme.palette.primary.contrastText
+  },
+  sourceMarkedIcon: {
+    color: theme.palette.secondary.contrastText
+  },
+  deleteButton: {
+    backgroundColor: theme.palette.error.main
+  },
+  deleteIcon: {
+    color: theme.palette.error.contrastText
+  },
+  errorIcon: {
+    color: theme.palette.error.main,
+    backgroundColor: theme.palette.error.contrastText,
+    borderRadius: '50%'
+  },
+  actionButton: {
+    marginLeft: theme.spacing(1)
+  },
+  urlField: {
+    width: '100%',
+    margin: 0
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  },
+  trackThumb: {
+    height: 40,
+    width: 40,
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  thumbImage: {
+    height: '100%'
+  },
+  trackName: {
+    maxWidth: 500,
+    minWidth: 250,
+    width: '100%',
+    userSelect: 'none'
+  },
+  trackDuration: {
+    width: 75,
+    textAign: 'end',
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(3),
+    userSelect: 'none'
+  },
+  artistContainer: {
+    minWidth: 225
+  },
+  trackArtist: {
+    display: 'inline-block',
+    userSelect: 'none',
+    cursor: 'pointer',
+    '&:hover': {
+      textDecoration: 'underline'
+    }
+  },
+  albumContainer: {
+    minWidth: 225
+  },
+  trackAlbum: {
+    userSelect: 'none',
+    cursor: 'pointer',
+    '&:hover': {
+      textDecoration: 'underline'
+    },
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  bigTooltip: {
+    fontSize: 'medium',
+    maxWidth: 500
+  },
+  tagChips: {
+    textAlign: 'center'
+  },
+  listItem: {
+    paddingRight: 110
+  },
+  preLine: {
+    whiteSpace: 'pre-line'
+  }
+}))
 
-export interface AudioSourceListItemProps extends WithStyles<typeof styles> {
+export interface AudioSourceListItemProps {
   checked: boolean
   index: number
   isSelect: boolean
@@ -205,7 +203,6 @@ export interface AudioSourceListItemProps extends WithStyles<typeof styles> {
 }
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const url = useAppSelector(selectAudioUrl(props.audioID))
   const marked = useAppSelector(selectAudioMarked(props.audioID))
@@ -226,7 +223,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
     } else if (e.shiftKey && !e.ctrlKey) {
       openExternalURL(sourceURL)
     } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip.api.showItemInFolder(sourceURL)
+      flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
       props.savePosition()
       try {
@@ -243,11 +240,11 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
     window.open(url, '_blank')?.focus()
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <div
       style={props.style}
-      className={clsx(
+      className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
         props.lastSelected && classes.lastSelected
       )}
@@ -313,14 +310,14 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                   {thumb == null && (
                     <Fab
                       size="small"
-                      className={clsx(
+                      className={cx(
                         classes.avatar,
                         marked && classes.markedSource
                       )}
                     >
                       <SourceIcon
                         url={url}
-                        className={clsx(
+                        className={cx(
                           classes.sourceIcon,
                           marked && classes.sourceMarkedIcon
                         )}
@@ -385,7 +382,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
             </IconButton>
             <IconButton
               onClick={() => props.onRemove(props.audioID)}
-              className={clsx(classes.deleteButton, classes.actionButton)}
+              className={cx(classes.deleteButton, classes.actionButton)}
               edge="end"
               size="small"
               aria-label="delete"
@@ -400,4 +397,4 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
 }
 
 ;(AudioSourceListItem as any).displayName = 'AudioSourceListItem'
-export default withStyles(styles)(AudioSourceListItem as any)
+export default AudioSourceListItem

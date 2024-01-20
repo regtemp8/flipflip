@@ -17,8 +17,7 @@ import {
   Tooltip
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
@@ -62,10 +61,9 @@ import {
   selectAudioDuration
 } from '../../store/audio/selectors'
 import { default as AudioPlaylistData } from '../../store/scene/AudioPlaylist'
-import FlipFlipService from '../../FlipFlipService'
+import flipflip from '../../FlipFlipService'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     audioList: {
       paddingLeft: 0
     },
@@ -117,9 +115,9 @@ const styles = (theme: Theme) =>
     sourceIcon: {
       color: theme.palette.primary.contrastText
     }
-  })
+  }))
 
-interface AudioListItemProps extends WithStyles<typeof styles> {
+interface AudioListItemProps {
   audioID: number
 }
 
@@ -141,7 +139,7 @@ function AudioListItem(props: AudioListItemProps) {
   )
 }
 
-interface PlaylistItemProps extends WithStyles<typeof styles> {
+interface PlaylistItemProps {
   audioID: number
   audios: number[]
   removeTrack: (audioID: number) => void
@@ -149,7 +147,6 @@ interface PlaylistItemProps extends WithStyles<typeof styles> {
 }
 
 function PlaylistItem(props: PlaylistItemProps) {
-  const flipflip = FlipFlipService.getInstance()
   const dispatch = useAppDispatch()
   const trackNum = useAppSelector(selectAudioTrackNum(props.audioID))
   const comment = useAppSelector(selectAudioComment(props.audioID))
@@ -164,13 +161,13 @@ function PlaylistItem(props: PlaylistItemProps) {
     if (e.shiftKey && !e.ctrlKey) {
       window.open(url, '_blank')?.focus()
     } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip.api.showItemInFolder(sourceURL)
+      flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
       dispatch(playAudio(props.audioID, props.audios))
     }
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <ListItem>
       <ListItemAvatar className={classes.listAvatar}>
@@ -252,7 +249,7 @@ function PlaylistItem(props: PlaylistItemProps) {
   )
 }
 
-export interface AudioPlaylistProps extends WithStyles<typeof styles> {
+export interface AudioPlaylistProps {
   sceneID: number
   playlistIndex: number
   playlist: AudioPlaylistData
@@ -392,7 +389,7 @@ function AudioPlaylist(props: AudioPlaylistProps) {
     )
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   if (props.startPlaying) {
     let audioID = playingAudios[currentIndex]
     if (!audioID) audioID = props.playlist.audios[currentIndex]
@@ -551,4 +548,4 @@ function AudioPlaylist(props: AudioPlaylistProps) {
 }
 
 ;(AudioPlaylist as any).displayName = 'AudioPlaylist'
-export default withStyles(styles)(AudioPlaylist as any)
+export default AudioPlaylist

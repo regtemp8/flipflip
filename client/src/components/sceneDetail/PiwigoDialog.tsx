@@ -32,8 +32,7 @@ import {
   Rating,
   SelectChangeEvent
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
@@ -51,8 +50,7 @@ import {
   selectAppConfigRemoteSettingsPiwigoUsername
 } from '../../store/app/selectors'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     list: {},
     subList: {
       paddingLeft: 10
@@ -97,7 +95,7 @@ const styles = (theme: Theme) =>
     typeSelect: {
       marginLeft: 10
     }
-  })
+  }))
 
 interface Album {
   id: number
@@ -120,7 +118,7 @@ interface Column {
   enabled: boolean
 }
 
-export interface AlbumListItemProps extends WithStyles<typeof styles> {
+export interface AlbumListItemProps {
   album: Album
   selectedAlbums: number[]
   onSelect: (albumID: number, selected: boolean) => void
@@ -180,7 +178,7 @@ function AlbumListItem(props: AlbumListItemProps) {
   )
 }
 
-export interface PiwigoDialogProps extends WithStyles<typeof styles> {
+export interface PiwigoDialogProps {
   open: boolean
   onClose: () => void
   onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
@@ -444,7 +442,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
     setSortOrder(newSortOrder)
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
 
   return (
     <Dialog
@@ -677,4 +675,4 @@ function PiwigoDialog(props: PiwigoDialogProps) {
 }
 
 ;(PiwigoDialog as any).displayName = 'PiwigoDialog'
-export default withStyles(styles)(PiwigoDialog as any)
+export default PiwigoDialog

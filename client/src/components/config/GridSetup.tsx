@@ -1,5 +1,5 @@
 import React, { type ChangeEvent, useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   AppBar,
@@ -13,8 +13,7 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -41,103 +40,102 @@ import { playGrid } from '../../store/player/thunks'
 import GridCellSetup from './GridCellSetup'
 import { convertGridIDToSceneID } from '../../data/utils'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      height: '100vh'
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1
-    },
-    appBarSpacer: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 8px',
-      minHeight: 64
-    },
-    title: {
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    headerBar: {
-      display: 'flex',
-      alignItems: 'center',
-      whiteSpace: 'nowrap',
-      flexWrap: 'nowrap'
-    },
-    headerLeft: {
-      flexBasis: '13%'
-    },
-    headerRight: {
-      flexBasis: '13%',
-      justifyContent: 'flex-end',
-      display: 'flex'
-    },
-    titleField: {
-      margin: 0,
-      textAlign: 'center',
-      flexGrow: 1
-    },
-    titleInput: {
-      color: theme.palette.primary.contrastText,
-      textAlign: 'center',
-      fontSize: theme.typography.h4.fontSize
-    },
-    noTitle: {
-      width: '33%',
-      height: theme.spacing(7)
-    },
-    content: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      backgroundColor: theme.palette.background.default
-    },
-    container: {
-      height: '100%',
-      padding: theme.spacing(0)
-    },
-    dimensionInput: {
-      color: `${theme.palette.primary.contrastText} !important`,
-      minWidth: theme.spacing(6)
-    },
-    grid: {
-      flexGrow: 1,
-      display: 'grid',
-      height: '100%'
-    },
-    deleteButton: {
-      backgroundColor: theme.palette.error.dark,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed',
-      zIndex: 3
-    },
-    deleteIcon: {
-      color: theme.palette.error.contrastText
-    },
-    fill: {
-      flexGrow: 1
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
-    }
-  })
+const useStyles = makeStyles()((theme: Theme) => ({
+  root: {
+    display: 'flex',
+    height: '100vh'
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
+  },
+  appBarSpacer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
+  },
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
+  },
+  headerLeft: {
+    flexBasis: '13%'
+  },
+  headerRight: {
+    flexBasis: '13%',
+    justifyContent: 'flex-end',
+    display: 'flex'
+  },
+  titleField: {
+    margin: 0,
+    textAlign: 'center',
+    flexGrow: 1
+  },
+  titleInput: {
+    color: theme.palette.primary.contrastText,
+    textAlign: 'center',
+    fontSize: theme.typography.h4.fontSize
+  },
+  noTitle: {
+    width: '33%',
+    height: theme.spacing(7)
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    backgroundColor: theme.palette.background.default
+  },
+  container: {
+    height: '100%',
+    padding: theme.spacing(0)
+  },
+  dimensionInput: {
+    color: `${theme.palette.primary.contrastText} !important`,
+    minWidth: theme.spacing(6)
+  },
+  grid: {
+    flexGrow: 1,
+    display: 'grid',
+    height: '100%'
+  },
+  deleteButton: {
+    backgroundColor: theme.palette.error.dark,
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed',
+    zIndex: 3
+  },
+  deleteIcon: {
+    color: theme.palette.error.contrastText
+  },
+  fill: {
+    flexGrow: 1
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface GridSetupProps extends WithStyles<typeof styles> {
+export interface GridSetupProps {
   gridID: number
 }
 
@@ -216,7 +214,7 @@ function GridSetup(props: GridSetupProps) {
     dispatch(playGrid(props.gridID))
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   const colSize = 100 / width
   const rowSize = 100 / height
   let gridTemplateColumns = ''
@@ -233,7 +231,7 @@ function GridSetup(props: GridSetupProps) {
       <AppBar
         enableColorOnDark
         position="absolute"
-        className={clsx(
+        className={cx(
           classes.appBar,
           tutorial === SGT.dimensions && classes.backdropTop
         )}
@@ -245,7 +243,7 @@ function GridSetup(props: GridSetupProps) {
                 edge="start"
                 color="inherit"
                 aria-label="Back"
-                className={clsx(tutorial === SGT.dimensions && classes.disable)}
+                className={cx(tutorial === SGT.dimensions && classes.disable)}
                 onClick={goBack}
                 size="large"
               >
@@ -274,7 +272,7 @@ function GridSetup(props: GridSetupProps) {
               component="h1"
               variant="h4"
               noWrap
-              className={clsx(
+              className={cx(
                 classes.title,
                 name.length === 0 && classes.noTitle,
                 tutorial === SGT.dimensions && classes.disable
@@ -292,7 +290,7 @@ function GridSetup(props: GridSetupProps) {
               value={height}
               onChange={onChangeHeight}
               variant="filled"
-              className={clsx(tutorial === SGT.dimensions && classes.highlight)}
+              className={cx(tutorial === SGT.dimensions && classes.highlight)}
               InputLabelProps={{ className: classes.dimensionInput }}
               inputProps={{
                 className: classes.dimensionInput,
@@ -307,7 +305,7 @@ function GridSetup(props: GridSetupProps) {
               value={width}
               onChange={onChangeWidth}
               variant="filled"
-              className={clsx(tutorial === SGT.dimensions && classes.highlight)}
+              className={cx(tutorial === SGT.dimensions && classes.highlight)}
               InputLabelProps={{ className: classes.dimensionInput }}
               inputProps={{
                 className: classes.dimensionInput,
@@ -320,7 +318,7 @@ function GridSetup(props: GridSetupProps) {
               edge="end"
               color="inherit"
               aria-label="Play"
-              className={clsx(tutorial === SGT.dimensions && classes.disable)}
+              className={cx(tutorial === SGT.dimensions && classes.disable)}
               onClick={onPlayGrid}
               size="large"
             >
@@ -372,4 +370,4 @@ function GridSetup(props: GridSetupProps) {
 }
 
 ;(GridSetup as any).displayName = 'GridSetup'
-export default withStyles(styles)(GridSetup as any)
+export default GridSetup

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Collapse,
@@ -11,8 +11,7 @@ import {
   type Theme
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import VolumeDownIcon from '@mui/icons-material/VolumeDown'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
@@ -94,45 +93,44 @@ import BaseSlider from '../common/slider/BaseSlider'
 import MillisTextField from '../common/text/MillisTextField'
 import BaseRadioGroup from '../common/BaseRadioGroup'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    gutterBottom: {
-      marginBottom: theme.spacing(2)
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  gutterBottom: {
+    marginBottom: theme.spacing(2)
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface ImageVideoCardProps extends WithStyles<typeof styles> {
+export interface ImageVideoCardProps {
   sceneID?: number
 }
 
 function ImageVideoCard(props: ImageVideoCardProps) {
-  const classes = props.classes
+  const { classes } = useStyles()
 
   const isConfig = useAppSelector(selectAppLastRouteIsConfig())
   const isPlayer = useAppSelector(selectAppLastRouteIsPlayer())
@@ -169,7 +167,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           container
           spacing={2}
           alignItems="center"
-          className={clsx(
+          className={cx(
             classes.gutterBottom,
             tutorial === SDT.imageOptions && classes.highlight
           )}
@@ -212,7 +210,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             item
             xs={12}
             sm={sidebar ? 12 : 6}
-            className={clsx(imageTypeFilter === IF.videos && classes.noPadding)}
+            className={cx(imageTypeFilter === IF.videos && classes.noPadding)}
           >
             <Collapse in={imageTypeFilter !== IF.videos}>
               <BaseSelect
@@ -234,7 +232,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             item
             xs={12}
             sm={sidebar ? 12 : 6}
-            className={clsx(
+            className={cx(
               (imageTypeFilter === IF.stills ||
                 imageTypeFilter === IF.videos) &&
                 classes.noPadding
@@ -263,7 +261,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             item
             xs={12}
             sm={sidebar ? 12 : 6}
-            className={clsx(
+            className={cx(
               (imageTypeFilter === IF.stills ||
                 imageTypeFilter === IF.videos ||
                 gifOption === GO.none ||
@@ -309,13 +307,13 @@ function ImageVideoCard(props: ImageVideoCardProps) {
         container
         spacing={2}
         alignItems="center"
-        className={clsx(tutorial === SDT.videoOptions && classes.highlight)}
+        className={cx(tutorial === SDT.videoOptions && classes.highlight)}
       >
         <Grid
           item
           xs={12}
           sm={sidebar ? 12 : 6}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -341,7 +339,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 6}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills ||
               imageTypeFilter === IF.images ||
               videoOption === VO.none ||
@@ -387,7 +385,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
               item
               xs={12}
               sm={sidebar ? 12 : 6}
-              className={clsx(
+              className={cx(
                 (imageTypeFilter === IF.stills ||
                   imageTypeFilter === IF.images) &&
                   classes.noPadding
@@ -419,7 +417,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 8}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -478,7 +476,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -497,7 +495,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
         <Grid
           item
           xs={12}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -525,7 +523,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           sm={sidebar ? 12 : 4}
           md={sidebar ? 12 : 6}
           lg={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -547,7 +545,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           sm={sidebar ? 12 : 4}
           md={sidebar ? 12 : 6}
           lg={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -576,7 +574,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills || imageTypeFilter === IF.images) &&
               classes.noPadding
           )}
@@ -596,7 +594,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills ||
               imageTypeFilter === IF.images ||
               playVideoClips) &&
@@ -621,7 +619,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(
+          className={cx(
             (imageTypeFilter === IF.stills ||
               imageTypeFilter === IF.images ||
               playVideoClips) &&
@@ -645,7 +643,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
         <Grid
           item
           xs={12}
-          className={clsx(
+          className={cx(
             imageTypeFilter === IF.stills &&
               imageTypeFilter === IF.images &&
               classes.noPadding
@@ -688,7 +686,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             item
             xs={12}
             sm={sidebar ? 12 : 4}
-            className={clsx(tutorial === SDT.weighting && classes.highlight)}
+            className={cx(tutorial === SDT.weighting && classes.highlight)}
           >
             <FormControl variant="standard" component="fieldset">
               <FormLabel component="legend">Weighting</FormLabel>
@@ -705,7 +703,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(tutorial === SDT.sordering && classes.highlight)}
+          className={cx(tutorial === SDT.sordering && classes.highlight)}
         >
           <FormControl variant="standard" component="fieldset">
             <FormLabel component="legend">Source Ordering</FormLabel>
@@ -730,7 +728,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           item
           xs={12}
           sm={sidebar ? 12 : 4}
-          className={clsx(tutorial === SDT.ordering && classes.highlight)}
+          className={cx(tutorial === SDT.ordering && classes.highlight)}
         >
           <FormControl variant="standard" component="fieldset">
             <FormLabel component="legend">Image Ordering</FormLabel>
@@ -755,4 +753,4 @@ function ImageVideoCard(props: ImageVideoCardProps) {
 }
 
 ;(ImageVideoCard as any).displayName = 'ImageVideoCard'
-export default withStyles(styles)(ImageVideoCard as any)
+export default ImageVideoCard

@@ -296,6 +296,12 @@ const IPC = {
   workerResponse: 'ipc.workerResponse',
 };
 
+const SDO = {
+  getNetworkURLs: 'sdo.getNetworkURLs',
+  getMagicLink: 'sdo.getMagicLink',
+  openExternal: 'sdo.openExternal'
+}
+
 const MO = {
   // Menu/Modal Constants
   new: 'mo.new',
@@ -599,6 +605,7 @@ export {
   IF,
   IG,
   IPC,
+  SDO,
   IT,
   LT,
   MO,

@@ -1,8 +1,7 @@
 import { areWeightsValid } from '../../data/utils'
-import { getScene } from '../scene/selectors'
 import { type RootState } from '../store'
 import type Overlay from './Overlay'
-import { EntryState } from '../EntryState'
+import { EntryState, getEntry } from '../EntryState'
 
 export const getOverlay = (state: EntryState<Overlay>, id: number) =>
   state.entries[id]
@@ -18,7 +17,7 @@ export const selectOverlaySceneID = (id: number) => {
 export const selectOverlayRegenerate = (id: number) => {
   return (state: RootState) => {
     const overlay = getOverlay(state.overlay, id)
-    const scene = getScene(state.scene, overlay.sceneID)
+    const scene = getEntry(state.scene, overlay.sceneID)
     return scene?.generatorWeights && scene.regenerate
   }
 }
@@ -29,7 +28,7 @@ export const selectOverlayIsInvalid = (id: number) => {
     const regenerate = selectOverlayRegenerate(id)(state)
     if (regenerate) {
       const overlay = getOverlay(state.overlay, id)
-      const scene = getScene(state.scene, overlay.sceneID)
+      const scene = getEntry(state.scene, overlay.sceneID)
       invalid = !areWeightsValid(scene)
     }
 

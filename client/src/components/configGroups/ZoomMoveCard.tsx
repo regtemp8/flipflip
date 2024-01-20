@@ -1,10 +1,10 @@
 import * as React from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
+
 import BaseSlider from '../common/slider/BaseSlider'
 import { en, HTF, SDT, VTF } from 'flipflip-common'
 import TimingCard from '../common/TimingCard'
@@ -81,40 +81,39 @@ import {
 import BaseSwitch from '../common/BaseSwitch'
 import { useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: '100%'
-    },
-    paddingLeft: {
-      [theme.breakpoints.up('sm')]: {
-        paddingLeft: theme.spacing(1)
-      }
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: 'solid'
-    },
-    disable: {
-      pointerEvents: 'none'
+const useStyles = makeStyles()((theme: Theme) => ({
+  fullWidth: {
+    width: '100%'
+  },
+  paddingLeft: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1)
     }
-  })
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  backdropTop: {
+    zIndex: `${theme.zIndex.modal + 1} !important` as any
+  },
+  highlight: {
+    borderWidth: 2,
+    borderColor: theme.palette.secondary.main,
+    borderStyle: 'solid'
+  },
+  disable: {
+    pointerEvents: 'none'
+  }
+}))
 
-export interface ZoomMoveCardProps extends WithStyles<typeof styles> {
+export interface ZoomMoveCardProps {
   sceneID?: number
 }
 
@@ -133,13 +132,13 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
   const enabled =
     zoom || horizTransType !== HTF.none || vertTransType !== VTF.none
 
-  const classes = props.classes
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           tutorial != null &&
             tutorial !== SDT.zoom1 &&
             tutorial !== SDT.zoom2 &&
@@ -158,11 +157,11 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             item
             xs={12}
             sm={sidebar ? 12 : 7}
-            className={clsx(tutorial != null && classes.disable)}
+            className={cx(tutorial != null && classes.disable)}
           >
             <Collapse
               in={zoom}
-              className={clsx(classes.fullWidth, classes.paddingLeft)}
+              className={cx(classes.fullWidth, classes.paddingLeft)}
             >
               <BaseSwitch
                 label="Randomize Zoom"
@@ -175,7 +174,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
         </Grid>
         <Collapse
           in={zoom && !zoomRandom}
-          className={clsx(
+          className={cx(
             classes.fullWidth,
             tutorial === SDT.zoom2 && classes.highlight
           )}
@@ -308,12 +307,12 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           </Grid>
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!enabled && classes.noPadding)}>
         <Collapse in={enabled} className={classes.fullWidth}>
           <Divider />
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(tutorial && classes.disable)}>
+      <Grid item xs={12} className={cx(tutorial && classes.disable)}>
         <MoveCard
           sidebar={sidebar}
           enabled={true}
@@ -342,12 +341,12 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           }}
         />
       </Grid>
-      <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!enabled && classes.noPadding)}>
         <Collapse in={enabled} className={classes.fullWidth}>
           <Divider />
         </Collapse>
       </Grid>
-      <Grid item xs={12} className={clsx(tutorial && classes.disable)}>
+      <Grid item xs={12} className={cx(tutorial && classes.disable)}>
         <MoveCard
           sidebar={sidebar}
           enabled={true}
@@ -376,7 +375,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           }}
         />
       </Grid>
-      <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
+      <Grid item xs={12} className={cx(!enabled && classes.noPadding)}>
         <Collapse in={enabled} className={classes.fullWidth}>
           <Divider />
         </Collapse>
@@ -384,7 +383,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
       <Grid
         item
         xs={12}
-        className={clsx(
+        className={cx(
           !enabled && classes.noPadding,
           tutorial != null && tutorial !== SDT.zoom3 && classes.disable
         )}
@@ -424,7 +423,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
       </Grid>
       {easingControls && (
         <React.Fragment>
-          <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
+          <Grid item xs={12} className={cx(!enabled && classes.noPadding)}>
             <Collapse in={enabled} className={classes.fullWidth}>
               <Divider />
             </Collapse>
@@ -467,4 +466,4 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
 }
 
 ;(ZoomMoveCard as any).displayName = 'ZoomMoveCard'
-export default withStyles(styles)(ZoomMoveCard as any)
+export default ZoomMoveCard

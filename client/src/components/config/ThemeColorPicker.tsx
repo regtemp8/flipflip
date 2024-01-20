@@ -2,15 +2,13 @@ import * as React from 'react'
 
 import { Fab, Grid, TextField, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import * as color from '@mui/material/colors'
 import type ReduxProps from '../common/ReduxProps'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     colorGrid: {
       width: 170
     },
@@ -33,7 +31,7 @@ const styles = (theme: Theme) =>
     colorField: {
       width: 100
     }
-  })
+  }))
 
 const colors = [
   color.red,
@@ -58,8 +56,7 @@ const colors = [
 ]
 
 export interface ThemeColorPickerProps
-  extends ReduxProps<string>,
-    WithStyles<typeof styles> {}
+  extends ReduxProps<string> {}
 
 function ThemeColorPicker(props: ThemeColorPickerProps) {
   const dispatch = useAppDispatch()
@@ -133,7 +130,7 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
     dispatch(props.action(color))
   }
 
-  const classes = props.classes
+  const {classes} = useStyles()
   return (
     <Grid container alignItems="center">
       <Grid item className={classes.colorGrid}>
@@ -198,4 +195,4 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
 }
 
 ;(ThemeColorPicker as any).displayName = 'ThemeColorPicker'
-export default withStyles(styles)(ThemeColorPicker as any)
+export default ThemeColorPicker

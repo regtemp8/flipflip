@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import clsx from 'clsx'
+import { cx } from '@emotion/css'
 
 import {
   Card,
@@ -11,52 +11,50 @@ import {
   Typography
 } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 
 import type Audio from '../../store/audio/Audio'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    media: {
-      height: 0,
-      paddingTop: '100%' // 16:9  = 56.25%
-    },
-    mediaIcon: {
-      width: '100%',
-      height: 'auto'
-    },
-    underlineTitle: {
-      textDecoration: 'underline'
-    },
-    pointer: {
-      cursor: 'pointer'
-    },
-    root: {
-      borderRadius: 1
-    },
-    cardContent: {
-      '&:last-child': {
-        paddingBottom: theme.spacing(2)
-      }
-    },
-    artist: {
-      '&:hover': {
-        textDecoration: 'underline'
-      }
+const useStyles = makeStyles()((theme: Theme) => ({
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  media: {
+    height: 0,
+    paddingTop: '100%' // 16:9  = 56.25%
+  },
+  mediaIcon: {
+    width: '100%',
+    height: 'auto'
+  },
+  underlineTitle: {
+    textDecoration: 'underline'
+  },
+  pointer: {
+    cursor: 'pointer'
+  },
+  root: {
+    borderRadius: 1
+  },
+  cardContent: {
+    '&:last-child': {
+      paddingBottom: theme.spacing(2)
     }
-  })
+  },
+  artist: {
+    '&:hover': {
+      textDecoration: 'underline'
+    }
+  }
+}))
 
-export interface AudioAlbumListProps extends WithStyles<typeof styles> {
+export interface AudioAlbumListProps {
   sources: Audio[]
   showHelp: boolean
   onClickAlbum: (album: string) => void
@@ -150,7 +148,7 @@ function AudioAlbumList(props: AudioAlbumListProps) {
     return albumMap
   }
 
-  const classes = props.classes
+  const { classes } = useStyles()
   if (albums.size === 0) {
     return (
       <React.Fragment>
@@ -217,7 +215,7 @@ function AudioAlbumList(props: AudioAlbumListProps) {
               <CardContent classes={{ root: classes.cardContent }}>
                 <Tooltip disableInteractive title={a} enterDelay={800}>
                   <Typography
-                    className={clsx(hover === a && classes.underlineTitle)}
+                    className={cx(hover === a && classes.underlineTitle)}
                     noWrap
                     variant="body1"
                   >
@@ -232,7 +230,7 @@ function AudioAlbumList(props: AudioAlbumListProps) {
                       props.onClickArtist(artist)
                     }
                   }}
-                  className={clsx(artist !== va && classes.artist)}
+                  className={cx(artist !== va && classes.artist)}
                   color="textSecondary"
                   variant="body2"
                 >
@@ -251,4 +249,4 @@ function AudioAlbumList(props: AudioAlbumListProps) {
 }
 
 ;(AudioAlbumList as any).displayName = 'AudioAlbumList'
-export default withStyles(styles)(AudioAlbumList as any)
+export default AudioAlbumList

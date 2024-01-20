@@ -8,8 +8,7 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import createStyles from '@mui/styles/createStyles'
-import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+import { makeStyles } from 'tss-react/mui'
 
 import Forward5Icon from '@mui/icons-material/Forward5'
 import Forward10Icon from '@mui/icons-material/Forward10'
@@ -34,8 +33,7 @@ import {
 import { useAppSelector } from '../../store/hooks'
 import { RootState } from '../../store/store'
 
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles()((theme: Theme) => ({
     root: {
       display: 'flex'
     },
@@ -52,9 +50,9 @@ const styles = (theme: Theme) =>
     noTransition: {
       transition: 'unset'
     }
-  })
+  }))
 
-export interface VideoControlProps extends WithStyles<typeof styles> {
+export interface VideoControlProps {
   video: HTMLVideoElement
   useHotkeys?: boolean
   player?: boolean
@@ -283,6 +281,7 @@ function VideoControl(props: VideoControlProps) {
     }
   }
 
+  const {classes} = useStyles()
   if (props.video == null) {
     return (
       <Grid
@@ -295,7 +294,6 @@ function VideoControl(props: VideoControlProps) {
   }
 
   const marks = getMarks()
-  const classes = props.classes
   return (
     <Grid
       container
@@ -420,4 +418,4 @@ function VideoControl(props: VideoControlProps) {
 }
 
 ;(VideoControl as any).displayName = 'VideoControl'
-export default withStyles(styles)(VideoControl as any)
+export default VideoControl

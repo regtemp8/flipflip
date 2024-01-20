@@ -13,8 +13,8 @@ import {
 } from '../audioLibrary/slice'
 import { setSceneAudioPlaylistAddAudios } from '../scene/slice'
 import { setAudio, setAudioMarked, setAudioTags } from './slice'
-import FlipFlipService from '../../FlipFlipService'
 import Scene from '../scene/Scene'
+import flipflip from '../../FlipFlipService'
 
 export function onAddAudioUrl(importURL: string, cachePath: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
@@ -58,8 +58,7 @@ export function onAddAudioUrl(importURL: string, cachePath: string) {
       .timeout(error)
       .internalError(error)
       .arrayBuffer((arrayBuffer) => {
-        const flipflip = FlipFlipService.getInstance()
-        flipflip.api
+        flipflip().api
           .parseMusicMetadataBuffer(arrayBuffer, cachePath)
           .then(async (metadata: any) => {
             return await extractMusicMetadata(audio, newAudio(metadata))
@@ -110,8 +109,7 @@ export function onAddAudioSources(newSources: string[], cachePath: string) {
 
       index++
       const url = newSources[index]
-      const flipflip = FlipFlipService.getInstance()
-      if (url.startsWith('http') || (await flipflip.api.pathExists(url))) {
+      if (url.startsWith('http') || (await flipflip().api.pathExists(url))) {
         const audio = newAudio({
           url,
           id: state.audio.nextID,
@@ -119,7 +117,7 @@ export function onAddAudioSources(newSources: string[], cachePath: string) {
         })
 
         dispatch(setAudio(audio))
-        flipflip.api
+        flipflip().api
           .parseMusicMetadataFile(url, cachePath)
           .then(async (metadata: any) => {
             return await extractMusicMetadata(audio, newAudio(metadata))

@@ -1,8 +1,0 @@
-.git
-.yarn
-dist
-pkg
-public
-package
-.eslintrc.js
-webpack.config.js
