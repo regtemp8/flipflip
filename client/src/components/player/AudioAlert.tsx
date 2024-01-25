@@ -3,7 +3,8 @@ import React, {
   useEffect,
   useRef,
   useState,
-  CSSProperties
+  CSSProperties,
+  useCallback
 } from 'react'
 import {
   ForwardedProps,
@@ -16,45 +17,52 @@ import { type Theme, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
-
-import type Audio from '../../store/audio/Audio'
+import {
+  selectAudioName,
+  selectAudioThumb,
+  selectAudioAlbum,
+  selectAudioArtist,
+  selectAudioUrl
+} from '../../store/audio/selectors'
+import { selectUndefined } from '../../store/app/selectors'
+import { useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    alert: {
-      float: 'left',
-      margin: theme.spacing(5),
-      display: 'flex'
+  alert: {
+    float: 'left',
+    margin: theme.spacing(5),
+    display: 'flex'
+  },
+  thumb: {
+    maxHeight: 250
+  },
+  infoContainer: {
+    display: 'flex',
+    position: 'relative',
+    flexDirection: 'column-reverse'
+  },
+  infoBackdrop: {
+    position: 'absolute',
+    backgroundColor: grey[500],
+    opacity: 0.5,
+    filter: 'blur(5px)',
+    width: '100%',
+    height: '100%',
+    zIndex: 8
+  },
+  info: {
+    paddingLeft: theme.spacing(4),
+    paddingRight: theme.spacing(4),
+    zIndex: 9,
+    '&:nth-child(2)': {
+      paddingBottom: theme.spacing(4),
+      textDecoration: 'underline'
     },
-    thumb: {
-      maxHeight: 250
-    },
-    infoContainer: {
-      display: 'flex',
-      position: 'relative',
-      flexDirection: 'column-reverse'
-    },
-    infoBackdrop: {
-      position: 'absolute',
-      backgroundColor: grey[500],
-      opacity: 0.5,
-      filter: 'blur(5px)',
-      width: '100%',
-      height: '100%',
-      zIndex: 8
-    },
-    info: {
-      paddingLeft: theme.spacing(4),
-      paddingRight: theme.spacing(4),
-      zIndex: 9,
-      '&:nth-child(2)': {
-        paddingBottom: theme.spacing(4),
-        textDecoration: 'underline'
-      },
-      '&:last-child': {
-        paddingTop: theme.spacing(4)
-      }
+    '&:last-child': {
+      paddingTop: theme.spacing(4)
     }
-  }))
+  }
+}))
 
 interface AudioAlertLayerProps {
   visible: boolean
@@ -104,16 +112,36 @@ function AudioAlertLayer(props: PropsWithChildren<AudioAlertLayerProps>) {
 }
 
 export interface AudioAlertProps {
-  audio: Audio
+  audioID?: number
 }
 
 function AudioAlert(props: AudioAlertProps) {
-  const [visible, setVisible] = useState(false)
+  const nameSelector =
+    props.audioID != null ? selectAudioName(props.audioID) : selectUndefined
+  const name = useAppSelector(nameSelector)
+  const thumbSelector =
+    props.audioID != null ? selectAudioThumb(props.audioID) : selectUndefined
+  const thumb = useAppSelector(thumbSelector)
+  const urlSelector =
+    props.audioID != null ? selectAudioUrl(props.audioID) : selectUndefined
+  const url = useAppSelector(urlSelector)
+  const albumSelector =
+    props.audioID != null ? selectAudioAlbum(props.audioID) : selectUndefined
+  const album = useAppSelector(albumSelector)
+  const artistSelector =
+    props.audioID != null ? selectAudioArtist(props.audioID) : selectUndefined
+  const artist = useAppSelector(artistSelector)
 
+  const [visible, setVisible] = useState(false)
   const _timeout = useRef<number>()
 
+  const show = useCallback(() => {
+    setVisible(true)
+    _timeout.current = window.setTimeout(hide, 6000)
+  }, [])
+
   useEffect(() => {
-    if (props.audio) {
+    if (props.audioID != null) {
       show()
     }
 
@@ -121,42 +149,37 @@ function AudioAlert(props: AudioAlertProps) {
       clearTimeout(_timeout.current)
       _timeout.current = undefined
     }
-  }, [])
+  }, [props.audioID, show])
 
   useEffect(() => {
     clearTimeout(_timeout.current)
     show()
-  }, [props.audio])
-
-  const show = () => {
-    setVisible(true)
-    _timeout.current = window.setTimeout(hide, 6000)
-  }
+  }, [props.audioID, show])
 
   const hide = () => {
     setVisible(false)
   }
 
-  const {classes} = useStyles()
-  if (!props.audio) return <React.Fragment />
+  const { classes } = useStyles()
+  if (props.audioID == null) return <React.Fragment />
 
   return (
     <AudioAlertLayer visible={visible}>
       <div className={classes.alert}>
-        <img className={classes.thumb} src={props.audio.thumb} />
+        <img className={classes.thumb} src={thumb} alt={name} />
         <div className={classes.infoContainer}>
           <div className={classes.infoBackdrop} />
           <Typography variant="h3" className={classes.info}>
-            {props.audio.name ? props.audio.name : props.audio.url}
+            {name ?? url}
           </Typography>
-          {props.audio.artist && (
+          {artist && (
             <Typography variant="h5" className={classes.info}>
-              {props.audio.artist}
+              {artist}
             </Typography>
           )}
-          {props.audio.album && (
+          {album && (
             <Typography variant="h6" className={classes.info}>
-              {props.audio.album}
+              {album}
             </Typography>
           )}
         </div>

@@ -21,11 +21,15 @@ export const initialCaptionScriptState: EntryState<CaptionScript> = {
   entries: {}
 }
 
-export default function createCaptionScriptReducer(captionScriptState?: EntryState<CaptionScript>) {
+export default function createCaptionScriptReducer(
+  captionScriptState?: EntryState<CaptionScript>
+) {
   return createCaptionScriptSlice(captionScriptState).reducer
 }
 
-function createCaptionScriptSlice(captionScriptState?: EntryState<CaptionScript>) {
+function createCaptionScriptSlice(
+  captionScriptState?: EntryState<CaptionScript>
+) {
   const initialState = captionScriptState ?? initialCaptionScriptState
   return createSlice({
     name: 'captionScripts',
@@ -60,22 +64,19 @@ function createCaptionScriptSlice(captionScriptState?: EntryState<CaptionScript>
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).stopAtEnd =
-          action.payload.value
+        getEntry(state, action.payload.id).stopAtEnd = action.payload.value
       },
       setCaptionScriptNextSceneAtEnd: (
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).nextSceneAtEnd =
-          action.payload.value
+        getEntry(state, action.payload.id).nextSceneAtEnd = action.payload.value
       },
       setCaptionScriptSyncWithAudio: (
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).syncWithAudio =
-          action.payload.value
+        getEntry(state, action.payload.id).syncWithAudio = action.payload.value
       },
       setCaptionScriptOpacity: (
         state,

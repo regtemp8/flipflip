@@ -1,3 +1,4 @@
+/// <reference path="../react-sortablejs.d.ts" />
 import React, {
   MouseEvent,
   type ReactNode,
@@ -686,7 +687,7 @@ function ScenePicker() {
             })
         }
       })
-  }, [])
+  }, [dispatch, version])
 
   const onImportScene = () => {
     setOpenMenu(MO.urlImport)
@@ -758,7 +759,7 @@ function ScenePicker() {
   }
 
   const onChangeTab = (e: SyntheticEvent, tab: number) => {
-    if (openTab != tab) {
+    if (openTab !== tab) {
       dispatch(setOpenTab(tab))
     }
   }

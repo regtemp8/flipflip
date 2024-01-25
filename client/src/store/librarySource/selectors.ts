@@ -45,6 +45,16 @@ export const selectLibrarySourceDisabledClipsIncludes = (
   }
 }
 
+export const selectLibrarySourceURLs = (ids: number[]) => {
+  return createSelector(
+    [
+      (state: RootState) => ids,
+      (state: RootState) => state.librarySource.entries
+    ],
+    (ids, entries) => ids.map((id) => entries[id].url)
+  )
+}
+
 export const selectLibrarySourceURL = (id: number) => {
   return (state: RootState) => state.librarySource.entries[id]?.url
 }
@@ -170,10 +180,12 @@ export const selectLibrarySourceBlacklist = (id: number) => {
 export const getLibrarySourceEntries = (state: RootState) =>
   state.librarySource.entries
 
-export const selectLibrarySources = () => {
-  return createSelector(
-    [selectAppLibrary(), getLibrarySourceEntries],
-    (ids, entries) => ids.map((id) => entries[id] as LibrarySource)
+export const selectLibrarySources = (ids?: number[]) => {
+  const idSelector =
+    ids == null ? selectAppLibrary() : (state: RootState) => ids
+
+  return createSelector([idSelector, getLibrarySourceEntries], (ids, entries) =>
+    ids.map((id) => entries[id] as LibrarySource)
   )
 }
 

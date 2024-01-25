@@ -1,3 +1,4 @@
+/// <reference path="../../react-sortablejs.d.ts" />
 import React, { ChangeEvent, MouseEvent, useState } from 'react'
 import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
@@ -189,6 +190,7 @@ function TagEditDialog(props: TagEditDialogProps) {
     }
   }
 
+  const { classes } = useStyles()
   return (
     <Dialog
       open={props.tagID !== -1}
@@ -216,7 +218,7 @@ function TagEditDialog(props: TagEditDialogProps) {
           id="phrase"
           value={tagPhrase}
           margin="dense"
-          inputProps={{ className: props.classes.phraseInput }}
+          inputProps={{ className: classes.phraseInput }}
           onChange={onChangePhrase}
         />
       </DialogContent>
@@ -247,9 +249,10 @@ interface TagCardProps {
 function TagCard(props: TagCardProps) {
   const name = useAppSelector(selectTagName(props.tagID)) || ''
 
+  const { classes } = useStyles()
   return (
     <Jiggle key={props.tagID + name} bounce>
-      <Card className={props.classes.tag}>
+      <Card className={classes.tag}>
         <CardActionArea onClick={() => props.onEdit(props.tagID)}>
           <CardContent>
             <Typography component="h2" variant="h6">
@@ -352,16 +355,12 @@ function TagManager() {
               }}
             >
               {tags.map((tagID) => (
-                <TagCard tagID={tagID} onEdit={onEditTag} classes={classes} />
+                <TagCard tagID={tagID} onEdit={onEditTag} />
               ))}
             </Sortable>
           </Container>
         </div>
-        <TagEditDialog
-          tagID={isEditing}
-          onClose={onCloseDialog}
-          classes={classes}
-        />
+        <TagEditDialog tagID={isEditing} onClose={onCloseDialog} />
       </main>
 
       {tags.length > 0 && (

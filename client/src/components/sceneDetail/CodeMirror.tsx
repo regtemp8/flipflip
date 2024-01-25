@@ -1,10 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { getTimingFromString } from '../../data/utils'
 import type ChildCallbackHack from '../player/ChildCallbackHack'
-import {type Mode, type Editor, type EditorChange} from 'codemirror'
+import { type Mode, type Editor, type EditorChange } from 'codemirror'
 
-const { registerHelper } = typeof window !== 'undefined' ? require('codemirror') : { registerHelper: (namespace: string, name: string, helper: any) => {}}
-const { Controlled } = typeof window !== 'undefined' ? require('react-codemirror2') : { Controlled: null };
+const { registerHelper } =
+  typeof window !== 'undefined'
+    ? require('codemirror')
+    : { registerHelper: (namespace: string, name: string, helper: any) => {} }
+const { Controlled } =
+  typeof window !== 'undefined'
+    ? require('react-codemirror2')
+    : { Controlled: null }
 
 const actions = [
   'blink',
@@ -92,6 +98,21 @@ export default function CodeMirror(props: CodeMirrorProps) {
   })
 
   const _sendUpdate = useRef<number>()
+  const onUpdateScript = useCallback(
+    (scriptText: string, editor?: Editor, changed = false) => {
+      setScriptText(scriptText)
+      if (editor) {
+        setCursor(editor.getDoc().getCursor())
+      }
+
+      clearTimeout(_sendUpdate.current)
+      _sendUpdate.current = window.setTimeout(
+        () => props.onUpdateScript(scriptText, changed),
+        500
+      )
+    },
+    [props]
+  )
 
   useEffect(() => {
     if (props.addHack) {
@@ -145,7 +166,14 @@ export default function CodeMirror(props: CodeMirrorProps) {
         props.overwriteHack.listener = undefined
       }
     }
-  }, [])
+  }, [
+    cursor.ch,
+    cursor.line,
+    onUpdateScript,
+    props.addHack,
+    props.overwriteHack,
+    scriptText
+  ])
 
   const defineFlipFlipMode = (): Mode<any> => {
     const words: any = {}
@@ -456,35 +484,18 @@ export default function CodeMirror(props: CodeMirrorProps) {
     setCursor(editor.getDoc().getCursor())
   }
 
-  const onUpdateScript = (
-    scriptText: string,
-    editor?: Editor,
-    changed = false
-  ) => {
-    setScriptText(scriptText)
-    if (editor) {
-      setCursor(editor.getDoc().getCursor())
-    }
-
-    clearTimeout(_sendUpdate.current)
-    _sendUpdate.current = window.setTimeout(
-      () => props.onUpdateScript(scriptText, changed),
-      500
-    )
-  }
-
   return (
     <Controlled
       className={props.className}
       value={scriptText}
       autoScroll={false}
-      defineMode={{name: 'flipflip', fn: defineFlipFlipMode}}
+      defineMode={{ name: 'flipflip', fn: defineFlipFlipMode }}
       options={{
         mode: 'flipflip',
         theme: 'material',
         lineNumbers: true,
         lineWrapping: true,
-        viewportMargin: Infinity,
+        viewportMargin: Infinity
       }}
       onBeforeChange={onBeforeChangeScript}
       onCursorActivity={onCursorActivity}

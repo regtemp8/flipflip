@@ -1,12 +1,12 @@
-import React from "react";
-import { describe, it, expect } from "@jest/globals";
-import renderer from "react-test-renderer";
-import CodeMirror from "../CodeMirror";
-import TestProvider from "../../../util/TestProvider";
-import store from "../../../store/store";
+import React from 'react'
+import { describe, it, expect } from '@jest/globals'
+import renderer from 'react-test-renderer'
+import CodeMirror from '../CodeMirror'
+import TestProvider from '../../../util/TestProvider'
+import store from '../../../store/store'
 
-describe("CodeMirror", () => {
-  it("should match snapshot", () => {
+describe('CodeMirror', () => {
+  it('should match snapshot', () => {
     const component = renderer.create(
       <TestProvider store={store}>
         <CodeMirror
@@ -14,9 +14,9 @@ describe("CodeMirror", () => {
           onUpdateScript={(text: string, changed?: boolean) => {}}
         />
       </TestProvider>
-    );
+    )
 
-    let tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
-  });
-});
+    const tree = component.toJSON()
+    expect(tree).toMatchSnapshot()
+  })
+})

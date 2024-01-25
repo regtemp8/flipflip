@@ -23,10 +23,7 @@ app.on('web-contents-created', (event, contents) => {
 app.on('ready', () => {
   server()
     .init()
-    .then(
-      () => windowManager().createWindow(),
-      () => {}
-    )
+    .then(windowManager().createWindow)
   initIpcEvents()
 })
 

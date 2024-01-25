@@ -9,16 +9,16 @@ import { useAppSelector } from '../../store/hooks'
 import { selectAppPlaylistOptions } from '../../store/playlist/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    searchSelect: {
-      minWidth: 200,
-      maxWidth: `calc(100% - ${theme.spacing(7)})`,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900]
-    },
-    select: {
-      color: grey[900]
-    }
-  }))
+  searchSelect: {
+    minWidth: 200,
+    maxWidth: `calc(100% - ${theme.spacing(7)})`,
+    maxHeight: theme.mixins.toolbar.minHeight,
+    color: grey[900]
+  },
+  select: {
+    color: grey[900]
+  }
+}))
 
 interface PlaylistSelectProps {
   menuIsOpen?: boolean
@@ -32,7 +32,7 @@ function PlaylistSelect(props: PlaylistSelectProps) {
     props.onChange(e?.value)
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   playlists['-1'] = '+ New Playlist'
   const options = Object.keys(playlists).map((key) => {
     return { label: playlists[key], value: key }

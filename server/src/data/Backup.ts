@@ -5,10 +5,15 @@ import moment from 'moment'
 import { type Config } from 'flipflip-common'
 import { getSaveDir } from '../utils'
 
-export function getBackups(): Array<{ url: string; size: number }> {
+export interface Backup {
+  url: string
+  size: number
+}
+
+export function getBackups(): Backup[] {
   const saveDir = getSaveDir()
   const files = fs.readdirSync(saveDir)
-  const backups = Array<any>()
+  const backups: Backup[] = []
   for (const file of files) {
     if (file.startsWith('data.json.') && file !== 'data.json.new') {
       const stats = fs.statSync(saveDir + '/' + file)

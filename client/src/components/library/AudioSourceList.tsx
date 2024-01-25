@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+  useCallback
+} from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
@@ -34,29 +40,34 @@ import { selectAudio, selectAudioUrl } from '../../store/audio/selectors'
 import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1
-    },
-    arrow: {
-      position: 'absolute',
-      bottom: 20,
-      right: 35,
-      fontSize: 220,
-      transform: 'rotateY(0deg) rotate(45deg)'
-    },
-    arrowMessage: {
-      position: 'absolute',
-      bottom: 260,
-      right: 160
-    }
-  }))
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  backdropTop: {
+    zIndex: theme.zIndex.modal + 1
+  },
+  arrow: {
+    position: 'absolute',
+    bottom: 20,
+    right: 35,
+    fontSize: 220,
+    transform: 'rotateY(0deg) rotate(45deg)'
+  },
+  arrowMessage: {
+    position: 'absolute',
+    bottom: 260,
+    right: 160
+  }
+}))
+
+interface SortableVirtualListProps {
+  width: number
+  height: number
+}
 
 export interface AudioSourceListProps {
   cachePath: string
@@ -108,7 +119,24 @@ function AudioSourceList(props: AudioSourceListProps) {
     }
   }
 
+  const savePosition = useCallback(() => {
+    const sortableList = document.getElementById('sortable-list')
+    if (sortableList) {
+      const scrollElement = sortableList.firstElementChild
+      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
+      dispatch(setAudioYOffset(scrollTop))
+    }
+  }, [dispatch])
+
   useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = true
+    }
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = false
+    }
+
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('keyup', onKeyUp, false)
     _shiftDown.current = false
@@ -121,24 +149,7 @@ function AudioSourceList(props: AudioSourceListProps) {
       _lastChecked.current = undefined
       savePosition()
     }
-  }, [])
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = true
-  }
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = false
-  }
-
-  const savePosition = () => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setAudioYOffset(scrollTop))
-    }
-  }
+  }, [savePosition])
 
   const onDelete = (audioID: number) => {
     setDeleteDialog(audioID)
@@ -164,8 +175,8 @@ function AudioSourceList(props: AudioSourceListProps) {
     }
   }
 
-  const onToggleSelect = (e: MouseEvent) => {
-    const value = (e.currentTarget as HTMLInputElement).value
+  const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value
     const audioID = Number(value)
     const index = props.selected.indexOf(audioID)
     const newSelected = Array.from(props.selected)
@@ -202,8 +213,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     }
   }
 
-  const onEditSource = (audioID: number, e: MouseEvent) => {
-    e.stopPropagation()
+  const onEditSource = (audioID: number) => {
     setSourceEditID(audioID)
     setLastSelected(audioID)
   }
@@ -212,8 +222,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     setSourceEditID(undefined)
   }
 
-  const onSourceOptions = (audioID: number, e: MouseEvent) => {
-    e.stopPropagation()
+  const onSourceOptions = (audioID: number) => {
     setSourceOptions(audioID)
     setLastSelected(audioID)
   }
@@ -227,7 +236,8 @@ function AudioSourceList(props: AudioSourceListProps) {
     onCloseSourceEditDialog()
   }
 
-  const SortableVirtualList = SortableContainer(VirtualList)
+  const SortableVirtualList =
+    SortableContainer<SortableVirtualListProps>(VirtualList)
 
   function VirtualList(props: any) {
     const { height, width } = props
@@ -248,7 +258,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     )
   }
 
-  const SortableItem = SortableElement(
+  const SortableItem = SortableElement<{ index: any; value: any }>(
     ({ value }: { value: { index: number; style: any; data: any[] } }) => {
       const index = value.index
       const audioID: number = value.data[index]
@@ -280,7 +290,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     return <SortableItem index={index} value={props} />
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   if (props.audios.length === 0) {
     return (
       <React.Fragment>
@@ -326,7 +336,9 @@ function AudioSourceList(props: AudioSourceListProps) {
         {({ height, width }: { height: number; width: number }) => (
           <List id="sortable-list" disablePadding onClick={clearLastSelected}>
             <SortableVirtualList
-              helperContainer={() => document.getElementById('sortable-list')}
+              helperContainer={() =>
+                document.getElementById('sortable-list') as HTMLElement
+              }
               distance={5}
               height={height - 1}
               width={width}

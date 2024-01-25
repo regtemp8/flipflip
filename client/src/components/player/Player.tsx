@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { IdleTimer } from './IdleTimer'
 
 import {
@@ -29,7 +29,6 @@ import {
   selectAppConfigDisplaySettingsAudioAlert,
   selectAppConfigDisplaySettingsStartImmediately,
   selectPlayerAllTags,
-  WatermarkSettings,
   selectUndefined
 } from '../../store/app/selectors'
 import {
@@ -57,9 +56,7 @@ import {
 import {
   selectPlayerOverlaysLoaded,
   selectPlayerState,
-  selectPlayerCanStart,
-  selectPlayerSceneID,
-  selectPlayerFirstImageLoaded
+  selectPlayerCanStart
 } from '../../store/player/selectors'
 import {
   nextScene,
@@ -82,37 +79,37 @@ import { selectSourceScraperProgress } from '../../store/sourceScraper/selectors
 import { setFullScreen } from '../../data/actions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    progressMain: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      backgroundColor: theme.palette.background.default,
-      zIndex: 10
-    },
-    progressContainer: {
-      flexGrow: 1,
-      padding: theme.spacing(0),
-      position: 'relative',
-      alignItems: 'center',
-      justifyContent: 'center',
-      display: 'flex'
-    },
-    emptyMain: {
-      display: 'flex',
-      flexGrow: 1,
-      flexDirection: 'column',
-      backgroundColor: theme.palette.background.default,
-      zIndex: 10
-    },
-    emptyContainer: {
-      flexGrow: 1,
-      padding: theme.spacing(0),
-      position: 'relative'
-    },
-    startNowBtn: {
-      marginTop: theme.spacing(1)
-    }
-  }))
+  progressMain: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    backgroundColor: theme.palette.background.default,
+    zIndex: 10
+  },
+  progressContainer: {
+    flexGrow: 1,
+    padding: theme.spacing(0),
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex'
+  },
+  emptyMain: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    backgroundColor: theme.palette.background.default,
+    zIndex: 10
+  },
+  emptyContainer: {
+    flexGrow: 1,
+    padding: theme.spacing(0),
+    position: 'relative'
+  },
+  startNowBtn: {
+    marginTop: theme.spacing(1)
+  }
+}))
 
 interface ProgressCardProps {
   sceneID: number
@@ -120,13 +117,14 @@ interface ProgressCardProps {
 }
 
 function ProgressCard(props: ProgressCardProps) {
+  const { classes } = useStyles()
   const progress = useAppSelector(selectSourceScraperProgress(props.sceneID))
   if (!progress) return null
 
   const { total, current, message } = progress
   return (
-    <main className={props.classes.progressMain}>
-      <Container maxWidth={false} className={props.classes.progressContainer}>
+    <main className={classes.progressMain}>
+      <Container maxWidth={false} className={classes.progressContainer}>
         <CircularProgress
           size={300}
           value={Math.round((current / total) * 100)}
@@ -157,7 +155,7 @@ function ProgressCard(props: ProgressCardProps) {
           ))}
           {props.start && (
             <Button
-              className={props.classes.startNowBtn}
+              className={classes.startNowBtn}
               variant="contained"
               color="secondary"
               onClick={() => {
@@ -257,9 +255,6 @@ function Player(props: PlayerProps) {
   const [historyPaths, setHistoryPaths] = useState(
     new Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>()
   )
-  const [imagePlayerDeleteHack, setImagePlayerDeleteHack] = useState(
-    new ChildCallbackHack()
-  )
   const [mainVideo, setMainVideo] = useState<HTMLVideoElement>()
   const [overlayVideos, setOverlayVideos] = useState<
     Array<Array<HTMLVideoElement | undefined>>
@@ -269,6 +264,7 @@ function Player(props: PlayerProps) {
   const [thumbImage, setThumbImage] = useState<HTMLImageElement>()
   const [hideCursor, setHideCursor] = useState(false)
 
+  const _imagePlayerDeleteHack = useRef(new ChildCallbackHack())
   const _startTime = useRef<number>()
   const _idleTimerRef = useRef<HTMLDivElement>(null)
   const _interval = useRef<number>()
@@ -521,7 +517,7 @@ function Player(props: PlayerProps) {
   // if(p_historyPaths.current !== historyPaths){
   // 	console.log('HISTORY_PATHS CHANGED')
   // }
-  // if(p_imagePlayerDeleteHack.current !== imagePlayerDeleteHack){
+  // if(p_imagePlayerDeleteHack.current !== _imagePlayerDeleteHack.current){
   // 	console.log('IMAGE_PLAYER_DELETE_HACK CHANGED')
   // }
   // if(p_mainVideo.current !== mainVideo){
@@ -625,7 +621,7 @@ function Player(props: PlayerProps) {
   // p_isPlaying.current = isPlaying
   // p_historyOffset.current = historyOffset
   // p_historyPaths.current = historyPaths
-  // p_imagePlayerDeleteHack.current = imagePlayerDeleteHack
+  // p_imagePlayerDeleteHack.current = _imagePlayerDeleteHack.current
   // p_mainVideo.current = mainVideo
   // p_overlayVideos.current = overlayVideos
   // p_timeToNextFrame.current = timeToNextFrame
@@ -645,11 +641,103 @@ function Player(props: PlayerProps) {
   // p_changeTimeToNextFrame.current = _changeTimeToNextFrame.current
   // END LOG COMPONENT CHANGES
 
+  const start = useCallback(
+    (
+      isMainLoaded: boolean,
+      areOverlaysLoaded: boolean[],
+      canStart: boolean,
+      force = false
+    ) => {
+      // if(props.uuid === 'root') {
+      //   console.log('== START ==')
+      //   console.log('isMainLoaded: ' + isMainLoaded)
+      //   console.log('force: ' + force)
+      //   console.log('canStart: ' + canStart)
+      //   console.log('props.allLoaded: ' + props.allLoaded)
+      //   console.log('state.overlays.length: ' + state.overlays.length)
+      //   console.log(state)
+      //   console.log(areOverlaysLoaded)
+      //   console.log('===========')
+      // }
+
+      const isLoaded =
+        !force &&
+        isMainLoaded &&
+        (state.overlays.length === 0 || areOverlaysLoaded.every((b) => b))
+      if (props.onLoaded && isLoaded) {
+        props.onLoaded()
+      }
+
+      // console.log('isLoaded: ' + isLoaded)
+
+      if (
+        force ||
+        (canStart &&
+          ((isLoaded && props.allLoaded !== false) || startImmediately))
+      ) {
+        // console.log('START state.hasStarted: ' + state.hasStarted)
+        dispatch(setPlayerHasStartedRecursive(props.uuid, true))
+        dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: true }))
+        if (!_startTime.current) {
+          _startTime.current = new Date().getTime()
+        }
+        setTimeout(() => {
+          if (isGridScene) {
+            for (const r of _imagePlayerAdvanceHacks.current) {
+              for (const hack of r) {
+                hack.fire()
+              }
+            }
+          }
+        }, 200)
+      } else if (!isGridScene && !isAudioScene && state.overlays.length === 0) {
+        dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: isLoaded }))
+      }
+    },
+    [
+      dispatch,
+      isAudioScene,
+      isGridScene,
+      props,
+      startImmediately,
+      state.overlays.length
+    ]
+  )
+
+  const play = useCallback(
+    (isMainLoaded: boolean, areOverlaysLoaded: boolean[]) => {
+      setIsPlaying(true)
+      start(isMainLoaded, areOverlaysLoaded, canStart)
+    },
+    [canStart, start]
+  )
+
+  const nextSceneLoop = useCallback(() => {
+    if (
+      !isScriptScene &&
+      isPlaying &&
+      _startTime.current != null &&
+      !nextSceneAllImages &&
+      Math.abs(new Date().getTime() - _startTime.current) >= nextSceneTime
+    ) {
+      dispatch(nextScene(props.uuid))
+    } else if (!isPlaying && _startTime.current) {
+      _startTime.current += 1000
+    }
+  }, [
+    dispatch,
+    isPlaying,
+    isScriptScene,
+    nextSceneAllImages,
+    nextSceneTime,
+    props.uuid
+  ])
+
   useEffect(() => {
     if (props.preventSleep && window.navigator.wakeLock != null) {
       window.navigator.wakeLock
         .request('screen')
-        .then((wakeLock) => (_wakeLock.current = wakeLock))
+        .then((wakeLock: WakeLockSentinel) => (_wakeLock.current = wakeLock))
     }
     if (currentAudio) {
       const thumbImage = new Image()
@@ -673,7 +761,7 @@ function Player(props: PlayerProps) {
         })
       }
     }
-  }, [])
+  }, [audioThumb, currentAudio, props.preventSleep])
 
   useEffect(() => {
     const thumbImage = new Image()
@@ -682,7 +770,7 @@ function Player(props: PlayerProps) {
     thumbImage.onload = () => {
       setThumbImage(thumbImage)
     }
-  }, [currentAudio])
+  }, [currentAudio, audioThumb])
 
   useEffect(() => {
     if (_interval.current != null) {
@@ -698,7 +786,7 @@ function Player(props: PlayerProps) {
       // setHasStarted(true);
       _startTime.current = new Date().getTime()
     }
-  }, [state.sceneID])
+  }, [state.sceneID, allTags, nextSceneLoop, state.nextSceneID])
 
   useEffect(() => {
     console.log('11-- STATE.OVERLAYS.LENGTH CHANGED --11')
@@ -714,41 +802,34 @@ function Player(props: PlayerProps) {
       // console.log('## START props.allLoaded === false || state.hasStarted === false')
       start(state.mainLoaded, areOverlaysLoaded, canStart)
     }
-  }, [props.allLoaded, state.hasStarted])
+  }, [
+    props.allLoaded,
+    state.hasStarted,
+    areOverlaysLoaded,
+    canStart,
+    start,
+    state.mainLoaded
+  ])
 
   useEffect(() => {
     if (canStart) {
       // console.log('## START canStart')
       start(state.mainLoaded, areOverlaysLoaded, canStart)
     }
-  }, [canStart])
+  }, [canStart, areOverlaysLoaded, start, state.mainLoaded])
 
   useEffect(() => {
     if (!state.isEmpty && state.mainLoaded) {
       // console.log('START mainLoaded')
       play(state.mainLoaded, areOverlaysLoaded)
     }
-  }, [state.mainLoaded])
+  }, [state.mainLoaded, areOverlaysLoaded, play, state.isEmpty])
 
   useEffect(() => {
     if (areOverlaysLoaded) {
       play(state.mainLoaded, areOverlaysLoaded)
     }
-  }, [areOverlaysLoaded])
-
-  const nextSceneLoop = () => {
-    if (
-      !isScriptScene &&
-      isPlaying &&
-      _startTime.current != null &&
-      !nextSceneAllImages &&
-      Math.abs(new Date().getTime() - _startTime.current) >= nextSceneTime
-    ) {
-      dispatch(nextScene(props.uuid))
-    } else if (!isPlaying && _startTime.current) {
-      _startTime.current += 1000
-    }
-  }
+  }, [areOverlaysLoaded, play, state.mainLoaded])
 
   const setOverlayVideo = (index: number, video?: HTMLVideoElement) => {
     const newOV = Array.from(overlayVideos)
@@ -798,66 +879,8 @@ function Player(props: PlayerProps) {
     }
   }
 
-  const play = (isMainLoaded: boolean, areOverlaysLoaded: boolean[]) => {
-    setIsPlaying(true)
-    start(isMainLoaded, areOverlaysLoaded, canStart)
-  }
-
   const pause = () => {
     setIsPlaying(false)
-  }
-
-  const start = (
-    isMainLoaded: boolean,
-    areOverlaysLoaded: boolean[],
-    canStart: boolean,
-    force = false
-  ) => {
-    // if(props.uuid === 'root') {
-    //   console.log('== START ==')
-    //   console.log('isMainLoaded: ' + isMainLoaded)
-    //   console.log('force: ' + force)
-    //   console.log('canStart: ' + canStart)
-    //   console.log('props.allLoaded: ' + props.allLoaded)
-    //   console.log('state.overlays.length: ' + state.overlays.length)
-    //   console.log(state)
-    //   console.log(areOverlaysLoaded)
-    //   console.log('===========')
-    // }
-
-    const isLoaded =
-      !force &&
-      isMainLoaded &&
-      (state.overlays.length === 0 || areOverlaysLoaded.every((b) => b))
-    if (props.onLoaded && isLoaded) {
-      props.onLoaded()
-    }
-
-    // console.log('isLoaded: ' + isLoaded)
-
-    if (
-      force ||
-      (canStart &&
-        ((isLoaded && props.allLoaded !== false) || startImmediately))
-    ) {
-      // console.log('START state.hasStarted: ' + state.hasStarted)
-      dispatch(setPlayerHasStartedRecursive(props.uuid, true))
-      dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: true }))
-      if (!_startTime.current) {
-        _startTime.current = new Date().getTime()
-      }
-      setTimeout(() => {
-        if (isGridScene) {
-          for (const r of _imagePlayerAdvanceHacks.current) {
-            for (const hack of r) {
-              hack.fire()
-            }
-          }
-        }
-      }, 200)
-    } else if (!isGridScene && !isAudioScene && state.overlays.length === 0) {
-      dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: isLoaded }))
-    }
   }
 
   const goBack = () => {
@@ -1066,6 +1089,7 @@ function Player(props: PlayerProps) {
     getCurrentTimestamp = getTimestamp
   }
 
+  const { classes } = useStyles()
   return (
     <div style={rootStyle}>
       {!recentPictureGrid && !props.gridView && state.hasStarted && (
@@ -1106,13 +1130,12 @@ function Player(props: PlayerProps) {
               ? () => start(state.mainLoaded, areOverlaysLoaded, canStart, true)
               : undefined
           }
-          classes={props.classes}
         />
       )}
       {state.isEmpty && (
-        <main className={props.classes.emptyMain}>
+        <main className={classes.emptyMain}>
           <div style={{ height: 64 }} />
-          <Container maxWidth={false} className={props.classes.emptyContainer}>
+          <Container maxWidth={false} className={classes.emptyContainer}>
             <Typography
               component="h1"
               variant="h3"
@@ -1144,7 +1167,7 @@ function Player(props: PlayerProps) {
           historyPaths={historyPaths}
           historyOffset={historyOffset}
           imagePlayerAdvanceHacks={_imagePlayerAdvanceHacks.current}
-          imagePlayerDeleteHack={imagePlayerDeleteHack}
+          imagePlayerDeleteHack={_imagePlayerDeleteHack.current}
           isEmpty={state.isEmpty}
           isPlaying={isPlaying}
           mainVideo={mainVideo}
@@ -1194,7 +1217,9 @@ function Player(props: PlayerProps) {
         )}
         {!recentPictureGrid &&
           (audioAlert || allTags) &&
-          (audioEnabled || persistAudio) && <AudioAlert audio={currentAudio} />}
+          (audioEnabled || persistAudio) && (
+            <AudioAlert audioID={currentAudio} />
+          )}
         {!isGridScene && !isAudioScene && (
           <SourceScraper
             uuid={props.uuid}
@@ -1210,7 +1235,7 @@ function Player(props: PlayerProps) {
                 ? props.advanceHack
                 : _imagePlayerAdvanceHacks.current[0][0]
             }
-            deleteHack={imagePlayerDeleteHack}
+            deleteHack={_imagePlayerDeleteHack.current}
             setHistoryOffset={_setHistoryOffset.current}
             setHistoryPaths={_setHistoryPaths.current}
             setSceneCopy={props.setSceneCopy}

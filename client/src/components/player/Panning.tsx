@@ -3,7 +3,8 @@ import React, {
   CSSProperties,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useCallback
 } from 'react'
 import {
   UseTransitionResult,
@@ -133,6 +134,57 @@ export default function Panning(props: PropsWithChildren<PanningProps>) {
   const _lastHorizRandom = useRef(0)
   const _lastVertRandom = useRef(0)
 
+  const calcDuration = useCallback(() => {
+    return (
+      getDuration(
+        {
+          timingFunction: panTF,
+          time: panDuration,
+          timeMin: panDurationMin,
+          timeMax: panDurationMax,
+          sinRate: panSinRate,
+          bpmMulti: panBPMMulti
+        },
+        props.timeToNextFrame,
+        bpm,
+        10
+      ) / 2
+    )
+  }, [
+    bpm,
+    panBPMMulti,
+    panDuration,
+    panDurationMax,
+    panDurationMin,
+    panSinRate,
+    panTF,
+    props.timeToNextFrame
+  ])
+
+  const panIn = useCallback(() => {
+    const duration = calcDuration()
+    setTogglePan(true)
+    setDuration(duration)
+    props.panFunction()
+    return duration
+  }, [calcDuration, props])
+
+  const panOut = useCallback(() => {
+    const duration = calcDuration()
+    setTogglePan(false)
+    setDuration(duration)
+    props.panFunction()
+    return duration
+  }, [calcDuration, props])
+
+  const panLoop = useCallback(
+    (doPanIn: boolean) => {
+      const delay = doPanIn ? panIn() : panOut()
+      _panTimeout.current = window.setTimeout(() => panLoop(!doPanIn), delay)
+    },
+    [panIn, panOut]
+  )
+
   useEffect(() => {
     _panOut.current = false
     _lastHorizRandom.current = 0
@@ -149,7 +201,7 @@ export default function Panning(props: PropsWithChildren<PanningProps>) {
       _lastHorizRandom.current = 0
       _lastVertRandom.current = 0
     }
-  }, [])
+  }, [panLoop, panTF, panning])
 
   useEffect(() => {
     if (panning) {
@@ -158,46 +210,7 @@ export default function Panning(props: PropsWithChildren<PanningProps>) {
         panLoop(true)
       }
     }
-  }, [panTF])
-
-  const panIn = () => {
-    const duration = calcDuration()
-    setTogglePan(true)
-    setDuration(duration)
-    props.panFunction()
-    return duration
-  }
-
-  const panOut = () => {
-    const duration = calcDuration()
-    setTogglePan(false)
-    setDuration(duration)
-    props.panFunction()
-    return duration
-  }
-
-  const panLoop = (doPanIn: boolean) => {
-    const delay = doPanIn ? panIn() : panOut()
-    _panTimeout.current = window.setTimeout(() => panLoop(!doPanIn), delay)
-  }
-
-  const calcDuration = () => {
-    return (
-      getDuration(
-        {
-          timingFunction: panTF,
-          time: panDuration,
-          timeMin: panDurationMin,
-          timeMax: panDurationMax,
-          sinRate: panSinRate,
-          bpmMulti: panBPMMulti
-        },
-        props.timeToNextFrame,
-        bpm,
-        10
-      ) / 2
-    )
-  }
+  }, [panLoop, panTF, panning])
 
   const sceneTiming = panTF === TF.scene
   if (props.togglePan !== _lastToggle.current) {

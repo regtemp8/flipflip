@@ -1,4 +1,4 @@
-import React, { MouseEvent } from 'react'
+import React, { ChangeEvent, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -198,7 +198,7 @@ export interface AudioSourceListItemProps {
   onEditSource: (audioID: number) => void
   onRemove: (audioID: number) => void
   onSourceOptions: (audioID: number) => void
-  onToggleSelect: () => void
+  onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
   savePosition: () => void
 }
 
@@ -305,7 +305,11 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
               >
                 <div onClick={onSourceIconClick} className={classes.trackThumb}>
                   {thumb != null && (
-                    <img className={classes.thumbImage} src={thumb} />
+                    <img
+                      className={classes.thumbImage}
+                      src={thumb}
+                      alt={name}
+                    />
                   )}
                   {thumb == null && (
                     <Fab

@@ -36,15 +36,15 @@ import BaseTextField from '../common/text/BaseTextField'
 import FontFamilySelect from '../common/FontFamilySelect'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    fullWidth: {
-      width: '100%'
-    }
-  }))
+  fullWidth: {
+    width: '100%'
+  }
+}))
 
 function WatermarkCard() {
   const watermark = useAppSelector(selectAppConfigGeneralSettingsWatermark())
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Grid container spacing={watermark ? 2 : 0} alignItems="center">
       <Grid item xs={12}>

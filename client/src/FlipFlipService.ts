@@ -273,7 +273,9 @@ class FlipFlipAPI {
     )
   }
 
-  public async igSavedItems(): Promise<InstagramItems<Record<string, unknown>>> {
+  public async igSavedItems(): Promise<
+    InstagramItems<Record<string, unknown>>
+  > {
     return await this.invoke(IPC.igSavedItems).then(
       (args: any[] | undefined) =>
         args != null
@@ -282,7 +284,9 @@ class FlipFlipAPI {
     )
   }
 
-  public async igUserFeedItems(username: string): Promise<InstagramItems<Record<string, unknown>>> {
+  public async igUserFeedItems(
+    username: string
+  ): Promise<InstagramItems<Record<string, unknown>>> {
     return await this.invoke(IPC.igUserFeedItems, username).then(
       (args: any[] | undefined) =>
         args != null
@@ -298,11 +302,15 @@ class FlipFlipAPI {
   ): Promise<InstagramItems<Record<string, unknown>> | undefined> {
     return await this.invoke(IPC.igGetMore, session, id, feedSession).then(
       (args: any[] | undefined) =>
-        args != null ? (args[0] as InstagramItems<Record<string, unknown>>) : undefined
+        args != null
+          ? (args[0] as InstagramItems<Record<string, unknown>>)
+          : undefined
     )
   }
 
-  public async igFollowingFeed(userId: number): Promise<InstagramItems<Record<string, unknown>>> {
+  public async igFollowingFeed(
+    userId: number
+  ): Promise<InstagramItems<Record<string, unknown>>> {
     return await this.invoke(IPC.igFollowingFeed, userId).then(
       (args: any[] | undefined) =>
         args != null
@@ -322,7 +330,9 @@ class FlipFlipAPI {
       userId,
       feedSession
     ).then((args: any[] | undefined) =>
-      args != null ? (args[0] as InstagramItems<Record<string, unknown>>) : undefined
+      args != null
+        ? (args[0] as InstagramItems<Record<string, unknown>>)
+        : undefined
     )
   }
 
@@ -507,7 +517,7 @@ class FlipFlipAPI {
 
   public async getSystemFonts(): Promise<string[]> {
     return await this.invoke(IPC.getSystemFonts).then(
-      (args: any[] | undefined) => args != null ? (args[0] as string[]) : []
+      (args: any[] | undefined) => (args != null ? (args[0] as string[]) : [])
     )
   }
 

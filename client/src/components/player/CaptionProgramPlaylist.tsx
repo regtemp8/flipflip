@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { randomizeList } from '../../data/utils'
 import CaptionProgram from './CaptionProgram'
@@ -40,7 +40,50 @@ export default function CaptionProgramPlaylist(
   )
   const [playingScripts, setPlayingScripts] = useState<number[]>([])
 
+  const restart = useCallback(() => {
+    let scripts = props.playlist.scripts
+    if (props.playlist.shuffle) {
+      scripts = randomizeList(Array.from(scripts))
+    }
+    setPlayingScripts(scripts)
+  }, [props.playlist.scripts, props.playlist.shuffle])
+
+  const prevTrack = useCallback(() => {
+    let prevTrack = currentIndex - 1
+    if (prevTrack < 0) {
+      prevTrack = props.playlist.scripts.length - 1
+    }
+    setCurrentIndex(prevTrack)
+  }, [currentIndex, props.playlist.scripts.length])
+
+  const nextTrack = useCallback(() => {
+    let nextTrack = currentIndex + 1
+    if (nextTrack >= props.playlist.scripts.length) {
+      if (props.playlist.repeat === RP.none) {
+        nextTrack = props.playlist.scripts.length
+      } else {
+        nextTrack = 0
+      }
+    }
+    setCurrentIndex(nextTrack)
+  }, [currentIndex, props.playlist.repeat, props.playlist.scripts.length])
+
   useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case '[':
+          e.preventDefault()
+          props.orderScriptTags(props.playlist.scripts[currentIndex])
+          prevTrack()
+          break
+        case ']':
+          e.preventDefault()
+          props.orderScriptTags(props.playlist.scripts[currentIndex])
+          nextTrack()
+          break
+      }
+    }
+
     if (props.playlistIndex === 0 && isScriptScene) {
       window.addEventListener('keydown', onKeyDown, false)
     }
@@ -51,56 +94,13 @@ export default function CaptionProgramPlaylist(
         window.removeEventListener('keydown', onKeyDown)
       }
     }
-  }, [])
+  }, [currentIndex, isScriptScene, nextTrack, prevTrack, props, restart])
 
   useEffect(() => {
     if (!props.persist) {
       restart()
     }
-  }, [props.playlist])
-
-  const restart = () => {
-    let scripts = props.playlist.scripts
-    if (props.playlist.shuffle) {
-      scripts = randomizeList(Array.from(scripts))
-    }
-    setPlayingScripts(scripts)
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case '[':
-        e.preventDefault()
-        props.orderScriptTags(props.playlist.scripts[currentIndex])
-        prevTrack()
-        break
-      case ']':
-        e.preventDefault()
-        props.orderScriptTags(props.playlist.scripts[currentIndex])
-        nextTrack()
-        break
-    }
-  }
-
-  const prevTrack = () => {
-    let prevTrack = currentIndex - 1
-    if (prevTrack < 0) {
-      prevTrack = props.playlist.scripts.length - 1
-    }
-    setCurrentIndex(prevTrack)
-  }
-
-  const nextTrack = () => {
-    let nextTrack = currentIndex + 1
-    if (nextTrack >= props.playlist.scripts.length) {
-      if (props.playlist.repeat === RP.none) {
-        nextTrack = props.playlist.scripts.length
-      } else {
-        nextTrack = 0
-      }
-    }
-    setCurrentIndex(nextTrack)
-  }
+  }, [props.playlist, props.persist, restart])
 
   let script = playingScripts[currentIndex]
   if (!script) script = props.playlist.scripts[currentIndex]

@@ -26,14 +26,14 @@ function createTagSlice(tagState?: EntryState<Tag>) {
         if (!action.payload.name) {
           throw new Error('tagSlice: tag must have a name')
         }
-  
+
         setEntry(state, action.payload)
       },
       setTags: (state, action: PayloadAction<Tag[]>) => {
         if (action.payload.find((s) => s.name === undefined) != null) {
           throw new Error('tagSlice: tag must have a name')
         }
-  
+
         action.payload.forEach((s) => setEntry(state, s))
       }
     }

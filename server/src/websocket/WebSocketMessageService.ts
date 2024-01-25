@@ -1,7 +1,7 @@
 import fs from 'fs'
 import type ws from 'ws'
 import { move, outputFile } from 'fs-extra'
-import { parseBuffer, parseFile } from 'music-metadata'
+import { IAudioMetadata, parseBuffer, parseFile } from 'music-metadata'
 import rimraf from 'rimraf'
 import { cleanBackups, getBackups } from '../data/Backup'
 import fontList from 'font-list'
@@ -26,7 +26,9 @@ import {
   isVideoPlaylist,
   urlToPath,
   IF,
-  IPC
+  IPC,
+  Audio,
+  newAudio
 } from 'flipflip-common'
 import AppStorage from '../data/AppStorage'
 import SystemFonts from 'system-font-families'
@@ -35,10 +37,14 @@ import windowManager from '../WindowManager'
 import server from '../FlipFlipServer'
 import fileUrl from 'file-url'
 
-type WebSocketMessageHandler = (
-  msg: WebSocketMessage,
+interface WebSocketMessageParams {
+  message: WebSocketMessage,
   socket: ws.WebSocket
-) => Promise<any[]>
+}
+
+type WebSocketMessageHandler = (
+  params: WebSocketMessageParams
+) => Promise<unknown[]>
 
 class WebSocketMessageService {
   private static instance: WebSocketMessageService
@@ -116,29 +122,27 @@ class WebSocketMessageService {
   }
 
   private async getWindowId(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
-      const id = socket.storage != null ? 1 : 9
+      const id = params.socket.storage != null ? 1 : 9
       resolve([id])
     })
   }
 
   private async getAppStorageInitialState(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
-      const storage = socket.storage ?? new AppStorage(9)
+      const storage = params.socket.storage ?? new AppStorage(9)
       resolve([storage.initialState])
     })
   }
 
   private async saveAppStorage(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message, socket} = params
     if (socket.storage != null) {
       const state = message.args[0]
       return await socket.storage.save(state, false).then(
@@ -151,10 +155,10 @@ class WebSocketMessageService {
   }
 
   private async backupAppStorage(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
+      const {message, socket} = params
       if (socket.storage != null) {
         const state = message.args[0]
         socket.storage.backup(state)
@@ -164,10 +168,7 @@ class WebSocketMessageService {
     })
   }
 
-  private async openJsonFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openJsonFile(): Promise<unknown[]> {
     return windowManager()
       .openJsonFile()
       .then(
@@ -176,10 +177,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openSubtitleFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openSubtitleFile(): Promise<unknown[]> {
     return windowManager()
       .openSubtitleFile()
       .then(
@@ -188,10 +186,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openTextFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openTextFile(): Promise<unknown[]> {
     return windowManager()
       .openTextFile()
       .then(
@@ -200,10 +195,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openTextFiles(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openTextFiles(): Promise<unknown[]> {
     return windowManager()
       .openTextFiles()
       .then(
@@ -212,10 +204,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openAudioFiles(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openAudioFiles(): Promise<unknown[]> {
     return windowManager()
       .openAudioFiles()
       .then(
@@ -224,10 +213,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openDirectory(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openDirectory(): Promise<unknown[]> {
     return windowManager()
       .openDirectory()
       .then(
@@ -236,10 +222,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openDirectories(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openDirectories(): Promise<unknown[]> {
     return windowManager()
       .openDirectories()
       .then(
@@ -248,10 +231,7 @@ class WebSocketMessageService {
       )
   }
 
-  private async openVideos(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async openVideos(): Promise<unknown[]> {
     return windowManager()
       .openVideos()
       .then(
@@ -261,9 +241,9 @@ class WebSocketMessageService {
   }
 
   private async saveTextFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const defaultPath = message.args[0] as string
     const filePath = await windowManager().saveTextFile(defaultPath)
     if (filePath != null) {
@@ -275,9 +255,9 @@ class WebSocketMessageService {
   }
 
   private async saveJsonFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const defaultPath = message.args[0] as string
     const filePath = await windowManager().saveJsonFile(defaultPath)
     if (filePath != null) {
@@ -289,10 +269,9 @@ class WebSocketMessageService {
   }
 
   private async readTextFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.readFile(path, 'utf-8').then(
       (text) => [text],
       () => []
@@ -300,10 +279,9 @@ class WebSocketMessageService {
   }
 
   private async readBinaryFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.readFile(path).then(
       (buffer) => [buffer],
       () => []
@@ -311,11 +289,10 @@ class WebSocketMessageService {
   }
 
   private async showItemInFolder(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
-      const source = message.args[0] as string
+      const source = params.message.args[0] as string
       if (fs.existsSync(source)) {
         windowManager().openExternal(source)
       }
@@ -325,9 +302,8 @@ class WebSocketMessageService {
   }
 
   private async loadThumbnail(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return windowManager()
       .openImageFiles()
       .then((files) => files.filter((i) => isImage(i, true)))
@@ -337,7 +313,7 @@ class WebSocketMessageService {
           : undefined
       })
       .then((data) => {
-        const cachePath = message.args[0] as string
+        const cachePath = params.message.args[0] as string
         const thumb =
           data != null ? generateThumbnailFile(cachePath, data) : undefined
 
@@ -346,12 +322,11 @@ class WebSocketMessageService {
   }
 
   private async loadAudioSources(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    let promise: Promise<any[]>
-    if (message.args[0] != null) {
-      promise = this.openDirectories(message, socket).then((dirs) => {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    let promise: Promise<string[]>
+    if (params.message.args[0] != null) {
+      promise = this.openDirectories().then((dirs: string[]) => {
         const audioSources: string[] = []
         for (const path of dirs) {
           if (fs.existsSync(path) && fs.lstatSync(path).isDirectory()) {
@@ -364,7 +339,7 @@ class WebSocketMessageService {
         return audioSources
       })
     } else {
-      promise = this.openAudioFiles(message, socket)
+      promise = this.openAudioFiles().then((files) => files as string[])
     }
     return await promise.then((sources) =>
       sources.filter((r) => isAudio(r, true))
@@ -372,12 +347,11 @@ class WebSocketMessageService {
   }
 
   private async loadScriptSources(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    let promise: Promise<any[]>
-    if (message.args[0] != null) {
-      promise = this.openDirectories(message, socket).then((dirs) => {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    let promise: Promise<string[]>
+    if (params.message.args[0] != null) {
+      promise = this.openDirectories().then((dirs: string[]) => {
         const scriptSources: string[] = []
         for (const path of dirs) {
           if (fs.existsSync(path) && fs.lstatSync(path).isDirectory()) {
@@ -390,7 +364,7 @@ class WebSocketMessageService {
         return scriptSources
       })
     } else {
-      promise = this.openTextFiles(message, socket)
+      promise = this.openTextFiles().then((files) => files as string[])
     }
 
     return await promise.then((sources) =>
@@ -398,11 +372,8 @@ class WebSocketMessageService {
     )
   }
 
-  private async loadVideoSources(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    return await this.openDirectories(message, socket).then((vdResult) => {
+  private async loadVideoSources(): Promise<unknown[]> {
+    return await this.openDirectories().then((vdResult: string[]) => {
       const rvResult: string[] = []
       for (const path of vdResult) {
         if (fs.existsSync(path) && fs.lstatSync(path).isDirectory()) {
@@ -418,18 +389,15 @@ class WebSocketMessageService {
     })
   }
 
-  private async getBackups(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async getBackups(): Promise<unknown[]> {
     return await Promise.resolve(getBackups())
   }
 
   private async getCachePath(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
+      const {message} = params
       const baseDir = message.args[0] as string
       const source =
         message.args.length >= 2 ? (message.args[1] as string) : undefined
@@ -441,21 +409,19 @@ class WebSocketMessageService {
   }
 
   private async pathExists(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
-      const path = message.args[0] as string
+      const path = params.message.args[0] as string
       const exists = fs.existsSync(path)
       resolve([exists])
     })
   }
 
   private async deletePath(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.unlink(path).then(
       () => [],
       () => []
@@ -463,10 +429,9 @@ class WebSocketMessageService {
   }
 
   private async makeDirectory(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.mkdir(path).then(
       () => [],
       () => []
@@ -474,9 +439,9 @@ class WebSocketMessageService {
   }
 
   private async writeFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const path = message.args[0] as string
     const text = message.args[1] as string
     return await fs.promises.writeFile(path, text).then(
@@ -486,21 +451,19 @@ class WebSocketMessageService {
   }
 
   private async hasFiles(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
-      const path = message.args[0] as string
+      const path = params.message.args[0] as string
       const hasFiles = fs.existsSync(path) && fs.readdirSync(path).length > 0
       resolve([hasFiles])
     })
   }
 
   private async getDirectories(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.readdir(path, { withFileTypes: true }).then(
       (dirs) => {
         return dirs
@@ -512,10 +475,9 @@ class WebSocketMessageService {
   }
 
   private async unlinkPath(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.unlink(path).then(
       () => [],
       () => []
@@ -523,17 +485,16 @@ class WebSocketMessageService {
   }
 
   private async readDirectory(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await fs.promises.readdir(path)
   }
 
   private async moveFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const from = message.args[0] as string
     const to = message.args[1] as string
     return await move(from, to).then(
@@ -543,9 +504,9 @@ class WebSocketMessageService {
   }
 
   private async outputFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const path = message.args[0] as string
     const output = message.args[1]
     const data =
@@ -564,20 +525,16 @@ class WebSocketMessageService {
   }
 
   private async getFolderSize(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await getFolderSize.loose(path).then(
       (size) => [size],
       () => [undefined]
     )
   }
 
-  private async getSystemFonts(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async getSystemFonts(): Promise<unknown[]> {
     if (isMacOSX) {
       return await new SystemFonts().getFonts().then(
         (fonts: string[]) => [fonts],
@@ -602,9 +559,9 @@ class WebSocketMessageService {
   }
 
   private async parseMusicMetadataFile(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const url = message.args[0] as string
     const cachePath = message.args[1] as string
     return await parseFile(url).then((metadata) => [
@@ -613,17 +570,16 @@ class WebSocketMessageService {
   }
 
   private async parseMusicMetadataBpm(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const url = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const url = params.message.args[0] as string
     return await parseFile(url).then((metadata) => [metadata?.common?.bpm])
   }
 
   private async parseMusicMetadataBuffer(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const {message} = params
     const bufferJSON = message.args[0] as
       | WithImplicitCoercion<string>
       | { [Symbol.toPrimitive](hint: 'string'): string }
@@ -633,8 +589,8 @@ class WebSocketMessageService {
     ])
   }
 
-  private extractMusicMetadata(metadata: any, cachePath: string): any {
-    const audio: any = {}
+  private extractMusicMetadata(metadata: IAudioMetadata, cachePath: string): Audio {
+    const audio = newAudio()
     if (metadata.common != null) {
       if (metadata.common.title != null) {
         audio.name = metadata.common.title
@@ -655,10 +611,10 @@ class WebSocketMessageService {
         )
       }
       if (metadata.common.track?.no != null) {
-        audio.trackNum = parseInt(metadata.common.track.no)
+        audio.trackNum = metadata.common.track.no
       }
       if (metadata.common.bpm != null) {
-        audio.bpm = parseFloat(metadata.common.bpm)
+        audio.bpm = metadata.common.bpm
       }
     }
     if (metadata.format?.duration != null) {
@@ -669,20 +625,18 @@ class WebSocketMessageService {
   }
 
   private async rimrafSync(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return await Promise.resolve([rimraf.sync(path)])
   }
 
   private async cleanBackups(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
     return await new Promise((resolve) => {
       try {
-        const config = message.args[0] as Config
+        const config = params.message.args[0] as Config
         cleanBackups(config)
       } catch (err) {
         console.error(err)
@@ -868,7 +822,7 @@ class WebSocketMessageService {
 
   // async function getRedditOAuth (
   //   message: WebSocketMessage
-  // ): Promise<any[]> {
+  // ): Promise<unknown[]> {
   //   const deviceID = message.args[0]
   //   const userAgent = message.args[1]
   //   const clientID = message.args[2]
@@ -936,17 +890,16 @@ class WebSocketMessageService {
   // }
 
   private getFileUrl(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
-    const path = message.args[0] as string
+    params: WebSocketMessageParams,
+  ): Promise<unknown[]> {
+    const path = params.message.args[0] as string
     return Promise.resolve([fileUrl(path)])
   }
 
   private async recursiveReadDirectory(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+    params: WebSocketMessageParams,
+  ): Promise<unknown[]> {
+    const { message } = params
     const url = message.args[0] as string
     const blacklist = message.args[1] as string[]
     const sourceBlacklist = message.args[2] as string[]
@@ -991,10 +944,7 @@ class WebSocketMessageService {
       })
   }
 
-  private async getContext(
-    message: WebSocketMessage,
-    socket: ws.WebSocket
-  ): Promise<any[]> {
+  private async getContext(): Promise<unknown[]> {
     return await new Promise((resolve) => {
       resolve([getContext()])
     })
@@ -1017,7 +967,7 @@ class WebSocketMessageService {
   public handle(message: WebSocketMessage, socket: ws.WebSocket): void {
     const handler = this.handlers[message.operation]
     if (handler != null) {
-      handler(message, socket)
+      handler({message, socket})
         .then((args) => {
           if (args.length > 0) {
             const response: WebSocketMessage = {

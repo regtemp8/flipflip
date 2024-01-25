@@ -18,17 +18,19 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
   useEffect(() => {
     // Define system fonts
     _promise.current = new CancelablePromise((resolve, reject) => {
-      flipflip().api.getSystemFonts().then(
-        (res: string[]) => {
-          if (!_promise.current?.hasCanceled) {
-            console.log(res)
-            setSystemFonts(res)
+      flipflip()
+        .api.getSystemFonts()
+        .then(
+          (res: string[]) => {
+            if (!_promise.current?.hasCanceled) {
+              console.log(res)
+              setSystemFonts(res)
+            }
+          },
+          (err: string) => {
+            reject(err)
           }
-        },
-        (err: string) => {
-          reject(err)
-        }
-      )
+        )
     })
 
     return () => {

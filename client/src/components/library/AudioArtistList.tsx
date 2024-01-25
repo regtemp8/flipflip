@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import { Avatar, type Theme, Typography } from '@mui/material'
@@ -7,7 +7,8 @@ import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 
-import type Audio from '../../store/audio/Audio'
+import { selectAudioArtists } from '../../store/audio/selectors'
+import { useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -53,20 +54,14 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface AudioArtistListProps {
-  sources: Audio[]
+  sources: number[]
   showHelp: boolean
   onClickArtist: (artist: string) => void
 }
 
 function AudioArtistList(props: AudioArtistListProps) {
-  const [artists, setArtists] = useState<Map<string, string | undefined>>(
-    new Map()
-  )
+  const artists = useAppSelector(selectAudioArtists(props.sources))
   const [hover, setHover] = useState<string>()
-
-  useEffect(() => {
-    setArtists(getArtists(props.sources))
-  }, [props.sources])
 
   const onMouseEnter = (artist: string) => {
     setHover(artist)
@@ -74,35 +69,6 @@ function AudioArtistList(props: AudioArtistListProps) {
 
   const onMouseLeave = () => {
     setHover(undefined)
-  }
-
-  const getArtists = (sources: Audio[]): Map<string, string | undefined> => {
-    const artistsMap = new Map<string, string | undefined>()
-    const songs = Array.from(sources).sort((a, b) => {
-      const artistA = a.artist as string
-      const artistB = b.artist as string
-      if (artistA > artistB) {
-        return 1
-      } else if (artistA < artistB) {
-        return -1
-      } else {
-        const nameA = a.name as string
-        const nameB = b.name as string
-        const reA = /^(A\s|a\s|The\s|the\s)/g
-        const valueA = nameA.replace(reA, '')
-        const valueB = nameB.replace(reA, '')
-        return valueA.localeCompare(valueB, 'en', { numeric: true })
-      }
-    })
-    for (const song of songs) {
-      if (
-        song.artist &&
-        (!artistsMap.has(song.artist) || !artistsMap.get(song.artist))
-      ) {
-        artistsMap.set(song.artist, song.thumb)
-      }
-    }
-    return artistsMap
   }
 
   const { classes } = useStyles()

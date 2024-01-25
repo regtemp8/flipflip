@@ -26,10 +26,10 @@ import { setSceneAudioEnabled } from '../../store/scene/actions'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    addButton: {
-      boxShadow: 'none'
-    }
-  }))
+  addButton: {
+    boxShadow: 'none'
+  }
+}))
 
 export interface AudioCardProps {
   sceneID: number
@@ -68,7 +68,7 @@ function AudioCard(props: AudioCardProps) {
     )
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Grid container alignItems="center">
       <Grid item xs={12}>
@@ -102,6 +102,7 @@ function AudioCard(props: AudioCardProps) {
           <Grid item xs={12}>
             <Collapse in={audioEnabled || props.persist}>
               <AudioPlaylist
+                sceneID={props.sceneID}
                 playlistIndex={i}
                 playlist={playlist}
                 scenePaths={props.scenePaths}
@@ -117,6 +118,7 @@ function AudioCard(props: AudioCardProps) {
                 }
                 goBack={props.goBack}
                 onPlaying={props.onPlaying}
+                onAddTracks={(playlistIndex: number) => {}} // TODO what to do here?
               />
             </Collapse>
           </Grid>

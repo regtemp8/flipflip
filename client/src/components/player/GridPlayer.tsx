@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, type ReactNode } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  type ReactNode
+} from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -126,7 +132,8 @@ interface GridCellPlayerProps {
 }
 
 function GridCellPlayer(props: GridCellPlayerProps) {
-  const { gridID, row, col, width, height, uuid, allLoaded, classes } = props
+  const { classes } = useStyles()
+  const { gridID, row, col, width, height, uuid, allLoaded } = props
 
   //console.log('ALL LOADED: ' + allLoaded)
   const sceneID = useAppSelector(selectSceneGridCellSceneID(gridID, row, col))
@@ -239,18 +246,23 @@ function GridPlayer(props: GridPlayerProps) {
 
   const _idleTimerRef = useRef<any>()
   const _appBarTimeout = useRef<any>()
-  const _abortController = useRef(new AbortController())
+
+  const navigateBack = useCallback(async () => {
+    setFullScreen(false)
+    dispatch(setRouteGoBack())
+  }, [dispatch])
 
   useEffect(() => {
-    flipflip().events.onGridNavigateBack(navigateBack, _abortController.current)
+    const abortController = new AbortController()
+    flipflip().events.onGridNavigateBack(navigateBack, abortController)
 
     return () => {
-      _abortController.current.abort()
+      abortController.abort()
       if (_appBarTimeout.current) {
         clearTimeout(_appBarTimeout.current)
       }
     }
-  }, [])
+  }, [navigateBack])
 
   const setSceneCopy = (
     rowIndex: number,
@@ -287,11 +299,6 @@ function GridPlayer(props: GridPlayerProps) {
   const toggleFull = async () => {
     const fullScreen = toggleFullScreen()
     dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
-  }
-
-  const navigateBack = async () => {
-    setFullScreen(false)
-    dispatch(setRouteGoBack())
   }
 
   const { classes } = useStyles()
@@ -414,7 +421,6 @@ function GridPlayer(props: GridPlayerProps) {
                       setVideo={props.setVideo}
                       setProgress={showProgress ? props.setProgress : undefined}
                       setSceneCopy={setSceneCopy}
-                      classes={classes}
                     />
                   )
                 })}

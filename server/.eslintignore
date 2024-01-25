@@ -1,0 +1,7 @@
+.git
+.webpack
+.yarn
+icons
+node_modules
+out
+.eslintrc.json

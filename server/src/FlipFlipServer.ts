@@ -1,7 +1,7 @@
 import fs from 'fs'
 import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
-import express, { type Express, RequestHandler } from 'express'
+import express, { type Express, RequestHandler, Response } from 'express'
 import session from 'express-session'
 import yaml from 'js-yaml'
 import ws from 'ws'
@@ -42,9 +42,11 @@ class FlipFlipServer {
   private server: Server
   private wsServer: ws.Server
   private sessionParser: RequestHandler
-  private writePermissions = [true]
+  private writePermissions: boolean[]
 
-  private constructor() {}
+  private constructor() {
+    this.writePermissions = [true]
+  }
 
   public static getInstance(): FlipFlipServer {
     if (FlipFlipServer.instance == null) {
@@ -235,7 +237,7 @@ class FlipFlipServer {
 
   private initWebSocketServer(): ws.Server {
     const wsServer = new ws.Server({ noServer: true })
-    wsServer.on('connection', (socket: ws.WebSocket, request) => {
+    wsServer.on('connection', (socket: ws.WebSocket) => {
       const canWrite = this.writePermissions.shift() ?? false
       if (canWrite) {
         socket.storage = new AppStorage(1)
@@ -274,7 +276,7 @@ class FlipFlipServer {
       const options = { key: privateKey, cert: certificate }
       this.server = createServer(options, this.initAPI())
       this.server.on('upgrade', (request, socket, head) => {
-        const response: any = {}
+        const response = {} as Response
         this.sessionParser(request, response, () => {
           if (request.session.authenticated !== true) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')

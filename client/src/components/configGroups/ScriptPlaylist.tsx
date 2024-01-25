@@ -1,3 +1,4 @@
+/// <reference path="../../react-sortablejs.d.ts" />
 import React, { MouseEvent } from 'react'
 import Sortable from 'react-sortablejs'
 
@@ -40,44 +41,44 @@ import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
 import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    scriptList: {
-      paddingLeft: 0
-    },
-    thumb: {
-      width: theme.spacing(6),
-      height: theme.spacing(6)
-    },
-    playlistAction: {
-      textAlign: 'center'
-    },
-    left: {
-      float: 'left',
-      paddingLeft: theme.spacing(2)
-    },
-    right: {
-      float: 'right',
-      paddingRight: theme.spacing(2)
-    },
-    scriptThumb: {
-      height: 40,
-      width: 40,
-      overflow: 'hidden',
-      display: 'flex',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      userSelect: 'none'
-    },
-    listAvatar: {
-      width: 56
-    },
-    avatar: {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: 'none'
-    },
-    sourceIcon: {
-      color: theme.palette.primary.contrastText
-    }
-  }))
+  scriptList: {
+    paddingLeft: 0
+  },
+  thumb: {
+    width: theme.spacing(6),
+    height: theme.spacing(6)
+  },
+  playlistAction: {
+    textAlign: 'center'
+  },
+  left: {
+    float: 'left',
+    paddingLeft: theme.spacing(2)
+  },
+  right: {
+    float: 'right',
+    paddingRight: theme.spacing(2)
+  },
+  scriptThumb: {
+    height: 40,
+    width: 40,
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  listAvatar: {
+    width: 56
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: 'none'
+  },
+  sourceIcon: {
+    color: theme.palette.primary.contrastText
+  }
+}))
 
 export interface ScriptPlaylistItemProps {
   sceneID: number
@@ -102,7 +103,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
     }
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <ListItem>
       <ListItemAvatar className={classes.listAvatar}>
@@ -197,7 +198,7 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
     )
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <List disablePadding>
       <Sortable

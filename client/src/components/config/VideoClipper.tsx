@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import { green, red } from '@mui/material/colors'
 
@@ -285,24 +285,11 @@ function VideoClipper() {
   const tags = useAppSelector(selectAppTags())
   const isLibrary = useAppSelector(selectAppIsLibrary())
 
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown, false)
-    window.addEventListener('wheel', onScroll, false)
-    initVideo()
+  const closeEdit = useCallback(() => {
+    dispatch(setVideoClipperResetState())
+  }, [dispatch])
 
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('wheel', onScroll)
-    }
-  }, [])
-
-  useEffect(() => {
-    setVideo(undefined)
-    setEmpty(false)
-    initVideo()
-  }, [sourceID])
-
-  const initVideo = () => {
+  const initVideo = useCallback(() => {
     const video = document.createElement('video')
 
     video.onerror = () => {
@@ -323,32 +310,84 @@ function VideoClipper() {
       video.setAttribute('subtitles', subtitleFile)
     }
     video.load()
-  }
+  }, [dispatch, sourceURL, subtitleFile])
 
-  const onAdd = () => {
-    const duration = video?.duration as number
-    dispatch(onVideoClipperAddClip(duration))
-  }
+  const prevClip = useCallback(() => {
+    dispatch(onVideoClipperPrevClip())
+  }, [dispatch])
 
-  const onEdit = (clipID: number) => {
-    dispatch(onVideoClipperEditClip(clipID))
-  }
+  const nextClip = useCallback(() => {
+    dispatch(onVideoClipperNextClip())
+  }, [dispatch])
 
-  const onCancel = () => {
-    closeEdit()
-  }
+  const prevSource = useCallback(() => {
+    dispatch(navigateClipping(-1))
+  }, [dispatch])
 
-  const onSave = () => {
+  const nextSource = useCallback(() => {
+    dispatch(navigateClipping(1))
+  }, [dispatch])
+
+  const onChangePosition = useCallback(
+    (values: number[], forceStart = false, forceEnd = false) => {
+      const videoEl = video as HTMLVideoElement
+      let min = values[0]
+      let max = values[1]
+      if (min < 0) min = 0
+      if (max < 0) max = 0
+      if (min > videoEl.duration) min = videoEl.duration
+      if (max > videoEl.duration) max = videoEl.duration
+
+      if (videoEl.paused) {
+        if (forceStart || values[0] !== editingValue[0]) {
+          videoEl.currentTime = min
+        } else if (forceEnd || values[1] !== editingValue[1]) {
+          videoEl.currentTime = max
+        }
+      } else {
+        if (videoEl.currentTime < min) {
+          videoEl.currentTime = min
+        } else if (videoEl.currentTime > max) {
+          videoEl.currentTime = max
+        }
+      }
+
+      dispatch(setVideoClipperEditingValue({ start: min, end: max }))
+    },
+    [dispatch, editingValue, video]
+  )
+
+  const onChangeEndTextValue = useCallback(
+    (timestampValue: number, force = false) => {
+      if (timestampValue != null) {
+        onChangePosition([editingValue[0], timestampValue], false, force)
+      }
+    },
+    [editingValue, onChangePosition]
+  )
+
+  const onChangeStartTextValue = useCallback(
+    (timestampValue: number, force = false) => {
+      if (timestampValue != null) {
+        onChangePosition([timestampValue, editingValue[1]], force, false)
+      }
+    },
+    [editingValue, onChangePosition]
+  )
+
+  const onChangeVolume = useCallback(
+    (volume: number) => {
+      dispatch(setVideoClipperSceneVideoVolume(volume))
+    },
+    [dispatch]
+  )
+
+  const onSave = useCallback(() => {
     dispatch(onSaveVideoClip())
     closeEdit()
-  }
+  }, [closeEdit, dispatch])
 
-  const onToggleClip = () => {
-    const value = editingClipID as number
-    dispatch(setLibrarySourceToggleDisabledClip({ id: sourceID, value }))
-  }
-
-  const onTag = () => {
+  const onTag = useCallback(() => {
     dispatch(
       setPlayerState({
         uuid: 'video-clipper',
@@ -364,6 +403,146 @@ function VideoClipper() {
       })
     )
     setIsTagging(!isTagging)
+  }, [dispatch, isTagging, sceneID])
+
+  useEffect(() => {
+    const onScroll = (e: WheelEvent) => {
+      const volumeChange = (e.deltaY / 100) * -5
+      let newVolume = videoVolume + volumeChange
+      if (newVolume < 0) {
+        newVolume = 0
+      } else if (newVolume > 100) {
+        newVolume = 100
+      }
+      onChangeVolume(newVolume)
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      const focus = document.activeElement?.tagName.toLocaleLowerCase()
+      const start = document.activeElement?.id === 'start'
+      const end = document.activeElement?.id === 'end'
+      switch (e.key) {
+        case 'Escape':
+          e.preventDefault()
+          if (isTagging) {
+            onTag()
+          } else if (editingClipID) {
+            if (isSourceClip) {
+              onSave()
+            } else {
+              closeEdit()
+            }
+          } else {
+            dispatch(setRouteGoBack())
+          }
+          break
+        case '[':
+          e.preventDefault()
+          if (editingClipID) {
+            prevClip()
+          } else {
+            prevSource()
+          }
+          break
+        case ']':
+          e.preventDefault()
+          if (editingClipID) {
+            nextClip()
+          } else {
+            nextSource()
+          }
+          break
+        case 'ArrowDown':
+          if (focus === 'input') {
+            e.preventDefault()
+            if (start) {
+              const timestampValue = getTimestampValue(editingStartText)
+              const startValue =
+                timestampValue - 1 >= 0 ? timestampValue - 1 : 0
+              onChangeStartTextValue(startValue, true)
+            } else if (end) {
+              const timestampValue = getTimestampValue(editingEndText)
+              const endValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0
+              onChangeEndTextValue(endValue, true)
+            }
+          }
+          break
+        case 'ArrowUp':
+          if (focus === 'input') {
+            e.preventDefault()
+            const videoEl = video as HTMLVideoElement
+            if (start) {
+              const timestampValue = getTimestampValue(editingStartText)
+              const startValue =
+                timestampValue + 1 <= videoEl.duration
+                  ? timestampValue + 1
+                  : Math.floor(videoEl.duration)
+              onChangeStartTextValue(startValue, true)
+            } else if (end) {
+              const timestampValue = getTimestampValue(editingEndText)
+              const endValue =
+                timestampValue + 1 <= videoEl.duration
+                  ? timestampValue + 1
+                  : Math.floor(videoEl.duration)
+              onChangeEndTextValue(endValue, true)
+            }
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown, false)
+    window.addEventListener('wheel', onScroll, false)
+    initVideo()
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('wheel', onScroll)
+    }
+  }, [
+    closeEdit,
+    dispatch,
+    editingClipID,
+    editingEndText,
+    editingStartText,
+    initVideo,
+    isSourceClip,
+    isTagging,
+    nextClip,
+    nextSource,
+    onChangeEndTextValue,
+    onChangeStartTextValue,
+    onChangeVolume,
+    onSave,
+    onTag,
+    prevClip,
+    prevSource,
+    video,
+    videoVolume
+  ])
+
+  useEffect(() => {
+    setVideo(undefined)
+    setEmpty(false)
+    initVideo()
+  }, [sourceID, initVideo])
+
+  const onAdd = () => {
+    const duration = video?.duration as number
+    dispatch(onVideoClipperAddClip(duration))
+  }
+
+  const onEdit = (clipID: number) => {
+    dispatch(onVideoClipperEditClip(clipID))
+  }
+
+  const onCancel = () => {
+    closeEdit()
+  }
+
+  const onToggleClip = () => {
+    const value = editingClipID as number
+    dispatch(setLibrarySourceToggleDisabledClip({ id: sourceID, value }))
   }
 
   const onClearVolume = () => {
@@ -388,55 +567,11 @@ function VideoClipper() {
     closeEdit()
   }
 
-  const closeEdit = () => {
-    dispatch(setVideoClipperResetState())
-  }
-
-  const onChangeVolume = (volume: number) => {
-    dispatch(setVideoClipperSceneVideoVolume(volume))
-  }
-
-  const onChangePosition = (
-    values: number[],
-    forceStart = false,
-    forceEnd = false
-  ) => {
-    const videoEl = video as HTMLVideoElement
-    let min = values[0]
-    let max = values[1]
-    if (min < 0) min = 0
-    if (max < 0) max = 0
-    if (min > videoEl.duration) min = videoEl.duration
-    if (max > videoEl.duration) max = videoEl.duration
-
-    if (videoEl.paused) {
-      if (forceStart || values[0] !== editingValue[0]) {
-        videoEl.currentTime = min
-      } else if (forceEnd || values[1] !== editingValue[1]) {
-        videoEl.currentTime = max
-      }
-    } else {
-      if (videoEl.currentTime < min) {
-        videoEl.currentTime = min
-      } else if (videoEl.currentTime > max) {
-        videoEl.currentTime = max
-      }
-    }
-
-    dispatch(setVideoClipperEditingValue({ start: min, end: max }))
-  }
-
   const onChangeStartText = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     dispatch(setVideoClipperEditingStartText(value))
     const timestampValue = getTimestampValue(value)
     onChangeStartTextValue(timestampValue)
-  }
-
-  const onChangeStartTextValue = (timestampValue: number, force = false) => {
-    if (timestampValue != null) {
-      onChangePosition([timestampValue, editingValue[1]], force, false)
-    }
   }
 
   const onClickStartText = () => {
@@ -452,116 +587,10 @@ function VideoClipper() {
     onChangeStartTextValue(timestampValue)
   }
 
-  const onChangeEndTextValue = (timestampValue: number, force = false) => {
-    if (timestampValue != null) {
-      onChangePosition([editingValue[0], timestampValue], false, force)
-    }
-  }
-
   const onClickEndText = () => {
     const time = video?.currentTime as number
     dispatch(setVideoClipperEditingEndText(getTimestamp(time)))
     onChangePosition([editingValue[0], time])
-  }
-
-  const onScroll = (e: WheelEvent) => {
-    const volumeChange = (e.deltaY / 100) * -5
-    let newVolume = videoVolume + volumeChange
-    if (newVolume < 0) {
-      newVolume = 0
-    } else if (newVolume > 100) {
-      newVolume = 100
-    }
-    onChangeVolume(newVolume)
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement?.tagName.toLocaleLowerCase()
-    const start = document.activeElement?.id === 'start'
-    const end = document.activeElement?.id === 'end'
-    switch (e.key) {
-      case 'Escape':
-        e.preventDefault()
-        if (isTagging) {
-          onTag()
-        } else if (editingClipID) {
-          if (isSourceClip) {
-            onSave()
-          } else {
-            closeEdit()
-          }
-        } else {
-          dispatch(setRouteGoBack())
-        }
-        break
-      case '[':
-        e.preventDefault()
-        if (editingClipID) {
-          prevClip()
-        } else {
-          prevSource()
-        }
-        break
-      case ']':
-        e.preventDefault()
-        if (editingClipID) {
-          nextClip()
-        } else {
-          nextSource()
-        }
-        break
-      case 'ArrowDown':
-        if (focus === 'input') {
-          e.preventDefault()
-          if (start) {
-            const timestampValue = getTimestampValue(editingStartText)
-            const startValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0
-            onChangeStartTextValue(startValue, true)
-          } else if (end) {
-            const timestampValue = getTimestampValue(editingEndText)
-            const endValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0
-            onChangeEndTextValue(endValue, true)
-          }
-        }
-        break
-      case 'ArrowUp':
-        if (focus === 'input') {
-          e.preventDefault()
-          const videoEl = video as HTMLVideoElement
-          if (start) {
-            const timestampValue = getTimestampValue(editingStartText)
-            const startValue =
-              timestampValue + 1 <= videoEl.duration
-                ? timestampValue + 1
-                : Math.floor(videoEl.duration)
-            onChangeStartTextValue(startValue, true)
-          } else if (end) {
-            const timestampValue = getTimestampValue(editingEndText)
-            const endValue =
-              timestampValue + 1 <= videoEl.duration
-                ? timestampValue + 1
-                : Math.floor(videoEl.duration)
-            onChangeEndTextValue(endValue, true)
-          }
-        }
-        break
-    }
-  }
-
-  const prevClip = () => {
-    dispatch(onVideoClipperPrevClip())
-  }
-
-  const nextClip = () => {
-    dispatch(onVideoClipperNextClip())
-  }
-
-  const prevSource = () => {
-    dispatch(navigateClipping(-1))
-  }
-
-  const nextSource = () => {
-    dispatch(navigateClipping(1))
   }
 
   const { classes } = useStyles()
@@ -691,8 +720,8 @@ function VideoClipper() {
                   <VideoControl
                     video={video}
                     volume={videoVolume}
-                    clipID={!editingClipID ? null : editingClipID}
-                    clipValue={!editingClipID ? null : editingValue}
+                    clipID={editingClipID}
+                    clipValue={editingClipID != null ? editingValue : undefined}
                     useHotkeys
                     onChangeVolume={onChangeVolume}
                   />

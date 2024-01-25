@@ -39,9 +39,9 @@ export default class RedditClient {
     redditRefreshToken: string,
     redditFunc: string,
     url: string,
-    after: any,
+    after: string,
     redditTime: 'hour' | 'day' | 'week' | 'month' | 'year' | 'all' | undefined
-  ): Promise<any> {
+  ): Promise<unknown[]> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
@@ -70,8 +70,8 @@ export default class RedditClient {
     redditClientID: string,
     redditRefreshToken: string,
     url: string,
-    after: any
-  ): Promise<any> {
+    after: string
+  ): Promise<unknown[]> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
@@ -85,8 +85,8 @@ export default class RedditClient {
     redditClientID: string,
     redditRefreshToken: string,
     url: string,
-    after: any
-  ): Promise<any> {
+    after: string
+  ): Promise<unknown[]> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
@@ -99,8 +99,8 @@ export default class RedditClient {
     redditUserAgent: string,
     redditClientID: string,
     redditRefreshToken: string,
-    after: any
-  ): Promise<any> {
+    after: string
+  ): Promise<unknown[]> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,

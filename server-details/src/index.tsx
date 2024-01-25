@@ -1,3 +1,4 @@
+/// <reference path="./global.d.ts" />
 import ReactDOM from 'react-dom/client'
 import ServerDetails from './ServerDetails'
 

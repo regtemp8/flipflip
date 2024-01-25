@@ -3,7 +3,8 @@ import React, {
   CSSProperties,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useCallback
 } from 'react'
 import {
   UseTransitionResult,
@@ -55,7 +56,15 @@ export default function Strobe(props: PropsWithChildren<StrobeProps>) {
     return validColor ? color : ''
   }
 
-  const strobeOnce = () => {
+  const getDuration = useCallback(() => {
+    return utils.getDuration(strobe.timing, props.timeToNextFrame, bpm, 10)
+  }, [strobe.timing, props.timeToNextFrame, bpm])
+
+  const getDelay = useCallback(() => {
+    return utils.getDuration(strobe.delay, props.timeToNextFrame, bpm)
+  }, [strobe.delay, props.timeToNextFrame, bpm])
+
+  const strobeOnce = useCallback(() => {
     const duration = getDuration()
     setDuration(duration)
     const delay = strobe.strobePulse ? getDelay() : duration
@@ -64,12 +73,12 @@ export default function Strobe(props: PropsWithChildren<StrobeProps>) {
       props.strobeFunction()
     }
     return delay
-  }
+  }, [getDelay, getDuration, props, strobe.strobePulse, toggleStrobe])
 
-  const strobeLoop = () => {
+  const strobeLoop = useCallback(() => {
     const delay = strobeOnce()
     _strobeTimeout.current = window.setTimeout(strobeLoop, delay)
-  }
+  }, [strobeOnce])
 
   useEffect(() => {
     if (
@@ -84,7 +93,12 @@ export default function Strobe(props: PropsWithChildren<StrobeProps>) {
       clearTimeout(_strobeTimeout.current)
       _strobeTimeout.current = undefined
     }
-  }, [])
+  }, [
+    strobe.delay.timingFunction,
+    strobe.strobePulse,
+    strobe.timing.timingFunction,
+    strobeLoop
+  ])
 
   useEffect(() => {
     clearTimeout(_strobeTimeout.current)
@@ -98,7 +112,8 @@ export default function Strobe(props: PropsWithChildren<StrobeProps>) {
   }, [
     strobe.timing.timingFunction,
     strobe.delay.timingFunction,
-    strobe.strobePulse
+    strobe.strobePulse,
+    strobeLoop
   ])
 
   useEffect(() => {
@@ -109,15 +124,12 @@ export default function Strobe(props: PropsWithChildren<StrobeProps>) {
     ) {
       strobeOnce()
     }
-  }, [props.toggleStrobe])
-
-  const getDuration = () => {
-    return utils.getDuration(strobe.timing, props.timeToNextFrame, bpm, 10)
-  }
-
-  const getDelay = () => {
-    return utils.getDuration(strobe.delay, props.timeToNextFrame, bpm)
-  }
+  }, [
+    strobe.strobePulse,
+    strobe.delay.timingFunction,
+    strobe.timing.timingFunction,
+    strobeOnce
+  ])
 
   const strobeTransitions: UseTransitionResult<
     boolean,

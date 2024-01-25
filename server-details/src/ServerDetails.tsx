@@ -1,3 +1,4 @@
+/// <reference path="./global.d.ts" />
 import React, { useEffect, useState } from 'react'
 import {
   Avatar,

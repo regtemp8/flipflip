@@ -387,7 +387,7 @@ function AudioOptions(props: AudioOptionsProps) {
             <Collapse in={tick} className={classes.fullWidth}>
               <TimingCard
                 sidebar={false}
-                hasBPMSelector={selectAudioHasBPM}
+                hasBPMSelector={selectAudioHasBPM(props.audioID)}
                 timing={{
                   selector: selectAudioTickTF(props.audioID),
                   action: setAudioTickTF(props.audioID)
@@ -415,7 +415,7 @@ function AudioOptions(props: AudioOptionsProps) {
                   labelledBy: 'tick-bpm-multi-slider',
                   min: -8,
                   max: 10,
-                  format: { type: 'tick-bpm' }
+                  format: 'tick-bpm'
                 }}
               />
             </Collapse>

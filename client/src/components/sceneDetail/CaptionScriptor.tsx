@@ -1,4 +1,10 @@
-import React, { MouseEvent, useEffect, useState, useRef } from 'react'
+import React, {
+  MouseEvent,
+  useEffect,
+  useState,
+  useRef,
+  useCallback
+} from 'react'
 import wretch from 'wretch'
 import { cx } from '@emotion/css'
 
@@ -261,6 +267,7 @@ function CaptionScriptor() {
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())
   const sceneScripts = useAppSelector(selectCaptionScriptorSceneScripts())
   const captionScriptID = useAppSelector(selectCaptionScriptorCaptionScriptID())
+  const loadFromSceneError = false
 
   const audioEnabledSelector =
     sceneID !== 0
@@ -274,24 +281,35 @@ function CaptionScriptor() {
   const [error, setError] = useState<string>()
   const [fullscreen, setFullscreen] = useState(false)
   const [scriptChanged, setScriptChanged] = useState(false)
-  const [loadFromSceneError, setLoadFromSceneError] = useState(false)
   const [openMenu, setOpenMenu] = useState<string>()
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
 
-  const _currentTimestamp = useRef<number>()
+  const _currentTimestamp = useRef<number>(0)
   const _captionProgramJumpToHack = useRef(new ChildCallbackHack())
   const _codeMirrorAddHack = useRef(new ChildCallbackHack())
   const _codeMirrorOverwriteHack = useRef(new ChildCallbackHack())
 
-  useEffect(() => {
-    _currentTimestamp.current = 0
-    window.addEventListener('keydown', onKeyDown, false)
+  const onFullscreen = useCallback(() => {
+    if (sceneID != null) {
+      setFullscreen((fullscreen) => !fullscreen)
+    } else {
+      setFullscreen(false)
+    }
+  }, [sceneID])
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && fullscreen) {
+        onFullscreen()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown, false)
     return () => {
-      _currentTimestamp.current = undefined
+      _currentTimestamp.current = 0
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [])
+  }, [fullscreen, onFullscreen])
 
   useEffect(() => {
     if (script) {
@@ -307,7 +325,7 @@ function CaptionScriptor() {
           setScriptChanged(false)
         })
     }
-  }, [captionScriptID])
+  }, [script, url])
 
   const onPlaying = (position: number, duration: number) => {
     _currentTimestamp.current = position
@@ -317,12 +335,6 @@ function CaptionScriptor() {
     setOpenMenu(undefined)
     setMenuAnchorEl(null)
     setSelectScript('')
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && fullscreen) {
-      onFullscreen()
-    }
   }
 
   const onNew = () => {
@@ -442,14 +454,6 @@ function CaptionScriptor() {
   const onConfirmLoadFromScene = () => {
     dispatch(onCaptionScriptorOpenScript(selectScript))
     onCloseDialog()
-  }
-
-  const onFullscreen = () => {
-    if (sceneID != null) {
-      setFullscreen(!fullscreen)
-    } else {
-      setFullscreen(false)
-    }
   }
 
   const onError = (e: string) => {
@@ -644,9 +648,7 @@ function CaptionScriptor() {
 
   const { classes } = useStyles()
   const { menuName, menuThen } = getMenu()
-  const getTimestamp = audioEnabled
-    ? () => _currentTimestamp.current
-    : undefined
+  const getTimestamp = () => _currentTimestamp.current
 
   return (
     <div className={classes.root}>
@@ -1212,7 +1214,6 @@ function CaptionScriptor() {
                   <div className={classes.fill} />
                   {sceneID !== 0 && !fullscreen && (
                     <AudioCard
-                      sidebar
                       startPlaying
                       shorterSeek
                       showMsTimestamp
@@ -1241,14 +1242,15 @@ function CaptionScriptor() {
               {sceneID !== 0 && (
                 <Player
                   uuid="caption-scriptor"
-                  sceneID={sceneID}
                   gridView={!fullscreen}
                   captionScale={fullscreen ? 1 : 0.3753}
                   onCaptionError={onError}
                   captionProgramJumpToHack={_captionProgramJumpToHack.current}
-                  getCurrentTimestamp={fullscreen ? undefined : getTimestamp}
-                  cache={() => {}}
-                  setCount={() => {}}
+                  getCurrentTimestamp={
+                    fullscreen === true || audioEnabled === false
+                      ? undefined
+                      : getTimestamp
+                  }
                 />
               )}
               {error != null && (

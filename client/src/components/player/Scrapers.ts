@@ -135,64 +135,57 @@ export const loadRemoteImageURLList = (
       if (lines.length > 0) {
         let convertedSource = Array<string>()
         let convertedCount = 0
+        const onConvertedURL = (urls: string[]) => {
+          convertedSource = convertedSource.concat(urls)
+          convertedCount++
+          if (convertedCount === lines.length) {
+            helpers.count = filterPathsToJustPlayable(
+              IF.any,
+              convertedSource,
+              true
+            ).length
+            pm(
+              {
+                data: filterPathsToJustPlayable(filter, convertedSource, true),
+                allURLs,
+                allPosts,
+                weight,
+                helpers,
+                source,
+                timeout: 0,
+                pathSep
+              },
+              resolve
+            )
+          }
+        }
+        const onConvertError = (error: any) => {
+          convertedCount++
+          if (convertedCount === lines.length) {
+            helpers.count = filterPathsToJustPlayable(
+              IF.any,
+              convertedSource,
+              true
+            ).length
+            pm(
+              {
+                error: error.message,
+                data: filterPathsToJustPlayable(filter, convertedSource, true),
+                allURLs,
+                allPosts,
+                weight,
+                helpers,
+                source,
+                timeout: 0,
+                pathSep
+              },
+              resolve
+            )
+          }
+        }
+
         for (const url of lines) {
-          convertURL(url, pathSep)
-            .then((urls: string[]) => {
-              convertedSource = convertedSource.concat(urls)
-              convertedCount++
-              if (convertedCount === lines.length) {
-                helpers.count = filterPathsToJustPlayable(
-                  IF.any,
-                  convertedSource,
-                  true
-                ).length
-                pm(
-                  {
-                    data: filterPathsToJustPlayable(
-                      filter,
-                      convertedSource,
-                      true
-                    ),
-                    allURLs,
-                    allPosts,
-                    weight,
-                    helpers,
-                    source,
-                    timeout: 0,
-                    pathSep
-                  },
-                  resolve
-                )
-              }
-            })
-            .catch((error: any) => {
-              convertedCount++
-              if (convertedCount === lines.length) {
-                helpers.count = filterPathsToJustPlayable(
-                  IF.any,
-                  convertedSource,
-                  true
-                ).length
-                pm(
-                  {
-                    error: error.message,
-                    data: filterPathsToJustPlayable(
-                      filter,
-                      convertedSource,
-                      true
-                    ),
-                    allURLs,
-                    allPosts,
-                    weight,
-                    helpers,
-                    source,
-                    timeout: 0,
-                    pathSep
-                  },
-                  resolve
-                )
-              }
-            })
+          convertURL(url, pathSep).then(onConvertedURL).catch(onConvertError)
         }
       } else {
         pm(
@@ -286,64 +279,55 @@ export const loadTumblr = async (
       if (images.length > 0) {
         let convertedSource = Array<string>()
         let convertedCount = 0
+        const onConvertedURL = (urls: string[]) => {
+          convertedSource = convertedSource.concat(urls)
+          convertedCount++
+          if (convertedCount === images.length) {
+            helpers.next = helpers.next + 1
+            helpers.count =
+              helpers.count +
+              filterPathsToJustPlayable(IF.any, convertedSource, false).length
+            pm(
+              {
+                data: filterPathsToJustPlayable(filter, convertedSource, false),
+                allURLs,
+                allPosts,
+                weight,
+                helpers,
+                source,
+                timeout,
+                pathSep
+              },
+              resolve
+            )
+          }
+        }
+        const onConvertError = (error: any) => {
+          convertedCount++
+          if (convertedCount === images.length) {
+            helpers.next = helpers.next + 1
+            helpers.count =
+              helpers.count +
+              filterPathsToJustPlayable(IF.any, convertedSource, false).length
+            pm(
+              {
+                error: error.message,
+                data: filterPathsToJustPlayable(filter, convertedSource, false),
+                allURLs,
+                allPosts,
+                weight,
+                helpers,
+                source,
+                timeout,
+                pathSep
+              },
+              resolve
+            )
+          }
+        }
+
         for (const url of images) {
-          convertURL(url, pathSep)
-            .then((urls: string[]) => {
-              convertedSource = convertedSource.concat(urls)
-              convertedCount++
-              if (convertedCount === images.length) {
-                helpers.next = helpers.next + 1
-                helpers.count =
-                  helpers.count +
-                  filterPathsToJustPlayable(IF.any, convertedSource, false)
-                    .length
-                pm(
-                  {
-                    data: filterPathsToJustPlayable(
-                      filter,
-                      convertedSource,
-                      false
-                    ),
-                    allURLs,
-                    allPosts,
-                    weight,
-                    helpers,
-                    source,
-                    timeout,
-                    pathSep
-                  },
-                  resolve
-                )
-              }
-            })
-            .catch((error: any) => {
-              convertedCount++
-              if (convertedCount === images.length) {
-                helpers.next = helpers.next + 1
-                helpers.count =
-                  helpers.count +
-                  filterPathsToJustPlayable(IF.any, convertedSource, false)
-                    .length
-                pm(
-                  {
-                    error: error.message,
-                    data: filterPathsToJustPlayable(
-                      filter,
-                      convertedSource,
-                      false
-                    ),
-                    allURLs,
-                    allPosts,
-                    weight,
-                    helpers,
-                    source,
-                    timeout,
-                    pathSep
-                  },
-                  resolve
-                )
-              }
-            })
+          convertURL(url, pathSep).then(onConvertedURL).catch(onConvertError)
         }
       } else {
         helpers.next = null
@@ -422,73 +406,79 @@ export const loadReddit = async (
   if (configured) {
     const url = source.url
     if (url.includes('/r/')) {
-      const handleSubmissions = (submissionListing: any) => {
+      const handleSubmissions = async (submissionListing: any) => {
         if (submissionListing.length > 0) {
           let convertedListing = Array<string>()
           let convertedCount = 0
+          const onConvertedURL = (urls: string[], permalink: string) => {
+            convertedListing = convertedListing.concat(urls)
+            convertedCount++
+            for (const u of urls) {
+              allPosts.set(u, 'https://www.reddit.com' + permalink)
+            }
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+          const onConvertError = (error: any) => {
+            convertedCount++
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  error: error.message,
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+
           for (const s of submissionListing) {
-            convertURL(s.url, pathSep)
-              .then((urls: string[]) => {
-                convertedListing = convertedListing.concat(urls)
-                convertedCount++
-                for (const u of urls) {
-                  allPosts.set(u, 'https://www.reddit.com' + s.permalink)
-                }
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
-              .catch((error: any) => {
-                convertedCount++
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      error: error.message,
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
+            try {
+              const urls = await convertURL(s.url, pathSep)
+              onConvertedURL(urls, s.permalink)
+            } catch(error) {
+              onConvertError(error)
+            }
           }
         } else {
           helpers.next = null
@@ -548,69 +538,75 @@ export const loadReddit = async (
         if (submissionListing.length > 0) {
           let convertedListing = Array<string>()
           let convertedCount = 0
+          const onConvertedURL = (urls: string[], permalink: string) => {
+            convertedListing = convertedListing.concat(urls)
+            convertedCount++
+            for (const u of urls) {
+              allPosts.set(u, 'https://www.reddit.com' + permalink)
+            }
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+          const onConvertError = (error: any) => {
+            convertedCount++
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  error: error.message,
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+
           for (const s of submissionListing) {
-            convertURL(s.url, pathSep)
-              .then((urls: string[]) => {
-                convertedListing = convertedListing.concat(urls)
-                convertedCount++
-                for (const u of urls) {
-                  allPosts.set(u, 'https://www.reddit.com' + s.permalink)
-                }
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
-              .catch((error: any) => {
-                convertedCount++
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      error: error.message,
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
+            try {
+              const urls = await convertURL(s.url, pathSep)
+              onConvertedURL(urls, s.permalink)
+            } catch(error) {
+              onConvertError(error)
+            }
           }
         } else {
           helpers.next = null
@@ -653,69 +649,75 @@ export const loadReddit = async (
         if (submissionListing.length > 0) {
           let convertedListing = Array<string>()
           let convertedCount = 0
+          const onConvertedURL = (urls: string[], permalink: string) => {
+            convertedListing = convertedListing.concat(urls)
+            convertedCount++
+            for (const u of urls) {
+              allPosts.set(u, 'https://www.reddit.com' + permalink)
+            }
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+          const onConvertError = (error: any) => {
+            convertedCount++
+            if (convertedCount === submissionListing.length) {
+              helpers.next =
+                submissionListing[submissionListing.length - 1].name
+              helpers.count =
+                helpers.count +
+                filterPathsToJustPlayable(IF.any, convertedListing, false)
+                  .length
+              pm(
+                {
+                  error: error.message,
+                  data: filterPathsToJustPlayable(
+                    filter,
+                    convertedListing,
+                    false
+                  ),
+                  allURLs,
+                  allPosts,
+                  weight,
+                  helpers,
+                  source,
+                  timeout,
+                  pathSep
+                },
+                resolve
+              )
+            }
+          }
+
           for (const s of submissionListing) {
-            convertURL(s.url, pathSep)
-              .then((urls: string[]) => {
-                convertedListing = convertedListing.concat(urls)
-                convertedCount++
-                for (const u of urls) {
-                  allPosts.set(u, 'https://www.reddit.com' + s.permalink)
-                }
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
-              .catch((error: any) => {
-                convertedCount++
-                if (convertedCount === submissionListing.length) {
-                  helpers.next =
-                    submissionListing[submissionListing.length - 1].name
-                  helpers.count =
-                    helpers.count +
-                    filterPathsToJustPlayable(IF.any, convertedListing, false)
-                      .length
-                  pm(
-                    {
-                      error: error.message,
-                      data: filterPathsToJustPlayable(
-                        filter,
-                        convertedListing,
-                        false
-                      ),
-                      allURLs,
-                      allPosts,
-                      weight,
-                      helpers,
-                      source,
-                      timeout,
-                      pathSep
-                    },
-                    resolve
-                  )
-                }
-              })
+            try {
+              const urls = await convertURL(s.url, pathSep)
+              onConvertedURL(urls, s.permalink)
+            } catch(error) {
+              onConvertError(error)
+            }
           }
         } else {
           helpers.next = null
@@ -1023,7 +1025,7 @@ const loadImageFapGallery = (
       const nextGalleryLink = galleryDoc.querySelector(
         '#gallery > font > span > a:last-child'
       )
-      if (nextGalleryLink && nextGalleryLink.innerHTML == ':: next ::') {
+      if (nextGalleryLink && nextGalleryLink.innerHTML === ':: next ::') {
         let href = nextGalleryLink.getAttribute('href') as string
         if (href.startsWith('/')) {
           href = href.substring(1)
@@ -1258,7 +1260,7 @@ export const loadImageFap = (
       .text((html) => {
         const foundVideoConfigURLs =
           /url: '(https:\/\/cdn-fck\.moviefap\.com\/moviefap\/.*)',/g.exec(html)
-        if (foundVideoConfigURLs != null && foundVideoConfigURLs.length == 2) {
+        if (foundVideoConfigURLs != null && foundVideoConfigURLs.length === 2) {
           const videoConfigURL = foundVideoConfigURLs[1] // get first group
           wretch(videoConfigURL)
             .addon(AbortAddon())
@@ -1370,7 +1372,7 @@ export const loadSexCom = (
   resolve?: Function
 ) => {
   const timeout = 8000
-  const url = source.url
+  // const url = source.url
   // This doesn't work anymore due to src url requiring referer
   helpers.next = null
   pm(
@@ -1984,7 +1986,7 @@ export const loadE621 = (
 ) => {
   const timeout = 8000
   const url = source.url
-  const hostRegex = /^(https?:\/\/[^\/]*)\//g
+  const hostRegex = /^(https?:\/\/[^/]*)\//g
   const thisHost = hostRegex.exec(url)![1]
   let suffix = ''
   if (url.includes('/pools/')) {
@@ -2343,7 +2345,7 @@ export const loadDanbooru = (
 ) => {
   const timeout = 8000
   const url = source.url
-  const hostRegex = /^(https?:\/\/[^\/]*)\//g
+  const hostRegex = /^(https?:\/\/[^/]*)\//g
   const thisHost = hostRegex.exec(url)![1]
   let suffix = ''
   if (url.includes('/pools/')) {
@@ -2639,7 +2641,7 @@ export const loadGelbooru1 = (
 ) => {
   const timeout = 8000
   const url = source.url
-  const hostRegex = /^(https?:\/\/[^\/]*)\//g
+  const hostRegex = /^(https?:\/\/[^/]*)\//g
   const thisHost = hostRegex.exec(url)![1]
   wretch(url + '&pid=' + helpers.next * 10)
     .addon(AbortAddon())
@@ -2815,7 +2817,7 @@ export const loadGelbooru2 = (
 ) => {
   const timeout = 8000
   const url = source.url
-  const hostRegex = /^(https?:\/\/[^\/]*)\//g
+  const hostRegex = /^(https?:\/\/[^/]*)\//g
   const thisHost = hostRegex.exec(url)![1]
   let suffix =
     '/index.php?page=dapi&s=post&q=index&limit=20&json=1&pid=' +
@@ -2995,6 +2997,33 @@ export const loadEHentai = (
       if (imageEls.length > 0) {
         let imageCount = 0
         const images = Array<string>()
+        const onAddImages = (html: string) => {
+          imageCount++
+          const contentURL = html.match('<img id="img" src="(.*?)"')
+          if (contentURL != null) {
+            images.push(contentURL[1])
+          }
+          if (imageCount === imageEls.length) {
+            helpers.next = helpers.next + 1
+            helpers.count =
+              helpers.count +
+              filterPathsToJustPlayable(IF.any, images, true).length
+            pm(
+              {
+                data: filterPathsToJustPlayable(filter, images, true),
+                allURLs,
+                allPosts,
+                weight,
+                helpers,
+                source,
+                timeout,
+                pathSep
+              },
+              resolve
+            )
+          }
+        }
+
         for (let i = 0; i < imageEls.length; i++) {
           const image = imageEls.item(i)
           wretch(image.getAttribute('href') as string)
@@ -3025,32 +3054,7 @@ export const loadEHentai = (
                 resolve
               )
             })
-            .text((html) => {
-              imageCount++
-              const contentURL = html.match('<img id="img" src="(.*?)"')
-              if (contentURL != null) {
-                images.push(contentURL[1])
-              }
-              if (imageCount === imageEls.length) {
-                helpers.next = helpers.next + 1
-                helpers.count =
-                  helpers.count +
-                  filterPathsToJustPlayable(IF.any, images, true).length
-                pm(
-                  {
-                    data: filterPathsToJustPlayable(filter, images, true),
-                    allURLs,
-                    allPosts,
-                    weight,
-                    helpers,
-                    source,
-                    timeout,
-                    pathSep
-                  },
-                  resolve
-                )
-              }
-            })
+            .text(onAddImages)
         }
       } else {
         helpers.next = null
@@ -3519,14 +3523,12 @@ export const loadBDSMlr = (
         .parseFromString(html, 'text/html')
         .querySelectorAll('item')
       if (itemEls.length > 0) {
-        let imageCount = 0
         const images = Array<string>()
         for (let i = 0; i < itemEls.length; i++) {
           const item = itemEls.item(i)
           const embeddedImages = item.querySelectorAll('description > img')
           if (embeddedImages.length > 0) {
             for (const image of embeddedImages) {
-              imageCount++
               images.push(image.getAttribute('src') as string)
             }
           }

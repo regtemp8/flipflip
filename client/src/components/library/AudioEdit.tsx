@@ -159,7 +159,11 @@ function AudioEdit(props: AudioEditProps) {
               >
                 <DeleteIcon className={classes.deleteIcon} color="inherit" />
               </IconButton>
-              <img className={classes.thumbImage} src={audio.thumb} />
+              <img
+                className={classes.thumbImage}
+                src={audio.thumb}
+                alt={audio.name}
+              />
             </React.Fragment>
           )}
           {audio.thumb == null && (

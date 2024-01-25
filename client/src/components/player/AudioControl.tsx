@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import Sound from 'react-sound'
 import { cx } from '@emotion/css'
 
@@ -104,6 +104,52 @@ function AudioControl(props: AudioControlProps) {
   const _timeout = useRef<number>()
   const _queueNextTrack = useRef(false)
 
+  const tickLoop = useCallback(
+    (starting: boolean = false) => {
+      if (!starting) {
+        if (_queueNextTrack.current) {
+          _queueNextTrack.current = false
+          props.nextTrack!()
+          setPosition(0)
+          setDuration(0)
+        }
+
+        setTickState(!tickState)
+      }
+      if (tick) {
+        const timeout = getDuration(
+          {
+            timingFunction: tickMode,
+            time: tickDelay,
+            timeMax: tickMaxDelay,
+            timeMin: tickMinDelay,
+            bpmMulti: tickBPMMulti,
+            sinRate: tickSinRate
+          },
+          0,
+          bpm
+        )
+        if (timeout != null) {
+          _timeout.current = window.setTimeout(tickLoop, timeout)
+          return
+        }
+      }
+      _timeout.current = undefined
+    },
+    [
+      bpm,
+      props.nextTrack,
+      tick,
+      tickBPMMulti,
+      tickDelay,
+      tickMaxDelay,
+      tickMinDelay,
+      tickMode,
+      tickSinRate,
+      tickState
+    ]
+  )
+
   useEffect(() => {
     if (playing) {
       tickLoop(true)
@@ -117,7 +163,7 @@ function AudioControl(props: AudioControlProps) {
 
       _queueNextTrack.current = false
     }
-  }, [])
+  }, [playing, tickLoop])
 
   useEffect(() => {
     setPosition(0)
@@ -130,7 +176,7 @@ function AudioControl(props: AudioControlProps) {
     } else {
       clearTimeout(_timeout.current)
     }
-  }, [playing])
+  }, [playing, tick, tickLoop, tickMode])
 
   useEffect(() => {
     if (
@@ -148,55 +194,23 @@ function AudioControl(props: AudioControlProps) {
 
       setTickState(!tickState)
     }
-  }, [tick, tickMode, props.scenePaths])
+  }, [tick, tickMode, props.scenePaths, props.nextTrack, tickState])
 
   useEffect(() => {
     if (tick) {
       tickLoop(true)
     }
-  }, [tick])
+  }, [tick, tickLoop])
 
   useEffect(() => {
     if (tick && tickMode === TF.scene) {
       tickLoop(true)
     }
-  }, [tickMode])
+  }, [tickMode, tick, tickLoop])
 
   const getTimestampFromMs = (ms: number): string => {
     const secs = Math.floor(ms / 1000)
     return getTimestamp(secs)
-  }
-
-  const tickLoop = (starting: boolean = false) => {
-    if (!starting) {
-      if (_queueNextTrack.current) {
-        _queueNextTrack.current = false
-        props.nextTrack!()
-        setPosition(0)
-        setDuration(0)
-      }
-
-      setTickState(!tickState)
-    }
-    if (tick) {
-      const timeout = getDuration(
-        {
-          timingFunction: tickMode,
-          time: tickDelay,
-          timeMax: tickMaxDelay,
-          timeMin: tickMinDelay,
-          bpmMulti: tickBPMMulti,
-          sinRate: tickSinRate
-        },
-        0,
-        bpm
-      )
-      if (timeout != null) {
-        _timeout.current = window.setTimeout(tickLoop, timeout)
-        return
-      }
-    }
-    _timeout.current = undefined
   }
 
   const onChangePosition = (

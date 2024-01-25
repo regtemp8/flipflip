@@ -118,6 +118,7 @@ import {
 import { playScene } from '../../store/player/thunks'
 import {
   selectAppConfigRemoteSettingsPiwigoConfigured,
+  selectAppLibrary,
   selectAppTutorial,
   selectAppSpecialMode,
   selectAppConfigGeneralSettingsConfirmSceneDeletion
@@ -152,7 +153,6 @@ import {
   selectSceneDetailFilters,
   selectSceneDetailDisplaySources
 } from '../../store/sceneDetail/selectors'
-import { selectLibrarySources } from '../../store/librarySource/selectors'
 import flipflip from '../../FlipFlipService'
 
 const drawerWidth = 240
@@ -493,7 +493,7 @@ function SceneDetail(props: SceneDetailProps) {
   const confirmSceneDeletion = useAppSelector(
     selectAppConfigGeneralSettingsConfirmSceneDeletion()
   )
-  const library = useAppSelector(selectLibrarySources())
+  const library = useAppSelector(selectAppLibrary())
   const openTab = useAppSelector(selectSceneOpenTab(props.sceneID))
   const name = useAppSelector(selectSceneName(props.sceneID))
   const sources = useAppSelector(selectSceneSources(props.sceneID))
@@ -516,14 +516,13 @@ function SceneDetail(props: SceneDetailProps) {
   const sceneEffectsBase64 = useAppSelector(
     selectSceneEffectsBase64(props.sceneID)
   )
+  const specialMode = useAppSelector(selectAppSpecialMode())
   const filters = useAppSelector(selectSceneDetailFilters())
   const displaySources = useAppSelector(
     selectSceneDetailDisplaySources(props.sceneID)
   )
 
-  const [isEditingName, setIsEditingName] = useState(
-    autoEdit ? name : undefined
-  )
+  const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
@@ -534,6 +533,21 @@ function SceneDetail(props: SceneDetailProps) {
   const [confirmCopy, setConfirmCopy] = useState(false)
 
   useEffect(() => {
+    // Use alt+P to access import modal
+    // Use alt+U to toggle highlighting untagged sources
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'p' || e.key === 'π')
+      ) {
+        setOpenMenu((menu) =>
+          menu === MO.gooninatorImport ? undefined : MO.gooninatorImport
+        )
+      }
+    }
+
     window.addEventListener('keydown', onKeyDown, false)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
@@ -544,25 +558,10 @@ function SceneDetail(props: SceneDetailProps) {
     if (autoEdit) {
       setIsEditingName(name)
     }
-  }, [autoEdit])
+  }, [autoEdit, name])
 
   const onUpdateFilters = (filters: string[]) =>
     dispatch(setSceneDetailFilters(filters))
-
-  // Use alt+P to access import modal
-  // Use alt+U to toggle highlighting untagged sources
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'p' || e.key === 'π')
-    ) {
-      setOpenMenu(
-        openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport
-      )
-    }
-  }
 
   const onCloseSnackbar = () => {
     setSnackbarOpen(false)
@@ -668,14 +667,14 @@ function SceneDetail(props: SceneDetailProps) {
     setOpenMenu(MO.simpleRule)
   }
 
-  const onAddSource = (addFunction: string, e: MouseEvent, ...args: any[]) => {
+  const onAddSource = (addFunction: string, e?: MouseEvent, ...args: any[]) => {
     onCloseDialog()
     if (tutorial === SDT.add2) {
       dispatch(doneTutorial(SDT.add2))
       dispatch(addSource('tutorial', props.sceneID))
-    } else if (addFunction === AF.videos && e.shiftKey) {
+    } else if (addFunction === AF.videos && e?.shiftKey) {
       dispatch(addSource(AF.videoDir, props.sceneID, ...args))
-    } else if (addFunction === AF.url && e.shiftKey) {
+    } else if (addFunction === AF.url && e?.shiftKey) {
       setOpenMenu(MO.urlImport)
     } else {
       dispatch(addSource(addFunction, props.sceneID, ...args))
@@ -1178,6 +1177,7 @@ function SceneDetail(props: SceneDetailProps) {
                   <SourceList
                     sources={displaySources}
                     useWeights={weightFunction === WF.sources && useWeights}
+                    showHelp={!specialMode && filters.length === 0}
                   />
                 </Box>
               </div>
@@ -1189,7 +1189,7 @@ function SceneDetail(props: SceneDetailProps) {
               <div className={classes.tabPanel}>
                 <div className={classes.drawerSpacer} />
                 <Box p={1} className={classes.fill}>
-                  <SceneGenerator />
+                  <SceneGenerator sceneID={props.sceneID} />
                 </Box>
               </div>
             </Typography>
@@ -1408,7 +1408,7 @@ function SceneDetail(props: SceneDetailProps) {
           </Fab>
 
           <GooninatorDialog
-            open={openMenu == MO.gooninatorImport}
+            open={openMenu === MO.gooninatorImport}
             onImportURL={onAddSource}
             onClose={onCloseDialog}
           />
@@ -1718,10 +1718,12 @@ function SceneDetail(props: SceneDetailProps) {
               <LibrarySearch
                 displaySources={library}
                 filters={(generatorWeights as WeightGroup[])
-                  .filter((wg) => !wg.rules)
-                  .map((wg) => wg.search)}
+                  .filter((wg) => wg.rules == null)
+                  .filter((wg) => wg.search != null)
+                  .map((wg) => wg.search as string)}
                 placeholder={'Search ...'}
                 autoFocus
+                isLibrary
                 isCreatable
                 fullWidth
                 onlyUsed

@@ -728,7 +728,9 @@ export function restoreAppStorageFromBackup(backupFile: string) {
     const backupState = copy<AppStorage>(initialAppStorage)
     backupState.version = data.version
     backupState.config = newConfigStorage(data.config)
-    backupState.scenes = data.scenes.map((s: any) => newSceneStorage(state.constants, s))
+    backupState.scenes = data.scenes.map((s: any) =>
+      newSceneStorage(state.constants, s)
+    )
     backupState.library = data.library.map((s: any) =>
       newLibrarySourceStorage(s)
     )
@@ -1681,8 +1683,8 @@ export function detectBPMs() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     let progress: Progress = { current: 0, total: 0 }
     const readMetadata = (audio: Audio) => {
-      flipflip().api
-        .parseMusicMetadataBpm(audio.url as string)
+      flipflip()
+        .api.parseMusicMetadataBpm(audio.url as string)
         .then((bpm: number | undefined) => {
           if (bpm) {
             audio.bpm = bpm

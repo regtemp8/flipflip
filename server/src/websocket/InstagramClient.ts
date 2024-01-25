@@ -48,7 +48,7 @@ export default class InstagramClient {
   }
 
   async onRequestTwoFactorLogin(
-    twoFactorIdentifier: any,
+    twoFactorIdentifier: string,
     username: string,
     verificationCode: string
   ): Promise<void> {

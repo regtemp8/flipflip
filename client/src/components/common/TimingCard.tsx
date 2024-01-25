@@ -3,7 +3,7 @@ import { makeStyles } from 'tss-react/mui'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import type ReduxProps from './ReduxProps'
 import { en, TF } from 'flipflip-common'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import type CommonSliderProps from './slider/CommonSliderProps'
 import BaseSelect from './BaseSelect'
 import BaseSlider from './slider/BaseSlider'
@@ -11,23 +11,23 @@ import MillisTextField from './text/MillisTextField'
 import { type RootState } from '../../store/store'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    noBPM: {
-      marginLeft: theme.spacing(0.5)
-    },
-    select: {
-      '& .MuiSelect-select': {
-        display: 'flex',
-        alignItems: 'center'
-      }
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  fullWidth: {
+    width: '100%'
+  },
+  noBPM: {
+    marginLeft: theme.spacing(0.5)
+  },
+  select: {
+    '& .MuiSelect-select': {
+      display: 'flex',
+      alignItems: 'center'
     }
-  }))
+  }
+}))
 
 export interface BPMSliderProps extends CommonSliderProps {
   min?: number
@@ -51,7 +51,7 @@ export interface TimingCardProps {
 function TimingCard(props: TimingCardProps) {
   const hasBPM = useAppSelector(props.hasBPMSelector)
   const timingFunction = useAppSelector(props.timing.selector)
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={12} sm={props.sidebar ? 12 : 4} style={{ paddingTop: 10 }}>
@@ -93,10 +93,7 @@ function TimingCard(props: TimingCardProps) {
         </BaseSelect>
       </Grid>
       <Grid item xs={12} sm={props.sidebar ? 12 : 8}>
-        <Collapse
-          in={timingFunction === TF.sin}
-          className={classes.fullWidth}
-        >
+        <Collapse in={timingFunction === TF.sin} className={classes.fullWidth}>
           <BaseSlider
             min={1}
             max={100}
@@ -111,10 +108,7 @@ function TimingCard(props: TimingCardProps) {
             }}
           />
         </Collapse>
-        <Collapse
-          in={timingFunction === TF.bpm}
-          className={classes.fullWidth}
-        >
+        <Collapse in={timingFunction === TF.bpm} className={classes.fullWidth}>
           <BaseSlider
             min={props.bpm.min ?? 1}
             max={props.bpm.max ?? 100}

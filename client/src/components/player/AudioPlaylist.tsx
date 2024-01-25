@@ -1,4 +1,5 @@
-import React, { MouseEvent, useEffect, useState } from 'react'
+/// <reference path="../../react-sortablejs.d.ts" />
+import React, { MouseEvent, useCallback, useEffect, useState } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -64,58 +65,58 @@ import { default as AudioPlaylistData } from '../../store/scene/AudioPlaylist'
 import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    audioList: {
-      paddingLeft: 0
-    },
-    mediaIcon: {
-      width: '100%',
-      height: 'auto'
-    },
-    thumb: {
-      width: theme.spacing(6),
-      height: theme.spacing(6)
-    },
-    playlistAction: {
-      textAlign: 'center'
-    },
-    left: {
-      float: 'left',
-      paddingLeft: theme.spacing(2)
-    },
-    right: {
-      float: 'right',
-      paddingRight: theme.spacing(2)
-    },
-    trackThumb: {
-      height: 40,
-      width: 40,
-      overflow: 'hidden',
-      display: 'flex',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      userSelect: 'none'
-    },
-    thumbImage: {
-      height: '100%'
-    },
-    listAvatar: {
-      width: 56
-    },
-    bigTooltip: {
-      fontSize: 'medium',
-      maxWidth: 500
-    },
-    tagChips: {
-      textAlign: 'center'
-    },
-    avatar: {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: 'none'
-    },
-    sourceIcon: {
-      color: theme.palette.primary.contrastText
-    }
-  }))
+  audioList: {
+    paddingLeft: 0
+  },
+  mediaIcon: {
+    width: '100%',
+    height: 'auto'
+  },
+  thumb: {
+    width: theme.spacing(6),
+    height: theme.spacing(6)
+  },
+  playlistAction: {
+    textAlign: 'center'
+  },
+  left: {
+    float: 'left',
+    paddingLeft: theme.spacing(2)
+  },
+  right: {
+    float: 'right',
+    paddingRight: theme.spacing(2)
+  },
+  trackThumb: {
+    height: 40,
+    width: 40,
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  thumbImage: {
+    height: '100%'
+  },
+  listAvatar: {
+    width: 56
+  },
+  bigTooltip: {
+    fontSize: 'medium',
+    maxWidth: 500
+  },
+  tagChips: {
+    textAlign: 'center'
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: 'none'
+  },
+  sourceIcon: {
+    color: theme.palette.primary.contrastText
+  }
+}))
 
 interface AudioListItemProps {
   audioID: number
@@ -124,14 +125,12 @@ interface AudioListItemProps {
 function AudioListItem(props: AudioListItemProps) {
   const name = useAppSelector(selectAudioName(props.audioID))
   const thumb = useAppSelector(selectAudioThumb(props.audioID))
-
+  const { classes } = useStyles()
   return (
     <ListItem disableGutters>
       <ListItemIcon>
-        <Avatar alt={name} src={thumb} className={props.classes.thumb}>
-          {thumb == null && (
-            <AudiotrackIcon className={props.classes.mediaIcon} />
-          )}
+        <Avatar alt={name} src={thumb} className={classes.thumb}>
+          {thumb == null && <AudiotrackIcon className={classes.mediaIcon} />}
         </Avatar>
       </ListItemIcon>
       <ListItemText primary={name} />
@@ -167,7 +166,7 @@ function PlaylistItem(props: PlaylistItemProps) {
     }
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <ListItem>
       <ListItemAvatar className={classes.listAvatar}>
@@ -211,7 +210,7 @@ function PlaylistItem(props: PlaylistItemProps) {
           >
             <div onClick={onSourceIconClick} className={classes.trackThumb}>
               {thumb != null && (
-                <img className={classes.thumbImage} src={thumb} />
+                <img className={classes.thumbImage} src={thumb} alt={name} />
               )}
               {thumb == null && (
                 <Fab size="small" className={classes.avatar}>
@@ -281,26 +280,7 @@ function AudioPlaylist(props: AudioPlaylistProps) {
   )
   const [playingAudios, setPlayingAudios] = useState<number[]>([])
 
-  useEffect(() => {
-    if (props.playlistIndex === 0 && isAudioScene) {
-      window.addEventListener('keydown', onKeyDown, false)
-    }
-    restart()
-
-    return () => {
-      if (props.playlistIndex === 0 && isAudioScene) {
-        window.removeEventListener('keydown', onKeyDown)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!props.persist) {
-      restart()
-    }
-  }, [props.persist, props.sceneID])
-
-  const restart = () => {
+  const restart = useCallback(() => {
     let audios = props.playlist.audios
     if (props.startPlaying) {
       if (props.playlist.shuffle) {
@@ -313,24 +293,9 @@ function AudioPlaylist(props: AudioPlaylistProps) {
       if (!audio) audio = props.playlist.audios[currentIndex]
       props.setCurrentAudio(audio)
     }
-  }
+  }, [currentIndex, props])
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case '[':
-        e.preventDefault()
-        dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
-        prevTrack()
-        break
-      case ']':
-        e.preventDefault()
-        dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
-        nextTrack()
-        break
-    }
-  }
-
-  const prevTrack = () => {
+  const prevTrack = useCallback(() => {
     let prevTrack = currentIndex - 1
     if (prevTrack < 0) {
       prevTrack = playingAudios.length - 1
@@ -339,9 +304,9 @@ function AudioPlaylist(props: AudioPlaylistProps) {
       props.setCurrentAudio(playingAudios[prevTrack])
     }
     setCurrentIndex(prevTrack)
-  }
+  }, [currentIndex, playingAudios, props])
 
-  const nextTrack = () => {
+  const nextTrack = useCallback(() => {
     let nextTrack = currentIndex + 1
     if (nextTrack >= playingAudios.length) {
       nextTrack = 0
@@ -350,7 +315,50 @@ function AudioPlaylist(props: AudioPlaylistProps) {
       props.setCurrentAudio(playingAudios[nextTrack])
     }
     setCurrentIndex(nextTrack)
-  }
+  }, [currentIndex, playingAudios, props])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case '[':
+          e.preventDefault()
+          dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
+          prevTrack()
+          break
+        case ']':
+          e.preventDefault()
+          dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
+          nextTrack()
+          break
+      }
+    }
+
+    if (props.playlistIndex === 0 && isAudioScene) {
+      window.addEventListener('keydown', onKeyDown, false)
+    }
+    restart()
+
+    return () => {
+      if (props.playlistIndex === 0 && isAudioScene) {
+        window.removeEventListener('keydown', onKeyDown)
+      }
+    }
+  }, [
+    currentIndex,
+    dispatch,
+    isAudioScene,
+    nextTrack,
+    prevTrack,
+    props.playlist.audios,
+    props.playlistIndex,
+    restart
+  ])
+
+  useEffect(() => {
+    if (!props.persist) {
+      restart()
+    }
+  }, [props.persist, props.sceneID, restart])
 
   const toggleShuffle = () => {
     dispatch(
@@ -389,22 +397,22 @@ function AudioPlaylist(props: AudioPlaylistProps) {
     )
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   if (props.startPlaying) {
     let audioID = playingAudios[currentIndex]
     if (!audioID) audioID = props.playlist.audios[currentIndex]
     if (!audioID) return <div />
     return (
       <React.Fragment>
-        <AudioListItem audioID={audioID} classes={classes} />
+        <AudioListItem audioID={audioID} />
         <AudioControl
           sceneID={props.sceneID}
           audioID={audioID}
-          audioEnabled={audioEnabled || props.persist}
+          audioEnabled={props.persist ?? audioEnabled}
           singleTrack={playingAudios.length === 1}
           lastTrack={currentIndex === playingAudios.length - 1}
           repeat={props.playlist.repeat}
-          scenePaths={props.scenePaths}
+          scenePaths={props.scenePaths ?? []}
           shorterSeek={props.shorterSeek}
           showMsTimestamp={props.showMsTimestamp}
           startPlaying={props.startPlaying}
@@ -482,7 +490,6 @@ function AudioPlaylist(props: AudioPlaylistProps) {
                 audios={props.playlist.audios}
                 onSourceOptions={props.onSourceOptions}
                 removeTrack={removeTrack}
-                classes={classes}
               />
             ))}
         </Sortable>

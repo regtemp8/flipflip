@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScriptSourceList should match snapshot 1`] = `
+Array [
+  <h1
+    className="MuiTypography-root MuiTypography-h3 MuiTypography-noWrap css-z1h95n-MuiTypography-root-emptyMessage"
+  >
+    乁( ◔ ౪◔)「
+  </h1>,
+  <h1
+    className="MuiTypography-root MuiTypography-h4 MuiTypography-noWrap css-1u3je4o-MuiTypography-root-emptyMessage2"
+  >
+    Nothing here
+  </h1>,
+]
+`;

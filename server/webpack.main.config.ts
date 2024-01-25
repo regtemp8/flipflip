@@ -6,6 +6,8 @@ import { rules } from './webpack.rules'
 import { plugins } from './webpack.plugins'
 
 import * as packageJson from './package.json'
+
+// eslint-disable-next-line import/default
 import CopyPlugin from 'copy-webpack-plugin'
 
 export const mainConfig: Configuration = {
@@ -22,6 +24,7 @@ export const mainConfig: Configuration = {
     ...plugins,
     new CopyPlugin({
       patterns: [
+        { from: './icons', to: 'icons' },
         {
           from: '../client/public',
           to: 'public',
@@ -53,5 +56,10 @@ export const mainConfig: Configuration = {
       react: path.resolve('./node_modules/react'),
       'react-dom': path.resolve('./node_modules/react-dom')
     }
+  },
+  externals: {
+    bufferutil: 'bufferutil',
+    'utf-8-validate': 'utf-8-validate',
+    '_stream_wrap': '_stream_wrap'
   }
 }

@@ -1,3 +1,4 @@
+/// <reference path="../global.d.ts" />
 import { getFileName } from '../components/player/Scrapers'
 import { ASF, SF } from 'flipflip-common'
 import type Audio from '../store/audio/Audio'
