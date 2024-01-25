@@ -1,12 +1,12 @@
-import React from "react";
-import { describe, it, expect } from "@jest/globals";
-import renderer from "react-test-renderer";
-import SoundTick from "../SoundTick";
-import TestProvider from "../../../util/TestProvider";
-import store from "../../../store/store";
+import React from 'react'
+import { describe, it, expect } from '@jest/globals'
+import renderer from 'react-test-renderer'
+import SoundTick from '../SoundTick'
+import TestProvider from '../../../util/TestProvider'
+import store from '../../../store/store'
 
-describe("SoundTick", () => {
-  it("should match snapshot", () => {
+describe('SoundTick', () => {
+  it('should match snapshot', () => {
     const component = renderer.create(
       <TestProvider store={store}>
         <SoundTick
@@ -20,9 +20,9 @@ describe("SoundTick", () => {
           onFinishedPlaying={() => {}}
         />
       </TestProvider>
-    );
+    )
 
-    let tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
-  });
-});
+    const tree = component.toJSON()
+    expect(tree).toMatchSnapshot()
+  })
+})

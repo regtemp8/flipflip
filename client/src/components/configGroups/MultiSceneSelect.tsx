@@ -9,13 +9,13 @@ import { useAppSelector } from '../../store/hooks'
 import { selectMultiSceneSelectOptions } from '../../store/scene/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    select: {
-      color: grey[900]
-    }
-  }))
+  select: {
+    color: grey[900]
+  }
+}))
 
 const Option = (props: any) => {
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <div>
       <components.Option {...props}>

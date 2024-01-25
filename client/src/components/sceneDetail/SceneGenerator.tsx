@@ -42,11 +42,10 @@ import { arrayMove } from '../../data/utils'
 import type WeightGroup from '../../store/scene/WeightGroup'
 import LibrarySearch from '../library/LibrarySearch'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppTutorial } from '../../store/app/selectors'
+import { selectAppLibrary, selectAppTutorial } from '../../store/app/selectors'
 import { doneTutorial } from '../../store/app/thunks'
 import { selectSceneGeneratorWeights } from '../../store/scene/selectors'
 import { setSceneGeneratorWeights } from '../../store/scene/slice'
-import { selectLibrarySources } from '../../store/librarySource/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   listElement: {
@@ -138,7 +137,7 @@ export interface SceneGeneratorProps {
 function SceneGenerator(props: SceneGeneratorProps) {
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
-  const library = useAppSelector(selectLibrarySources())
+  const library = useAppSelector(selectAppLibrary())
   const generatorWeights = useAppSelector(
     selectSceneGeneratorWeights(props.sceneID)
   )
@@ -152,8 +151,8 @@ function SceneGenerator(props: SceneGeneratorProps) {
   useEffect(() => {
     if (
       generatorWeights &&
-      generatorWeights.length > 0 &&
-      generatorWeights.length > generatorWeights.length
+      generatorWeights.length > 0 // && TODO fix last condition
+      // generatorWeights.length > generatorWeights.length
     ) {
       const lastIndex = generatorWeights.length - 1
       const lastWG = generatorWeights[lastIndex]
@@ -407,15 +406,6 @@ function SceneGenerator(props: SceneGeneratorProps) {
 
   const { classes } = useStyles()
   const weights = generatorWeights as WeightGroup[]
-  const isWeighing: WeightGroup | undefined =
-    isWeighingIndex === -1
-      ? undefined
-      : isEditingIndex === -1
-        ? weights[isWeighingIndex]
-        : weights[isEditingIndex].rules![isWeighingIndex]
-  const isEditing: WeightGroup | undefined =
-    isEditingIndex === -1 ? undefined : weights[isEditingIndex]
-
   const grid = Array<any[]>()
   for (let w = 0; w < weights.length; w++) {
     if (!grid[w % 4]) {
@@ -746,10 +736,12 @@ function SceneGenerator(props: SceneGeneratorProps) {
                   <LibrarySearch
                     displaySources={library}
                     filters={weights[isEditingIndex]
-                      .rules!.filter((wg) => !wg.rules)
-                      .map((wg) => wg.search)}
+                      .rules!.filter((wg) => wg.rules == null)
+                      .filter((wg) => wg.search != null)
+                      .map((wg) => wg.search as string)}
                     placeholder={'Search ...'}
                     autoFocus
+                    isLibrary
                     isCreatable
                     fullWidth
                     onlyUsed

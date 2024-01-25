@@ -1,23 +1,19 @@
-import React from "react";
-import { describe, it, expect } from "@jest/globals";
-import renderer from "react-test-renderer";
-import BatchClipDialog from "../BatchClipDialog";
-import TestProvider from "../../../util/TestProvider";
-import store from "../../../store/store";
+import React from 'react'
+import { describe, it, expect } from '@jest/globals'
+import renderer from 'react-test-renderer'
+import BatchClipDialog from '../BatchClipDialog'
+import TestProvider from '../../../util/TestProvider'
+import store from '../../../store/store'
 
-describe("BatchClipDialog", () => {
-  it("should match snapshot", () => {
+describe('BatchClipDialog', () => {
+  it('should match snapshot', () => {
     const component = renderer.create(
       <TestProvider store={store}>
-        <BatchClipDialog
-            open={false}
-            selected={[]}
-            onCloseDialog={()=>{}}
-        />
+        <BatchClipDialog open={false} selected={[]} onCloseDialog={() => {}} />
       </TestProvider>
-    );
+    )
 
-    let tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
-  });
-});
+    const tree = component.toJSON()
+    expect(tree).toMatchSnapshot()
+  })
+})

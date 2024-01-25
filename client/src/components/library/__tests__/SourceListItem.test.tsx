@@ -1,19 +1,21 @@
-import React from "react";
-import { describe, it, expect } from "@jest/globals";
-import renderer from "react-test-renderer";
-import SourceListItem from "../SourceListItem";
-import TestProvider from "../../../util/TestProvider";
-import store from "../../../store/store";
-import { setLibrarySource } from "../../../store/librarySource/slice";
-import { newLibrarySource } from "../../../store/librarySource/LibrarySource";
+import React from 'react'
+import { describe, it, expect } from '@jest/globals'
+import renderer from 'react-test-renderer'
+import SourceListItem from '../SourceListItem'
+import TestProvider from '../../../util/TestProvider'
+import store from '../../../store/store'
+import { setLibrarySource } from '../../../store/librarySource/slice'
+import { newLibrarySource } from '../../../store/librarySource/LibrarySource'
 
-jest.mock('../SourceIcon', () => 'SourceIcon');
+jest.mock('../SourceIcon', () => 'SourceIcon')
 
 // TODO create functional tests instead of snapshots
-describe("SourceListItem", () => {
-  it("should match snapshot", () => {
+describe('SourceListItem', () => {
+  it('should match snapshot', () => {
     const sourceID = 3
-    store.dispatch(setLibrarySource(newLibrarySource({id: sourceID, url: 'image.png'})))
+    store.dispatch(
+      setLibrarySource(newLibrarySource({ id: sourceID, url: 'image.png' }))
+    )
     const component = renderer.create(
       <TestProvider store={store}>
         <SourceListItem
@@ -38,9 +40,9 @@ describe("SourceListItem", () => {
           savePosition={() => {}}
         />
       </TestProvider>
-    );
+    )
 
-    let tree = component.toJSON();
-    // expect(tree).toMatchSnapshot();
-  });
-});
+    const tree = component.toJSON()
+    expect(tree).toMatchSnapshot()
+  })
+})

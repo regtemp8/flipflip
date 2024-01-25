@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, useState } from 'react'
+import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
 
 import {
   Button,
@@ -16,21 +16,21 @@ import { makeStyles } from 'tss-react/mui'
 import { AF } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    root: {
-      display: 'flex'
-    },
-    rootInput: {
-      marginLeft: theme.spacing(2),
-      flexGrow: 1
-    },
-    urlInput: {
-      minWidth: 550,
-      minHeight: 300,
-      whiteSpace: 'nowrap',
-      overflowX: 'hidden',
-      overflowY: 'auto !important' as any
-    }
-  }))
+  root: {
+    display: 'flex'
+  },
+  rootInput: {
+    marginLeft: theme.spacing(2),
+    flexGrow: 1
+  },
+  urlInput: {
+    minWidth: 550,
+    minHeight: 300,
+    whiteSpace: 'nowrap',
+    overflowX: 'hidden',
+    overflowY: 'auto !important' as any
+  }
+}))
 
 export interface URLDialogProps {
   open: boolean
@@ -51,7 +51,7 @@ function URLDialog(props: URLDialogProps) {
     props.onClose()
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Dialog
       open={props.open}

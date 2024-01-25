@@ -68,7 +68,10 @@ function createAudioSlice(audio?: EntryState<Audio>) {
       ) => {
         getEntry(state, action.payload.id).tickBPMMulti = action.payload.value
       },
-      setAudioStopAtEnd: (state, action: PayloadAction<EntryUpdate<boolean>>) => {
+      setAudioStopAtEnd: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
         getEntry(state, action.payload.id).stopAtEnd = action.payload.value
       },
       setAudioNextSceneAtEnd: (
@@ -95,7 +98,10 @@ function createAudioSlice(audio?: EntryState<Audio>) {
       setAudioBPM: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).bpm = action.payload.value
       },
-      setAudioToggleTag: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setAudioToggleTag: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         const audio = getEntry(state, action.payload.id)
         const index = audio.tags.indexOf(action.payload.value)
         if (index === -1) {
@@ -111,7 +117,7 @@ function createAudioSlice(audio?: EntryState<Audio>) {
         state.entries[action.payload].playedCount++
       }
     }
-  })  
+  })
 }
 
 export const {

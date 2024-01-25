@@ -46,7 +46,8 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   selectAppTutorial,
   selectAppConfigTutorials,
-  selectAppLastRoute
+  selectAppLastRoute,
+  selectUndefined
 } from '../store/app/selectors'
 import {
   selectSceneGeneratorWeights,
@@ -64,8 +65,6 @@ import {
   setSceneCrossFade
 } from '../store/scene/slice'
 import { setSceneGridGrid } from '../store/sceneGrid/slice'
-import flipflip from '../FlipFlipService'
-import { RootState } from '../store/store'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   deleteIcon: {
@@ -102,7 +101,7 @@ function Tutorial(props: TutorialProps) {
   const weightsSelector =
     props.sceneID != null
       ? selectSceneGeneratorWeights(props.sceneID)
-      : (state: RootState) => undefined
+      : selectUndefined
   const generatorWeights = useAppSelector(weightsSelector)
   const zoom = useAppSelector(selectSceneZoom(props.sceneID))
   const zoomStart = useAppSelector(selectSceneZoomStart(props.sceneID))

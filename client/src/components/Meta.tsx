@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import { Box, createTheme, CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
@@ -46,8 +46,6 @@ export default function Meta(props: MetaProps) {
   const tutorial = useAppSelector(selectAppTutorial())
   const route = useAppSelector(selectAppLastRoute())
 
-  const _abortController = useRef(new AbortController())
-
   // START LOG COMPONENT CHANGES
   // const p_initialized = useRef<boolean>()
   // const p_theme = useRef<ThemeOptions>()
@@ -75,8 +73,16 @@ export default function Meta(props: MetaProps) {
   // p_route.current = route
   // END LOG COMPONENT CHANGES
 
+  const startScene = useCallback(
+    (sceneName: string) => {
+      dispatch(startFromScene(sceneName))
+    },
+    [dispatch]
+  )
+
   useEffect(() => {
-    flipflip().events.onStartScene(startScene, _abortController.current)
+    const abortController = new AbortController()
+    flipflip().events.onStartScene(startScene, abortController)
 
     // Disable react-sound's verbose console output
     ;(window as any).soundManager.setup({ debugMode: false })
@@ -91,24 +97,20 @@ export default function Meta(props: MetaProps) {
       })
 
     return () => {
-      _abortController.current.abort()
+      abortController.abort()
     }
-  }, [])
+  }, [dispatch, startScene])
 
   // Returns true if the last route matches the given kind
   const isRoute = (route: Route, kind: string): boolean => {
     return route && route.kind === kind
   }
 
-  const startScene = (sceneName: string) => {
-    dispatch(startFromScene(sceneName))
-  }
-
   const renderRoute = (route?: Route) => {
     if (route == null) {
       return <ScenePicker />
     } else if (isRoute(route, 'scene')) {
-      return <SceneDetail sceneID={route.value} />
+      return <SceneDetail sceneID={route.value as number} />
     } else if (isRoute(route, 'library')) {
       return <Library />
     } else if (isRoute(route, 'audios')) {
@@ -120,13 +122,13 @@ export default function Meta(props: MetaProps) {
     } else if (isRoute(route, 'clip')) {
       return <VideoClipper />
     } else if (isRoute(route, 'grid')) {
-      return <GridSetup gridID={route.value} />
+      return <GridSetup gridID={route.value as number} />
     } else if (
       isRoute(route, 'play') ||
       isRoute(route, 'libraryplay') ||
       isRoute(route, 'gridplay')
     ) {
-      return <Player uuid={route.value} preventSleep />
+      return <Player uuid={route.value as string} preventSleep />
     } else if (isRoute(route, 'config')) {
       return <ConfigForm />
     } else if (isRoute(route, 'scriptor')) {
@@ -149,12 +151,12 @@ export default function Meta(props: MetaProps) {
               <Tutorial
                 sceneID={
                   route != null && isRoute(route, 'scene')
-                    ? route.value
+                    ? (route.value as number)
                     : undefined
                 }
                 gridID={
                   route != null && isRoute(route, 'grid')
-                    ? route.value
+                    ? (route.value as number)
                     : undefined
                 }
               />

@@ -51,7 +51,10 @@ function createClipSlice(clipState?: EntryState<Clip>) {
       setClipTags: (state, action: PayloadAction<EntryUpdate<number[]>>) => {
         state.entries[action.payload.id].tags = action.payload.value
       },
-      setClipStartEnd: (state, action: PayloadAction<EntryUpdate<number[]>>) => {
+      setClipStartEnd: (
+        state,
+        action: PayloadAction<EntryUpdate<number[]>>
+      ) => {
         const clip = state.entries[action.payload.id]
         clip.start = action.payload.value[0]
         clip.end = action.payload.value[1]

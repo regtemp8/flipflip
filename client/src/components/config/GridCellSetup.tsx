@@ -20,19 +20,19 @@ import {
 import { setSceneGridCellMirror } from '../../store/sceneGrid/actions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    gridCell: {
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column'
-    },
-    sceneMenu: {
-      minHeight: 365,
-      minWidth: 250
-    }
-  }))
+  gridCell: {
+    height: '100%',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column'
+  },
+  sceneMenu: {
+    minHeight: 365,
+    minWidth: 250
+  }
+}))
 
 export interface GridCellSetupProps {
   id: number

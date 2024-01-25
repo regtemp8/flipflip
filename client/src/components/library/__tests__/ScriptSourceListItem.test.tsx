@@ -1,18 +1,20 @@
-import React from "react";
-import { describe, it, expect } from "@jest/globals";
-import renderer from "react-test-renderer";
-import ScriptSourceListItem from "../ScriptSourceListItem";
-import TestProvider from "../../../util/TestProvider";
-import store from "../../../store/store";
-import { setCaptionScript } from "../../../store/captionScript/slice";
-import { newCaptionScript } from "../../../store/captionScript/CaptionScript";
+import React from 'react'
+import { describe, it, expect } from '@jest/globals'
+import renderer from 'react-test-renderer'
+import ScriptSourceListItem from '../ScriptSourceListItem'
+import TestProvider from '../../../util/TestProvider'
+import store from '../../../store/store'
+import { setCaptionScript } from '../../../store/captionScript/slice'
+import { newCaptionScript } from '../../../store/captionScript/CaptionScript'
 
-jest.mock('../SourceIcon', () => 'SourceIcon');
+jest.mock('../SourceIcon', () => 'SourceIcon')
 
-describe("ScriptSourceListItem", () => {
-  it("should match snapshot", () => {
+describe('ScriptSourceListItem', () => {
+  it('should match snapshot', () => {
     const scriptID = 3
-    store.dispatch(setCaptionScript(newCaptionScript({id: scriptID, url: 'script.txt'})))
+    store.dispatch(
+      setCaptionScript(newCaptionScript({ id: scriptID, url: 'script.txt' }))
+    )
     const component = renderer.create(
       <TestProvider store={store}>
         <ScriptSourceListItem
@@ -32,9 +34,9 @@ describe("ScriptSourceListItem", () => {
           savePosition={() => {}}
         />
       </TestProvider>
-    );
+    )
 
-    let tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
-  });
-});
+    const tree = component.toJSON()
+    expect(tree).toMatchSnapshot()
+  })
+})

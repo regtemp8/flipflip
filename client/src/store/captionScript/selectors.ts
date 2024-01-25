@@ -2,6 +2,17 @@ import { type RootState } from '../store'
 import { type EntryState, getEntry } from '../EntryState'
 import type CaptionScript from './CaptionScript'
 import { type FontSettingsType } from './FontSettings'
+import { createSelector } from '@reduxjs/toolkit'
+
+export const selectCaptionScripts = (ids: number[]) => {
+  return createSelector(
+    [
+      (state: RootState) => ids,
+      (state: RootState) => state.captionScript.entries
+    ],
+    (ids, entries) => ids.map((id) => entries[id])
+  )
+}
 
 export const selectCaptionScript = (id: number) => {
   return (state: RootState) => getEntry(state.captionScript, id)
@@ -16,18 +27,15 @@ export const selectCaptionScriptScript = (id: number) => {
 }
 
 export const selectCaptionScriptStopAtEnd = (id: number) => {
-  return (state: RootState) =>
-    getEntry(state.captionScript, id).stopAtEnd
+  return (state: RootState) => getEntry(state.captionScript, id).stopAtEnd
 }
 
 export const selectCaptionScriptNextSceneAtEnd = (id: number) => {
-  return (state: RootState) =>
-    getEntry(state.captionScript, id).nextSceneAtEnd
+  return (state: RootState) => getEntry(state.captionScript, id).nextSceneAtEnd
 }
 
 export const selectCaptionScriptSyncWithAudio = (id: number) => {
-  return (state: RootState) =>
-    getEntry(state.captionScript, id).syncWithAudio
+  return (state: RootState) => getEntry(state.captionScript, id).syncWithAudio
 }
 
 export const selectCaptionScriptOpacity = (id: number) => {

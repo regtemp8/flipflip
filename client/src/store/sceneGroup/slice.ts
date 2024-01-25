@@ -14,7 +14,9 @@ export const initialSceneGroupState: EntryState<SceneGroup> = {
   entries: {}
 }
 
-export default function createSceneGroupReducer(sceneGroupState?: EntryState<SceneGroup>) {
+export default function createSceneGroupReducer(
+  sceneGroupState?: EntryState<SceneGroup>
+) {
   return createSceneGroupSlice(sceneGroupState).reducer
 }
 
@@ -37,7 +39,10 @@ function createSceneGroupSlice(sceneGroupState?: EntryState<SceneGroup>) {
       deleteSceneGroup: (state, action: PayloadAction<number>) => {
         deleteEntry(state, action.payload)
       },
-      setSceneGroupName: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneGroupName: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         state.entries[action.payload.id].name = action.payload.value
       },
       setSceneGroupAddScene: (
@@ -55,7 +60,7 @@ function createSceneGroupSlice(sceneGroupState?: EntryState<SceneGroup>) {
         scenes.splice(index, 1)
       }
     }
-  })  
+  })
 }
 
 export const {

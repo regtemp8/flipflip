@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, ChangeEvent } from 'react'
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+  MouseEvent,
+  useCallback
+} from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
@@ -137,6 +144,24 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
+interface SortableElementProps {
+  value: SortableValue
+}
+
+interface SortableValue {
+  index: number
+  style: any
+  data: any[]
+}
+
+interface SortableVirtualListProps {
+  height: number
+  width: number
+  tutorial?: string
+  yOffset: number
+  sources: number[]
+}
+
 interface BlacklistDialogProps {
   sourceID: number
   onClose: () => void
@@ -162,6 +187,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
     props.onClose()
   }
 
+  const { classes } = useStyles()
   return (
     <Dialog
       open={true}
@@ -181,7 +207,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
           helperText="One URL to blacklist per line"
           value={blacklistToEdit}
           margin="dense"
-          inputProps={{ className: props.classes.blacklistInput }}
+          inputProps={{ className: classes.blacklistInput }}
           onChange={onChangeBlacklist}
         />
       </DialogContent>
@@ -266,7 +292,6 @@ function ClipMenu(props: ClipMenuProps) {
           sourceID={props.sourceID}
           clipID={c}
           index={index}
-          classes={props.classes}
         />
       ))}
     </>
@@ -282,7 +307,7 @@ interface ClipMenuItemProps {
 function ClipMenuItem(props: ClipMenuItemProps) {
   const start = useAppSelector(selectClipStart(props.clipID))
   const end = useAppSelector(selectClipEnd(props.clipID))
-
+  const { classes } = useStyles()
   return (
     <MenuItem>
       <ListItemText
@@ -294,7 +319,7 @@ function ClipMenuItem(props: ClipMenuItemProps) {
           ' - ' +
           getTimestamp(end as number)
         }
-        className={props.classes.marginRight}
+        className={classes.marginRight}
       />
       <ListItemSecondaryAction>
         <BaseSwitch
@@ -332,6 +357,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
     dispatch(setLibrarySourceSubtitleFile(props.sourceID)(subtitleFile))
   }
 
+  const { classes } = useStyles()
   return (
     <>
       {type === ST.local && (
@@ -402,7 +428,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
                 url !== undefined &&
                 (url.includes('/user/') || url.includes('/u/'))
               }
-              controlClassName={props.classes.fullWidth}
+              controlClassName={classes.fullWidth}
               selector={selectLibrarySourceRedditFunc(props.sourceID)}
               action={setLibrarySourceRedditFunc(props.sourceID)}
             >
@@ -416,10 +442,9 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
               <BaseSelect
                 label="Post Time"
                 disabled={
-                  url != undefined &&
-                  (url.includes('/user/') || url.includes('/u/'))
+                  url != null && (url.includes('/user/') || url.includes('/u/'))
                 }
-                controlClassName={props.classes.fullWidth}
+                controlClassName={classes.fullWidth}
                 selector={selectLibrarySourceRedditTime(props.sourceID)}
                 action={setLibrarySourceRedditTime(props.sourceID)}
               >
@@ -430,12 +455,11 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
                 ))}
               </BaseSelect>
             )}
-            {url != undefined &&
-              (url.includes('/user/') || url.includes('/u/')) && (
-                <DialogContentText>
-                  This only applies to subreddits, not user profiles
-                </DialogContentText>
-              )}
+            {url != null && (url.includes('/user/') || url.includes('/u/')) && (
+              <DialogContentText>
+                This only applies to subreddits, not user profiles
+              </DialogContentText>
+            )}
           </DialogContent>
         </Dialog>
       )}
@@ -507,23 +531,38 @@ function SourceList(props: SourceListProps) {
   const _shiftDown = useRef(false)
   const _lastChecked = useRef<number>()
 
+  const savePosition = useCallback(() => {
+    const sortableList = document.getElementById('sortable-list')
+    if (sortableList) {
+      const scrollElement = sortableList.firstElementChild
+      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
+      dispatch(setLibraryYOffset(scrollTop))
+    }
+  }, [dispatch])
+
   useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = true
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = false
+    }
+
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('keyup', onKeyUp, false)
-
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
       savePosition()
     }
-  }, [])
+  }, [savePosition])
 
   useEffect(() => {
     if (firstSourceURL === '') {
       console.log('setIsEditing')
       setIsEditing(props.sources[0])
     }
-  }, [props.sources])
+  }, [props.sources, firstSourceURL])
 
   const onSortEnd = ({
     oldIndex,
@@ -538,23 +577,6 @@ function SourceList(props: SourceListProps) {
       dispatch(swapLibrary({ oldSourceID, newSourceID }))
     } else {
       dispatch(setSceneSwapSources(oldSourceID, newSourceID))
-    }
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = true
-  }
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = false
-  }
-
-  const savePosition = () => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setLibraryYOffset(scrollTop))
     }
   }
 
@@ -590,8 +612,8 @@ function SourceList(props: SourceListProps) {
     }
   }
 
-  const onToggleSelect = (e: MouseEvent) => {
-    const value = (e.currentTarget as HTMLInputElement).value
+  const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value
     const sourceID = Number(value)
     const newSelected = Array.from(props.selected || [])
     const index = newSelected.indexOf(sourceID)
@@ -722,24 +744,25 @@ function SourceList(props: SourceListProps) {
     )
   }
 
-  const SortableVirtualList = SortableContainer(VirtualList)
+  const SortableVirtualList =
+    SortableContainer<SortableVirtualListProps>(VirtualList)
 
-  const SortableItem = SortableElement(
-    ({ value }: { value: { index: number; style: any; data: any[] } }) => {
+  const SortableItem = SortableElement<SortableElementProps>(
+    ({ value }: SortableElementProps) => {
       const index = value.index
       const sourceID: number = value.data[index]
       return (
         <SourceListItem
           key={sourceID}
           checked={
-            props.isSelect &&
-            props.selected &&
+            props.isSelect === true &&
+            props.selected != null &&
             props.selected.includes(sourceID)
           }
           index={index}
           isEditing={isEditing}
-          isLibrary={props.isLibrary}
-          isSelect={props.isSelect}
+          isLibrary={props.isLibrary ?? false}
+          isSelect={props.isSelect ?? false}
           source={sourceID}
           sources={props.sources}
           style={value.style}
@@ -824,7 +847,9 @@ function SourceList(props: SourceListProps) {
             )}
           >
             <SortableVirtualList
-              helperContainer={() => document.getElementById('sortable-list')}
+              helperContainer={() =>
+                document.getElementById('sortable-list') as HTMLElement
+              }
               distance={5}
               height={height - 1}
               width={width}
@@ -853,7 +878,7 @@ function SourceList(props: SourceListProps) {
         open={!!clipMenu}
         onClose={onCloseDialog}
       >
-        {!!clipMenu && <ClipMenu sourceID={clipMenu} classes={classes} />}
+        {!!clipMenu && <ClipMenu sourceID={clipMenu} />}
       </Menu>
       {!!weightMenu && (
         <Menu
@@ -923,14 +948,12 @@ function SourceList(props: SourceListProps) {
           sourceID={blacklistSource}
           onClose={onCloseBlacklist}
           onFinish={onFinishBlacklist}
-          classes={classes}
         />
       )}
       {sourceOptionsID && (
         <SourceOptionsDialog
           sourceID={sourceOptionsID}
           onClose={onCloseSourceOptions}
-          classes={classes}
         />
       )}
       {deleteDialog != null && (

@@ -9,29 +9,29 @@ import type ReduxProps from '../common/ReduxProps'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    colorGrid: {
-      width: 170
-    },
-    colorButton: {
-      backgroundColor: theme.palette.common.white,
-      marginTop: 0,
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      boxShadow: 'none'
-    },
-    colorPickerButton: {
-      backgroundColor: theme.palette.common.white,
-      marginRight: theme.spacing(0.25),
-      width: theme.spacing(2),
-      height: theme.spacing(2),
-      minHeight: theme.spacing(2),
-      boxShadow: 'none'
-    },
-    colorField: {
-      width: 100
-    }
-  }))
+  colorGrid: {
+    width: 170
+  },
+  colorButton: {
+    backgroundColor: theme.palette.common.white,
+    marginTop: 0,
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+    boxShadow: 'none'
+  },
+  colorPickerButton: {
+    backgroundColor: theme.palette.common.white,
+    marginRight: theme.spacing(0.25),
+    width: theme.spacing(2),
+    height: theme.spacing(2),
+    minHeight: theme.spacing(2),
+    boxShadow: 'none'
+  },
+  colorField: {
+    width: 100
+  }
+}))
 
 const colors = [
   color.red,
@@ -56,11 +56,11 @@ const colors = [
 ]
 
 export interface ThemeColorPickerProps
-  extends ReduxProps<string> {}
+  extends ReduxProps<Record<string, string>> {}
 
 function ThemeColorPicker(props: ThemeColorPickerProps) {
   const dispatch = useAppDispatch()
-  const currentColor = useAppSelector(props.selector)
+  const currentColor = useAppSelector(props.selector).main
 
   const onChangeBlack = () => {
     const black = color.common.black
@@ -130,7 +130,7 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
     dispatch(props.action(color))
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Grid container alignItems="center">
       <Grid item className={classes.colorGrid}>

@@ -34,53 +34,53 @@ import BaseSlider from '../common/slider/BaseSlider'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    bpmProgress: {
-      position: 'absolute',
-      right: 67
-    },
-    tagProgress: {
-      position: 'absolute',
-      right: 20
-    },
-    success: {
-      backgroundColor: green[500],
-      '&:hover': {
-        backgroundColor: green[700]
-      }
-    },
-    failure: {
-      backgroundColor: red[500],
-      '&:hover': {
-        backgroundColor: red[700]
-      }
-    },
-    actions: {
-      marginRight: theme.spacing(3)
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    percentInput: {
-      minWidth: theme.spacing(11)
-    },
-    toggleFont: {
-      marginLeft: 'auto'
-    },
-    fontDivider: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(2)
-    },
-    fontProgress: {
-      position: 'absolute'
+  bpmProgress: {
+    position: 'absolute',
+    right: 67
+  },
+  tagProgress: {
+    position: 'absolute',
+    right: 20
+  },
+  success: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700]
     }
-  }))
+  },
+  failure: {
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700]
+    }
+  },
+  actions: {
+    marginRight: theme.spacing(3)
+  },
+  fullWidth: {
+    width: '100%'
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  percentInput: {
+    minWidth: theme.spacing(11)
+  },
+  toggleFont: {
+    marginLeft: 'auto'
+  },
+  fontDivider: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2)
+  },
+  fontProgress: {
+    position: 'absolute'
+  }
+}))
 
 export interface ScriptOptionsProps {
   scriptID: number
@@ -103,7 +103,7 @@ function ScriptOptions(props: ScriptOptionsProps) {
     props.onDone()
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Dialog open={true} onClose={onCancel} aria-describedby="edit-description">
       <DialogContent>
@@ -151,25 +151,25 @@ function ScriptOptions(props: ScriptOptionsProps) {
           <Grid item xs={12}>
             <FontOptions
               name={'Blink'}
-              captionScriptId={props.scriptID}
+              captionScriptID={props.scriptID}
               type="blink"
             />
             <Divider className={classes.fontDivider} />
             <FontOptions
               name={'Caption'}
-              captionScriptId={props.scriptID}
+              captionScriptID={props.scriptID}
               type="caption"
             />
             <Divider className={classes.fontDivider} />
             <FontOptions
               name={'Big Caption'}
-              captionScriptId={props.scriptID}
+              captionScriptID={props.scriptID}
               type="captionBig"
             />
             <Divider className={classes.fontDivider} />
             <FontOptions
               name={'Count'}
-              captionScriptId={props.scriptID}
+              captionScriptID={props.scriptID}
               type="count"
             />
           </Grid>

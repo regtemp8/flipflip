@@ -1,15 +1,21 @@
+import { ST, getSourceType } from 'flipflip-common'
 import { type AppDispatch, type RootState } from '../store'
 import { setLibrary } from '../app/slice'
 import {
   setLibrarySource,
   setLibrarySourceTags,
   setLibrarySourceMarked,
-  setLibrarySourceBlacklist
+  setLibrarySourceBlacklist,
+  setLibrarySourceMove
 } from './slice'
+import { setLibraryRemoveAll } from '../app/slice'
 import { getActiveScene } from '../app/thunks'
 import { setSceneSources } from '../scene/slice'
 import { newLibrarySource } from './LibrarySource'
 import Scene from '../scene/Scene'
+import flipflip from '../../FlipFlipService'
+import { getCachePath, getLocalPath } from '../../data/utils'
+import { setLibraryRemoveOne } from '../app/slice'
 
 export function inheritTagsFromClips(sourceID: number) {
   return async (
@@ -220,5 +226,75 @@ export function editBlacklist(sourceURL: string, blacklist: string) {
     new Set(sourceIDs).forEach((id) =>
       dispatch(setLibrarySourceBlacklist({ id, value: newBlacklist }))
     )
+  }
+}
+
+export function doLibraryMove() {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const cachingDirectory = state.app.config.caching.directory
+    const library = state.app.library.map(
+      (id) => state.librarySource.entries[id]
+    )
+    for (const source of library) {
+      if (source.offline) {
+        const cachePath = (await getCachePath(
+          cachingDirectory,
+          source.url
+        )) as string
+        let files = []
+        let error: NodeJS.ErrnoException | undefined
+        try {
+          files = await flipflip().api.readdir(cachePath)
+        } catch (err: any) {
+          // TODO does catch still work?
+          error = err
+        }
+
+        if (!!error || files.length === 0) {
+          dispatch(setLibraryRemoveOne(source.id))
+        } else {
+          const localPath = (await getLocalPath(
+            cachingDirectory,
+            source.url as string
+          )) as string
+          await flipflip().api.move(cachePath, localPath)
+          dispatch(
+            setLibrarySourceMove({
+              id: source.id,
+              url: localPath,
+              count: files.length
+            })
+          )
+        }
+      }
+    }
+  }
+}
+
+export function doLibraryDeleteAll() {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const library = state.app.library.map(
+      (id) => state.librarySource.entries[id]
+    )
+    for (const l of library) {
+      const url = l.url as string
+      const fileType = getSourceType(url)
+      try {
+        if (fileType === ST.local) {
+          flipflip().api.rimrafSync(url)
+        } else if (
+          fileType === ST.video ||
+          fileType === ST.playlist ||
+          fileType === ST.list
+        ) {
+          await flipflip().api.unlink(url)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    dispatch(setLibraryRemoveAll())
   }
 }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
 
 import {
   Button,
@@ -23,19 +23,19 @@ import { GT } from 'flipflip-common'
 import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    root: {
-      display: 'flex'
-    },
-    rootInput: {
-      marginLeft: theme.spacing(2),
-      flexGrow: 1
-    }
-  }))
+  root: {
+    display: 'flex'
+  },
+  rootInput: {
+    marginLeft: theme.spacing(2),
+    flexGrow: 1
+  }
+}))
 
 export interface GooninatorDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
 }
 
 function GooninatorDialog(props: GooninatorDialogProps) {
@@ -60,11 +60,11 @@ function GooninatorDialog(props: GooninatorDialogProps) {
   }
 
   const onImportURL = () => {
-    props.onImportURL(importType, new MouseEvent(''), importURL, rootDir)
+    props.onImportURL(importType, undefined, importURL, rootDir)
     props.onClose()
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Dialog
       open={props.open}
@@ -98,7 +98,7 @@ function GooninatorDialog(props: GooninatorDialogProps) {
               <MenuItem value={GT.local}>Local Directories</MenuItem>
             </Select>
           </FormControl>
-          <Collapse className={classes.rootInput} in={importType == GT.local}>
+          <Collapse className={classes.rootInput} in={importType === GT.local}>
             <TextField
               variant="standard"
               fullWidth
@@ -117,7 +117,7 @@ function GooninatorDialog(props: GooninatorDialogProps) {
         <Button
           disabled={
             !importURL.match('^https?://') ||
-            (importType == GT.local && rootDir.length == 0)
+            (importType === GT.local && rootDir.length === 0)
           }
           onClick={onImportURL}
           color="primary"

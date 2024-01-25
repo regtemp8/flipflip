@@ -4,7 +4,7 @@ import { SystemConstants, copy } from 'flipflip-common'
 
 export default function createConstantsReducer(constants?: SystemConstants) {
   let initialState = copy<SystemConstants>(initialSystemConstants)
-  if(constants != null) {
+  if (constants != null) {
     initialState = Object.assign(initialState, constants)
   }
 

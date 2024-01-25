@@ -47,7 +47,7 @@ export type AppStorage = {
   systemSnack?: string;
   systemSnackSeverity?: string;
   tutorial?: string;
-  theme: Record<string, unknown>;
+  theme: Record<string, Record<string, string | Record<string, string>>>;
 };
 
 export const initialAppStorage: AppStorage = {

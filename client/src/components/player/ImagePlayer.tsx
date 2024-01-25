@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
+/// <reference path="../../gif-info.d.ts" />
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import wretch from 'wretch'
 import gifInfo from 'gif-info'
 
@@ -775,6 +776,1120 @@ export default function ImagePlayer(props: ImagePlayerProps) {
   // r_prevSceneID.current = _prevSceneID.current
   // END LOG COMPONENT CHANGES
 
+  const advance = useCallback(
+    (force = false, schedule = true) => {
+      // console.log('=== ADVANCE === ' + props.uuid)
+      // console.log('force: ' + force)
+      // console.log('props.isPlaying: ' + props.isPlaying)
+      // console.log('_isMounted.current: ' + _isMounted.current)
+      // console.log('hasStarted: ' + _hasStarted.current)
+      // console.log('_historyPaths.current.length === 0: ' + (_historyPaths.current.length === 0))
+      // console.log('===============')
+      // bail if dead
+      if (
+        !(
+          force ||
+          (props.isPlaying &&
+            _isMounted.current &&
+            (_hasStarted.current || _historyPaths.current.length === 0))
+        )
+      ) {
+        // console.log('$$$ DEAD $$$')
+        _isLooping.current = false
+        return
+      }
+      _isLooping.current = true
+
+      let nextHistoryPaths = _historyPaths.current
+      let nextImg:
+        | HTMLImageElement
+        | HTMLVideoElement
+        | HTMLIFrameElement
+        | undefined
+      if (props.historyOffset === 0) {
+        if (
+          downloadScene &&
+          _playedURLs.current.length === sources[0].count &&
+          _hasStarted.current
+        ) {
+          dispatch(setRouteGoBack())
+        }
+        if (nextSceneAllImages && nextSceneID !== 0) {
+          let remainingLibrary
+          const allURLs = _allURLs.current as Record<string, string[]>
+          if (weightFunction === WF.sources) {
+            remainingLibrary = flatten(Object.values(allURLs)).filter(
+              (u: string) => !_playedURLs.current.includes(u)
+            )
+          } else {
+            remainingLibrary = flatten(Object.keys(allURLs)).filter(
+              (u: string) => !_playedURLs.current.includes(u)
+            )
+          }
+          if (remainingLibrary.length === 0) {
+            _playedURLs.current = new Array<string>()
+            dispatch(nextScene(sceneID as number))
+            return
+          }
+        }
+
+        // Prevent playing same image again, if possible
+        do {
+          if (
+            _readyToDisplay.current.length > 0 &&
+            _readyToDisplay.current[0] != null
+          ) {
+            // If there is an image ready, display the next image
+            nextImg = _readyToDisplay.current.shift()
+            // console.log(`[${sceneID}] readyToDisplay: ${nextImg.src}`)
+            _strictCheckCount.current = 0
+          } else if (
+            _historyPaths.current.length > 0 &&
+            defaultSceneOrderFunction === OF.random &&
+            !forceAll
+          ) {
+            // If no image is ready, we have a history to choose from, ordering is random, and NOT forcing all
+            // Choose a random image from history to display
+            nextImg = getRandomListItem(_historyPaths.current)
+            // console.log('random historyPaths: ' + nextImg.src)
+          } else if (_historyPaths.current.length > 0) {
+            // If no image is ready, we have a history to choose from, and ordering is not random
+            // Show the next image from history
+            if (orderFunction === OF.strict) {
+              // If ordering strictly and next isn't ready yet, don't load any image
+              _strictCheckCount.current++
+              if (_strictCheckCount.current >= 50) {
+                _readyToDisplay.current.shift()
+                _strictCheckCount.current = 0
+              }
+              nextImg = undefined
+              // console.log('nextImg = undefined')
+            } else {
+              nextImg =
+                _historyPaths.current[
+                  _nextAdvIndex.current++ % _historyPaths.current.length
+                ]
+
+              // console.log('adv historyPaths: ' + nextImg.src)
+            }
+          }
+        } while (
+          _historyPaths.current.length > 0 &&
+          nextImg?.src ===
+            _historyPaths.current[_historyPaths.current.length - 1].src &&
+          (_readyToDisplay.current.length > 0 ||
+            _historyPaths.current.filter(
+              (s) =>
+                s.src !==
+                _historyPaths.current[_historyPaths.current.length - 1]?.src
+            ).length > 0)
+        )
+
+        if (nextImg) {
+          if (continueVideo && nextImg instanceof HTMLVideoElement) {
+            const videoFind = Array.from(_historyPaths.current)
+              .reverse()
+              .find(
+                (i) =>
+                  i.src === nextImg!.src &&
+                  i.getAttribute('start') === nextImg!.getAttribute('start') &&
+                  i.getAttribute('end') === nextImg!.getAttribute('end')
+              )
+            if (videoFind) {
+              nextImg = videoFind
+              // console.log('videoFind: ' + nextImg.src)
+            }
+          }
+
+          nextHistoryPaths = nextHistoryPaths.concat([nextImg])
+        }
+
+        while (nextHistoryPaths.length > maxInHistory) {
+          nextHistoryPaths.shift()!.remove()
+        }
+
+        if (
+          nextImg != null &&
+          (downloadScene ||
+            (nextSceneAllImages && nextSceneID !== 0 && nextImg && nextImg.src))
+        ) {
+          if (!_playedURLs.current.includes(nextImg.src)) {
+            _playedURLs.current.push(nextImg.src)
+          }
+        }
+      } else {
+        const newOffset = props.historyOffset + 1
+        nextImg =
+          _historyPaths.current[_historyPaths.current.length - 1 + newOffset]
+
+        // console.log('newOffset: ' + nextImg.src)
+        props.setHistoryOffset(newOffset)
+      }
+
+      if (!schedule) {
+        _historyPaths.current = nextHistoryPaths
+        props.setHistoryPaths(nextHistoryPaths)
+        setState({
+          ...state,
+          image: nextImg
+        })
+      } else {
+        let timeToNextFrame = getDuration(
+          {
+            timingFunction: timingTF,
+            time: timingDuration,
+            timeMin: timingDurationMin,
+            timeMax: timingDurationMax,
+            sinRate: timingSinRate,
+            bpmMulti: timingBPMMulti
+          },
+          0,
+          bpm
+        )
+
+        const durationAttr = nextImg?.getAttribute('duration')
+        if (durationAttr) {
+          timeToNextFrame = Math.max(timeToNextFrame, parseFloat(durationAttr))
+        }
+        if (props.setTimeToNextFrame) {
+          props.setTimeToNextFrame(timeToNextFrame)
+        }
+
+        // props.setHistoryPaths(nextHistoryPaths)
+        _historyPaths.current = nextHistoryPaths
+        // console.log('IMAGE CHANGE')
+        // console.log(`timeToNextFrame: ${timeToNextFrame}`)
+        setState({
+          image: nextImg,
+          timeToNextFrame,
+          toggleStrobe: strobe ? !state.toggleStrobe : state.toggleStrobe
+        })
+
+        if (
+          !(nextImg instanceof HTMLVideoElement && videoOption === VO.full) &&
+          !(
+            singleImage &&
+            _historyPaths.current.length > 0 &&
+            getSourceType(
+              _historyPaths.current[
+                _historyPaths.current.length - 1
+              ]!.getAttribute('source') as string
+            ) === ST.nimja
+          )
+        ) {
+          _timeout.current = window.setTimeout(() => {
+            // console.log('ADVANCE TIMEOUT ' + new Date().getTime())
+            advance(false, true)
+          }, timeToNextFrame)
+
+          // _timeout.current = window.setTimeout(
+          //   () => advance(false, true),
+          //   timeToNextFrame
+          // )
+        }
+      }
+    },
+    [
+      bpm,
+      continueVideo,
+      defaultSceneOrderFunction,
+      dispatch,
+      downloadScene,
+      forceAll,
+      maxInHistory,
+      nextSceneAllImages,
+      nextSceneID,
+      orderFunction,
+      props,
+      sceneID,
+      singleImage,
+      sources,
+      state,
+      strobe,
+      timingBPMMulti,
+      timingDuration,
+      timingDurationMax,
+      timingDurationMin,
+      timingSinRate,
+      timingTF,
+      videoOption,
+      weightFunction
+    ]
+  )
+
+  const runFetchLoop = useCallback(
+    async (i: number) => {
+      if (!_isMounted.current) return
+
+      if (_readyToDisplay.current.length >= maxInMemory || !_allURLs.current) {
+        // Wait for the display loop to use an image
+        _waitTimeouts.current[i] = window.setTimeout(() => {
+          queueRunFetchLoop(i)
+        }, 100)
+        return
+      }
+
+      let source: string
+      let collection: string[]
+      let url: string
+      let urlIndex = 0
+      let sourceIndex = 0
+      let sourceLength = 0
+      // For source weighted
+      if (weightFunction === WF.sources) {
+        let keys: string[]
+        if (useWeights) {
+          const validKeys = Object.keys(_allURLs.current)
+          keys = []
+          for (const source of sources) {
+            if (validKeys.includes(source.url as string)) {
+              for (let w = source.weight; w > 0; w--) {
+                keys.push(source.url as string)
+              }
+            }
+          }
+        } else {
+          keys = Object.keys(_allURLs.current)
+        }
+
+        // If sorting randomly, get a random source
+        if (sourceOrderFunction === SOF.random) {
+          // If we're playing full sources
+          if (fullSource) {
+            // If this is the first loop or source is done get next source
+            if (_nextIndex.current === -1 || _sourceComplete.current) {
+              if (forceAllSource) {
+                // Filter the available urls to those not played yet
+                keys = keys.filter((s) => !_loadedSources.current.includes(s))
+                // If there are no remaining urls for this source
+                if (!(keys && keys.length > 0)) {
+                  _loadedSources.current = []
+                  keys = Object.keys(_allURLs.current)
+                }
+              }
+
+              source = getRandomListItem(keys)
+              _nextIndex.current = keys.indexOf(source)
+              _sourceComplete.current = false
+              _loadedSources.current.push(source)
+            } else {
+              // Play same source
+              source = keys[_nextIndex.current]
+            }
+          } else {
+            source = getRandomListItem(keys)
+            _loadedSources.current.push(source)
+          }
+        } else {
+          // Else get the next source
+          // If we're playing full sources
+          if (fullSource) {
+            // If this is the first loop or source is done get next source
+            if (_nextIndex.current === -1 || _sourceComplete.current) {
+              source = keys[++_nextIndex.current % keys.length]
+              _sourceComplete.current = false
+            } else {
+              // Play same source
+              source = keys[_nextIndex.current % keys.length]
+            }
+          } else {
+            source = keys[++_nextIndex.current % keys.length]
+          }
+          sourceIndex = _nextIndex.current % keys.length
+        }
+        // Get the urls from the source
+        collection = _allURLs.current[source] || []
+
+        // If we have no urls, loop again
+        if (!(collection && collection.length > 0)) {
+          queueRunFetchLoop(i)
+          return
+        }
+
+        // If sorting randomly and forcing all
+        if (orderFunction === OF.random && (forceAll || fullSource)) {
+          // Filter the available urls to those not played yet
+          collection = collection.filter(
+            (u) => !_loadedURLs.current.includes(u)
+          )
+          // If there are no remaining urls for this source
+          if (!(collection && collection.length > 0)) {
+            if (fullSource) {
+              _loadedURLs.current = []
+              _sourceComplete.current = true
+              queueRunFetchLoop(i)
+              return
+            } else {
+              // Make sure all the other sources are also extinguished
+              const remainingLibrary = flatten(
+                Object.values(_allURLs.current)
+              ).filter((u: string) => !_loadedURLs.current.includes(u))
+              // If they are, clear loadedURLs
+              if (remainingLibrary.length === 0) {
+                _loadedURLs.current = []
+                collection = _allURLs.current[source] || []
+              } else {
+                // Else loop again
+                queueRunFetchLoop(i)
+                return
+              }
+            }
+          }
+        }
+
+        // If sorting randomly, get a random URL
+        if (orderFunction === OF.random) {
+          url = getRandomListItem(collection)
+        } else {
+          // Else get the next index for this source
+          let index = _nextSourceIndex.current.get(source)
+          if (!index) {
+            if (_nextSourceIndex.current.size > 0) {
+              index = Math.min(..._nextSourceIndex.current.values())
+            } else {
+              index = 0
+            }
+          }
+          if (orderFunction === OF.strict) {
+            urlIndex = index
+            sourceLength = collection.length
+          }
+          if (
+            fullSource &&
+            index % collection.length === collection.length - 1
+          ) {
+            _sourceComplete.current = true
+          }
+          url = collection[index % collection.length]
+          _nextSourceIndex.current.set(source, index + 1)
+        }
+      } else {
+        // For image weighted
+
+        // Concat all images together
+        const urlKeys = flatten(Object.keys(_allURLs.current))
+        collection = urlKeys
+        // If there are none, loop again
+        if (!(collection && collection.length > 0)) {
+          queueRunFetchLoop(i)
+          return
+        }
+
+        // If sorting randomly and forcing all
+        if (orderFunction === OF.random && forceAll) {
+          // Filter the available ulls to those not played yet
+          collection = collection.filter(
+            (u: string) => !_loadedURLs.current.includes(u)
+          )
+          // If there are no remaining urls, clear loadedURLs
+          if (!(collection && collection.length > 0)) {
+            _loadedURLs.current = []
+            collection = urlKeys
+          }
+        }
+
+        // If sorting randomly, get a random url
+        if (orderFunction === OF.random) {
+          url = getRandomListItem(collection)
+        } else {
+          // Else get the next index
+          url = collection[++_nextIndex.current % collection.length]
+          if (orderFunction === OF.strict) {
+            urlIndex = _nextIndex.current
+            sourceLength = collection.length
+          }
+        }
+
+        // Get the source of this image from the map
+        source = _allURLs.current[url][0]
+      }
+
+      const allPosts = _allPosts.current as Record<string, string>
+      const post = allPosts[url]
+
+      if (
+        orderFunction === OF.random &&
+        (forceAll || (weightFunction === WF.sources && fullSource))
+      ) {
+        _loadedURLs.current.push(url)
+      }
+
+      // Don't bother loading files we've already cached locally
+      const fileType = getSourceType(url)
+      if (cachingEnabled && url.startsWith('http')) {
+        if (
+          fileType !== ST.nimja &&
+          fileType !== ST.hydrus &&
+          fileType !== ST.piwigo &&
+          fileType !== ST.video &&
+          fileType !== ST.local &&
+          fileType !== ST.playlist
+        ) {
+          const sourceCachePath = await getCachePath(cachingDirectory, source)
+          const filePath = sourceCachePath + getFileName(url, pathSep)
+          const cachedAlready = await flipflip().api.pathExists(filePath)
+          if (cachedAlready) {
+            url = filePath
+          }
+        }
+      }
+
+      if (fileType === ST.nimja) {
+        const iframe = document.createElement('iframe')
+        iframe.setAttribute('source', source)
+        if (post) {
+          iframe.setAttribute('post', post)
+        }
+        if (orderFunction === OF.strict) {
+          iframe.setAttribute('index', urlIndex.toString())
+          iframe.setAttribute('length', sourceLength.toString())
+          if (sourceIndex != null) {
+            iframe.setAttribute('sindex', sourceIndex.toString())
+          }
+        }
+
+        const successCallback = () => {
+          if (_imgLoadTimeouts.current) {
+            clearTimeout(_imgLoadTimeouts.current[i])
+          }
+          if (!_isMounted.current) return
+          ;(iframe as any).key = _nextImageID.current++
+          _readyToDisplay.current.push(iframe)
+          if (_historyPaths.current.length === 0) {
+            // console.log('ADVANCE 555')
+            advance(false, false)
+          }
+          queueRunFetchLoop(i)
+        }
+
+        iframe.oncontextmenu = () => {
+          return false
+        }
+
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin')
+        iframe.src = url
+
+        clearTimeout(_imgLoadTimeouts.current[i])
+        successCallback()
+      } else if (isVideo(url, false)) {
+        const video = document.createElement('video')
+        video.setAttribute('source', source)
+        if (post) {
+          video.setAttribute('post', post)
+        }
+        if (orderFunction === OF.strict) {
+          video.setAttribute('index', urlIndex.toString())
+          video.setAttribute('length', sourceLength.toString())
+          if (sourceIndex != null) {
+            video.setAttribute('sindex', sourceIndex.toString())
+          }
+        }
+        const subtitleSplit = url.split('|||')
+        if (subtitleSplit.length > 1) {
+          url = subtitleSplit[0]
+          video.setAttribute('subtitles', subtitleSplit[1])
+        }
+        const clipRegex =
+          /(.*):::(\d+):([\d-]+):::(\d+\.?\d*):(\d+\.?\d*)$/g.exec(url)
+        if (clipRegex != null) {
+          url = clipRegex[1]
+          video.setAttribute('clip', clipRegex[2])
+          if (clipRegex[3] !== '-') {
+            video.setAttribute('volume', clipRegex[3])
+          }
+          video.setAttribute('start', clipRegex[4])
+          video.setAttribute('end', clipRegex[5])
+        }
+
+        const successCallback = () => {
+          if (_imgLoadTimeouts.current) {
+            clearTimeout(_imgLoadTimeouts.current[i])
+          }
+          if (!_isMounted.current) return
+          dispatch(cacheImage(video))
+
+          const width = video.videoWidth
+          const height = video.videoHeight
+          if (
+            (videoOrientation === OT.onlyLandscape && height > width) ||
+            (videoOrientation === OT.onlyPortrait && height < width)
+          ) {
+            errorCallback()
+            return
+          }
+
+          if (
+            !video.hasAttribute('start') &&
+            !video.hasAttribute('end') &&
+            (skipVideoStart > 0 || skipVideoEnd > 0) &&
+            video.duration - skipVideoStart / 1000 - skipVideoEnd / 1000 > 0
+          ) {
+            video.setAttribute('start', (skipVideoStart / 1000).toString())
+            video.setAttribute(
+              'end',
+              (video.duration - skipVideoEnd / 1000).toString()
+            )
+          }
+
+          let speed = videoSpeed
+          if (videoRandomSpeed) {
+            speed =
+              Math.floor(Math.random() * (videoSpeedMax - videoSpeedMin + 1)) +
+              videoSpeedMin
+          }
+          video.setAttribute('speed', speed.toString())
+
+          if (video.hasAttribute('start') && video.hasAttribute('end')) {
+            const start = parseFloat(video.getAttribute('start') as string)
+            const end = parseFloat(video.getAttribute('end') as string)
+            if (randomVideoStart && (!continueVideo || !video.currentTime)) {
+              video.currentTime = start + Math.random() * (end - start)
+            } else if (video.currentTime < start || video.currentTime > end) {
+              video.currentTime = start
+            }
+          } else if (
+            randomVideoStart &&
+            (!continueVideo || !video.currentTime)
+          ) {
+            video.currentTime = Math.random() * video.duration
+          }
+
+          switch (videoOption) {
+            case VO.full:
+              let duration
+              if (video.hasAttribute('start') && video.hasAttribute('end')) {
+                const start = video.currentTime
+                  ? video.currentTime
+                  : parseFloat(video.getAttribute('start') as string)
+                const end = parseFloat(video.getAttribute('end') as string)
+                duration = end - start
+              } else {
+                duration = video.duration - video.currentTime
+              }
+              duration = (duration * 1000) / (speed / 10)
+              video.setAttribute('duration', duration.toString())
+              break
+            case VO.part:
+              video.setAttribute('duration', videoTimingConstant.toString())
+              break
+            case VO.partr:
+              video.setAttribute(
+                'duration',
+                getRandomNumber(videoTimingMin, videoTimingMax).toString()
+              )
+              break
+            case VO.atLeast:
+              let partDuration
+              if (video.hasAttribute('start') && video.hasAttribute('end')) {
+                const start = parseFloat(video.getAttribute('start') as string)
+                const end = parseFloat(video.getAttribute('end') as string)
+                partDuration = end - start
+              } else {
+                partDuration = video.duration
+              }
+              partDuration = (partDuration * 1000) / (speed / 10)
+              let atLeastDuration = 0
+              do {
+                atLeastDuration += partDuration
+              } while (atLeastDuration < videoTimingConstant)
+              video.setAttribute('duration', atLeastDuration.toString())
+              break
+          }
+
+          ;(video as any).key = _nextImageID.current
+          if (orderFunction === OF.strict) {
+            const lastIndex =
+              _historyPaths.current.length > 0
+                ? parseInt(
+                    _historyPaths.current[
+                      _historyPaths.current.length - 1
+                    ].getAttribute('index') as string
+                  )
+                : -1
+            while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+              _readyToDisplay.current.push(undefined)
+            }
+            _readyToDisplay.current[urlIndex - lastIndex - 1] = video
+            _nextImageID.current++
+          } else {
+            _readyToDisplay.current.push(video)
+            _nextImageID.current++
+          }
+          if (_historyPaths.current.length === 0) {
+            // console.log('ADVANCE 666')
+            advance(false, false)
+          }
+          queueRunFetchLoop(i)
+        }
+
+        const errorCallback = () => {
+          if (_imgLoadTimeouts.current) {
+            clearTimeout(_imgLoadTimeouts.current[i])
+          }
+          if (!_isMounted.current) return
+          if (
+            downloadScene ||
+            (nextSceneAllImages && nextSceneID !== 0 && video && video.src)
+          ) {
+            if (!_playedURLs.current.includes(video.src)) {
+              _playedURLs.current.push(video.src)
+            }
+          }
+          if (orderFunction === OF.strict) {
+            const lastIndex =
+              _historyPaths.current.length > 0
+                ? parseInt(
+                    _historyPaths.current[
+                      _historyPaths.current.length - 1
+                    ].getAttribute('index') as string
+                  )
+                : -1
+
+            while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+              _readyToDisplay.current.push(undefined)
+            }
+            const errImage = new Image()
+            errImage.setAttribute('index', urlIndex.toString())
+            errImage.setAttribute('length', sourceLength.toString())
+            if (sourceIndex != null) {
+              errImage.setAttribute('sindex', sourceIndex.toString())
+            }
+            errImage.src = 'img/flipflip_logo.png'
+            _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
+            _nextImageID.current++
+          }
+          queueRunFetchLoop(i)
+        }
+
+        video.onloadeddata = () => {
+          // images may load immediately, but that messes up the setState()
+          // lifecycle, so always load on the next event loop iteration.
+          // Also, now  we know the image size, so we can finally filter it.
+          if (
+            video.videoWidth < minVideoSize ||
+            video.videoHeight < minVideoSize
+          ) {
+            console.warn(
+              'Video skipped due to minimum width/height: ' + video.src
+            )
+            errorCallback()
+          } else {
+            successCallback()
+          }
+        }
+
+        video.onerror = video.onabort = () => {
+          errorCallback()
+        }
+
+        video.onended = () => {
+          if (videoOption === VO.full) {
+            clearTimeout(_timeout.current)
+            _timeout.current = undefined
+            // console.log('ADVANCE 777')
+            advance(true, true)
+          } else {
+            video.play().catch((err) => console.warn(err))
+          }
+        }
+
+        video.src = url
+        video.volume = 0
+        video.preload = 'auto'
+
+        clearTimeout(_imgLoadTimeouts.current[i])
+        _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 15000)
+
+        video.load()
+      } else {
+        const img = new Image()
+        img.setAttribute('source', source)
+        if (post) {
+          img.setAttribute('post', post)
+        }
+        if (orderFunction === OF.strict) {
+          img.setAttribute('index', urlIndex.toString())
+          img.setAttribute('length', sourceLength.toString())
+          if (sourceIndex != null) {
+            img.setAttribute('sindex', sourceIndex.toString())
+          }
+        }
+
+        const successCallback = () => {
+          if (_imgLoadTimeouts.current) {
+            clearTimeout(_imgLoadTimeouts.current[i])
+          }
+          if (!_isMounted.current) return
+          dispatch(cacheImage(img))
+
+          const width = img.width
+          const height = img.height
+          if (
+            (imageOrientation === OT.onlyLandscape && height > width) ||
+            (imageOrientation === OT.onlyPortrait && height < width)
+          ) {
+            errorCallback()
+            return
+          }
+
+          ;(img as any).key = _nextImageID.current
+          if (orderFunction === OF.strict) {
+            const lastIndex =
+              _historyPaths.current.length > 0
+                ? parseInt(
+                    _historyPaths.current[
+                      _historyPaths.current.length - 1
+                    ].getAttribute('index') as string
+                  )
+                : -1
+
+            while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+              _readyToDisplay.current.push(undefined)
+            }
+            _readyToDisplay.current[urlIndex - lastIndex - 1] = img
+            _nextImageID.current++
+          } else {
+            _readyToDisplay.current.push(img)
+            _nextImageID.current++
+          }
+          if (_historyPaths.current.length === 0 && _timeout.current == null) {
+            // console.log('ADVANCE 888')
+            advance(false, false)
+          }
+          queueRunFetchLoop(i)
+        }
+
+        const errorCallback = () => {
+          if (_imgLoadTimeouts.current) {
+            clearTimeout(_imgLoadTimeouts.current[i])
+          }
+          if (!_isMounted.current) return
+          if (
+            downloadScene ||
+            (nextSceneAllImages && nextSceneID !== 0 && img && img.src)
+          ) {
+            if (!_playedURLs.current.includes(img.src)) {
+              _playedURLs.current.push(img.src)
+            }
+          }
+          if (orderFunction === OF.strict) {
+            const lastIndex =
+              _historyPaths.current.length > 0
+                ? parseInt(
+                    _historyPaths.current[
+                      _historyPaths.current.length - 1
+                    ].getAttribute('index') as string
+                  )
+                : -1
+
+            while (_readyToDisplay.current.length < urlIndex - lastIndex) {
+              _readyToDisplay.current.push(undefined)
+            }
+            const errImage = new Image()
+            errImage.setAttribute('index', urlIndex.toString())
+            errImage.setAttribute('length', sourceLength.toString())
+            if (sourceIndex != null) {
+              errImage.setAttribute('sindex', sourceIndex.toString())
+            }
+            errImage.src = 'img/flipflip_logo.png'
+            _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
+            _nextImageID.current++
+          }
+          queueRunFetchLoop(i)
+        }
+
+        img.onload = () => {
+          // images may load immediately, but that messes up the setState()
+          // lifecycle, so always load on the next event loop iteration.
+          // Also, now  we know the image size, so we can finally filter it.
+          if (img.width < minImageSize || img.height < minImageSize) {
+            console.warn(
+              'Image skipped due to minimum width/height: ' + img.src
+            )
+            errorCallback()
+          } else {
+            successCallback()
+          }
+        }
+
+        img.onerror = img.onabort = () => {
+          errorCallback()
+        }
+
+        const processInfo = (info?: GifInfo) => {
+          if (info == null) {
+            queueRunFetchLoop(i)
+            return
+          }
+
+          // If gif is animated and we want to play entire length, store its duration
+          if (info && info.animated) {
+            switch (gifOption) {
+              case GO.full:
+                img.setAttribute(
+                  'duration',
+                  (info.durationChrome
+                    ? info.durationChrome
+                    : info.duration
+                  ).toString()
+                )
+                break
+              case GO.part:
+                img.setAttribute('duration', gifTimingConstant.toString())
+                break
+              case GO.partr:
+                img.setAttribute(
+                  'duration',
+                  getRandomNumber(gifTimingMin, gifTimingMax).toString()
+                )
+                break
+              case GO.atLeast:
+                let duration = 0
+                do {
+                  duration += info.durationChrome
+                    ? info.durationChrome
+                    : info.duration
+                  if (duration === 0) {
+                    break
+                  }
+                } while (duration < gifTimingConstant)
+                img.setAttribute('duration', duration.toString())
+                break
+            }
+          }
+
+          // Exclude non-animated gifs from gifs
+          if (imageTypeFilter === IF.animated && info && !info.animated) {
+            queueRunFetchLoop(i)
+            return
+            // Exclude animated gifs from stills
+          } else if (imageTypeFilter === IF.stills && info && info.animated) {
+            queueRunFetchLoop(i)
+            return
+          }
+
+          img.src = url
+          clearTimeout(_imgLoadTimeouts.current[i])
+          _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
+        }
+
+        // Get gifinfo if we need for imageFilter or playing full gif
+        if (
+          (imageTypeFilter === IF.animated ||
+            imageTypeFilter === IF.stills ||
+            gifOption !== GO.none) &&
+          url.includes('.gif')
+        ) {
+          // Get gif info. See https://github.com/Prinzhorn/gif-info
+          try {
+            if (url.includes('file://')) {
+              const arrayBuffer = await flipflip().api.readBinaryFile(
+                urlToPath(url, isWin32)
+              )
+              processInfo(gifInfo(arrayBuffer))
+            } else {
+              wretch(url)
+                .get()
+                .arrayBuffer((arrayBuffer) => {
+                  processInfo(gifInfo(arrayBuffer))
+                })
+                .catch((err) => {
+                  console.error(err)
+                  processInfo()
+                })
+            }
+          } catch (e) {
+            console.error(e)
+          }
+        } else {
+          img.src = url
+          clearTimeout(_imgLoadTimeouts.current[i])
+          _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
+        }
+      }
+    },
+    [
+      advance,
+      cachingDirectory,
+      cachingEnabled,
+      continueVideo,
+      dispatch,
+      downloadScene,
+      forceAll,
+      forceAllSource,
+      fullSource,
+      gifOption,
+      gifTimingConstant,
+      gifTimingMax,
+      gifTimingMin,
+      imageOrientation,
+      imageTypeFilter,
+      isWin32,
+      maxInMemory,
+      minImageSize,
+      minVideoSize,
+      nextSceneAllImages,
+      nextSceneID,
+      orderFunction,
+      pathSep,
+      randomVideoStart,
+      skipVideoEnd,
+      skipVideoStart,
+      sourceOrderFunction,
+      sources,
+      useWeights,
+      videoOption,
+      videoOrientation,
+      videoRandomSpeed,
+      videoSpeed,
+      videoSpeedMax,
+      videoSpeedMin,
+      videoTimingConstant,
+      videoTimingMax,
+      videoTimingMin,
+      weightFunction
+    ]
+  )
+
+  const animationFrame = useCallback(() => {
+    if (!_isMounted.current || singleImage) {
+      cancelAnimationFrame(_animationFrameHandle.current as number)
+      return
+    }
+    let requestAnimation = false
+    if (_readyToDisplay.current.length < maxLoadingAtOnce && _allURLs.current) {
+      const requests = _runFetchLoopCallRequests.current || []
+      while (requests.length > 0) {
+        requestAnimation = true
+        runFetchLoop(requests.shift() as number)
+      }
+    }
+    if (requestAnimation) {
+      _animationFrameHandle.current = requestAnimationFrame(animationFrame)
+    } else {
+      setTimeout(animationFrame, 100)
+    }
+  }, [maxLoadingAtOnce, runFetchLoop, singleImage])
+
+  const getHistoryOffset = useCallback(() => {
+    return props.historyOffset + _historyOffset.current
+  }, [props.historyOffset])
+
+  const deleteImg = useCallback(() => {
+    const img =
+      _historyPaths.current[
+        _historyPaths.current.length - 1 + getHistoryOffset()
+      ]
+    const url = img.src
+    const newHistoryPaths = []
+    let newHistoryOffset = props.historyOffset
+    for (const image of _historyPaths.current) {
+      if (image.src !== url) {
+        newHistoryPaths.push(image)
+      } else {
+        newHistoryOffset += 1
+      }
+    }
+    if (newHistoryOffset > 0) {
+      newHistoryOffset = 0
+    }
+
+    props.setHistoryPaths(newHistoryPaths)
+    props.setHistoryOffset(newHistoryOffset)
+    _historyPaths.current = newHistoryPaths
+    _historyOffset.current = newHistoryOffset
+
+    _readyToDisplay.current = _readyToDisplay.current.filter(
+      (i) => i !== undefined && i.src !== url
+    )
+  }, [getHistoryOffset, props])
+
+  const start = useCallback(() => {
+    if (_allURLs.current == null) {
+      // console.log('_allURLs.current == null')
+      return
+    }
+
+    // console.log('ADVANCE 444')
+    advance(true, true)
+  }, [advance])
+
+  const startFetchLoops = useCallback(
+    (max: number, loop = 0) => {
+      if (loop < max) {
+        runFetchLoop(loop)
+        // Put a small delay between our loops
+        _waitTimeouts.current[loop] = window.setTimeout(
+          () => startFetchLoops(max, loop + 1),
+          10
+        )
+      }
+    },
+    [runFetchLoop]
+  )
+
+  const getBackForthTiming = useCallback((): number => {
+    return getDuration(
+      {
+        timingFunction: backForthTF,
+        time: backForthDuration,
+        timeMin: backForthDurationMin,
+        timeMax: backForthDurationMax,
+        sinRate: backForthSinRate,
+        bpmMulti: backForthBPMMulti
+      },
+      state.timeToNextFrame,
+      bpm
+    )
+  }, [
+    backForthBPMMulti,
+    backForthDuration,
+    backForthDurationMax,
+    backForthDurationMin,
+    backForthSinRate,
+    backForthTF,
+    bpm,
+    state.timeToNextFrame
+  ])
+
+  const doBackForth = useCallback(
+    (newOffset: number) => {
+      if (props.isPlaying && _isMounted.current) {
+        _historyOffset.current = newOffset
+
+        let newImage = undefined
+        if (_historyPaths.current.length > 0) {
+          let offset = props.historyOffset + newOffset
+          if (offset <= -_historyPaths.current.length) {
+            offset = -_historyPaths.current.length + 1
+          }
+
+          newImage =
+            _historyPaths.current[_historyPaths.current.length - 1 + offset]
+        }
+        // console.log('doBackForth: SET IMG')
+        setState({
+          ...state,
+          image: newImage
+        })
+
+        // console.log('RESCHEDULE BACKFORTH | ' + new Date().getTime())
+        const nextOffset = newOffset === 0 ? -1 : 0
+        _backForth.current = window.setTimeout(
+          () => doBackForth(nextOffset),
+          getBackForthTiming()
+        )
+      } else {
+        if (_isMounted.current && _historyOffset.current !== 0) {
+          _historyOffset.current = 0
+        }
+        clearTimeout(_backForth.current)
+        _backForth.current = undefined
+      }
+    },
+    [getBackForthTiming, props.historyOffset, props.isPlaying, state]
+  )
+
   useEffect(() => {
     _isMounted.current = true
     props.advanceHack.listener = () => {
@@ -840,7 +1955,16 @@ export default function ImagePlayer(props: ImagePlayerProps) {
         props.deleteHack.listener = undefined
       }
     }
-  }, [])
+  }, [
+    advance,
+    animationFrame,
+    deleteImg,
+    maxLoadingAtOnce,
+    props.advanceHack,
+    props.deleteHack,
+    start,
+    startFetchLoops
+  ])
 
   useEffect(() => {
     if (
@@ -854,7 +1978,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       clearTimeout(_timeout.current)
       _timeout.current = undefined
     }
-  }, [props.isPlaying, _allURLs.current, _hasStarted.current])
+  }, [props.isPlaying, start])
 
   useEffect(() => {
     if (_prevSceneID.current !== undefined) {
@@ -902,7 +2026,15 @@ export default function ImagePlayer(props: ImagePlayerProps) {
     }
 
     _prevSceneID.current = sceneID
-  }, [sceneID])
+  }, [
+    sceneID,
+    advance,
+    animationFrame,
+    maxLoadingAtOnce,
+    props,
+    startFetchLoops,
+    state.timeToNextFrame
+  ])
 
   useEffect(() => {
     _readyToDisplay.current = []
@@ -924,7 +2056,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
         getBackForthTiming()
       )
     }
-  }, [backForth, props.isPlaying, _hasStarted.current])
+  }, [backForth, props.isPlaying, doBackForth, getBackForthTiming])
 
   useEffect(() => {
     if (!backForth) {
@@ -933,1036 +2065,11 @@ export default function ImagePlayer(props: ImagePlayerProps) {
     }
   }, [backForth])
 
-  const getHistoryOffset = () => {
-    return props.historyOffset + _historyOffset.current
-  }
-
-  const getBackForthTiming = (): number =>
-    getDuration(
-      {
-        timingFunction: backForthTF,
-        time: backForthDuration,
-        timeMin: backForthDurationMin,
-        timeMax: backForthDurationMax,
-        sinRate: backForthSinRate,
-        bpmMulti: backForthBPMMulti
-      },
-      state.timeToNextFrame,
-      bpm
-    )
-
-  const doBackForth = (newOffset: number) => {
-    if (props.isPlaying && _isMounted.current) {
-      _historyOffset.current = newOffset
-
-      let newImage = undefined
-      if (_historyPaths.current.length > 0) {
-        let offset = props.historyOffset + newOffset
-        if (offset <= -_historyPaths.current.length) {
-          offset = -_historyPaths.current.length + 1
-        }
-
-        newImage =
-          _historyPaths.current[_historyPaths.current.length - 1 + offset]
-      }
-      // console.log('doBackForth: SET IMG')
-      setState({
-        ...state,
-        image: newImage
-      })
-
-      // console.log('RESCHEDULE BACKFORTH | ' + new Date().getTime())
-      const nextOffset = newOffset === 0 ? -1 : 0
-      _backForth.current = window.setTimeout(
-        () => doBackForth(nextOffset),
-        getBackForthTiming()
-      )
-    } else {
-      if (_isMounted.current && _historyOffset.current !== 0) {
-        _historyOffset.current = 0
-      }
-      clearTimeout(_backForth.current)
-      _backForth.current = undefined
-    }
-  }
-
-  const deleteImg = () => {
-    const img =
-      _historyPaths.current[
-        _historyPaths.current.length - 1 + getHistoryOffset()
-      ]
-    const url = img.src
-    const newHistoryPaths = []
-    let newHistoryOffset = props.historyOffset
-    for (const image of _historyPaths.current) {
-      if (image.src !== url) {
-        newHistoryPaths.push(image)
-      } else {
-        newHistoryOffset += 1
-      }
-    }
-    if (newHistoryOffset > 0) {
-      newHistoryOffset = 0
-    }
-
-    props.setHistoryPaths(newHistoryPaths)
-    props.setHistoryOffset(newHistoryOffset)
-    _historyPaths.current = newHistoryPaths
-    _historyOffset.current = newHistoryOffset
-
-    _readyToDisplay.current = _readyToDisplay.current.filter(
-      (i) => i !== undefined && i.src !== url
-    )
-  }
-
-  const start = () => {
-    if (_allURLs.current == null) {
-      // console.log('_allURLs.current == null')
-      return
-    }
-
-    // console.log('ADVANCE 444')
-    advance(true, true)
-  }
-
-  const startFetchLoops = (max: number, loop = 0) => {
-    if (loop < max) {
-      runFetchLoop(loop)
-      // Put a small delay between our loops
-      _waitTimeouts.current[loop] = window.setTimeout(
-        () => startFetchLoops(max, loop + 1),
-        10
-      )
-    }
-  }
-
-  const animationFrame = () => {
-    if (!_isMounted.current || singleImage) {
-      cancelAnimationFrame(_animationFrameHandle.current as number)
-      return
-    }
-    let requestAnimation = false
-    if (_readyToDisplay.current.length < maxLoadingAtOnce && _allURLs.current) {
-      const requests = _runFetchLoopCallRequests.current || []
-      while (requests.length > 0) {
-        requestAnimation = true
-        runFetchLoop(requests.shift() as number)
-      }
-    }
-    if (requestAnimation) {
-      _animationFrameHandle.current = requestAnimationFrame(animationFrame)
-    } else {
-      setTimeout(animationFrame, 100)
-    }
-  }
-
   const queueRunFetchLoop = (i: number) => {
     if (_runFetchLoopCallRequests.current) {
       _runFetchLoopCallRequests.current.push(i)
     } else {
       _runFetchLoopCallRequests.current = [i]
-    }
-  }
-
-  const runFetchLoop = async (i: number) => {
-    if (!_isMounted.current) return
-
-    if (_readyToDisplay.current.length >= maxInMemory || !_allURLs.current) {
-      // Wait for the display loop to use an image
-      _waitTimeouts.current[i] = window.setTimeout(() => {
-        queueRunFetchLoop(i)
-      }, 100)
-      return
-    }
-
-    let source: string
-    let collection: string[]
-    let url: string
-    let urlIndex = 0
-    let sourceIndex = 0
-    let sourceLength = 0
-    // For source weighted
-    if (weightFunction === WF.sources) {
-      let keys: string[]
-      if (useWeights) {
-        const validKeys = Object.keys(_allURLs.current)
-        keys = []
-        for (const source of sources) {
-          if (validKeys.includes(source.url as string)) {
-            for (let w = source.weight; w > 0; w--) {
-              keys.push(source.url as string)
-            }
-          }
-        }
-      } else {
-        keys = Object.keys(_allURLs.current)
-      }
-
-      // If sorting randomly, get a random source
-      if (sourceOrderFunction === SOF.random) {
-        // If we're playing full sources
-        if (fullSource) {
-          // If this is the first loop or source is done get next source
-          if (_nextIndex.current === -1 || _sourceComplete.current) {
-            if (forceAllSource) {
-              // Filter the available urls to those not played yet
-              keys = keys.filter((s) => !_loadedSources.current.includes(s))
-              // If there are no remaining urls for this source
-              if (!(keys && keys.length > 0)) {
-                _loadedSources.current = []
-                keys = Object.keys(_allURLs.current)
-              }
-            }
-
-            source = getRandomListItem(keys)
-            _nextIndex.current = keys.indexOf(source)
-            _sourceComplete.current = false
-            _loadedSources.current.push(source)
-          } else {
-            // Play same source
-            source = keys[_nextIndex.current]
-          }
-        } else {
-          source = getRandomListItem(keys)
-          _loadedSources.current.push(source)
-        }
-      } else {
-        // Else get the next source
-        // If we're playing full sources
-        if (fullSource) {
-          // If this is the first loop or source is done get next source
-          if (_nextIndex.current === -1 || _sourceComplete.current) {
-            source = keys[++_nextIndex.current % keys.length]
-            _sourceComplete.current = false
-          } else {
-            // Play same source
-            source = keys[_nextIndex.current % keys.length]
-          }
-        } else {
-          source = keys[++_nextIndex.current % keys.length]
-        }
-        sourceIndex = _nextIndex.current % keys.length
-      }
-      // Get the urls from the source
-      collection = _allURLs.current[source] || []
-
-      // If we have no urls, loop again
-      if (!(collection && collection.length > 0)) {
-        queueRunFetchLoop(i)
-        return
-      }
-
-      // If sorting randomly and forcing all
-      if (orderFunction === OF.random && (forceAll || fullSource)) {
-        // Filter the available urls to those not played yet
-        collection = collection.filter((u) => !_loadedURLs.current.includes(u))
-        // If there are no remaining urls for this source
-        if (!(collection && collection.length > 0)) {
-          if (fullSource) {
-            _loadedURLs.current = []
-            _sourceComplete.current = true
-            queueRunFetchLoop(i)
-            return
-          } else {
-            // Make sure all the other sources are also extinguished
-            const remainingLibrary = flatten(
-              Object.values(_allURLs.current)
-            ).filter((u: string) => !_loadedURLs.current.includes(u))
-            // If they are, clear loadedURLs
-            if (remainingLibrary.length === 0) {
-              _loadedURLs.current = []
-              collection = _allURLs.current[source] || []
-            } else {
-              // Else loop again
-              queueRunFetchLoop(i)
-              return
-            }
-          }
-        }
-      }
-
-      // If sorting randomly, get a random URL
-      if (orderFunction === OF.random) {
-        url = getRandomListItem(collection)
-      } else {
-        // Else get the next index for this source
-        let index = _nextSourceIndex.current.get(source)
-        if (!index) {
-          if (_nextSourceIndex.current.size > 0) {
-            index = Math.min(..._nextSourceIndex.current.values())
-          } else {
-            index = 0
-          }
-        }
-        if (orderFunction === OF.strict) {
-          urlIndex = index
-          sourceLength = collection.length
-        }
-        if (fullSource && index % collection.length === collection.length - 1) {
-          _sourceComplete.current = true
-        }
-        url = collection[index % collection.length]
-        _nextSourceIndex.current.set(source, index + 1)
-      }
-    } else {
-      // For image weighted
-
-      // Concat all images together
-      const urlKeys = flatten(Object.keys(_allURLs.current))
-      collection = urlKeys
-      // If there are none, loop again
-      if (!(collection && collection.length > 0)) {
-        queueRunFetchLoop(i)
-        return
-      }
-
-      // If sorting randomly and forcing all
-      if (orderFunction === OF.random && forceAll) {
-        // Filter the available ulls to those not played yet
-        collection = collection.filter(
-          (u: string) => !_loadedURLs.current.includes(u)
-        )
-        // If there are no remaining urls, clear loadedURLs
-        if (!(collection && collection.length > 0)) {
-          _loadedURLs.current = []
-          collection = urlKeys
-        }
-      }
-
-      // If sorting randomly, get a random url
-      if (orderFunction === OF.random) {
-        url = getRandomListItem(collection)
-      } else {
-        // Else get the next index
-        url = collection[++_nextIndex.current % collection.length]
-        if (orderFunction === OF.strict) {
-          urlIndex = _nextIndex.current
-          sourceLength = collection.length
-        }
-      }
-
-      // Get the source of this image from the map
-      source = _allURLs.current[url][0]
-    }
-
-    const allPosts = _allPosts.current as Record<string, string>
-    const post = allPosts[url]
-
-    if (
-      orderFunction === OF.random &&
-      (forceAll || (weightFunction === WF.sources && fullSource))
-    ) {
-      _loadedURLs.current.push(url)
-    }
-
-    // Don't bother loading files we've already cached locally
-    const fileType = getSourceType(url)
-    if (cachingEnabled && url.startsWith('http')) {
-      if (
-        fileType !== ST.nimja &&
-        fileType !== ST.hydrus &&
-        fileType !== ST.piwigo &&
-        fileType !== ST.video &&
-        fileType !== ST.local &&
-        fileType !== ST.playlist
-      ) {
-        const sourceCachePath = await getCachePath(cachingDirectory, source)
-        const filePath = sourceCachePath + getFileName(url, pathSep)
-        const cachedAlready = await flipflip().api.pathExists(filePath)
-        if (cachedAlready) {
-          url = filePath
-        }
-      }
-    }
-
-    if (fileType === ST.nimja) {
-      const iframe = document.createElement('iframe')
-      iframe.setAttribute('source', source)
-      if (post) {
-        iframe.setAttribute('post', post)
-      }
-      if (orderFunction === OF.strict) {
-        iframe.setAttribute('index', urlIndex.toString())
-        iframe.setAttribute('length', sourceLength.toString())
-        if (sourceIndex != null) {
-          iframe.setAttribute('sindex', sourceIndex.toString())
-        }
-      }
-
-      const successCallback = () => {
-        if (_imgLoadTimeouts.current) {
-          clearTimeout(_imgLoadTimeouts.current[i])
-        }
-        if (!_isMounted.current) return
-        ;(iframe as any).key = _nextImageID.current++
-        _readyToDisplay.current.push(iframe)
-        if (_historyPaths.current.length === 0) {
-          // console.log('ADVANCE 555')
-          advance(false, false)
-        }
-        queueRunFetchLoop(i)
-      }
-
-      iframe.oncontextmenu = () => {
-        return false
-      }
-
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin')
-      iframe.src = url
-
-      clearTimeout(_imgLoadTimeouts.current[i])
-      successCallback()
-    } else if (isVideo(url, false)) {
-      const video = document.createElement('video')
-      video.setAttribute('source', source)
-      if (post) {
-        video.setAttribute('post', post)
-      }
-      if (orderFunction === OF.strict) {
-        video.setAttribute('index', urlIndex.toString())
-        video.setAttribute('length', sourceLength.toString())
-        if (sourceIndex != null) {
-          video.setAttribute('sindex', sourceIndex.toString())
-        }
-      }
-      const subtitleSplit = url.split('|||')
-      if (subtitleSplit.length > 1) {
-        url = subtitleSplit[0]
-        video.setAttribute('subtitles', subtitleSplit[1])
-      }
-      const clipRegex =
-        /(.*):::(\d+):([\d-]+):::(\d+\.?\d*):(\d+\.?\d*)$/g.exec(url)
-      if (clipRegex != null) {
-        url = clipRegex[1]
-        video.setAttribute('clip', clipRegex[2])
-        if (clipRegex[3] !== '-') {
-          video.setAttribute('volume', clipRegex[3])
-        }
-        video.setAttribute('start', clipRegex[4])
-        video.setAttribute('end', clipRegex[5])
-      }
-
-      const successCallback = () => {
-        if (_imgLoadTimeouts.current) {
-          clearTimeout(_imgLoadTimeouts.current[i])
-        }
-        if (!_isMounted.current) return
-        dispatch(cacheImage(video))
-
-        const width = video.videoWidth
-        const height = video.videoHeight
-        if (
-          (videoOrientation === OT.onlyLandscape && height > width) ||
-          (videoOrientation === OT.onlyPortrait && height < width)
-        ) {
-          errorCallback()
-          return
-        }
-
-        if (
-          !video.hasAttribute('start') &&
-          !video.hasAttribute('end') &&
-          (skipVideoStart > 0 || skipVideoEnd > 0) &&
-          video.duration - skipVideoStart / 1000 - skipVideoEnd / 1000 > 0
-        ) {
-          video.setAttribute('start', (skipVideoStart / 1000).toString())
-          video.setAttribute(
-            'end',
-            (video.duration - skipVideoEnd / 1000).toString()
-          )
-        }
-
-        let speed = videoSpeed
-        if (videoRandomSpeed) {
-          speed =
-            Math.floor(Math.random() * (videoSpeedMax - videoSpeedMin + 1)) +
-            videoSpeedMin
-        }
-        video.setAttribute('speed', speed.toString())
-
-        if (video.hasAttribute('start') && video.hasAttribute('end')) {
-          const start = parseFloat(video.getAttribute('start') as string)
-          const end = parseFloat(video.getAttribute('end') as string)
-          if (randomVideoStart && (!continueVideo || !video.currentTime)) {
-            video.currentTime = start + Math.random() * (end - start)
-          } else if (video.currentTime < start || video.currentTime > end) {
-            video.currentTime = start
-          }
-        } else if (randomVideoStart && (!continueVideo || !video.currentTime)) {
-          video.currentTime = Math.random() * video.duration
-        }
-
-        switch (videoOption) {
-          case VO.full:
-            let duration
-            if (video.hasAttribute('start') && video.hasAttribute('end')) {
-              const start = video.currentTime
-                ? video.currentTime
-                : parseFloat(video.getAttribute('start') as string)
-              const end = parseFloat(video.getAttribute('end') as string)
-              duration = end - start
-            } else {
-              duration = video.duration - video.currentTime
-            }
-            duration = (duration * 1000) / (speed / 10)
-            video.setAttribute('duration', duration.toString())
-            break
-          case VO.part:
-            video.setAttribute('duration', videoTimingConstant.toString())
-            break
-          case VO.partr:
-            video.setAttribute(
-              'duration',
-              getRandomNumber(videoTimingMin, videoTimingMax).toString()
-            )
-            break
-          case VO.atLeast:
-            let partDuration
-            if (video.hasAttribute('start') && video.hasAttribute('end')) {
-              const start = parseFloat(video.getAttribute('start') as string)
-              const end = parseFloat(video.getAttribute('end') as string)
-              partDuration = end - start
-            } else {
-              partDuration = video.duration
-            }
-            partDuration = (partDuration * 1000) / (speed / 10)
-            let atLeastDuration = 0
-            do {
-              atLeastDuration += partDuration
-            } while (atLeastDuration < videoTimingConstant)
-            video.setAttribute('duration', atLeastDuration.toString())
-            break
-        }
-
-        ;(video as any).key = _nextImageID.current
-        if (orderFunction === OF.strict) {
-          const lastIndex =
-            _historyPaths.current.length > 0
-              ? parseInt(
-                  _historyPaths.current[
-                    _historyPaths.current.length - 1
-                  ].getAttribute('index') as string
-                )
-              : -1
-          let count = 0
-          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
-            count++
-            _readyToDisplay.current.push(undefined)
-          }
-          _readyToDisplay.current[urlIndex - lastIndex - 1] = video
-          _nextImageID.current++
-        } else {
-          _readyToDisplay.current.push(video)
-          _nextImageID.current++
-        }
-        if (_historyPaths.current.length === 0) {
-          // console.log('ADVANCE 666')
-          advance(false, false)
-        }
-        queueRunFetchLoop(i)
-      }
-
-      const errorCallback = () => {
-        if (_imgLoadTimeouts.current) {
-          clearTimeout(_imgLoadTimeouts.current[i])
-        }
-        if (!_isMounted.current) return
-        if (
-          downloadScene ||
-          (nextSceneAllImages && nextSceneID !== 0 && video && video.src)
-        ) {
-          if (!_playedURLs.current.includes(video.src)) {
-            _playedURLs.current.push(video.src)
-          }
-        }
-        if (orderFunction === OF.strict) {
-          const lastIndex =
-            _historyPaths.current.length > 0
-              ? parseInt(
-                  _historyPaths.current[
-                    _historyPaths.current.length - 1
-                  ].getAttribute('index') as string
-                )
-              : -1
-
-          let count = 0
-          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
-            count++
-            _readyToDisplay.current.push(undefined)
-          }
-          const errImage = new Image()
-          errImage.setAttribute('index', urlIndex.toString())
-          errImage.setAttribute('length', sourceLength.toString())
-          if (sourceIndex != null) {
-            errImage.setAttribute('sindex', sourceIndex.toString())
-          }
-          errImage.src = 'img/flipflip_logo.png'
-          _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
-          _nextImageID.current++
-        }
-        queueRunFetchLoop(i)
-      }
-
-      video.onloadeddata = () => {
-        // images may load immediately, but that messes up the setState()
-        // lifecycle, so always load on the next event loop iteration.
-        // Also, now  we know the image size, so we can finally filter it.
-        if (
-          video.videoWidth < minVideoSize ||
-          video.videoHeight < minVideoSize
-        ) {
-          console.warn(
-            'Video skipped due to minimum width/height: ' + video.src
-          )
-          errorCallback()
-        } else {
-          successCallback()
-        }
-      }
-
-      video.onerror = video.onabort = () => {
-        errorCallback()
-      }
-
-      video.onended = () => {
-        if (videoOption === VO.full) {
-          clearTimeout(_timeout.current)
-          _timeout.current = undefined
-          // console.log('ADVANCE 777')
-          advance(true, true)
-        } else {
-          video.play().catch((err) => console.warn(err))
-        }
-      }
-
-      video.src = url
-      video.volume = 0
-      video.preload = 'auto'
-
-      clearTimeout(_imgLoadTimeouts.current[i])
-      _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 15000)
-
-      video.load()
-    } else {
-      const img = new Image()
-      img.setAttribute('source', source)
-      if (post) {
-        img.setAttribute('post', post)
-      }
-      if (orderFunction === OF.strict) {
-        img.setAttribute('index', urlIndex.toString())
-        img.setAttribute('length', sourceLength.toString())
-        if (sourceIndex != null) {
-          img.setAttribute('sindex', sourceIndex.toString())
-        }
-      }
-
-      const successCallback = () => {
-        if (_imgLoadTimeouts.current) {
-          clearTimeout(_imgLoadTimeouts.current[i])
-        }
-        if (!_isMounted.current) return
-        dispatch(cacheImage(img))
-
-        const width = img.width
-        const height = img.height
-        if (
-          (imageOrientation === OT.onlyLandscape && height > width) ||
-          (imageOrientation === OT.onlyPortrait && height < width)
-        ) {
-          errorCallback()
-          return
-        }
-
-        ;(img as any).key = _nextImageID.current
-        if (orderFunction === OF.strict) {
-          const lastIndex =
-            _historyPaths.current.length > 0
-              ? parseInt(
-                  _historyPaths.current[
-                    _historyPaths.current.length - 1
-                  ].getAttribute('index') as string
-                )
-              : -1
-
-          let count = 0
-          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
-            count++
-            _readyToDisplay.current.push(undefined)
-          }
-          _readyToDisplay.current[urlIndex - lastIndex - 1] = img
-          _nextImageID.current++
-        } else {
-          _readyToDisplay.current.push(img)
-          _nextImageID.current++
-        }
-        if (_historyPaths.current.length === 0 && _timeout.current == null) {
-          // console.log('ADVANCE 888')
-          advance(false, false)
-        }
-        queueRunFetchLoop(i)
-      }
-
-      const errorCallback = () => {
-        if (_imgLoadTimeouts.current) {
-          clearTimeout(_imgLoadTimeouts.current[i])
-        }
-        if (!_isMounted.current) return
-        if (
-          downloadScene ||
-          (nextSceneAllImages && nextSceneID !== 0 && img && img.src)
-        ) {
-          if (!_playedURLs.current.includes(img.src)) {
-            _playedURLs.current.push(img.src)
-          }
-        }
-        if (orderFunction === OF.strict) {
-          const lastIndex =
-            _historyPaths.current.length > 0
-              ? parseInt(
-                  _historyPaths.current[
-                    _historyPaths.current.length - 1
-                  ].getAttribute('index') as string
-                )
-              : -1
-
-          let count = 0
-          while (_readyToDisplay.current.length < urlIndex - lastIndex) {
-            count++
-            _readyToDisplay.current.push(undefined)
-          }
-          const errImage = new Image()
-          errImage.setAttribute('index', urlIndex.toString())
-          errImage.setAttribute('length', sourceLength.toString())
-          if (sourceIndex != null) {
-            errImage.setAttribute('sindex', sourceIndex.toString())
-          }
-          errImage.src = 'img/flipflip_logo.png'
-          _readyToDisplay.current[urlIndex - lastIndex - 1] = errImage
-          _nextImageID.current++
-        }
-        queueRunFetchLoop(i)
-      }
-
-      img.onload = () => {
-        // images may load immediately, but that messes up the setState()
-        // lifecycle, so always load on the next event loop iteration.
-        // Also, now  we know the image size, so we can finally filter it.
-        if (img.width < minImageSize || img.height < minImageSize) {
-          console.warn('Image skipped due to minimum width/height: ' + img.src)
-          errorCallback()
-        } else {
-          successCallback()
-        }
-      }
-
-      img.onerror = img.onabort = () => {
-        errorCallback()
-      }
-
-      const processInfo = (info?: GifInfo) => {
-        if (info == null) {
-          queueRunFetchLoop(i)
-          return
-        }
-
-        // If gif is animated and we want to play entire length, store its duration
-        if (info && info.animated) {
-          switch (gifOption) {
-            case GO.full:
-              img.setAttribute(
-                'duration',
-                (info.durationChrome
-                  ? info.durationChrome
-                  : info.duration
-                ).toString()
-              )
-              break
-            case GO.part:
-              img.setAttribute('duration', gifTimingConstant.toString())
-              break
-            case GO.partr:
-              img.setAttribute(
-                'duration',
-                getRandomNumber(gifTimingMin, gifTimingMax).toString()
-              )
-              break
-            case GO.atLeast:
-              let duration = 0
-              do {
-                duration += info.durationChrome
-                  ? info.durationChrome
-                  : info.duration
-                if (duration === 0) {
-                  break
-                }
-              } while (duration < gifTimingConstant)
-              img.setAttribute('duration', duration.toString())
-              break
-          }
-        }
-
-        // Exclude non-animated gifs from gifs
-        if (imageTypeFilter === IF.animated && info && !info.animated) {
-          queueRunFetchLoop(i)
-          return
-          // Exclude animated gifs from stills
-        } else if (imageTypeFilter === IF.stills && info && info.animated) {
-          queueRunFetchLoop(i)
-          return
-        }
-
-        img.src = url
-        clearTimeout(_imgLoadTimeouts.current[i])
-        _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
-      }
-
-      // Get gifinfo if we need for imageFilter or playing full gif
-      if (
-        (imageTypeFilter === IF.animated ||
-          imageTypeFilter === IF.stills ||
-          gifOption !== GO.none) &&
-        url.includes('.gif')
-      ) {
-        // Get gif info. See https://github.com/Prinzhorn/gif-info
-        try {
-          if (url.includes('file://')) {
-            const arrayBuffer = await flipflip().api.readBinaryFile(
-              urlToPath(url, isWin32)
-            )
-            processInfo(gifInfo(arrayBuffer))
-          } else {
-            wretch(url)
-              .get()
-              .arrayBuffer((arrayBuffer) => {
-                processInfo(gifInfo(arrayBuffer))
-              })
-              .catch((err) => {
-                console.error(err)
-                processInfo()
-              })
-          }
-        } catch (e) {
-          console.error(e)
-        }
-      } else {
-        img.src = url
-        clearTimeout(_imgLoadTimeouts.current[i])
-        _imgLoadTimeouts.current[i] = window.setTimeout(errorCallback, 5000)
-      }
-    }
-  }
-
-  const advance = (force = false, schedule = true) => {
-    // console.log('=== ADVANCE === ' + props.uuid)
-    // console.log('force: ' + force)
-    // console.log('props.isPlaying: ' + props.isPlaying)
-    // console.log('_isMounted.current: ' + _isMounted.current)
-    // console.log('hasStarted: ' + _hasStarted.current)
-    // console.log('_historyPaths.current.length === 0: ' + (_historyPaths.current.length === 0))
-    // console.log('===============')
-    // bail if dead
-    if (
-      !(
-        force ||
-        (props.isPlaying &&
-          _isMounted.current &&
-          (_hasStarted.current || _historyPaths.current.length === 0))
-      )
-    ) {
-      // console.log('$$$ DEAD $$$')
-      _isLooping.current = false
-      return
-    }
-    _isLooping.current = true
-
-    let nextHistoryPaths = _historyPaths.current
-    let nextImg:
-      | HTMLImageElement
-      | HTMLVideoElement
-      | HTMLIFrameElement
-      | undefined
-    if (props.historyOffset === 0) {
-      if (
-        downloadScene &&
-        _playedURLs.current.length === sources[0].count &&
-        _hasStarted.current
-      ) {
-        dispatch(setRouteGoBack())
-      }
-      if (nextSceneAllImages && nextSceneID !== 0) {
-        let remainingLibrary
-        const allURLs = _allURLs.current as Record<string, string[]>
-        if (weightFunction === WF.sources) {
-          remainingLibrary = flatten(Object.values(allURLs)).filter(
-            (u: string) => !_playedURLs.current.includes(u)
-          )
-        } else {
-          remainingLibrary = flatten(Object.keys(allURLs)).filter(
-            (u: string) => !_playedURLs.current.includes(u)
-          )
-        }
-        if (remainingLibrary.length === 0) {
-          _playedURLs.current = new Array<string>()
-          dispatch(nextScene(sceneID as number))
-          return
-        }
-      }
-
-      // Prevent playing same image again, if possible
-      do {
-        if (
-          _readyToDisplay.current.length > 0 &&
-          _readyToDisplay.current[0] != null
-        ) {
-          // If there is an image ready, display the next image
-          nextImg = _readyToDisplay.current.shift()
-          // console.log(`[${sceneID}] readyToDisplay: ${nextImg.src}`)
-          _strictCheckCount.current = 0
-        } else if (
-          _historyPaths.current.length > 0 &&
-          defaultSceneOrderFunction === OF.random &&
-          !forceAll
-        ) {
-          // If no image is ready, we have a history to choose from, ordering is random, and NOT forcing all
-          // Choose a random image from history to display
-          nextImg = getRandomListItem(_historyPaths.current)
-          // console.log('random historyPaths: ' + nextImg.src)
-        } else if (_historyPaths.current.length > 0) {
-          // If no image is ready, we have a history to choose from, and ordering is not random
-          // Show the next image from history
-          if (orderFunction === OF.strict) {
-            // If ordering strictly and next isn't ready yet, don't load any image
-            _strictCheckCount.current++
-            if (_strictCheckCount.current >= 50) {
-              _readyToDisplay.current.shift()
-              _strictCheckCount.current = 0
-            }
-            nextImg = undefined
-            // console.log('nextImg = undefined')
-          } else {
-            nextImg =
-              _historyPaths.current[
-                _nextAdvIndex.current++ % _historyPaths.current.length
-              ]
-
-            // console.log('adv historyPaths: ' + nextImg.src)
-          }
-        }
-      } while (
-        _historyPaths.current.length > 0 &&
-        nextImg?.src ==
-          _historyPaths.current[_historyPaths.current.length - 1].src &&
-        (_readyToDisplay.current.length > 0 ||
-          _historyPaths.current.filter(
-            (s) =>
-              s.src !=
-              _historyPaths.current[_historyPaths.current.length - 1]?.src
-          ).length > 0)
-      )
-
-      if (nextImg) {
-        if (continueVideo && nextImg instanceof HTMLVideoElement) {
-          const videoFind = Array.from(_historyPaths.current)
-            .reverse()
-            .find(
-              (i) =>
-                i.src === nextImg!.src &&
-                i.getAttribute('start') === nextImg!.getAttribute('start') &&
-                i.getAttribute('end') === nextImg!.getAttribute('end')
-            )
-          if (videoFind) {
-            nextImg = videoFind
-            // console.log('videoFind: ' + nextImg.src)
-          }
-        }
-
-        nextHistoryPaths = nextHistoryPaths.concat([nextImg])
-      }
-
-      while (nextHistoryPaths.length > maxInHistory) {
-        nextHistoryPaths.shift()!.remove()
-      }
-
-      if (
-        nextImg != null &&
-        (downloadScene ||
-          (nextSceneAllImages && nextSceneID !== 0 && nextImg && nextImg.src))
-      ) {
-        if (!_playedURLs.current.includes(nextImg.src)) {
-          _playedURLs.current.push(nextImg.src)
-        }
-      }
-    } else {
-      const newOffset = props.historyOffset + 1
-      nextImg =
-        _historyPaths.current[_historyPaths.current.length - 1 + newOffset]
-
-      // console.log('newOffset: ' + nextImg.src)
-      props.setHistoryOffset(newOffset)
-    }
-
-    if (!schedule) {
-      _historyPaths.current = nextHistoryPaths
-      props.setHistoryPaths(nextHistoryPaths)
-      setState({
-        ...state,
-        image: nextImg
-      })
-    } else {
-      let timeToNextFrame = getDuration(
-        {
-          timingFunction: timingTF,
-          time: timingDuration,
-          timeMin: timingDurationMin,
-          timeMax: timingDurationMax,
-          sinRate: timingSinRate,
-          bpmMulti: timingBPMMulti
-        },
-        0,
-        bpm
-      )
-
-      const durationAttr = nextImg?.getAttribute('duration')
-      if (durationAttr) {
-        timeToNextFrame = Math.max(timeToNextFrame, parseFloat(durationAttr))
-      }
-      if (props.setTimeToNextFrame) {
-        props.setTimeToNextFrame(timeToNextFrame)
-      }
-
-      // props.setHistoryPaths(nextHistoryPaths)
-      _historyPaths.current = nextHistoryPaths
-      // console.log('IMAGE CHANGE')
-      // console.log(`timeToNextFrame: ${timeToNextFrame}`)
-      setState({
-        image: nextImg,
-        timeToNextFrame,
-        toggleStrobe: strobe ? !state.toggleStrobe : state.toggleStrobe
-      })
-
-      if (
-        !(nextImg instanceof HTMLVideoElement && videoOption === VO.full) &&
-        !(
-          singleImage &&
-          _historyPaths.current.length > 0 &&
-          getSourceType(
-            _historyPaths.current[
-              _historyPaths.current.length - 1
-            ]!.getAttribute('source') as string
-          ) === ST.nimja
-        )
-      ) {
-        _timeout.current = window.setTimeout(() => {
-          // console.log('ADVANCE TIMEOUT ' + new Date().getTime())
-          advance(false, true)
-        }, timeToNextFrame)
-
-        // _timeout.current = window.setTimeout(
-        //   () => advance(false, true),
-        //   timeToNextFrame
-        // )
-      }
     }
   }
 

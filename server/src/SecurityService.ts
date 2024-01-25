@@ -64,7 +64,7 @@ class SecurityService {
   }
 
   public verifyToken(token: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       jwt.verify(
         token,
         this.jwtSecret,

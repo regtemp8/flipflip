@@ -24,7 +24,7 @@ export interface EasingCardProps {
 }
 
 function EasingCard(props: EasingCardProps) {
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   const easing = useAppSelector(props.easing.selector)
 
   return (

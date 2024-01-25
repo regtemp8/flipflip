@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { cx } from '@emotion/css'
-import wretch from 'wretch'
 
 import {
   AppBar,
@@ -66,7 +65,6 @@ import {
   selectAppPlayerTags,
   selectAppPlayerTagsIncludes,
   selectPlayerAllTags,
-  selectAppConfigCachingDirectory,
   selectAppPlayerCanInheritClipTags
 } from '../../store/app/selectors'
 import {
@@ -346,7 +344,6 @@ function PlayerBars(props: PlayerBarsProps) {
   const allTags = useAppSelector(selectPlayerAllTags())
   const tags = useAppSelector(selectAppPlayerTags(props.sceneID))
   const cachingEnabled = useAppSelector(selectAppConfigCachingEnabled())
-  const cachingDirectory = useAppSelector(selectAppConfigCachingDirectory())
   const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
   const clickToProgress = useAppSelector(
     selectAppConfigDisplaySettingsClickToProgress()
@@ -390,37 +387,340 @@ function PlayerBars(props: PlayerBarsProps) {
   const _drawerTimeout = useRef<any>()
   const _tagDrawerTimeout = useRef<any>()
   const _showVideoControls = useRef(false)
-  const _abortController = useRef(new AbortController())
+
+  const canChangeSource = useCallback(() => {
+    return (
+      !isDownloadScene && !isAudioScene && !isScriptScene && allTags != null
+    )
+  }, [allTags, isAudioScene, isDownloadScene, isScriptScene])
+
+  const copyImageToClipboard = useCallback(
+    (sourceURL: string) => {
+      let url = sourceURL
+      if (!url) {
+        url =
+          props.historyPaths[
+            props.historyPaths.length - 1 + props.historyOffset
+          ].src
+      }
+      const isFile = url.startsWith('file://')
+      const path = urlToPath(url, isWin32)
+      const imagePath = isFile ? path : url
+      if (
+        imagePath.toLocaleLowerCase().endsWith('.png') ||
+        imagePath.toLocaleLowerCase().endsWith('.jpg') ||
+        imagePath.toLocaleLowerCase().endsWith('.jpeg')
+      ) {
+        flipflip().clipboard.copyImageToClipboard(imagePath)
+      } else {
+        flipflip().clipboard.copyTextToClipboard(imagePath)
+      }
+    },
+    [isWin32, props.historyOffset, props.historyPaths]
+  )
+
+  const doDelete = useCallback(
+    async (path: string) => {
+      const errorMessage = await flipflip().api.deletePath(path)
+      if (errorMessage != null) {
+        setDeletePath(undefined)
+        setDeleteError(
+          'An error occurred while deleting the file: ' + errorMessage
+        )
+        console.error(errorMessage)
+      } else {
+        props.imagePlayerDeleteHack.fire()
+        onCloseDialog()
+      }
+    },
+    [props.imagePlayerDeleteHack]
+  )
+
+  const historyBack = useCallback(() => {
+    if (
+      !drawerHover ||
+      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
+    ) {
+      if (props.historyOffset > -(props.historyPaths.length - 1)) {
+        props.historyBack()
+      }
+    }
+  }, [drawerHover, props])
+
+  const historyForward = useCallback(() => {
+    if (
+      !drawerHover ||
+      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
+    ) {
+      if (props.historyOffset >= 0) {
+        props.imagePlayerAdvanceHacks[0][0].fire()
+      } else {
+        props.historyForward()
+      }
+    }
+  }, [drawerHover, props])
+
+  const prevSource = useCallback(() => {
+    props.navigateTagging(-1)
+  }, [props])
+
+  const nextSource = useCallback(() => {
+    props.navigateTagging(1)
+  }, [props])
+
+  const setFullscreen = useCallback(
+    (fullScreen: boolean) => {
+      dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
+      setFullScreen(fullScreen)
+    },
+    [dispatch]
+  )
+
+  const toggleFullscreen = useCallback(() => {
+    setFullscreen(!fullScreen)
+  }, [fullScreen, setFullscreen])
+
+  const navigateBack = useCallback(async () => {
+    setFullScreen(false)
+    props.goBack()
+  }, [props])
+
+  const onDeletePath = useCallback(
+    async (path: string) => {
+      const exists = await flipflip().api.pathExists(path)
+      if (exists) {
+        if (confirmFileDeletion) {
+          setDeletePath(path)
+        } else {
+          doDelete(path)
+        }
+      } else {
+        setDeletePath(undefined)
+        setDeleteError("This file doesn't exist, cannot delete")
+      }
+    },
+    [confirmFileDeletion, doDelete]
+  )
+
+  const onDelete = useCallback(() => {
+    if (
+      !drawerHover ||
+      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
+    ) {
+      const img =
+        props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+      const url = img.src
+      const isFile = url.startsWith('file://')
+      const path = urlToPath(url, isWin32)
+      if (isFile) {
+        onDeletePath(path)
+      }
+    }
+  }, [
+    drawerHover,
+    isWin32,
+    onDeletePath,
+    props.historyOffset,
+    props.historyPaths
+  ])
+
+  const onBlacklistFile = useCallback(
+    (source: string, fileToBlacklist: string) => {
+      if (confirmBlacklist) {
+        setSourceToBlacklist(source)
+        setFileToBlacklist(fileToBlacklist)
+      } else {
+        dispatch(blacklistFile(source, fileToBlacklist))
+      }
+    },
+    [confirmBlacklist, dispatch]
+  )
+
+  const onBlacklist = useCallback(() => {
+    const img =
+      props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+    if (img == null) return
+    const source = img.getAttribute('source')
+    const url = img.src
+    const isFile = url.startsWith('file://')
+    const path = urlToPath(url, isWin32)
+    const type = getSourceType(source)
+    if (
+      (!isFile && type !== ST.video && type !== ST.playlist) ||
+      type === ST.local
+    ) {
+      onBlacklistFile(source, isFile ? path : url)
+    }
+  }, [isWin32, onBlacklistFile, props.historyOffset, props.historyPaths])
+
+  const setPlayPause = useCallback(
+    (play: boolean) => {
+      if (play) {
+        props.play()
+      } else {
+        props.pause()
+      }
+    },
+    [props]
+  )
+
+  const playPause = useCallback(() => {
+    if (
+      !drawerHover ||
+      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
+    ) {
+      setPlayPause(!props.isPlaying)
+    }
+  }, [drawerHover, props.isPlaying, setPlayPause])
 
   useEffect(() => {
-    flipflip().events.onPlayerPlayPause(playPause, _abortController.current)
-    flipflip().events.onPlayerHistoryBack(historyBack, _abortController.current)
-    flipflip().events.onPlayerHistoryForward(
-      historyForward,
-      _abortController.current
-    )
-    flipflip().events.onPlayerNavigateBack(
-      navigateBack,
-      _abortController.current
-    )
-    flipflip().events.onPlayerDelete(doDelete, _abortController.current)
-    flipflip().events.onPlayerPrevSource(prevSource, _abortController.current)
-    flipflip().events.onPlayerNextSource(nextSource, _abortController.current)
+    const abortController = new AbortController()
+    flipflip().events.onPlayerPlayPause(playPause, abortController)
+    flipflip().events.onPlayerHistoryBack(historyBack, abortController)
+    flipflip().events.onPlayerHistoryForward(historyForward, abortController)
+    flipflip().events.onPlayerNavigateBack(navigateBack, abortController)
+    flipflip().events.onPlayerDelete(doDelete, abortController)
+    flipflip().events.onPlayerPrevSource(prevSource, abortController)
+    flipflip().events.onPlayerNextSource(nextSource, abortController)
     flipflip().events.onBlackListFile(async (source: string, file: string) => {
       await dispatch(blacklistFile(source, file))
-    }, _abortController.current)
+    }, abortController)
     flipflip().events.onGotoTagSource(async (sourceURL: string) => {
       await dispatch(playSceneFromLibrary(sourceURL, []))
-    }, _abortController.current)
+    }, abortController)
     flipflip().events.onGotoClipSource((sourceURL: string) => {
       dispatch(clipVideo(sourceURL, []))
-    }, _abortController.current)
+    }, abortController)
     flipflip().events.onRecentPictureGrid(
       props.onRecentPictureGrid,
-      _abortController.current
+      abortController
     )
 
     setFullscreen(fullScreen)
+
+    const onClick = (e: MouseEvent) => {
+      if (
+        isAudioScene ||
+        props.recentPictureGrid ||
+        drawerHover ||
+        tagDrawerHover ||
+        appBarHover
+      ) {
+        return
+      }
+      if (
+        (!props.isPlaying || clickToProgressWhilePlaying) &&
+        props.hasStarted
+      ) {
+        props.imagePlayerAdvanceHacks[0][0].fire()
+        // TODO Improve this to be able to advance specific grids
+        /* for (let x of props.imagePlayerAdvanceHacks) {
+          for (let y of x) {
+            y.fire();
+          }
+        } */
+      }
+    }
+
+    const onScroll = (e: WheelEvent) => {
+      if (props.recentPictureGrid || drawerHover) return
+      const volumeChange = (e.deltaY / 100) * -5
+      let newVolume = parseInt(videoVolume as any) + volumeChange
+      if (newVolume < 0) {
+        newVolume = 0
+      } else if (newVolume > 100) {
+        newVolume = 100
+      }
+      if (props.mainVideo) {
+        props.mainVideo.volume = newVolume / 100
+      }
+
+      dispatch(setSceneVideoVolume({ id: props.sceneID, value: newVolume }))
+    }
+    const showContextMenu = async (e: MouseEvent) => {
+      if (tutorial != null) return
+      // const img = props.recentPictureGrid
+      //   ? e.target
+      //   : props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+      // const url = img.src
+      // let source = img.getAttribute('source')
+      // const post = img.hasAttribute('post') ? img.getAttribute('post') : null
+      // const literalSource = source
+      // if (/^https?:\/\//g.exec(source) == null) {
+      //   const fileUrl = await flipflip().api.getFileUrl(source)
+      //   source = urlToPath(fileUrl, isWin32)
+      // }
+      // const isFile = url.startsWith('file://')
+      // const path = urlToPath(url, isWin32)
+      // const type = getSourceType(source)
+
+      // TODO show context menu
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      const focus = document.activeElement!.tagName.toLocaleLowerCase()
+      switch (e.key) {
+        case ' ':
+          if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+            e.preventDefault()
+            playPause()
+          }
+          break
+        case 'ArrowLeft':
+          if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+            e.preventDefault()
+            historyBack()
+          }
+          break
+        case 'ArrowRight':
+          if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+            e.preventDefault()
+            historyForward()
+          }
+          break
+        case 'Escape':
+          e.preventDefault()
+          navigateBack()
+          break
+        case 'c':
+          if (e.ctrlKey) {
+            e.preventDefault()
+            copyImageToClipboard('')
+          }
+          break
+        case 'f':
+          if (e.ctrlKey) {
+            e.preventDefault()
+            toggleFullscreen()
+          }
+          break
+        case 'b':
+          if (e.ctrlKey) {
+            e.preventDefault()
+            onBlacklist()
+          }
+          break
+        case 'Delete':
+          if (!drawerHover || focus !== 'input') {
+            if (cachingEnabled) {
+              e.preventDefault()
+              onDelete()
+            }
+          }
+          break
+        case '[':
+          if (canChangeSource()) {
+            e.preventDefault()
+            prevSource()
+          }
+          break
+        case ']':
+          if (canChangeSource()) {
+            e.preventDefault()
+            nextSource()
+          }
+          break
+      }
+    }
 
     window.addEventListener('contextmenu', showContextMenu, false)
     window.addEventListener('keydown', onKeyDown, false)
@@ -439,7 +739,7 @@ function PlayerBars(props: PlayerBarsProps) {
       _drawerTimeout.current = null
       _tagDrawerTimeout.current = null
 
-      _abortController.current.abort()
+      abortController.abort()
 
       window.removeEventListener('contextmenu', showContextMenu)
       window.removeEventListener('keydown', onKeyDown)
@@ -448,44 +748,39 @@ function PlayerBars(props: PlayerBarsProps) {
         window.removeEventListener('click', onClick)
       }
     }
-  }, [])
-
-  const onClick = (e: MouseEvent) => {
-    if (
-      isAudioScene ||
-      props.recentPictureGrid ||
-      drawerHover ||
-      tagDrawerHover ||
-      appBarHover
-    ) {
-      return
-    }
-    if ((!props.isPlaying || clickToProgressWhilePlaying) && props.hasStarted) {
-      props.imagePlayerAdvanceHacks[0][0].fire()
-      // TODO Improve this to be able to advance specific grids
-      /* for (let x of props.imagePlayerAdvanceHacks) {
-        for (let y of x) {
-          y.fire();
-        }
-      } */
-    }
-  }
-
-  const onScroll = (e: WheelEvent) => {
-    if (props.recentPictureGrid || drawerHover) return
-    const volumeChange = (e.deltaY / 100) * -5
-    let newVolume = parseInt(videoVolume as any) + volumeChange
-    if (newVolume < 0) {
-      newVolume = 0
-    } else if (newVolume > 100) {
-      newVolume = 100
-    }
-    if (props.mainVideo) {
-      props.mainVideo.volume = newVolume / 100
-    }
-
-    dispatch(setSceneVideoVolume({ id: props.sceneID, value: newVolume }))
-  }
+  }, [
+    appBarHover,
+    cachingEnabled,
+    canChangeSource,
+    clickToProgress,
+    clickToProgressWhilePlaying,
+    copyImageToClipboard,
+    dispatch,
+    doDelete,
+    drawerHover,
+    fullScreen,
+    historyBack,
+    historyForward,
+    isAudioScene,
+    navigateBack,
+    nextSource,
+    onBlacklist,
+    onDelete,
+    playPause,
+    prevSource,
+    props.hasStarted,
+    props.imagePlayerAdvanceHacks,
+    props.isPlaying,
+    props.mainVideo,
+    props.onRecentPictureGrid,
+    props.recentPictureGrid,
+    props.sceneID,
+    setFullscreen,
+    tagDrawerHover,
+    toggleFullscreen,
+    tutorial,
+    videoVolume
+  ])
 
   const openLink = (url: string) => {
     window.open(url, '_blank')?.focus()
@@ -540,274 +835,18 @@ function PlayerBars(props: PlayerBarsProps) {
     setDeleteError(undefined)
   }
 
-  const onBlacklistFile = (source: string, fileToBlacklist: string) => {
-    if (confirmBlacklist) {
-      setSourceToBlacklist(source)
-      setFileToBlacklist(fileToBlacklist)
-    } else {
-      dispatch(blacklistFile(source, fileToBlacklist))
-    }
-  }
-
   const onFinishBlacklistFile = () => {
     dispatch(blacklistFile(sourceToBlacklist as string, fileToBlacklist))
     onCloseDialog()
-  }
-
-  const onDeletePath = async (path: string) => {
-    const exists = await flipflip().api.pathExists(path)
-    if (exists) {
-      if (confirmFileDeletion) {
-        setDeletePath(path)
-      } else {
-        doDelete(path)
-      }
-    } else {
-      setDeletePath(undefined)
-      setDeleteError("This file doesn't exist, cannot delete")
-    }
-  }
-
-  const doDelete = async (path: string) => {
-    const errorMessage = await flipflip().api.deletePath(path)
-    if (errorMessage != null) {
-      setDeletePath(undefined)
-      setDeleteError(
-        'An error occurred while deleting the file: ' + errorMessage
-      )
-      console.error(errorMessage)
-    } else {
-      props.imagePlayerDeleteHack.fire()
-      onCloseDialog()
-    }
   }
 
   const onFinishDeletePath = () => {
     doDelete(deletePath as string)
   }
 
-  const historyBack = () => {
-    if (
-      !drawerHover ||
-      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
-    ) {
-      if (props.historyOffset > -(props.historyPaths.length - 1)) {
-        props.historyBack()
-      }
-    }
-  }
-
-  const historyForward = () => {
-    if (
-      !drawerHover ||
-      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
-    ) {
-      if (props.historyOffset >= 0) {
-        props.imagePlayerAdvanceHacks[0][0].fire()
-      } else {
-        props.historyForward()
-      }
-    }
-  }
-
-  const isPlaying = () => {
-    return props.isPlaying
-  }
-
-  const canDelete = () => {
-    return cachingEnabled
-  }
-
-  const canChangeSource = () => {
-    return (
-      !isDownloadScene && !isAudioScene && !isScriptScene && allTags != null
-    )
-  }
-
   const toggleFull = async () => {
     const fullScreen = toggleFullScreen()
     dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
-  }
-
-  const toggleFullscreen = () => {
-    setFullscreen(!fullScreen)
-  }
-
-  const setFullscreen = (fullScreen: boolean) => {
-    dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
-    setFullScreen(fullScreen)
-  }
-
-  const showContextMenu = async (e: MouseEvent) => {
-    if (tutorial != null) return
-    const img = props.recentPictureGrid
-      ? e.target
-      : props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
-    const url = img.src
-    let source = img.getAttribute('source')
-    const post = img.hasAttribute('post') ? img.getAttribute('post') : null
-    const literalSource = source
-    if (/^https?:\/\//g.exec(source) == null) {
-      const fileUrl = await flipflip().api.getFileUrl(source)
-      source = urlToPath(fileUrl, isWin32)
-    }
-    const isFile = url.startsWith('file://')
-    const path = urlToPath(url, isWin32)
-    const type = getSourceType(source)
-
-    // TODO show context menu
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement!.tagName.toLocaleLowerCase()
-    switch (e.key) {
-      case ' ':
-        if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-          e.preventDefault()
-          playPause()
-        }
-        break
-      case 'ArrowLeft':
-        if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-          e.preventDefault()
-          historyBack()
-        }
-        break
-      case 'ArrowRight':
-        if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-          e.preventDefault()
-          historyForward()
-        }
-        break
-      case 'Escape':
-        e.preventDefault()
-        navigateBack()
-        break
-      case 'c':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          copyImageToClipboard('')
-        }
-        break
-      case 'f':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          toggleFullscreen()
-        }
-        break
-      case 'b':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          onBlacklist()
-        }
-        break
-      case 'Delete':
-        if (!drawerHover || focus !== 'input') {
-          if (cachingEnabled) {
-            e.preventDefault()
-            onDelete()
-          }
-        }
-        break
-      case '[':
-        if (canChangeSource()) {
-          e.preventDefault()
-          prevSource()
-        }
-        break
-      case ']':
-        if (canChangeSource()) {
-          e.preventDefault()
-          nextSource()
-        }
-        break
-    }
-  }
-
-  const setPlayPause = (play: boolean) => {
-    if (play) {
-      props.play()
-    } else {
-      props.pause()
-    }
-  }
-
-  const navigateBack = async () => {
-    setFullScreen(false)
-    props.goBack()
-  }
-
-  const copyImageToClipboard = (sourceURL: string) => {
-    let url = sourceURL
-    if (!url) {
-      url =
-        props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
-          .src
-    }
-    const isFile = url.startsWith('file://')
-    const path = urlToPath(url, isWin32)
-    const imagePath = isFile ? path : url
-    if (
-      imagePath.toLocaleLowerCase().endsWith('.png') ||
-      imagePath.toLocaleLowerCase().endsWith('.jpg') ||
-      imagePath.toLocaleLowerCase().endsWith('.jpeg')
-    ) {
-      flipflip().clipboard.copyImageToClipboard(imagePath)
-    } else {
-      flipflip().clipboard.copyTextToClipboard(imagePath)
-    }
-  }
-
-  /* Menu and hotkey options DON'T DELETE */
-
-  const onDelete = () => {
-    if (
-      !drawerHover ||
-      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
-    ) {
-      const img =
-        props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
-      const url = img.src
-      const isFile = url.startsWith('file://')
-      const path = urlToPath(url, isWin32)
-      if (isFile) {
-        onDeletePath(path)
-      }
-    }
-  }
-
-  const onBlacklist = () => {
-    const img =
-      props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
-    if (img == null) return
-    const source = img.getAttribute('source')
-    const url = img.src
-    const isFile = url.startsWith('file://')
-    const path = urlToPath(url, isWin32)
-    const type = getSourceType(source)
-    if (
-      (!isFile && type !== ST.video && type !== ST.playlist) ||
-      type === ST.local
-    ) {
-      onBlacklistFile(source, isFile ? path : url)
-    }
-  }
-
-  const playPause = () => {
-    if (
-      !drawerHover ||
-      document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
-    ) {
-      setPlayPause(!props.isPlaying)
-    }
-  }
-
-  const prevSource = () => {
-    props.navigateTagging(-1)
-  }
-
-  const nextSource = () => {
-    props.navigateTagging(1)
   }
 
   const inheritClipTags =
@@ -1106,7 +1145,6 @@ function PlayerBars(props: PlayerBarsProps) {
                   </AccordionSummary>
                   <AccordionDetails>
                     <AudioCard
-                      sidebar
                       sceneID={props.sceneID}
                       scenePaths={props.historyPaths}
                       startPlaying
@@ -1165,7 +1203,6 @@ function PlayerBars(props: PlayerBarsProps) {
                           tagID={tag}
                           libraryID={libraryID}
                           sceneID={props.sceneID}
-                          classes={classes}
                         />
                       ))}
                     </div>
@@ -1192,8 +1229,8 @@ function PlayerBars(props: PlayerBarsProps) {
                   getSourceType(videoSourceURL) === ST.video && (
                     <VideoControl
                       video={props.mainVideo}
-                      clipID={clipID || null}
-                      clipValue={clipValue || null}
+                      clipID={clipID}
+                      clipValue={clipValue}
                       useHotkeys
                       skip={videoSkip}
                       onChangeVolume={() => {}}

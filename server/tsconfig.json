@@ -16,8 +16,8 @@
     "jsx": "react-jsx",
     "paths": {
       "*": ["node_modules/*"]
-    }
-    "types": []
+    },
+    "types": ["dom-screen-wake-lock"]
   },
   "include": ["src/**/*"]
 }

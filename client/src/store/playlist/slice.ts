@@ -13,7 +13,9 @@ export const initialPlaylistState: EntryState<Playlist> = {
   entries: {}
 }
 
-export default function createPlaylistReducer(playlistState?: EntryState<Playlist>) {
+export default function createPlaylistReducer(
+  playlistState?: EntryState<Playlist>
+) {
   return createPlaylistSlice(playlistState).reducer
 }
 
@@ -24,7 +26,10 @@ function createPlaylistSlice(playlistState?: EntryState<Playlist>) {
     // `createSlice` will infer the state type from the `initialState` argument
     initialState,
     reducers: {
-      setPlaylistSlice: (state, action: PayloadAction<EntryState<Playlist>>) => {
+      setPlaylistSlice: (
+        state,
+        action: PayloadAction<EntryState<Playlist>>
+      ) => {
         setEntrySlice(state, action.payload)
       },
       setPlaylist: (state, action: PayloadAction<Playlist>) => {

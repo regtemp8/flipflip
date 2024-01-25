@@ -9,16 +9,16 @@ import { useAppSelector } from '../../store/hooks'
 import { selectSceneSelectOptions } from '../../store/scene/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    searchSelect: {
-      minWidth: 200,
-      maxWidth: `calc(100% - ${theme.spacing(7)})`,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900]
-    },
-    select: {
-      color: grey[900]
-    }
-  }))
+  searchSelect: {
+    minWidth: 200,
+    maxWidth: `calc(100% - ${theme.spacing(7)})`,
+    maxHeight: theme.mixins.toolbar.minHeight,
+    color: grey[900]
+  },
+  select: {
+    color: grey[900]
+  }
+}))
 
 export interface SceneSelectProps {
   value: number
@@ -48,7 +48,7 @@ function SceneSelect(props: SceneSelectProps) {
     }
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Select
       className={classes.select}

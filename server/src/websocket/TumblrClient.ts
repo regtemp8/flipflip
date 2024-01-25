@@ -34,10 +34,10 @@ export default class TumblrClient {
     tokenSecret: string,
     blogID: string,
     offset: number
-  ): Promise<any[]> {
+  ): Promise<unknown[]> {
     return await this.getClient(consumerKey, consumerSecret, token, tokenSecret)
       .blogPosts(blogID, { offset })
-      .then((data: any) => {
+      .then((data) => {
         const images = []
         for (const post of data.posts) {
           // Sometimes photos are listed separately
@@ -59,11 +59,11 @@ export default class TumblrClient {
           if (post.body != null) {
             const regex = /<img[^(?:src|/>)]*src=["']([^"']*)[^>]*>/g
             let imageSource
-            while ((imageSource = regex.exec(post.body)) !== null) {
+            while ((imageSource = regex.exec(post.body)) != null) {
               images.push(imageSource[1])
             }
             const regex2 = /<source[^(?:src|/>)]*src=["']([^"']*)[^>]*>/g
-            while ((imageSource = regex2.exec(post.body)) !== null) {
+            while ((imageSource = regex2.exec(post.body)) != null) {
               images.push(imageSource[1])
             }
           }
@@ -81,7 +81,7 @@ export default class TumblrClient {
     consumerSecret: string,
     token: string,
     tokenSecret: string
-  ): Promise<any> {
+  ): Promise<unknown[]> {
     const client = this.getClient(
       consumerKey,
       consumerSecret,
@@ -90,7 +90,7 @@ export default class TumblrClient {
     )
     return await client
       .userFollowing({ limit: 0 })
-      .then((data: any) => data.total_blogs)
+      .then((data) => [data.total_blogs])
   }
 
   async onRequestTumblrBlogs(
@@ -99,14 +99,14 @@ export default class TumblrClient {
     token: string,
     tokenSecret: string,
     offset: number
-  ): Promise<any[]> {
+  ): Promise<unknown[]> {
     const client = this.getClient(
       consumerKey,
       consumerSecret,
       token,
       tokenSecret
     )
-    return await client.userFollowing({ offset }).then((data: any) => {
+    return await client.userFollowing({ offset }).then((data) => {
       const following = []
       for (const blog of data.blogs) {
         const blogURL = 'http://' + blog.name + '.tumblr.com/'

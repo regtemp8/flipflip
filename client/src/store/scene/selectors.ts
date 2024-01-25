@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getActiveSceneID } from '../app/thunks'
 import { type RootState } from '../store'
-import { type EntryState, getEntry } from '../EntryState'
+import { getEntry } from '../EntryState'
 import { AppStorageImport, initialAppStorageImport } from '../AppStorageImport'
 import type TimingSettings from './TimingSettings'
 import type Scene from './Scene'
@@ -29,9 +29,7 @@ const getSceneOrSceneSettings = (
   state: RootState,
   id?: number
 ): Scene | SceneSettings => {
-  return id != null
-    ? getEntry(state.scene, id)
-    : state.app.config.defaultScene
+  return id != null ? getEntry(state.scene, id) : state.app.config.defaultScene
 }
 
 export const selectSceneFadeExp = (id?: number) => {
@@ -1319,7 +1317,7 @@ export const selectVideoClipperSceneID = () => {
 }
 
 export const selectVideoClipperSceneVideoVolume = () => {
-  return (state: RootState) => getVideoClipperScene(state).volume
+  return (state: RootState) => getVideoClipperScene(state).videoVolume
 }
 
 export const selectSceneAudioPlaylistDuration = (

@@ -756,9 +756,7 @@ export function generateScenes(
         }
       }
       genSources = reduceList(
-        randomizeList(
-          removeDuplicatesBy((s) => s.url, genSources)
-        ),
+        randomizeList(removeDuplicatesBy((s) => s.url, genSources)),
         newScene.generatorMax
       )
       genSources = copy<LibrarySource[]>(genSources)
@@ -889,7 +887,7 @@ function getNewSources(
   state: RootState
 ) {
   // dedup
-  newSources = [...new Set(newSources)];
+  newSources = [...new Set(newSources)]
   const sourceURLs = originalSources.map((s) => s.url)
   newSources = newSources.filter((s) => !sourceURLs.includes(s))
 
@@ -1021,7 +1019,9 @@ export function addSource(type: string, sceneID?: number, ...args: any[]) {
           }
           break
         case AF.list:
-          newSources = Array.from((args[0] as string).trim().split("\n")).filter((s: string) => s.length > 0)
+          newSources = Array.from(
+            (args[0] as string).trim().split('\n')
+          ).filter((s: string) => s.length > 0)
           break
         case AF.directory:
           newSources = await flipflip().api.openDirectories()

@@ -27,24 +27,24 @@ import {
 import { useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    fullWidth: {
-      width: '100%'
-    },
-    noPadding: {
-      padding: '0 !important'
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0
-    },
-    fontDivider: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(2)
-    },
-    fontProgress: {
-      position: 'absolute'
-    }
-  }))
+  fullWidth: {
+    width: '100%'
+  },
+  noPadding: {
+    padding: '0 !important'
+  },
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  fontDivider: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2)
+  },
+  fontProgress: {
+    position: 'absolute'
+  }
+}))
 
 export interface FontOptionsProps {
   name: string
@@ -53,7 +53,7 @@ export interface FontOptionsProps {
 }
 
 function FontOptions(props: FontOptionsProps) {
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   const border = useAppSelector(
     selectCaptionScriptFontSettingsBorder(props.captionScriptID, props.type)
   )

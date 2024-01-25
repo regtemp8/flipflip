@@ -24,20 +24,20 @@ import {
   selectAppConfigDisplaySettingsMinVideoSize,
   selectAppConfigDisplaySettingsMaxInHistory,
   selectAppConfigDisplaySettingsMaxInMemory,
-  selectAppConfigDisplaySettingsMaxLoadingAtOnce
+  selectAppConfigDisplaySettingsMaxLoadingAtOnce,
+  selectAppLibrary
 } from '../../store/app/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectLibrarySources } from '../../store/librarySource/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    grey: {
-      color: theme.palette.text.secondary
-    }
-  }))
+  grey: {
+    color: theme.palette.text.secondary
+  }
+}))
 
 function PlayerNumCard() {
   const dispatch = useAppDispatch()
-  const library = useAppSelector(selectLibrarySources())
+  const library = useAppSelector(selectAppLibrary())
   const ignoredTags = useAppSelector(
     selectAppConfigDisplaySettingsIgnoredTags()
   )
@@ -46,7 +46,7 @@ function PlayerNumCard() {
     dispatch(setConfigDisplaySettingsIgnoredTags(selectedTags))
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={12}>
@@ -138,10 +138,12 @@ function PlayerNumCard() {
             <LibrarySearch
               displaySources={library}
               filters={ignoredTags}
+              isLibrary
               isClearable
               onlyTagsAndTypes
               showCheckboxes
               withBrackets
+              placeholder={'Search ...'}
               hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
             />
