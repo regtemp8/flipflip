@@ -17,27 +17,29 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import { getSourceType, ST } from 'flipflip-common'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { clipLibrarySource } from '../../store/app/thunks'
+import { selectLibrarySourceURLs } from '../../store/librarySource/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    noScroll: {
-      overflow: 'visible'
-    },
-    progress: {
-      position: 'absolute',
-      right: 20
-    }
-  }))
+  noScroll: {
+    overflow: 'visible'
+  },
+  progress: {
+    position: 'absolute',
+    right: 20
+  }
+}))
 
 export interface BatchClipDialogProps {
   open: boolean
-  selected: string[]
+  selected: number[]
   onCloseDialog: () => void
 }
 
 function BatchClipDialog(props: BatchClipDialogProps) {
   const dispatch = useAppDispatch()
+  const sourceURLs = useAppSelector(selectLibrarySourceURLs(props.selected))
   const [clipOffset, setClipOffset] = useState([0, 0])
   const [creatingClips, setCreatingClips] = useState(false)
 
@@ -77,12 +79,12 @@ function BatchClipDialog(props: BatchClipDialogProps) {
     }
     const createBatchClips = () => {
       index++
-      if (index === props.selected.length) {
+      if (index === sourceURLs.length) {
         onCloseDialog()
         return
       }
 
-      const sourceURL = props.selected[index]
+      const sourceURL = sourceURLs[index]
       const type = getSourceType(sourceURL)
       if (type === ST.video) {
         const video = document.createElement('video')
@@ -110,7 +112,7 @@ function BatchClipDialog(props: BatchClipDialogProps) {
     props.onCloseDialog()
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   return (
     <Dialog
       open={props.open}

@@ -169,12 +169,12 @@ export interface SourceListItemProps {
   onDelete: (sourceID: number) => void
   onEditBlacklist: (sourceID: number) => void
   onEndEdit: (newURL: string) => void
-  onOpenClipMenu: (sourceID: number) => void
-  onOpenWeightMenu: (sourceID: number) => void
+  onOpenClipMenu: (sourceID: number, e: MouseEvent) => void
+  onOpenWeightMenu: (sourceID: number, e: MouseEvent) => void
   onRemove: (sourceID: number) => void
   onSourceOptions: (sourceID: number) => void
   onStartEdit: (sourceID: number) => void
-  onToggleSelect: () => void
+  onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
   savePosition: () => void
 }
 
@@ -205,7 +205,7 @@ function SourceListItem(props: SourceListItemProps) {
 
   useEffect(() => {
     setUrlInput(url)
-  }, [props.source])
+  }, [url])
 
   const onSourceIconClick = async (e: MouseEvent<HTMLButtonElement>) => {
     const sourceURL = url as string
@@ -448,7 +448,9 @@ function SourceListItem(props: SourceListItemProps) {
                   label={weight || '1'}
                   color="default"
                   size="small"
-                  onClick={() => props.onOpenWeightMenu(props.source)}
+                  onClick={(e: MouseEvent) =>
+                    props.onOpenWeightMenu(props.source, e)
+                  }
                 />
               </React.Fragment>
             )}
@@ -495,7 +497,9 @@ function SourceListItem(props: SourceListItemProps) {
                     '/' +
                     clips.length
                   }
-                  onClick={() => props.onOpenClipMenu(props.source)}
+                  onClick={(e: MouseEvent) =>
+                    props.onOpenClipMenu(props.source, e)
+                  }
                   color="primary"
                   size="small"
                 />

@@ -1,4 +1,4 @@
-import { type MouseEvent, useEffect, useState } from 'react'
+import { type MouseEvent, useCallback, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -63,11 +63,7 @@ function CacheCard() {
   const [cacheSize, setCacheSize] = useState('--')
   const [clearCacheAlert, setClearCacheAlert] = useState(false)
 
-  useEffect(() => {
-    calculateCacheSize()
-  }, [maxSize, directory])
-
-  const calculateCacheSize = async () => {
+  const calculateCacheSize = useCallback(async () => {
     const cachePath = (await getCachePath(directory)) as string
     if (maxSize !== 0) {
       if (await flipflip().api.pathExists(cachePath)) {
@@ -78,7 +74,11 @@ function CacheCard() {
     }
 
     setCachePath(cachePath)
-  }
+  }, [maxSize, directory])
+
+  useEffect(() => {
+    calculateCacheSize()
+  }, [calculateCacheSize])
 
   const onCloseClear = () => {
     setClearCacheAlert(false)

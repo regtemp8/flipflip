@@ -15,8 +15,8 @@ import {
 } from '../../store/app/slice'
 import {
   selectAppThemeMode,
-  selectAppThemePalettePrimaryMain,
-  selectAppThemePaletteSecondaryMain
+  selectAppThemePalettePrimary,
+  selectAppThemePaletteSecondary
 } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -44,14 +44,14 @@ function ThemeCard() {
       <div className={cx(classes.themePicker, classes.gutterBottom)}>
         <Typography>Primary Color</Typography>
         <ThemeColorPicker
-          selector={selectAppThemePalettePrimaryMain()}
+          selector={selectAppThemePalettePrimary()}
           action={setThemePalettePrimary}
         />
       </div>
       <div className={classes.themePicker}>
         <Typography>Secondary Color</Typography>
         <ThemeColorPicker
-          selector={selectAppThemePaletteSecondaryMain()}
+          selector={selectAppThemePaletteSecondary()}
           action={setThemePaletteSecondary}
         />
       </div>

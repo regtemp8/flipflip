@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, {
+  ChangeEvent,
+  useEffect,
+  useState,
+  useRef,
+  useCallback
+} from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
@@ -37,37 +43,43 @@ import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
 import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    emptyMessage: {
-      textAlign: 'center',
-      marginTop: '25%'
-    },
-    emptyMessage2: {
-      textAlign: 'center'
-    },
-    marginRight: {
-      marginRight: theme.spacing(1)
-    },
-    arrow: {
-      position: 'absolute',
-      bottom: 20,
-      right: 35,
-      fontSize: 220,
-      transform: 'rotateY(0deg) rotate(45deg)'
-    },
-    arrowMessage: {
-      position: 'absolute',
-      bottom: 260,
-      right: 160
-    },
-    scenePick: {
-      height: 410
-    }
-  }))
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: '25%'
+  },
+  emptyMessage2: {
+    textAlign: 'center'
+  },
+  marginRight: {
+    marginRight: theme.spacing(1)
+  },
+  arrow: {
+    position: 'absolute',
+    bottom: 20,
+    right: 35,
+    fontSize: 220,
+    transform: 'rotateY(0deg) rotate(45deg)'
+  },
+  arrowMessage: {
+    position: 'absolute',
+    bottom: 260,
+    right: 160
+  },
+  scenePick: {
+    height: 410
+  }
+}))
+
+interface SortableVirtualListProps {
+  height: number
+  width: number
+  yOffset: number
+  sources: number[]
+}
 
 export interface ScriptSourceListProps {
   showHelp: boolean
   sources: number[]
-  tutorial: string
   selected: number[]
   onUpdateSelected: (selected: number[]) => void
 }
@@ -98,11 +110,26 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
 
+  const savePosition = useCallback(() => {
+    const sortableList = document.getElementById('sortable-list')
+    if (sortableList) {
+      const scrollElement = sortableList.firstElementChild
+      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
+      dispatch(setScriptYOffset(scrollTop))
+    }
+  }, [dispatch])
+
   useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = true
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') _shiftDown.current = false
+    }
+
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('keyup', onKeyUp, false)
     _shiftDown.current = false
-
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
@@ -110,13 +137,13 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       _lastChecked.current = undefined
       savePosition()
     }
-  }, [])
+  }, [savePosition])
 
   useEffect(() => {
     if (firstSourceURL === '') {
       setIsEditing(props.sources[0])
     }
-  }, [props.sources])
+  }, [props.sources, firstSourceURL])
 
   const onSortEnd = ({
     oldIndex,
@@ -130,31 +157,13 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     dispatch(swapScripts(oldSourceID, newSourceID))
   }
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = true
-  }
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.key === 'Shift') _shiftDown.current = false
-  }
-
-  const savePosition = () => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setScriptYOffset(scrollTop))
-    }
-  }
-
   const clearLastSelected = () => {
     if (!sourceOptions) {
       setLastSelected(undefined)
     }
   }
 
-  const onSourceOptions = (scriptID: number, e: MouseEvent) => {
-    e.stopPropagation()
+  const onSourceOptions = (scriptID: number) => {
     setSourceOptions(scriptID)
     setLastSelected(scriptID)
   }
@@ -182,8 +191,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     dispatch(setScriptsRemoveOne(scriptID))
   }
 
-  const onToggleSelect = (e: MouseEvent) => {
-    const value = (e.currentTarget as HTMLInputElement).value
+  const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value
     const scriptID = Number(value)
     if (specialMode === SP.selectSingle) {
       props.onUpdateSelected([scriptID])
@@ -250,8 +259,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     }
   }
 
-  const onChangeScene = (sceneID: string) => {
-    setPlayWithScene(Number(sceneID))
+  const onChangeScene = (sceneID: number) => {
+    setPlayWithScene(sceneID)
   }
 
   function VirtualList(props: {
@@ -280,7 +289,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
 
   function Row(props: any) {
     const { index } = props
-    const SortableItem = SortableElement(
+    const SortableItem = SortableElement<{ index: any; value: any }>(
       ({ value }: { value: { index: number; style: any; data: any[] } }) => {
         const index = value.index
         const scriptID: number = value.data[index]
@@ -309,7 +318,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     return <SortableItem index={index} value={props} />
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
       <React.Fragment>
@@ -349,7 +358,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     )
   }
 
-  const SortableVirtualList = SortableContainer(VirtualList)
+  const SortableVirtualList =
+    SortableContainer<SortableVirtualListProps>(VirtualList)
   return (
     <React.Fragment>
       <AutoSizer>
@@ -406,7 +416,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             <SceneSelect
               autoFocus
               menuIsOpen
-              value={playWithScene}
+              value={playWithScene ?? 0}
               onChange={onChangeScene}
             />
           </DialogContent>

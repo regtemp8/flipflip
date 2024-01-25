@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useEffect, useState } from 'react'
+import React, { type MouseEvent, useEffect, useState, useCallback } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -360,39 +360,7 @@ function ScriptLibrary() {
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
 
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown, false)
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (tutorial === SLT.final && drawerOpen) {
-      setDrawerOpen(false)
-    }
-  }, [tutorial, drawerOpen])
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'm' || e.key === 'µ')
-    ) {
-      toggleMarked()
-    } else if (e.key === 'Escape' && specialMode != null) {
-      goBack()
-    }
-  }
-
-  const onBatchTag = () => {
-    onCloseDialog()
-    dispatch(batchTag())
-  }
-
-  const goBack = () => {
+  const goBack = useCallback(() => {
     if (specialMode === SP.batchTag) {
       dispatch(setScriptSelected([]))
       setSelectedTags([])
@@ -400,6 +368,41 @@ function ScriptLibrary() {
     } else {
       dispatch(setRouteGoBack())
     }
+  }, [dispatch, specialMode])
+
+  const toggleMarked = useCallback(() => {
+    dispatch(setCaptionScriptsToggleMarked(displaySources))
+  }, [dispatch, displaySources])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'm' || e.key === 'µ')
+      ) {
+        toggleMarked()
+      } else if (e.key === 'Escape' && specialMode != null) {
+        goBack()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown, false)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [goBack, specialMode, toggleMarked])
+
+  useEffect(() => {
+    if (tutorial === SLT.final && drawerOpen) {
+      setDrawerOpen(false)
+    }
+  }, [tutorial, drawerOpen])
+
+  const onBatchTag = () => {
+    onCloseDialog()
+    dispatch(batchTag())
   }
 
   const onUpdateFilters = (filters: string[]) => {
@@ -497,10 +500,6 @@ function ScriptLibrary() {
     dispatch(setScriptSelected(newSelected))
   }
 
-  const toggleMarked = () => {
-    dispatch(setCaptionScriptsToggleMarked(displaySources))
-  }
-
   const batchTagOverwrite = () => {
     dispatch(setCaptionScriptsTags(selected, selectedTags))
     onCloseDialog()
@@ -589,6 +588,7 @@ function ScriptLibrary() {
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
+                isScript
                 isCreatable
                 onlyUsed
                 noTypes
@@ -959,6 +959,7 @@ function ScriptLibrary() {
               displaySources={scripts}
               filters={selectedTags}
               placeholder={'Tag These Sources'}
+              isScript
               isClearable
               onlyTags
               showCheckboxes

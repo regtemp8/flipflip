@@ -207,6 +207,7 @@ export default function SourceScraper(props: SourceScraperProps) {
         <Dialog open={true} onClose={onCloseDialog}>
           <DialogContent style={{ height: 600 }}>
             <iframe
+              title="Captcha Form"
               sandbox="allow-forms"
               src={captcha.captcha}
               height={'100%'}

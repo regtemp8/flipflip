@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { animated } from 'react-spring'
 import wretch from 'wretch'
 
@@ -136,6 +136,782 @@ export default function ImageView(props: ImageViewProps) {
   const _prevBackgroundType = useRef<string>()
   const _prevHasStarted = useRef<boolean>()
 
+  const _applyImage = useCallback(
+    (forceBG = false) => {
+      // console.log(`APPLY IMAGE: ${props.uuid}`)
+      const el = _contentRef.current
+      const bg = _backgroundRef.current
+      const img = props.image
+      // console.log('el: ' + !!el)
+      // console.log('img: ' + !!img)
+      // console.log('forceBG: ' + forceBG)
+      // console.log('======================')
+      if (!el || !img) {
+        return
+      }
+
+      const firstChild = el.firstChild as
+        | HTMLImageElement
+        | HTMLVideoElement
+        | HTMLIFrameElement
+      if (
+        !forceBG &&
+        firstChild &&
+        firstChild.src === img.src &&
+        firstChild.getAttribute('start') === img.getAttribute('start') &&
+        firstChild.getAttribute('end') === img.getAttribute('end')
+      ) {
+        return
+      }
+
+      if (
+        !forceBG &&
+        img instanceof HTMLVideoElement &&
+        img.hasAttribute('subtitles')
+      ) {
+        try {
+          const subURL = img.getAttribute('subtitles') as string
+          wretch(subURL)
+            .get()
+            .blob((blob) => {
+              const track: any = document.createElement('track')
+              track.kind = 'captions'
+              track.label = 'English'
+              track.srclang = 'en'
+              track.src = URL.createObjectURL(blob)
+              if (img.textTracks.length === 0) {
+                img.append(track)
+              } else {
+                img.textTracks[0] = track
+              }
+              track.mode = 'showing'
+              img.textTracks[0].mode = 'showing'
+            })
+        } catch (e) {
+          console.error(e)
+        }
+      }
+
+      const videoLoop = (v: any) => {
+        if (
+          !el ||
+          !el.parentElement ||
+          parseFloat(el.parentElement.style.opacity) === 0.99 ||
+          v.paused ||
+          _timeouts.current == null
+        ) {
+          return
+        }
+        if (v.ended) {
+          v.onended(null)
+          return
+        }
+
+        if (
+          !props.pictureGrid &&
+          _hasStarted.current &&
+          _crossFade.current &&
+          _crossFadeAudio.current &&
+          v instanceof HTMLVideoElement
+        ) {
+          const volume = v.hasAttribute('volume')
+            ? parseInt(v.getAttribute('volume') as string)
+            : _videoVolume.current
+          v.volume =
+            (volume / 100) *
+            parseFloat(
+              el.parentElement!.parentElement!.getAttribute('volume') as string
+            )
+        }
+        if (v.hasAttribute('start') && v.hasAttribute('end')) {
+          const start = v.getAttribute('start')
+          const end = v.getAttribute('end')
+          if (v.currentTime > end) {
+            v.onended(null)
+            v.currentTime = start
+          }
+        }
+        _timeouts.current.push(window.setTimeout(videoLoop, 100, v))
+      }
+
+      const drawLoop = (
+        v: any,
+        c: CanvasRenderingContext2D,
+        w: number,
+        h: number
+      ) => {
+        if (
+          !el ||
+          !el.parentElement ||
+          parseFloat(el.parentElement.style.opacity) === 0.99 ||
+          _timeouts.current == null
+        ) {
+          return
+        }
+        c.drawImage(v, 0, 0, w, h)
+        _timeouts.current.push(window.setTimeout(drawLoop, 20, v, c, w, h))
+      }
+
+      const extraDrawLoop = (v: any, w: number, h: number) => {
+        if (
+          !el ||
+          !el.parentElement ||
+          parseFloat(el.parentElement.style.opacity) === 0.99 ||
+          v.ended ||
+          v.paused ||
+          _timeouts.current == null
+        ) {
+          return
+        }
+        for (const canvas of document.getElementsByClassName(
+          'canvas-' +
+            props.gridCoordinates![0] +
+            '-' +
+            props.gridCoordinates![1]
+        )) {
+          const context = (canvas as HTMLCanvasElement).getContext(
+            '2d'
+          ) as CanvasRenderingContext2D
+          context.drawImage(v, 0, 0, w, h)
+        }
+        _timeouts.current.push(window.setTimeout(extraDrawLoop, 20, v, w, h))
+      }
+
+      const extraBGDrawLoop = (v: any, w: number, h: number) => {
+        if (
+          !el ||
+          !el.parentElement ||
+          parseFloat(el.parentElement.style.opacity) === 0.99 ||
+          _timeouts.current == null
+        ) {
+          return
+        }
+        for (const canvas of document.getElementsByClassName(
+          'canvas-bg-' +
+            props.gridCoordinates![0] +
+            '-' +
+            props.gridCoordinates![1]
+        )) {
+          const context = (canvas as HTMLCanvasElement).getContext(
+            '2d'
+          ) as CanvasRenderingContext2D
+          context.drawImage(v, 0, 0, w, h)
+        }
+        _timeouts.current.push(window.setTimeout(extraBGDrawLoop, 20, v, w, h))
+      }
+
+      let parentWidth = el.offsetWidth
+      let parentHeight = el.offsetHeight
+      if (props.fitParent) {
+        parentWidth = el.parentElement!.offsetWidth
+        parentHeight = el.parentElement!.offsetHeight
+      }
+      if (parentWidth === 0 || parentHeight === 0) {
+        parentWidth = window.innerWidth
+        parentHeight = window.innerHeight
+      }
+      if (
+        parentHeight !== _parentHeight.current ||
+        parentWidth !== _parentWidth.current
+      ) {
+        _parentHeight.current = parentHeight
+        _parentWidth.current = parentWidth
+      }
+      const parentAspect = parentWidth / parentHeight
+      let imgWidth = 1
+      let imgHeight = 1
+      let scale = 1
+      let bgscale = 1
+      let type = null
+      if (img instanceof HTMLImageElement) {
+        imgWidth = img.width
+        imgHeight = img.height
+      } else if (img instanceof HTMLVideoElement) {
+        type = ST.video
+        imgWidth = img.videoWidth
+        imgHeight = img.videoHeight
+        if (img.paused) img.play().catch((err) => console.warn(err))
+      } else if (img instanceof HTMLIFrameElement) {
+        type = ST.nimja
+      }
+      let imgAspect = imgWidth / imgHeight
+
+      const rotate =
+        !props.pictureGrid &&
+        ((type === ST.video &&
+          ((_videoOrientation.current === OT.forceLandscape &&
+            imgWidth < imgHeight) ||
+            (_videoOrientation.current === OT.forcePortrait &&
+              imgWidth > imgHeight))) ||
+          (type == null &&
+            ((_imageOrientation.current === OT.forceLandscape &&
+              imgWidth < imgHeight) ||
+              (_imageOrientation.current === OT.forcePortrait &&
+                imgWidth > imgHeight))))
+
+      const blur =
+        !props.pictureGrid &&
+        _backgroundType.current === BT.blur &&
+        type !== ST.nimja
+      let bgImg: any
+      if (blur) {
+        if (img.src.endsWith('.gif')) {
+          bgImg = img.cloneNode()
+        } else {
+          bgImg = document.createElement('canvas')
+
+          const context = bgImg.getContext('2d')
+          bgImg.width = parentWidth
+          bgImg.height = parentHeight
+
+          if (!_crossFade.current) {
+            clearTimeouts()
+          }
+          if (type == null) {
+            context.drawImage(img, 0, 0, parentWidth, parentHeight)
+          } else if (type === ST.video) {
+            if (forceBG) {
+              drawLoop(img, context, parentWidth, parentHeight)
+              if (props.gridCoordinates) {
+                extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
+                extraBGDrawLoop(img, parentWidth, parentHeight)
+              }
+            } else {
+              img.onplay = () => {
+                videoLoop(img)
+                if (props.gridCoordinates) {
+                  extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
+                }
+              }
+              drawLoop(img, context, parentWidth, parentHeight)
+              if (props.gridCoordinates) {
+                extraBGDrawLoop(img, parentWidth, parentHeight)
+              }
+            }
+          }
+        }
+
+        if (rotate) {
+          bgImg.style.transform = 'rotate(270deg)'
+          if (imgAspect > parentAspect) {
+            if (imgWidth > imgHeight) {
+              bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
+              bgImg.style.width = imgWidth * bgscale + 'px'
+              bgImg.style.height = parentWidth + 'px'
+              bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
+              bgImg.style.marginLeft =
+                (parentWidth - imgWidth * bgscale) / 2 + 'px'
+            } else {
+              bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
+              bgImg.style.width = parentHeight + 'px'
+              bgImg.style.height = imgHeight * bgscale + 'px'
+              bgImg.style.marginTop =
+                (parentHeight - imgHeight * bgscale) / 2 + 'px'
+              bgImg.style.marinLeft = (parentWidth - parentHeight) / 2 + 'px'
+            }
+          } else {
+            if (imgWidth > imgHeight) {
+              bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
+              bgImg.style.width = imgWidth * bgscale + 'px'
+              bgImg.style.height = parentWidth + 'px'
+              bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
+              bgImg.style.marginLeft =
+                (parentWidth - imgWidth * bgscale) / 2 + 'px'
+            } else {
+              bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
+              bgImg.style.width = parentHeight + 'px'
+              bgImg.style.height = imgHeight * bgscale + 'px'
+              bgImg.style.marginTop =
+                parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
+              bgImg.style.marginLeft = (parentWidth - parentHeight) / 2 + 'px'
+            }
+          }
+        } else {
+          if (imgAspect < parentAspect) {
+            bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
+            bgImg.style.width = '100%'
+            bgImg.style.height = imgHeight * bgscale + 'px'
+            bgImg.style.marginTop =
+              parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
+            bgImg.style.marginLeft = '0'
+          } else {
+            bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
+            bgImg.style.width = imgWidth * bgscale + 'px'
+            bgImg.style.height = '100%'
+            bgImg.style.marginTop = '0'
+            bgImg.style.marginLeft =
+              parentWidth / 2 - (imgWidth * bgscale) / 2 + 'px'
+          }
+        }
+      }
+
+      if (!forceBG && img instanceof HTMLVideoElement) {
+        if (!props.pictureGrid && _hasStarted.current) {
+          const volume = img.hasAttribute('volume')
+            ? parseInt(img.getAttribute('volume') as string)
+            : _videoVolume.current
+          img.volume = volume / 100
+        } else {
+          img.volume = 0
+        }
+        img.playbackRate = img.hasAttribute('speed')
+          ? parseInt(img.getAttribute('speed') as string) / 10
+          : 1
+        if (!blur) {
+          img.onplay = () => {
+            videoLoop(img)
+            if (props.gridCoordinates) {
+              extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
+            }
+          }
+        }
+        if (img.paused) {
+          img.play().catch((err) => console.warn(err))
+        }
+      }
+
+      const fitBestClip = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentAspect: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          const imgAspect = imgHeight / imgWidth
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'top right'
+          if (imgAspect < parentAspect) {
+            const scale = parentWidth / imgHeight
+            img.style.height = parentWidth.toString() + 'px'
+            img.style.marginLeft = '-' + imgWidth * scale + 'px'
+            img.style.marginTop =
+              parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
+          } else {
+            const scale = parentHeight / imgWidth
+            img.style.width = parentHeight.toString() + 'px'
+            img.style.marginLeft =
+              -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
+          }
+        } else {
+          if (imgAspect > parentAspect) {
+            scale = parentHeight / imgHeight
+            img.style.width = 'auto'
+            img.style.height = '100%'
+            img.style.marginTop = '0'
+            img.style.marginLeft =
+              parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
+          } else {
+            scale = parentWidth / imgWidth
+            img.style.width = '100%'
+            img.style.height = 'auto'
+            img.style.marginTop =
+              parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
+            img.style.marginLeft = '0'
+          }
+        }
+      }
+
+      const fitBestNoClip = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentAspect: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          const imgAspect = imgHeight / imgWidth
+          if (imgAspect < parentAspect) {
+            const scale = parentHeight / imgWidth
+            img.style.width = parentHeight.toString() + 'px'
+            img.style.marginLeft =
+              -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
+
+            img.style.transform = 'rotate(270deg)'
+            img.style.transformOrigin = 'top right'
+          } else {
+            const scale = parentWidth / imgHeight
+            img.style.height = parentWidth.toString() + 'px'
+            img.style.marginLeft = '-' + imgWidth * scale + 'px'
+            img.style.marginTop =
+              parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
+
+            img.style.transform = 'rotate(270deg)'
+            img.style.transformOrigin = 'top right'
+          }
+        } else {
+          if (imgAspect < parentAspect) {
+            const scale = parentHeight / imgHeight
+            img.style.width = 'auto'
+            img.style.height = '100%'
+            img.style.marginTop = '0'
+            img.style.marginLeft =
+              parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
+          } else {
+            const scale = parentWidth / imgWidth
+            img.style.width = '100%'
+            img.style.height = 'auto'
+            img.style.marginTop =
+              parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
+            img.style.marginLeft = '0'
+          }
+        }
+      }
+
+      const centerNoClip = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentAspect: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'center'
+        }
+        const cTop = parentHeight - imgHeight
+        const cLeft = parentWidth - imgWidth
+        if (cTop >= 0 && cLeft >= 0) {
+          img.style.marginTop = cTop / 2 + 'px'
+          img.style.marginLeft = cLeft / 2 + 'px'
+          return
+        }
+
+        fitBestNoClip(
+          img,
+          rotate,
+          imgHeight,
+          imgWidth,
+          parentAspect,
+          parentHeight,
+          parentWidth
+        )
+      }
+
+      const stretch = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          const scale = parentWidth / imgHeight
+          img.style.height = parentWidth.toString() + 'px'
+          img.style.marginLeft = '-' + imgWidth * scale + 'px'
+          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
+
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'top right'
+        } else {
+          img.style.objectFit = 'fill'
+          img.style.width = '100%'
+          img.style.height = '100%'
+        }
+      }
+
+      const center = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'center'
+        }
+        const top = parentHeight - imgHeight
+        const left = parentWidth - imgWidth
+        img.style.marginTop = top / 2 + 'px'
+        img.style.marginLeft = left / 2 + 'px'
+      }
+
+      const fitWidth = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          const scale = parentWidth / imgHeight
+          img.style.height = parentWidth.toString() + 'px'
+          img.style.marginLeft = '-' + imgWidth * scale + 'px'
+          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
+
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'top right'
+        } else {
+          const scale = parentWidth / imgWidth
+          img.style.width = '100%'
+          img.style.height = 'auto'
+          img.style.marginTop =
+            parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
+          img.style.marginLeft = '0'
+        }
+      }
+
+      const fitHeight = (
+        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
+        rotate: boolean,
+        imgHeight: number,
+        imgWidth: number,
+        parentHeight: number,
+        parentWidth: number
+      ) => {
+        if (rotate) {
+          const scale = parentHeight / imgWidth
+          img.style.width = parentHeight.toString() + 'px'
+          img.style.marginLeft =
+            -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
+
+          img.style.transform = 'rotate(270deg)'
+          img.style.transformOrigin = 'top right'
+        } else {
+          const scale = parentHeight / imgHeight
+          img.style.width = 'auto'
+          img.style.height = '100%'
+          img.style.marginTop = '0'
+          img.style.marginLeft = parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
+        }
+      }
+
+      if (!props.pictureGrid && type !== ST.nimja) {
+        switch (_imageType.current) {
+          case IT.fitBestClip:
+            fitBestClip(
+              img,
+              rotate,
+              imgHeight,
+              imgWidth,
+              parentAspect,
+              parentHeight,
+              parentWidth
+            )
+            break
+          case IT.centerNoClip:
+            centerNoClip(
+              img,
+              rotate,
+              imgHeight,
+              imgWidth,
+              parentAspect,
+              parentHeight,
+              parentWidth
+            )
+            break
+          default:
+          case IT.fitBestNoClip:
+            fitBestNoClip(
+              img,
+              rotate,
+              imgHeight,
+              imgWidth,
+              parentAspect,
+              parentHeight,
+              parentWidth
+            )
+            break
+          case IT.stretch:
+            stretch(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
+            break
+          case IT.center:
+            center(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
+            break
+          case IT.fitWidth:
+            fitWidth(
+              img,
+              rotate,
+              imgHeight,
+              imgWidth,
+              parentHeight,
+              parentWidth
+            )
+            break
+          case IT.fitHeight:
+            fitHeight(
+              img,
+              rotate,
+              imgHeight,
+              imgWidth,
+              parentHeight,
+              parentWidth
+            )
+            break
+        }
+      } else {
+        img.style.width = '100%'
+        img.style.height = '100%'
+        img.style.marginTop = '0'
+        img.style.marginLeft = '0'
+      }
+
+      if (!forceBG) {
+        if (props.setVideo) {
+          // console.log('INVOKE SET_VIDEO')
+          props.setVideo(img instanceof HTMLVideoElement ? img : undefined)
+        }
+
+        _image.current = img
+        _scale.current = scale
+
+        const appendOriginal = () => {
+          if (props.removeChild && el.hasChildNodes()) {
+            el.removeChild(el.children.item(0) as Element)
+          }
+          if (
+            img instanceof HTMLVideoElement &&
+            props.pictureGrid &&
+            img.paused
+          ) {
+            img.play().catch((err) => console.warn(err))
+          }
+          if (img instanceof HTMLIFrameElement) {
+            img.onload = () => {
+              img
+                .contentWindow!.document.getElementsByClassName('copyright')[0]
+                .remove()
+              img.contentWindow!.document.getElementById('intro-start')!.click()
+            }
+          }
+
+          if (props.pictureGrid) {
+            el.appendChild(img.cloneNode())
+          } else {
+            el.appendChild(img)
+          }
+        }
+        if (props.gridCoordinates) {
+          for (const element of document.getElementsByClassName(
+            'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
+          )) {
+            if (element === el) {
+              appendOriginal()
+            } else {
+              if (
+                props.removeChild &&
+                element.hasChildNodes() &&
+                el.hasChildNodes()
+              ) {
+                element.removeChild(element.children.item(0) as Element)
+              }
+              if (img instanceof HTMLVideoElement) {
+                if (_cloneGridVideoElements.current) {
+                  const clone = img.cloneNode() as HTMLVideoElement
+                  clone.volume = img.volume
+                  clone.currentTime = img.currentTime
+                  for (const attr of img.getAttributeNames()) {
+                    clone.setAttribute(attr, img.getAttribute(attr) as string)
+                  }
+                  clone.play().catch((err) => console.warn(err))
+                  element.appendChild(clone)
+                } else {
+                  const canvas = document.createElement('canvas')
+                  canvas.className =
+                    'canvas-' +
+                    props.gridCoordinates[0] +
+                    '-' +
+                    props.gridCoordinates[1]
+                  canvas.width = img.videoWidth * scale
+                  canvas.height = img.videoHeight * scale
+                  canvas.style.marginTop = img.style.marginTop
+                  canvas.style.marginLeft = img.style.marginLeft
+                  canvas.style.transform = img.style.transform
+                  canvas.style.transformOrigin = img.style.transformOrigin
+                  element.appendChild(canvas)
+                }
+              } else {
+                element.appendChild(img.cloneNode())
+              }
+            }
+          }
+        } else {
+          appendOriginal()
+        }
+      }
+      if (blur) {
+        const bgDiv = bg as HTMLDivElement
+        const appendOriginalBG = () => {
+          if (props.removeChild && bgDiv.hasChildNodes()) {
+            bgDiv.removeChild(bgDiv.children.item(0) as Element)
+          }
+          bgDiv.appendChild(bgImg)
+        }
+        if (props.gridCoordinates) {
+          for (const element of document.getElementsByClassName(
+            'copy-bg-' +
+              props.gridCoordinates[0] +
+              '-' +
+              props.gridCoordinates[1]
+          )) {
+            if (element === bgDiv) {
+              appendOriginalBG()
+            } else {
+              if (
+                props.removeChild &&
+                element.hasChildNodes() &&
+                bgDiv.hasChildNodes()
+              ) {
+                element.removeChild(element.children.item(0) as Element)
+              }
+              if (
+                img instanceof HTMLVideoElement ||
+                bgImg instanceof HTMLCanvasElement
+              ) {
+                const canvas = document.createElement('canvas')
+                canvas.className =
+                  'canvas-bg-' +
+                  props.gridCoordinates[0] +
+                  '-' +
+                  props.gridCoordinates[1]
+                canvas.width = bgImg.width
+                canvas.height = bgImg.height
+                canvas.style.width = bgImg.style.width
+                canvas.style.height = bgImg.style.height
+                canvas.style.marginTop = bgImg.style.marginTop
+                canvas.style.marginLeft = bgImg.style.marginLeft
+                canvas.style.transform = bgImg.style.transform
+                element.appendChild(canvas)
+              } else {
+                element.appendChild(bgImg.cloneNode())
+              }
+            }
+          }
+        } else {
+          appendOriginalBG()
+        }
+
+        if (props.gridCoordinates && type == null) {
+          for (const canvas of document.getElementsByClassName(
+            'canvas-bg-' +
+              props.gridCoordinates[0] +
+              '-' +
+              props.gridCoordinates[1]
+          )) {
+            const context: any = (canvas as HTMLCanvasElement).getContext('2d')
+            context.drawImage(img, 0, 0, parentWidth, parentHeight)
+          }
+        }
+      }
+
+      if (!props.isOverlay && !_firstImageLoaded.current) {
+        // console.log('firstImageLoaded')
+        dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: true }))
+      }
+    },
+    [dispatch, props]
+  )
+
   useEffect(() => {
     _timeouts.current = []
     if (!props.isOverlay && !_firstImageLoaded.current) {
@@ -149,8 +925,10 @@ export default function ImageView(props: ImageViewProps) {
       clearTimeouts()
       _timeouts.current = []
     }
-  }, [])
+  }, [dispatch, props.isOverlay, props.uuid])
 
+  const startAttr = props.image?.getAttribute('start')
+  const endAttr = props.image?.getAttribute('end')
   useEffect(() => {
     let forceBG = false
     if (
@@ -170,13 +948,11 @@ export default function ImageView(props: ImageViewProps) {
     _prevBackgroundType.current = _backgroundType.current
   }, [
     props.image?.src,
-    props.image?.getAttribute('start'),
-    props.image?.getAttribute('end'),
-    _strobe.current,
-    _fadeInOut.current,
-    sceneID,
-    _backgroundType.current,
-    _hasStarted.current
+    startAttr,
+    endAttr,
+    props.pictureGrid,
+    _applyImage,
+    sceneID
   ])
 
   useEffect(() => {
@@ -204,754 +980,6 @@ export default function ImageView(props: ImageViewProps) {
   const clearTimeouts = () => {
     for (const timeout of _timeouts.current) {
       clearTimeout(timeout)
-    }
-  }
-
-  const _applyImage = (forceBG = false) => {
-    // console.log(`APPLY IMAGE: ${props.uuid}`)
-    const el = _contentRef.current
-    const bg = _backgroundRef.current
-    const img = props.image
-    // console.log('el: ' + !!el)
-    // console.log('img: ' + !!img)
-    // console.log('forceBG: ' + forceBG)
-    // console.log('======================')
-    if (!el || !img) {
-      return
-    }
-
-    const firstChild = el.firstChild as
-      | HTMLImageElement
-      | HTMLVideoElement
-      | HTMLIFrameElement
-    if (
-      !forceBG &&
-      firstChild &&
-      firstChild.src === img.src &&
-      firstChild.getAttribute('start') === img.getAttribute('start') &&
-      firstChild.getAttribute('end') === img.getAttribute('end')
-    ) {
-      return
-    }
-
-    if (
-      !forceBG &&
-      img instanceof HTMLVideoElement &&
-      img.hasAttribute('subtitles')
-    ) {
-      try {
-        const subURL = img.getAttribute('subtitles') as string
-        wretch(subURL)
-          .get()
-          .blob((blob) => {
-            const track: any = document.createElement('track')
-            track.kind = 'captions'
-            track.label = 'English'
-            track.srclang = 'en'
-            track.src = URL.createObjectURL(blob)
-            if (img.textTracks.length === 0) {
-              img.append(track)
-            } else {
-              img.textTracks[0] = track
-            }
-            track.mode = 'showing'
-            img.textTracks[0].mode = 'showing'
-          })
-      } catch (e) {
-        console.error(e)
-      }
-    }
-
-    const videoLoop = (v: any) => {
-      if (
-        !el ||
-        !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) === 0.99 ||
-        v.paused ||
-        _timeouts.current == null
-      ) {
-        return
-      }
-      if (v.ended) {
-        v.onended(null)
-        return
-      }
-
-      if (
-        !props.pictureGrid &&
-        _hasStarted.current &&
-        _crossFade.current &&
-        _crossFadeAudio.current &&
-        v instanceof HTMLVideoElement
-      ) {
-        const volume = v.hasAttribute('volume')
-          ? parseInt(v.getAttribute('volume') as string)
-          : _videoVolume.current
-        v.volume =
-          (volume / 100) *
-          parseFloat(
-            el.parentElement!.parentElement!.getAttribute('volume') as string
-          )
-      }
-      if (v.hasAttribute('start') && v.hasAttribute('end')) {
-        const start = v.getAttribute('start')
-        const end = v.getAttribute('end')
-        if (v.currentTime > end) {
-          v.onended(null)
-          v.currentTime = start
-        }
-      }
-      _timeouts.current.push(window.setTimeout(videoLoop, 100, v))
-    }
-
-    const drawLoop = (
-      v: any,
-      c: CanvasRenderingContext2D,
-      w: number,
-      h: number
-    ) => {
-      if (
-        !el ||
-        !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) === 0.99 ||
-        _timeouts.current == null
-      ) {
-        return
-      }
-      c.drawImage(v, 0, 0, w, h)
-      _timeouts.current.push(window.setTimeout(drawLoop, 20, v, c, w, h))
-    }
-
-    const extraDrawLoop = (v: any, w: number, h: number) => {
-      if (
-        !el ||
-        !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) === 0.99 ||
-        v.ended ||
-        v.paused ||
-        _timeouts.current == null
-      ) {
-        return
-      }
-      for (const canvas of document.getElementsByClassName(
-        'canvas-' + props.gridCoordinates![0] + '-' + props.gridCoordinates![1]
-      )) {
-        const context = (canvas as HTMLCanvasElement).getContext(
-          '2d'
-        ) as CanvasRenderingContext2D
-        context.drawImage(v, 0, 0, w, h)
-      }
-      _timeouts.current.push(window.setTimeout(extraDrawLoop, 20, v, w, h))
-    }
-
-    const extraBGDrawLoop = (v: any, w: number, h: number) => {
-      if (
-        !el ||
-        !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) === 0.99 ||
-        _timeouts.current == null
-      ) {
-        return
-      }
-      for (const canvas of document.getElementsByClassName(
-        'canvas-bg-' +
-          props.gridCoordinates![0] +
-          '-' +
-          props.gridCoordinates![1]
-      )) {
-        const context = (canvas as HTMLCanvasElement).getContext(
-          '2d'
-        ) as CanvasRenderingContext2D
-        context.drawImage(v, 0, 0, w, h)
-      }
-      _timeouts.current.push(window.setTimeout(extraBGDrawLoop, 20, v, w, h))
-    }
-
-    let parentWidth = el.offsetWidth
-    let parentHeight = el.offsetHeight
-    if (props.fitParent) {
-      parentWidth = el.parentElement!.offsetWidth
-      parentHeight = el.parentElement!.offsetHeight
-    }
-    if (parentWidth === 0 || parentHeight === 0) {
-      parentWidth = window.innerWidth
-      parentHeight = window.innerHeight
-    }
-    if (
-      parentHeight !== _parentHeight.current ||
-      parentWidth !== _parentWidth.current
-    ) {
-      _parentHeight.current = parentHeight
-      _parentWidth.current = parentWidth
-    }
-    const parentAspect = parentWidth / parentHeight
-    let imgWidth = 1
-    let imgHeight = 1
-    let scale = 1
-    let bgscale = 1
-    let type = null
-    if (img instanceof HTMLImageElement) {
-      imgWidth = img.width
-      imgHeight = img.height
-    } else if (img instanceof HTMLVideoElement) {
-      type = ST.video
-      imgWidth = img.videoWidth
-      imgHeight = img.videoHeight
-      if (img.paused) img.play().catch((err) => console.warn(err))
-    } else if (img instanceof HTMLIFrameElement) {
-      type = ST.nimja
-    }
-    let imgAspect = imgWidth / imgHeight
-
-    const rotate =
-      !props.pictureGrid &&
-      ((type === ST.video &&
-        ((_videoOrientation.current === OT.forceLandscape &&
-          imgWidth < imgHeight) ||
-          (_videoOrientation.current === OT.forcePortrait &&
-            imgWidth > imgHeight))) ||
-        (type == null &&
-          ((_imageOrientation.current === OT.forceLandscape &&
-            imgWidth < imgHeight) ||
-            (_imageOrientation.current === OT.forcePortrait &&
-              imgWidth > imgHeight))))
-
-    const blur =
-      !props.pictureGrid &&
-      _backgroundType.current === BT.blur &&
-      type !== ST.nimja
-    let bgImg: any
-    if (blur) {
-      if (img.src.endsWith('.gif')) {
-        bgImg = img.cloneNode()
-      } else {
-        bgImg = document.createElement('canvas')
-
-        const context = bgImg.getContext('2d')
-        bgImg.width = parentWidth
-        bgImg.height = parentHeight
-
-        if (!_crossFade.current) {
-          clearTimeouts()
-        }
-        if (type == null) {
-          context.drawImage(img, 0, 0, parentWidth, parentHeight)
-        } else if (type === ST.video) {
-          if (forceBG) {
-            drawLoop(img, context, parentWidth, parentHeight)
-            if (props.gridCoordinates) {
-              extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-              extraBGDrawLoop(img, parentWidth, parentHeight)
-            }
-          } else {
-            img.onplay = () => {
-              videoLoop(img)
-              if (props.gridCoordinates) {
-                extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-              }
-            }
-            drawLoop(img, context, parentWidth, parentHeight)
-            if (props.gridCoordinates) {
-              extraBGDrawLoop(img, parentWidth, parentHeight)
-            }
-          }
-        }
-      }
-
-      if (rotate) {
-        bgImg.style.transform = 'rotate(270deg)'
-        if (imgAspect > parentAspect) {
-          if (imgWidth > imgHeight) {
-            bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-            bgImg.style.width = imgWidth * bgscale + 'px'
-            bgImg.style.height = parentWidth + 'px'
-            bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
-            bgImg.style.marginLeft =
-              (parentWidth - imgWidth * bgscale) / 2 + 'px'
-          } else {
-            bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-            bgImg.style.width = parentHeight + 'px'
-            bgImg.style.height = imgHeight * bgscale + 'px'
-            bgImg.style.marginTop =
-              (parentHeight - imgHeight * bgscale) / 2 + 'px'
-            bgImg.style.marinLeft = (parentWidth - parentHeight) / 2 + 'px'
-          }
-        } else {
-          if (imgWidth > imgHeight) {
-            bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-            bgImg.style.width = imgWidth * bgscale + 'px'
-            bgImg.style.height = parentWidth + 'px'
-            bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
-            bgImg.style.marginLeft =
-              (parentWidth - imgWidth * bgscale) / 2 + 'px'
-          } else {
-            bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-            bgImg.style.width = parentHeight + 'px'
-            bgImg.style.height = imgHeight * bgscale + 'px'
-            bgImg.style.marginTop =
-              parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
-            bgImg.style.marginLeft = (parentWidth - parentHeight) / 2 + 'px'
-          }
-        }
-      } else {
-        if (imgAspect < parentAspect) {
-          bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-          bgImg.style.width = '100%'
-          bgImg.style.height = imgHeight * bgscale + 'px'
-          bgImg.style.marginTop =
-            parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
-          bgImg.style.marginLeft = '0'
-        } else {
-          bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-          bgImg.style.width = imgWidth * bgscale + 'px'
-          bgImg.style.height = '100%'
-          bgImg.style.marginTop = '0'
-          bgImg.style.marginLeft =
-            parentWidth / 2 - (imgWidth * bgscale) / 2 + 'px'
-        }
-      }
-    }
-
-    if (!forceBG && img instanceof HTMLVideoElement) {
-      if (!props.pictureGrid && _hasStarted.current) {
-        const volume = img.hasAttribute('volume')
-          ? parseInt(img.getAttribute('volume') as string)
-          : _videoVolume.current
-        img.volume = volume / 100
-      } else {
-        img.volume = 0
-      }
-      img.playbackRate = img.hasAttribute('speed')
-        ? parseInt(img.getAttribute('speed') as string) / 10
-        : 1
-      if (!blur) {
-        img.onplay = () => {
-          videoLoop(img)
-          if (props.gridCoordinates) {
-            extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-          }
-        }
-      }
-      if (img.paused) {
-        img.play().catch((err) => console.warn(err))
-      }
-    }
-
-    const fitBestClip = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentAspect: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        const imgAspect = imgHeight / imgWidth
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'top right'
-        if (imgAspect < parentAspect) {
-          const scale = parentWidth / imgHeight
-          img.style.height = parentWidth.toString() + 'px'
-          img.style.marginLeft = '-' + imgWidth * scale + 'px'
-          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-        } else {
-          const scale = parentHeight / imgWidth
-          img.style.width = parentHeight.toString() + 'px'
-          img.style.marginLeft =
-            -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-        }
-      } else {
-        if (imgAspect > parentAspect) {
-          scale = parentHeight / imgHeight
-          img.style.width = 'auto'
-          img.style.height = '100%'
-          img.style.marginTop = '0'
-          img.style.marginLeft = parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-        } else {
-          scale = parentWidth / imgWidth
-          img.style.width = '100%'
-          img.style.height = 'auto'
-          img.style.marginTop =
-            parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-          img.style.marginLeft = '0'
-        }
-      }
-    }
-
-    const fitBestNoClip = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentAspect: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        const imgAspect = imgHeight / imgWidth
-        if (imgAspect < parentAspect) {
-          const scale = parentHeight / imgWidth
-          img.style.width = parentHeight.toString() + 'px'
-          img.style.marginLeft =
-            -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-        } else {
-          const scale = parentWidth / imgHeight
-          img.style.height = parentWidth.toString() + 'px'
-          img.style.marginLeft = '-' + imgWidth * scale + 'px'
-          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-        }
-      } else {
-        if (imgAspect < parentAspect) {
-          const scale = parentHeight / imgHeight
-          img.style.width = 'auto'
-          img.style.height = '100%'
-          img.style.marginTop = '0'
-          img.style.marginLeft = parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-        } else {
-          const scale = parentWidth / imgWidth
-          img.style.width = '100%'
-          img.style.height = 'auto'
-          img.style.marginTop =
-            parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-          img.style.marginLeft = '0'
-        }
-      }
-    }
-
-    const centerNoClip = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentAspect: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'center'
-      }
-      const cTop = parentHeight - imgHeight
-      const cLeft = parentWidth - imgWidth
-      if (cTop >= 0 && cLeft >= 0) {
-        img.style.marginTop = cTop / 2 + 'px'
-        img.style.marginLeft = cLeft / 2 + 'px'
-        return
-      }
-
-      fitBestNoClip(
-        img,
-        rotate,
-        imgHeight,
-        imgWidth,
-        parentAspect,
-        parentHeight,
-        parentWidth
-      )
-    }
-
-    const stretch = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        const scale = parentWidth / imgHeight
-        img.style.height = parentWidth.toString() + 'px'
-        img.style.marginLeft = '-' + imgWidth * scale + 'px'
-        img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'top right'
-      } else {
-        img.style.objectFit = 'fill'
-        img.style.width = '100%'
-        img.style.height = '100%'
-      }
-    }
-
-    const center = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'center'
-      }
-      const top = parentHeight - imgHeight
-      const left = parentWidth - imgWidth
-      img.style.marginTop = top / 2 + 'px'
-      img.style.marginLeft = left / 2 + 'px'
-    }
-
-    const fitWidth = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        const scale = parentWidth / imgHeight
-        img.style.height = parentWidth.toString() + 'px'
-        img.style.marginLeft = '-' + imgWidth * scale + 'px'
-        img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'top right'
-      } else {
-        const scale = parentWidth / imgWidth
-        img.style.width = '100%'
-        img.style.height = 'auto'
-        img.style.marginTop = parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-        img.style.marginLeft = '0'
-      }
-    }
-
-    const fitHeight = (
-      img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      rotate: boolean,
-      imgHeight: number,
-      imgWidth: number,
-      parentHeight: number,
-      parentWidth: number
-    ) => {
-      if (rotate) {
-        const scale = parentHeight / imgWidth
-        img.style.width = parentHeight.toString() + 'px'
-        img.style.marginLeft =
-          -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-
-        img.style.transform = 'rotate(270deg)'
-        img.style.transformOrigin = 'top right'
-      } else {
-        const scale = parentHeight / imgHeight
-        img.style.width = 'auto'
-        img.style.height = '100%'
-        img.style.marginTop = '0'
-        img.style.marginLeft = parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-      }
-    }
-
-    if (!props.pictureGrid && type !== ST.nimja) {
-      switch (_imageType.current) {
-        case IT.fitBestClip:
-          fitBestClip(
-            img,
-            rotate,
-            imgHeight,
-            imgWidth,
-            parentAspect,
-            parentHeight,
-            parentWidth
-          )
-          break
-        case IT.centerNoClip:
-          centerNoClip(
-            img,
-            rotate,
-            imgHeight,
-            imgWidth,
-            parentAspect,
-            parentHeight,
-            parentWidth
-          )
-          break
-        default:
-        case IT.fitBestNoClip:
-          fitBestNoClip(
-            img,
-            rotate,
-            imgHeight,
-            imgWidth,
-            parentAspect,
-            parentHeight,
-            parentWidth
-          )
-          break
-        case IT.stretch:
-          stretch(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-          break
-        case IT.center:
-          center(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-          break
-        case IT.fitWidth:
-          fitWidth(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-          break
-        case IT.fitHeight:
-          fitHeight(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-          break
-      }
-    } else {
-      img.style.width = '100%'
-      img.style.height = '100%'
-      img.style.marginTop = '0'
-      img.style.marginLeft = '0'
-    }
-
-    if (!forceBG) {
-      if (props.setVideo) {
-        // console.log('INVOKE SET_VIDEO')
-        props.setVideo(img instanceof HTMLVideoElement ? img : undefined)
-      }
-
-      _image.current = img
-      _scale.current = scale
-
-      const appendOriginal = () => {
-        if (props.removeChild && el.hasChildNodes()) {
-          el.removeChild(el.children.item(0) as Element)
-        }
-        if (
-          img instanceof HTMLVideoElement &&
-          props.pictureGrid &&
-          img.paused
-        ) {
-          img.play().catch((err) => console.warn(err))
-        }
-        if (img instanceof HTMLIFrameElement) {
-          img.onload = () => {
-            img
-              .contentWindow!.document.getElementsByClassName('copyright')[0]
-              .remove()
-            img.contentWindow!.document.getElementById('intro-start')!.click()
-          }
-        }
-
-        if (props.pictureGrid) {
-          el.appendChild(img.cloneNode())
-        } else {
-          el.appendChild(img)
-        }
-      }
-      if (props.gridCoordinates) {
-        for (const element of document.getElementsByClassName(
-          'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-        )) {
-          if (element === el) {
-            appendOriginal()
-          } else {
-            if (
-              props.removeChild &&
-              element.hasChildNodes() &&
-              el.hasChildNodes()
-            ) {
-              element.removeChild(element.children.item(0) as Element)
-            }
-            if (img instanceof HTMLVideoElement) {
-              if (_cloneGridVideoElements.current) {
-                const clone = img.cloneNode() as HTMLVideoElement
-                clone.volume = img.volume
-                clone.currentTime = img.currentTime
-                for (const attr of img.getAttributeNames()) {
-                  clone.setAttribute(attr, img.getAttribute(attr) as string)
-                }
-                clone.play().catch((err) => console.warn(err))
-                element.appendChild(clone)
-              } else {
-                const canvas = document.createElement('canvas')
-                canvas.className =
-                  'canvas-' +
-                  props.gridCoordinates[0] +
-                  '-' +
-                  props.gridCoordinates[1]
-                canvas.width = img.videoWidth * scale
-                canvas.height = img.videoHeight * scale
-                canvas.style.marginTop = img.style.marginTop
-                canvas.style.marginLeft = img.style.marginLeft
-                canvas.style.transform = img.style.transform
-                canvas.style.transformOrigin = img.style.transformOrigin
-                element.appendChild(canvas)
-              }
-            } else {
-              element.appendChild(img.cloneNode())
-            }
-          }
-        }
-      } else {
-        appendOriginal()
-      }
-    }
-    if (blur) {
-      const bgDiv = bg as HTMLDivElement
-      const appendOriginalBG = () => {
-        if (props.removeChild && bgDiv.hasChildNodes()) {
-          bgDiv.removeChild(bgDiv.children.item(0) as Element)
-        }
-        bgDiv.appendChild(bgImg)
-      }
-      if (props.gridCoordinates) {
-        for (const element of document.getElementsByClassName(
-          'copy-bg-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-        )) {
-          if (element === bgDiv) {
-            appendOriginalBG()
-          } else {
-            if (
-              props.removeChild &&
-              element.hasChildNodes() &&
-              bgDiv.hasChildNodes()
-            ) {
-              element.removeChild(element.children.item(0) as Element)
-            }
-            if (
-              img instanceof HTMLVideoElement ||
-              bgImg instanceof HTMLCanvasElement
-            ) {
-              const canvas = document.createElement('canvas')
-              canvas.className =
-                'canvas-bg-' +
-                props.gridCoordinates[0] +
-                '-' +
-                props.gridCoordinates[1]
-              canvas.width = bgImg.width
-              canvas.height = bgImg.height
-              canvas.style.width = bgImg.style.width
-              canvas.style.height = bgImg.style.height
-              canvas.style.marginTop = bgImg.style.marginTop
-              canvas.style.marginLeft = bgImg.style.marginLeft
-              canvas.style.transform = bgImg.style.transform
-              element.appendChild(canvas)
-            } else {
-              element.appendChild(bgImg.cloneNode())
-            }
-          }
-        }
-      } else {
-        appendOriginalBG()
-      }
-
-      if (props.gridCoordinates && type == null) {
-        for (const canvas of document.getElementsByClassName(
-          'canvas-bg-' +
-            props.gridCoordinates[0] +
-            '-' +
-            props.gridCoordinates[1]
-        )) {
-          const context: any = (canvas as HTMLCanvasElement).getContext('2d')
-          context.drawImage(img, 0, 0, parentWidth, parentHeight)
-        }
-      }
-    }
-
-    if (!props.isOverlay && !_firstImageLoaded.current) {
-      // console.log('firstImageLoaded')
-      dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: true }))
     }
   }
 

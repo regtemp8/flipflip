@@ -28,7 +28,9 @@ export const initialSceneGridState: EntryState<SceneGrid> = {
   entries: {}
 }
 
-export default function createSceneGridReducer(sceneGridState?: EntryState<SceneGrid>) {
+export default function createSceneGridReducer(
+  sceneGridState?: EntryState<SceneGrid>
+) {
   return createSceneGridSlice(sceneGridState).reducer
 }
 
@@ -64,7 +66,7 @@ function createSceneGridSlice(sceneGridState?: EntryState<SceneGrid>) {
         const grid = getEntry(state, action.payload.id).grid
         const rows = action.payload.row
         const cols = action.payload.col
-  
+
         // Adjust height
         if (grid.length > rows) {
           grid.splice(rows, grid.length - rows)
@@ -85,7 +87,7 @@ function createSceneGridSlice(sceneGridState?: EntryState<SceneGrid>) {
             }
           }
         }
-  
+
         for (const row of grid) {
           for (const cell of row) {
             if (

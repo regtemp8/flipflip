@@ -3,7 +3,8 @@ import React, {
   MouseEvent,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useCallback
 } from 'react'
 import { cx } from '@emotion/css'
 
@@ -504,44 +505,52 @@ function AudioLibrary() {
   const commonAudio = useAppSelector(selectCommonAudio())
   const selectedTagNames = useAppSelector(selectAppAudioSelectedTagNames())
 
-  const [cachePath, setCachePath] = useState<string>()
+  const [cachePath, setCachePath] = useState<string>('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [importURL, setImportURL] = useState<string>()
 
   const _menuAnchorEl = useRef<any>()
 
-  useEffect(() => {
-    getCachePath(cachingDirectory).then(setCachePath)
-    window.addEventListener('keydown', onKeyDown, false)
+  const toggleMarked = useCallback(() => {
+    dispatch(toggleAudiosMarked(displaySources))
+  }, [dispatch, displaySources])
 
+  useEffect(() => {
+    getCachePath(cachingDirectory)
+      .then((path) => path ?? '')
+      .then(setCachePath)
+
+    // Use alt+M to toggle highlighting  sources
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'm' || e.key === 'µ')
+      ) {
+        toggleMarked()
+      } else if (e.key === 'Escape' && specialMode != null) {
+        dispatch(goBack())
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown, false)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [])
+  }, [cachingDirectory, dispatch, specialMode, toggleMarked])
 
   useEffect(() => {
-    getCachePath(cachingDirectory).then(setCachePath)
+    getCachePath(cachingDirectory)
+      .then((path) => path ?? '')
+      .then(setCachePath)
   }, [cachingDirectory])
 
   useEffect(() => {
     if (tutorial === ALT.final && drawerOpen) {
       setDrawerOpen(false)
     }
-  }, [tutorial])
-
-  // Use alt+M to toggle highlighting  sources
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'm' || e.key === 'µ')
-    ) {
-      toggleMarked()
-    } else if (e.key === 'Escape' && specialMode != null) {
-      dispatch(goBack())
-    }
-  }
+  }, [tutorial, drawerOpen])
 
   const onChangeTab = (e: any, newTab: number) => {
     if (newTab !== openTab) {
@@ -554,8 +563,7 @@ function AudioLibrary() {
     dispatch(setAudioFilters(['playlist:' + playlist]))
   }
 
-  const onClickArtist = (artist: string, e: MouseEvent) => {
-    e.stopPropagation()
+  const onClickArtist = (artist: string) => {
     dispatch(setAudioOpenTab(2))
     dispatch(
       setAudioFilters(
@@ -734,9 +742,6 @@ function AudioLibrary() {
     dispatch(
       setAudioSelected(selected.filter((id) => !displaySources.includes(id)))
     )
-  const toggleMarked = () => {
-    dispatch(toggleAudiosMarked(displaySources))
-  }
 
   const onFinishBatchEdit = (common: Audio) => {
     const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
@@ -832,6 +837,7 @@ function AudioLibrary() {
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
+                isAudio
                 isCreatable
                 onlyUsed
                 noTypes
@@ -1095,7 +1101,7 @@ function AudioLibrary() {
                     isSelect={!!specialMode}
                     selected={selected}
                     showHelp={!specialMode && filters.length === 0}
-                    sources={displaySources}
+                    audios={displaySources}
                     playlist={playlist}
                     onClickAlbum={onClickAlbum}
                     onClickArtist={onClickArtist}
@@ -1601,6 +1607,7 @@ function AudioLibrary() {
                 displaySources={audios}
                 filters={selectedTags}
                 placeholder={'Tag These Sources'}
+                isAudio
                 isClearable
                 onlyTags
                 showCheckboxes

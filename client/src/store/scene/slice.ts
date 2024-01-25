@@ -71,7 +71,7 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         if (!scene.generatorWeights) {
           scene.generatorWeights = []
         }
-  
+
         scene.generatorWeights.push(action.payload.value)
       },
       setSceneGeneratorMax: (
@@ -84,7 +84,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<WeightGroup[]>>
       ) => {
-        getEntry(state, action.payload.id).generatorWeights = action.payload.value
+        getEntry(state, action.payload.id).generatorWeights =
+          action.payload.value
       },
       setSceneFadeTF: (state, action: PayloadAction<EntryUpdate<string>>) => {
         getEntry(state, action.payload.id).fadeTF = action.payload.value
@@ -99,13 +100,15 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).fadeDurationMin = action.payload.value
+        getEntry(state, action.payload.id).fadeDurationMin =
+          action.payload.value
       },
       setSceneFadeDurationMax: (
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).fadeDurationMax = action.payload.value
+        getEntry(state, action.payload.id).fadeDurationMax =
+          action.payload.value
       },
       setSceneFadeSinRate: (
         state,
@@ -131,7 +134,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       setSceneFadePer: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).fadePer = action.payload.value
       },
-      setSceneFadeInOut: (state, action: PayloadAction<EntryUpdate<boolean>>) => {
+      setSceneFadeInOut: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
         getEntry(state, action.payload.id).fadeInOut = action.payload.value
       },
       setSceneFadeIOTF: (state, action: PayloadAction<EntryUpdate<string>>) => {
@@ -241,7 +247,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).panDurationMax = action.payload.value
       },
-      setScenePanSinRate: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setScenePanSinRate: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).panSinRate = action.payload.value
       },
       setScenePanBPMMulti: (
@@ -283,7 +292,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).timingBPMMulti = action.payload.value
       },
-      setSceneBackForth: (state, action: PayloadAction<EntryUpdate<boolean>>) => {
+      setSceneBackForth: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
         getEntry(state, action.payload.id).backForth = action.payload.value
       },
       setSceneBackForthTF: (
@@ -315,7 +327,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).backForthSinRate = action.payload.value
+        getEntry(state, action.payload.id).backForthSinRate =
+          action.payload.value
       },
       setSceneBackForthBPMMulti: (
         state,
@@ -340,13 +353,15 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).slideDurationMin = action.payload.value
+        getEntry(state, action.payload.id).slideDurationMin =
+          action.payload.value
       },
       setSceneSlideDurationMax: (
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).slideDurationMax = action.payload.value
+        getEntry(state, action.payload.id).slideDurationMax =
+          action.payload.value
       },
       setSceneSlideSinRate: (
         state,
@@ -453,13 +468,15 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).transDurationMin = action.payload.value
+        getEntry(state, action.payload.id).transDurationMin =
+          action.payload.value
       },
       setSceneZoomDurationMax: (
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).transDurationMax = action.payload.value
+        getEntry(state, action.payload.id).transDurationMax =
+          action.payload.value
       },
       setSceneZoomSinRate: (
         state,
@@ -480,7 +497,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).fadeIOStartEase = action.payload.value
+        getEntry(state, action.payload.id).fadeIOStartEase =
+          action.payload.value
       },
       setSceneFadeIOEndEase: (
         state,
@@ -500,7 +518,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).panStartExp = action.payload.value
       },
-      setScenePanStartOv: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setScenePanStartOv: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).panStartOv = action.payload.value
       },
       setScenePanStartAmp: (
@@ -515,22 +536,37 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).panStartPer = action.payload.value
       },
-      setScenePanEndEase: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setScenePanEndEase: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).panEndEase = action.payload.value
       },
-      setScenePanEndExp: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setScenePanEndExp: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).panEndExp = action.payload.value
       },
       setScenePanEndOv: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).panEndOv = action.payload.value
       },
-      setScenePanEndAmp: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setScenePanEndAmp: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).panEndAmp = action.payload.value
       },
-      setScenePanEndPer: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setScenePanEndPer: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).panEndPer = action.payload.value
       },
-      setSceneSlideEase: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneSlideEase: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).slideEase = action.payload.value
       },
       setSceneSlideExp: (state, action: PayloadAction<EntryUpdate<number>>) => {
@@ -545,22 +581,37 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       setSceneSlidePer: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).slidePer = action.payload.value
       },
-      setSceneStrobeEase: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneStrobeEase: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).strobeEase = action.payload.value
       },
-      setSceneStrobeExp: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneStrobeExp: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).strobeExp = action.payload.value
       },
       setSceneStrobeOv: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).strobeOv = action.payload.value
       },
-      setSceneStrobeAmp: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneStrobeAmp: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).strobeAmp = action.payload.value
       },
-      setSceneStrobePer: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneStrobePer: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).strobePer = action.payload.value
       },
-      setSceneTransEase: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneTransEase: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).transEase = action.payload.value
       },
       setSceneTransExp: (state, action: PayloadAction<EntryUpdate<number>>) => {
@@ -593,7 +644,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).panHorizTransImg = action.payload.value
+        getEntry(state, action.payload.id).panHorizTransImg =
+          action.payload.value
       },
       setScenePanHorizTransLevel: (
         state,
@@ -620,7 +672,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).panVertTransType = action.payload.value
+        getEntry(state, action.payload.id).panVertTransType =
+          action.payload.value
       },
       setScenePanVertTransRandom: (
         state,
@@ -633,7 +686,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).panVertTransImg = action.payload.value
+        getEntry(state, action.payload.id).panVertTransImg =
+          action.payload.value
       },
       setScenePanVertTransLevel: (
         state,
@@ -666,13 +720,15 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).horizTransRandom = action.payload.value
+        getEntry(state, action.payload.id).horizTransRandom =
+          action.payload.value
       },
       setSceneHorizTransLevel: (
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).horizTransLevel = action.payload.value
+        getEntry(state, action.payload.id).horizTransLevel =
+          action.payload.value
       },
       setSceneHorizTransLevelMin: (
         state,
@@ -698,7 +754,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).vertTransRandom = action.payload.value
+        getEntry(state, action.payload.id).vertTransRandom =
+          action.payload.value
       },
       setSceneVertTransLevel: (
         state,
@@ -729,7 +786,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).zoomRandom = action.payload.value
       },
-      setSceneZoomStart: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneZoomStart: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).zoomStart = action.payload.value
       },
       setSceneZoomEnd: (state, action: PayloadAction<EntryUpdate<number>>) => {
@@ -747,25 +807,36 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).zoomStartMax = action.payload.value
       },
-      setSceneZoomEndMin: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneZoomEndMin: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).zoomEndMin = action.payload.value
       },
-      setSceneZoomEndMax: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneZoomEndMax: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).zoomEndMax = action.payload.value
       },
       setSceneImageTypeFilter: (
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).imageTypeFilter = action.payload.value
+        getEntry(state, action.payload.id).imageTypeFilter =
+          action.payload.value
       },
       setSceneImageOrientation: (
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).imageOrientation = action.payload.value
+        getEntry(state, action.payload.id).imageOrientation =
+          action.payload.value
       },
-      setSceneGifOption: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneGifOption: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).gifOption = action.payload.value
       },
       setSceneVideoOption: (
@@ -778,9 +849,13 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).videoOrientation = action.payload.value
+        getEntry(state, action.payload.id).videoOrientation =
+          action.payload.value
       },
-      setSceneImageType: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneImageType: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).imageType = action.payload.value
       },
       setSceneBackgroundType: (
@@ -793,7 +868,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).backgroundColor = action.payload.value
+        getEntry(state, action.payload.id).backgroundColor =
+          action.payload.value
       },
       setSceneBackgroundColorSet: (
         state,
@@ -802,7 +878,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         getEntry(state, action.payload.id).backgroundColorSet =
           action.payload.value
       },
-      setSceneSlideType: (state, action: PayloadAction<EntryUpdate<string>>) => {
+      setSceneSlideType: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
         getEntry(state, action.payload.id).slideType = action.payload.value
       },
       setSceneSlideDistance: (
@@ -815,7 +894,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<string>>
       ) => {
-        getEntry(state, action.payload.id).strobeColorType = action.payload.value
+        getEntry(state, action.payload.id).strobeColorType =
+          action.payload.value
       },
       setSceneStrobeLayer: (
         state,
@@ -890,14 +970,18 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).fullSource = action.payload.value
       },
-      setSceneVideoSpeed: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneVideoSpeed: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).videoSpeed = action.payload.value
       },
       setSceneVideoRandomSpeed: (
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).videoRandomSpeed = action.payload.value
+        getEntry(state, action.payload.id).videoRandomSpeed =
+          action.payload.value
       },
       setSceneVideoSpeedMin: (
         state,
@@ -911,7 +995,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).videoSpeedMax = action.payload.value
       },
-      setSceneVideoSkip: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneVideoSkip: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).videoSkip = action.payload.value
       },
       setSceneVideoVolume: (
@@ -924,7 +1011,8 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
-        getEntry(state, action.payload.id).randomVideoStart = action.payload.value
+        getEntry(state, action.payload.id).randomVideoStart =
+          action.payload.value
       },
       setSceneContinueVideo: (
         state,
@@ -944,7 +1032,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).forceAllSource = action.payload.value
       },
-      setSceneForceAll: (state, action: PayloadAction<EntryUpdate<boolean>>) => {
+      setSceneForceAll: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
         getEntry(state, action.payload.id).forceAll = action.payload.value
       },
       setSceneGifTimingConstant: (
@@ -1016,7 +1107,10 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).orderFunction = action.payload.value
       },
-      setSceneCrossFade: (state, action: PayloadAction<EntryUpdate<boolean>>) => {
+      setSceneCrossFade: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
         getEntry(state, action.payload.id).crossFade = action.payload.value
       },
       setSceneCrossFadeAudio: (
@@ -1053,14 +1147,18 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number[]>>
       ) => {
-        getEntry(state, action.payload.id).nextSceneRandoms = action.payload.value
+        getEntry(state, action.payload.id).nextSceneRandoms =
+          action.payload.value
       },
-      setSceneAddOverlay: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneAddOverlay: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         const scene = getEntry(state, action.payload.id)
         if (!scene.overlays) {
           scene.overlays = []
         }
-  
+
         scene.overlays.push(action.payload.value)
       },
       setSceneRemoveOverlay: (
@@ -1224,10 +1322,16 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         ].scripts
         arrayMove(scripts, oldIndex, newIndex)
       },
-      setSceneSources: (state, action: PayloadAction<EntryUpdate<number[]>>) => {
+      setSceneSources: (
+        state,
+        action: PayloadAction<EntryUpdate<number[]>>
+      ) => {
         getEntry(state, action.payload.id).sources = action.payload.value
       },
-      setSceneAddSource: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setSceneAddSource: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).sources.push(action.payload.value)
       },
       setSceneAddSources: (

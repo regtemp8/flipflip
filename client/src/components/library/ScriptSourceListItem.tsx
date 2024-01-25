@@ -26,7 +26,6 @@ import { grey } from '@mui/material/colors'
 import { SP } from 'flipflip-common'
 import EditIcon from '@mui/icons-material/Edit'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectConstants } from '../../store/constants/selectors'
 import { selectAppSpecialMode } from '../../store/app/selectors'
 import { openScriptInScriptor } from '../../store/app/thunks'
 import TagChip from './TagChip'
@@ -128,7 +127,7 @@ export interface ScriptSourceListItemProps {
   onRemove: (scriptID: number) => void
   onSourceOptions: (scriptID: number) => void
   onStartEdit: (scriptID: number) => void
-  onToggleSelect: () => void
+  onToggleSelect: (e: ChangeEvent<HTMLInputElement>) => void
   savePosition: () => void
 }
 
@@ -143,7 +142,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
 
   useEffect(() => {
     setUrlInput(url)
-  }, [props.scriptID])
+  }, [url])
 
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
     const sourceURL = url as string

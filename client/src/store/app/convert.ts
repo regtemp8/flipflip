@@ -21,7 +21,10 @@ import {
 
 import { type RootState } from '../store'
 import { type EntryState, type Identifiable } from '../EntryState'
-import { type AppStorageImport, initialAppStorageImport } from '../AppStorageImport'
+import {
+  type AppStorageImport,
+  initialAppStorageImport
+} from '../AppStorageImport'
 import { newApp } from './data/App'
 import type Config from './data/Config'
 import { newConfig } from './data/Config'

@@ -14,11 +14,15 @@ export const initialLibrarySourceState: EntryState<LibrarySource> = {
   entries: {}
 }
 
-export default function createLibrarySourceReducer(librarySourceState?: EntryState<LibrarySource>) {
+export default function createLibrarySourceReducer(
+  librarySourceState?: EntryState<LibrarySource>
+) {
   return createLibrarySourceSlice(librarySourceState).reducer
 }
 
-function createLibrarySourceSlice(librarySourceState?: EntryState<LibrarySource>) {
+function createLibrarySourceSlice(
+  librarySourceState?: EntryState<LibrarySource>
+) {
   const initialState = librarySourceState ?? initialLibrarySourceState
   return createSlice({
     name: 'librarySources',

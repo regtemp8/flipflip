@@ -1,3 +1,4 @@
+/// <reference path="./global.d.ts" />
 import { MouseEvent, useState, useRef } from 'react'
 import { Tooltip, IconButton, CircularProgress } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'

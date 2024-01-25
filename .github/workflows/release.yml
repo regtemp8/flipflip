@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+            arch: [x64, arm64]
+    env:
+      PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win32' || 'darwin') }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+    - name: Enable Yarn
+      run: |
+        corepack enable
+        corepack prepare yarn@stable --activate
+    - name: Install Common
+      working-directory: ./common
+      run: yarn install
+    - name: Build Common Main
+      working-directory: ./common
+      run: yarn build:main
+    - name: Build Common Module
+      working-directory: ./common
+      run: yarn build:module      
+    - name: Install Client
+      working-directory: ./client
+      run: yarn install
+    - name: Build Client
+      working-directory: ./client
+      run: yarn build
+    - name: Install Server Details
+      working-directory: ./server-details
+      run: yarn install
+    - name: Build Server Details
+      working-directory: ./server-details
+      run: yarn build
+    - name: Get Package Version
+      id: get-package-version
+      uses: stevenbenitez/get-package-version-action@v1
+      with:
+        path: ./server
+    - name: Set Version
+      run: echo "VERSION=${{ steps.get-package-version.outputs.version }}" >> $GITHUB_ENV
+    - name: Install Server
+      working-directory: ./server
+      run: yarn install
+    - name: Make Release
+      working-directory: ./server
+      run: yarn make --platform ${{ env.PLATFORM }} --arch ${{ matrix.arch }}
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./server/out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}/FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ env.VERSION }}.zip
+        asset_name: FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ env.VERSION }}.zip
+        asset_content_type: application/zip

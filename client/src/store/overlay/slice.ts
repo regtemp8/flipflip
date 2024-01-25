@@ -8,7 +8,7 @@ import {
   deleteEntry,
   getEntry,
   setEntry,
-  setEntrySlice,
+  setEntrySlice
 } from '../EntryState'
 
 export const initialOverlayState: EntryState<Overlay> = {
@@ -17,7 +17,9 @@ export const initialOverlayState: EntryState<Overlay> = {
   entries: {}
 }
 
-export default function createOverlayReducer(overlayState?: EntryState<Overlay>) {
+export default function createOverlayReducer(
+  overlayState?: EntryState<Overlay>
+) {
   return createOverlaySlice(overlayState).reducer
 }
 
@@ -40,10 +42,16 @@ function createOverlaySlice(overlayState?: EntryState<Overlay>) {
       deleteOverlay: (state, action: PayloadAction<number>) => {
         deleteEntry(state, action.payload)
       },
-      setOverlayOpacity: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setOverlayOpacity: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).opacity = action.payload.value
       },
-      setOverlaySceneID: (state, action: PayloadAction<EntryUpdate<number>>) => {
+      setOverlaySceneID: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
         getEntry(state, action.payload.id).sceneID = action.payload.value
       }
     }

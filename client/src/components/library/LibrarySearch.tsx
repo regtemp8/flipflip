@@ -2,14 +2,9 @@ import React, { useState } from 'react'
 import { cx } from '@emotion/css'
 import Select, { MultiValue, components } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-
 import { Checkbox, type Theme } from '@mui/material'
-import { makeStyles } from 'tss-react/mui'
-
 import { grey } from '@mui/material/colors'
-
-import type Audio from '../../store/audio/Audio'
-import type LibrarySource from '../../store/librarySource/LibrarySource'
+import { makeStyles } from 'tss-react/mui'
 import { useAppSelector } from '../../store/hooks'
 import { selectAppLibrarySearchOptions } from '../../store/app/selectors'
 
@@ -53,10 +48,12 @@ function MultiValueComponent(props: any) {
 }
 
 export interface LibrarySearchProps {
+  displaySources: number[]
   filters: string[]
   placeholder: string
-  displaySources: Array<LibrarySource | Audio>
-  onUpdateFilters: (filter: string[]) => void
+  isLibrary?: boolean
+  isAudio?: boolean
+  isScript?: boolean
   autoFocus?: boolean
   controlShouldRenderValue?: boolean
   hideSelectedOptions?: boolean
@@ -70,14 +67,19 @@ export interface LibrarySearchProps {
   showCheckboxes?: boolean
   fullWidth?: boolean
   withBrackets?: boolean
+  onUpdateFilters: (filter: string[]) => void
 }
 
 function LibrarySearch(props: LibrarySearchProps) {
   const [searchInput, setSearchInput] = useState('')
   const options = useAppSelector(
     selectAppLibrarySearchOptions(
+      props.displaySources,
       props.filters,
       searchInput,
+      props.isLibrary,
+      props.isAudio,
+      props.isScript,
       props.onlyUsed,
       props.onlyTags,
       props.onlyTagsAndTypes,

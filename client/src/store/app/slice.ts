@@ -38,7 +38,10 @@ function createAppSlice(app?: App) {
       setConfigNewWindowAlerted: (state, action: PayloadAction<boolean>) => {
         state.config.newWindowAlerted = action.payload
       },
-      setConfigDefaultSceneBackForth: (state, action: PayloadAction<boolean>) => {
+      setConfigDefaultSceneBackForth: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
         state.config.defaultScene.backForth = action.payload
       },
       setConfigDefaultSceneBackForthBPMMulti: (
@@ -101,7 +104,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.backgroundType = action.payload
       },
-      setConfigDefaultSceneImageType: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneImageType: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.imageType = action.payload
       },
       setConfigDefaultSceneNextSceneAllImages: (
@@ -179,7 +185,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.imageOrientation = action.payload
       },
-      setConfigDefaultSceneGifOption: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneGifOption: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.gifOption = action.payload
       },
       setConfigDefaultSceneVideoOption: (
@@ -206,7 +215,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.fullSource = action.payload
       },
-      setConfigDefaultSceneVideoSpeed: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneVideoSpeed: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.videoSpeed = action.payload
       },
       setConfigDefaultSceneVideoRandomSpeed: (
@@ -227,7 +239,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.videoSpeedMax = action.payload
       },
-      setConfigDefaultSceneVideoSkip: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneVideoSkip: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.videoSkip = action.payload
       },
       setConfigDefaultSceneVideoVolume: (
@@ -260,7 +275,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.forceAllSource = action.payload
       },
-      setConfigDefaultSceneForceAll: (state, action: PayloadAction<boolean>) => {
+      setConfigDefaultSceneForceAll: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
         state.config.defaultScene.forceAll = action.payload
       },
       setConfigDefaultSceneGifTimingConstant: (
@@ -377,7 +395,10 @@ function createAppSlice(app?: App) {
       setConfigDefaultSceneFadeEase: (state, action: PayloadAction<string>) => {
         state.config.defaultScene.fadeEase = action.payload
       },
-      setConfigDefaultSceneCrossFade: (state, action: PayloadAction<boolean>) => {
+      setConfigDefaultSceneCrossFade: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
         state.config.defaultScene.crossFade = action.payload
       },
       setConfigDefaultSceneCrossFadeAudio: (
@@ -422,7 +443,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.slideBPMMulti = action.payload
       },
-      setConfigDefaultSceneSlideEase: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneSlideEase: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.slideEase = action.payload
       },
       setConfigDefaultSceneSlideExp: (state, action: PayloadAction<number>) => {
@@ -437,7 +461,10 @@ function createAppSlice(app?: App) {
       setConfigDefaultSceneSlidePer: (state, action: PayloadAction<number>) => {
         state.config.defaultScene.slidePer = action.payload
       },
-      setConfigDefaultSceneSlideType: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneSlideType: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.slideType = action.payload
       },
       setConfigDefaultSceneSlideDistance: (
@@ -524,19 +551,31 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.strobeDelayBPMMulti = action.payload
       },
-      setConfigDefaultSceneStrobeEase: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneStrobeEase: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.strobeEase = action.payload
       },
-      setConfigDefaultSceneStrobeExp: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneStrobeExp: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.strobeExp = action.payload
       },
       setConfigDefaultSceneStrobeOv: (state, action: PayloadAction<number>) => {
         state.config.defaultScene.strobeOv = action.payload
       },
-      setConfigDefaultSceneStrobeAmp: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneStrobeAmp: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.strobeAmp = action.payload
       },
-      setConfigDefaultSceneStrobePer: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneStrobePer: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.strobePer = action.payload
       },
       setConfigDefaultSceneStrobeColorType: (
@@ -602,7 +641,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.transBPMMulti = action.payload
       },
-      setConfigDefaultSceneTransEase: (state, action: PayloadAction<string>) => {
+      setConfigDefaultSceneTransEase: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.transEase = action.payload
       },
       setConfigDefaultSceneTransExp: (state, action: PayloadAction<number>) => {
@@ -686,7 +728,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.zoomRandom = action.payload
       },
-      setConfigDefaultSceneZoomStart: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneZoomStart: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.zoomStart = action.payload
       },
       setConfigDefaultSceneZoomEnd: (state, action: PayloadAction<number>) => {
@@ -704,13 +749,22 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.zoomStartMax = action.payload
       },
-      setConfigDefaultSceneZoomEndMin: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneZoomEndMin: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.zoomEndMin = action.payload
       },
-      setConfigDefaultSceneZoomEndMax: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneZoomEndMax: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.zoomEndMax = action.payload
       },
-      setConfigDefaultSceneFadeInOut: (state, action: PayloadAction<boolean>) => {
+      setConfigDefaultSceneFadeInOut: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
         state.config.defaultScene.fadeInOut = action.payload
       },
       setConfigDefaultSceneFadeIOTF: (state, action: PayloadAction<string>) => {
@@ -830,7 +884,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.panDurationMax = action.payload
       },
-      setConfigDefaultScenePanSinRate: (state, action: PayloadAction<number>) => {
+      setConfigDefaultScenePanSinRate: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.panSinRate = action.payload
       },
       setConfigDefaultScenePanBPMMulti: (
@@ -851,7 +908,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.panStartExp = action.payload
       },
-      setConfigDefaultScenePanStartOv: (state, action: PayloadAction<number>) => {
+      setConfigDefaultScenePanStartOv: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.panStartOv = action.payload
       },
       setConfigDefaultScenePanStartAmp: (
@@ -866,19 +926,31 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.panStartPer = action.payload
       },
-      setConfigDefaultScenePanEndEase: (state, action: PayloadAction<string>) => {
+      setConfigDefaultScenePanEndEase: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.defaultScene.panEndEase = action.payload
       },
-      setConfigDefaultScenePanEndExp: (state, action: PayloadAction<number>) => {
+      setConfigDefaultScenePanEndExp: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.panEndExp = action.payload
       },
       setConfigDefaultScenePanEndOv: (state, action: PayloadAction<number>) => {
         state.config.defaultScene.panEndOv = action.payload
       },
-      setConfigDefaultScenePanEndAmp: (state, action: PayloadAction<number>) => {
+      setConfigDefaultScenePanEndAmp: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.panEndAmp = action.payload
       },
-      setConfigDefaultScenePanEndPer: (state, action: PayloadAction<number>) => {
+      setConfigDefaultScenePanEndPer: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.panEndPer = action.payload
       },
       setConfigDefaultScenePanHorizTransType: (
@@ -953,7 +1025,10 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.panVertTransLevelMax = action.payload
       },
-      setConfigDefaultSceneAddOverlay: (state, action: PayloadAction<number>) => {
+      setConfigDefaultSceneAddOverlay: (
+        state,
+        action: PayloadAction<number>
+      ) => {
         state.config.defaultScene.overlays.push(action.payload)
       },
       setConfigDefaultSceneRemoveOverlay: (
@@ -1005,7 +1080,10 @@ function createAppSlice(app?: App) {
       setConfigTutorialsSceneGrid: (state, action: PayloadAction<string>) => {
         state.config.tutorials.sceneGrid = action.payload
       },
-      setConfigTutorialsVideoClipper: (state, action: PayloadAction<string>) => {
+      setConfigTutorialsVideoClipper: (
+        state,
+        action: PayloadAction<string>
+      ) => {
         state.config.tutorials.videoClipper = action.payload
       },
       setConfigDisplaySettingsFullScreen: (
@@ -1030,7 +1108,8 @@ function createAppSlice(app?: App) {
         state,
         action: PayloadAction<boolean>
       ) => {
-        state.config.displaySettings.clickToProgressWhilePlaying = action.payload
+        state.config.displaySettings.clickToProgressWhilePlaying =
+          action.payload
       },
       setConfigDisplaySettingsEasingControls: (
         state,
@@ -1589,7 +1668,9 @@ function createAppSlice(app?: App) {
         state.scriptSelected = []
       },
       setScriptsRemove: (state, action: PayloadAction<number[]>) => {
-        state.scripts = state.scripts.filter((id) => !action.payload.includes(id))
+        state.scripts = state.scripts.filter(
+          (id) => !action.payload.includes(id)
+        )
         state.scriptSelected = state.scriptSelected.filter((id) =>
           state.scripts.includes(id)
         )
@@ -1620,7 +1701,9 @@ function createAppSlice(app?: App) {
         )
       },
       setLibraryRemove: (state, action: PayloadAction<number[]>) => {
-        state.library = state.library.filter((id) => !action.payload.includes(id))
+        state.library = state.library.filter(
+          (id) => !action.payload.includes(id)
+        )
         state.librarySelected = state.librarySelected.filter((id) =>
           state.library.includes(id)
         )
@@ -1642,8 +1725,12 @@ function createAppSlice(app?: App) {
         state,
         action: PayloadAction<{ oldSourceID: number; newSourceID: number }>
       ) => {
-        const oldLibraryIndex = state.library.indexOf(action.payload.oldSourceID)
-        const newLibraryIndex = state.library.indexOf(action.payload.newSourceID)
+        const oldLibraryIndex = state.library.indexOf(
+          action.payload.oldSourceID
+        )
+        const newLibraryIndex = state.library.indexOf(
+          action.payload.newSourceID
+        )
         arrayMove(state.library, oldLibraryIndex, newLibraryIndex)
       }
     }

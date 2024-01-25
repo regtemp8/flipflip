@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -10,12 +10,10 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-
-import { makeStyles } from 'tss-react/mui'
-
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
-
-import type Audio from '../../store/audio/Audio'
+import { makeStyles } from 'tss-react/mui'
+import { selectAudioAlbums } from '../../store/audio/selectors'
+import { useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -55,23 +53,15 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface AudioAlbumListProps {
-  sources: Audio[]
+  sources: number[]
   showHelp: boolean
   onClickAlbum: (album: string) => void
   onClickArtist: (artist: string) => void
 }
 
 function AudioAlbumList(props: AudioAlbumListProps) {
-  const [albums, setAlbums] = useState<
-    Map<string, { artist: string; thumb?: string; count: number }>
-  >(new Map())
+  const albums = useAppSelector(selectAudioAlbums(props.sources))
   const [hover, setHover] = useState<string>()
-
-  useEffect(() => {
-    setAlbums(getAlbums(props.sources))
-  }, [props.sources])
-
-  const nop = () => {}
 
   const onMouseEnter = (album: string) => {
     setHover(album)
@@ -79,73 +69,6 @@ function AudioAlbumList(props: AudioAlbumListProps) {
 
   const onMouseLeave = () => {
     setHover(undefined)
-  }
-
-  const getAlbums = (
-    sources: Audio[]
-  ): Map<string, { artist: string; thumb?: string; count: number }> => {
-    const va = 'Various Artists'
-    const albumMap = new Map<
-      string,
-      { artist: string; thumb?: string; count: number }
-    >()
-    const songs = Array.from(sources).sort((a, b) => {
-      const albumA = a.album as string
-      const albumB = b.album as string
-      if (albumA > albumB) {
-        return 1
-      } else if (albumA < albumB) {
-        return -1
-      } else {
-        const trackNumA = a.trackNum as number
-        const trackNumB = b.trackNum as number
-        if (trackNumA > trackNumB) {
-          return 1
-        } else if (trackNumA < trackNumB) {
-          return -1
-        } else {
-          const nameA = a.name as string
-          const nameB = b.name as string
-          const reA = /^(A\s|a\s|The\s|the\s)/g
-          const valueA = nameA.replace(reA, '')
-          const valueB = nameB.replace(reA, '')
-          return valueA.localeCompare(valueB, 'en', { numeric: true })
-        }
-      }
-    })
-    for (const song of songs) {
-      if (
-        song.album &&
-        (!albumMap.has(song.album) ||
-          !albumMap.get(song.album)?.thumb ||
-          (albumMap.get(song.album)?.artist !== song.artist &&
-            albumMap.get(song.album)?.artist !== va))
-      ) {
-        if (
-          albumMap.has(song.album) &&
-          albumMap.get(song.album)?.artist !== song.artist
-        ) {
-          albumMap.set(song.album, { artist: va, thumb: song.thumb, count: 0 })
-        } else {
-          albumMap.set(song.album, {
-            artist: song.artist as string,
-            thumb: song.thumb,
-            count: 0
-          })
-        }
-      }
-    }
-    for (const song of songs) {
-      if (song.album) {
-        const album = albumMap.get(song.album)
-        albumMap.set(song.album, {
-          artist: album?.artist as string,
-          thumb: album?.thumb,
-          count: (album?.count as number) + 1
-        })
-      }
-    }
-    return albumMap
   }
 
   const { classes } = useStyles()

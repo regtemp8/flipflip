@@ -1,3 +1,4 @@
+/// <reference path="../../react-sortablejs.d.ts" />
 import React, { MouseEvent, useState } from 'react'
 import wretch from 'wretch'
 import AbortAddon from 'wretch/addons/abort'
@@ -42,7 +43,6 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { en, AF, PW, PWS } from 'flipflip-common'
 import { arrayMove } from '../../data/utils'
 import { useAppSelector } from '../../store/hooks'
-import { selectConstants } from '../../store/constants/selectors'
 import {
   selectAppConfigRemoteSettingsPiwigoHost,
   selectAppConfigRemoteSettingsPiwigoPassword,
@@ -51,51 +51,51 @@ import {
 } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    list: {},
-    subList: {
-      paddingLeft: 10
-    },
-    rootInput: {
-      marginLeft: theme.spacing(2),
-      flexGrow: 1
-    },
-    sortListDisabled: {
-      pointerEvents: 'none',
-      opacity: 0.6
-    },
-    sortCol: {
-      marginBottom: 5
-    },
-    sortColContent: {
-      display: 'flex',
-      padding: '5px !important'
-    },
-    sortColLabel: {
-      lineHeight: 2,
-      marginRight: 'auto'
-    },
-    sortColDir: {
-      marginTop: 8
-    },
-    tagChip: {
-      marginTop: 0,
-      marginRight: 5,
-      marginBottom: 5,
-      marginLeft: 0
-    },
-    areaHeaderFirst: {
-      marginTop: 0
-    },
-    areaHeader: {
-      marginTop: 15
-    },
-    ratingArea: {
-      display: 'flex'
-    },
-    typeSelect: {
-      marginLeft: 10
-    }
-  }))
+  list: {},
+  subList: {
+    paddingLeft: 10
+  },
+  rootInput: {
+    marginLeft: theme.spacing(2),
+    flexGrow: 1
+  },
+  sortListDisabled: {
+    pointerEvents: 'none',
+    opacity: 0.6
+  },
+  sortCol: {
+    marginBottom: 5
+  },
+  sortColContent: {
+    display: 'flex',
+    padding: '5px !important'
+  },
+  sortColLabel: {
+    lineHeight: 2,
+    marginRight: 'auto'
+  },
+  sortColDir: {
+    marginTop: 8
+  },
+  tagChip: {
+    marginTop: 0,
+    marginRight: 5,
+    marginBottom: 5,
+    marginLeft: 0
+  },
+  areaHeaderFirst: {
+    marginTop: 0
+  },
+  areaHeader: {
+    marginTop: 15
+  },
+  ratingArea: {
+    display: 'flex'
+  },
+  typeSelect: {
+    marginLeft: 10
+  }
+}))
 
 interface Album {
   id: number
@@ -132,7 +132,8 @@ function AlbumListItem(props: AlbumListItemProps) {
     setFoldersOpen(foldersOpen)
   }
 
-  const { album, selectedAlbums, onSelect, classes } = props
+  const { classes } = useStyles()
+  const { album, selectedAlbums, onSelect } = props
   const isSelected = selectedAlbums.includes(album.id)
 
   return (
@@ -165,7 +166,6 @@ function AlbumListItem(props: AlbumListItemProps) {
         <List className={classes.subList}>
           {album.sub_categories.map((album: Album) => (
             <AlbumListItem
-              classes={classes}
               key={album.id}
               album={album}
               selectedAlbums={selectedAlbums}
@@ -185,7 +185,6 @@ export interface PiwigoDialogProps {
 }
 
 function PiwigoDialog(props: PiwigoDialogProps) {
-  const { pathSep } = useAppSelector(selectConstants())
   const piwigoPassword = useAppSelector(
     selectAppConfigRemoteSettingsPiwigoPassword()
   )
@@ -442,7 +441,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
     setSortOrder(newSortOrder)
   }
 
-  const {classes} = useStyles()
+  const { classes } = useStyles()
 
   return (
     <Dialog
@@ -496,7 +495,6 @@ function PiwigoDialog(props: PiwigoDialogProps) {
             <List className={classes.list}>
               {albums.map((album: Album) => (
                 <AlbumListItem
-                  classes={classes}
                   key={album.id}
                   album={album}
                   selectedAlbums={selectedAlbums}

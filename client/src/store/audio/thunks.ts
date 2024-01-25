@@ -58,8 +58,8 @@ export function onAddAudioUrl(importURL: string, cachePath: string) {
       .timeout(error)
       .internalError(error)
       .arrayBuffer((arrayBuffer) => {
-        flipflip().api
-          .parseMusicMetadataBuffer(arrayBuffer, cachePath)
+        flipflip()
+          .api.parseMusicMetadataBuffer(arrayBuffer, cachePath)
           .then(async (metadata: any) => {
             return await extractMusicMetadata(audio, newAudio(metadata))
           })
@@ -117,8 +117,8 @@ export function onAddAudioSources(newSources: string[], cachePath: string) {
         })
 
         dispatch(setAudio(audio))
-        flipflip().api
-          .parseMusicMetadataFile(url, cachePath)
+        flipflip()
+          .api.parseMusicMetadataFile(url, cachePath)
           .then(async (metadata: any) => {
             return await extractMusicMetadata(audio, newAudio(metadata))
           })

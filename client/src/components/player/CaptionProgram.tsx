@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import wretch from 'wretch'
 import Sound from 'react-sound'
 
@@ -129,70 +129,890 @@ export default function CaptionProgram(props: CaptionProgramProps) {
   const _lastTimestamp = useRef<number>()
   const _timestampTimeout = useRef<number>()
 
-  useEffect(() => {
-    start()
-    if (props.jumpToHack) {
-      props.jumpToHack.listener = (args) => {
-        if (args && args.length > 0) {
-          setState({ ...state, programCounter: args[0] })
+  const getPhrase = useCallback(
+    (value: string) => {
+      const registerRegex = /^\$(\d)$/.exec(value)
+      if (value === '$RANDOM_PHRASE') {
+        return getRandomListItem(state.phrases.get(0) as string[])
+      } else if (registerRegex != null) {
+        const register = parseInt(registerRegex[1])
+        return getRandomListItem(state.phrases.get(register) as string[])
+      } else if (value === '$TAG_PHRASE') {
+        if (props.currentImage) {
+          const tag = getRandomListItem(currentImageTags)
+          if (tag) {
+            const phraseString = tag.phraseString
+            return getRandomListItem(phraseString.split('\n'))
+          }
+        }
+        return ''
+      } else {
+        return value
+      }
+    },
+    [currentImageTags, props.currentImage, state.phrases]
+  )
+
+  const commands = useMemo(
+    () => ({
+      showText: (value: string, ms: number, opacity: number) => {
+        return (nextCommand: Function) => {
+          const element = _el.current as HTMLDivElement
+          element.style.opacity = (opacity / 100).toString()
+          element.innerHTML = htmlEntities(value)
+          const waitFn = commands.wait(ms)
+          waitFn(() => {
+            element.style.opacity = '0'
+            nextCommand()
+          })
+        }
+      },
+      wait: (ms: number) => {
+        return (nextCommand: Function) => {
+          clearTimeout(_timeout.current)
+          _timeout.current = window.setTimeout(nextCommand, ms)
+        }
+      },
+      cap: (value: string, timestamp = false) => {
+        return (nextCommand: Function) => {
+          const command = () => {
+            if (state.countProgress) {
+              setState({ ...state, countProgress: false })
+            }
+            const duration = getDuration(
+              {
+                timingFunction: state.captionTF,
+                time: state.captionDuration[0],
+                timeMin: state.captionDuration[0],
+                timeMax: state.captionDuration[1],
+                sinRate: state.captionWaveRate,
+                bpmMulti: state.captionBPMMulti
+              },
+              timeToNextFrame,
+              bpm
+            )
+            const showTextFn = commands.showText(
+              getPhrase(value),
+              duration,
+              state.captionOpacity
+            )
+            const delay = timestamp
+              ? 0
+              : getDuration(
+                  {
+                    timingFunction: state.captionDelayTF,
+                    time: state.captionDelay[0],
+                    timeMin: state.captionDelay[0],
+                    timeMax: state.captionDelay[1],
+                    sinRate: state.captionDelayWaveRate,
+                    bpmMulti: state.captionDelayBPMMulti
+                  },
+                  timeToNextFrame,
+                  bpm
+                )
+            const waitFn = commands.wait(delay)
+            const element = _el.current as HTMLDivElement
+            element.style.color = fsCaption.color
+            element.style.fontSize = fsCaption.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fsCaption.fontFamily
+            element.style.display = 'table-cell'
+            element.style.textAlign = 'center'
+            element.style.verticalAlign = 'bottom'
+            const yPos = (14 + state.captionY) * props.scale
+            if (yPos > 0) {
+              element.style.paddingBottom = yPos + 'vmin'
+              element.style.paddingTop = 'unset'
+            } else {
+              element.style.paddingBottom = 'unset'
+              element.style.paddingTop = yPos * -1 + 'vmin'
+            }
+            const xPos = state.captionX * props.scale
+            if (xPos > 0) {
+              element.style.paddingLeft = xPos + 'vmin'
+              element.style.paddingRight = 'unset'
+            } else {
+              element.style.paddingLeft = 'unset'
+              element.style.paddingRight = xPos * -1 + 'vmin'
+            }
+            // _el.current.style.transition = 'opacity 0.5s ease-in-out';
+            if (fsCaption.border) {
+              element.style.webkitTextStroke =
+                fsCaption.borderpx * props.scale + 'px ' + fsCaption.borderColor
+            } else {
+              element.style.webkitTextStroke = 'unset'
+            }
+            if (state.captionDelayTF === TF.scene && !timestamp) {
+              showTextFn(() => nextCommand())
+            } else {
+              showTextFn(() => {
+                waitFn(nextCommand)
+              })
+            }
+          }
+          if (state.captionDelayTF === TF.scene && !timestamp) {
+            _sceneCommand.current = command
+          } else {
+            command()
+          }
+        }
+      },
+      bigcap: (value: string, timestamp = false) => {
+        return (nextCommand: Function) => {
+          const command = () => {
+            if (state.countProgress) {
+              setState({ ...state, countProgress: false })
+            }
+            const duration = getDuration(
+              {
+                timingFunction: state.captionTF,
+                time: state.captionDuration[0],
+                timeMin: state.captionDuration[0],
+                timeMax: state.captionDuration[1],
+                sinRate: state.captionWaveRate,
+                bpmMulti: state.captionBPMMulti
+              },
+              timeToNextFrame,
+              bpm
+            )
+            const showTextFn = commands.showText(
+              getPhrase(value),
+              duration,
+              state.captionOpacity
+            )
+            const delay = timestamp
+              ? 0
+              : getDuration(
+                  {
+                    timingFunction: state.captionDelayTF,
+                    time: state.captionDelay[0],
+                    timeMin: state.captionDelay[0],
+                    timeMax: state.captionDelay[1],
+                    sinRate: state.captionDelayWaveRate,
+                    bpmMulti: state.captionDelayBPMMulti
+                  },
+                  timeToNextFrame,
+                  bpm
+                )
+            const waitFn = commands.wait(delay)
+            const element = _el.current as HTMLDivElement
+            element.style.color = fsCaptionBig.color
+            element.style.fontSize =
+              fsCaptionBig.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fsCaptionBig.fontFamily
+            element.style.display = 'table-cell'
+            element.style.textAlign = 'center'
+            element.style.verticalAlign = 'middle'
+            const yPos = state.bigCaptionY * props.scale
+            if (yPos > 0) {
+              element.style.paddingBottom = yPos + 'vmin'
+              element.style.paddingTop = 'unset'
+            } else {
+              element.style.paddingBottom = 'unset'
+              element.style.paddingTop = yPos * -1 + 'vmin'
+            }
+            const xPos = state.bigCaptionX * props.scale
+            if (xPos > 0) {
+              element.style.paddingLeft = xPos + 'vmin'
+              element.style.paddingRight = 'unset'
+            } else {
+              element.style.paddingLeft = 'unset'
+              element.style.paddingRight = xPos * -1 + 'vmin'
+            }
+            element.style.transition = 'opacity 0.1s ease-out'
+            if (fsCaptionBig.border) {
+              element.style.webkitTextStroke =
+                fsCaptionBig.borderpx * props.scale +
+                'px ' +
+                fsCaptionBig.borderColor
+            } else {
+              element.style.webkitTextStroke = 'unset'
+            }
+            if (state.captionDelayTF === TF.scene && !timestamp) {
+              showTextFn(() => nextCommand())
+            } else {
+              showTextFn(() => {
+                waitFn(nextCommand)
+              })
+            }
+          }
+          if (state.captionDelayTF === TF.scene && !timestamp) {
+            _sceneCommand.current = command
+          } else {
+            command()
+          }
+        }
+      },
+      blink: (value: string, timestamp = false) => {
+        return (nextCommand: Function) => {
+          const command = () => {
+            if (state.countProgress) {
+              setState({ ...state, countProgress: false })
+            }
+            const fns = new Array<Function>()
+            let i = 0
+            const phrase = getPhrase(value).split('/')
+            const length = phrase.length
+            for (let word of phrase) {
+              word = getPhrase(word.trim())
+              const j = i
+              i += 1
+              fns.push(() => {
+                const duration = getDuration(
+                  {
+                    timingFunction: state.blinkTF,
+                    time: state.blinkDuration[0],
+                    timeMin: state.blinkDuration[0],
+                    timeMax: state.blinkDuration[1],
+                    sinRate: state.blinkWaveRate,
+                    bpmMulti: state.blinkBPMMulti
+                  },
+                  timeToNextFrame,
+                  bpm
+                )
+                const showTextFn = commands.showText(
+                  word,
+                  duration,
+                  state.blinkOpacity
+                )
+                if (
+                  j === length - 1 &&
+                  (state.blinkDelayTF === TF.scene ||
+                    state.blinkGroupDelayTF === TF.scene ||
+                    timestamp)
+                ) {
+                  showTextFn(() => nextCommand())
+                } else if (state.blinkDelayTF === TF.scene) {
+                  showTextFn(() => (_sceneCommand.current = fns[j + 1]))
+                } else {
+                  const delay = getDuration(
+                    {
+                      timingFunction: state.blinkDelayTF,
+                      time: state.blinkDelay[0],
+                      timeMin: state.blinkDelay[0],
+                      timeMax: state.blinkDelay[1],
+                      sinRate: state.blinkDelayWaveRate,
+                      bpmMulti: state.blinkDelayBPMMulti
+                    },
+                    timeToNextFrame,
+                    bpm
+                  )
+                  const waitFn = commands.wait(delay)
+                  showTextFn(() => {
+                    waitFn(fns[j + 1])
+                  })
+                }
+              })
+            }
+
+            if (
+              state.blinkGroupDelayTF !== TF.scene &&
+              state.blinkDelayTF !== TF.scene &&
+              !timestamp
+            ) {
+              const delay = getDuration(
+                {
+                  timingFunction: state.blinkGroupDelayTF,
+                  time: state.blinkGroupDelay[0],
+                  timeMin: state.blinkGroupDelay[0],
+                  timeMax: state.blinkGroupDelay[1],
+                  sinRate: state.blinkGroupDelayWaveRate,
+                  bpmMulti: state.blinkGroupDelayBPMMulti
+                },
+                timeToNextFrame,
+                bpm
+              )
+              const lastWaitFn = commands.wait(delay)
+              fns.push(() => {
+                lastWaitFn(nextCommand)
+              })
+            }
+
+            const element = _el.current as HTMLDivElement
+            element.style.color = fsBlink.color
+            element.style.fontSize = fsBlink.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fsBlink.fontFamily
+            element.style.display = 'table-cell'
+            element.style.textAlign = 'center'
+            element.style.verticalAlign = 'middle'
+            const yPos = state.blinkY * props.scale
+            if (yPos > 0) {
+              element.style.paddingBottom = yPos + 'vmin'
+              element.style.paddingTop = 'unset'
+            } else {
+              element.style.paddingBottom = 'unset'
+              element.style.paddingTop = yPos * -1 + 'vmin'
+            }
+            const xPos = state.blinkX * props.scale
+            if (xPos > 0) {
+              element.style.paddingLeft = xPos + 'vmin'
+              element.style.paddingRight = 'unset'
+            } else {
+              element.style.paddingLeft = 'unset'
+              element.style.paddingRight = xPos * -1 + 'vmin'
+            }
+            element.style.transition = 'opacity 0.1s ease-out'
+            if (fsBlink.border) {
+              element.style.webkitTextStroke =
+                fsBlink.borderpx * props.scale + 'px ' + fsBlink.borderColor
+            } else {
+              element.style.webkitTextStroke = 'unset'
+            }
+            fns[0]()
+          }
+          if (
+            (state.blinkGroupDelayTF === TF.scene ||
+              state.blinkDelayTF === TF.scene) &&
+            !timestamp
+          ) {
+            _sceneCommand.current = command
+          } else {
+            command()
+          }
+        }
+      },
+      count: (start: number, end: number, timestamp = false) => {
+        const values = Array<number>()
+        const origStart = start
+        const origEnd = end
+        do {
+          values.push(start)
+          if (start === end) {
+            break
+          } else if (start < end) {
+            start += 1
+          } else if (start > end) {
+            start -= 1
+          }
+        } while (true)
+
+        return (nextCommand: Function) => {
+          const command = () => {
+            let offset = 0
+            if (state.showCountProgress) {
+              offset = state.countProgressOffset
+                ? Math.min(origStart, origEnd)
+                : 0
+              setState({
+                ...state,
+                countProgress: true,
+                countCurrent: origStart - offset,
+                countTotal: Math.max(origStart, origEnd) - offset,
+                countColor: fsCount.color
+              })
+            } else if (state.countProgress) {
+              setState({ ...state, countProgress: false })
+            }
+            const fns = new Array<Function>()
+            let i = 0
+            const length = values.length
+            for (const val of values) {
+              const j = i
+              i += 1
+              fns.push(() => {
+                const duration = getDuration(
+                  {
+                    timingFunction: state.countTF,
+                    time: state.countDuration[0],
+                    timeMin: state.countDuration[0],
+                    timeMax: state.countDuration[1],
+                    sinRate: state.countWaveRate,
+                    bpmMulti: state.countBPMMulti
+                  },
+                  timeToNextFrame,
+                  bpm
+                )
+                if (state.showCountProgress) {
+                  if (state.countColors.has(val)) {
+                    const countColor = state.countColors.get(val) as string
+                    setState({
+                      ...state,
+                      countCurrent: val - offset,
+                      countColor
+                    })
+                    if (state.countColorMatch) {
+                      const element = _el.current as HTMLDivElement
+                      element.style.color = countColor
+                    }
+                  } else {
+                    setState({ ...state, countCurrent: val - offset })
+                  }
+                } else {
+                  if (state.countColorMatch) {
+                    const element = _el.current as HTMLDivElement
+                    element.style.color = state.countColors.get(val) as string
+                  }
+                }
+                const showTextFn = commands.showText(
+                  val.toString(),
+                  duration,
+                  state.countOpacity
+                )
+                if (
+                  j === length - 1 &&
+                  (state.countDelayTF === TF.scene ||
+                    state.countGroupDelayTF === TF.scene ||
+                    timestamp)
+                ) {
+                  showTextFn(() => nextCommand())
+                } else if (state.countDelayTF === TF.scene) {
+                  showTextFn(() => (_sceneCommand.current = fns[j + 1]))
+                } else {
+                  const delay = getDuration(
+                    {
+                      timingFunction: state.countDelayTF,
+                      time: state.countDelay[0],
+                      timeMin: state.countDelay[0],
+                      timeMax: state.countDelay[1],
+                      sinRate: state.countDelayWaveRate,
+                      bpmMulti: state.countDelayBPMMulti
+                    },
+                    timeToNextFrame,
+                    bpm
+                  )
+                  const waitFn = commands.wait(delay)
+                  showTextFn(() => {
+                    waitFn(fns[j + 1])
+                  })
+                }
+              })
+            }
+
+            if (
+              state.countGroupDelayTF !== TF.scene &&
+              state.countDelayTF !== TF.scene &&
+              !timestamp
+            ) {
+              const delay = getDuration(
+                {
+                  timingFunction: state.countGroupDelayTF,
+                  time: state.countGroupDelay[0],
+                  timeMin: state.countGroupDelay[0],
+                  timeMax: state.countGroupDelay[1],
+                  sinRate: state.countGroupDelayWaveRate,
+                  bpmMulti: state.countGroupDelayBPMMulti
+                },
+                timeToNextFrame,
+                bpm
+              )
+              const lastWaitFn = commands.wait(delay)
+              fns.push(() => {
+                lastWaitFn(nextCommand)
+              })
+            }
+
+            const element = _el.current as HTMLDivElement
+            element.style.color = fsCount.color
+            element.style.fontSize = fsCount.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fsCount.fontFamily
+            element.style.display = 'table-cell'
+            element.style.textAlign = 'center'
+            element.style.verticalAlign = 'middle'
+            const yPos = state.countY * props.scale
+            if (yPos > 0) {
+              element.style.paddingBottom = yPos + 'vmin'
+              element.style.paddingTop = 'unset'
+            } else {
+              element.style.paddingBottom = 'unset'
+              element.style.paddingTop = yPos * -1 + 'vmin'
+            }
+            const xPos = state.countX * props.scale
+            if (xPos > 0) {
+              element.style.paddingLeft = xPos + 'vmin'
+              element.style.paddingRight = 'unset'
+            } else {
+              element.style.paddingLeft = 'unset'
+              element.style.paddingRight = xPos * -1 + 'vmin'
+            }
+            element.style.transition = 'opacity 0.1s ease-out'
+            if (fsCount.border) {
+              element.style.webkitTextStroke =
+                fsCount.borderpx * props.scale + 'px ' + fsCount.borderColor
+            } else {
+              element.style.webkitTextStroke = 'unset'
+            }
+            fns[0]()
+          }
+          if (
+            (state.countGroupDelayTF === TF.scene ||
+              state.countDelayTF === TF.scene) &&
+            !timestamp
+          ) {
+            _sceneCommand.current = command
+          } else {
+            command()
+          }
+        }
+      },
+      playAudio: (alias: string, volume: number) => {
+        return (nextCommand: Function) => {
+          const newAudios = Array.from(state.audios)
+          const audio = newAudios.find((a) => a.alias === alias)
+          if (audio) {
+            audio.playing = true
+            audio.volume = volume
+            setState({ ...state, audios: newAudios })
+          }
+
+          nextCommand()
+        }
+      },
+      setBlinkY: (relYPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkY: relYPos })
+          nextCommand()
+        }
+      },
+      setCaptionY: (relYPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionY: relYPos })
+          nextCommand()
+        }
+      },
+      setBigCaptionY: (relYPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, bigCaptionY: relYPos })
+          nextCommand()
+        }
+      },
+      setCountY: (relYPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countY: relYPos })
+          nextCommand()
+        }
+      },
+      setBlinkX: (relXPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkX: relXPos })
+          nextCommand()
+        }
+      },
+      setCaptionX: (relXPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionX: relXPos })
+          nextCommand()
+        }
+      },
+      setBigCaptionX: (relXPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, bigCaptionX: relXPos })
+          nextCommand()
+        }
+      },
+      setCountX: (relXPos: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countX: relXPos })
+          nextCommand()
+        }
+      },
+      /* Blink */
+      setBlinkDuration: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.blinkDuration[1])
+          }
+          setState({ ...state, blinkDuration: ms })
+          nextCommand()
+        }
+      },
+      setBlinkWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setBlinkBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setBlinkTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkTF: tf })
+          nextCommand()
+        }
+      },
+      /* Blink Delay */
+      setBlinkDelay: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.blinkDelay[1])
+          }
+          setState({ ...state, blinkDelay: ms })
+          nextCommand()
+        }
+      },
+      setBlinkDelayWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkDelayWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setBlinkDelayBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkDelayBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setBlinkDelayTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkDelayTF: tf })
+          nextCommand()
+        }
+      },
+      /* Blink Group Delay */
+      setBlinkGroupDelay: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.blinkGroupDelay[1])
+          }
+          setState({ ...state, blinkGroupDelay: ms })
+          nextCommand()
+        }
+      },
+      setBlinkGroupDelayWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkGroupDelayWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setBlinkGroupDelayBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkGroupDelayBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setBlinkGroupDelayTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkGroupDelayTF: tf })
+          nextCommand()
+        }
+      },
+      /* Caption */
+      setCaptionDuration: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.captionDuration[1])
+          }
+          setState({ ...state, captionDuration: ms })
+          nextCommand()
+        }
+      },
+      setCaptionWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setCaptionBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setCaptionTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionTF: tf })
+          nextCommand()
+        }
+      },
+      /* Caption Delay */
+      setCaptionDelay: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.captionDelay[1])
+          }
+          setState({ ...state, captionDelay: ms })
+          nextCommand()
+        }
+      },
+      setCaptionDelayWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionDelayWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setCaptionDelayBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionDelayBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setCaptionDelayTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionDelayTF: tf })
+          nextCommand()
+        }
+      },
+      /* Count */
+      setCountDuration: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.countDuration[1])
+          }
+          setState({ ...state, countDuration: ms })
+          nextCommand()
+        }
+      },
+      setCountWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setCountBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setCountTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countTF: tf })
+          nextCommand()
+        }
+      },
+      /* Count Delay */
+      setCountDelay: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.countDelay[1])
+          }
+          setState({ ...state, countDelay: ms })
+          nextCommand()
+        }
+      },
+      setCountDelayWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countDelayWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setCountDelayBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countDelayBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setCountDelayTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countDelayTF: tf })
+          nextCommand()
+        }
+      },
+      /* Count Group Delay */
+      setCountGroupDelay: (ms: number[]) => {
+        return (nextCommand: Function) => {
+          if (ms.length === 1) {
+            ms.push(state.countGroupDelay[1])
+          }
+          setState({ ...state, countGroupDelay: ms })
+          nextCommand()
+        }
+      },
+      setCountGroupDelayWaveRate: (waveRate: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countGroupDelayWaveRate: waveRate })
+          nextCommand()
+        }
+      },
+      setCountGroupDelayBPMMulti: (bpmMulti: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countGroupDelayBPMMulti: bpmMulti })
+          nextCommand()
+        }
+      },
+      setCountGroupDelayTF: (tf: string) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countGroupDelayTF: tf })
+          nextCommand()
+        }
+      },
+      setShowCountProgress: (show: boolean) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, showCountProgress: show })
+          nextCommand()
+        }
+      },
+      setCountProgressScale: (scale: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countProgressScale: scale })
+          nextCommand()
+        }
+      },
+      setCountProgressColor: (args: any[]) => {
+        return (nextCommand: Function) => {
+          const newColors = state.countColors
+          newColors.set(args[0], args[1])
+          setState({ ...state, countColors: newColors })
+          nextCommand()
+        }
+      },
+      setCountProgressOffset: (offset: boolean) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countProgressOffset: offset })
+          nextCommand()
+        }
+      },
+      setCountColorMatch: (match: boolean) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countColorMatch: match })
+          nextCommand()
+        }
+      },
+      setBlinkOpacity: (opacity: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, blinkOpacity: opacity })
+          nextCommand()
+        }
+      },
+      setCaptionOpacity: (opacity: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, captionOpacity: opacity })
+          nextCommand()
+        }
+      },
+      setCountOpacity: (opacity: number) => {
+        return (nextCommand: Function) => {
+          setState({ ...state, countOpacity: opacity })
+          nextCommand()
         }
       }
-    }
+    }),
+    [
+      bpm,
+      fsBlink.border,
+      fsBlink.borderColor,
+      fsBlink.borderpx,
+      fsBlink.color,
+      fsBlink.fontFamily,
+      fsBlink.fontSize,
+      fsCaption.border,
+      fsCaption.borderColor,
+      fsCaption.borderpx,
+      fsCaption.color,
+      fsCaption.fontFamily,
+      fsCaption.fontSize,
+      fsCaptionBig.border,
+      fsCaptionBig.borderColor,
+      fsCaptionBig.borderpx,
+      fsCaptionBig.color,
+      fsCaptionBig.fontFamily,
+      fsCaptionBig.fontSize,
+      fsCount.border,
+      fsCount.borderColor,
+      fsCount.borderpx,
+      fsCount.color,
+      fsCount.fontFamily,
+      fsCount.fontSize,
+      getPhrase,
+      props.scale,
+      state,
+      timeToNextFrame
+    ]
+  )
 
-    return () => {
-      reset()
-      stop()
-      if (props.jumpToHack) {
-        props.jumpToHack.listener = undefined
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (_sceneCommand.current != null) {
-      const command = _sceneCommand.current
-      _sceneCommand.current = undefined
-      command()
-    }
-  }, [props.currentImage])
-
-  useEffect(() => {
-    if (_el.current) {
-      stop()
-      reset()
-      start()
-    }
-  }, [props.captionScriptID])
-
-  useEffect(() => {
-    if (props.getCurrentTimestamp == null) {
-      stop()
-      reset()
-      start()
-    }
-  }, [props.getCurrentTimestamp])
-
-  const reset = () => {
-    setState({
-      ...captionProgramDefaults,
-      phrases: new Map<number, string[]>(),
-      audios: new Array<{
-        alias: string
-        file: string
-        playing: boolean
-        volume: number
-      }>(),
-      timestampFn: new Map<number, Function[]>(),
-      countColors: new Map<number, string>(),
-      countColor: '#FFFFFF',
-      countProgress: false,
-      countCurrent: 0,
-      countTotal: 0,
-      countChild: 0
-    })
-  }
-
-  const stop = () => {
+  const stop = useCallback(() => {
     captionProgramDefaults.phrases = new Map<number, string[]>()
     captionProgramDefaults.audios = new Array<{
       alias: string
@@ -221,9 +1041,141 @@ export default function CaptionProgram(props: CaptionProgramProps) {
       clearTimeout(_timestampTimeout.current)
       _timestampTimeout.current = undefined
     }
-  }
+  }, [state])
 
-  const start = () => {
+  const advance = useCallback(() => {
+    return (nextCommand: Function) => {
+      if (props.advance) {
+        props.advance()
+      }
+      const waitFn = commands.wait(0)
+      waitFn(() => nextCommand())
+    }
+  }, [commands, props])
+
+  const timestampLoop = useCallback(() => {
+    const doLoop = (passed: number): number => {
+      let index = state.timestampCounter
+      let fns
+      while (
+        state.timestamps.length >= index &&
+        passed > state.timestamps[index + 1]
+      ) {
+        index++
+      }
+      fns = state.timestampFn.get(state.timestamps[index]) as Function[]
+      _nextTimestamp.current = state.timestamps[index + 1]
+
+      for (const fn of fns) {
+        fn(() => {
+          const newCounter = index
+          if (newCounter >= state.timestamps.length - 1) {
+            if (stopAtEnd) {
+              dispatch(setRouteGoBack())
+              return
+            }
+            if (nextSceneAtEnd) {
+              dispatch(nextScene(props.sceneID))
+              return
+            }
+            if (
+              ((props.repeat === RP.all && !props.singleTrack) ||
+                props.repeat === RP.none) &&
+              props.nextTrack
+            ) {
+              props.nextTrack()
+              return
+            }
+          }
+          setState({ ...state, timestampCounter: newCounter })
+        })
+      }
+      return index
+    }
+
+    if (props.getCurrentTimestamp && syncWithAudio) {
+      const passed = props.getCurrentTimestamp()
+      if (
+        _lastTimestamp.current == null ||
+        Math.abs(_lastTimestamp.current - passed) > 1000
+      ) {
+        // Timestamp has changed, reset
+        let index = 0
+        if (passed > state.timestamps[0]) {
+          while (
+            state.timestamps.length >= index &&
+            passed > state.timestamps[index + 1]
+          ) {
+            const actions = state.timestampFn.get(state.timestamps[index]) || []
+            for (const fn of actions) {
+              if (/const command = \(\)/g.exec(fn.toString()) == null) {
+                fn(() => {})
+              }
+            }
+            index++
+          }
+          _nextTimestamp.current = state.timestamps[index + 1]
+        } else {
+          _nextTimestamp.current = state.timestamps[index]
+        }
+        setState({ ...state, timestampCounter: index })
+      } else if (passed > (_nextTimestamp.current as number)) {
+        const index = doLoop(passed)
+        if (index >= state.timestamps.length - 1) {
+          _nextTimestamp.current = 99999999
+        }
+      }
+      _lastTimestamp.current = passed
+      _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
+    } else {
+      if (_nextTimestamp.current == null) {
+        _nextTimestamp.current = state.timestamps[state.timestampCounter]
+      }
+      const passed = new Date().getTime() - _timeStarted.current!.getTime()
+      if (passed > _nextTimestamp.current) {
+        const index = doLoop(passed)
+        if (index >= state.timestamps.length - 1) {
+          return
+        }
+      }
+      _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
+    }
+  }, [dispatch, nextSceneAtEnd, props, state, stopAtEnd, syncWithAudio])
+
+  const captionLoop = useCallback(() => {
+    if (state.program[state.programCounter]) {
+      state.program[state.programCounter](() => {
+        let newCounter = state.programCounter + 1
+        if (newCounter >= state.program.length) {
+          if (stopAtEnd) {
+            dispatch(setRouteGoBack())
+            return
+          }
+          if (nextSceneAtEnd) {
+            dispatch(nextScene(props.sceneID))
+            if (!props.persist) return
+          }
+          if (
+            ((props.repeat === RP.all && !props.singleTrack) ||
+              props.repeat === RP.none) &&
+            props.nextTrack
+          ) {
+            props.nextTrack()
+            return
+          }
+          newCounter = 0
+        }
+        setState({
+          ...state,
+          programCounter: newCounter,
+          countChild: state.countChild === 0 ? 1 : 0
+        })
+        captionLoop()
+      })
+    }
+  }, [dispatch, nextSceneAtEnd, props, state, stopAtEnd])
+
+  const start = useCallback(() => {
     _runningPromise.current = new CancelablePromise((resolve, reject) => {
       if (script != null) {
         resolve({ data: [script] })
@@ -342,7 +1294,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             }
             let rr
             if (command === 'blink') {
-              rr = /(?:^|[\/\s])(\$RANDOM_PHRASE|\$\d)(?:[\/\s]|$)/g
+              rr = /(?:^|[/\s])(\$RANDOM_PHRASE|\$\d)(?:[/\s]|$)/g
             } else {
               rr = /(?:^|\s)(\$RANDOM_PHRASE|\$\d)(?:\s|$)/g
             }
@@ -836,981 +1788,69 @@ export default function CaptionProgram(props: CaptionProgramProps) {
         }
       }
     })
-  }
+  }, [advance, captionLoop, commands, props, script, state, timestampLoop, url])
 
-  const timestampLoop = () => {
-    const doLoop = (passed: number): number => {
-      let index = state.timestampCounter
-      let fns
-      while (
-        state.timestamps.length >= index &&
-        passed > state.timestamps[index + 1]
-      ) {
-        index++
+  useEffect(() => {
+    start()
+    if (props.jumpToHack) {
+      props.jumpToHack.listener = (args) => {
+        if (args && args.length > 0) {
+          setState({ ...state, programCounter: args[0] })
+        }
       }
-      fns = state.timestampFn.get(state.timestamps[index]) as Function[]
-      _nextTimestamp.current = state.timestamps[index + 1]
-
-      for (const fn of fns) {
-        fn(() => {
-          const newCounter = index
-          if (newCounter >= state.timestamps.length - 1) {
-            if (stopAtEnd) {
-              dispatch(setRouteGoBack())
-              return
-            }
-            if (nextSceneAtEnd) {
-              dispatch(nextScene(props.sceneID))
-              return
-            }
-            if (
-              ((props.repeat === RP.all && !props.singleTrack) ||
-                props.repeat === RP.none) &&
-              props.nextTrack
-            ) {
-              props.nextTrack()
-              return
-            }
-          }
-          setState({ ...state, timestampCounter: newCounter })
-        })
-      }
-      return index
     }
 
-    if (props.getCurrentTimestamp && syncWithAudio) {
-      const passed = props.getCurrentTimestamp()
-      if (
-        _lastTimestamp.current == null ||
-        Math.abs(_lastTimestamp.current - passed) > 1000
-      ) {
-        // Timestamp has changed, reset
-        let index = 0
-        if (passed > state.timestamps[0]) {
-          while (
-            state.timestamps.length >= index &&
-            passed > state.timestamps[index + 1]
-          ) {
-            const actions = state.timestampFn.get(state.timestamps[index]) || []
-            for (const fn of actions) {
-              if (/const command = \(\)/g.exec(fn.toString()) == null) {
-                fn(() => {})
-              }
-            }
-            index++
-          }
-          _nextTimestamp.current = state.timestamps[index + 1]
-        } else {
-          _nextTimestamp.current = state.timestamps[index]
-        }
-        setState({ ...state, timestampCounter: index })
-      } else if (passed > (_nextTimestamp.current as number)) {
-        const index = doLoop(passed)
-        if (index >= state.timestamps.length - 1) {
-          _nextTimestamp.current = 99999999
-        }
-      }
-      _lastTimestamp.current = passed
-      _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
-    } else {
-      if (_nextTimestamp.current == null) {
-        _nextTimestamp.current = state.timestamps[state.timestampCounter]
-      }
-      const passed = new Date().getTime() - _timeStarted.current!.getTime()
-      if (passed > _nextTimestamp.current) {
-        const index = doLoop(passed)
-        if (index >= state.timestamps.length - 1) {
-          return
-        }
-      }
-      _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
-    }
-  }
-
-  const captionLoop = () => {
-    if (state.program[state.programCounter]) {
-      state.program[state.programCounter](() => {
-        let newCounter = state.programCounter + 1
-        if (newCounter >= state.program.length) {
-          if (stopAtEnd) {
-            dispatch(setRouteGoBack())
-            return
-          }
-          if (nextSceneAtEnd) {
-            dispatch(nextScene(props.sceneID))
-            if (!props.persist) return
-          }
-          if (
-            ((props.repeat === RP.all && !props.singleTrack) ||
-              props.repeat === RP.none) &&
-            props.nextTrack
-          ) {
-            props.nextTrack()
-            return
-          }
-          newCounter = 0
-        }
-        setState({
-          ...state,
-          programCounter: newCounter,
-          countChild: state.countChild === 0 ? 1 : 0
-        })
-        captionLoop()
-      })
-    }
-  }
-
-  const getPhrase = (value: string) => {
-    const registerRegex = /^\$(\d)$/.exec(value)
-    if (value === '$RANDOM_PHRASE') {
-      return getRandomListItem(state.phrases.get(0) as string[])
-    } else if (registerRegex != null) {
-      const register = parseInt(registerRegex[1])
-      return getRandomListItem(state.phrases.get(register) as string[])
-    } else if (value === '$TAG_PHRASE') {
-      if (props.currentImage) {
-        const tag = getRandomListItem(currentImageTags)
-        if (tag) {
-          const phraseString = tag.phraseString
-          return getRandomListItem(phraseString.split('\n'))
-        }
-      }
-      return ''
-    } else {
-      return value
-    }
-  }
-
-  const showText = (value: string, ms: number, opacity: number) => {
-    return (nextCommand: Function) => {
-      const element = _el.current as HTMLDivElement
-      element.style.opacity = (opacity / 100).toString()
-      element.innerHTML = htmlEntities(value)
-      const waitFn = commands.wait(ms)
-      waitFn(() => {
-        element.style.opacity = '0'
-        nextCommand()
-      })
-    }
-  }
-
-  const advance = () => {
-    return (nextCommand: Function) => {
-      if (props.advance) {
-        props.advance()
-      }
-      const waitFn = commands.wait(0)
-      waitFn(() => nextCommand())
-    }
-  }
-
-  const commands = {
-    wait: (ms: number) => {
-      return (nextCommand: Function) => {
-        clearTimeout(_timeout.current)
-        _timeout.current = window.setTimeout(nextCommand, ms)
-      }
-    },
-    cap: (value: string, timestamp = false) => {
-      return (nextCommand: Function) => {
-        const command = () => {
-          if (state.countProgress) {
-            setState({ ...state, countProgress: false })
-          }
-          const duration = getDuration(
-            {
-              timingFunction: state.captionTF,
-              time: state.captionDuration[0],
-              timeMin: state.captionDuration[0],
-              timeMax: state.captionDuration[1],
-              sinRate: state.captionWaveRate,
-              bpmMulti: state.captionBPMMulti
-            },
-            timeToNextFrame,
-            bpm
-          )
-          const showTextFn = showText(
-            getPhrase(value),
-            duration,
-            state.captionOpacity
-          )
-          const delay = timestamp
-            ? 0
-            : getDuration(
-                {
-                  timingFunction: state.captionDelayTF,
-                  time: state.captionDelay[0],
-                  timeMin: state.captionDelay[0],
-                  timeMax: state.captionDelay[1],
-                  sinRate: state.captionDelayWaveRate,
-                  bpmMulti: state.captionDelayBPMMulti
-                },
-                timeToNextFrame,
-                bpm
-              )
-          const waitFn = commands.wait(delay)
-          const element = _el.current as HTMLDivElement
-          element.style.color = fsCaption.color
-          element.style.fontSize = fsCaption.fontSize * props.scale + 'vmin'
-          element.style.fontFamily = fsCaption.fontFamily
-          element.style.display = 'table-cell'
-          element.style.textAlign = 'center'
-          element.style.verticalAlign = 'bottom'
-          const yPos = (14 + state.captionY) * props.scale
-          if (yPos > 0) {
-            element.style.paddingBottom = yPos + 'vmin'
-            element.style.paddingTop = 'unset'
-          } else {
-            element.style.paddingBottom = 'unset'
-            element.style.paddingTop = yPos * -1 + 'vmin'
-          }
-          const xPos = state.captionX * props.scale
-          if (xPos > 0) {
-            element.style.paddingLeft = xPos + 'vmin'
-            element.style.paddingRight = 'unset'
-          } else {
-            element.style.paddingLeft = 'unset'
-            element.style.paddingRight = xPos * -1 + 'vmin'
-          }
-          // _el.current.style.transition = 'opacity 0.5s ease-in-out';
-          if (fsCaption.border) {
-            element.style.webkitTextStroke =
-              fsCaption.borderpx * props.scale + 'px ' + fsCaption.borderColor
-          } else {
-            element.style.webkitTextStroke = 'unset'
-          }
-          if (state.captionDelayTF === TF.scene && !timestamp) {
-            showTextFn(() => nextCommand())
-          } else {
-            showTextFn(() => {
-              waitFn(nextCommand)
-            })
-          }
-        }
-        if (state.captionDelayTF === TF.scene && !timestamp) {
-          _sceneCommand.current = command
-        } else {
-          command()
-        }
-      }
-    },
-    bigcap: (value: string, timestamp = false) => {
-      return (nextCommand: Function) => {
-        const command = () => {
-          if (state.countProgress) {
-            setState({ ...state, countProgress: false })
-          }
-          const duration = getDuration(
-            {
-              timingFunction: state.captionTF,
-              time: state.captionDuration[0],
-              timeMin: state.captionDuration[0],
-              timeMax: state.captionDuration[1],
-              sinRate: state.captionWaveRate,
-              bpmMulti: state.captionBPMMulti
-            },
-            timeToNextFrame,
-            bpm
-          )
-          const showTextFn = showText(
-            getPhrase(value),
-            duration,
-            state.captionOpacity
-          )
-          const delay = timestamp
-            ? 0
-            : getDuration(
-                {
-                  timingFunction: state.captionDelayTF,
-                  time: state.captionDelay[0],
-                  timeMin: state.captionDelay[0],
-                  timeMax: state.captionDelay[1],
-                  sinRate: state.captionDelayWaveRate,
-                  bpmMulti: state.captionDelayBPMMulti
-                },
-                timeToNextFrame,
-                bpm
-              )
-          const waitFn = commands.wait(delay)
-          const element = _el.current as HTMLDivElement
-          element.style.color = fsCaptionBig.color
-          element.style.fontSize = fsCaptionBig.fontSize * props.scale + 'vmin'
-          element.style.fontFamily = fsCaptionBig.fontFamily
-          element.style.display = 'table-cell'
-          element.style.textAlign = 'center'
-          element.style.verticalAlign = 'middle'
-          const yPos = state.bigCaptionY * props.scale
-          if (yPos > 0) {
-            element.style.paddingBottom = yPos + 'vmin'
-            element.style.paddingTop = 'unset'
-          } else {
-            element.style.paddingBottom = 'unset'
-            element.style.paddingTop = yPos * -1 + 'vmin'
-          }
-          const xPos = state.bigCaptionX * props.scale
-          if (xPos > 0) {
-            element.style.paddingLeft = xPos + 'vmin'
-            element.style.paddingRight = 'unset'
-          } else {
-            element.style.paddingLeft = 'unset'
-            element.style.paddingRight = xPos * -1 + 'vmin'
-          }
-          element.style.transition = 'opacity 0.1s ease-out'
-          if (fsCaptionBig.border) {
-            element.style.webkitTextStroke =
-              fsCaptionBig.borderpx * props.scale +
-              'px ' +
-              fsCaptionBig.borderColor
-          } else {
-            element.style.webkitTextStroke = 'unset'
-          }
-          if (state.captionDelayTF === TF.scene && !timestamp) {
-            showTextFn(() => nextCommand())
-          } else {
-            showTextFn(() => {
-              waitFn(nextCommand)
-            })
-          }
-        }
-        if (state.captionDelayTF === TF.scene && !timestamp) {
-          _sceneCommand.current = command
-        } else {
-          command()
-        }
-      }
-    },
-    blink: (value: string, timestamp = false) => {
-      return (nextCommand: Function) => {
-        const command = () => {
-          if (state.countProgress) {
-            setState({ ...state, countProgress: false })
-          }
-          const fns = new Array<Function>()
-          let i = 0
-          const phrase = getPhrase(value).split('/')
-          const length = phrase.length
-          for (let word of phrase) {
-            word = getPhrase(word.trim())
-            const j = i
-            i += 1
-            fns.push(() => {
-              const duration = getDuration(
-                {
-                  timingFunction: state.blinkTF,
-                  time: state.blinkDuration[0],
-                  timeMin: state.blinkDuration[0],
-                  timeMax: state.blinkDuration[1],
-                  sinRate: state.blinkWaveRate,
-                  bpmMulti: state.blinkBPMMulti
-                },
-                timeToNextFrame,
-                bpm
-              )
-              const showTextFn = showText(word, duration, state.blinkOpacity)
-              if (
-                j === length - 1 &&
-                (state.blinkDelayTF === TF.scene ||
-                  state.blinkGroupDelayTF === TF.scene ||
-                  timestamp)
-              ) {
-                showTextFn(() => nextCommand())
-              } else if (state.blinkDelayTF === TF.scene) {
-                showTextFn(() => (_sceneCommand.current = fns[j + 1]))
-              } else {
-                const delay = getDuration(
-                  {
-                    timingFunction: state.blinkDelayTF,
-                    time: state.blinkDelay[0],
-                    timeMin: state.blinkDelay[0],
-                    timeMax: state.blinkDelay[1],
-                    sinRate: state.blinkDelayWaveRate,
-                    bpmMulti: state.blinkDelayBPMMulti
-                  },
-                  timeToNextFrame,
-                  bpm
-                )
-                const waitFn = commands.wait(delay)
-                showTextFn(() => {
-                  waitFn(fns[j + 1])
-                })
-              }
-            })
-          }
-
-          if (
-            state.blinkGroupDelayTF !== TF.scene &&
-            state.blinkDelayTF !== TF.scene &&
-            !timestamp
-          ) {
-            const delay = getDuration(
-              {
-                timingFunction: state.blinkGroupDelayTF,
-                time: state.blinkGroupDelay[0],
-                timeMin: state.blinkGroupDelay[0],
-                timeMax: state.blinkGroupDelay[1],
-                sinRate: state.blinkGroupDelayWaveRate,
-                bpmMulti: state.blinkGroupDelayBPMMulti
-              },
-              timeToNextFrame,
-              bpm
-            )
-            const lastWaitFn = commands.wait(delay)
-            fns.push(() => {
-              lastWaitFn(nextCommand)
-            })
-          }
-
-          const element = _el.current as HTMLDivElement
-          element.style.color = fsBlink.color
-          element.style.fontSize = fsBlink.fontSize * props.scale + 'vmin'
-          element.style.fontFamily = fsBlink.fontFamily
-          element.style.display = 'table-cell'
-          element.style.textAlign = 'center'
-          element.style.verticalAlign = 'middle'
-          const yPos = state.blinkY * props.scale
-          if (yPos > 0) {
-            element.style.paddingBottom = yPos + 'vmin'
-            element.style.paddingTop = 'unset'
-          } else {
-            element.style.paddingBottom = 'unset'
-            element.style.paddingTop = yPos * -1 + 'vmin'
-          }
-          const xPos = state.blinkX * props.scale
-          if (xPos > 0) {
-            element.style.paddingLeft = xPos + 'vmin'
-            element.style.paddingRight = 'unset'
-          } else {
-            element.style.paddingLeft = 'unset'
-            element.style.paddingRight = xPos * -1 + 'vmin'
-          }
-          element.style.transition = 'opacity 0.1s ease-out'
-          if (fsBlink.border) {
-            element.style.webkitTextStroke =
-              fsBlink.borderpx * props.scale + 'px ' + fsBlink.borderColor
-          } else {
-            element.style.webkitTextStroke = 'unset'
-          }
-          fns[0]()
-        }
-        if (
-          (state.blinkGroupDelayTF === TF.scene ||
-            state.blinkDelayTF === TF.scene) &&
-          !timestamp
-        ) {
-          _sceneCommand.current = command
-        } else {
-          command()
-        }
-      }
-    },
-    count: (start: number, end: number, timestamp = false) => {
-      const values = Array<number>()
-      const origStart = start
-      const origEnd = end
-      do {
-        values.push(start)
-        if (start === end) {
-          break
-        } else if (start < end) {
-          start += 1
-        } else if (start > end) {
-          start -= 1
-        }
-      } while (true)
-
-      return (nextCommand: Function) => {
-        const command = () => {
-          let offset = 0
-          if (state.showCountProgress) {
-            offset = state.countProgressOffset
-              ? Math.min(origStart, origEnd)
-              : 0
-            setState({
-              ...state,
-              countProgress: true,
-              countCurrent: origStart - offset,
-              countTotal: Math.max(origStart, origEnd) - offset,
-              countColor: fsCount.color
-            })
-          } else if (state.countProgress) {
-            setState({ ...state, countProgress: false })
-          }
-          const fns = new Array<Function>()
-          let i = 0
-          const length = values.length
-          for (const val of values) {
-            const j = i
-            i += 1
-            fns.push(() => {
-              const duration = getDuration(
-                {
-                  timingFunction: state.countTF,
-                  time: state.countDuration[0],
-                  timeMin: state.countDuration[0],
-                  timeMax: state.countDuration[1],
-                  sinRate: state.countWaveRate,
-                  bpmMulti: state.countBPMMulti
-                },
-                timeToNextFrame,
-                bpm
-              )
-              if (state.showCountProgress) {
-                if (state.countColors.has(val)) {
-                  const countColor = state.countColors.get(val) as string
-                  setState({
-                    ...state,
-                    countCurrent: val - offset,
-                    countColor
-                  })
-                  if (state.countColorMatch) {
-                    const element = _el.current as HTMLDivElement
-                    element.style.color = countColor
-                  }
-                } else {
-                  setState({ ...state, countCurrent: val - offset })
-                }
-              } else {
-                if (state.countColorMatch) {
-                  const element = _el.current as HTMLDivElement
-                  element.style.color = state.countColors.get(val) as string
-                }
-              }
-              const showTextFn = showText(
-                val.toString(),
-                duration,
-                state.countOpacity
-              )
-              if (
-                j === length - 1 &&
-                (state.countDelayTF === TF.scene ||
-                  state.countGroupDelayTF === TF.scene ||
-                  timestamp)
-              ) {
-                showTextFn(() => nextCommand())
-              } else if (state.countDelayTF === TF.scene) {
-                showTextFn(() => (_sceneCommand.current = fns[j + 1]))
-              } else {
-                const delay = getDuration(
-                  {
-                    timingFunction: state.countDelayTF,
-                    time: state.countDelay[0],
-                    timeMin: state.countDelay[0],
-                    timeMax: state.countDelay[1],
-                    sinRate: state.countDelayWaveRate,
-                    bpmMulti: state.countDelayBPMMulti
-                  },
-                  timeToNextFrame,
-                  bpm
-                )
-                const waitFn = commands.wait(delay)
-                showTextFn(() => {
-                  waitFn(fns[j + 1])
-                })
-              }
-            })
-          }
-
-          if (
-            state.countGroupDelayTF !== TF.scene &&
-            state.countDelayTF !== TF.scene &&
-            !timestamp
-          ) {
-            const delay = getDuration(
-              {
-                timingFunction: state.countGroupDelayTF,
-                time: state.countGroupDelay[0],
-                timeMin: state.countGroupDelay[0],
-                timeMax: state.countGroupDelay[1],
-                sinRate: state.countGroupDelayWaveRate,
-                bpmMulti: state.countGroupDelayBPMMulti
-              },
-              timeToNextFrame,
-              bpm
-            )
-            const lastWaitFn = commands.wait(delay)
-            fns.push(() => {
-              lastWaitFn(nextCommand)
-            })
-          }
-
-          const element = _el.current as HTMLDivElement
-          element.style.color = fsCount.color
-          element.style.fontSize = fsCount.fontSize * props.scale + 'vmin'
-          element.style.fontFamily = fsCount.fontFamily
-          element.style.display = 'table-cell'
-          element.style.textAlign = 'center'
-          element.style.verticalAlign = 'middle'
-          const yPos = state.countY * props.scale
-          if (yPos > 0) {
-            element.style.paddingBottom = yPos + 'vmin'
-            element.style.paddingTop = 'unset'
-          } else {
-            element.style.paddingBottom = 'unset'
-            element.style.paddingTop = yPos * -1 + 'vmin'
-          }
-          const xPos = state.countX * props.scale
-          if (xPos > 0) {
-            element.style.paddingLeft = xPos + 'vmin'
-            element.style.paddingRight = 'unset'
-          } else {
-            element.style.paddingLeft = 'unset'
-            element.style.paddingRight = xPos * -1 + 'vmin'
-          }
-          element.style.transition = 'opacity 0.1s ease-out'
-          if (fsCount.border) {
-            element.style.webkitTextStroke =
-              fsCount.borderpx * props.scale + 'px ' + fsCount.borderColor
-          } else {
-            element.style.webkitTextStroke = 'unset'
-          }
-          fns[0]()
-        }
-        if (
-          (state.countGroupDelayTF === TF.scene ||
-            state.countDelayTF === TF.scene) &&
-          !timestamp
-        ) {
-          _sceneCommand.current = command
-        } else {
-          command()
-        }
-      }
-    },
-    playAudio: (alias: string, volume: number) => {
-      return (nextCommand: Function) => {
-        const newAudios = Array.from(state.audios)
-        const audio = newAudios.find((a) => a.alias === alias)
-        if (audio) {
-          audio.playing = true
-          audio.volume = volume
-          setState({ ...state, audios: newAudios })
-        }
-
-        nextCommand()
-      }
-    },
-    setBlinkY: (relYPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkY: relYPos })
-        nextCommand()
-      }
-    },
-    setCaptionY: (relYPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionY: relYPos })
-        nextCommand()
-      }
-    },
-    setBigCaptionY: (relYPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, bigCaptionY: relYPos })
-        nextCommand()
-      }
-    },
-    setCountY: (relYPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countY: relYPos })
-        nextCommand()
-      }
-    },
-    setBlinkX: (relXPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkX: relXPos })
-        nextCommand()
-      }
-    },
-    setCaptionX: (relXPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionX: relXPos })
-        nextCommand()
-      }
-    },
-    setBigCaptionX: (relXPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, bigCaptionX: relXPos })
-        nextCommand()
-      }
-    },
-    setCountX: (relXPos: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countX: relXPos })
-        nextCommand()
-      }
-    },
-    /* Blink */
-    setBlinkDuration: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.blinkDuration[1])
-        }
-        setState({ ...state, blinkDuration: ms })
-        nextCommand()
-      }
-    },
-    setBlinkWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setBlinkBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setBlinkTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkTF: tf })
-        nextCommand()
-      }
-    },
-    /* Blink Delay */
-    setBlinkDelay: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.blinkDelay[1])
-        }
-        setState({ ...state, blinkDelay: ms })
-        nextCommand()
-      }
-    },
-    setBlinkDelayWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkDelayWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setBlinkDelayBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkDelayBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setBlinkDelayTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkDelayTF: tf })
-        nextCommand()
-      }
-    },
-    /* Blink Group Delay */
-    setBlinkGroupDelay: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.blinkGroupDelay[1])
-        }
-        setState({ ...state, blinkGroupDelay: ms })
-        nextCommand()
-      }
-    },
-    setBlinkGroupDelayWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkGroupDelayWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setBlinkGroupDelayBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkGroupDelayBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setBlinkGroupDelayTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkGroupDelayTF: tf })
-        nextCommand()
-      }
-    },
-    /* Caption */
-    setCaptionDuration: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.captionDuration[1])
-        }
-        setState({ ...state, captionDuration: ms })
-        nextCommand()
-      }
-    },
-    setCaptionWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setCaptionBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setCaptionTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionTF: tf })
-        nextCommand()
-      }
-    },
-    /* Caption Delay */
-    setCaptionDelay: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.captionDelay[1])
-        }
-        setState({ ...state, captionDelay: ms })
-        nextCommand()
-      }
-    },
-    setCaptionDelayWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionDelayWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setCaptionDelayBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionDelayBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setCaptionDelayTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionDelayTF: tf })
-        nextCommand()
-      }
-    },
-    /* Count */
-    setCountDuration: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.countDuration[1])
-        }
-        setState({ ...state, countDuration: ms })
-        nextCommand()
-      }
-    },
-    setCountWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setCountBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setCountTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countTF: tf })
-        nextCommand()
-      }
-    },
-    /* Count Delay */
-    setCountDelay: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.countDelay[1])
-        }
-        setState({ ...state, countDelay: ms })
-        nextCommand()
-      }
-    },
-    setCountDelayWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countDelayWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setCountDelayBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countDelayBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setCountDelayTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countDelayTF: tf })
-        nextCommand()
-      }
-    },
-    /* Count Group Delay */
-    setCountGroupDelay: (ms: number[]) => {
-      return (nextCommand: Function) => {
-        if (ms.length === 1) {
-          ms.push(state.countGroupDelay[1])
-        }
-        setState({ ...state, countGroupDelay: ms })
-        nextCommand()
-      }
-    },
-    setCountGroupDelayWaveRate: (waveRate: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countGroupDelayWaveRate: waveRate })
-        nextCommand()
-      }
-    },
-    setCountGroupDelayBPMMulti: (bpmMulti: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countGroupDelayBPMMulti: bpmMulti })
-        nextCommand()
-      }
-    },
-    setCountGroupDelayTF: (tf: string) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countGroupDelayTF: tf })
-        nextCommand()
-      }
-    },
-    setShowCountProgress: (show: boolean) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, showCountProgress: show })
-        nextCommand()
-      }
-    },
-    setCountProgressScale: (scale: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countProgressScale: scale })
-        nextCommand()
-      }
-    },
-    setCountProgressColor: (args: any[]) => {
-      return (nextCommand: Function) => {
-        const newColors = state.countColors
-        newColors.set(args[0], args[1])
-        setState({ ...state, countColors: newColors })
-        nextCommand()
-      }
-    },
-    setCountProgressOffset: (offset: boolean) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countProgressOffset: offset })
-        nextCommand()
-      }
-    },
-    setCountColorMatch: (match: boolean) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countColorMatch: match })
-        nextCommand()
-      }
-    },
-    setBlinkOpacity: (opacity: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, blinkOpacity: opacity })
-        nextCommand()
-      }
-    },
-    setCaptionOpacity: (opacity: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, captionOpacity: opacity })
-        nextCommand()
-      }
-    },
-    setCountOpacity: (opacity: number) => {
-      return (nextCommand: Function) => {
-        setState({ ...state, countOpacity: opacity })
-        nextCommand()
+    return () => {
+      reset()
+      stop()
+      if (props.jumpToHack) {
+        props.jumpToHack.listener = undefined
       }
     }
+  }, [props.jumpToHack, start, state, stop])
+
+  useEffect(() => {
+    if (_sceneCommand.current != null) {
+      const command = _sceneCommand.current
+      _sceneCommand.current = undefined
+      command()
+    }
+  }, [props.currentImage])
+
+  useEffect(() => {
+    if (_el.current) {
+      stop()
+      reset()
+      start()
+    }
+  }, [props.captionScriptID, start, stop])
+
+  useEffect(() => {
+    if (props.getCurrentTimestamp == null) {
+      stop()
+      reset()
+      start()
+    }
+  }, [props.getCurrentTimestamp, start, stop])
+
+  const reset = () => {
+    setState({
+      ...captionProgramDefaults,
+      phrases: new Map<number, string[]>(),
+      audios: new Array<{
+        alias: string
+        file: string
+        playing: boolean
+        volume: number
+      }>(),
+      timestampFn: new Map<number, Function[]>(),
+      countColors: new Map<number, string>(),
+      countColor: '#FFFFFF',
+      countProgress: false,
+      countCurrent: 0,
+      countTotal: 0,
+      countChild: 0
+    })
   }
 
   const countXPos = state.countX * props.scale

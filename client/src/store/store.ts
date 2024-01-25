@@ -1,6 +1,10 @@
+/// <reference path="../global.d.ts"/>
 import { createReduxStore } from '../server/renderer'
 
-const store = createReduxStore(window.flipflipAppStorage, window.flipflipConstants)
+const store = createReduxStore(
+  window.flipflipAppStorage,
+  window.flipflipConstants
+)
 
 export default store
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -3,7 +3,8 @@ import React, {
   CSSProperties,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useCallback
 } from 'react'
 import {
   UseTransitionResult,
@@ -14,7 +15,6 @@ import {
 
 import { TF } from 'flipflip-common'
 import { getDuration, getEaseFunction } from '../../data/utils'
-import Audio from '../../store/audio/Audio'
 import { useAppSelector } from '../../store/hooks'
 import {
   selectSceneFadeInOut,
@@ -115,32 +115,7 @@ export default function FadeInOut(props: PropsWithChildren<FadeInOutProps>) {
   const _fadeOut = useRef(false)
   const _lastToggle = useRef<any>()
 
-  useEffect(() => {
-    _fadeOut.current = false
-    if (
-      fadeInOut &&
-      (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene)
-    ) {
-      fadeLoop()
-    }
-
-    return () => {
-      clearTimeout(_fadeTimeout.current)
-      _fadeTimeout.current = undefined
-      _fadeOut.current = false
-    }
-  }, [])
-
-  useEffect(() => {
-    if (fadeInOut) {
-      clearTimeout(_fadeTimeout.current)
-      if (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene) {
-        fadeLoop()
-      }
-    }
-  }, [fadeIOTF, fadeIODelayTF, fadeIOPulse])
-
-  const calcDuration = () => {
+  const calcDuration = useCallback(() => {
     return (
       getDuration(
         {
@@ -156,23 +131,18 @@ export default function FadeInOut(props: PropsWithChildren<FadeInOutProps>) {
         10
       ) / 2
     )
-  }
+  }, [
+    bpm,
+    fadeIOBPMMulti,
+    fadeIODuration,
+    fadeIODurationMax,
+    fadeIODurationMin,
+    fadeIOSinRate,
+    fadeIOTF,
+    props.timeToNextFrame
+  ])
 
-  const fade = () => {
-    const duration = calcDuration()
-    const delay = fadeIOPulse ? getDelay() : duration
-    setToggleFade(!toggleFade)
-    setDuration(duration)
-    props.fadeFunction()
-    return delay
-  }
-
-  const fadeLoop = () => {
-    const delay = fade()
-    _fadeTimeout.current = window.setTimeout(fadeLoop, delay)
-  }
-
-  const getDelay = () => {
+  const getDelay = useCallback(() => {
     return getDuration(
       {
         timingFunction: fadeIODelayTF,
@@ -185,7 +155,55 @@ export default function FadeInOut(props: PropsWithChildren<FadeInOutProps>) {
       props.timeToNextFrame,
       bpm
     )
-  }
+  }, [
+    bpm,
+    fadeIODelay,
+    fadeIODelayBPMMulti,
+    fadeIODelayMax,
+    fadeIODelayMin,
+    fadeIODelaySinRate,
+    fadeIODelayTF,
+    props.timeToNextFrame
+  ])
+
+  const fade = useCallback(() => {
+    const duration = calcDuration()
+    const delay = fadeIOPulse ? getDelay() : duration
+    setToggleFade(!toggleFade)
+    setDuration(duration)
+    props.fadeFunction()
+    return delay
+  }, [calcDuration, fadeIOPulse, getDelay, props, toggleFade])
+
+  const fadeLoop = useCallback(() => {
+    const delay = fade()
+    _fadeTimeout.current = window.setTimeout(fadeLoop, delay)
+  }, [fade])
+
+  useEffect(() => {
+    _fadeOut.current = false
+    if (
+      fadeInOut &&
+      (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene)
+    ) {
+      fadeLoop()
+    }
+
+    return () => {
+      clearTimeout(_fadeTimeout.current)
+      _fadeTimeout.current = undefined
+      _fadeOut.current = false
+    }
+  }, [fadeIODelayTF, fadeIOPulse, fadeIOTF, fadeInOut, fadeLoop])
+
+  useEffect(() => {
+    if (fadeInOut) {
+      clearTimeout(_fadeTimeout.current)
+      if (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene) {
+        fadeLoop()
+      }
+    }
+  }, [fadeIOTF, fadeIODelayTF, fadeIOPulse, fadeInOut, fadeLoop])
 
   const sceneTiming = fadeIOTF === TF.scene
   if (props.toggleFade !== _lastToggle.current) {

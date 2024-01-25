@@ -862,7 +862,10 @@ async function scrapeFiles(
         source.url
       )) as string
 
-      if (config.caching.enabled && (await flipflip().api.hasFiles(cachePath))) {
+      if (
+        config.caching.enabled &&
+        (await flipflip().api.hasFiles(cachePath))
+      ) {
         // If the cache directory exists, use it
         if (returnPromise) {
           return await new CancelablePromise((resolve) => {

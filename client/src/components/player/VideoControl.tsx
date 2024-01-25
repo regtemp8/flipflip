@@ -1,4 +1,10 @@
-import React, { SyntheticEvent, useEffect, useRef, useState } from 'react'
+import React, {
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 
 import {
   Grid,
@@ -31,26 +37,26 @@ import {
   selectClipStartMarks
 } from '../../store/clip/selectors'
 import { useAppSelector } from '../../store/hooks'
-import { RootState } from '../../store/store'
+import { selectUndefined } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-    root: {
-      display: 'flex'
-    },
-    timeSlider: {
-      marginLeft: theme.spacing(2),
-      marginRight: theme.spacing(3),
-      marginTop: theme.spacing(2)
-    },
-    valueLabel: {
-      color: theme.palette.text.primary,
-      backgroundColor: 'transparent',
-      top: 2
-    },
-    noTransition: {
-      transition: 'unset'
-    }
-  }))
+  root: {
+    display: 'flex'
+  },
+  timeSlider: {
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(3),
+    marginTop: theme.spacing(2)
+  },
+  valueLabel: {
+    color: theme.palette.text.primary,
+    backgroundColor: 'transparent',
+    top: 2
+  },
+  noTransition: {
+    transition: 'unset'
+  }
+}))
 
 export interface VideoControlProps {
   video: HTMLVideoElement
@@ -68,24 +74,76 @@ export interface VideoControlProps {
 
 function VideoControl(props: VideoControlProps) {
   const volumeSelector =
-    props.clipID != null
-      ? selectClipVolume(props.clipID)
-      : (state: RootState) => undefined
+    props.clipID != null ? selectClipVolume(props.clipID) : selectUndefined
   const volume = useAppSelector(volumeSelector)
   const clipStartMarks = useAppSelector(selectClipStartMarks(props.clips))
 
   const [playing, setPlaying] = useState(true)
-  const [update, setUpdate] = useState(true)
   const [showSpeed, setShowSpeed] = useState(false)
 
   const _interval = useRef<number>()
 
+  const onChangeVolume = useCallback(
+    (e: Event, volume: number | number[]) => {
+      let newVolume = Array.isArray(volume) ? volume[0] : volume
+      if (newVolume > 100) {
+        newVolume = 100
+      }
+      if (newVolume < 0) {
+        newVolume = 0
+      }
+      props.onChangeVolume(newVolume)
+      if (props.video) {
+        props.video.volume = newVolume / 100
+      }
+    },
+    [props]
+  )
+
+  const onPlay = useCallback(() => {
+    setPlaying(true)
+    props.video.play().catch((err) => console.warn(err))
+  }, [props.video])
+
+  const onPause = useCallback(() => {
+    setPlaying(false)
+    props.video.pause()
+  }, [props.video])
+
+  const onChangePosition = useCallback(
+    (e: Event, value: number | number[]) => {
+      const newPosition: number = Array.isArray(value) ? value[0] : value
+      props.video.currentTime = newPosition
+    },
+    [props.video]
+  )
+
+  const onBack = useCallback(() => {
+    const skip = props.skip ? props.skip : 10
+    let position = props.video.currentTime - skip
+    if (position < 0) {
+      position = 0
+    }
+    onChangePosition(new Event('back'), position)
+  }, [onChangePosition, props.skip, props.video.currentTime])
+
+  const onForward = useCallback(() => {
+    const skip = props.skip ? props.skip : 10
+    let position = props.video.currentTime + skip
+    if (position > props.video.duration) {
+      position = props.video.duration
+    }
+    onChangePosition(new Event('forward'), position)
+  }, [
+    onChangePosition,
+    props.skip,
+    props.video.currentTime,
+    props.video.duration
+  ])
+
   useEffect(() => {
     _interval.current = window.setInterval(() => {
       if (!props.video) return
-      if (!props.video.paused) {
-        triggerUpdate()
-      }
       if (props.clipValue) {
         if (props.video.paused && playing) {
           setPlaying(false)
@@ -103,151 +161,9 @@ function VideoControl(props: VideoControlProps) {
         }
       }
     }, 50)
-    if (props.useHotkeys) {
-      if (props.player) {
-        window.addEventListener('keydown', onPlayerKeyDown, false)
-      } else {
-        window.addEventListener('keydown', onKeyDown, false)
-      }
-    }
 
-    return () => {
-      clearInterval(_interval.current)
-      if (props.useHotkeys) {
-        if (props.player) {
-          window.removeEventListener('keydown', onPlayerKeyDown)
-        } else {
-          window.removeEventListener('keydown', onKeyDown)
-        }
-      }
-    }
-  }, [])
-
-  const onSwapSlider = () => {
-    setShowSpeed(!showSpeed)
-  }
-  const triggerUpdate = () => {
-    setUpdate(!update)
-  }
-
-  const onChangePosition = (e: Event, value: number | number[]) => {
-    const newPosition: number = Array.isArray(value) ? value[0] : value
-    props.video.currentTime = newPosition
-    if (props.video.paused) {
-      triggerUpdate()
-    }
-  }
-
-  const onChangeVolume = (e: Event, volume: number | number[]) => {
-    let newVolume = Array.isArray(volume) ? volume[0] : volume
-    if (newVolume > 100) {
-      newVolume = 100
-    }
-    if (newVolume < 0) {
-      newVolume = 0
-    }
-    props.onChangeVolume(newVolume)
-    if (props.video) {
-      props.video.volume = newVolume / 100
-      triggerUpdate()
-    }
-  }
-
-  const onChangeSpeed = (
-    e: Event | SyntheticEvent<Element>,
-    speed: number | number[]
-  ) => {
-    const newSpeed = Array.isArray(speed) ? speed[0] : speed
-    if (props.onChangeSpeed != null) {
-      props.onChangeSpeed(newSpeed)
-    }
-    if (props.video) {
-      props.video.playbackRate = newSpeed / 10
-      triggerUpdate()
-    }
-  }
-
-  const onPlay = () => {
-    setPlaying(true)
-    props.video.play().catch((err) => console.warn(err))
-  }
-
-  const onPause = () => {
-    setPlaying(false)
-    props.video.pause()
-  }
-
-  const onBack = () => {
-    const skip = props.skip ? props.skip : 10
-    let position = props.video.currentTime - skip
-    if (position < 0) {
-      position = 0
-    }
-    onChangePosition(new Event('back'), position)
-  }
-
-  const onForward = () => {
-    const skip = props.skip ? props.skip : 10
-    let position = props.video.currentTime + skip
-    if (position > props.video.duration) {
-      position = props.video.duration
-    }
-    onChangePosition(new Event('forward'), position)
-  }
-
-  const getMarks = (): Array<{ value: number; label: string }> => {
-    if (!props.video) return []
-    const min = props.clipValue ? props.clipValue[0] : 0
-    const max = props.clipValue ? props.clipValue[1] : props.video.duration
-    const marks = [
-      { value: min, label: getTimestamp(min) },
-      { value: max, label: getTimestamp(max) }
-    ]
-    if (!props.clipValue && clipStartMarks) {
-      clipStartMarks.forEach((start, index) => {
-        marks.push({ value: start, label: (index + 1).toString() })
-      })
-    }
-    return marks
-  }
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement!.tagName.toLocaleLowerCase()
-    switch (e.key) {
-      case ' ':
-        e.preventDefault()
-        playing ? onPause() : onPlay()
-        break
-      case 'ArrowUp':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          onChangeVolume(new Event(e.key), props.video.volume * 100 + 5)
-        }
-        break
-      case 'ArrowDown':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          onChangeVolume(new Event(e.key), props.video.volume * 100 - 5)
-        }
-        break
-      case 'ArrowLeft':
-        if (focus !== 'input') {
-          e.preventDefault()
-          onBack()
-        }
-        break
-      case 'ArrowRight':
-        if (focus !== 'input') {
-          e.preventDefault()
-          onForward()
-        }
-        break
-    }
-  }
-
-  const onPlayerKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement!.tagName.toLocaleLowerCase()
-    if (e.shiftKey) {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const focus = document.activeElement!.tagName.toLocaleLowerCase()
       switch (e.key) {
         case ' ':
           e.preventDefault()
@@ -279,9 +195,107 @@ function VideoControl(props: VideoControlProps) {
           break
       }
     }
+    const onPlayerKeyDown = (e: KeyboardEvent) => {
+      const focus = document.activeElement!.tagName.toLocaleLowerCase()
+      if (e.shiftKey) {
+        switch (e.key) {
+          case ' ':
+            e.preventDefault()
+            playing ? onPause() : onPlay()
+            break
+          case 'ArrowUp':
+            if (e.ctrlKey) {
+              e.preventDefault()
+              onChangeVolume(new Event(e.key), props.video.volume * 100 + 5)
+            }
+            break
+          case 'ArrowDown':
+            if (e.ctrlKey) {
+              e.preventDefault()
+              onChangeVolume(new Event(e.key), props.video.volume * 100 - 5)
+            }
+            break
+          case 'ArrowLeft':
+            if (focus !== 'input') {
+              e.preventDefault()
+              onBack()
+            }
+            break
+          case 'ArrowRight':
+            if (focus !== 'input') {
+              e.preventDefault()
+              onForward()
+            }
+            break
+        }
+      }
+    }
+
+    if (props.useHotkeys) {
+      if (props.player) {
+        window.addEventListener('keydown', onPlayerKeyDown, false)
+      } else {
+        window.addEventListener('keydown', onKeyDown, false)
+      }
+    }
+
+    return () => {
+      clearInterval(_interval.current)
+      if (props.useHotkeys) {
+        if (props.player) {
+          window.removeEventListener('keydown', onPlayerKeyDown)
+        } else {
+          window.removeEventListener('keydown', onKeyDown)
+        }
+      }
+    }
+  }, [
+    onBack,
+    onChangeVolume,
+    onForward,
+    onPause,
+    onPlay,
+    playing,
+    props.clipValue,
+    props.player,
+    props.useHotkeys,
+    props.video
+  ])
+
+  const onSwapSlider = () => {
+    setShowSpeed(!showSpeed)
   }
 
-  const {classes} = useStyles()
+  const onChangeSpeed = (
+    e: Event | SyntheticEvent<Element>,
+    speed: number | number[]
+  ) => {
+    const newSpeed = Array.isArray(speed) ? speed[0] : speed
+    if (props.onChangeSpeed != null) {
+      props.onChangeSpeed(newSpeed)
+    }
+    if (props.video) {
+      props.video.playbackRate = newSpeed / 10
+    }
+  }
+
+  const getMarks = (): Array<{ value: number; label: string }> => {
+    if (!props.video) return []
+    const min = props.clipValue ? props.clipValue[0] : 0
+    const max = props.clipValue ? props.clipValue[1] : props.video.duration
+    const marks = [
+      { value: min, label: getTimestamp(min) },
+      { value: max, label: getTimestamp(max) }
+    ]
+    if (!props.clipValue && clipStartMarks) {
+      clipStartMarks.forEach((start, index) => {
+        marks.push({ value: start, label: (index + 1).toString() })
+      })
+    }
+    return marks
+  }
+
+  const { classes } = useStyles()
   if (props.video == null) {
     return (
       <Grid
@@ -401,7 +415,7 @@ function VideoControl(props: VideoControlProps) {
                     }
                     onChange={onChangeVolume}
                     marks={
-                      volume != undefined ? [{ value: volume, label: '↑' }] : []
+                      volume != null ? [{ value: volume, label: '↑' }] : []
                     }
                   />
                 </Grid>

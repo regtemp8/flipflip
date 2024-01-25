@@ -12,7 +12,7 @@ export interface AppProps {
 export default function App(props: AppProps) {
   return (
     <Provider store={props.store}>
-      <Meta cache={props.cache}/>
+      <Meta cache={props.cache} />
     </Provider>
   )
 }

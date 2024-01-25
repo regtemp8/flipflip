@@ -7,7 +7,10 @@ import { getActiveScene } from './thunks'
 import { selectSceneSources } from '../scene/selectors'
 import type LibrarySource from '../librarySource/LibrarySource'
 import type CaptionScript from '../captionScript/CaptionScript'
-import { getCaptionScriptEntries } from '../captionScript/selectors'
+import {
+  getCaptionScriptEntries,
+  selectCaptionScripts
+} from '../captionScript/selectors'
 import type Audio from '../audio/Audio'
 import type Tag from '../tag/Tag'
 import { getSourceType, en, SP, ST } from 'flipflip-common'
@@ -21,10 +24,10 @@ import {
   selectLibrarySources,
   getLibrarySourceEntries
 } from '../librarySource/selectors'
-import { getAudioEntries } from '../audio/selectors'
-import { SimplePaletteColorOptions, ThemeOptions } from '@mui/material'
+import { getAudioEntries, selectAudios } from '../audio/selectors'
+import { ThemeOptions } from '@mui/material'
 
-export const selectUndefined = (state: RootState) => undefined
+export const selectUndefined = (state: RootState): undefined => undefined
 
 export const selectAppIsInitialized = () => {
   return (state: RootState): boolean => {
@@ -70,8 +73,12 @@ export const selectAppLibraryYOffset = () => {
 }
 
 export const selectAppLibrarySearchOptions = (
+  displaySources: number[],
   filters: string[],
   searchInput: string,
+  isLibrary?: boolean,
+  isAudio?: boolean,
+  isScript?: boolean,
   onlyUsed?: boolean,
   onlyTags?: boolean,
   onlyTagsAndTypes?: boolean,
@@ -79,6 +86,19 @@ export const selectAppLibrarySearchOptions = (
   withBrackets?: boolean,
   noTypes?: boolean
 ) => {
+  let selectDisplaySources: (
+    state: RootState
+  ) => LibrarySource[] | Audio[] | CaptionScript[]
+  if (isLibrary === true) {
+    selectDisplaySources = selectLibrarySources(displaySources)
+  } else if (isAudio === true) {
+    selectDisplaySources = selectAudios(displaySources)
+  } else if (isScript === true) {
+    selectDisplaySources = selectCaptionScripts(displaySources)
+  } else {
+    throw new Error('No library search type specified')
+  }
+
   return createSelector(
     [
       (state) => filters,
@@ -91,7 +111,7 @@ export const selectAppLibrarySearchOptions = (
       (state) => noTypes,
       selectAppTags(),
       getTagEntries,
-      selectLibrarySources(),
+      selectDisplaySources,
       getClipEntries
     ],
     (
@@ -105,7 +125,7 @@ export const selectAppLibrarySearchOptions = (
       noTypes,
       appTags,
       tagEntries,
-      librarySources,
+      displaySources,
       clipEntries
     ) => {
       const tags = new Map<string, number>()
@@ -120,7 +140,7 @@ export const selectAppLibrarySearchOptions = (
       let untaggedCount = 0
       let offlineCount = 0
       let markedCount = 0
-      for (const source of librarySources) {
+      for (const source of displaySources) {
         if (source.offline) {
           offlineCount++
         }
@@ -139,15 +159,18 @@ export const selectAppLibrarySearchOptions = (
           }
         }
 
-        for (const clipID of source.clips) {
-          const clip = clipEntries[clipID] as Clip
-          for (const tagID of clip.tags) {
-            untagged = false
-            if (!source.tags.includes(tagID)) {
-              const tag = tagEntries[tagID] as Tag
-              if (tag.name === undefined) continue
-              const tagCount = tags.get(tag.name) ?? 0
-              tags.set(tag.name, tagCount + 1)
+        if (isLibrary === true) {
+          const librarySource = source as LibrarySource
+          for (const clipID of librarySource.clips) {
+            const clip = clipEntries[clipID] as Clip
+            for (const tagID of clip.tags) {
+              untagged = false
+              if (!librarySource.tags.includes(tagID)) {
+                const tag = tagEntries[tagID] as Tag
+                if (tag.name === undefined) continue
+                const tagCount = tags.get(tag.name) ?? 0
+                tags.set(tag.name, tagCount + 1)
+              }
             }
           }
         }
@@ -273,19 +296,15 @@ export const selectAppThemeMode = () => {
   return (state: RootState): boolean => state.app.theme.palette?.mode === 'dark'
 }
 
-export const selectAppThemePalettePrimaryMain = () => {
-  return (state: RootState): string => {
-    const primary = state.app.theme.palette
-      ?.primary as SimplePaletteColorOptions
-    return primary.main
+export const selectAppThemePalettePrimary = () => {
+  return (state: RootState): Record<string, string> => {
+    return state.app.theme.palette?.primary as Record<string, string>
   }
 }
 
-export const selectAppThemePaletteSecondaryMain = () => {
-  return (state: RootState): string => {
-    const secondary = state.app.theme.palette
-      ?.secondary as SimplePaletteColorOptions
-    return secondary.main
+export const selectAppThemePaletteSecondary = () => {
+  return (state: RootState): Record<string, string> => {
+    return state.app.theme.palette?.secondary as Record<string, string>
   }
 }
 

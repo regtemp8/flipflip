@@ -63,7 +63,7 @@ function PictureGrid(props: PictureGridProps) {
         })
       )
     }
-  }, [maxPictures])
+  }, [maxPictures, dispatch])
 
   const { classes } = useStyles()
   const pictures = Array.from(props.pictures).reverse()

@@ -2,7 +2,8 @@ import React, {
   useEffect,
   useState,
   type MouseEvent,
-  type ChangeEvent
+  type ChangeEvent,
+  useCallback
 } from 'react'
 import { cx } from '@emotion/css'
 import wretch from 'wretch'
@@ -67,8 +68,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 
 import flipflip from '../../FlipFlipService'
-import { getSourceType, en, AF, LT, MO, PR, SF, SP, ST } from 'flipflip-common'
-import { getCachePath, getLocalPath } from '../../data/utils'
+import { en, AF, LT, MO, PR, SF, SP, ST } from 'flipflip-common'
 import BatchClipDialog from './BatchClipDialog'
 import LibrarySearch from './LibrarySearch'
 import SourceIcon from './SourceIcon'
@@ -84,7 +84,6 @@ import {
   batchClip,
   batchTag,
   manageTags,
-  setLibraryRemoveOne,
   setLibraryRemove,
   setLibraryRemoveAll
 } from '../../store/app/slice'
@@ -96,7 +95,7 @@ import {
   selectAppConfigRemoteSettingsInstagramConfigured,
   selectAppConfigRemoteSettingsPiwigoConfigured,
   selectAppTutorial,
-  selectAppConfigCachingDirectory,
+  selectAppLibrary,
   selectAppTags,
   selectAppSpecialMode,
   selectAppProgressCurrent,
@@ -122,15 +121,15 @@ import {
   doneTutorial,
   sortSources
 } from '../../store/app/thunks'
-import { setLibrarySourceMove } from '../../store/librarySource/slice'
 import {
   setLibrarySourcesToggleMarked,
   setLibrarySourcesTags,
   setLibrarySourcesAddTags,
-  setLibrarySourcesRemoveTags
+  setLibrarySourcesRemoveTags,
+  doLibraryMove,
+  doLibraryDeleteAll
 } from '../../store/librarySource/thunks'
 import { addSource } from '../../store/scene/thunks'
-import { selectLibrarySources } from '../../store/librarySource/selectors'
 
 const drawerWidth = 240
 
@@ -397,7 +396,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 function Library() {
   const dispatch = useAppDispatch()
   const tutorial = useAppSelector(selectAppTutorial())
-  const library = useAppSelector(selectLibrarySources())
+  const library = useAppSelector(selectAppLibrary())
   const tags = useAppSelector(selectAppTags())
   const specialMode = useAppSelector(selectAppSpecialMode())
   const tumblrAuthorized = useAppSelector(
@@ -415,7 +414,6 @@ function Library() {
   const piwigoConfigured = useAppSelector(
     selectAppConfigRemoteSettingsPiwigoConfigured()
   )
-  const cachingDirectory = useAppSelector(selectAppConfigCachingDirectory())
   const progressCurrent = useAppSelector(selectAppProgressCurrent())
   const progressMode = useAppSelector(selectAppProgressMode())
   const progressTotal = useAppSelector(selectAppProgressTotal())
@@ -431,50 +429,54 @@ function Library() {
   const [moveDialog, setMoveDialog] = useState(false)
   const [importFile, setImportFile] = useState('')
 
+  const toggleMarked = useCallback(() => {
+    dispatch(setLibrarySourcesToggleMarked(displaySources))
+  }, [dispatch, displaySources])
+
   useEffect(() => {
+    // Use alt+P to access import modal
+    // Use alt+M to toggle highlighting  sources
+    // Use alt+L to move cached offline sources to local sources
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'p' || e.key === 'π')
+      ) {
+        setOpenMenu(
+          openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport
+        )
+      } else if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'm' || e.key === 'µ')
+      ) {
+        toggleMarked()
+      } else if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'l' || e.key === '¬')
+      ) {
+        moveOffline()
+      } else if (e.key === 'Escape' && specialMode != null) {
+        dispatch(setRouteGoBack())
+      }
+    }
+
     window.addEventListener('keydown', onKeyDown, false)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [])
+  }, [dispatch, openMenu, specialMode, toggleMarked])
 
   useEffect(() => {
     if (tutorial === LT.final && drawerOpen) {
       setDrawerOpen(false)
     }
   }, [tutorial, drawerOpen])
-
-  // Use alt+P to access import modal
-  // Use alt+M to toggle highlighting  sources
-  // Use alt+L to move cached offline sources to local sources
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'p' || e.key === 'π')
-    ) {
-      setOpenMenu(
-        openMenu === MO.gooninatorImport ? undefined : MO.gooninatorImport
-      )
-    } else if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'm' || e.key === 'µ')
-    ) {
-      toggleMarked()
-    } else if (
-      !e.shiftKey &&
-      !e.ctrlKey &&
-      e.altKey &&
-      (e.key === 'l' || e.key === '¬')
-    ) {
-      moveOffline()
-    } else if (e.key === 'Escape' && specialMode != null) {
-      dispatch(setRouteGoBack())
-    }
-  }
 
   const moveOffline = () => {
     setMoveDialog(true)
@@ -485,39 +487,7 @@ function Library() {
   }
 
   const onFinishMove = async () => {
-    for (const source of library) {
-      if (source.offline) {
-        const cachePath = (await getCachePath(
-          cachingDirectory,
-          source.url
-        )) as string
-        let files = []
-        let error: NodeJS.ErrnoException | undefined
-        try {
-          files = await flipflip().api.readdir(cachePath)
-        } catch (err: any) {
-          // TODO does catch still work?
-          error = err
-        }
-
-        if (!!error || files.length === 0) {
-          dispatch(setLibraryRemoveOne(source.id))
-        } else {
-          const localPath = (await getLocalPath(
-            cachingDirectory,
-            source.url as string
-          )) as string
-          await flipflip().api.move(cachePath, localPath)
-          dispatch(
-            setLibrarySourceMove({
-              id: source.id,
-              url: localPath,
-              count: files.length
-            })
-          )
-        }
-      }
-    }
+    dispatch(doLibraryMove())
     onCloseMoveDialog()
   }
 
@@ -626,24 +596,7 @@ function Library() {
   }
 
   const onFinishDeleteAll = async () => {
-    for (const l of library) {
-      const url = l.url as string
-      const fileType = getSourceType(url)
-      try {
-        if (fileType === ST.local) {
-          flipflip().api.rimrafSync(url)
-        } else if (
-          fileType === ST.video ||
-          fileType === ST.playlist ||
-          fileType === ST.list
-        ) {
-          await flipflip().api.unlink(url)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    dispatch(setLibraryRemoveAll())
+    dispatch(doLibraryDeleteAll())
     onCloseDialog()
   }
 
@@ -704,10 +657,6 @@ function Library() {
   const onSelectNone = () => {
     const newSelected = selected.filter((id) => !displaySources.includes(id))
     dispatch(setLibrarySelected(newSelected))
-  }
-
-  const toggleMarked = () => {
-    dispatch(setLibrarySourcesToggleMarked(displaySources))
   }
 
   const batchTagOverwrite = () => {
@@ -829,6 +778,7 @@ function Library() {
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
+                isLibrary
                 isCreatable
                 onlyUsed
                 onUpdateFilters={onUpdateFilters}
@@ -1561,7 +1511,7 @@ function Library() {
       </Menu>
 
       <GooninatorDialog
-        open={openMenu == MO.gooninatorImport}
+        open={openMenu === MO.gooninatorImport}
         onImportURL={onAddSource}
         onClose={onCloseDialog}
       />
@@ -1587,6 +1537,7 @@ function Library() {
               displaySources={library}
               filters={selectedTags}
               placeholder={'Tag These Sources'}
+              isLibrary
               isClearable
               onlyTags
               showCheckboxes

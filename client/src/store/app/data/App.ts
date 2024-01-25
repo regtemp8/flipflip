@@ -1,7 +1,4 @@
-import {
-  defaultTheme,
-  copy
-} from 'flipflip-common'
+import { defaultTheme, copy } from 'flipflip-common'
 import type Config from './Config'
 import { initialConfig } from './Config'
 import type Route from './Route'
