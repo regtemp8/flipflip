@@ -3,7 +3,7 @@ declare module 'tumblr.js' {
     embed_code: string
   }
   export interface Photo {
-    original_size: {url: string}
+    original_size: { url: string }
   }
   export interface BlogPost {
     photos: Photo[]
@@ -23,7 +23,10 @@ declare module 'tumblr.js' {
   }
   export function createClient(options: Record<string, unknown>): Client
   export class Client {
-    blogPosts(blogID: string, options: Record<string, unknown>): Promise<BlogPosts>
+    blogPosts(
+      blogID: string,
+      options: Record<string, unknown>
+    ): Promise<BlogPosts>
     userFollowing(options: Record<string, unknown>): Promise<UserFollowing>
   }
 }

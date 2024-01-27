@@ -21,9 +21,7 @@ app.on('web-contents-created', (event, contents) => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  server()
-    .init()
-    .then(windowManager().createWindow)
+  server().init().then(windowManager().createWindow)
   initIpcEvents()
 })
 

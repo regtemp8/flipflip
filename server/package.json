@@ -9,8 +9,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --fix --ignore-path .eslintignore --ext .ts,.tsx .",
-    "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\""
+    "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
+    "test:lint": "eslint --ignore-path .eslintignore --ext .js,.ts,.tsx .",
+    "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",
+    "test:format": "prettier --ignore-path .eslintignore --list-different \"**/*.+(js|ts|tsx|json)\""
   },
   "keywords": [],
   "license": "MIT",

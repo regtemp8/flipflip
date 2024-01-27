@@ -3248,6 +3248,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/eslint@npm:^8":
+  version: 8.56.2
+  resolution: "@types/eslint@npm:8.56.2"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/json-schema": "npm:*"
+  checksum: e33ca87a30a9454ba9943e1270ac759996f5fe598a1c1afbaec1d1e7346a339e20bf2a9d81f177067116bbaa6cfa4f748993cb338f57978ae862ad38ffae56fe
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*, @types/estree@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree@npm:1.0.5"
@@ -6624,7 +6634,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.3.0":
+"eslint@npm:^8.3.0, eslint@npm:^8.56.0":
   version: 8.56.0
   resolution: "eslint@npm:8.56.0"
   dependencies:
@@ -7078,6 +7088,7 @@ __metadata:
     "@types/codemirror": "npm:^5.59.0"
     "@types/d3-ease": "npm:^3.0.2"
     "@types/dom-screen-wake-lock": "npm:^1.0.3"
+    "@types/eslint": "npm:^8"
     "@types/jest": "npm:^29.5.8"
     "@types/react": "npm:^18"
     "@types/react-color": "npm:^3.0.10"
@@ -7089,6 +7100,7 @@ __metadata:
     "@types/uuid": "npm:^9"
     codemirror: "npm:^5.59.0"
     d3-ease: "npm:^3.0.1"
+    eslint: "npm:^8.56.0"
     flipflip-common: "link:./../common"
     gif-info: "npm:^1.0.1"
     prettier: "npm:^3.1.1"

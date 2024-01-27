@@ -299,8 +299,8 @@ const IPC = {
 const SDO = {
   getNetworkURLs: 'sdo.getNetworkURLs',
   getMagicLink: 'sdo.getMagicLink',
-  openExternal: 'sdo.openExternal'
-}
+  openExternal: 'sdo.openExternal',
+};
 
 const MO = {
   // Menu/Modal Constants

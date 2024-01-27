@@ -1,0 +1,27 @@
+name: Build Dependency
+inputs:
+  working-directory:
+    required: true
+    type: string
+  build-task:
+    required: false
+    type: string
+  build-task-extra:
+    required: false
+    type: string
+runs:
+  using: "composite"
+  steps:
+    - id: install
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: yarn install
+    - id: build
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: yarn ${{ inputs.build-task || 'build' }}
+    - id: build-extra
+      if: ${{ inputs.build-task-extra != null }}
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: yarn ${{ inputs.build-task-extra }}

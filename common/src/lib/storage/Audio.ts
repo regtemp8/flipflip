@@ -57,10 +57,10 @@ export function newAudio(init?: Partial<Audio>): Audio {
   tickModes['at.scene'] = 'tf.scene';
 
   const audio = Object.assign(copy<Audio>(initialAudio), init);
-  const tickMode = tickModes[audio.tickMode]
-  if(tickMode != null) {
-    audio.tickMode = tickMode
+  const tickMode = tickModes[audio.tickMode];
+  if (tickMode != null) {
+    audio.tickMode = tickMode;
   }
-  
-  return audio
+
+  return audio;
 }

@@ -1,0 +1,35 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [v4.0.0]
+
+jobs:
+  common:
+    uses: ./.github/workflows/module-check.yml
+    with:
+      display-name: Common
+      working-directory: ./common
+      format-task: test:prettier
+      build-task: build:main
+      build-task-extra: build:module
+  client:
+    uses: ./.github/workflows/module-check.yml
+    with:
+      display-name: Client
+      working-directory: ./client
+      depends-on-common: true
+  server-details:
+    uses: ./.github/workflows/module-check.yml
+    with:
+      display-name: Server Details
+      working-directory: ./server-details
+  server:
+    uses: ./.github/workflows/module-check.yml
+    with:
+      display-name: Server
+      working-directory: ./server
+      build-task: package
+      depends-on-common: true
+      depends-on-client: true
+      depends-on-server-details: true

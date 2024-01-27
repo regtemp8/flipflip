@@ -19,7 +19,9 @@ export function newSceneGrid(init?: Partial<SceneGrid>) {
   };
 }
 
-function mapGrid(grid?: SceneGridCell[][] | number[][] | string[][]): SceneGridCell[][] | undefined {
+function mapGrid(
+  grid?: SceneGridCell[][] | number[][] | string[][]
+): SceneGridCell[][] | undefined {
   if (grid == null) {
     return undefined;
   }
@@ -28,7 +30,7 @@ function mapGrid(grid?: SceneGridCell[][] | number[][] | string[][]): SceneGridC
     r.map((c) => {
       const partial = c as Partial<SceneGridCell>;
       if (partial.sceneID == null) {
-        const sceneID = Number.isNaN(c) ? parseInt(c as string) : c as number
+        const sceneID = Number.isNaN(c) ? parseInt(c as string) : (c as number);
         return newSceneGridCell({ sceneID });
       } else {
         return newSceneGridCell(partial);
