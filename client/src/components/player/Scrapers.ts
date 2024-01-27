@@ -476,7 +476,7 @@ export const loadReddit = async (
             try {
               const urls = await convertURL(s.url, pathSep)
               onConvertedURL(urls, s.permalink)
-            } catch(error) {
+            } catch (error) {
               onConvertError(error)
             }
           }
@@ -604,7 +604,7 @@ export const loadReddit = async (
             try {
               const urls = await convertURL(s.url, pathSep)
               onConvertedURL(urls, s.permalink)
-            } catch(error) {
+            } catch (error) {
               onConvertError(error)
             }
           }
@@ -715,7 +715,7 @@ export const loadReddit = async (
             try {
               const urls = await convertURL(s.url, pathSep)
               onConvertedURL(urls, s.permalink)
-            } catch(error) {
+            } catch (error) {
               onConvertError(error)
             }
           }

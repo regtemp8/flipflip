@@ -365,7 +365,10 @@ export function filterPathsToJustPlayable(
   }
 }
 
-export function removeDuplicatesBy<T>(keyFn: (item: T) => string, array: T[]): T[] {
+export function removeDuplicatesBy<T>(
+  keyFn: (item: T) => string,
+  array: T[]
+): T[] {
   const mySet = new Set();
   return array.filter((x: T) => {
     const key = keyFn(x);

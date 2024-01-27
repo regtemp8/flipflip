@@ -1,4 +1,10 @@
-import { BrowserWindow, FileFilter, OpenDialogOptions, dialog, shell } from 'electron'
+import {
+  BrowserWindow,
+  FileFilter,
+  OpenDialogOptions,
+  dialog,
+  shell
+} from 'electron'
 import security from './SecurityService'
 import server from './FlipFlipServer'
 import { isLinux } from './utils'
@@ -14,7 +20,7 @@ class WindowManager {
   private icon?: string
 
   private constructor() {
-    if(isLinux) {
+    if (isLinux) {
       this.icon = './icons/flipflip_logo.png'
     }
   }
@@ -61,7 +67,7 @@ class WindowManager {
     return !returnValue.canceled ? returnValue.filePaths : undefined
   }
 
-  public async openAudioFiles (): Promise<string[] | undefined> {
+  public async openAudioFiles(): Promise<string[] | undefined> {
     return await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -70,8 +76,8 @@ class WindowManager {
       properties: ['openFile', 'multiSelections']
     })
   }
-  
-  public async openTextFiles (): Promise<string[] | undefined> {
+
+  public async openTextFiles(): Promise<string[] | undefined> {
     return await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -81,7 +87,7 @@ class WindowManager {
     })
   }
 
-  public async openJsonFile (): Promise<string | undefined> {
+  public async openJsonFile(): Promise<string | undefined> {
     const paths = await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -92,7 +98,7 @@ class WindowManager {
     return paths ? paths[0] : undefined
   }
 
-  public async openSubtitleFile (): Promise<string | undefined> {
+  public async openSubtitleFile(): Promise<string | undefined> {
     const paths = await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -103,7 +109,7 @@ class WindowManager {
     return paths ? paths[0] : undefined
   }
 
-  public async openTextFile (): Promise<string | undefined> {
+  public async openTextFile(): Promise<string | undefined> {
     const paths = await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -128,18 +134,21 @@ class WindowManager {
     })
   }
 
-  public async openVideos (): Promise<string[] | undefined> {
+  public async openVideos(): Promise<string[] | undefined> {
     return await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
-        { name: 'Video files', extensions: ['mp4', 'mkv', 'webm', 'ogv', 'mov'] },
+        {
+          name: 'Video files',
+          extensions: ['mp4', 'mkv', 'webm', 'ogv', 'mov']
+        },
         { name: 'Playlist files', extensions: ['asx', 'm3u8', 'pls', 'xspf'] }
       ],
       properties: ['openFile', 'multiSelections']
     })
   }
-  
-  public async openImageFiles (): Promise<string[] | undefined> {
+
+  public async openImageFiles(): Promise<string[] | undefined> {
     return await this.showOpenDialog({
       filters: [
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -152,7 +161,7 @@ class WindowManager {
     })
   }
 
-  private async showSaveDialog (
+  private async showSaveDialog(
     filters: FileFilter[],
     defaultPath: string
   ): Promise<string | undefined> {
@@ -167,18 +176,14 @@ class WindowManager {
     return returnValue.filePath
   }
 
-  public async saveTextFile (
-    defaultPath: string
-  ): Promise<string | undefined> {
+  public async saveTextFile(defaultPath: string): Promise<string | undefined> {
     return await this.showSaveDialog(
       [{ name: 'Text Document', extensions: ['txt'] }],
       defaultPath
     )
   }
-  
-  public async saveJsonFile (
-    defaultPath: string
-  ): Promise<string | undefined> {
+
+  public async saveJsonFile(defaultPath: string): Promise<string | undefined> {
     return await this.showSaveDialog(
       [{ name: 'JSON Document', extensions: ['json'] }],
       defaultPath
