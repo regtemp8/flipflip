@@ -2,8 +2,8 @@
 
 <img src="doc_images/flipflip_home.png" alt="FlipFlip" class="col-xs-10 col-xl-7">
 
-## [Releases](https://github.com/ififfy/flipflip/releases)
-#### [Latest Release](https://github.com/ififfy/flipflip/releases/latest)
+## [Releases](https://github.com/regtemp8/flipflip/releases)
+#### [Latest Release](https://github.com/regtemp8/flipflip/releases/latest)
 
 ## Features
 * Local files as well as Tumblr, ~~Reddit~~, ~~Twitter~~, Instagram, Imgur, DeviantArt, Booru & More

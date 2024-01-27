@@ -1,25 +1,27 @@
-import * as React from "react";
+import * as React from 'react'
 
-import { Theme } from "@mui/material";
+import { type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles';
-import withStyles from '@mui/styles/withStyles';
+import createStyles from '@mui/styles/createStyles'
+import withStyles, { type WithStyles } from '@mui/styles/withStyles'
 
-const styles = (theme: Theme) => createStyles({});
+const styles = (theme: Theme) =>
+  createStyles({
+    fullWidth: {
+      width: '100%'
+    },
+    marginTop: {
+      marginTop: '20px'
+    }
+  })
 
-class Template extends React.Component {
-  readonly props: {
-    classes: any,
-  };
+interface TemplateProps extends WithStyles<typeof styles> {}
 
-  render() {
-    const classes = this.props.classes;
+function Template (props: TemplateProps): JSX.Element {
+  const classes = props.classes
 
-    return(
-      <div/>
-    );
-  }
+  return <div className={classes.fullWidth} />
 }
 
-(Template as any).displayName="Template";
-export default withStyles(styles)(Template as any);
+;(Template as any).displayName = 'Template'
+export default withStyles(styles)(Template as any)

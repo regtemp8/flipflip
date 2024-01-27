@@ -1,7 +1,12 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
+import Meta from './components/Meta'
+import './style.scss'
+import store from '../store/store'
 
-import Meta from './components/Meta';
-import './style.scss';
-
-ReactDOM.render(<Meta/>, document.getElementById('app'));
+ReactDOM.render(
+  <Provider store={store}>
+    <Meta />
+  </Provider>,
+  document.getElementById('app')
+)

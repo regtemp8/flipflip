@@ -3,25 +3,17 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import SourceList from "../SourceList";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
 
 jest.mock('../SourceListItem', () => 'SourceListItem');
 
 describe("SourceList", () => {
   it("should match snapshot", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceList
-          config={null}
-          library={[]}
           showHelp={false}
           sources={[]}
-          tutorial={null}
-          onClearBlacklist={(sourceURL) => {}}
-          onClip={(source, displayed) => {}}
-          onDownload={(source) => {}}
-          onEditBlacklist={(sourceURL, blacklist) => {}}
-          onPlay={(source, displayed) => {}}
-          systemMessage={(message) => {}}
         />
       </TestProvider>
     );

@@ -4,27 +4,29 @@ import renderer from "react-test-renderer";
 import CaptionProgramPlaylist from "../CaptionProgramPlaylist";
 import TestProvider from "../../../../../test/util/TestProvider";
 import { RP } from "../../../data/const";
-import Scene from "../../../data/Scene";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../store/scene/Scene";
 
 jest.mock('../CaptionProgram', () => 'CaptionProgram');
 
 describe("CaptionProgramPlaylist", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
+    const sceneID = 3
+    store.dispatch(setScene(newScene({id: sceneID})))
+
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <CaptionProgramPlaylist
           playlistIndex={0}
           playlist={{ scripts: [], shuffle: false, repeat: RP.none }}
           currentAudio={null}
           currentImage={null}
           scale={1}
-          scene={scene}
+          sceneID={sceneID}
           timeToNextFrame={0}
-          getTags={(source, clipID) => []}
-          goBack={() => {}}
           orderScriptTags={(script) => {}}
-          playNextScene={() => {}}
+          persist={false}
         />
       </TestProvider>
     );

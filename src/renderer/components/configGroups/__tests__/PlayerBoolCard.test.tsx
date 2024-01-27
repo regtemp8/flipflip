@@ -3,17 +3,13 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import PlayerBoolCard from "../PlayerBoolCard";
 import TestProvider from "../../../../../test/util/TestProvider";
-import { DisplaySettings } from "../../../data/Config";
+import store from "../../../../store/store";
 
 describe("PlayerBoolCard", () => {
   it("should match snapshot", () => {
-    const settings = new DisplaySettings();
     const component = renderer.create(
-      <TestProvider>
-        <PlayerBoolCard
-          displaySettings={settings}
-          onUpdateDisplaySettings={(fn) => {}}
-        />
+      <TestProvider store={store}>
+        <PlayerBoolCard />
       </TestProvider>
     );
 

@@ -4,8 +4,10 @@ import renderer from "react-test-renderer";
 import ScriptPlaylist from "../ScriptPlaylist";
 import TestProvider from "../../../../../test/util/TestProvider";
 import { RP } from "../../../data/const";
-import Scene from "../../../data/Scene";
-import CaptionScript from "../../../data/CaptionScript";
+import { setScene, setSceneAddScriptPlaylist } from "../../../../store/scene/slice";
+import { setCaptionScript } from "../../../../store/captionScript/slice";
+import store from "../../../../store/store";
+import { newScene } from "../../../../storage/Scene";
 
 jest.mock('../../library/SourceIcon', () => 'SourceIcon');
 
@@ -14,19 +16,17 @@ jest.mock('react-sortablejs', () => 'Sortable');
 
 describe("ScriptPlaylist", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
-    const script = new CaptionScript();
+    const sceneID = 3
+    const scriptID = 7
+    store.dispatch(setScene(newScene({ id: sceneID })))
+    store.dispatch(setCaptionScript({id: scriptID }))
+    store.dispatch(setSceneAddScriptPlaylist({ id: sceneID, value: { scripts: [scriptID], shuffle: false, repeat: RP.none }}))
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <ScriptPlaylist
+            sceneID={sceneID}
             playlistIndex={0}
-            playlist={{ scripts: [script], shuffle: false, repeat: RP.none }}
-            scene={scene}
-            onAddScript={(playlistIndex) => {}}
-            onPlay={(source, sceneID, displaySources) => {}}
-            onSourceOptions={(script) => {}}
-            onUpdateScene={(scene, fn) => {}}
-            systemMessage={(message) => {}}
+            onSourceOptions={(scriptID) => {}}
         />
       </TestProvider>
     );

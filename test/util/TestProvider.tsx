@@ -1,10 +1,16 @@
-import * as React from "react";
+import React, { type PropsWithChildren } from "react";
+import { Provider } from 'react-redux'
 import { createTheme } from "@mui/material";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import defaultTheme from "../../src/renderer/data/theme";
 
-export default class TestProvider extends React.Component {
-  disableTransitions = {
+export interface TestProviderProps {
+  store: any
+}
+
+export default function TestProvider(props: PropsWithChildren<TestProviderProps>) {
+
+  const disableTransitions = {
     defaultProps: {
       disablePortal: true,
       hideBackdrop: true,
@@ -12,21 +18,22 @@ export default class TestProvider extends React.Component {
     }
   };
 
-  render() {
-    const theme = createTheme({
-      ...defaultTheme,
-      // disable Transitions when runing tests, throws errors otherwise.
-      components: {
-        MuiMenu: this.disableTransitions,
-        MuiPopover: this.disableTransitions,
-        MuiDialog: this.disableTransitions,
-        MuiModal: this.disableTransitions
-      }
-    } as any);
-    return (
+  const theme = createTheme({
+    ...defaultTheme,
+    // disable Transitions when runing tests, throws errors otherwise.
+    components: {
+      MuiMenu: disableTransitions,
+      MuiPopover: disableTransitions,
+      MuiDialog: disableTransitions,
+      MuiModal: disableTransitions
+    }
+  } as any);
+
+  return (
+    <Provider store={props.store}>
       <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>{this.props.children}</ThemeProvider>
+        <ThemeProvider theme={theme}>{props.children}</ThemeProvider>
       </StyledEngineProvider>
-    );
-  }
+    </Provider>
+  );
 }

@@ -1,113 +1,74 @@
-import * as React from "react";
+import * as React from 'react'
 
-import { Fab, Grid, TextField, Theme } from "@mui/material";
+import { Fab, Grid, TextField, type Theme } from '@mui/material'
 
-import createStyles from '@mui/styles/createStyles';
-import withStyles from '@mui/styles/withStyles';
+import createStyles from '@mui/styles/createStyles'
+import withStyles, { type WithStyles } from '@mui/styles/withStyles'
 
-import * as color from "@mui/material/colors";
+import * as color from '@mui/material/colors'
+import type ReduxProps from '../common/ReduxProps'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 
-const styles = (theme: Theme) => createStyles({
-  colorGrid: {
-    width: 170,
-  },
-  colorButton: {
-    backgroundColor: theme.palette.common.white,
-    marginTop: 0,
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-    boxShadow: 'none',
-  },
-  colorPickerButton: {
-    backgroundColor: theme.palette.common.white,
-    marginRight: theme.spacing(0.25),
-    width: theme.spacing(2),
-    height: theme.spacing(2),
-    minHeight: theme.spacing(2),
-    boxShadow: 'none',
-  },
-  colorField: {
-    width: 100,
-  },
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    colorGrid: {
+      width: 170
+    },
+    colorButton: {
+      backgroundColor: theme.palette.common.white,
+      marginTop: 0,
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      boxShadow: 'none'
+    },
+    colorPickerButton: {
+      backgroundColor: theme.palette.common.white,
+      marginRight: theme.spacing(0.25),
+      width: theme.spacing(2),
+      height: theme.spacing(2),
+      minHeight: theme.spacing(2),
+      boxShadow: 'none'
+    },
+    colorField: {
+      width: 100
+    }
+  })
 
-const colors = [color.red, color.pink, color.purple, color.deepPurple, color.indigo, color.blue, color.lightBlue,
-                color.cyan, color.teal, color.green, color.lightGreen, color.lime, color.yellow, color.amber, color.orange,
-                color.deepOrange, color.brown, color.grey, color.blueGrey];
+const colors = [
+  color.red,
+  color.pink,
+  color.purple,
+  color.deepPurple,
+  color.indigo,
+  color.blue,
+  color.lightBlue,
+  color.cyan,
+  color.teal,
+  color.green,
+  color.lightGreen,
+  color.lime,
+  color.yellow,
+  color.amber,
+  color.orange,
+  color.deepOrange,
+  color.brown,
+  color.grey,
+  color.blueGrey
+]
 
-class ThemeColorPicker extends React.Component {
-  readonly props: {
-    classes: any,
-    currentColor: string,
-    onChangeColor(colorTheme: any): void,
-  };
+export interface ThemeColorPickerProps
+  extends ReduxProps<any>,
+  WithStyles<typeof styles> {}
 
-  render() {
-    const classes = this.props.classes;
+function ThemeColorPicker (props: ThemeColorPickerProps) {
+  const dispatch = useAppDispatch()
+  const currentColor = useAppSelector(props.selector)
 
-    return (
-      <Grid container alignItems="center">
-        <Grid item className={classes.colorGrid}>
-          <Fab
-            className={classes.colorButton}
-            style={{backgroundColor: this.props.currentColor}}
-            size="medium">
-            <div/>
-          </Fab>
-          <TextField
-            variant="standard"
-            className={classes.colorField}
-            label="Color"
-            InputProps={{
-              readOnly: true,
-            }}
-            value={this.props.currentColor} />
-        </Grid>
-        <Grid item xs={12} sm>
-          <Grid container alignItems="center">
-            {colors.map((c) =>
-              <Grid key={c[500]} item>
-                <Fab
-                  className={classes.colorPickerButton}
-                  style={{backgroundColor: c[500]}}
-                  value={c[500]}
-                  onClick={this.onChangeColor.bind(this, c)}
-                  size="small">
-                  <div/>
-                </Fab>
-              </Grid>
-            )}
-            <Grid key={color.common.white} item>
-              <Fab
-                className={classes.colorPickerButton}
-                style={{backgroundColor: color.common.white}}
-                value={color.common.white}
-                onClick={this.onChangeWhite.bind(this)}
-                size="small">
-                <div/>
-              </Fab>
-            </Grid>
-            <Grid key={color.common.black} item>
-              <Fab
-                className={classes.colorPickerButton}
-                style={{backgroundColor: color.common.black}}
-                value={color.common.black}
-                onClick={this.onChangeBlack.bind(this)}
-                size="small">
-                <div/>
-              </Fab>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  }
-
-  onChangeBlack() {
-    const black = color.common.black;
-    const grey = color.grey;
-    this.props.onChangeColor({
+  const onChangeBlack = () => {
+    const black = color.common.black
+    const grey = color.grey
+    setColorChange({
       50: grey[50],
       100: grey[100],
       200: grey[200],
@@ -122,14 +83,14 @@ class ThemeColorPicker extends React.Component {
       A200: grey.A200,
       A400: grey.A400,
       A700: grey.A700,
-      main: black,
-    });
+      main: black
+    })
   }
 
-  onChangeWhite() {
-    const white = color.common.white;
-    const grey = color.grey;
-    this.props.onChangeColor({
+  const onChangeWhite = () => {
+    const white = color.common.white
+    const grey = color.grey
+    setColorChange({
       50: grey[900],
       100: grey[800],
       200: grey[700],
@@ -144,12 +105,12 @@ class ThemeColorPicker extends React.Component {
       A200: grey.A400,
       A400: grey.A200,
       A700: grey.A100,
-      main: white,
+      main: white
     })
   }
 
-  onChangeColor(color: any) {
-    this.props.onChangeColor({
+  const onChangeColor = (color: any) => {
+    setColorChange({
       50: color[50],
       100: color[100],
       200: color[200],
@@ -164,10 +125,77 @@ class ThemeColorPicker extends React.Component {
       A200: color.A200,
       A400: color.A400,
       A700: color.A700,
-      main: color[500],
-    });
+      main: color[500]
+    })
   }
+
+  const setColorChange = (color: any) => {
+    dispatch(props.action(color))
+  }
+
+  const classes = props.classes
+  return (
+    <Grid container alignItems="center">
+      <Grid item className={classes.colorGrid}>
+        <Fab
+          className={classes.colorButton}
+          style={{ backgroundColor: currentColor }}
+          size="medium"
+        >
+          <div />
+        </Fab>
+        <TextField
+          variant="standard"
+          className={classes.colorField}
+          label="Color"
+          InputProps={{
+            readOnly: true
+          }}
+          value={currentColor}
+        />
+      </Grid>
+      <Grid item xs={12} sm>
+        <Grid container alignItems="center">
+          {colors.map((c) => (
+            <Grid key={c[500]} item>
+              <Fab
+                className={classes.colorPickerButton}
+                style={{ backgroundColor: c[500] }}
+                value={c[500]}
+                onClick={onChangeColor.bind(this, c)}
+                size="small"
+              >
+                <div />
+              </Fab>
+            </Grid>
+          ))}
+          <Grid key={color.common.white} item>
+            <Fab
+              className={classes.colorPickerButton}
+              style={{ backgroundColor: color.common.white }}
+              value={color.common.white}
+              onClick={onChangeWhite.bind(this)}
+              size="small"
+            >
+              <div />
+            </Fab>
+          </Grid>
+          <Grid key={color.common.black} item>
+            <Fab
+              className={classes.colorPickerButton}
+              style={{ backgroundColor: color.common.black }}
+              value={color.common.black}
+              onClick={onChangeBlack.bind(this)}
+              size="small"
+            >
+              <div />
+            </Fab>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
+  )
 }
 
-(ThemeColorPicker as any).displayName="ThemeColorPicker";
-export default withStyles(styles)(ThemeColorPicker as any);
+;(ThemeColorPicker as any).displayName = 'ThemeColorPicker'
+export default withStyles(styles)(ThemeColorPicker as any)

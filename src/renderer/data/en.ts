@@ -146,13 +146,13 @@ export default new Map<string, string>([
   ['rf.cont', 'Controversial'],
   ['rf.rising', 'Rising'],
 
-  ['date_available', "Date Available"],
-  ['date_creation', "Date Created"],
-  ['name', "Name"],
-  ['file', "Filename"],
-  ['hit', "Hits"],
-  ['rating_score', "Rating"],
-  ['id', "ID"],
+  ['date_available', 'Date Available'],
+  ['date_creation', 'Date Created'],
+  ['name', 'Name'],
+  ['file', 'Filename'],
+  ['hit', 'Hits'],
+  ['rating_score', 'Rating'],
+  ['id', 'ID'],
 
   ['wc.bottomRight', 'Bottom Right'],
   ['wc.bottomLeft', 'Bottom Left'],
@@ -187,5 +187,5 @@ export default new Map<string, string>([
   ['ea.elasticInOut', 'Elastic InOut'],
   ['ea.backIn', 'Back In'],
   ['ea.backOut', 'Back Out'],
-  ['ea.backInOut', 'Back InOut'],
-]);
+  ['ea.backInOut', 'Back InOut']
+])

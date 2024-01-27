@@ -3,15 +3,17 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import AudioEdit from "../AudioEdit";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
+import { newAudio } from "../../../../storage/Audio";
 
 // mocking this so that test doesn't throw error
 jest.mock('@mui/base/TextareaAutosize', () => 'TextareaAutosize');
 
 describe("AudioEdit", () => {
   it("should match snapshot", () => {
-    const audio = new Audio();
+    const audio = newAudio()
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <AudioEdit
           audio={audio}
           cachePath=""

@@ -14,7 +14,9 @@ body {
   overflow: hidden;
 }
 
-.MuiDrawer-paper::-webkit-scrollbar { width: 0 !important }
+.MuiDrawer-paper::-webkit-scrollbar {
+  width: 0 !important;
+}
 
 div.CreatableSelect {
   > div:first-child {
@@ -53,5 +55,5 @@ video::cue {
 }
 
 .react-draggable-dragging {
-  z-index:1;
+  z-index: 1;
 }

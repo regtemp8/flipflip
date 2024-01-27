@@ -3,15 +3,13 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import PiwigoDialog from "../PiwigoDialog";
 import TestProvider from "../../../../../test/util/TestProvider";
-import Config from "../../../data/Config";
+import store from "../../../../store/store";
 
 describe("PiwigoDialog", () => {
   it("should match snapshot", () => {
-    const config = new Config();
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <PiwigoDialog
-          config={config}
           open={false}
           onClose={() => {}}
           onImportURL={(type: string, e: MouseEvent, ...args: any[]) => {}}

@@ -1,953 +1,1301 @@
-import {remote, webFrame} from 'electron';
-const {getCurrentWindow} = remote;
-import * as React from 'react';
-import {IdleTimer} from "./IdleTimer";
+import React, { useEffect, useRef, useState } from 'react'
+import { IdleTimer } from './IdleTimer'
 
 import {
-  Button, CircularProgress, Container, Theme, Typography
-} from "@mui/material";
+  Button,
+  CircularProgress,
+  Container,
+  type Theme,
+  Typography
+} from '@mui/material'
+import createStyles from '@mui/styles/createStyles'
+import withStyles, { type WithStyles } from '@mui/styles/withStyles'
 
-import {SL, WC} from "../../data/const";
-import {getRandomListItem, urlToPath} from "../../data/utils";
-import {getFileGroup, getFileName} from "./Scrapers";
-import Audio from "../../data/Audio";
-import CaptionScript from "../../data/CaptionScript";
-import Config from "../../data/Config";
-import LibrarySource from "../../data/LibrarySource";
-import Scene from '../../data/Scene';
-import SceneGrid from "../../data/SceneGrid";
-import Tag from "../../data/Tag";
-import AudioAlert from "./AudioAlert";
-import CaptionProgramPlaylist from "./CaptionProgramPlaylist";
-import ChildCallbackHack from './ChildCallbackHack';
-import GridPlayer from "./GridPlayer";
-import ImageView from "./ImageView";
-import PictureGrid from "./PictureGrid";
-import PlayerBars from "./PlayerBars";
-import SourceScraper from './SourceScraper';
-import Strobe from "./Strobe";
+import { SL, WC } from '../../data/const'
+import { urlToPath } from '../../data/utils'
+import { getFileGroup, getFileName } from './Scrapers'
+import AudioAlert from './AudioAlert'
+import CaptionProgramPlaylist from './CaptionProgramPlaylist'
+import ChildCallbackHack from './ChildCallbackHack'
+import GridPlayer from './GridPlayer'
+import ImageView from './ImageView'
+import PictureGrid from './PictureGrid'
+import PlayerBars from './PlayerBars'
+import SourceScraper from './SourceScraper'
+import Strobe from './Strobe'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { selectConstants } from '../../../store/constants/selectors'
+import {
+  selectAppTutorial,
+  selectAppConfigGeneralSettingsWatermarkSettings,
+  selectAppConfigDisplaySettingsAudioAlert,
+  selectAppConfigDisplaySettingsStartImmediately,
+  selectPlayerAllTags,
+  WatermarkSettings
+} from '../../../store/app/selectors'
+import {
+  selectSceneIsGridScene,
+  selectSceneIsAudioScene,
+  selectSceneIsScriptScene,
+  selectSceneIsDownloadScene,
+  selectSceneNextSceneAllImages,
+  selectSceneNextSceneTime,
+  selectScenePersistAudio,
+  selectSceneAudioEnabled,
+  selectScenePersistText,
+  selectSceneTextEnabled,
+  selectSceneStrobe,
+  selectSceneStrobeLayer,
+  selectSceneScriptPlaylists,
+  selectSceneName,
+  selectSceneFirstSourceUrl
+} from '../../../store/scene/selectors'
+import { changeAudioRoute } from '../../../store/scene/slice'
+import {
+  navigateDisplayedLibrary,
+  setRouteGoBack
+} from '../../../store/app/thunks'
+import { selectPlayerOverlaysLoaded, selectPlayerState, selectPlayerCanStart, selectPlayerSceneID, selectPlayerFirstImageLoaded } from '../../../store/player/selectors'
+import { nextScene, setPlayerHasStartedRecursive } from '../../../store/player/thunks'
+import {
+  selectAudioName,
+  selectAudioThumb,
+  selectAudioUrl,
+  selectAudioArtist,
+  selectAudioAlbum
+} from '../../../store/audio/selectors'
+import { orderScriptTags } from '../../../store/tag/thunks'
+import { setPlayerFirstImageLoaded, setPlayerIsEmpty, setPlayerMainLoaded } from '../../../store/player/slice'
+import { selectSourceScraperProgress } from '../../../store/sourceScraper/selectors'
 
-export default class Player extends React.Component {
-  readonly props: {
-    config: Config,
-    scene: Scene,
-    scenes: Array<Scene>,
-    sceneGrids: Array<SceneGrid>,
-    theme: Theme,
-    tutorial: string,
-    advanceHack?: ChildCallbackHack,
-    allLoaded?: boolean,
-    allTags?: Array<Tag>,
-    captionProgramJumpToHack?: ChildCallbackHack,
-    captionScale?: number,
-    gridCoordinates?: Array<number>,
-    gridView?: boolean,
-    hasStarted?: boolean,
-    preventSleep?: boolean,
-    tags?: Array<Tag>,
-    cache(i: HTMLImageElement | HTMLVideoElement): void,
-    getTags(source: string): Array<Tag>,
-    goBack(): void,
-    setCount(sourceURL: string, count: number, countComplete: boolean): void,
-    systemMessage(message: string): void,
-    blacklistFile?(sourceURL: string, fileToBlacklist: string): void,
-    goToTagSource?(source: LibrarySource): void,
-    goToClipSource?(source: LibrarySource): void,
-    navigateTagging?(offset: number): void,
-    nextScene?(): void,
-    onUpdateScene?(scene: Scene, fn: (scene: Scene) => void): void,
-    playTrack?(url: string): void,
-    changeAudioRoute?(aID: number): void,
-    toggleTag?(sourceID: number, tag: Tag): void,
-    inheritTags?(sourceID: number): void,
-    getCurrentTimestamp?(): number,
-    onCaptionError?(e: string): void,
-    onLoaded?(): void,
-    setProgress?(total: number, current: number, message: string[]): void,
-    setSceneCopy?(children: React.ReactNode): void,
-    setVideo?(video: HTMLVideoElement): void,
-    onGenerate?(scene: Scene | SceneGrid, children?: boolean): void,
-  };
-
-  readonly state = {
-    canStart: this.props.scene.gridScene || this.props.scene.audioScene,
-    hasStarted: this.props.hasStarted != null ? this.props.hasStarted : this.props.scene.audioScene,
-    isMainLoaded: this.props.scene.gridScene || this.props.scene.audioScene,
-    areOverlaysLoaded: Array<boolean>(this.props.scene.overlays.length).fill(false),
-    isEmpty: false,
-    isPlaying: true,
-    total: 0,
-    progress: 0,
-    progressMessage: this.props.scene.sources.length > 0 ? [this.props.scene.sources[0].url] : [""],
-    startTime: null as Date,
-    historyOffset: 0,
-    historyPaths: Array<any>(),
-    imagePlayerAdvanceHacks: new Array<Array<ChildCallbackHack>>(this.props.scene.overlays.length + 1).fill(null).map((c) => [new ChildCallbackHack()]),
-    imagePlayerDeleteHack: new ChildCallbackHack(),
-    mainVideo: null as HTMLVideoElement,
-    overlayVideos: Array<Array<HTMLVideoElement>>(this.props.scene.overlays.length).fill(null).map((n) => [null]),
-    currentAudio: null as Audio,
-    timeToNextFrame: null as number,
-    recentPictureGrid: false,
-    thumbImage: null as HTMLImageElement,
-    persistAudio: false,
-    persistText: false,
-    scriptPlaylists: null as {scripts: CaptionScript[], shuffle: boolean, repeat: string}[],
-    hideCursor: false,
-  };
-
-  readonly idleTimerRef: React.RefObject<HTMLDivElement> = React.createRef();
-  _interval: number = null;
-  _toggleStrobe = false;
-  _powerSaveID: number = null;
-
-  render() {
-    const nextScene = this.getScene(this.props.scene.nextSceneID == -1 ? this.props.scene.nextSceneRandomID : this.props.scene.nextSceneID);
-    const showCaptionProgram = (!this.state.recentPictureGrid && this.state.hasStarted &&
-      ((this.props.scene.textEnabled &&
-      this.props.scene.scriptPlaylists.length > 0) || this.state.persistText));
-    const scriptPlaylists = this.state.persistText ? this.state.scriptPlaylists : this.props.scene.scriptPlaylists;
-    const showStrobe = !this.state.recentPictureGrid && this.props.scene.strobe && this.state.hasStarted && this.state.isPlaying &&
-      (this.props.scene.strobeLayer == SL.top || this.props.scene.strobeLayer == SL.bottom);
-
-    let rootStyle: any;
-    if (this.props.gridView) {
-      rootStyle = {
-        display: 'flex',
-        position: 'relative',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        overflow: 'hidden',
-      }
-    } else {
-      rootStyle = {
-        display: 'flex',
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-      };
+const styles = (theme: Theme) =>
+  createStyles({
+    progressMain: {
+      display: 'flex',
+      flexGrow: 1,
+      flexDirection: 'column',
+      backgroundColor: theme.palette.background.default,
+      zIndex: 10
+    },
+    progressContainer: {
+      flexGrow: 1,
+      padding: theme.spacing(0),
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      display: 'flex'
+    },
+    emptyMain: {
+      display: 'flex',
+      flexGrow: 1,
+      flexDirection: 'column',
+      backgroundColor: theme.palette.background.default,
+      zIndex: 10
+    },
+    emptyContainer: {
+      flexGrow: 1,
+      padding: theme.spacing(0),
+      position: 'relative'
+    },
+    startNowBtn: {
+      marginTop: theme.spacing(1)
     }
-    if (this.props.tutorial != null) {
-      rootStyle = {
-        ...rootStyle,
-        pointerEvents: 'none',
-      }
-    }
+  })
 
-    let playerStyle: any = {};
-    if (!this.props.gridView) {
-      playerStyle = {
-        position: 'fixed',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-      };
-    } else if (this.props.hasStarted ? this.props.hasStarted : this.state.hasStarted) {
-      playerStyle = {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }
-    }
-    if (!this.state.hasStarted && !this.props.scene.downloadScene) {
-      playerStyle = {
-        ...playerStyle,
-        opacity: 0,
-      }
-    }
-
-    let watermarkStyle: any = {}
-    let watermarkText = "";
-    if (this.props.config.generalSettings.watermark && (!this.props.gridView || this.props.config.generalSettings.watermarkGrid)) {
-      watermarkStyle = {
-        position: 'absolute',
-        zIndex: 11,
-        whiteSpace: 'pre',
-        fontFamily: this.props.config.generalSettings.watermarkFontFamily,
-        fontSize: this.props.config.generalSettings.watermarkFontSize,
-        color: this.props.config.generalSettings.watermarkColor
-      };
-      switch (this.props.config.generalSettings.watermarkCorner) {
-        case WC.bottomRight:
-          watermarkStyle.bottom = 5;
-          watermarkStyle.right = 5;
-          watermarkStyle.textAlign = 'right';
-          break;
-        case WC.bottomLeft:
-          watermarkStyle.bottom = 5;
-          watermarkStyle.left = 5;
-          watermarkStyle.textAlign = 'left';
-          break;
-        case WC.topRight:
-          watermarkStyle.top = 5;
-          watermarkStyle.right = 5;
-          watermarkStyle.textAlign = 'right';
-          break;
-        case WC.topLeft:
-          watermarkStyle.top = 5;
-          watermarkStyle.left = 5;
-          watermarkStyle.textAlign = 'left';
-          break;
-      }
-
-      watermarkText = this.props.config.generalSettings.watermarkText;
-      watermarkText = watermarkText.replace("{scene_name}", this.props.scene.name);
-      const img = this.state.historyPaths[(this.state.historyPaths.length - 1) + this.state.historyOffset];
-      if (img) {
-        watermarkText = watermarkText.replace("{source_url}", img.getAttribute("source"));
-        watermarkText = watermarkText.replace("{source_name}", getFileGroup(img.getAttribute("source")));
-        if (img.hasAttribute("post")) {
-          watermarkText = watermarkText.replace("{post_url}", img.getAttribute("post"));
-        } else {
-          watermarkText = watermarkText.replace(/\{post_url\}\s*/g, "");
-        }
-        watermarkText = watermarkText.replace("{file_url}", img.src.startsWith("file") ? urlToPath(img.src) : img.src);
-        watermarkText = watermarkText.replace("{file_name}", decodeURIComponent(getFileName(img.src)));
-      } else {
-        watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, "");
-      }
-      if (this.state.currentAudio) {
-        watermarkText = watermarkText.replace("{audio_url}", this.state.currentAudio.url);
-        watermarkText = watermarkText.replace("{audio_name}", getFileName(this.state.currentAudio.url));
-        if (this.state.currentAudio.name) {
-          watermarkText = watermarkText.replace("{audio_title}", this.state.currentAudio.name);
-        } else {
-          watermarkText = watermarkText.replace(/\{audio_title\}\s*/g, "");
-        }
-        if (this.state.currentAudio.artist) {
-          watermarkText = watermarkText.replace("{audio_artist}", this.state.currentAudio.artist);
-        } else {
-          watermarkText = watermarkText.replace(/\{audio_artist\}\s*/g, "");
-        }
-        if (this.state.currentAudio.album) {
-          watermarkText = watermarkText.replace("{audio_album}", this.state.currentAudio.album);
-        } else {
-          watermarkText = watermarkText.replace(/\{audio_album\}\s*/g, "");
-        }
-      } else {
-        watermarkText = watermarkText.replace(/\s*\{audio_url\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{audio_name\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{audio_title\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{audio_artist\}\s*/g, "");
-        watermarkText = watermarkText.replace(/\s*\{audio_album\}\s*/g, "");
-      }
-    }
-
-    const captionScale = this.props.captionScale ? this.props.captionScale : 1;
-
-    let getCurrentTimestamp: any = undefined;
-    if (this.props.getCurrentTimestamp) {
-      getCurrentTimestamp = this.props.getCurrentTimestamp;
-    } else if (this.props.scene && this.props.scene.audioEnabled) {
-      getCurrentTimestamp = this.getTimestamp.bind(this);
-    }
-
-    return (
-      <div style={rootStyle}>
-        {!this.state.recentPictureGrid && !this.props.gridView && this.state.hasStarted && (
-          <div style={{zIndex: 999, position: 'absolute', width: '100%', height: '100%', cursor: this.state.hideCursor ? 'none' : 'unset'}}
-               ref={this.idleTimerRef}>
-            <IdleTimer
-              ref={ref => {return this.idleTimerRef}}
-              onActive={this.onActive.bind(this)}
-              onIdle={this.onIdle.bind(this)}
-              timeout={2000} />
-          </div>
-        )}
-        {showStrobe && (
-          <Strobe
-            currentAudio={this.state.currentAudio}
-            zIndex={5}
-            toggleStrobe={this._toggleStrobe}
-            timeToNextFrame={this.state.timeToNextFrame}
-            scene={this.props.scene}
-          />
-        )}
-        {!this.state.hasStarted && !this.state.isEmpty && !this.props.scene.downloadScene && (
-          <main style={{
-            display: 'flex',
-            flexGrow: 1,
-            flexDirection: 'column',
-            backgroundColor: this.props.theme.palette.background.default,
-            zIndex: 10,
-          }}>
-            <Container
-              maxWidth={false}
-              style={{
-                flexGrow: 1,
-                padding: this.props.theme.spacing(0),
-                position: 'relative',
-                alignItems: 'center',
-                justifyContent: 'center',
-                display: 'flex',
-              }}>
-              <CircularProgress
-                size={300}
-                value={Math.round((this.state.progress / this.state.total) * 100)}
-                variant="determinate"/>
-                <div
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    display: 'flex',
-                    position: 'absolute',
-                    flexDirection: 'column',
-                  }}>
-                  <Typography component="h1" variant="h6" color="inherit" noWrap>
-                    {this.state.progress} / {this.state.total}
-                  </Typography>
-                  {this.state.progressMessage.map((message) =>
-                    <Typography key={message} component="h1" variant="h5" color="inherit" noWrap>
-                      {message}
-                    </Typography>
-                  )}
-                  {this.state.canStart && (
-                    <Button
-                      style={{
-                        marginTop: this.props.theme.spacing(1),
-                      }}
-                      variant="contained"
-                      color="secondary"
-                      onClick={this.start.bind(this, this.state.canStart, true)}>
-                      Start Now
-                    </Button>
-                  )}
-                </div>
-            </Container>
-          </main>
-        )}
-        {this.state.isEmpty && (
-          <main
-            style={{
-              display: 'flex',
-              flexGrow: 1,
-              flexDirection: 'column',
-              backgroundColor: this.props.theme.palette.background.default,
-              zIndex: 10,
-            }} >
-            <div style={{height: 64}}/>
-            <Container
-              maxWidth={false}
-              style={{
-                flexGrow: 1,
-                padding: this.props.theme.spacing(0),
-                position: 'relative',
-              }}>
-              <Typography component="h1" variant="h3" color="inherit" noWrap
-                          style={{
-                            textAlign: 'center',
-                            marginTop: '25%',
-                          }}>
-                (ಥ﹏ಥ)
-              </Typography>
-              <Typography component="h1" variant="h4" color="inherit" noWrap
-                          style={{textAlign: 'center'}}>
-                I couldn't find anything
-              </Typography>
-            </Container>
-          </main>
-        )}
-
-        {!this.props.gridView && (
-          <PlayerBars
-            config={this.props.config}
-            hasStarted={this.state.hasStarted}
-            historyPaths={this.state.historyPaths}
-            historyOffset={this.state.historyOffset}
-            imagePlayerAdvanceHacks={this.state.imagePlayerAdvanceHacks}
-            imagePlayerDeleteHack={this.state.imagePlayerDeleteHack}
-            isEmpty={this.state.isEmpty}
-            isPlaying={this.state.isPlaying}
-            mainVideo={this.state.mainVideo}
-            overlayVideos={this.state.overlayVideos}
-            scene={this.props.scene}
-            scenes={this.props.scenes}
-            sceneGrids={this.props.sceneGrids}
-            title={this.props.allTags ? (this.props.scene.audioScene ? this.state.currentAudio ? this.state.currentAudio.name : "Loading..." : this.props.scene.sources[0].url) : this.props.scene.name}
-            tutorial={this.props.tutorial}
-            recentPictureGrid={this.state.recentPictureGrid}
-            persistAudio={this.state.persistAudio}
-            persistText={this.state.persistText}
-            goBack={this.goBack.bind(this)}
-            historyBack={this.historyBack.bind(this)}
-            historyForward={this.historyForward.bind(this)}
-            navigateTagging={this.navigateTagging.bind(this)}
-            onRecentPictureGrid={this.onRecentPictureGrid.bind(this)}
-            onUpdateScene={this.props.onUpdateScene.bind(this)}
-            playNextScene={this.props.nextScene}
-            play={this.play.bind(this)}
-            pause={this.pause.bind(this)}
-            playTrack={this.props.playTrack}
-            onGenerate={this.props.onGenerate}
-            onPlaying={!this.props.scene.textEnabled || !this.state.currentAudio || this.props.getCurrentTimestamp ? undefined : this.onPlaying.bind(this)}
-            setCurrentAudio={this.setCurrentAudio.bind(this)}
-            allTags={this.props.allTags}
-            tags={this.props.tags}
-            blacklistFile={this.props.blacklistFile}
-            goToTagSource={this.props.goToTagSource}
-            goToClipSource={this.props.goToClipSource}
-            toggleTag={this.props.toggleTag}
-            inheritTags={this.props.inheritTags}
-          />
-        )}
-
-        <div style={playerStyle}>
-          {this.state.recentPictureGrid && (
-            <PictureGrid
-              pictures={this.state.historyPaths} />
-          )}
-          {!this.state.recentPictureGrid && this.props.config.generalSettings.watermark && (
-            <div style={watermarkStyle}>
-              {watermarkText}
-            </div>
-          )}
-          {this.props.scene.audioScene && (
-            <ImageView
-              image={this.state.thumbImage}
-              currentAudio={this.state.currentAudio}
-              scene={this.props.scene}
-              fitParent
-              hasStarted
-              removeChild
-            />
-          )}
-          {!this.state.recentPictureGrid && (this.props.config.displaySettings.audioAlert || this.props.allTags) &&
-            (this.props.scene.audioEnabled || this.state.persistAudio) && (
-            <AudioAlert
-              audio={this.state.currentAudio}
-            />
-          )}
-          {!this.props.scene.gridScene && !this.props.scene.audioScene && (
-            <SourceScraper
-              config={this.props.config}
-              scene={this.props.scene}
-              nextScene={nextScene}
-              currentAudio={this.state.currentAudio}
-              opacity={this.state.recentPictureGrid ? 0 : 1}
-              gridCoordinates={this.props.gridCoordinates}
-              gridView={this.props.gridView}
-              isPlaying={this.state.isPlaying}
-              hasStarted={this.state.hasStarted}
-              strobeLayer={this.props.scene.strobe ? this.props.scene.strobeLayer : null}
-              historyOffset={this.state.historyOffset}
-              advanceHack={this.props.advanceHack ? this.props.advanceHack : this.state.imagePlayerAdvanceHacks[0][0]}
-              deleteHack={this.state.imagePlayerDeleteHack}
-              setHistoryOffset={this.setHistoryOffset.bind(this)}
-              setHistoryPaths={this.setHistoryPaths.bind(this)}
-              finishedLoading={this.setMainLoaded.bind(this)}
-              firstImageLoaded={this.setMainCanStart.bind(this)}
-              setProgress={this.setProgress.bind(this)}
-              setSceneCopy={this.props.setSceneCopy}
-              setVideo={this.props.setVideo ? this.props.setVideo : this.setMainVideo.bind(this)}
-              setCount={this.props.setCount.bind(this)}
-              cache={this.props.cache.bind(this)}
-              onEndScene={this.props.goBack.bind(this)}
-              setTimeToNextFrame={this.setTimeToNextFrame.bind(this)}
-              systemMessage={this.props.systemMessage.bind(this)}
-              playNextScene={this.props.nextScene}
-            />
-          )}
-
-          {!this.state.recentPictureGrid && !this.props.scene.audioScene && this.props.scene.overlayEnabled && this.props.scene.overlays.length > 0 &&
-           !this.state.isEmpty && this.props.scene.overlays.map((overlay, index) => {
-              let showProgress = this.state.isMainLoaded && !this.state.hasStarted;
-              if (showProgress) {
-                for (let x = 0; x < index; x++) {
-                  if (!this.state.areOverlaysLoaded[x]) {
-                    showProgress = false;
-                    break;
-                  }
-                }
-              }
-              let overlayScene = null;
-              let overlayGrid = null;
-              if (overlay.sceneID.toString().startsWith('999')) {
-                overlayGrid = this.getSceneGrid(overlay.sceneID.toString().replace('999', ''));
-              } else {
-                overlayScene = this.getScene(overlay.sceneID);
-              }
-              if (overlayScene) {
-                let advanceHacks = this.state.imagePlayerAdvanceHacks;
-                let changed = false;
-                while (advanceHacks.length <= index + 1) {
-                  advanceHacks.push([new ChildCallbackHack()]);
-                  changed = true;
-                }
-                if (changed) {
-                  setTimeout(() => this.setState({imagePlayerAdvanceHacks: advanceHacks}), 200);
-                }
-                return (
-                  <SourceScraper
-                    key={overlay.id}
-                    config={this.props.config}
-                    scene={this.getScene(overlay.sceneID)}
-                    currentAudio={this.state.currentAudio}
-                    opacity={overlay.opacity / 100}
-                    gridView={this.props.gridView}
-                    isOverlay
-                    isPlaying={this.state.isPlaying && !this.state.isEmpty}
-                    hasStarted={this.state.hasStarted}
-                    historyOffset={0}
-                    advanceHack={this.state.imagePlayerAdvanceHacks[index + 1][0]}
-                    setHistoryOffset={this.nop}
-                    setHistoryPaths={this.nop}
-                    finishedLoading={this.setOverlayLoaded.bind(this, index)}
-                    firstImageLoaded={this.nop}
-                    setProgress={showProgress ? this.setProgress.bind(this) : this.nop}
-                    setVideo={this.props.setVideo && !this.props.gridView ? this.props.setVideo : this.setOverlayVideo.bind(this, index)}
-                    setCount={this.props.setCount.bind(this)}
-                    cache={this.props.cache.bind(this)}
-                    systemMessage={this.props.systemMessage.bind(this)}
-                  />
-                );
-              } else if (overlayGrid && !this.props.gridView) {
-                const gridSize = overlayGrid.grid[0].length * overlayGrid.grid.length;
-                let advanceHacks = this.state.imagePlayerAdvanceHacks;
-                let changed = false;
-                while (advanceHacks.length <= index + 1) {
-                  advanceHacks.push([new ChildCallbackHack()]);
-                  changed = true;
-                }
-                if (advanceHacks[index + 1].length != gridSize) {
-                  advanceHacks[index + 1] = new Array<ChildCallbackHack>(gridSize).fill(null).map((c) => new ChildCallbackHack());
-                  setTimeout(() => this.setState({imagePlayerAdvanceHacks: advanceHacks}), 200);
-                } else if (changed) {
-                  setTimeout(() => this.setState({imagePlayerAdvanceHacks: advanceHacks}), 200);
-                }
-                return (
-                  <div
-                    key={overlay.id}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      opacity: overlay.opacity / 100
-                    }}>
-                    <GridPlayer
-                      hideBars
-                      advanceHacks={this.state.imagePlayerAdvanceHacks[index + 1]}
-                      config={this.props.config}
-                      scene={overlayGrid}
-                      hasStarted={this.state.hasStarted}
-                      allScenes={this.props.scenes}
-                      sceneGrids={this.props.sceneGrids}
-                      theme={this.props.theme}
-                      cache={this.props.cache}
-                      finishedLoading={this.setOverlayLoaded.bind(this, index)}
-                      getTags={this.props.getTags}
-                      goBack={this.props.goBack}
-                      onGenerate={this.props.onGenerate}
-                      setCount={this.props.setCount}
-                      setProgress={showProgress ? this.setProgress.bind(this) : undefined}
-                      setVideo={this.setGridOverlayVideo.bind(this, index)}
-                      systemMessage={this.props.systemMessage}
-                    />
-                  </div>
-                )
-              } else {
-                if (!this.state.areOverlaysLoaded[index]) {
-                  setTimeout(() => this.setOverlayLoaded(index, true), 200);
-                }
-                return <div key={overlay.id}/>;
-              }
-            }
-          )}
-        </div>
-
-        {showCaptionProgram && scriptPlaylists.map((playlist, i) =>
-          <CaptionProgramPlaylist
-            key={i}
-            playlistIndex={i}
-            playlist={playlist}
-            currentAudio={this.state.currentAudio}
-            currentImage={this.state.historyPaths.length > 0 ? this.state.historyPaths[this.state.historyPaths.length - 1] : null}
-            scale={captionScale}
-            scene={this.props.scene}
-            timeToNextFrame={this.state.timeToNextFrame}
-            persist={this.state.persistText}
-            getTags={this.props.getTags.bind(this)}
-            goBack={this.props.goBack.bind(this)}
-            orderScriptTags={this.orderScriptTags.bind(this)}
-            playNextScene={this.props.nextScene}
-            jumpToHack={this.props.captionProgramJumpToHack}
-            getCurrentTimestamp={getCurrentTimestamp}
-            advance={() => {
-              const advance = this.props.advanceHack ? this.props.advanceHack : this.state.imagePlayerAdvanceHacks[0][0];
-              advance.fire();
-            }}
-            onError={this.props.onCaptionError}
-            systemMessage={this.props.systemMessage}/>
-        )}
-      </div>
-    );
-  }
-
-  nextSceneLoop() {
-    if (this.props.scene.nextSceneID == 0) {
-      clearInterval(this._interval);
-    }
-    if (!this.props.scene.scriptScene && this.state.isPlaying && this.state.startTime != null && !this.props.scene.nextSceneAllImages &&
-      Math.abs(new Date().getTime() - this.state.startTime.getTime()) >= this.props.scene.nextSceneTime) {
-      this.setState({startTime: null});
-      this.props.nextScene();
-    } else if (!this.state.isPlaying && this.state.startTime) {
-      const startTime = this.state.startTime;
-      startTime.setTime(startTime.getTime() + 1000);
-      this.setState({startTime: startTime});
-    }
-  }
-
-  componentDidUpdate(props: any, state: any) {
-    if (this.state.currentAudio && state.currentAudio != this.state.currentAudio) {
-      let thumbImage = new Image();
-      if (this.state.currentAudio.thumb) {
-        thumbImage.src = this.state.currentAudio.thumb;
-      } else {
-        thumbImage.src = 'src/renderer/icons/flipflip_logo.png';
-      }
-      thumbImage.onload = () => {
-        this.setState({thumbImage: thumbImage});
-      };
-    }
-    if (props.scene.id !== this.props.scene.id) {
-      if (this.props.allTags) {
-        this.setState({startTime: new Date()});
-      } else {
-        this.setState({hasStarted: true, startTime: new Date()});
-      }
-      if (this.props.scene.nextSceneID == -1 && this.props.onUpdateScene) {
-        let sceneID: number;
-        if (this.props.scene.nextSceneRandoms.length == 0) {
-          sceneID = getRandomListItem(this.props.scenes.map((s) => s.id));
-        } else {
-          sceneID = getRandomListItem(this.props.scene.nextSceneRandoms);
-        }
-        this.props.onUpdateScene(this.props.scene, (s) => {
-          s.nextSceneRandomID = sceneID;
-        })
-      }
-    }
-    if (this.props.scene.overlayEnabled != props.scene.overlayEnabled) {
-      this.setState({overlayVideos: Array<Array<HTMLVideoElement>>(this.props.scene.overlays.length).fill(null).map((n) => [null])});
-    } else if (this.props.scene.overlays != props.scene.overlays) {
-      if (this.props.scene.overlays.length == props.scene.overlays.length) {
-        for (let o = 0; o < this.props.scene.overlays.length; o++) {
-          if (this.props.scene.overlays[o].sceneID != props.scene.overlays[o].sceneID) {
-            this.clearOverlayVideo(o);
-            break;
-          }
-        }
-      } else if (this.props.scene.overlays.length < props.scene.overlays.length) {
-        for (let o = 0; o < this.props.scene.overlays.length; o++) {
-          if (this.props.scene.overlays[o].sceneID != props.scene.overlays[o].sceneID) {
-            this.spliceOverlayVideo(o);
-            break;
-          }
-        }
-      }
-    }
-    if ((this.props.allLoaded == true && props.allLoaded == false) || (this.props.hasStarted && this.props.hasStarted != props.hasStarted)) {
-      this.start(true);
-    }
-  }
-
-  componentDidMount() {
-    if (!!this.props.nextScene) {
-      this._interval = setInterval(() => this.nextSceneLoop(), 1000);
-    }
-    if (this.props.preventSleep) {
-      this._powerSaveID = remote.powerSaveBlocker.start('prevent-display-sleep');
-    }
-    if (this.props.scene.nextSceneID == -1 && this.props.onUpdateScene) {
-      let sceneID: number;
-      if (this.props.scene.nextSceneRandoms.length == 0) {
-        sceneID = getRandomListItem(this.props.scenes.map((s) => s.id));
-      } else {
-        sceneID = getRandomListItem(this.props.scene.nextSceneRandoms);
-      }
-      this.props.onUpdateScene(this.props.scene, (s) => {
-        s.nextSceneRandomID = sceneID;
-      })
-    }
-    if (this.state.currentAudio) {
-      let thumbImage = new Image();
-      if (this.state.currentAudio.thumb) {
-        thumbImage.src = this.state.currentAudio.thumb;
-      } else {
-        thumbImage.src = 'src/renderer/icons/flipflip_logo.png';
-      }
-      thumbImage.onload = () => {
-        this.setState({thumbImage: thumbImage});
-      };
-    }
-    if (this.props.scene.persistAudio && this.props.scene.audioEnabled) {
-      this.setState({persistAudio: true});
-    }
-    if (this.props.scene.persistText && this.props.scene.textEnabled) {
-      this.setState({persistText: true, scriptPlaylists: this.props.scene.scriptPlaylists});
-    }
-  }
-
-  componentWillUnmount() {
-    clearInterval(this._interval);
-    this._interval = null;
-    getCurrentWindow().setAlwaysOnTop(false);
-    getCurrentWindow().setFullScreen(false);
-    // Clear ALL the available browser caches
-    global.gc();
-    webFrame.clearCache();
-    remote.getCurrentWindow().webContents.session.clearCache(() => {});
-    if (this.props.preventSleep || this._powerSaveID != null) {
-      remote.powerSaveBlocker.stop(this._powerSaveID);
-      this._powerSaveID = null;
-    }
-  }
-
-  shouldComponentUpdate(props: any, state: any): boolean {
-    return this.props.scene !== props.scene ||
-      this.props.tags !== props.tags ||
-      this.props.gridView !== props.gridView ||
-      this.props.allLoaded !== props.allLoaded ||
-      this.props.hasStarted !== props.hasStarted ||
-      this.state.canStart !== state.canStart ||
-      this.state.hasStarted !== state.hasStarted ||
-      this.state.isMainLoaded !== state.isMainLoaded ||
-      this.state.areOverlaysLoaded !== state.areOverlaysLoaded ||
-      this.state.hideCursor !== state.hideCursor ||
-      this.state.isEmpty !== state.isEmpty ||
-      this.state.isPlaying !== state.isPlaying ||
-      this.state.total !== state.total ||
-      this.state.progress !== state.progress ||
-      this.state.progressMessage !== state.progressMessage ||
-      this.state.historyOffset !== state.historyOffset ||
-      this.state.historyPaths !== state.historyPaths ||
-      this.state.mainVideo !== state.mainVideo ||
-      this.state.overlayVideos !== state.overlayVideos ||
-      this.state.recentPictureGrid !== state.recentPictureGrid ||
-      this.state.thumbImage !== state.thumbImage ||
-      this.state.currentAudio !== state.currentAudio;
-  }
-
-  nop() {}
-
-  _currentTimestamp: number = null;
-  onPlaying(position: number, duration: number) {
-    this._currentTimestamp = position;
-  }
-  getTimestamp() {
-    return this._currentTimestamp;
-  }
-
-  setCurrentAudio(audio: Audio) {
-    this.setState({currentAudio: audio});
-    if (this.props.changeAudioRoute) {
-      this.props.changeAudioRoute(audio.id);
-    }
-  }
-
-  setProgress(total: number, current: number, message: string[]) {
-    if (this.props.setProgress) {
-      this.props.setProgress(total, current, message);
-    }
-    this.setState({total: total, progress: current, progressMessage: message});
-  }
-
-  setMainCanStart() {
-    if (!this.state.canStart) {
-      this.setState({canStart: true, isEmpty: false});
-      this.start(true);
-    }
-  }
-
-  setMainLoaded(empty: boolean) {
-    if (empty) {
-      this.setState({isEmpty: empty});
-    } else {
-      this.setState({isMainLoaded: true});
-      this.play();
-    }
-  }
-
-  setOverlayLoaded(index: number, empty: boolean) {
-    const newAOL = this.state.areOverlaysLoaded;
-    newAOL[index] = true;
-    this.setState({areOverlaysLoaded: newAOL});
-    this.play();
-  }
-
-  setTimeToNextFrame(ttnf: number) {
-    this._toggleStrobe = !this._toggleStrobe;
-    this.setState({timeToNextFrame: ttnf});
-  }
-
-  setMainVideo(video: HTMLVideoElement) {
-    this.setState({mainVideo: video});
-  }
-
-  spliceOverlayVideo(index: number) {
-    const newOV = Array.from(this.state.overlayVideos);
-    while (newOV.length <= index) {
-      newOV.push([null]);
-    }
-    newOV.splice(index, 1);
-    this.setState({overlayVideos: newOV});
-  }
-
-  clearOverlayVideo(index: number) {
-    const newOV = Array.from(this.state.overlayVideos);
-    while (newOV.length <= index) {
-      newOV.push([null]);
-    }
-    newOV[index] = [null];
-    this.setState({overlayVideos: newOV});
-  }
-
-  setOverlayVideo(index: number, video: HTMLVideoElement) {
-    const newOV = Array.from(this.state.overlayVideos);
-    while (newOV.length <= index) {
-      newOV.push([null]);
-    }
-    if (newOV[index][0] != video) {
-      newOV[index][0] = video;
-      this.setState({overlayVideos: newOV});
-    }
-  }
-
-  setGridOverlayVideo(oIndex: number, gIndex: number, video: HTMLVideoElement) {
-    const newOV = Array.from(this.state.overlayVideos);
-    while (newOV.length <= oIndex) {
-      newOV.push([null]);
-    }
-    while (newOV[oIndex].length <= gIndex) {
-      newOV[oIndex].push(null);
-    }
-    if (newOV[oIndex][gIndex] != video) {
-      newOV[oIndex][gIndex] = video;
-      this.setState({overlayVideos: newOV});
-    }
-  }
-
-  start(canStart: boolean, force = false) {
-    const isLoaded = !force && (this.state.isMainLoaded && (!this.props.scene.overlayEnabled || this.props.scene.overlays.length == 0 || this.state.areOverlaysLoaded.find((b) => !b) == null));
-    if (this.props.onLoaded && isLoaded) {
-      this.props.onLoaded();
-    }
-    if (force || (canStart && ((isLoaded && (this.props.allLoaded == undefined || this.props.allLoaded)) || this.props.config.displaySettings.startImmediately))) {
-      this.setState({hasStarted: this.props.hasStarted != null ? this.props.hasStarted : true, isLoaded: true, startTime: this.state.startTime ?  this.state.startTime : new Date()});
-      setTimeout(() => {
-        if (this.props.scene.gridScene) {
-          for (let r of this.state.imagePlayerAdvanceHacks) {
-            for (let hack of r) {
-              hack.fire();
-            }
-          }
-        }
-      }, 200);
-    } else {
-      this.setState({isLoaded: isLoaded});
-    }
-  }
-
-  goBack() {
-    if (this.state.recentPictureGrid) {
-      this.setState({recentPictureGrid: false});
-    } else {
-      this.props.goBack();
-    }
-  }
-
-  play() {
-    this.setState({isPlaying: true});
-    this.start(this.state.canStart);
-  }
-
-  pause() {
-    this.setState({isPlaying: false});
-  }
-
-  historyBack() {
-    this.setState({
-      isPlaying: false,
-      historyOffset: this.state.historyOffset - 1,
-    });
-  }
-
-  historyForward() {
-    this.setState({
-      isPlaying: false,
-      historyOffset: this.state.historyOffset + 1,
-    });
-  }
-
-  setHistoryPaths(paths: Array<any>) {
-    this.setState({historyPaths: paths});
-  }
-
-  setHistoryOffset(offset: number) {
-    this.setState({historyOffset: offset});
-  }
-
-  getSceneGrid(id: string): SceneGrid {
-    return this.props.sceneGrids.find((s) => s.id.toString() == id);
-  }
-
-  getScene(id: number): Scene {
-    return this.props.scenes.find((s) => s.id == id);
-  }
-
-  onActive() {
-    this.setState({hideCursor: false})
-  }
-
-  onIdle() {
-    this.setState({hideCursor: true})
-  }
-
-  navigateTagging(offset: number) {
-    this.setState({
-      canStart: false,
-      hasStarted: false,
-      isMainLoaded: false,
-      isEmpty: false,
-      historyOffset: 0,
-      historyPaths: Array<any>(),
-      total: 0,
-      progress: 0,
-      progressMessage: this.props.scene.sources.length > 0 ? [this.props.scene.sources[0].url] : [""],
-    });
-    this.props.navigateTagging(offset);
-  }
-
-  orderScriptTags(script: CaptionScript) {
-    const tagNames = this.props.allTags.map((t: Tag) => t.name);
-    // Re-order the tags of the audio we were playing
-    script.tags = script.tags.sort((a: Tag, b: Tag) => {
-      const aIndex = tagNames.indexOf(a.name);
-      const bIndex = tagNames.indexOf(b.name);
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-  }
-
-  onRecentPictureGrid() {
-    this.setState({recentPictureGrid: true});
-  }
+interface ProgressCardProps extends WithStyles<typeof styles> {
+  sceneID: number
+  start?: () => void
 }
 
-(Player as any).displayName="Player";
+function ProgressCard(props: ProgressCardProps) {
+  const progress = useAppSelector(selectSourceScraperProgress(props.sceneID))
+  if(!progress) return null
+
+  const {total, current, message} = progress
+  return (
+    <main className={props.classes.progressMain}>
+      <Container
+        maxWidth={false}
+        className={props.classes.progressContainer}
+      >
+        <CircularProgress
+          size={300}
+          value={Math.round((current / total) * 100)}
+          variant="determinate"
+        />
+        <div
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex',
+            position: 'absolute',
+            flexDirection: 'column'
+          }}
+        >
+          <Typography component="h1" variant="h6" color="inherit" noWrap>
+            {current} / {total}
+          </Typography>
+          {message.map((line, index) => (
+            <Typography
+              key={'msg-' + index}
+              component="h1"
+              variant="h5"
+              color="inherit"
+              noWrap
+            >
+              {line}
+            </Typography>
+          ))}
+          {props.start && (
+            <Button
+              className={props.classes.startNowBtn}
+              variant="contained"
+              color="secondary"
+              onClick={() => props.start()}
+            >
+              Start Now
+            </Button>
+          )}
+        </div>
+      </Container>
+    </main>
+  )
+}
+
+export interface PlayerProps extends WithStyles<typeof styles> {
+  uuid?: string
+  advanceHack?: ChildCallbackHack
+  allLoaded?: boolean
+  captionProgramJumpToHack?: ChildCallbackHack
+  captionScale?: number
+  gridCoordinates?: number[]
+  gridView?: boolean
+  preventSleep?: boolean
+  getCurrentTimestamp?: () => number
+  onCaptionError?: (e: string) => void
+  onLoaded?: () => void
+  setProgress?: (total: number, current: number, message: string[]) => void
+  setSceneCopy?: (children: React.ReactNode) => void
+  setVideo?: (video: HTMLVideoElement) => void
+}
+
+function Player(props: PlayerProps) {
+  const [currentAudio, setCurrentAudio] = useState<number>()
+
+  const dispatch = useAppDispatch()
+  const { isWin32, pathSep } = useAppSelector(selectConstants())
+  const state = useAppSelector(selectPlayerState(props.uuid))
+  const areOverlaysLoaded = useAppSelector(selectPlayerOverlaysLoaded(props.uuid))
+  const canStart = useAppSelector(selectPlayerCanStart(props.uuid))
+
+  const watermark = useAppSelector(
+    selectAppConfigGeneralSettingsWatermarkSettings(props.gridView)
+  )
+  const audioAlert = useAppSelector(selectAppConfigDisplaySettingsAudioAlert())
+  const startImmediately = useAppSelector(
+    selectAppConfigDisplaySettingsStartImmediately()
+  )
+  const tutorial = useAppSelector(selectAppTutorial())
+  const allTags = useAppSelector(selectPlayerAllTags())
+  const isGridScene = useAppSelector(selectSceneIsGridScene(state.sceneID))
+  const isAudioScene = useAppSelector(selectSceneIsAudioScene(state.sceneID))
+  const isScriptScene = useAppSelector(selectSceneIsScriptScene(state.sceneID))
+  const isDownloadScene = useAppSelector(
+    selectSceneIsDownloadScene(state.sceneID)
+  )
+  const nextSceneAllImages = useAppSelector(
+    selectSceneNextSceneAllImages(state.sceneID)
+  )
+  const nextSceneTime = useAppSelector(selectSceneNextSceneTime(state.sceneID))
+  const persistAudio = useAppSelector(selectScenePersistAudio(state.sceneID))
+  const audioEnabled = useAppSelector(selectSceneAudioEnabled(state.sceneID))
+  const persistText = useAppSelector(selectScenePersistText(state.sceneID))
+  const textEnabled = useAppSelector(selectSceneTextEnabled(state.sceneID))
+  const strobe = useAppSelector(selectSceneStrobe(state.sceneID))
+  const strobeLayer = useAppSelector(selectSceneStrobeLayer(state.sceneID))
+  const scriptPlaylists = useAppSelector(
+    selectSceneScriptPlaylists(state.sceneID)
+  )
+  const name = useAppSelector(selectSceneName(state.sceneID))
+  const firstSourceUrl = useAppSelector(
+    selectSceneFirstSourceUrl(state.sceneID)
+  )
+
+  const audioThumb = useAppSelector(selectAudioThumb(currentAudio ?? -1))
+  const audioUrl = useAppSelector(selectAudioUrl(currentAudio ?? -1))
+  const audioName = useAppSelector(selectAudioName(currentAudio ?? -1))
+  const audioArtist = useAppSelector(selectAudioArtist(currentAudio ?? -1))
+  const audioAlbum = useAppSelector(selectAudioAlbum(currentAudio ?? -1))
+
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [historyOffset, setHistoryOffset] = useState(0)
+  const [historyPaths, setHistoryPaths] = useState(
+    new Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>()
+  )
+  const [imagePlayerDeleteHack, setImagePlayerDeleteHack] = useState(
+    new ChildCallbackHack()
+  )
+  const [mainVideo, setMainVideo] = useState<HTMLVideoElement>()
+  const [overlayVideos, setOverlayVideos] = useState<HTMLVideoElement[][]>([])
+  const [timeToNextFrame, setTimeToNextFrame] = useState<number>()
+  const [recentPictureGrid, setRecentPictureGrid] = useState(false)
+  const [thumbImage, setThumbImage] = useState<HTMLImageElement>()
+  const [hideCursor, setHideCursor] = useState(false)
+
+  const _startTime = useRef<number>()
+  const _idleTimerRef = useRef<HTMLDivElement>()
+  const _interval = useRef<number>()
+  const _toggleStrobe = useRef(false)
+  const _powerSaveID = useRef<number>()
+  const _currentTimestamp = useRef<number>()
+  const _imagePlayerAdvanceHacks = useRef(
+    new Array<ChildCallbackHack[]>(state.overlays.length + 1)
+      .fill(null)
+      .map((c) => [new ChildCallbackHack()])
+  )
+
+  const _setHistoryOffset = useRef<(offset: number) => void>(setHistoryOffset)
+  const _setHistoryPaths = useRef<(paths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>) => void>(setHistoryPaths)
+  const _setVideo = useRef<(video: HTMLVideoElement) => void>((video: HTMLVideoElement) => {
+    if(props.setVideo) {
+      props.setVideo(video)
+    } else {
+      setMainVideo(video)
+    }
+  })
+  const _changeTimeToNextFrame = useRef<(ttnf: number) => void>((ttnf: number) => {
+    _toggleStrobe.current = !_toggleStrobe.current
+    setTimeToNextFrame(ttnf)
+  })
+
+  // START LOG COMPONENT CHANGES
+  // const pr_uuid = useRef<string>()
+  // const pr_advanceHack = useRef<ChildCallbackHack>()
+  // const pr_allLoaded = useRef<boolean>()
+  // const pr_captionProgramJumpToHack = useRef<ChildCallbackHack>()
+  // const pr_captionScale = useRef<number>()
+  // const pr_gridCoordinates = useRef<number[]>()
+  // const pr_gridView = useRef<boolean>()
+  // const pr_preventSleep = useRef<boolean>()
+  // const pr_getCurrentTimestamp = useRef<() => number>()
+  // const pr_onCaptionError = useRef<(e: string) => void>()
+  // const pr_onLoaded = useRef<() => void>()
+  // const pr_setProgress = useRef<(total: number, current: number, message: string[]) => void>()
+  // const pr_setSceneCopy = useRef<(children: React.ReactNode) => void>()
+  // const pr_setVideo = useRef<(video: HTMLVideoElement) => void>()
+  // const p_currentAudio = useRef<number>()
+  // const p_isWin32 = useRef<boolean>()
+  // const p_pathSep = useRef<string>()
+  // const p_state = useRef<PlayerState>()
+  // const p_areOverlaysLoaded = useRef<boolean[]>()
+  // const p_canStart = useRef<boolean>()
+  // const p_watermark = useRef<WatermarkSettings>()
+  // const p_audioAlert = useRef<boolean>()
+  // const p_startImmediately = useRef<boolean>()
+  // const p_tutorial = useRef<string>()
+  // const p_allTags = useRef<number[]>()
+  // const p_isGridScene = useRef<boolean>()
+  // const p_isAudioScene = useRef<boolean>()
+  // const p_isScriptScene = useRef<boolean>()
+  // const p_isDownloadScene = useRef<boolean>()
+  // const p_nextSceneAllImages = useRef<boolean>()
+  // const p_nextSceneTime = useRef<number>()
+  // const p_persistAudio = useRef<boolean>()
+  // const p_audioEnabled = useRef<boolean>()
+  // const p_persistText = useRef<boolean>()
+  // const p_textEnabled = useRef<boolean>()
+  // const p_strobe = useRef<boolean>()
+  // const p_strobeLayer = useRef<string>()
+  // const p_scriptPlaylists = useRef<ScriptPlaylist[]>()
+  // const p_name = useRef<string>()
+  // const p_firstSourceUrl = useRef<string>()
+  // const p_audioThumb = useRef<string>()
+  // const p_audioUrl = useRef<string>()
+  // const p_audioName = useRef<string>()
+  // const p_audioArtist = useRef<string>()
+  // const p_audioAlbum = useRef<string>()
+  // const p_isPlaying = useRef<boolean>()
+  // const p_historyOffset = useRef<number>()
+  // const p_historyPaths = useRef<Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>>()
+  // const p_imagePlayerDeleteHack = useRef<ChildCallbackHack>()
+  // const p_mainVideo = useRef<HTMLVideoElement>()
+  // const p_overlayVideos = useRef<HTMLVideoElement[][]>()
+  // const p_timeToNextFrame = useRef<number>()
+  // const p_recentPictureGrid = useRef<boolean>()
+  // const p_thumbImage = useRef<HTMLImageElement>()
+  // const p_hideCursor = useRef<boolean>()
+  // const p_startTime = useRef<number>()
+  // const p_idleTimerRef = useRef<HTMLDivElement>()
+  // const p_interval = useRef<number>()
+  // const p_toggleStrobe = useRef(false)
+  // const p_powerSaveID = useRef<number>()
+  // const p_currentTimestamp = useRef<number>()
+  // const p_imagePlayerAdvanceHacks = useRef<ChildCallbackHack[][]>()
+  // const p_setHistoryOffset = useRef<(offset: number) => void>()
+  // const p_setHistoryPaths = useRef<(paths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>) => void>()
+  // const p_setVideo = useRef<(video: HTMLVideoElement) => void>()
+  // const p_changeTimeToNextFrame = useRef<(ttnf: number) => void>()
+
+  // console.log('11------------------------11')
+  // if(pr_uuid.current !== props.uuid){
+  //   console.log('UUID PROP CHANGED')
+  // }
+  // if(pr_advanceHack.current !== props.advanceHack){
+  //   console.log('ADVANCE_HACK PROP CHANGED')
+  // }
+  // if(pr_allLoaded.current !== props.allLoaded){
+  //   console.log('ALL_LOADED PROP CHANGED')
+  // }
+  // if(pr_captionProgramJumpToHack.current !== props.captionProgramJumpToHack){
+  //   console.log('CAPTION_PROGRAM_JUMP_TO_HACK PROP CHANGED')
+  // }
+  // if(pr_captionScale.current !== props.captionScale){
+  //   console.log('CAPTION_SCALE PROP CHANGED')
+  // }
+  // if(pr_gridCoordinates.current !== props.gridCoordinates){
+  //   console.log('GRID_COORDINATES PROP CHANGED')
+  // }
+  // if(pr_gridView.current !== props.gridView){
+  //   console.log('GRID_VIEW PROP CHANGED')
+  // }
+  // if(pr_preventSleep.current !== props.preventSleep){
+  //   console.log('PREVENT_SLEEP PROP CHANGED')
+  // }
+  // if(pr_getCurrentTimestamp.current !== props.getCurrentTimestamp){
+  //   console.log('GET_CURRENT_TIMESTAMP PROP CHANGED')
+  // }
+  // if(pr_onCaptionError.current !== props.onCaptionError){
+  //   console.log('ON_CAPTION_ERROR PROP CHANGED')
+  // }
+  // if(pr_onLoaded.current !== props.onLoaded){
+  //   console.log('ON_LOADED PROP CHANGED')
+  // }
+  // if(pr_setProgress.current !== props.setProgress){
+  //   console.log('SET_PROGRESS PROP CHANGED')
+  // }
+  // if(pr_setSceneCopy.current !== props.setSceneCopy){
+  //   console.log('SET_SCENE_COPY PROP CHANGED')
+  // }
+  // if(pr_setVideo.current !== props.setVideo){
+  //   console.log('SET_VIDEO PROP CHANGED')
+  // }
+  // if(p_currentAudio.current !== currentAudio){
+  //   console.log('CURRENT_AUDIO CHANGED')
+  // }
+  // if(p_isWin32.current !== isWin32){
+  //   console.log('IS_WIN32 CHANGED')
+  // }
+  // if(p_pathSep.current !== pathSep){
+  //   console.log('PATH_SEP CHANGED')
+  // }
+  // if(p_state.current !== state){
+  //   console.log('PLAYER_STATE CHANGED')
+  //   console.log('-- PREV --')
+  //   console.log(p_state.current)
+  //   console.log('-- NEXT --')
+  //   console.log(state)
+  // }
+  // if(p_areOverlaysLoaded.current !== areOverlaysLoaded){
+  //   console.log('ARE_OVERLAYS_LOADED CHANGED')
+  // }
+  // if(p_canStart.current !== canStart){
+  //   console.log('CAN_START CHANGED')
+  // }
+  // if(p_watermark.current !== watermark){
+  //   console.log('WATERMARK CHANGED')
+  // }
+  // if(p_audioAlert.current !== audioAlert){
+  //   console.log('AUDIO_ALERT CHANGED')
+  // }
+  // if(p_startImmediately.current !== startImmediately){
+  //   console.log('START_IMMEDIATELY CHANGED')
+  // }
+  // if(p_tutorial.current !== tutorial){
+  //   console.log('TUTORIAL CHANGED')
+  // }
+  // if(p_allTags.current !== allTags){
+  //   console.log('ALL_TAGS CHANGED')
+  // }
+  // if(p_isGridScene.current !== isGridScene){
+  //   console.log('IS_GRID_SCENE CHANGED')
+  // }
+  // if(p_isAudioScene.current !== isAudioScene){
+  //   console.log('IS_AUDIO_SCENE CHANGED')
+  // }
+  // if(p_isScriptScene.current !== isScriptScene){
+  //   console.log('IS_SCRIPT_SCENE CHANGED')
+  // }
+  // if(p_isDownloadScene.current !== isDownloadScene){
+  //   console.log('IS_DOWNLOAD_SCENE CHANGED')
+  // }
+  // if(p_nextSceneAllImages.current !== nextSceneAllImages){
+  //   console.log('NEXT_SCENE_ALL_IMAGES CHANGED')
+  // }
+  // if(p_nextSceneTime.current !== nextSceneTime){
+  //   console.log('UUID CHANGED')
+  // }
+  // if(p_persistAudio.current !== persistAudio){
+  //   console.log('PERSIST_AUDIO CHANGED')
+  // }
+  // if(p_audioEnabled.current !== audioEnabled){
+  //   console.log('AUDIO_ENABLED CHANGED')
+  // }
+  // if(p_persistText.current !== persistText){
+  //   console.log('PERSIST_TEXT CHANGED')
+  // }
+  // if(p_textEnabled.current !== textEnabled){
+	// 	console.log('TEXT_ENABLED CHANGED')
+	// }
+  // if(p_strobe.current !== strobe){
+	// 	console.log('STROBE CHANGED')
+	// }
+  // if(p_strobeLayer.current !== strobeLayer){
+	// 	console.log('STROBE_LAYER CHANGED')
+	// }
+  // if(p_scriptPlaylists.current !== scriptPlaylists){
+	// 	console.log('SCRIPT_PLAYLISTS CHANGED')
+	// }
+  // if(p_name.current !== name){
+	// 	console.log('NAME CHANGED')
+	// }
+  // if(p_firstSourceUrl.current !== firstSourceUrl){
+	// 	console.log('FIRST_SOURCE_URL CHANGED')
+	// }
+  // if(p_audioThumb.current !== audioThumb){
+	// 	console.log('AUDIO_THUMB CHANGED')
+	// }
+  // if(p_audioUrl.current !== audioUrl){
+	// 	console.log('AUDIO_URL CHANGED')
+	// }
+  // if(p_audioName.current !== audioName){
+	// 	console.log('AUDIO_NAME CHANGED')
+	// }
+  // if(p_audioArtist.current !== audioArtist){
+	// 	console.log('AUDIO_ARTIST CHANGED')
+	// }
+  // if(p_audioAlbum.current !== audioAlbum){
+	// 	console.log('AUDIO_ALBUM CHANGED')
+	// }
+  // if(p_isPlaying.current !== isPlaying){
+	// 	console.log('IS_PLAYING CHANGED')
+	// }
+  // if(p_historyOffset.current !== historyOffset){
+	// 	console.log('HISTORY_OFFSET CHANGED')
+	// }
+  // if(p_historyPaths.current !== historyPaths){
+	// 	console.log('HISTORY_PATHS CHANGED')
+	// }
+  // if(p_imagePlayerDeleteHack.current !== imagePlayerDeleteHack){
+	// 	console.log('IMAGE_PLAYER_DELETE_HACK CHANGED')
+	// }
+  // if(p_mainVideo.current !== mainVideo){
+	// 	console.log('MAIN_VIDEO CHANGED')
+	// }
+  // if(p_overlayVideos.current !== overlayVideos){
+	// 	console.log('OVERLAY_VIDEOS CHANGED')
+	// }
+  // if(p_timeToNextFrame.current !== timeToNextFrame){
+	// 	console.log('TIME_TO_NEXT_FRAME CHANGED')
+	// }
+  // if(p_recentPictureGrid.current !== recentPictureGrid){
+	// 	console.log('RECENT_PICTURE_GRID CHANGED')
+	// }
+  // if(p_thumbImage.current !== thumbImage){
+	// 	console.log('THUMB_IMAGE CHANGED')
+	// }
+  // if(p_hideCursor.current !== hideCursor){
+	// 	console.log('HIDE_CURSOR CHANGED')
+	// }
+  // if(p_startTime.current !== _startTime.current){
+	// 	console.log('START_TIME CHANGED')
+	// }
+  // if(p_idleTimerRef.current !== _idleTimerRef.current){
+	// 	console.log('IDLE_TIMER_REF CHANGED')
+	// }
+  // if(p_interval.current !== _interval.current){
+	// 	console.log('INTERVAL CHANGED')
+	// }
+  // if(p_toggleStrobe.current !== _toggleStrobe.current){
+	// 	console.log('TOGGLE_STROBE CHANGED')
+	// }
+  // if(p_powerSaveID.current !== _powerSaveID.current){
+	// 	console.log('POWER_SAVE_ID CHANGED')
+	// }
+  // if(p_currentTimestamp.current !== _currentTimestamp.current){
+	// 	console.log('CURRENT_TIMESTAMP CHANGED')
+	// }
+  // if(p_imagePlayerAdvanceHacks.current !== _imagePlayerAdvanceHacks.current){
+	// 	console.log('IMAGE_PLAYER_ADVANCE_HACKS CHANGED')
+	// }
+  // if(p_setHistoryOffset.current !== _setHistoryOffset.current){
+	// 	console.log('SET_HISTORY_OFFSET CHANGED')
+	// }
+  // if(p_setHistoryPaths.current !== _setHistoryPaths.current){
+	// 	console.log('SET_HISTORY_PATHS CHANGED')
+	// }
+  // if(p_setVideo.current !== _setVideo.current){
+	// 	console.log('SET_VIDEO CHANGED')
+	// }
+  // if(p_changeTimeToNextFrame.current !== _changeTimeToNextFrame.current){
+	// 	console.log('CHANGE_TIME_TO_NEXT_FRAME CHANGED')
+	// }
+  // console.log('11------------------------11')
+
+  // pr_uuid.current = props.uuid
+  // pr_advanceHack.current = props.advanceHack
+  // pr_allLoaded.current = props.allLoaded
+  // pr_captionProgramJumpToHack.current = props.captionProgramJumpToHack
+  // pr_captionScale.current = props.captionScale
+  // pr_gridCoordinates.current = props.gridCoordinates
+  // pr_gridView.current = props.gridView
+  // pr_preventSleep.current = props.preventSleep
+  // pr_getCurrentTimestamp.current = props.getCurrentTimestamp
+  // pr_onCaptionError.current = props.onCaptionError
+  // pr_onLoaded.current = props.onLoaded
+  // pr_setProgress.current = props.setProgress
+  // pr_setSceneCopy.current = props.setSceneCopy
+  // pr_setVideo.current = props.setVideo
+  // p_currentAudio.current = currentAudio
+  // p_isWin32.current = isWin32
+  // p_pathSep.current = pathSep
+  // p_state.current = state
+  // p_areOverlaysLoaded.current = areOverlaysLoaded
+  // p_canStart.current = canStart
+  // p_watermark.current = watermark
+  // p_audioAlert.current = audioAlert
+  // p_startImmediately.current = startImmediately
+  // p_tutorial.current = tutorial
+  // p_allTags.current = allTags
+  // p_isGridScene.current = isGridScene
+  // p_isAudioScene.current = isAudioScene
+  // p_isScriptScene.current = isScriptScene
+  // p_isDownloadScene.current = isDownloadScene
+  // p_nextSceneAllImages.current = nextSceneAllImages
+  // p_nextSceneTime.current = nextSceneTime
+  // p_persistAudio.current = persistAudio
+  // p_audioEnabled.current = audioEnabled
+  // p_persistText.current = persistText
+  // p_textEnabled.current = textEnabled
+  // p_strobe.current = strobe
+  // p_strobeLayer.current = strobeLayer
+  // p_scriptPlaylists.current = scriptPlaylists
+  // p_name.current = name
+  // p_firstSourceUrl.current = firstSourceUrl
+  // p_audioThumb.current = audioThumb
+  // p_audioUrl.current = audioUrl
+  // p_audioName.current = audioName
+  // p_audioArtist.current = audioArtist
+  // p_audioAlbum.current = audioAlbum
+  // p_isPlaying.current = isPlaying
+  // p_historyOffset.current = historyOffset
+  // p_historyPaths.current = historyPaths
+  // p_imagePlayerDeleteHack.current = imagePlayerDeleteHack
+  // p_mainVideo.current = mainVideo
+  // p_overlayVideos.current = overlayVideos
+  // p_timeToNextFrame.current = timeToNextFrame
+  // p_recentPictureGrid.current = recentPictureGrid
+  // p_thumbImage.current = thumbImage
+  // p_hideCursor.current = hideCursor
+  // p_startTime.current = _startTime.current
+  // p_idleTimerRef.current = _idleTimerRef.current
+  // p_interval.current = _interval.current
+  // p_toggleStrobe.current = _toggleStrobe.current
+  // p_powerSaveID.current = _powerSaveID.current
+  // p_currentTimestamp.current = _currentTimestamp.current
+  // p_imagePlayerAdvanceHacks.current = _imagePlayerAdvanceHacks.current
+  // p_setHistoryOffset.current = _setHistoryOffset.current
+  // p_setHistoryPaths.current = _setHistoryPaths.current
+  // p_setVideo.current = _setVideo.current
+  // p_changeTimeToNextFrame.current = _changeTimeToNextFrame.current
+  // END LOG COMPONENT CHANGES
+
+  useEffect(() => {
+    if (props.preventSleep) {
+      window.flipflip.api
+        .preventDisplaySleep()
+        .then((id) => (_powerSaveID.current = id))
+    }
+    if (currentAudio) {
+      const thumbImage = new Image()
+      if (audioThumb) {
+        thumbImage.src = audioThumb
+      } else {
+        thumbImage.src = 'src/renderer/icons/flipflip_logo.png'
+      }
+      thumbImage.onload = () => {
+        setThumbImage(thumbImage)
+      }
+    }
+
+    return () => {
+      clearInterval(_interval.current)
+      _interval.current = undefined
+      window.flipflip.api.playerSetAlwaysOnTop(false, false, false, false)
+      window.flipflip.api.playerSetFullScreen(false, false, false, false)
+
+      // Clear ALL the available browser caches
+      global.gc()
+      window.flipflip.api.clearCaches()
+      if (props.preventSleep && _powerSaveID.current != undefined) {
+        window.flipflip.api.stopPreventDisplaySleep(_powerSaveID.current)
+        _powerSaveID.current = undefined
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const thumbImage = new Image()
+    thumbImage.src =
+      currentAudio && audioThumb
+        ? audioThumb
+        : 'src/renderer/icons/flipflip_logo.png'
+    thumbImage.onload = () => {
+      setThumbImage(thumbImage)
+    }
+  }, [currentAudio])
+
+  useEffect(() => {
+    if(_interval.current != null) {
+      window.clearInterval(_interval.current)
+    }
+    if(state.nextSceneID !== 0) {
+      _interval.current = window.setInterval(nextSceneLoop, 1000)
+    }
+
+    if (allTags) {
+      _startTime.current = new Date().getTime()
+    } else {
+      // setHasStarted(true);
+      _startTime.current = new Date().getTime()
+    }
+  }, [state.sceneID])
+
+  useEffect(() => {
+    console.log('11-- STATE.OVERLAYS.LENGTH CHANGED --11')
+    setOverlayVideos(
+      new Array<HTMLVideoElement[]>(state.overlays.length).fill([null])
+    )
+  }, [state.overlays.length])
+
+  useEffect(() => {
+    if (props.allLoaded === false || state.hasStarted === false) {
+      // console.log('## START props.allLoaded === false || state.hasStarted === false')
+      start(state.mainLoaded, areOverlaysLoaded, canStart)
+    }
+  }, [props.allLoaded, state.hasStarted])
+
+  useEffect(() => {
+    if (canStart) {
+      // console.log('## START canStart')
+      start(state.mainLoaded, areOverlaysLoaded, canStart)
+    }
+  }, [canStart])
+
+  useEffect(() => {
+    if (!state.isEmpty && state.mainLoaded) {
+      // console.log('START mainLoaded')
+      play(state.mainLoaded, areOverlaysLoaded)
+    }
+  }, [state.mainLoaded])
+
+  useEffect(() => {
+    if(areOverlaysLoaded) {
+      play(state.mainLoaded, areOverlaysLoaded)
+    }
+  }, [areOverlaysLoaded])
+
+  const nextSceneLoop = () => {
+    if (
+      !isScriptScene &&
+      isPlaying &&
+      _startTime.current != null &&
+      !nextSceneAllImages &&
+      Math.abs(new Date().getTime() - _startTime.current) >= nextSceneTime
+    ) {
+      dispatch(nextScene(props.uuid))
+    } else if (!isPlaying && _startTime.current) {
+      _startTime.current += 1000
+    }
+  }
+
+  const setOverlayVideo = (index: number, video: HTMLVideoElement) => {
+    const newOV = Array.from(overlayVideos)
+    while (newOV.length <= index) {
+      newOV.push([null])
+    }
+    if (newOV[index][0] !== video) {
+      newOV[index][0] = video
+      setOverlayVideos(newOV)
+    }
+  }
+
+  const nop = () => {}
+
+  const onPlaying = (position: number, duration: number) => {
+    _currentTimestamp.current = position
+  }
+
+  const getTimestamp = () => {
+    return _currentTimestamp.current
+  }
+
+  const changeCurrentAudio = (audioID: number) => {
+    setCurrentAudio(audioID)
+    if (isAudioScene) {
+      dispatch(changeAudioRoute({ id: state.sceneID, value: audioID }))
+    }
+  }
+
+  const setGridOverlayVideo = (
+    oIndex: number,
+    gIndex: number,
+    video: HTMLVideoElement
+  ) => {
+    const newOV = Array.from(overlayVideos)
+    while (newOV.length <= oIndex) {
+      newOV.push([null])
+    }
+    while (newOV[oIndex].length <= gIndex) {
+      newOV[oIndex].push(null)
+    }
+    if (newOV[oIndex][gIndex] !== video) {
+      newOV[oIndex][gIndex] = video
+      setOverlayVideos(newOV)
+    }
+  }
+
+  const play = (isMainLoaded: boolean, areOverlaysLoaded: boolean[]) => {
+    setIsPlaying(true)
+    start(isMainLoaded, areOverlaysLoaded, canStart)
+  }
+
+  const pause = () => {
+    setIsPlaying(false)
+  }
+
+  const start = (isMainLoaded: boolean, areOverlaysLoaded: boolean[], canStart: boolean, force = false) => {
+    // if(props.uuid === 'root') {
+    //   console.log('== START ==')
+    //   console.log('isMainLoaded: ' + isMainLoaded)
+    //   console.log('force: ' + force)
+    //   console.log('canStart: ' + canStart)
+    //   console.log('props.allLoaded: ' + props.allLoaded)
+    //   console.log('state.overlays.length: ' + state.overlays.length)
+    //   console.log(state)
+    //   console.log(areOverlaysLoaded)
+    //   console.log('===========')
+    // }
+
+    const isLoaded =
+      !force &&
+      isMainLoaded &&
+      (state.overlays.length === 0 || areOverlaysLoaded.every((b) => b))
+    if (props.onLoaded && isLoaded) {
+      props.onLoaded()
+    }
+
+    // console.log('isLoaded: ' + isLoaded)
+
+    if (
+      force ||
+      (canStart &&
+        ((isLoaded && props.allLoaded !== false) ||
+          startImmediately))
+    ) {
+      // console.log('START state.hasStarted: ' + state.hasStarted)
+      dispatch(setPlayerHasStartedRecursive(props.uuid, true))
+      dispatch(setPlayerMainLoaded({uuid: props.uuid, value: true}))
+      if (!_startTime.current) {
+        _startTime.current = new Date().getTime()
+      }
+      setTimeout(() => {
+        if (isGridScene) {
+          for (const r of _imagePlayerAdvanceHacks.current) {
+            for (const hack of r) {
+              hack.fire()
+            }
+          }
+        }
+      }, 200)
+    } else if (!isGridScene && !isAudioScene && state.overlays.length === 0) {
+      dispatch(setPlayerMainLoaded({uuid: props.uuid, value: isLoaded}))
+    }
+  }
+
+  const goBack = () => {
+    if (recentPictureGrid) {
+      setRecentPictureGrid(false)
+    } else {
+      dispatch(setRouteGoBack())
+    }
+  }
+
+  const historyBack = () => {
+    setIsPlaying(false)
+    setHistoryOffset(historyOffset - 1)
+  }
+
+  const historyForward = () => {
+    setIsPlaying(false)
+    setHistoryOffset(historyOffset + 1)
+  }
+
+  const onActive = () => {
+    setHideCursor(false)
+  }
+
+  const onIdle = () => {
+    setHideCursor(true)
+  }
+
+  const navigateTagging = (offset: number) => {
+    // console.log('navigateTagging: false')
+    dispatch(setPlayerFirstImageLoaded({uuid: props.uuid, value: false}))
+    dispatch(setPlayerHasStartedRecursive(props.uuid, false))
+    dispatch(setPlayerMainLoaded({uuid: props.uuid, value: false}))
+    dispatch(setPlayerIsEmpty({uuid: props.uuid, value: false}))
+    setHistoryOffset(0)
+    setHistoryPaths(new Array<any>())
+    dispatch(navigateDisplayedLibrary(offset))
+  }
+
+  const onRecentPictureGrid = () => {
+    setRecentPictureGrid(true)
+  }
+
+  const showCaptionProgram =
+    !recentPictureGrid &&
+    state.hasStarted &&
+    textEnabled &&
+    (scriptPlaylists.length > 0 || persistText)
+  const showStrobe =
+    !recentPictureGrid &&
+    strobe &&
+    state.hasStarted &&
+    isPlaying &&
+    (strobeLayer === SL.top || strobeLayer === SL.bottom)
+
+  let rootStyle: any
+  if (props.gridView) {
+    rootStyle = {
+      display: 'flex',
+      position: 'relative',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      overflow: 'hidden'
+    }
+  } else {
+    rootStyle = {
+      display: 'flex',
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    }
+  }
+  if (tutorial != null) {
+    rootStyle = {
+      ...rootStyle,
+      pointerEvents: 'none'
+    }
+  }
+
+  let playerStyle: any = {}
+  if (!props.gridView) {
+    playerStyle = {
+      position: 'fixed',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0
+    }
+  } else if (state.hasStarted) {
+    playerStyle = {
+      position: 'relative',
+      width: '100%',
+      height: '100%'
+    }
+  }
+  if (!state.hasStarted && !isDownloadScene) {
+    playerStyle = {
+      ...playerStyle,
+      opacity: 0
+    }
+  }
+
+  let watermarkStyle: any = {}
+  let watermarkText = ''
+  if (watermark) {
+    watermarkStyle = {
+      position: 'absolute',
+      zIndex: 11,
+      whiteSpace: 'pre',
+      fontFamily: watermark.fontFamily,
+      fontSize: watermark.fontSize,
+      color: watermark.color
+    }
+    switch (watermark.corner) {
+      case WC.bottomRight:
+        watermarkStyle.bottom = 5
+        watermarkStyle.right = 5
+        watermarkStyle.textAlign = 'right'
+        break
+      case WC.bottomLeft:
+        watermarkStyle.bottom = 5
+        watermarkStyle.left = 5
+        watermarkStyle.textAlign = 'left'
+        break
+      case WC.topRight:
+        watermarkStyle.top = 5
+        watermarkStyle.right = 5
+        watermarkStyle.textAlign = 'right'
+        break
+      case WC.topLeft:
+        watermarkStyle.top = 5
+        watermarkStyle.left = 5
+        watermarkStyle.textAlign = 'left'
+        break
+    }
+
+    watermarkText = watermark.text.replace('{scene_name}', name)
+    const img = historyPaths[historyPaths.length - 1 + historyOffset]
+    if (img) {
+      watermarkText = watermarkText.replace(
+        '{source_url}',
+        img.getAttribute('source')
+      )
+      watermarkText = watermarkText.replace(
+        '{source_name}',
+        getFileGroup(img.getAttribute('source'), pathSep)
+      )
+      if (img.hasAttribute('post')) {
+        watermarkText = watermarkText.replace(
+          '{post_url}',
+          img.getAttribute('post')
+        )
+      } else {
+        watermarkText = watermarkText.replace(/\{post_url\}\s*/g, '')
+      }
+      watermarkText = watermarkText.replace(
+        '{file_url}',
+        img.src.startsWith('file') ? urlToPath(img.src, isWin32) : img.src
+      )
+      watermarkText = watermarkText.replace(
+        '{file_name}',
+        decodeURIComponent(getFileName(img.src, pathSep))
+      )
+    } else {
+      watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
+    }
+    if (currentAudio) {
+      watermarkText = watermarkText.replace('{audio_url}', audioUrl)
+      watermarkText = watermarkText.replace(
+        '{audio_name}',
+        getFileName(audioUrl, pathSep)
+      )
+      if (audioName) {
+        watermarkText = watermarkText.replace('{audio_title}', audioName)
+      } else {
+        watermarkText = watermarkText.replace(/\{audio_title\}\s*/g, '')
+      }
+      if (audioArtist) {
+        watermarkText = watermarkText.replace('{audio_artist}', audioArtist)
+      } else {
+        watermarkText = watermarkText.replace(/\{audio_artist\}\s*/g, '')
+      }
+      if (audioAlbum) {
+        watermarkText = watermarkText.replace('{audio_album}', audioAlbum)
+      } else {
+        watermarkText = watermarkText.replace(/\{audio_album\}\s*/g, '')
+      }
+    } else {
+      watermarkText = watermarkText.replace(/\s*\{audio_url\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{audio_name\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{audio_title\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{audio_artist\}\s*/g, '')
+      watermarkText = watermarkText.replace(/\s*\{audio_album\}\s*/g, '')
+    }
+  }
+
+  const captionScale = props.captionScale ? props.captionScale : 1
+
+  let getCurrentTimestamp: any
+  if (props.getCurrentTimestamp) {
+    getCurrentTimestamp = props.getCurrentTimestamp
+  } else if (audioEnabled) {
+    getCurrentTimestamp = getTimestamp.bind(this)
+  }
+
+  return (
+    <div style={rootStyle}>
+      {!recentPictureGrid && !props.gridView && state.hasStarted && (
+        <div
+          style={{
+            zIndex: 999,
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            cursor: hideCursor ? 'none' : 'unset'
+          }}
+          ref={_idleTimerRef}
+        >
+          <IdleTimer
+            ref={(ref) => {
+              return _idleTimerRef.current
+            }}
+            onActive={onActive.bind(this)}
+            onIdle={onIdle.bind(this)}
+            timeout={2000}
+          />
+        </div>
+      )}
+      {showStrobe && (
+        <Strobe
+          sceneID={state.sceneID}
+          currentAudio={currentAudio}
+          zIndex={5}
+          toggleStrobe={_toggleStrobe.current}
+          timeToNextFrame={timeToNextFrame}
+        />
+      )}
+      {!state.hasStarted && !state.isEmpty && !isDownloadScene && (
+        <ProgressCard 
+          sceneID={state.sceneID} 
+          start={canStart ? start.bind(this, state.mainLoaded, areOverlaysLoaded, canStart, true) : undefined} 
+          classes={props.classes}
+        />
+      )}
+      {state.isEmpty && (
+        <main className={props.classes.emptyMain}>
+          <div style={{ height: 64 }} />
+          <Container maxWidth={false} className={props.classes.emptyContainer}>
+            <Typography
+              component="h1"
+              variant="h3"
+              color="inherit"
+              noWrap
+              style={{
+                textAlign: 'center',
+                marginTop: '25%'
+              }}
+            >
+              (ಥ﹏ಥ)
+            </Typography>
+            <Typography
+              component="h1"
+              variant="h4"
+              color="inherit"
+              noWrap
+              style={{ textAlign: 'center' }}
+            >
+              I couldn't find anything
+            </Typography>
+          </Container>
+        </main>
+      )}
+
+      {!props.gridView && (
+        <PlayerBars
+          hasStarted={state.hasStarted}
+          historyPaths={historyPaths}
+          historyOffset={historyOffset}
+          imagePlayerAdvanceHacks={_imagePlayerAdvanceHacks.current}
+          imagePlayerDeleteHack={imagePlayerDeleteHack}
+          isEmpty={state.isEmpty}
+          isPlaying={isPlaying}
+          mainVideo={mainVideo}
+          overlayVideos={overlayVideos}
+          sceneID={state.sceneID}
+          title={
+            allTags
+              ? isAudioScene
+                ? currentAudio
+                  ? audioName
+                  : 'Loading...'
+                : firstSourceUrl
+              : name
+          }
+          recentPictureGrid={recentPictureGrid}
+          persistAudio={audioEnabled && persistAudio}
+          persistText={textEnabled && persistText}
+          goBack={goBack.bind(this)}
+          historyBack={historyBack.bind(this)}
+          historyForward={historyForward.bind(this)}
+          navigateTagging={navigateTagging.bind(this)}
+          onRecentPictureGrid={onRecentPictureGrid.bind(this)}
+          play={play.bind(this, state.mainLoaded, areOverlaysLoaded)}
+          pause={pause.bind(this)}
+          onPlaying={
+            !textEnabled || !currentAudio || props.getCurrentTimestamp
+              ? undefined
+              : onPlaying.bind(this)
+          }
+          setCurrentAudio={changeCurrentAudio.bind(this)}
+        />
+      )}
+
+      <div style={playerStyle}>
+        {recentPictureGrid && <PictureGrid pictures={historyPaths} />}
+        {!recentPictureGrid && watermark && (
+          <div style={watermarkStyle}>{watermarkText}</div>
+        )}
+        {isAudioScene && (
+          <ImageView
+            uuid={props.uuid}
+            image={thumbImage}
+            currentAudio={currentAudio}
+            fitParent
+            removeChild
+          />
+        )}
+        {!recentPictureGrid &&
+          (audioAlert || allTags) &&
+          (audioEnabled || persistAudio) && <AudioAlert audio={currentAudio} />}
+        {!isGridScene && !isAudioScene && (
+          <SourceScraper
+            uuid={props.uuid}
+            currentAudio={currentAudio}
+            opacity={recentPictureGrid ? 0 : 1}
+            gridCoordinates={props.gridCoordinates}
+            gridView={props.gridView}
+            isPlaying={isPlaying}
+            strobeLayer={strobe ? strobeLayer : null}
+            historyOffset={historyOffset}
+            advanceHack={
+              props.advanceHack
+                ? props.advanceHack
+                : _imagePlayerAdvanceHacks.current[0][0]
+            }
+            deleteHack={imagePlayerDeleteHack}
+            setHistoryOffset={_setHistoryOffset.current}
+            setHistoryPaths={_setHistoryPaths.current}
+            setSceneCopy={props.setSceneCopy}
+            setVideo={_setVideo.current}
+            setTimeToNextFrame={_changeTimeToNextFrame.current}
+          />
+        )}
+
+        {!recentPictureGrid &&
+          !isAudioScene &&
+          state.overlays.length > 0 &&
+          !state.isEmpty &&
+          state.overlays.map((overlay, index) => {
+            let showProgress = state.mainLoaded && !state.hasStarted
+            if (showProgress) {
+              for (let x = 0; x < index; x++) {
+                if (!areOverlaysLoaded[x]) {
+                  showProgress = false
+                  break
+                }
+              }
+            }
+            if (!overlay.isGrid) {
+              while (_imagePlayerAdvanceHacks.current.length <= index + 1) {
+                _imagePlayerAdvanceHacks.current.push([new ChildCallbackHack()])
+              }
+              return (
+                <SourceScraper
+                  key={index}
+                  uuid={props.uuid}
+                  overlayIndex={index}
+                  currentAudio={currentAudio}
+                  gridView={props.gridView}
+                  isPlaying={isPlaying && !state.isEmpty}
+                  historyOffset={0}
+                  advanceHack={_imagePlayerAdvanceHacks.current[index + 1][0]}
+                  setHistoryOffset={nop}
+                  setHistoryPaths={nop}
+                  setVideo={
+                    props.setVideo && !props.gridView
+                      ? props.setVideo
+                      : setOverlayVideo.bind(this, index)
+                  }
+                />
+              )
+            } else if (overlay.isGrid && !props.gridView) {
+              const gridSize = overlay.grid[0].length * overlay.grid.length
+              while (_imagePlayerAdvanceHacks.current.length <= index + 1) {
+                _imagePlayerAdvanceHacks.current.push([new ChildCallbackHack()])
+              }
+              if (
+                _imagePlayerAdvanceHacks.current[index + 1].length !== gridSize
+              ) {
+                _imagePlayerAdvanceHacks.current[index + 1] =
+                  new Array<ChildCallbackHack>(gridSize)
+                    .fill(null)
+                    .map((c) => new ChildCallbackHack())
+              }
+
+              return (
+                <div
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    opacity: overlay.opacity / 100
+                  }}
+                >
+                  <GridPlayer
+                    hideBars
+                    parentUUID={props.uuid}
+                    overlayIndex={index}
+                    gridConfig={overlay}
+                    advanceHacks={_imagePlayerAdvanceHacks.current[index + 1]}
+                    setVideo={setGridOverlayVideo.bind(this, index)}
+                  />
+                </div>
+              )
+            } else {
+              return <div key={index} />
+            }
+          })}
+      </div>
+
+      {showCaptionProgram &&
+        (textEnabled && persistText ? scriptPlaylists : []).map(
+          (playlist, i) => (
+            <CaptionProgramPlaylist
+              key={i}
+              playlistIndex={i}
+              playlist={playlist}
+              currentAudio={currentAudio}
+              currentImage={
+                historyPaths.length > 0
+                  ? historyPaths[historyPaths.length - 1]
+                  : null
+              }
+              scale={captionScale}
+              sceneID={state.sceneID}
+              timeToNextFrame={timeToNextFrame}
+              persist={textEnabled && persistText}
+              orderScriptTags={(scriptID: number) => {
+                dispatch(orderScriptTags(scriptID))
+              }}
+              jumpToHack={props.captionProgramJumpToHack}
+              getCurrentTimestamp={getCurrentTimestamp}
+              advance={() => {
+                const advance = props.advanceHack
+                  ? props.advanceHack
+                  : _imagePlayerAdvanceHacks.current[0][0]
+                advance.fire()
+              }}
+              onError={props.onCaptionError}
+            />
+          )
+        )}
+    </div>
+  )
+}
+
+;(Player as any).displayName = 'Player'
+export default withStyles(styles)(Player as any)

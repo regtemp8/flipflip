@@ -4,11 +4,12 @@ import renderer from "react-test-renderer";
 import SourceIcon from "../SourceIcon";
 import TestProvider from "../../../../../test/util/TestProvider";
 import { ST } from "../../../data/const";
+import store from "../../../../store/store";
 
 describe("SourceIcon", () => {
   it("should render empty div when no type or url is specified", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon />
       </TestProvider>
     );
@@ -18,7 +19,7 @@ describe("SourceIcon", () => {
   });
   it("should render audio track icon when type is audio", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.audio} />
       </TestProvider>
     );
@@ -28,7 +29,7 @@ describe("SourceIcon", () => {
   });
   it("should render audio track icon when url is file://audio.mp3", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="file://audio.mp3" />
       </TestProvider>
     );
@@ -38,7 +39,7 @@ describe("SourceIcon", () => {
   });
   it("should render folder icon when type is local", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.local} />
       </TestProvider>
     );
@@ -48,7 +49,7 @@ describe("SourceIcon", () => {
   });
   it("should render folder icon when url is file://home/user/pictures", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="file://home/user/pictures" />
       </TestProvider>
     );
@@ -58,7 +59,7 @@ describe("SourceIcon", () => {
   });
   it("should render movie icon when type is video", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.video} />
       </TestProvider>
     );
@@ -68,7 +69,7 @@ describe("SourceIcon", () => {
   });
   it("should render movie icon when url is file://video.mp4", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="file://video.mp4" />
       </TestProvider>
     );
@@ -78,7 +79,7 @@ describe("SourceIcon", () => {
   });
   it("should render subscriptions icon when type is playlist", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.playlist} />
       </TestProvider>
     );
@@ -88,7 +89,7 @@ describe("SourceIcon", () => {
   });
   it("should render subscriptions icon when url is https://example.com/live/playlist.m3u8", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://example.com/live/playlist.m3u8" />
       </TestProvider>
     );
@@ -98,7 +99,7 @@ describe("SourceIcon", () => {
   });
   it("should render list icon when type is list", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.list} />
       </TestProvider>
     );
@@ -108,7 +109,7 @@ describe("SourceIcon", () => {
   });
   it("should render list icon when url is file://image-list.txt", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="file://image-list.txt" />
       </TestProvider>
     );
@@ -118,7 +119,7 @@ describe("SourceIcon", () => {
   });
   it("should render Reddit icon when type is reddit", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.reddit} />
       </TestProvider>
     );
@@ -128,7 +129,7 @@ describe("SourceIcon", () => {
   });
   it("should render Reddit icon when url is https://www.reddit.com/r/flipflip/", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.reddit.com/r/flipflip/" />
       </TestProvider>
     );
@@ -138,7 +139,7 @@ describe("SourceIcon", () => {
   });
   it("should render RedGIFs icon when type is redgifs", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.redgifs} />
       </TestProvider>
     );
@@ -148,7 +149,7 @@ describe("SourceIcon", () => {
   });
   it("should render RedGIFs icon when url is https://www.redgifs.com/", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.redgifs.com/" />
       </TestProvider>
     );
@@ -158,7 +159,7 @@ describe("SourceIcon", () => {
   });
   it("should render Twitter icon when type is twitter", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.twitter} />
       </TestProvider>
     );
@@ -168,7 +169,7 @@ describe("SourceIcon", () => {
   });
   it("should render Twitter icon when url is https://twitter.com/notifications", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://twitter.com/notifications" />
       </TestProvider>
     );
@@ -178,7 +179,7 @@ describe("SourceIcon", () => {
   });
   it("should render Instagram icon when type is instagram", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.instagram} />
       </TestProvider>
     );
@@ -188,7 +189,7 @@ describe("SourceIcon", () => {
   });
   it("should render Instagram icon when url is https://www.instagram.com/me/saved", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.instagram.com/me/saved" />
       </TestProvider>
     );
@@ -198,7 +199,7 @@ describe("SourceIcon", () => {
   });
   it("should render tumblr icon when type is tumblr", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.tumblr} />
       </TestProvider>
     );
@@ -208,7 +209,7 @@ describe("SourceIcon", () => {
   });
   it("should render tumblr icon when url is https://www.tumblr.com/explore/today", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.tumblr.com/explore/today" />
       </TestProvider>
     );
@@ -218,7 +219,7 @@ describe("SourceIcon", () => {
   });
   it("should render ImageFap icon when type is imagefap", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.imagefap} />
       </TestProvider>
     );
@@ -228,7 +229,7 @@ describe("SourceIcon", () => {
   });
   it("should render ImageFap icon when url is https://www.imagefap.com/pics/70/ai-generated.php", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.imagefap.com/pics/70/ai-generated.php" />
       </TestProvider>
     );
@@ -238,7 +239,7 @@ describe("SourceIcon", () => {
   });
   it("should render sex.com icon when type is sexcom", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.sexcom} />
       </TestProvider>
     );
@@ -248,7 +249,7 @@ describe("SourceIcon", () => {
   });
   it("should render sex.com icon when url is https://www.sex.com/gifs/?sort=latest", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.sex.com/gifs/?sort=latest" />
       </TestProvider>
     );
@@ -258,7 +259,7 @@ describe("SourceIcon", () => {
   });
   it("should render Imgur icon when type is imgur", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.imgur} />
       </TestProvider>
     );
@@ -268,7 +269,7 @@ describe("SourceIcon", () => {
   });
   it("should render Imgur icon when url is https://imgur.com/a/mMslVXT", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://imgur.com/a/mMslVXT" />
       </TestProvider>
     );
@@ -278,7 +279,7 @@ describe("SourceIcon", () => {
   });
   it("should render DeviantArt icon when type is deviantart", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.deviantart} />
       </TestProvider>
     );
@@ -288,7 +289,7 @@ describe("SourceIcon", () => {
   });
   it("should render DeviantArt icon when url is https://www.deviantart.com/?topic=ai", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.deviantart.com/?topic=ai" />
       </TestProvider>
     );
@@ -298,7 +299,7 @@ describe("SourceIcon", () => {
   });
   it("should render Danbooru icon when type is danbooru", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.danbooru} />
       </TestProvider>
     );
@@ -308,7 +309,7 @@ describe("SourceIcon", () => {
   });
   it("should render Danbooru icon when url is https://danbooru.donmai.us/posts", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://danbooru.donmai.us/posts" />
       </TestProvider>
     );
@@ -318,7 +319,7 @@ describe("SourceIcon", () => {
   });
   it("should render Danbooru icon when type is e621", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.e621} />
       </TestProvider>
     );
@@ -328,7 +329,7 @@ describe("SourceIcon", () => {
   });
   it("should render Danbooru icon when url is https://e621.net/posts", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://e621.net/posts" />
       </TestProvider>
     );
@@ -338,7 +339,7 @@ describe("SourceIcon", () => {
   });
   it("should render Luscious icon when type is luscious", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.luscious} />
       </TestProvider>
     );
@@ -348,7 +349,7 @@ describe("SourceIcon", () => {
   });
   it("should render Luscious icon when url is https://www.luscious.net/albums/list/?album_type=manga&display=date_trending&page=1", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.luscious.net/albums/list/?album_type=manga&display=date_trending&page=1" />
       </TestProvider>
     );
@@ -358,7 +359,7 @@ describe("SourceIcon", () => {
   });
   it("should render Gelbooru icon when type is gelbooru1", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.gelbooru1} />
       </TestProvider>
     );
@@ -368,7 +369,7 @@ describe("SourceIcon", () => {
   });
   it("should render Gelbooru icon when url is https://rm.booru.org/index.php?page=post&s=list", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://rm.booru.org/index.php?page=post&s=list" />
       </TestProvider>
     );
@@ -378,7 +379,7 @@ describe("SourceIcon", () => {
   });
   it("should render Gelbooru icon when type is gelbooru2", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.gelbooru2} />
       </TestProvider>
     );
@@ -388,7 +389,7 @@ describe("SourceIcon", () => {
   });
   it("should render Gelbooru icon when url is https://gelbooru.com/index.php?page=post&s=view&id=9230193", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://gelbooru.com/index.php?page=post&s=view&id=9230193" />
       </TestProvider>
     );
@@ -398,7 +399,7 @@ describe("SourceIcon", () => {
   });
   it("should render E-Hentai icon when type is ehentai", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.ehentai} />
       </TestProvider>
     );
@@ -408,7 +409,7 @@ describe("SourceIcon", () => {
   });
   it("should render E-Hentai icon when url is https://www.e-hentai.org/g/2735124/b663d74779", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://www.e-hentai.org/g/2735124/b663d74779" />
       </TestProvider>
     );
@@ -418,7 +419,7 @@ describe("SourceIcon", () => {
   });
   it("should render bdsmlr icon when type is bdsmlr", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.bdsmlr} />
       </TestProvider>
     );
@@ -428,7 +429,7 @@ describe("SourceIcon", () => {
   });
   it("should render bdsmlr icon when url is https://about.bdsmlr.com", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://about.bdsmlr.com"/>
       </TestProvider>
     );
@@ -438,7 +439,7 @@ describe("SourceIcon", () => {
   });
   it("should render Hydrus Network icon when type is hydrus", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.hydrus} />
       </TestProvider>
     );
@@ -448,7 +449,7 @@ describe("SourceIcon", () => {
   });
   it("should render Hydrus Network icon when url is https://localhost:8080/get_files/search_files", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://localhost:8080/get_files/search_files" />
       </TestProvider>
     );
@@ -458,7 +459,7 @@ describe("SourceIcon", () => {
   });
   it("should render Piwigo icon when type is piwigo", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.piwigo} />
       </TestProvider>
     );
@@ -468,7 +469,7 @@ describe("SourceIcon", () => {
   });
   it("should render Piwigo icon when url is https://piwigo.localhost:8080/ws.php", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://piwigo.localhost:8080/ws.php" />
       </TestProvider>
     );
@@ -478,7 +479,7 @@ describe("SourceIcon", () => {
   });
   it("should render Nimja icon when type is nimja", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.nimja} />
       </TestProvider>
     );
@@ -488,7 +489,7 @@ describe("SourceIcon", () => {
   });
   it("should render Nimja icon when url is https://hypno.nimja.com/visual/135", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="https://hypno.nimja.com/visual/135" />
       </TestProvider>
     );
@@ -498,7 +499,7 @@ describe("SourceIcon", () => {
   });
   it("should prioritize url over type prop", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon url="file://audio.mp3" type={ST.reddit} />
       </TestProvider>
     );
@@ -509,7 +510,7 @@ describe("SourceIcon", () => {
   it("should render icon with className prop", () => {
     const className = "customClass"
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.local} className={className} />
       </TestProvider>
     );
@@ -518,7 +519,7 @@ describe("SourceIcon", () => {
   });
   it("should render Reddit icon with red color, because source is unsupported", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.reddit} />
       </TestProvider>
     );
@@ -527,7 +528,7 @@ describe("SourceIcon", () => {
   });
   it("should render Twitter icon with red color, because source is unsupported", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.twitter} />
       </TestProvider>
     );
@@ -536,7 +537,7 @@ describe("SourceIcon", () => {
   });
   it("should render Sex.com icon with red color, because source is unsupported", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <SourceIcon type={ST.sexcom} />
       </TestProvider>
     );

@@ -1,38 +1,28 @@
-import * as React from 'react';
-import {Spring, animated} from "react-spring/renderprops";
+import React, { type PropsWithChildren, useState } from 'react'
+import { Spring, animated } from 'react-spring/renderprops'
 
-export default class VSpin extends React.Component {
-  readonly props: {
-    className?: string,
-    title?: string,
-    style?: any,
-    onClick?(): void,
-    children?: React.ReactNode,
-  };
+export default function VSpin (props: PropsWithChildren<any>) {
+  const [toggle, setToggle] = useState(false)
 
-  readonly state = {
-    toggle: false,
-  };
-
-  render() {
-    return (
-      <Spring
-        from={{transform: 'rotateX(0deg)'}}
-        to={{transform: this.state.toggle ? 'rotateX(360deg)' : 'rotateX(0deg)'}}
-      >
-      {props => (
+  return (
+    <Spring
+      from={{ transform: 'rotateX(0deg)' }}
+      to={{
+        transform: toggle ? 'rotateX(360deg)' : 'rotateX(0deg)'
+      }}
+    >
+      {(animation) => (
         <animated.div
-          className={this.props.className}
-          style={this.props.style ? {...props,...this.props.style} : props}
-          title={this.props.title}
-          onMouseEnter={() => {this.setState({toggle: !this.state.toggle})}}
-          onClick={this.props.onClick}>
-          {this.props.children}
+          style={animation}
+          onMouseEnter={() => {
+            setToggle(!toggle)
+          }}
+        >
+          {props.children}
         </animated.div>
       )}
-    </Spring>)
-
-  }
+    </Spring>
+  )
 }
 
-(VSpin as any).displayName="VSpin";
+;(VSpin as any).displayName = 'VSpin'

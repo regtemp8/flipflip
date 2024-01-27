@@ -3,23 +3,26 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import VideoCard from "../VideoCard";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../storage/Scene";
 
 jest.mock('../../player/VideoControl', () => 'VideoControl');
 
 describe("VideoCard", () => {
   it("should match snapshot", () => {
+    const sceneID = 3
+    store.dispatch(setScene(newScene({ id: sceneID })))
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <VideoCard
-            scene={null}
-            otherScenes={[]}
-            isPlaying={false}
-            mainVideo={null}
-            mainClip={null}
-            mainClipValue={[]}
-            otherVideos={[]}
-            imagePlayerAdvanceHacks={[]}
-            onUpdateScene={(scene, fn) => {}}
+          sceneID={sceneID}
+          isPlaying={false}
+          mainVideo={null}
+          mainClipID={null}
+          mainClipValue={[]}
+          otherVideos={[]}
+          imagePlayerAdvanceHacks={[]}
         />
       </TestProvider>
     );

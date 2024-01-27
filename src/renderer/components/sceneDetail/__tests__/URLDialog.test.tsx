@@ -3,11 +3,12 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import URLDialog from "../URLDialog";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
 
 describe("URLDialog", () => {
   it("should match snapshot", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <URLDialog
           open={false}
           onClose={() => {}}
