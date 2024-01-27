@@ -60,6 +60,6 @@ export const mainConfig: Configuration = {
   externals: {
     bufferutil: 'bufferutil',
     'utf-8-validate': 'utf-8-validate',
-    '_stream_wrap': '_stream_wrap'
+    _stream_wrap: '_stream_wrap'
   }
 }

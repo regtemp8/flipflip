@@ -27,7 +27,11 @@ export default function ServerDetails(props: ServerDetailsProps) {
   >([])
 
   useEffect(() => {
-    window.flipflip?.ipc.getNetworkURLs().then((urls: Array<{name: string, url: string}>) => setNetworkURLs(urls))
+    window.flipflip?.ipc
+      .getNetworkURLs()
+      .then((urls: Array<{ name: string; url: string }>) =>
+        setNetworkURLs(urls)
+      )
   }, [])
 
   return (

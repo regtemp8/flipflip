@@ -27,7 +27,7 @@ export * from './lib/storage/ScriptPlaylist';
 export * from './lib/storage/Tag';
 export * from './lib/storage/Tutorials';
 export * from './lib/storage/WeightGroup';
-export * from './lib/twitter/TwitterFollowers'
-export * from './lib/twitter/TwitterItems'
-export * from './lib/instagram/InstagramItems'
-export * from './lib/SystemConstants'
+export * from './lib/twitter/TwitterFollowers';
+export * from './lib/twitter/TwitterItems';
+export * from './lib/instagram/InstagramItems';
+export * from './lib/SystemConstants';

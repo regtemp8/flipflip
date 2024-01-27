@@ -15,9 +15,7 @@ const config: ForgeConfig = {
     icon: './icons/flipflip_logo'
   },
   rebuildConfig: {},
-  makers: [
-    new MakerZIP({}, ['darwin', 'linux', 'win32'])
-  ],
+  makers: [new MakerZIP({}, ['darwin', 'linux', 'win32'])],
   plugins: [
     new AutoUnpackNativesPlugin({}),
     new WebpackPlugin({
@@ -38,7 +36,9 @@ const config: ForgeConfig = {
   hooks: {
     postPackage: async (forgeConfig, packageResult) => {
       for (const output of packageResult.outputPaths) {
-        await fs.promises.cp('config', path.join(output, 'config'), {recursive: true})
+        await fs.promises.cp('config', path.join(output, 'config'), {
+          recursive: true
+        })
       }
     }
   }

@@ -78,10 +78,7 @@ export function newConfig(init?: Partial<Config>) {
     config.defaultScene.videoOrientation = OT.forceLandscape;
     config.defaultScene.rotatePortrait = false;
   }
-  if (
-    config.displaySettings &&
-    config.displaySettings.portableMode === true
-  ) {
+  if (config.displaySettings && config.displaySettings.portableMode === true) {
     config.displaySettings.portableMode = undefined;
     config.generalSettings.portableMode = true;
   }

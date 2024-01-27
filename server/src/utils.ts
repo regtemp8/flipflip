@@ -29,19 +29,19 @@ export function getContext(): SystemConstants {
   }
 }
 
-export function getSaveDir (): string {
+export function getSaveDir(): string {
   return path.join(app.getPath('appData'), 'flipflip')
 }
 
-export function getSavePath (): string {
+export function getSavePath(): string {
   return path.join(getSaveDir(), 'data.json')
 }
 
-export function getPortablePath (): string {
+export function getPortablePath(): string {
   return path.join(path.dirname(app.getAppPath()), 'data.json')
 }
 
-export function getPortablePathExists (): boolean {
+export function getPortablePathExists(): boolean {
   return fs.existsSync(getPortablePath())
 }
 

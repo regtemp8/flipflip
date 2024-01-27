@@ -1,0 +1,75 @@
+name: Module Check
+
+on:
+  workflow_call:
+    inputs:
+      display-name:
+        required: true
+        type: string
+      working-directory:
+        required: true
+        type: string
+      format-task:
+        required: false
+        type: string
+      build-task:
+        required: false
+        type: string
+      build-task-extra:
+        required: false
+        type: string
+      depends-on-common:
+        required: false
+        type: boolean
+      depends-on-client:
+        required: false
+        type: boolean
+      depends-on-server-details:
+        required: false
+        type: boolean
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - name: Enable Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@stable --activate
+      - name: Build Common Dependency
+        if: ${{ inputs.depends-on-common == true }}
+        uses: ./.github/actions/build-dependency
+        with:
+          working-directory: ./common
+          build-task: build:main
+          build-task-extra: build:module
+      - name: Build Client Dependency
+        if: ${{ inputs.depends-on-client == true }}
+        uses: ./.github/actions/build-dependency
+        with:
+          working-directory: ./client
+      - name: Build Server Details Dependency
+        if: ${{ inputs.depends-on-server-details == true }}
+        uses: ./.github/actions/build-dependency
+        with:
+          working-directory: ./server-details
+      - name: Install ${{ inputs.display-name }}
+        working-directory: ${{ inputs.working-directory }}
+        run: yarn install
+      - name: Lint ${{ inputs.display-name }}
+        working-directory: ${{ inputs.working-directory }}
+        run: yarn test:lint
+      - name: Format ${{ inputs.display-name }}
+        working-directory: ${{ inputs.working-directory }}
+        run: yarn ${{ inputs.format-task || 'test:format' }}
+      - name: Build ${{ inputs.display-name }} ${{ inputs.build-task  || ''}}
+        working-directory: ${{ inputs.working-directory }}
+        run: yarn ${{ inputs.build-task || 'build' }}
+      - name: Build Extra ${{ inputs.display-name }} ${{ inputs.build-task-extra  || ''}}
+        if: ${{ inputs.build-task-extra != null }}
+        working-directory: ${{ inputs.working-directory }}
+        run: yarn ${{ inputs.build-task-extra }}

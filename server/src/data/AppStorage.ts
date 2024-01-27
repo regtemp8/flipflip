@@ -188,13 +188,17 @@ export default class AppStorage {
             openTab: 0,
             displayedSources: [],
             config: newConfig(data.config),
-            scenes: data.scenes.map((s: Partial<Scene>) => newScene(context, s)),
+            scenes: data.scenes.map((s: Partial<Scene>) =>
+              newScene(context, s)
+            ),
             sceneGroups: [],
             grids: [],
             audios: [],
             scripts: [],
             playlists: [],
-            library: data.library.map((s: Partial<LibrarySource>) => newLibrarySource(s)),
+            library: data.library.map((s: Partial<LibrarySource>) =>
+              newLibrarySource(s)
+            ),
             tags: data.tags.map((t: Partial<Tag>) => newTag(t)),
             route: [],
             libraryYOffset: 0,
@@ -381,10 +385,14 @@ export default class AppStorage {
             openTab: data.openTab,
             displayedSources: [],
             config: newConfig(data.config),
-            scenes: data.scenes.map((s: Partial<Scene>) => newScene(context, s)),
+            scenes: data.scenes.map((s: Partial<Scene>) =>
+              newScene(context, s)
+            ),
             sceneGroups:
               data.sceneGroups != null
-                ? data.sceneGroups.map((g: Partial<SceneGroup>) => newSceneGroup(g))
+                ? data.sceneGroups.map((g: Partial<SceneGroup>) =>
+                    newSceneGroup(g)
+                  )
                 : [],
             grids: data.grids.map((g: Partial<SceneGrid>) => newSceneGrid(g)),
             audios:
@@ -393,13 +401,17 @@ export default class AppStorage {
                 : [],
             scripts:
               data.scripts != null
-                ? data.scripts.map((s: Partial<CaptionScript>) => newCaptionScript(s))
+                ? data.scripts.map((s: Partial<CaptionScript>) =>
+                    newCaptionScript(s)
+                  )
                 : [],
             playlists:
               data.playlists != null
                 ? data.playlists.map((p: Partial<Playlist>) => newPlaylist(p))
                 : [],
-            library: data.library.map((s: Partial<LibrarySource>) => newLibrarySource(s)),
+            library: data.library.map((s: Partial<LibrarySource>) =>
+              newLibrarySource(s)
+            ),
             tags: data.tags.map((t: Partial<Tag>) => newTag(t)),
             route: data.route.map((s: Partial<Route>) => newRoute(s)),
             libraryYOffset: 0,
@@ -447,10 +459,14 @@ export default class AppStorage {
             openTab: data.openTab,
             displayedSources: [],
             config: newConfig(data.config),
-            scenes: data.scenes.map((s: Partial<Scene>) => newScene(context, s)),
+            scenes: data.scenes.map((s: Partial<Scene>) =>
+              newScene(context, s)
+            ),
             sceneGroups:
               data.sceneGroups != null
-                ? data.sceneGroups.map((g: Partial<SceneGroup>) => newSceneGroup(g))
+                ? data.sceneGroups.map((g: Partial<SceneGroup>) =>
+                    newSceneGroup(g)
+                  )
                 : [],
             grids: data.grids.map((g: Partial<SceneGrid>) => newSceneGrid(g)),
             audios:
@@ -459,13 +475,17 @@ export default class AppStorage {
                 : [],
             scripts:
               data.scripts != null
-                ? data.scripts.map((s: Partial<CaptionScript>) => newCaptionScript(s))
+                ? data.scripts.map((s: Partial<CaptionScript>) =>
+                    newCaptionScript(s)
+                  )
                 : [],
             playlists:
               data.playlists != null
                 ? data.playlists.map((p: Partial<Playlist>) => newPlaylist(p))
                 : [],
-            library: data.library.map((s: Partial<LibrarySource>) => newLibrarySource(s)),
+            library: data.library.map((s: Partial<LibrarySource>) =>
+              newLibrarySource(s)
+            ),
             tags: data.tags.map((t: Partial<Tag>) => newTag(t)),
             route: data.route.map((s: Partial<Route>) => newRoute(s)),
             libraryYOffset: 0,
@@ -515,7 +535,10 @@ export default class AppStorage {
     }
   }
 
-  async writeFileTransactional(path: string, content: string): Promise<boolean> {
+  async writeFileTransactional(
+    path: string,
+    content: string
+  ): Promise<boolean> {
     const temporaryPath = `${path}.new`
     try {
       await promises.writeFile(temporaryPath, content)
@@ -527,7 +550,10 @@ export default class AppStorage {
     }
   }
 
-  async save(state: Partial<AppStorageData>, quickSave: boolean): Promise<boolean> {
+  async save(
+    state: Partial<AppStorageData>,
+    quickSave: boolean
+  ): Promise<boolean> {
     let saved = false
     if (state.config.generalSettings.portableMode === true) {
       saved = await this.writeFileTransactional(
