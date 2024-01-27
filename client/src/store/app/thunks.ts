@@ -187,7 +187,8 @@ import {
   SOF,
   SF,
   SS,
-  PR
+  PR,
+  en
 } from 'flipflip-common'
 import { getFileName } from '../../components/player/Scrapers'
 import { setVideoClipperSourceID } from '../videoClipper/slice'
@@ -2742,17 +2743,32 @@ export function setLibraryRemoveVisible(displayIDs: number[]) {
       .map((id) => state.librarySource.entries[id])
       .map((s) => s.url)
 
+    const cachePath = async (url: string): Promise<string> => {
+      const baseDir = state.app.config.caching.directory
+      const typeDir = (en.get(getSourceType(url)) as string).toLowerCase()
+      return flipflip()
+        .api.cachePath(baseDir, url, typeDir)
+        .then((path) => path as string)
+    }
+
     for (const url of sourceURLs) {
       const fileType = getSourceType(url)
       try {
         if (fileType === ST.local) {
-          flipflip().api.rimrafSync(url)
+          await flipflip().api.rimrafSync(url)
         } else if (
           fileType === ST.video ||
           fileType === ST.playlist ||
           fileType === ST.list
         ) {
           await flipflip().api.unlink(url)
+
+          const path = await cachePath(url)
+          const fileName = getFileName(url, state.constants.pathSep)
+          await flipflip().api.rimrafSync(path + fileName)
+        } else {
+          const path = await cachePath(url)
+          await flipflip().api.rimrafSync(path)
         }
       } catch (e) {
         console.error(e)
