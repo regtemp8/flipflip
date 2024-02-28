@@ -193,8 +193,6 @@ import {
 import { getFileName } from '../../components/player/Scrapers'
 import { setVideoClipperSourceID } from '../videoClipper/slice'
 import { setCaptionScriptorCaptionScriptID } from '../captionScriptor/slice'
-import { setPlayersState } from '../player/slice'
-import { setSourceScraperState } from '../sourceScraper/slice'
 import flipflip from '../../FlipFlipService'
 
 export function fetchAppStorage() {
@@ -656,14 +654,6 @@ export function setRouteGoBack() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const route = getAppLastRoute(state.app) as Route
-    if (
-      route.kind != null &&
-      ['play', 'gridplay', 'libraryplay'].includes(route.kind)
-    ) {
-      dispatch(setPlayersState({}))
-      dispatch(setSourceScraperState({}))
-    }
-
     if (getAppIsRoute(route, 'libraryplay')) {
       let librarySource
       const scene = getActiveScene(state) as Scene

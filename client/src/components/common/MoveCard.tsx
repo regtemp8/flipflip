@@ -38,6 +38,7 @@ export interface MoveCardProps {
   type: ReduxProps<string>
   random: ReduxProps<boolean>
   imageWidth?: ReduxProps<boolean>
+  imageHeight?: ReduxProps<boolean>
   level: ReduxProps<number>
   levelMin: ReduxProps<number>
   levelMax: ReduxProps<number>
@@ -49,6 +50,9 @@ function MoveCard(props: MoveCardProps) {
   const imageWidthSelector: (state: RootState) => boolean =
     props.imageWidth?.selector ?? ((state) => false)
   const imageWidth = useAppSelector(imageWidthSelector)
+  const imageHeightSelector: (state: RootState) => boolean =
+    props.imageHeight?.selector ?? ((state) => false)
+  const imageHeight = useAppSelector(imageHeightSelector)
   const { classes } = useStyles()
   return (
     <Grid container spacing={2} alignItems="center">
@@ -86,7 +90,12 @@ function MoveCard(props: MoveCardProps) {
         )}
       >
         <Collapse
-          in={props.enabled && !imageWidth && type !== props.values.none}
+          in={
+            props.enabled &&
+            !imageWidth &&
+            !imageHeight &&
+            type !== props.values.none
+          }
           className={cx(classes.fullWidth, classes.paddingLeft)}
         >
           <BaseSwitch
@@ -96,7 +105,7 @@ function MoveCard(props: MoveCardProps) {
             action={props.random.action}
           />
         </Collapse>
-        {props.imageWidth ? (
+        {props.imageWidth != null ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
             className={cx(classes.fullWidth, classes.paddingLeft)}
@@ -106,6 +115,19 @@ function MoveCard(props: MoveCardProps) {
               size="small"
               selector={props.imageWidth.selector}
               action={props.imageWidth.action}
+            />
+          </Collapse>
+        ) : null}
+        {props.imageHeight != null ? (
+          <Collapse
+            in={props.enabled && type !== props.values.none}
+            className={cx(classes.fullWidth, classes.paddingLeft)}
+          >
+            <BaseSwitch
+              label="Use Img Height"
+              size="small"
+              selector={props.imageHeight.selector}
+              action={props.imageHeight.action}
             />
           </Collapse>
         ) : null}
@@ -121,6 +143,7 @@ function MoveCard(props: MoveCardProps) {
           in={
             props.enabled &&
             !imageWidth &&
+            !imageHeight &&
             type !== props.values.none &&
             !random
           }
@@ -143,7 +166,11 @@ function MoveCard(props: MoveCardProps) {
         </Collapse>
         <Collapse
           in={
-            props.enabled && !imageWidth && type !== props.values.none && random
+            props.enabled &&
+            !imageWidth &&
+            !imageHeight &&
+            type !== props.values.none &&
+            random
           }
           className={classes.fullWidth}
         >

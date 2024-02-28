@@ -121,7 +121,8 @@ import {
   selectAppLibrary,
   selectAppTutorial,
   selectAppSpecialMode,
-  selectAppConfigGeneralSettingsConfirmSceneDeletion
+  selectAppConfigGeneralSettingsConfirmSceneDeletion,
+  selectAppConfigDisplaySettingsFullScreen
 } from '../../store/app/selectors'
 import { setSceneGeneratorMax } from '../../store/scene/actions'
 import {
@@ -154,6 +155,7 @@ import {
   selectSceneDetailDisplaySources
 } from '../../store/sceneDetail/selectors'
 import flipflip from '../../FlipFlipService'
+import { setFullScreen } from '../../data/actions'
 
 const drawerWidth = 240
 
@@ -521,6 +523,7 @@ function SceneDetail(props: SceneDetailProps) {
   const displaySources = useAppSelector(
     selectSceneDetailDisplaySources(props.sceneID)
   )
+  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -580,6 +583,7 @@ function SceneDetail(props: SceneDetailProps) {
     // Regenerate scene(s) before playback
     dispatch(generateScenes(props.sceneID))
     dispatch(playScene(props.sceneID))
+    setFullScreen(fullScreen)
   }
 
   const onToggleOverrideIgnore = () => {
@@ -860,6 +864,7 @@ function SceneDetail(props: SceneDetailProps) {
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
+                isLibrary
                 isCreatable
                 onlyUsed
                 onUpdateFilters={onUpdateFilters}

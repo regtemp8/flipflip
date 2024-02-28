@@ -25,7 +25,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import VolumeDownIcon from '@mui/icons-material/VolumeDown'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
 
-import { getDuration, getMsRemainder, getTimestamp } from '../../data/utils'
+import { getMsRemainder, getTimestamp } from '../../data/utils'
 import { RP, TF } from 'flipflip-common'
 import SoundTick from './SoundTick'
 import { nextScene } from '../../store/scene/thunks'
@@ -47,6 +47,7 @@ import {
   selectAudioStopAtEnd,
   selectAudioNextSceneAtEnd
 } from '../../store/audio/selectors'
+import DurationCalculator from '../../data/DurationCalculator'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -103,6 +104,7 @@ function AudioControl(props: AudioControlProps) {
 
   const _timeout = useRef<number>()
   const _queueNextTrack = useRef(false)
+  const _duration = useRef(new DurationCalculator())
 
   const tickLoop = useCallback(
     (starting: boolean = false) => {
@@ -117,7 +119,7 @@ function AudioControl(props: AudioControlProps) {
         setTickState(!tickState)
       }
       if (tick) {
-        const timeout = getDuration(
+        const timeout = _duration.current.calc(
           {
             timingFunction: tickMode,
             time: tickDelay,

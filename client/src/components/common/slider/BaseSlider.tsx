@@ -73,14 +73,14 @@ export default function BaseSlider(props: BaseSliderProps) {
   }
 
   const dispatchValueChange = (value?: number) => {
-    if (!value) return
-    if (props.min && value < props.min) {
+    if (value == null) return
+    if (props.min != null && value < props.min) {
       value = props.min
     }
-    if (props.max && value > props.max) {
+    if (props.max != null && value > props.max) {
       value = props.max
     }
-    if (props.scale) {
+    if (props.scale != null) {
       value = value / props.scale
     }
 

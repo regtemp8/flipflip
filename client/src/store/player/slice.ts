@@ -1,17 +1,47 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import {
+  ContentData,
+  EffectsData,
+  TransformData,
+  ViewData
+} from './ContentPreloadService'
 
 export interface PlayerUpdate<T> {
   uuid: string
+  overlayIndex?: number
   value: T
+}
+
+export interface ImageViewState {
+  show: boolean
+  zIndex: number
+  data: ContentData
+  transform: TransformData
+  view: ViewData
+  effects: EffectsData
+  displayIndex?: number
+}
+
+export interface ImageViewLoaderState {
+  loadingCount: number
+  iframeCount: number
+  onlyIframes: boolean
+  readyToLoad: number[]
+  displayIndex: number
+  zIndex: number
+  shownIndex?: number
+  imageViews: Array<ImageViewState | undefined>
 }
 
 export interface PlayerOverlayState {
   id: number
+  show: boolean
   opacity: number
   sceneID: number
   isGrid: boolean
   grid: string[][]
   loaded: boolean
+  loader: ImageViewLoaderState
   captcha?: PlayerCaptcha
 }
 
@@ -21,9 +51,11 @@ export interface PlayerState {
   overlays: PlayerOverlayState[]
   firstImageLoaded: boolean
   mainLoaded: boolean
+  loader: ImageViewLoaderState
   isEmpty: boolean
   hasStarted: boolean
   captcha?: PlayerCaptcha
+  currentAudio?: number
 }
 
 export interface PlayerCaptcha {
@@ -41,7 +73,7 @@ export const playersSlice = createSlice({
   initialState: initialPlayersState,
   reducers: {
     setPlayersState: (state, action: PayloadAction<PlayersState>) => {
-      Object.assign(state, action.payload)
+      return action.payload
     },
     setPlayerSceneID: (state, action: PayloadAction<string>) => {
       state[action.payload].sceneID = state[action.payload].nextSceneID
@@ -97,18 +129,126 @@ export const playersSlice = createSlice({
     },
     setPlayerCaptcha: (
       state,
+      action: PayloadAction<PlayerUpdate<PlayerCaptcha | undefined>>
+    ) => {
+      const { uuid, overlayIndex, value } = action.payload
+      const player =
+        overlayIndex != null ? state[uuid].overlays[overlayIndex] : state[uuid]
+      player.captcha = value
+    },
+    setPlayerStartLoading: (
+      state,
+      action: PayloadAction<PlayerUpdate<number>>
+    ) => {
+      const { uuid, value, overlayIndex } = action.payload
+      const loader =
+        overlayIndex != null
+          ? state[uuid].overlays[overlayIndex].loader
+          : state[uuid].loader
+      loader.loadingCount += value
+      loader.readyToLoad.splice(0, value)
+    },
+    setPlayerLoadingComplete: (
+      state,
+      action: PayloadAction<PlayerUpdate<number>>
+    ) => {
+      const { uuid, value, overlayIndex } = action.payload
+      const loader =
+        overlayIndex != null
+          ? state[uuid].overlays[overlayIndex].loader
+          : state[uuid].loader
+      loader.loadingCount--
+      loader.readyToLoad.push(value)
+    },
+    setPlayerShownImageView: (
+      state,
+      action: PayloadAction<PlayerUpdate<number>>
+    ) => {
+      const { uuid, value, overlayIndex } = action.payload
+      const loader =
+        overlayIndex != null
+          ? state[uuid].overlays[overlayIndex].loader
+          : state[uuid].loader
+      const oldShownIndex = loader.shownIndex
+      const imageViews = loader.imageViews as ImageViewState[]
+      if (oldShownIndex != null) {
+        imageViews[oldShownIndex].show = false
+      }
+
+      imageViews[value].zIndex = loader.zIndex++
+      imageViews[value].show = true
+      loader.shownIndex = value
+    },
+    setPlayerPushReadyToLoad: (
+      state,
+      action: PayloadAction<PlayerUpdate<number[]>>
+    ) => {
+      const { uuid, value, overlayIndex } = action.payload
+      const loader =
+        overlayIndex != null
+          ? state[uuid].overlays[overlayIndex].loader
+          : state[uuid].loader
+
+      loader.iframeCount -= value.filter(
+        (index) => loader.imageViews[index]?.data.type === 'iframe'
+      ).length
+      loader.readyToLoad.push(...value)
+    },
+    setPlayerSetImageView: (
+      state,
       action: PayloadAction<
-        PlayerUpdate<{ captcha?: PlayerCaptcha; overlayIndex?: number }>
+        PlayerUpdate<{ index: number; view: ImageViewState }>
       >
     ) => {
-      const { uuid, value } = action.payload
-      const { captcha, overlayIndex } = value
+      const { uuid, value, overlayIndex } = action.payload
+      const loader =
+        overlayIndex != null
+          ? state[uuid].overlays[overlayIndex].loader
+          : state[uuid].loader
+
+      loader.imageViews[value.index] = value.view
+    },
+    setPlayerReadyToDisplay: (
+      state,
+      action: PayloadAction<PlayerUpdate<undefined>>
+    ) => {
+      const { uuid, overlayIndex } = action.payload
       const player = state[uuid]
-      if (overlayIndex != null) {
-        player.overlays[overlayIndex].captcha = captcha
-      } else {
-        player.captcha = captcha
+      const isPlayer = overlayIndex == null
+      const loader = isPlayer
+        ? player.loader
+        : player.overlays[overlayIndex].loader
+
+      loader.loadingCount--
+      if (isPlayer && !player.firstImageLoaded) {
+        player.firstImageLoaded = true
       }
+    },
+    setPlayerIncrementDisplayIndex: (
+      state,
+      action: PayloadAction<PlayerUpdate<undefined>>
+    ) => {
+      const { uuid, overlayIndex } = action.payload
+      const player = state[uuid]
+      const isPlayer = overlayIndex == null
+      const loader = isPlayer
+        ? player.loader
+        : player.overlays[overlayIndex].loader
+
+      loader.displayIndex++
+    },
+    setPlayerIncrementIFrameCount: (
+      state,
+      action: PayloadAction<PlayerUpdate<undefined>>
+    ) => {
+      const { uuid, overlayIndex } = action.payload
+      const player = state[uuid]
+      const isPlayer = overlayIndex == null
+      const loader = isPlayer
+        ? player.loader
+        : player.overlays[overlayIndex].loader
+
+      loader.iframeCount++
     }
   }
 })
@@ -123,7 +263,15 @@ export const {
   setPlayersLoaded,
   setPlayerState,
   setPlayerStates,
-  setPlayerCaptcha
+  setPlayerCaptcha,
+  setPlayerStartLoading,
+  setPlayerLoadingComplete,
+  setPlayerShownImageView,
+  setPlayerPushReadyToLoad,
+  setPlayerSetImageView,
+  setPlayerReadyToDisplay,
+  setPlayerIncrementDisplayIndex,
+  setPlayerIncrementIFrameCount
 } = playersSlice.actions
 
 export default playersSlice.reducer

@@ -1,223 +1,95 @@
-import React, { type PropsWithChildren } from 'react'
-import { animated, useSpring } from 'react-spring'
+import React, { useRef, type PropsWithChildren, useMemo } from 'react'
+import { animated, useSpring } from '@react-spring/web'
+import { ZoomMoveData } from '../../store/player/ContentPreloadService'
+import { getEaseFunction } from '../../data/utils'
 
-import { HTF, VTF } from 'flipflip-common'
-import { getDuration, getEaseFunction } from '../../data/utils'
-import { useAppSelector } from '../../store/hooks'
-import {
-  selectSceneHorizTransType,
-  selectSceneHorizTransLevel,
-  selectSceneHorizTransLevelMin,
-  selectSceneHorizTransLevelMax,
-  selectSceneHorizTransRandom,
-  selectSceneVertTransType,
-  selectSceneVertTransLevel,
-  selectSceneVertTransLevelMin,
-  selectSceneVertTransLevelMax,
-  selectSceneVertTransRandom,
-  selectSceneZoom,
-  selectSceneZoomRandom,
-  selectSceneZoomStart,
-  selectSceneZoomStartMin,
-  selectSceneZoomStartMax,
-  selectSceneZoomEnd,
-  selectSceneZoomEndMin,
-  selectSceneZoomEndMax,
-  selectSceneZoomTF,
-  selectSceneZoomDuration,
-  selectSceneZoomDurationMin,
-  selectSceneZoomDurationMax,
-  selectSceneZoomSinRate,
-  selectSceneZoomBPMMulti,
-  selectSceneTransEase,
-  selectSceneTransExp,
-  selectSceneTransAmp,
-  selectSceneTransPer,
-  selectSceneTransOv
-} from '../../store/scene/selectors'
-import { selectAudioBPM } from '../../store/audio/selectors'
-import { selectUndefined } from '../../store/app/selectors'
+interface EffectProps {
+  data: ZoomMoveData
+  show: boolean
+  isPlaying: boolean
+  className?: string
+}
+
+function Effect(props: PropsWithChildren<EffectProps>) {
+  const { data, show, isPlaying, className, children } = props
+
+  const _prevShow = useRef<boolean>(false)
+
+  const animation = useMemo(() => {
+    const toTransform: string[] = []
+    const fromTransform: string[] = []
+    if (data.translateX !== 0 && data.translateY !== 0) {
+      fromTransform.push('translate(0%, 0%)')
+      toTransform.push(`translate(${data.translateX}%, ${data.translateY}%)`)
+    } else if (data.translateX !== 0) {
+      fromTransform.push('translateX(0%)')
+      toTransform.push(`translateX(${data.translateX}%)`)
+    } else if (data.translateY !== 0) {
+      fromTransform.push('translateY(0%)')
+      toTransform.push(`translateY(${data.translateY}%)`)
+    }
+    if (data.scaleFrom !== 1 || data.scaleTo !== 1) {
+      fromTransform.push(`scale(${data.scaleFrom})`)
+      toTransform.push(`scale(${data.scaleTo})`)
+    }
+
+    let easing: ((time: number) => number) | undefined = undefined
+    if (data.easing != null) {
+      const { ea, exp, amp, per, ov } = data.easing
+      easing = getEaseFunction(ea, exp, amp, per, ov)
+    }
+
+    return {
+      from: {
+        transform: fromTransform.join(' ')
+      },
+      to: {
+        transform: toTransform.join(' ')
+      },
+      config: {
+        duration: data.duration,
+        easing
+      }
+    }
+  }, [data])
+
+  const reset = _prevShow.current !== show && show
+  _prevShow.current = show
+  const style = useSpring({
+    ...animation,
+    reset,
+    pause: !isPlaying
+  })
+  return (
+    <animated.div className={className} style={style}>
+      {children}
+    </animated.div>
+  )
+}
 
 export interface ZoomMoveProps {
-  sceneID: number
-  reset: boolean
-  timeToNextFrame: number
-  currentAudio?: number
+  show: boolean
+  isPlaying: boolean
+  data?: ZoomMoveData
+  className?: string
 }
 
 export default function ZoomMove(props: PropsWithChildren<ZoomMoveProps>) {
-  const horizTransType = useAppSelector(
-    selectSceneHorizTransType(props.sceneID)
-  )
-  const horizTransLevel = useAppSelector(
-    selectSceneHorizTransLevel(props.sceneID)
-  )
-  const horizTransLevelMin = useAppSelector(
-    selectSceneHorizTransLevelMin(props.sceneID)
-  )
-  const horizTransLevelMax = useAppSelector(
-    selectSceneHorizTransLevelMax(props.sceneID)
-  )
-  const horizTransRandom = useAppSelector(
-    selectSceneHorizTransRandom(props.sceneID)
-  )
-  const vertTransType = useAppSelector(selectSceneVertTransType(props.sceneID))
-  const vertTransLevel = useAppSelector(
-    selectSceneVertTransLevel(props.sceneID)
-  )
-  const vertTransLevelMin = useAppSelector(
-    selectSceneVertTransLevelMin(props.sceneID)
-  )
-  const vertTransLevelMax = useAppSelector(
-    selectSceneVertTransLevelMax(props.sceneID)
-  )
-  const vertTransRandom = useAppSelector(
-    selectSceneVertTransRandom(props.sceneID)
-  )
-  const zoom = useAppSelector(selectSceneZoom(props.sceneID))
-  const zoomRandom = useAppSelector(selectSceneZoomRandom(props.sceneID))
-  const zoomStart = useAppSelector(selectSceneZoomStart(props.sceneID))
-  const zoomStartMin = useAppSelector(selectSceneZoomStartMin(props.sceneID))
-  const zoomStartMax = useAppSelector(selectSceneZoomStartMax(props.sceneID))
-  const zoomEnd = useAppSelector(selectSceneZoomEnd(props.sceneID))
-  const zoomEndMin = useAppSelector(selectSceneZoomEndMin(props.sceneID))
-  const zoomEndMax = useAppSelector(selectSceneZoomEndMax(props.sceneID))
-  const transTF = useAppSelector(selectSceneZoomTF(props.sceneID))
-  const transDuration = useAppSelector(selectSceneZoomDuration(props.sceneID))
-  const transDurationMin = useAppSelector(
-    selectSceneZoomDurationMin(props.sceneID)
-  )
-  const transDurationMax = useAppSelector(
-    selectSceneZoomDurationMax(props.sceneID)
-  )
-  const transSinRate = useAppSelector(selectSceneZoomSinRate(props.sceneID))
-  const transBPMMulti = useAppSelector(selectSceneZoomBPMMulti(props.sceneID))
-  const transEase = useAppSelector(selectSceneTransEase(props.sceneID))
-  const transExp = useAppSelector(selectSceneTransExp(props.sceneID))
-  const transAmp = useAppSelector(selectSceneTransAmp(props.sceneID))
-  const transPer = useAppSelector(selectSceneTransPer(props.sceneID))
-  const transOv = useAppSelector(selectSceneTransOv(props.sceneID))
-  const bpmSelector =
-    props.currentAudio != null
-      ? selectAudioBPM(props.currentAudio)
-      : selectUndefined
-  const bpm = useAppSelector(bpmSelector)
-
-  let translateX = 0
-  if (horizTransType !== HTF.none) {
-    translateX = horizTransLevel
-    if (horizTransRandom) {
-      translateX =
-        Math.floor(
-          Math.random() * (horizTransLevelMax - horizTransLevelMin + 1)
-        ) + horizTransLevelMin
-    }
-    if (horizTransType === HTF.left) {
-      translateX = -translateX
-    } else if (horizTransType === HTF.right) {
-      // Already set
-    } else if (horizTransType === HTF.random) {
-      const type = Math.floor(Math.random() * 2)
-      if (type) {
-        translateX = -translateX
-      } else {
-        // Already set
-      }
-    }
+  const { show, isPlaying, data, className, children } = props
+  if (data != null) {
+    return (
+      <Effect
+        data={data}
+        show={show}
+        isPlaying={isPlaying}
+        className={className}
+      >
+        {children}
+      </Effect>
+    )
+  } else {
+    return <>{children}</>
   }
-
-  let translateY = 0
-  if (vertTransType !== VTF.none) {
-    translateY = vertTransLevel
-    if (vertTransRandom) {
-      translateY =
-        Math.floor(
-          Math.random() * (vertTransLevelMax - vertTransLevelMin + 1)
-        ) + vertTransLevelMin
-    }
-    if (vertTransType === VTF.up) {
-      translateY = -translateY
-    } else if (vertTransType === VTF.down) {
-      // Already set
-    } else if (vertTransType === VTF.random) {
-      const type = Math.floor(Math.random() * 2)
-      if (type) {
-        translateY = -translateY
-      } else {
-        // Already set
-      }
-    }
-  }
-
-  let scaleFrom = 1
-  let scaleTo = 1
-  if (zoom) {
-    if (zoomRandom) {
-      scaleFrom =
-        (Math.floor(
-          Math.random() * (zoomStartMax * 10 - zoomStartMin * 10 + 1)
-        ) +
-          zoomStartMin * 10) /
-        10
-      scaleTo =
-        (Math.floor(Math.random() * (zoomEndMax * 10 - zoomEndMin * 10 + 1)) +
-          zoomEndMin * 10) /
-        10
-    } else {
-      scaleFrom = zoomStart
-      scaleTo = zoomEnd
-    }
-  }
-
-  const duration = getDuration(
-    {
-      timingFunction: transTF,
-      time: transDuration,
-      timeMax: transDurationMax,
-      timeMin: transDurationMin,
-      sinRate: transSinRate,
-      bpmMulti: transBPMMulti
-    },
-    props.timeToNextFrame,
-    bpm
-  )
-
-  const imageProps = useSpring({
-    reset: props.reset,
-    from: {
-      transform: 'translate(0%, 0%) scale(' + scaleFrom + ')'
-    },
-    to: {
-      transform:
-        'translate(' +
-        translateX +
-        '%, ' +
-        translateY +
-        '%) scale(' +
-        scaleTo +
-        ')'
-    },
-    config: {
-      duration,
-      easing: getEaseFunction(transEase, transExp, transAmp, transPer, transOv)
-    }
-  })
-
-  return (
-    <animated.div
-      style={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        zIndex: 2,
-        ...imageProps
-      }}
-    >
-      {props.children}
-    </animated.div>
-  )
 }
 
 ;(ZoomMove as any).displayName = 'ZoomMove'

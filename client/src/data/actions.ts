@@ -4,6 +4,7 @@ import { ASF, SF } from 'flipflip-common'
 import type Audio from '../store/audio/Audio'
 import type LibrarySource from '../store/librarySource/LibrarySource'
 import type CaptionScript from '../store/captionScript/CaptionScript'
+import fscreen from 'fscreen'
 
 /** Getters **/
 
@@ -14,53 +15,39 @@ import type CaptionScript from '../store/captionScript/CaptionScript'
 // The first argument is always a State object, even if it isn't used.
 
 function openFullScreen() {
-  const elem = document.documentElement as any
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen()
-  } else if (elem.webkitRequestFullscreen) {
-    /* Safari */
-    elem.webkitRequestFullscreen()
-  } else if (elem.msRequestFullscreen) {
-    /* IE11 */
-    elem.msRequestFullscreen()
+  if (fscreen.fullscreenEnabled) {
+    const elem = document.documentElement as any
+    fscreen.requestFullscreen(elem)
   }
 }
 
 function closeFullScreen() {
-  const doc = document as any
-  if (doc.exitFullscreen) {
-    doc.exitFullscreen()
-  } else if (doc.webkitExitFullscreen) {
-    /* Safari */
-    doc.webkitExitFullscreen()
-  } else if (doc.msExitFullscreen) {
-    /* IE11 */
-    doc.msExitFullscreen()
+  if (fscreen.fullscreenEnabled) {
+    fscreen.exitFullscreen()
   }
 }
 
-function getFullScreenElement() {
-  const doc = document as any
-  return (
-    doc.fullscreenElement /* Standard syntax */ ??
-    doc.webkitFullscreenElement /* Safari and Opera syntax */ ??
-    doc.msFullscreenElement
-  ) /* IE11 syntax */
-}
+export function toggleFullScreen(): boolean | undefined {
+  if (!fscreen.fullscreenEnabled) {
+    return undefined
+  }
 
-export function toggleFullScreen(): boolean {
-  const fullScreen = getFullScreenElement() != null
-  if (fullScreen) {
+  const isFullScreen = fscreen.fullscreenElement != null
+  if (isFullScreen) {
     closeFullScreen()
   } else {
     openFullScreen()
   }
 
-  return fullScreen
+  return isFullScreen
 }
 
 export function setFullScreen(fullScreen: boolean): void {
-  const isFullScreen = getFullScreenElement() != null
+  if (!fscreen.fullscreenEnabled) {
+    return
+  }
+
+  const isFullScreen = fscreen.fullscreenElement != null
   if (fullScreen === isFullScreen) {
     return
   } else if (fullScreen) {

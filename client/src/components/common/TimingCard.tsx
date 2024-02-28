@@ -80,7 +80,7 @@ function TimingCard(props: TimingCardProps) {
                   )}
                 </MenuItem>
               )
-            } else if (props.excludeScene && tf === TF.scene) {
+            } else if (props.excludeScene === true && tf === TF.scene) {
               return null
             } else {
               return (
@@ -115,7 +115,7 @@ function TimingCard(props: TimingCardProps) {
             selector={props.bpm.selector}
             action={props.bpm.action}
             format={
-              props.bpm.format
+              props.bpm.format != null
                 ? { type: props.bpm.format }
                 : { type: 'times', divideBy: 10 }
             }

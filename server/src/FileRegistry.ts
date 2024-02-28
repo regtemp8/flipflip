@@ -24,10 +24,11 @@ class FileRegistry {
   }
 
   public set(url: string): string {
-    const uuid = randomUUID()
+    const extension = url.substring(url.lastIndexOf('.'))
+    const alias = randomUUID() + extension
     const path = urlToPath(url, isWin32)
-    this.registry.set(uuid, path)
-    return uuid
+    this.registry.set(alias, path)
+    return alias
   }
 }
 

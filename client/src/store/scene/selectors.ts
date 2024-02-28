@@ -1066,46 +1066,6 @@ export interface SceneStrobeOptions {
 const selectScene = (id: number) => (state: RootState) =>
   state.scene.entries[id]
 
-export const selectSceneStrobeOptions = (id: number) => {
-  return createSelector([selectScene(id)], (scene) => {
-    const timing: TimingSettings = {
-      timingFunction: scene.strobeTF,
-      time: scene.strobeTime,
-      timeMax: scene.strobeTimeMax,
-      timeMin: scene.strobeTimeMin,
-      sinRate: scene.strobeSinRate,
-      bpmMulti: scene.strobeBPMMulti
-    }
-    const delay: TimingSettings = {
-      timingFunction: scene.strobeDelayTF,
-      time: scene.strobeDelay,
-      timeMax: scene.strobeDelayMax,
-      timeMin: scene.strobeDelayMin,
-      sinRate: scene.strobeDelaySinRate,
-      bpmMulti: scene.strobeDelayBPMMulti
-    }
-    const easing = {
-      ease: scene.strobeEase,
-      exp: scene.strobeExp,
-      amp: scene.strobeAmp,
-      per: scene.strobePer,
-      ov: scene.strobeOv
-    }
-
-    return {
-      colorType: scene.strobeColorType,
-      color: scene.strobeColor,
-      colorSet: scene.strobeColorSet,
-      strobePulse: scene.strobePulse,
-      strobeLayer: scene.strobeLayer,
-      strobeOpacity: scene.strobeOpacity,
-      timing,
-      delay,
-      easing
-    }
-  })
-}
-
 export const selectSceneFadeIODelayTF = (id: number) => {
   return (state: RootState): string => getEntry(state.scene, id).fadeIODelayTF
 }

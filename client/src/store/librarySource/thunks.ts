@@ -141,13 +141,12 @@ export function setLibraryEditUrl(sourceId: number, newURL: string) {
 
 export function setSceneSourcesEditUrl(sourceID: number, newURL: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    console.log('setSceneSourcesEditUrl: ' + sourceID)
     const state = getState()
     const librarySource = state.app.library
       .map((id) => state.librarySource.entries[id])
       .find((source) => source.url === newURL)
     const scene = getActiveScene(state) as Scene
-    if (scene.sources.includes(sourceID)) {
+    if (!scene.sources.includes(sourceID)) {
       throw new Error('LibrarySource is not part of scene ')
     }
 
@@ -186,12 +185,13 @@ export function setSceneSourcesEditUrl(sourceID: number, newURL: string) {
         : editSource.resolution
 
     const newSources = new Map<string, number>()
-    for (const sourceID of scene.sources) {
-      const sourceURL = state.librarySource.entries[sourceID].url
+    for (const id of scene.sources) {
+      const sourceURL =
+        id === sourceID ? newURL : state.librarySource.entries[id].url
       if (/^\s*$/.exec(sourceURL) == null) {
         const existingID = newSources.get(sourceURL)
-        if (existingID == null || existingID > sourceID) {
-          newSources.set(sourceURL, sourceID)
+        if (existingID == null || existingID > id) {
+          newSources.set(sourceURL, id)
         }
       }
     }

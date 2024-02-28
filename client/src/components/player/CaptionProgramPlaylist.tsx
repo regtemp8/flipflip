@@ -10,12 +10,13 @@ import {
   selectSceneScriptStartIndex
 } from '../../store/scene/selectors'
 import type ScriptPlaylist from '../../store/scene/ScriptPlaylist'
+import { HTMLContentElement } from './HTMLContentElement'
 
 export interface CaptionProgramPlaylistProps {
   playlistIndex: number
   playlist: ScriptPlaylist
   currentAudio: number
-  currentImage?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  currentImage?: HTMLContentElement
   scale: number
   sceneID: number
   timeToNextFrame: number

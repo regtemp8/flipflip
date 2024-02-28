@@ -117,3 +117,38 @@ const isAtLeastOneGridCellLoaded = (
 export const selectPlayerCaptcha = (uuid: string) => {
   return (state: RootState) => state.players[uuid].captcha
 }
+
+export const selectPlayerImageViews = (uuid: string, overlayIndex?: number) => {
+  return (state: RootState) => {
+    const player =
+      overlayIndex != null
+        ? state.players[uuid].overlays[overlayIndex]
+        : state.players[uuid]
+    return player.loader.imageViews
+  }
+}
+
+export const selectPlayerNextSceneID = (uuid: string) => {
+  return (state: RootState) => state.players[uuid].nextSceneID
+}
+
+export const selectPlayerIsEmpty = (uuid: string) => {
+  return (state: RootState) => state.players[uuid].isEmpty
+}
+
+export const selectPlayerOverlays = (uuid: string) => {
+  return createSelector(
+    [(state: RootState) => state.players[uuid].overlays],
+    (overlays) => {
+      return overlays.map((o) => {
+        const gridSize = o.isGrid ? o.grid[0].length * o.grid.length : 0
+        const opacity = o.show ? o.opacity : 0
+        return { opacity, isGrid: o.isGrid, gridSize }
+      })
+    }
+  )
+}
+
+export const selectPlayerOverlayGrid = (overlayIndex: number, uuid: string) => {
+  return (state: RootState) => state.players[uuid].overlays[overlayIndex].grid
+}

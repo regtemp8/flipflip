@@ -21,7 +21,12 @@ app.on('web-contents-created', (event, contents) => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  server().init().then(windowManager().createWindow)
+  server().init(() => {
+    const wm = windowManager()
+    wm.createWindow()
+    wm.initCertificateVerifyProcedure()
+    wm.loadContent()
+  })
   initIpcEvents()
 })
 
@@ -38,7 +43,10 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    windowManager().createWindow()
+    const wm = windowManager()
+    wm.createWindow()
+    wm.initCertificateVerifyProcedure()
+    wm.loadContent()
   }
 })
 

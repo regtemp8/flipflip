@@ -661,6 +661,8 @@ function ImageVideoCard(props: ImageVideoCardProps) {
                   selector={selectSceneVideoVolume(props.sceneID)}
                   action={setSceneVideoVolume(props.sceneID)}
                   labelledBy="video-volume-slider"
+                  min={0}
+                  max={100}
                 />
               </Grid>
               <Grid item>

@@ -53,6 +53,7 @@ import { systemMessage } from '../app/slice'
 import { setCount } from '../app/thunks'
 import { toLibrarySourceStorage } from '../app/convert'
 import flipflip from '../../FlipFlipService'
+import { loadImageViews } from '../player/thunks'
 
 function convertMapToRecord<V>(map: Map<string, V>): Record<string, V> {
   const record: Record<string, V> = {}
@@ -159,7 +160,7 @@ function promiseLoop(
       return
 
     const workerUUID = state.sourceScraper[sceneID].workerUUID
-    const receiveMessage = (message: any) => {
+    const receiveMessage = async (message: any) => {
       const state = getState()
       const object = message.data
       if (
@@ -173,13 +174,11 @@ function promiseLoop(
         dispatch(
           setPlayerCaptcha({
             uuid: playerUUID,
+            overlayIndex,
             value: {
-              captcha: {
-                captcha: object.captcha,
-                source: object?.source,
-                helpers: object?.helpers
-              },
-              overlayIndex
+              captcha: object.captcha,
+              source: object?.source,
+              helpers: object?.helpers
             }
           })
         )
@@ -203,7 +202,6 @@ function promiseLoop(
       }
 
       // If we are not at the end of a source
-      console.log(object)
       if (object?.source) {
         if (object?.data) {
           const sources = state.sourceScraper[sceneID]
@@ -219,9 +217,11 @@ function promiseLoop(
             value.promiseQueue = [...value.promiseQueue, { source, helpers }]
           }
 
-          console.log('setSourceScraperSources')
           dispatch(setSourceScraperSources({ id: sceneID, value }))
           dispatch(setCount(source.url, helpers.count, helpers.next == null))
+          if (!isNextSceneID) {
+            dispatch(loadImageViews(playerUUID, overlayIndex))
+          }
         }
 
         setTimeout(
@@ -241,7 +241,7 @@ function promiseLoop(
 
     dispatch(setSourceScraperShiftPromiseQueue(sceneID))
     const config = state.app.config
-    const pathSep = state.constants.pathSep
+    const { pathSep } = state.constants
     const { imageTypeFilter, weightFunction } = state.scene.entries[sceneID]
     const workerListener = receiveMessage
     if (config.generalSettings.prioritizePerformance) {
@@ -292,7 +292,6 @@ function sourceLoop(
       dispatch(scrapeSources(playerUUID))
       return
     }
-    console.log('isPlayerStopped')
     if (
       isPlayerStopped(
         dispatch,
@@ -305,9 +304,8 @@ function sourceLoop(
     )
       return
 
-    console.log('SOURCE LOOP: ' + current)
     const sceneSources = scraperState.sceneSources
-    const d = sceneSources[current]
+    const d = newLibrarySource(sceneSources[current])
     let allURLs: Map<string, string[]>
     if (scraperState.allURLs) {
       allURLs = convertRecordToMap(scraperState.allURLs)
@@ -331,7 +329,7 @@ function sourceLoop(
         })
       )
     }
-    if (!scene.playVideoClips && d.clips) {
+    if (!scene.playVideoClips && d.clips.length > 0) {
       d.clips = []
     }
 
@@ -352,13 +350,11 @@ function sourceLoop(
           dispatch(
             setPlayerCaptcha({
               uuid: playerUUID,
+              overlayIndex,
               value: {
-                captcha: {
-                  captcha: object.captcha,
-                  source: object?.source,
-                  helpers: object?.helpers
-                },
-                overlayIndex
+                captcha: object.captcha,
+                source: object?.source,
+                helpers: object?.helpers
               }
             })
           )
@@ -382,7 +378,6 @@ function sourceLoop(
         dispatch(systemMessage(object.systemMessage))
       }
 
-      console.log(object)
       if (object?.source) {
         // Just add the new urls to the end of the list
         if (object?.data && object?.allURLs) {
@@ -399,9 +394,11 @@ function sourceLoop(
             value.promiseQueue = [...value.promiseQueue, { source, helpers }]
           }
 
-          console.log('setSourceScraperSources')
           dispatch(setSourceScraperSources({ id: sceneID, value }))
           dispatch(setCount(source.url, helpers.count, helpers.next == null))
+          if (!isNextSceneID) {
+            dispatch(loadImageViews(playerUUID, overlayIndex))
+          }
         }
 
         const timeout = object?.timeout != null ? object.timeout : 1000
@@ -412,7 +409,7 @@ function sourceLoop(
     }
 
     const config = state.app.config
-    const pathSep = state.constants.pathSep
+    const { pathSep } = state.constants
     const { imageTypeFilter, weightFunction } = state.scene.entries[sceneID]
     const workerListener = receiveMessage
     if (config.generalSettings.prioritizePerformance) {
@@ -452,7 +449,6 @@ function startScrape(
   overlayIndex?: number
 ) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
-    console.log('startScrape')
     const state = getState()
     const pathSep = state.constants.pathSep
     const scene = state.scene.entries[sceneID]
@@ -475,15 +471,12 @@ function startScrape(
         sceneSources.push(toLibrarySourceStorage(source.id, state))
       }
     }
-    console.log('<< sceneSources')
 
     if (scene.sourceOrderFunction === SOF.random) {
       randomizeList(sceneSources)
     }
 
-    console.log('setSourceScraperSceneSources')
     dispatch(setSourceScraperSceneSources({ id: sceneID, value: sceneSources }))
-    console.log('sourceLoop')
     dispatch(sourceLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
   }
 }
@@ -531,7 +524,6 @@ function scheduleScrape(
     let scheduled = false
     const state = getState()
     if (shouldStartScrape(sceneID, state.sourceScraper)) {
-      console.log('shouldStartScrape')
       dispatch(
         setSourceScraperSources({
           id: sceneID,
@@ -549,13 +541,11 @@ function scheduleScrape(
       }, 200)
       scheduled = true
     } else if (shouldContinueScrape(sceneID, state.sourceScraper)) {
-      console.log('shouldContinueScrape')
       setTimeout(() => {
         dispatch(sourceLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
       }, 200)
       scheduled = true
     } else if (shouldScrapePromises(sceneID, state.sourceScraper)) {
-      console.log('shouldScrapePromises')
       dispatch(
         setSourceScraperSourcesWorker({ id: sceneID, value: workerUUID })
       )
@@ -574,7 +564,6 @@ function scheduleScrape(
       scheduled = true
     }
 
-    console.log('scheduleScrape: ' + scheduled)
     return scheduled
   }
 }
@@ -588,11 +577,9 @@ export function scrapeSources(playerUUID: string) {
       scheduleScrape(playerUUID, sceneID as number, false, workerUUID)
     )
     if (!scheduled) {
-      console.log('SCHEDULE NEXT SCENE')
       dispatch(scheduleScrape(playerUUID, nextSceneID, true, workerUUID))
     }
     overlays.forEach(({ sceneID }, index) => {
-      console.log('SCHEDULE OVERLAY ' + index)
       dispatch(scheduleScrape(playerUUID, sceneID, false, workerUUID, index))
     })
   }
@@ -1002,7 +989,7 @@ const loadLocalDirectory = async (
   let data: any | undefined
   try {
     data = url
-      ? await flipflip().api.recursiveReaddir(
+      ? await flipflip().api.readDirectoryFiles(
           url,
           blacklist,
           source.blacklist,

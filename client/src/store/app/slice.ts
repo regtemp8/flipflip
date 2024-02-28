@@ -21,7 +21,7 @@ function createAppSlice(app?: App) {
     initialState,
     reducers: {
       setAppSlice: (state, action: PayloadAction<App>) => {
-        Object.assign(state, action.payload)
+        return action.payload
       },
       setSpecialMode: (state, action: PayloadAction<string | undefined>) => {
         state.specialMode = action.payload

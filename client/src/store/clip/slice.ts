@@ -1,11 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type Clip from './Clip'
-import {
-  type EntryState,
-  type EntryUpdate,
-  setEntrySlice,
-  setEntry
-} from '../EntryState'
+import { type EntryState, type EntryUpdate, setEntry } from '../EntryState'
 
 export const initialClipState: EntryState<Clip> = {
   name: 'clipSlice',
@@ -25,7 +20,7 @@ function createClipSlice(clipState?: EntryState<Clip>) {
     initialState,
     reducers: {
       setClipSlice: (state, action: PayloadAction<EntryState<Clip>>) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setClip: (state, action: PayloadAction<Clip>) => {
         setEntry(state, action.payload)

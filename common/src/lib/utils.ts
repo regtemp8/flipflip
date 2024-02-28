@@ -50,6 +50,7 @@ export function isImage(path: string, strict: boolean): boolean {
     '.jpeg',
     '.jpg',
     '.webp',
+    '.avif',
     '.tiff',
     '.svg',
   ];

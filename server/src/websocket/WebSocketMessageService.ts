@@ -1,18 +1,18 @@
-import fs from 'fs'
+import fs, { Dirent } from 'fs'
 import type ws from 'ws'
 import { move, outputFile } from 'fs-extra'
 import { IAudioMetadata, parseBuffer, parseFile } from 'music-metadata'
 import rimraf from 'rimraf'
 import { cleanBackups, getBackups } from '../data/Backup'
 import fontList from 'font-list'
-import recursiveReaddir from 'recursive-readdir'
 import {
   cachePath,
   getFilesRecursively,
   generateThumbnailFile,
   getContext,
   isWin32,
-  isMacOSX
+  isMacOSX,
+  pathSep
 } from '../utils'
 import getFolderSize from 'get-folder-size'
 import {
@@ -34,12 +34,12 @@ import AppStorage from '../data/AppStorage'
 import SystemFonts from 'system-font-families'
 import fileRegistry from '../FileRegistry'
 import windowManager from '../WindowManager'
-import server from '../FlipFlipServer'
 import fileUrl from 'file-url'
 
 interface WebSocketMessageParams {
   message: WebSocketMessage
   socket: ws.WebSocket
+  host: string
 }
 
 type WebSocketMessageHandler = (
@@ -95,8 +95,9 @@ class WebSocketMessageService {
     // this.handlers[IPC.twitterOAuth] = getTwitterOAuth
     // this.handlers[IPC.redditOAuth] = getRedditOAuth
     this.handlers[IPC.getFileUrl] = this.getFileUrl
-    this.handlers[IPC.recursiveReaddir] = this.recursiveReadDirectory
+    this.handlers[IPC.readDirectoryFiles] = this.readDirectoryFiles
     this.handlers[IPC.getContext] = this.getContext
+    this.handlers[IPC.proxyNimjaURL] = this.proxyNimjaURL
     // this.handlers[IPC.loadInWorker] = getLoadInWorker
     // this.handlers[IPC.workerSendMessage] = getWorkerSendMessage
 
@@ -456,14 +457,17 @@ class WebSocketMessageService {
     params: WebSocketMessageParams
   ): Promise<unknown[]> {
     const path = params.message.args[0] as string
-    return await fs.promises.readdir(path, { withFileTypes: true }).then(
-      (dirs) => {
-        return dirs
-          .filter((dirent) => dirent.isDirectory())
-          .map((dirent) => dirent.name)
-      },
-      () => []
-    )
+    return await fs.promises
+      .readdir(path, { withFileTypes: true })
+      .then(
+        (dirs) => {
+          return dirs
+            .filter((dirent) => dirent.isDirectory())
+            .map((dirent) => dirent.name)
+        },
+        () => []
+      )
+      .then((value) => [value])
   }
 
   private async unlinkPath(params: WebSocketMessageParams): Promise<unknown[]> {
@@ -877,22 +881,30 @@ class WebSocketMessageService {
   // }
 
   private getFileUrl(params: WebSocketMessageParams): Promise<unknown[]> {
-    const path = params.message.args[0] as string
-    return Promise.resolve([fileUrl(path)])
+    return new Promise((resolve) => {
+      const path = params.message.args[0] as string
+      const url = fileUrl(path)
+      const uuid = fileRegistry().set(url)
+      resolve([`https://${params.host}/file/${uuid}`])
+    })
   }
 
-  private async recursiveReadDirectory(
+  private async readDirectoryFiles(
     params: WebSocketMessageParams
   ): Promise<unknown[]> {
     const { message } = params
     const url = message.args[0] as string
-    const blacklist = message.args[1] as string[]
+    // const blacklist = message.args[1] as string[]
     const sourceBlacklist = message.args[2] as string[]
     const filter = message.args[3] as string
     const local = message.args[4] as boolean
 
-    return await recursiveReaddir(url, blacklist)
-      .then((rawFiles: string[]) => {
+    return await fs.promises
+      .readdir(url, { withFileTypes: true })
+      .then((dirents: Dirent[]) => {
+        const rawFiles = dirents
+          .filter((dirent) => dirent.isFile())
+          .map((file) => file.path + pathSep + file.name)
         const collator = new Intl.Collator(undefined, {
           numeric: true,
           sensitivity: 'base'
@@ -913,10 +925,9 @@ class WebSocketMessageService {
           )
         }
 
-        const serverURL = server().getServerURL()
         sources = sources.map((url) => {
           const uuid = fileRegistry().set(url)
-          return `${serverURL}/file/${uuid}`
+          return `https://${params.host}/file/${uuid}`
         })
 
         const count = local
@@ -924,7 +935,8 @@ class WebSocketMessageService {
           : undefined
         return [{ sources, count }]
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error)
         return [{ sources: [], count: 0 }]
       })
   }
@@ -932,6 +944,19 @@ class WebSocketMessageService {
   private async getContext(): Promise<unknown[]> {
     return await new Promise((resolve) => {
       resolve([getContext()])
+    })
+  }
+
+  private async proxyNimjaURL(
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    return await new Promise((resolve) => {
+      let url = params.message.args[0] as string
+      url = url.replace(
+        'https://hypno.nimja.com',
+        `https://${params.host}/nimja`
+      )
+      resolve([url])
     })
   }
 
@@ -949,10 +974,14 @@ class WebSocketMessageService {
   //   workerResponse(webContentsId, data)
   // }
 
-  public handle(message: WebSocketMessage, socket: ws.WebSocket): void {
+  public handle(
+    message: WebSocketMessage,
+    socket: ws.WebSocket,
+    host: string
+  ): void {
     const handler = this.handlers[message.operation]
     if (handler != null) {
-      handler({ message, socket })
+      handler({ message, socket, host })
         .then((args) => {
           if (args.length > 0) {
             const response: WebSocketMessage = {

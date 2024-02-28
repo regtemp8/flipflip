@@ -1,1584 +1,754 @@
-import React, { useCallback, useEffect, useRef } from 'react'
-import { animated } from 'react-spring'
-import wretch from 'wretch'
-
-import CrossFade from './CrossFade'
-import FadeInOut from './FadeInOut'
-import Panning from './Panning'
-import Slide from './Slide'
+import React, {
+  CSSProperties,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+  SyntheticEvent
+} from 'react'
+import { type Theme } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
+import { ResizeObserver } from '@juggle/resize-observer'
+import { BT, IT, SL } from 'flipflip-common'
+import {
+  ContentData,
+  EffectsData,
+  StrobeData,
+  TransformData,
+  ViewData
+} from '../../store/player/ContentPreloadService'
+import { cx } from '@emotion/css'
 import Strobe from './Strobe'
-import StrobeImage from './StrobeImage'
 import ZoomMove from './ZoomMove'
+import FadeInOut from './FadeInOut'
+import Panning, { ImageMeasurements } from './Panning'
+import ImageTransition from './ImageTransition'
+import useMeasure from 'react-use-measure'
 
-import { getRandomColor, getRandomListItem } from '../../data/utils'
-import { BT, HTF, IT, OT, SL, ST, TF, VTF } from 'flipflip-common'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppConfigDisplaySettingsCloneGridVideoElements } from '../../store/app/selectors'
-import {
-  selectSceneBackgroundType,
-  selectSceneBackgroundColor,
-  selectSceneBackgroundColorSet,
-  selectSceneBackgroundBlur,
-  selectSceneVideoVolume,
-  selectSceneCrossFade,
-  selectSceneCrossFadeAudio,
-  selectSceneSlide,
-  selectSceneImageOrientation,
-  selectSceneVideoOrientation,
-  selectSceneImageType,
-  selectSceneStrobe,
-  selectSceneStrobeLayer,
-  selectSceneStrobePulse,
-  selectSceneStrobeDelayTF,
-  selectSceneStrobeTF,
-  selectSceneZoom,
-  selectSceneHorizTransType,
-  selectSceneVertTransType,
-  selectScenePanning,
-  selectSceneFadeInOut
-} from '../../store/scene/selectors'
-import { Box } from '@mui/material'
-import {
-  selectPlayerFirstImageLoaded,
-  selectPlayerHasStarted,
-  selectPlayerSceneID
-} from '../../store/player/selectors'
-import { setPlayerFirstImageLoaded } from '../../store/player/slice'
-
-export interface ImageViewProps {
-  uuid: string
-  isOverlay?: boolean
-  image?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-  fitParent: boolean
-  currentAudio?: number
-  gridCoordinates?: number[]
-  timeToNextFrame?: number
-  toggleStrobe?: boolean
-  pictureGrid?: boolean
-  removeChild?: boolean
-  className?: string
-  onLoaded?: () => void
-  setSceneCopy?: (children: React.ReactNode) => void
-  setVideo?: (video?: HTMLVideoElement) => void
+const playVideo = (video: HTMLVideoElement): void => {
+  video.play().catch((err) => console.warn(err))
 }
 
-export default function ImageView(props: ImageViewProps) {
-  const dispatch = useAppDispatch()
-  const _hasStarted = useRef(useAppSelector(selectPlayerHasStarted(props.uuid)))
-  const _firstImageLoaded = useRef(
-    useAppSelector(selectPlayerFirstImageLoaded(props.uuid))
-  )
-  const sceneID = useAppSelector(selectPlayerSceneID(props.uuid))
-  const _cloneGridVideoElements = useRef<boolean>()
-  _cloneGridVideoElements.current = useAppSelector(
-    selectAppConfigDisplaySettingsCloneGridVideoElements()
-  )
-  const _backgroundType = useRef<string>()
-  _backgroundType.current = useAppSelector(selectSceneBackgroundType(sceneID))
-  const _backgroundColor = useRef<string>()
-  _backgroundColor.current = useAppSelector(selectSceneBackgroundColor(sceneID))
-  const _backgroundColorSet = useRef<string[]>()
-  _backgroundColorSet.current = useAppSelector(
-    selectSceneBackgroundColorSet(sceneID)
-  )
-  const _backgroundBlur = useRef<number>()
-  _backgroundBlur.current = useAppSelector(selectSceneBackgroundBlur(sceneID))
-  const _videoVolume = useRef<number>(0)
-  _videoVolume.current = useAppSelector(selectSceneVideoVolume(sceneID))
-  const _crossFade = useRef<boolean>()
-  _crossFade.current = useAppSelector(selectSceneCrossFade(sceneID))
-  const _crossFadeAudio = useRef<boolean>()
-  _crossFadeAudio.current = useAppSelector(selectSceneCrossFadeAudio(sceneID))
-  const _slide = useRef<boolean>()
-  _slide.current = useAppSelector(selectSceneSlide(sceneID))
-  const _imageOrientation = useRef<string>()
-  _imageOrientation.current = useAppSelector(
-    selectSceneImageOrientation(sceneID)
-  )
-  const _videoOrientation = useRef<string>()
-  _videoOrientation.current = useAppSelector(
-    selectSceneVideoOrientation(sceneID)
-  )
-  const _imageType = useRef<string>()
-  _imageType.current = useAppSelector(selectSceneImageType(sceneID))
-  const _strobe = useRef<boolean>()
-  _strobe.current = useAppSelector(selectSceneStrobe(sceneID))
-  const _strobeLayer = useRef<string>()
-  _strobeLayer.current = useAppSelector(selectSceneStrobeLayer(sceneID))
-  const _strobePulse = useRef<boolean>()
-  _strobePulse.current = useAppSelector(selectSceneStrobePulse(sceneID))
-  const _strobeDelayTF = useRef<string>()
-  _strobeDelayTF.current = useAppSelector(selectSceneStrobeDelayTF(sceneID))
-  const _strobeTF = useRef<string>()
-  _strobeTF.current = useAppSelector(selectSceneStrobeTF(sceneID))
-  const _zoom = useRef<boolean>()
-  _zoom.current = useAppSelector(selectSceneZoom(sceneID))
-  const _horizTransType = useRef<string>()
-  _horizTransType.current = useAppSelector(selectSceneHorizTransType(sceneID))
-  const _vertTransType = useRef<string>()
-  _vertTransType.current = useAppSelector(selectSceneVertTransType(sceneID))
-  const _panning = useRef<boolean>()
-  _panning.current = useAppSelector(selectScenePanning(sceneID))
-  const _fadeInOut = useRef<boolean>()
-  _fadeInOut.current = useAppSelector(selectSceneFadeInOut(sceneID))
+const pauseVideo = (video: HTMLVideoElement): void => {
+  video.pause()
+}
 
-  const _parentHeight = useRef<number>()
-  const _parentWidth = useRef<number>()
-  const _backgroundRef = useRef<HTMLDivElement>(null)
-  const _contentRef = useRef<HTMLDivElement>(null)
-  const _canvas = useRef<HTMLCanvasElement>(null)
-  const _image = useRef<
-    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-  >()
-  const _scale = useRef<number>()
-  const _timeouts = useRef<number[]>([])
+const center = (
+  width: number,
+  height: number,
+  parentWidth: number,
+  parentHeight: number
+): CSSProperties => {
+  const left = (parentWidth - height) / 2 - width
+  const top = (parentHeight - width) / 2
+  return { width, height, left, top }
+}
 
-  const _prevBackgroundType = useRef<string>()
-  const _prevHasStarted = useRef<boolean>()
+const fitWidth = (
+  imgWidth: number,
+  imgHeight: number,
+  parentWidth: number,
+  parentHeight: number
+): CSSProperties => {
+  const height = parentWidth
+  const width = (height / imgHeight) * imgWidth
+  return center(width, height, parentWidth, parentHeight)
+}
 
-  const _applyImage = useCallback(
-    (forceBG = false) => {
-      // console.log(`APPLY IMAGE: ${props.uuid}`)
-      const el = _contentRef.current
-      const bg = _backgroundRef.current
-      const img = props.image
-      // console.log('el: ' + !!el)
-      // console.log('img: ' + !!img)
-      // console.log('forceBG: ' + forceBG)
-      // console.log('======================')
-      if (!el || !img) {
-        return
-      }
+const fitHeight = (
+  imgWidth: number,
+  imgHeight: number,
+  parentWidth: number,
+  parentHeight: number
+): CSSProperties => {
+  const width = parentHeight
+  const height = (width / imgWidth) * imgHeight
+  return center(width, height, parentWidth, parentHeight)
+}
 
-      const firstChild = el.firstChild as
-        | HTMLImageElement
-        | HTMLVideoElement
-        | HTMLIFrameElement
-      if (
-        !forceBG &&
-        firstChild &&
-        firstChild.src === img.src &&
-        firstChild.getAttribute('start') === img.getAttribute('start') &&
-        firstChild.getAttribute('end') === img.getAttribute('end')
-      ) {
-        return
-      }
+const fitBestNoClip = (
+  imgWidth: number,
+  imgHeight: number,
+  parentWidth: number,
+  parentHeight: number
+): CSSProperties => {
+  const heightRatio = parentHeight / imgWidth
+  const widthRatio = parentWidth / imgHeight
+  return heightRatio < widthRatio
+    ? fitHeight(imgWidth, imgHeight, parentWidth, parentHeight)
+    : fitWidth(imgWidth, imgHeight, parentWidth, parentHeight)
+}
 
-      if (
-        !forceBG &&
-        img instanceof HTMLVideoElement &&
-        img.hasAttribute('subtitles')
-      ) {
-        try {
-          const subURL = img.getAttribute('subtitles') as string
-          wretch(subURL)
-            .get()
-            .blob((blob) => {
-              const track: any = document.createElement('track')
-              track.kind = 'captions'
-              track.label = 'English'
-              track.srclang = 'en'
-              track.src = URL.createObjectURL(blob)
-              if (img.textTracks.length === 0) {
-                img.append(track)
-              } else {
-                img.textTracks[0] = track
-              }
-              track.mode = 'showing'
-              img.textTracks[0].mode = 'showing'
-            })
-        } catch (e) {
-          console.error(e)
-        }
-      }
+const enableStrobeImage = (strobe: StrobeData) => strobe.layer === SL.image
+const enableStrobeBackground = (strobe: StrobeData) =>
+  strobe.layer === SL.background
+const enableStobeTopOrBottom = (strobe: StrobeData) => {
+  return strobe.layer === SL.top || strobe.layer === SL.bottom
+}
 
-      const videoLoop = (v: any) => {
-        if (
-          !el ||
-          !el.parentElement ||
-          parseFloat(el.parentElement.style.opacity) === 0.99 ||
-          v.paused ||
-          _timeouts.current == null
-        ) {
-          return
-        }
-        if (v.ended) {
-          v.onended(null)
-          return
-        }
-
-        if (
-          !props.pictureGrid &&
-          _hasStarted.current &&
-          _crossFade.current &&
-          _crossFadeAudio.current &&
-          v instanceof HTMLVideoElement
-        ) {
-          const volume = v.hasAttribute('volume')
-            ? parseInt(v.getAttribute('volume') as string)
-            : _videoVolume.current
-          v.volume =
-            (volume / 100) *
-            parseFloat(
-              el.parentElement!.parentElement!.getAttribute('volume') as string
-            )
-        }
-        if (v.hasAttribute('start') && v.hasAttribute('end')) {
-          const start = v.getAttribute('start')
-          const end = v.getAttribute('end')
-          if (v.currentTime > end) {
-            v.onended(null)
-            v.currentTime = start
-          }
-        }
-        _timeouts.current.push(window.setTimeout(videoLoop, 100, v))
-      }
-
-      const drawLoop = (
-        v: any,
-        c: CanvasRenderingContext2D,
-        w: number,
-        h: number
-      ) => {
-        if (
-          !el ||
-          !el.parentElement ||
-          parseFloat(el.parentElement.style.opacity) === 0.99 ||
-          _timeouts.current == null
-        ) {
-          return
-        }
-        c.drawImage(v, 0, 0, w, h)
-        _timeouts.current.push(window.setTimeout(drawLoop, 20, v, c, w, h))
-      }
-
-      const extraDrawLoop = (v: any, w: number, h: number) => {
-        if (
-          !el ||
-          !el.parentElement ||
-          parseFloat(el.parentElement.style.opacity) === 0.99 ||
-          v.ended ||
-          v.paused ||
-          _timeouts.current == null
-        ) {
-          return
-        }
-        for (const canvas of document.getElementsByClassName(
-          'canvas-' +
-            props.gridCoordinates![0] +
-            '-' +
-            props.gridCoordinates![1]
-        )) {
-          const context = (canvas as HTMLCanvasElement).getContext(
-            '2d'
-          ) as CanvasRenderingContext2D
-          context.drawImage(v, 0, 0, w, h)
-        }
-        _timeouts.current.push(window.setTimeout(extraDrawLoop, 20, v, w, h))
-      }
-
-      const extraBGDrawLoop = (v: any, w: number, h: number) => {
-        if (
-          !el ||
-          !el.parentElement ||
-          parseFloat(el.parentElement.style.opacity) === 0.99 ||
-          _timeouts.current == null
-        ) {
-          return
-        }
-        for (const canvas of document.getElementsByClassName(
-          'canvas-bg-' +
-            props.gridCoordinates![0] +
-            '-' +
-            props.gridCoordinates![1]
-        )) {
-          const context = (canvas as HTMLCanvasElement).getContext(
-            '2d'
-          ) as CanvasRenderingContext2D
-          context.drawImage(v, 0, 0, w, h)
-        }
-        _timeouts.current.push(window.setTimeout(extraBGDrawLoop, 20, v, w, h))
-      }
-
-      let parentWidth = el.offsetWidth
-      let parentHeight = el.offsetHeight
-      if (props.fitParent) {
-        parentWidth = el.parentElement!.offsetWidth
-        parentHeight = el.parentElement!.offsetHeight
-      }
-      if (parentWidth === 0 || parentHeight === 0) {
-        parentWidth = window.innerWidth
-        parentHeight = window.innerHeight
-      }
-      if (
-        parentHeight !== _parentHeight.current ||
-        parentWidth !== _parentWidth.current
-      ) {
-        _parentHeight.current = parentHeight
-        _parentWidth.current = parentWidth
-      }
-      const parentAspect = parentWidth / parentHeight
-      let imgWidth = 1
-      let imgHeight = 1
-      let scale = 1
-      let bgscale = 1
-      let type = null
-      if (img instanceof HTMLImageElement) {
-        imgWidth = img.width
-        imgHeight = img.height
-      } else if (img instanceof HTMLVideoElement) {
-        type = ST.video
-        imgWidth = img.videoWidth
-        imgHeight = img.videoHeight
-        if (img.paused) img.play().catch((err) => console.warn(err))
-      } else if (img instanceof HTMLIFrameElement) {
-        type = ST.nimja
-      }
-      let imgAspect = imgWidth / imgHeight
-
-      const rotate =
-        !props.pictureGrid &&
-        ((type === ST.video &&
-          ((_videoOrientation.current === OT.forceLandscape &&
-            imgWidth < imgHeight) ||
-            (_videoOrientation.current === OT.forcePortrait &&
-              imgWidth > imgHeight))) ||
-          (type == null &&
-            ((_imageOrientation.current === OT.forceLandscape &&
-              imgWidth < imgHeight) ||
-              (_imageOrientation.current === OT.forcePortrait &&
-                imgWidth > imgHeight))))
-
-      const blur =
-        !props.pictureGrid &&
-        _backgroundType.current === BT.blur &&
-        type !== ST.nimja
-      let bgImg: any
-      if (blur) {
-        if (img.src.endsWith('.gif')) {
-          bgImg = img.cloneNode()
-        } else {
-          bgImg = document.createElement('canvas')
-
-          const context = bgImg.getContext('2d')
-          bgImg.width = parentWidth
-          bgImg.height = parentHeight
-
-          if (!_crossFade.current) {
-            clearTimeouts()
-          }
-          if (type == null) {
-            context.drawImage(img, 0, 0, parentWidth, parentHeight)
-          } else if (type === ST.video) {
-            if (forceBG) {
-              drawLoop(img, context, parentWidth, parentHeight)
-              if (props.gridCoordinates) {
-                extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-                extraBGDrawLoop(img, parentWidth, parentHeight)
-              }
-            } else {
-              img.onplay = () => {
-                videoLoop(img)
-                if (props.gridCoordinates) {
-                  extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-                }
-              }
-              drawLoop(img, context, parentWidth, parentHeight)
-              if (props.gridCoordinates) {
-                extraBGDrawLoop(img, parentWidth, parentHeight)
-              }
-            }
-          }
-        }
-
-        if (rotate) {
-          bgImg.style.transform = 'rotate(270deg)'
-          if (imgAspect > parentAspect) {
-            if (imgWidth > imgHeight) {
-              bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-              bgImg.style.width = imgWidth * bgscale + 'px'
-              bgImg.style.height = parentWidth + 'px'
-              bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
-              bgImg.style.marginLeft =
-                (parentWidth - imgWidth * bgscale) / 2 + 'px'
-            } else {
-              bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-              bgImg.style.width = parentHeight + 'px'
-              bgImg.style.height = imgHeight * bgscale + 'px'
-              bgImg.style.marginTop =
-                (parentHeight - imgHeight * bgscale) / 2 + 'px'
-              bgImg.style.marinLeft = (parentWidth - parentHeight) / 2 + 'px'
-            }
-          } else {
-            if (imgWidth > imgHeight) {
-              bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-              bgImg.style.width = imgWidth * bgscale + 'px'
-              bgImg.style.height = parentWidth + 'px'
-              bgImg.style.marginTop = (parentHeight - parentWidth) / 2 + 'px'
-              bgImg.style.marginLeft =
-                (parentWidth - imgWidth * bgscale) / 2 + 'px'
-            } else {
-              bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-              bgImg.style.width = parentHeight + 'px'
-              bgImg.style.height = imgHeight * bgscale + 'px'
-              bgImg.style.marginTop =
-                parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
-              bgImg.style.marginLeft = (parentWidth - parentHeight) / 2 + 'px'
-            }
-          }
-        } else {
-          if (imgAspect < parentAspect) {
-            bgscale = (parentWidth + 0.04 * parentWidth) / imgWidth
-            bgImg.style.width = '100%'
-            bgImg.style.height = imgHeight * bgscale + 'px'
-            bgImg.style.marginTop =
-              parentHeight / 2 - (imgHeight * bgscale) / 2 + 'px'
-            bgImg.style.marginLeft = '0'
-          } else {
-            bgscale = (parentHeight + 0.04 * parentHeight) / imgHeight
-            bgImg.style.width = imgWidth * bgscale + 'px'
-            bgImg.style.height = '100%'
-            bgImg.style.marginTop = '0'
-            bgImg.style.marginLeft =
-              parentWidth / 2 - (imgWidth * bgscale) / 2 + 'px'
-          }
-        }
-      }
-
-      if (!forceBG && img instanceof HTMLVideoElement) {
-        if (!props.pictureGrid && _hasStarted.current) {
-          const volume = img.hasAttribute('volume')
-            ? parseInt(img.getAttribute('volume') as string)
-            : _videoVolume.current
-          img.volume = volume / 100
-        } else {
-          img.volume = 0
-        }
-        img.playbackRate = img.hasAttribute('speed')
-          ? parseInt(img.getAttribute('speed') as string) / 10
-          : 1
-        if (!blur) {
-          img.onplay = () => {
-            videoLoop(img)
-            if (props.gridCoordinates) {
-              extraDrawLoop(img, imgWidth * scale, imgHeight * scale)
-            }
-          }
-        }
-        if (img.paused) {
-          img.play().catch((err) => console.warn(err))
-        }
-      }
-
-      const fitBestClip = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentAspect: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          const imgAspect = imgHeight / imgWidth
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-          if (imgAspect < parentAspect) {
-            const scale = parentWidth / imgHeight
-            img.style.height = parentWidth.toString() + 'px'
-            img.style.marginLeft = '-' + imgWidth * scale + 'px'
-            img.style.marginTop =
-              parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-          } else {
-            const scale = parentHeight / imgWidth
-            img.style.width = parentHeight.toString() + 'px'
-            img.style.marginLeft =
-              -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-          }
-        } else {
-          if (imgAspect > parentAspect) {
-            scale = parentHeight / imgHeight
-            img.style.width = 'auto'
-            img.style.height = '100%'
-            img.style.marginTop = '0'
-            img.style.marginLeft =
-              parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-          } else {
-            scale = parentWidth / imgWidth
-            img.style.width = '100%'
-            img.style.height = 'auto'
-            img.style.marginTop =
-              parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-            img.style.marginLeft = '0'
-          }
-        }
-      }
-
-      const fitBestNoClip = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentAspect: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          const imgAspect = imgHeight / imgWidth
-          if (imgAspect < parentAspect) {
-            const scale = parentHeight / imgWidth
-            img.style.width = parentHeight.toString() + 'px'
-            img.style.marginLeft =
-              -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-
-            img.style.transform = 'rotate(270deg)'
-            img.style.transformOrigin = 'top right'
-          } else {
-            const scale = parentWidth / imgHeight
-            img.style.height = parentWidth.toString() + 'px'
-            img.style.marginLeft = '-' + imgWidth * scale + 'px'
-            img.style.marginTop =
-              parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-            img.style.transform = 'rotate(270deg)'
-            img.style.transformOrigin = 'top right'
-          }
-        } else {
-          if (imgAspect < parentAspect) {
-            const scale = parentHeight / imgHeight
-            img.style.width = 'auto'
-            img.style.height = '100%'
-            img.style.marginTop = '0'
-            img.style.marginLeft =
-              parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-          } else {
-            const scale = parentWidth / imgWidth
-            img.style.width = '100%'
-            img.style.height = 'auto'
-            img.style.marginTop =
-              parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-            img.style.marginLeft = '0'
-          }
-        }
-      }
-
-      const centerNoClip = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentAspect: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'center'
-        }
-        const cTop = parentHeight - imgHeight
-        const cLeft = parentWidth - imgWidth
-        if (cTop >= 0 && cLeft >= 0) {
-          img.style.marginTop = cTop / 2 + 'px'
-          img.style.marginLeft = cLeft / 2 + 'px'
-          return
-        }
-
-        fitBestNoClip(
-          img,
-          rotate,
-          imgHeight,
-          imgWidth,
-          parentAspect,
-          parentHeight,
-          parentWidth
-        )
-      }
-
-      const stretch = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          const scale = parentWidth / imgHeight
-          img.style.height = parentWidth.toString() + 'px'
-          img.style.marginLeft = '-' + imgWidth * scale + 'px'
-          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-        } else {
-          img.style.objectFit = 'fill'
-          img.style.width = '100%'
-          img.style.height = '100%'
-        }
-      }
-
-      const center = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'center'
-        }
-        const top = parentHeight - imgHeight
-        const left = parentWidth - imgWidth
-        img.style.marginTop = top / 2 + 'px'
-        img.style.marginLeft = left / 2 + 'px'
-      }
-
-      const fitWidth = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          const scale = parentWidth / imgHeight
-          img.style.height = parentWidth.toString() + 'px'
-          img.style.marginLeft = '-' + imgWidth * scale + 'px'
-          img.style.marginTop = parentHeight / 2 - (imgWidth * scale) / 2 + 'px'
-
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-        } else {
-          const scale = parentWidth / imgWidth
-          img.style.width = '100%'
-          img.style.height = 'auto'
-          img.style.marginTop =
-            parentHeight / 2 - (imgHeight * scale) / 2 + 'px'
-          img.style.marginLeft = '0'
-        }
-      }
-
-      const fitHeight = (
-        img: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-        rotate: boolean,
-        imgHeight: number,
-        imgWidth: number,
-        parentHeight: number,
-        parentWidth: number
-      ) => {
-        if (rotate) {
-          const scale = parentHeight / imgWidth
-          img.style.width = parentHeight.toString() + 'px'
-          img.style.marginLeft =
-            -parentHeight + (parentWidth / 2 - (imgHeight * scale) / 2) + 'px'
-
-          img.style.transform = 'rotate(270deg)'
-          img.style.transformOrigin = 'top right'
-        } else {
-          const scale = parentHeight / imgHeight
-          img.style.width = 'auto'
-          img.style.height = '100%'
-          img.style.marginTop = '0'
-          img.style.marginLeft = parentWidth / 2 - (imgWidth * scale) / 2 + 'px'
-        }
-      }
-
-      if (!props.pictureGrid && type !== ST.nimja) {
-        switch (_imageType.current) {
-          case IT.fitBestClip:
-            fitBestClip(
-              img,
-              rotate,
-              imgHeight,
-              imgWidth,
-              parentAspect,
-              parentHeight,
-              parentWidth
-            )
-            break
-          case IT.centerNoClip:
-            centerNoClip(
-              img,
-              rotate,
-              imgHeight,
-              imgWidth,
-              parentAspect,
-              parentHeight,
-              parentWidth
-            )
-            break
-          default:
-          case IT.fitBestNoClip:
-            fitBestNoClip(
-              img,
-              rotate,
-              imgHeight,
-              imgWidth,
-              parentAspect,
-              parentHeight,
-              parentWidth
-            )
-            break
-          case IT.stretch:
-            stretch(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-            break
-          case IT.center:
-            center(img, rotate, imgHeight, imgWidth, parentHeight, parentWidth)
-            break
-          case IT.fitWidth:
-            fitWidth(
-              img,
-              rotate,
-              imgHeight,
-              imgWidth,
-              parentHeight,
-              parentWidth
-            )
-            break
-          case IT.fitHeight:
-            fitHeight(
-              img,
-              rotate,
-              imgHeight,
-              imgWidth,
-              parentHeight,
-              parentWidth
-            )
-            break
-        }
-      } else {
-        img.style.width = '100%'
-        img.style.height = '100%'
-        img.style.marginTop = '0'
-        img.style.marginLeft = '0'
-      }
-
-      if (!forceBG) {
-        if (props.setVideo) {
-          // console.log('INVOKE SET_VIDEO')
-          props.setVideo(img instanceof HTMLVideoElement ? img : undefined)
-        }
-
-        _image.current = img
-        _scale.current = scale
-
-        const appendOriginal = () => {
-          if (props.removeChild && el.hasChildNodes()) {
-            el.removeChild(el.children.item(0) as Element)
-          }
-          if (
-            img instanceof HTMLVideoElement &&
-            props.pictureGrid &&
-            img.paused
-          ) {
-            img.play().catch((err) => console.warn(err))
-          }
-          if (img instanceof HTMLIFrameElement) {
-            img.onload = () => {
-              img
-                .contentWindow!.document.getElementsByClassName('copyright')[0]
-                .remove()
-              img.contentWindow!.document.getElementById('intro-start')!.click()
-            }
-          }
-
-          if (props.pictureGrid) {
-            el.appendChild(img.cloneNode())
-          } else {
-            el.appendChild(img)
-          }
-        }
-        if (props.gridCoordinates) {
-          for (const element of document.getElementsByClassName(
-            'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-          )) {
-            if (element === el) {
-              appendOriginal()
-            } else {
-              if (
-                props.removeChild &&
-                element.hasChildNodes() &&
-                el.hasChildNodes()
-              ) {
-                element.removeChild(element.children.item(0) as Element)
-              }
-              if (img instanceof HTMLVideoElement) {
-                if (_cloneGridVideoElements.current) {
-                  const clone = img.cloneNode() as HTMLVideoElement
-                  clone.volume = img.volume
-                  clone.currentTime = img.currentTime
-                  for (const attr of img.getAttributeNames()) {
-                    clone.setAttribute(attr, img.getAttribute(attr) as string)
-                  }
-                  clone.play().catch((err) => console.warn(err))
-                  element.appendChild(clone)
-                } else {
-                  const canvas = document.createElement('canvas')
-                  canvas.className =
-                    'canvas-' +
-                    props.gridCoordinates[0] +
-                    '-' +
-                    props.gridCoordinates[1]
-                  canvas.width = img.videoWidth * scale
-                  canvas.height = img.videoHeight * scale
-                  canvas.style.marginTop = img.style.marginTop
-                  canvas.style.marginLeft = img.style.marginLeft
-                  canvas.style.transform = img.style.transform
-                  canvas.style.transformOrigin = img.style.transformOrigin
-                  element.appendChild(canvas)
-                }
-              } else {
-                element.appendChild(img.cloneNode())
-              }
-            }
-          }
-        } else {
-          appendOriginal()
-        }
-      }
-      if (blur) {
-        const bgDiv = bg as HTMLDivElement
-        const appendOriginalBG = () => {
-          if (props.removeChild && bgDiv.hasChildNodes()) {
-            bgDiv.removeChild(bgDiv.children.item(0) as Element)
-          }
-          bgDiv.appendChild(bgImg)
-        }
-        if (props.gridCoordinates) {
-          for (const element of document.getElementsByClassName(
-            'copy-bg-' +
-              props.gridCoordinates[0] +
-              '-' +
-              props.gridCoordinates[1]
-          )) {
-            if (element === bgDiv) {
-              appendOriginalBG()
-            } else {
-              if (
-                props.removeChild &&
-                element.hasChildNodes() &&
-                bgDiv.hasChildNodes()
-              ) {
-                element.removeChild(element.children.item(0) as Element)
-              }
-              if (
-                img instanceof HTMLVideoElement ||
-                bgImg instanceof HTMLCanvasElement
-              ) {
-                const canvas = document.createElement('canvas')
-                canvas.className =
-                  'canvas-bg-' +
-                  props.gridCoordinates[0] +
-                  '-' +
-                  props.gridCoordinates[1]
-                canvas.width = bgImg.width
-                canvas.height = bgImg.height
-                canvas.style.width = bgImg.style.width
-                canvas.style.height = bgImg.style.height
-                canvas.style.marginTop = bgImg.style.marginTop
-                canvas.style.marginLeft = bgImg.style.marginLeft
-                canvas.style.transform = bgImg.style.transform
-                element.appendChild(canvas)
-              } else {
-                element.appendChild(bgImg.cloneNode())
-              }
-            }
-          }
-        } else {
-          appendOriginalBG()
-        }
-
-        if (props.gridCoordinates && type == null) {
-          for (const canvas of document.getElementsByClassName(
-            'canvas-bg-' +
-              props.gridCoordinates[0] +
-              '-' +
-              props.gridCoordinates[1]
-          )) {
-            const context: any = (canvas as HTMLCanvasElement).getContext('2d')
-            context.drawImage(img, 0, 0, parentWidth, parentHeight)
-          }
-        }
-      }
-
-      if (!props.isOverlay && !_firstImageLoaded.current) {
-        // console.log('firstImageLoaded')
-        dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: true }))
-      }
+const useStyles = makeStyles()((theme: Theme) => {
+  return {
+    rotate: {
+      position: 'absolute',
+      transform: 'rotate(270deg)',
+      transformOrigin: 'top right'
     },
-    [dispatch, props]
-  )
-
-  useEffect(() => {
-    _timeouts.current = []
-    if (!props.isOverlay && !_firstImageLoaded.current) {
-      // console.log('firstImageLoaded')
-      dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: true }))
-    }
-    // console.log('MOUNT applyImage')
-    //_applyImage()
-
-    return () => {
-      clearTimeouts()
-      _timeouts.current = []
-    }
-  }, [dispatch, props.isOverlay, props.uuid])
-
-  const startAttr = props.image?.getAttribute('start')
-  const endAttr = props.image?.getAttribute('end')
-  useEffect(() => {
-    let forceBG = false
-    if (
-      !props.pictureGrid &&
-      _prevBackgroundType.current !== _backgroundType.current
-    ) {
-      if (_backgroundType.current === BT.blur) {
-        forceBG = true
-      } else if (
-        _backgroundType.current === BT.blur &&
-        _backgroundRef.current?.firstChild
-      ) {
-        _backgroundRef.current.removeChild(_backgroundRef.current.firstChild)
-      }
-    }
-    _applyImage(forceBG)
-    _prevBackgroundType.current = _backgroundType.current
-  }, [
-    props.image?.src,
-    startAttr,
-    endAttr,
-    props.pictureGrid,
-    _applyImage,
-    sceneID
-  ])
-
-  useEffect(() => {
-    const context = _canvas.current?.getContext('2d')
-    if (context == null) return
-
-    const image = props.image as HTMLImageElement
-    const height =
-      (image.naturalHeight / image.naturalWidth) * context.canvas.width
-    context.fillStyle = '#2196f3'
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height)
-    context.drawImage(
-      image,
-      0,
-      0,
-      image.naturalWidth,
-      image.naturalHeight,
-      0,
-      0,
-      context.canvas.width,
-      height
-    )
-  }, [props.image])
-
-  const clearTimeouts = () => {
-    for (const timeout of _timeouts.current) {
-      clearTimeout(timeout)
+    fitContain: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain'
+    },
+    fitCover: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover'
+    },
+    fitFill: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'fill'
+    },
+    fitCenter: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    fitScaleDown: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'scale-down'
+    },
+    fitParentWidth: {
+      position: 'relative',
+      width: '100%',
+      height: 'auto',
+      display: 'block',
+      margin: '0 auto',
+      top: '50%',
+      transform: 'translateY(-50%)'
+    },
+    fitParentHeight: {
+      position: 'relative',
+      height: '100%',
+      width: 'auto',
+      display: 'block',
+      margin: '0 auto'
+    },
+    imageContainer: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      zIndex: 2,
+      position: 'absolute'
+    },
+    backgroundContainer: {
+      height: '100%',
+      width: '100%',
+      zIndex: -1,
+      position: 'absolute',
+      overflow: 'hidden',
+      backgroundSize: 'cover'
     }
   }
+})
 
-  const strobeImage = () => {
-    const el = _contentRef.current
-    const img = _image.current
-    const scale = _scale.current || 1
-    const appendOriginal = (
-      image: HTMLIFrameElement | HTMLImageElement | HTMLVideoElement,
-      contentRef: HTMLDivElement
-    ) => {
-      if (image) {
-        contentRef.appendChild(image)
-      }
-      if (image instanceof HTMLVideoElement && image.paused) {
-        image.play().catch((err) => console.warn(err))
-      }
-    }
-    if (props.gridCoordinates) {
-      for (const element of document.getElementsByClassName(
-        'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-      )) {
-        if (el && img && img.src === props.image?.src) {
-          if (element === el) {
-            appendOriginal(img, el)
-          } else {
-            if (
-              props.removeChild &&
-              element.hasChildNodes() &&
-              el.hasChildNodes()
-            ) {
-              element.removeChild(element.children.item(0) as Element)
-            }
-            if (img instanceof HTMLVideoElement) {
-              if (_cloneGridVideoElements.current) {
-                const clone = img.cloneNode() as HTMLVideoElement
-                clone.volume = img.volume
-                clone.currentTime = img.currentTime
-                for (const attr of img.getAttributeNames()) {
-                  clone.setAttribute(attr, img.getAttribute(attr) as string)
-                }
-                clone.play().catch((err) => console.warn(err))
-                element.appendChild(clone)
-              } else {
-                const canvas = document.createElement('canvas')
-                canvas.className =
-                  'canvas-' +
-                  props.gridCoordinates[0] +
-                  '-' +
-                  props.gridCoordinates[1]
-                canvas.width = img.videoWidth * scale
-                canvas.height = img.videoHeight * scale
-                canvas.style.marginTop = img.style.marginTop
-                canvas.style.marginLeft = img.style.marginLeft
-                canvas.style.transform = img.style.transform
-                canvas.style.transformOrigin = img.style.transformOrigin
-                element.appendChild(canvas)
-              }
-            } else {
-              element.appendChild(img.cloneNode())
-            }
+interface ImageStyling {
+  style?: CSSProperties
+  className?: string
+  containerClassName?: string
+}
+
+export interface ImageViewProps {
+  index: number
+  show: boolean
+  isPlaying: boolean
+  zIndex: number
+  data: ContentData
+  transform: TransformData
+  view: ViewData
+  effects: EffectsData
+  displayIndex?: number
+  fitParent: boolean
+  gridCoordinates?: number[]
+  pictureGrid?: boolean
+  onLoad: (index: number, duration: number, displayIndex?: number) => void
+  onError: (index: number) => void
+  onHide: (index: number) => void
+}
+
+function ImageView(props: ImageViewProps) {
+  const {
+    index,
+    show,
+    isPlaying,
+    zIndex,
+    data,
+    transform,
+    view,
+    effects,
+    displayIndex,
+    onLoad,
+    onError,
+    onHide
+  } = props
+  const { classes } = useStyles()
+  const [backgroundRef, backgroundBounds] = useMeasure({
+    polyfill: ResizeObserver,
+    offsetSize: true
+  })
+  const [foregroundRef, foregroundBounds] = useMeasure({
+    polyfill: ResizeObserver,
+    offsetSize: true
+  })
+
+  const _prevURL = useRef<string>()
+  const _prevShow = useRef<boolean>(false)
+  const _prevIsPlaying = useRef<boolean>(true)
+  const _foregroundImage = useRef<HTMLImageElement | null>(null)
+  const _backgroundImage = useRef<HTMLImageElement | null>(null)
+  const _foregroundVideo = useRef<HTMLVideoElement | null>(null)
+  const _backgroundVideo = useRef<HTMLVideoElement | null>(null)
+  const _foregroundIFrame = useRef<HTMLIFrameElement | null>(null)
+  const _backgroundIFrame = useRef<HTMLIFrameElement | null>(null)
+  const _iframeLoadCount = useRef<number>(10)
+  const _loading = useRef<boolean>(true)
+  const _hidden = useRef<boolean>(true)
+
+  const imageStyling = useMemo((): ImageStyling => {
+    if (transform.rotate) {
+      const className = classes.rotate
+      const imgWidth = data.width as number
+      const imgHeight = data.height as number
+      const parentWidth = foregroundBounds.width
+      const parentHeight = foregroundBounds.height
+      switch (view.imageType) {
+        case IT.fitBestNoClip: {
+          return {
+            className,
+            style: fitBestNoClip(imgWidth, imgHeight, parentWidth, parentHeight)
           }
         }
+        case IT.fitBestClip: {
+          const heightRatio = parentHeight / imgWidth
+          const widthRatio = parentWidth / imgHeight
+          const style =
+            heightRatio > widthRatio
+              ? fitHeight(imgWidth, imgHeight, parentWidth, parentHeight)
+              : fitWidth(imgWidth, imgHeight, parentWidth, parentHeight)
+          return { className, style }
+        }
+        case IT.stretch: {
+          return {
+            className,
+            style: center(parentHeight, parentWidth, parentWidth, parentHeight)
+          }
+        }
+        case IT.center: {
+          return {
+            className,
+            style: center(imgWidth, imgHeight, parentWidth, parentHeight)
+          }
+        }
+        case IT.centerNoClip: {
+          const style =
+            imgWidth > parentHeight || imgHeight > parentWidth
+              ? fitBestNoClip(imgWidth, imgHeight, parentWidth, parentHeight)
+              : center(imgWidth, imgHeight, parentWidth, parentHeight)
+
+          return { className, style }
+        }
+        case IT.fitWidth: {
+          return {
+            className,
+            style: fitWidth(imgWidth, imgHeight, parentWidth, parentHeight)
+          }
+        }
+        case IT.fitHeight: {
+          return {
+            className,
+            style: fitHeight(imgWidth, imgHeight, parentWidth, parentHeight)
+          }
+        }
+        default:
+          return {}
       }
     } else {
-      if (el && img && img.src === props.image?.src) {
-        appendOriginal(img, el)
+      switch (view.imageType) {
+        case IT.fitBestNoClip:
+          return { className: classes.fitContain }
+        case IT.fitBestClip:
+          const imgWidth = data.width as number
+          const imgHeight = data.height as number
+          const parentWidth = foregroundBounds.width
+          const parentHeight = foregroundBounds.height
+          const heightRatio = parentHeight / imgWidth
+          const widthRatio = parentWidth / imgHeight
+          const className =
+            heightRatio > widthRatio
+              ? classes.fitParentHeight
+              : classes.fitParentWidth
+          return { className }
+        case IT.stretch:
+          return { className: classes.fitFill }
+        case IT.center:
+          return { containerClassName: classes.fitCenter }
+        case IT.centerNoClip:
+          return { className: classes.fitScaleDown }
+        case IT.fitWidth:
+          return { className: classes.fitParentWidth }
+        case IT.fitHeight:
+          return { className: classes.fitParentHeight }
+        default:
+          return {}
       }
     }
-  }
+  }, [
+    view.imageType,
+    transform.rotate,
+    data.height,
+    data.width,
+    foregroundBounds.height,
+    foregroundBounds.width,
+    classes.fitCenter,
+    classes.fitContain,
+    classes.fitFill,
+    classes.fitParentHeight,
+    classes.fitParentWidth,
+    classes.fitScaleDown,
+    classes.rotate
+  ])
 
-  if (
-    _hasStarted.current === false &&
-    _prevHasStarted.current !== _hasStarted.current
-  ) {
-    const el = _contentRef.current
-    if (el?.firstChild && el.firstChild instanceof HTMLVideoElement) {
-      const volume = el.firstChild.hasAttribute('volume')
-        ? parseInt(el.firstChild.getAttribute('volume') as string)
-        : _videoVolume.current
-      el.firstChild.volume = volume / 100
+  const blurredBackgroundStyling = useMemo((): ImageStyling => {
+    if (view.backgroundType !== BT.blur) {
+      return {}
+    }
+    if (transform.rotate) {
+      const imgWidth = data.width as number
+      const imgHeight = data.height as number
+      const parentWidth = backgroundBounds.width
+      const parentHeight = backgroundBounds.height
+      const heightRatio = parentHeight / imgWidth
+      const widthRatio = parentWidth / imgHeight
+      const style =
+        heightRatio > widthRatio
+          ? fitHeight(imgWidth, imgHeight, parentWidth, parentHeight)
+          : fitWidth(imgWidth, imgHeight, parentWidth, parentHeight)
+
+      const className = classes.rotate
+      return { className, style }
+    } else {
+      return { className: classes.fitCover }
+    }
+  }, [
+    view.backgroundType,
+    classes.fitCover,
+    classes.rotate,
+    transform.rotate,
+    backgroundBounds.height,
+    backgroundBounds.width,
+    data.height,
+    data.width
+  ])
+
+  const onHideEvent = useCallback(() => {
+    _hidden.current = true
+    if (_foregroundVideo.current != null) {
+      _foregroundVideo.current.volume = 0
+      pauseVideo(_foregroundVideo.current)
+    }
+    if (_backgroundVideo.current != null) {
+      pauseVideo(_backgroundVideo.current)
+    }
+    if (_foregroundIFrame.current != null) {
+      _foregroundIFrame.current.src = 'about:blank'
+    }
+    if (_backgroundIFrame.current != null) {
+      _backgroundIFrame.current.src = 'about:blank'
+    }
+    onHide(index)
+  }, [onHide, index])
+
+  const onLoadEvent = useCallback(() => {
+    if (_loading.current) {
+      _loading.current = false
+      onLoad(index, view.timeToNextFrame, displayIndex)
+    }
+  }, [onLoad, index, view.timeToNextFrame, displayIndex])
+
+  const onErrorEvent = useCallback(() => {
+    if (_loading.current) {
+      _loading.current = false
+      onError(index)
+    }
+  }, [onError, index])
+
+  const onLoadIFrame = useCallback(
+    (event: SyntheticEvent<HTMLIFrameElement>) => {
+      const iframe = event.currentTarget
+      let loaded =
+        iframe.contentWindow != null &&
+        iframe.contentWindow.location.href === data.url
+      const document = loaded
+        ? iframe.contentDocument ?? iframe.contentWindow?.document
+        : undefined
+      if (document != null && document.readyState === 'complete') {
+        const copyright = document.getElementsByClassName('copyright')
+        if (copyright.length > 0) {
+          copyright[0].remove()
+        }
+        const startButton = document.getElementById('intro-start')
+        loaded = startButton != null
+      }
+
+      if (loaded) {
+        _iframeLoadCount.current--
+        if (_iframeLoadCount.current === 0) {
+          onLoadEvent()
+        }
+      } else {
+        _iframeLoadCount.current = 10
+        onErrorEvent()
+      }
+    },
+    [data.url, onLoadEvent, onErrorEvent]
+  )
+
+  const onVideoRepeat = useCallback(
+    (event: SyntheticEvent<HTMLVideoElement>) => {
+      const video = event.currentTarget
+      pauseVideo(video)
+      if (_hidden.current) {
+        return
+      }
+
+      video.currentTime = view.video?.start as number
+      if (isPlaying) {
+        playVideo(video)
+      }
+    },
+    [view.video?.start, isPlaying]
+  )
+
+  const onVideoTimeUpdate = useCallback(
+    (event: SyntheticEvent<HTMLVideoElement>) => {
+      const { currentTime } = event.currentTarget
+      const start = view.video?.start as number
+      const end = view.video?.end as number
+      if (currentTime < start || currentTime >= end) {
+        onVideoRepeat(event)
+      }
+    },
+    [onVideoRepeat, view.video?.end, view.video?.start]
+  )
+
+  const foregroundComponent = useMemo(() => {
+    const { className, style } = imageStyling
+    switch (data.type) {
+      case 'image':
+        return (
+          <img
+            ref={_foregroundImage}
+            onLoad={onLoadEvent}
+            onError={onErrorEvent}
+            onAbort={onErrorEvent}
+            src={data.url}
+            className={className}
+            style={style}
+            alt=""
+          />
+        )
+      case 'video':
+        return (
+          <video
+            ref={_foregroundVideo}
+            onLoadedData={onLoadEvent}
+            onError={onErrorEvent}
+            onAbort={onErrorEvent}
+            src={view.video?.url}
+            onTimeUpdate={onVideoTimeUpdate}
+            onEnded={onVideoRepeat}
+            className={className}
+            style={style}
+          />
+        )
+      case 'iframe':
+        return (
+          <iframe
+            ref={_foregroundIFrame}
+            className={classes.fitContain}
+            style={{ border: 0 }}
+            onLoad={onLoadIFrame}
+            onError={onErrorEvent}
+            onAbort={onErrorEvent}
+            src={data.url}
+            title={`nimja-${index}`}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        )
+      default:
+        return null
+    }
+  }, [
+    index,
+    data.type,
+    data.url,
+    view.video?.url,
+    imageStyling,
+    classes.fitContain,
+    onErrorEvent,
+    onLoadEvent,
+    onLoadIFrame,
+    onVideoRepeat,
+    onVideoTimeUpdate
+  ])
+
+  const backgroundComponent = useMemo(() => {
+    if (view.backgroundType !== BT.blur) {
+      return null
+    }
+
+    const { className, style } = blurredBackgroundStyling
+    switch (data.type) {
+      case 'image':
+        return (
+          <img
+            ref={_backgroundImage}
+            src={data.url}
+            className={className}
+            style={style}
+            alt=""
+          />
+        )
+      case 'video':
+        return (
+          <video
+            ref={_backgroundVideo}
+            src={view.video?.url}
+            onTimeUpdate={onVideoTimeUpdate}
+            onEnded={onVideoRepeat}
+            className={className}
+            style={style}
+            muted
+          />
+        )
+      case 'iframe':
+        return (
+          <iframe
+            ref={_backgroundIFrame}
+            title={`nimja-bg-${index}`}
+            className={className}
+            style={{ ...style, border: 0 }}
+            onLoad={onLoadIFrame}
+            src={data.url}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        )
+      default:
+        return null
+    }
+  }, [
+    view.backgroundType,
+    view.video?.url,
+    data.type,
+    data.url,
+    blurredBackgroundStyling,
+    index,
+    onLoadIFrame,
+    onVideoRepeat,
+    onVideoTimeUpdate
+  ])
+
+  if (_prevURL.current !== data.url) {
+    _prevURL.current = data.url
+    _loading.current = true
+    switch (data.type) {
+      case 'image':
+        _foregroundImage.current?.removeAttribute('src')
+        _backgroundImage.current?.removeAttribute('src')
+        break
+      case 'video':
+        _foregroundVideo.current?.removeAttribute('src')
+        _backgroundVideo.current?.removeAttribute('src')
+        _foregroundVideo.current?.load()
+        _backgroundVideo.current?.load()
+        break
+      case 'iframe':
+        _iframeLoadCount.current = view.backgroundType === BT.blur ? 2 : 1
+        break
     }
   }
 
-  // START LOG COMPONENT CHANGES
-  // const pr_uuid = useRef<string>()
-  // const pr_isOverlay = useRef<boolean>()
-  // const pr_image = useRef<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>()
-  // const pr_fitParent = useRef<boolean>()
-  // const pr_currentAudio = useRef<number>()
-  // const pr_gridCoordinates = useRef<number[]>()
-  // const pr_timeToNextFrame = useRef<number>()
-  // const pr_toggleStrobe = useRef<boolean>()
-  // const pr_pictureGrid = useRef<boolean>()
-  // const pr_removeChild = useRef<boolean>()
-  // const pr_className = useRef<string>()
-  // const pr_onLoaded = useRef<() => void>()
-  // const pr_setSceneCopy = useRef<(children: React.ReactNode) => void>()
-  // const pr_setVideo = useRef<(video: HTMLVideoElement) => void>()
-  // const p_hasStarted = useRef<boolean>()
-  // const p_firstImageLoaded = useRef<boolean>()
-  // const p_sceneID = useRef<number>()
-  // const p_cloneGridVideoElements = useRef<boolean>()
-  // const p_backgroundType = useRef<string>()
-  // const p_backgroundColor = useRef<string>()
-  // const p_backgroundColorSet = useRef<string[]>()
-  // const p_backgroundBlur = useRef<number>()
-  // const p_videoVolume = useRef<number>()
-  // const p_crossFade = useRef<boolean>()
-  // const p_crossFadeAudio = useRef<boolean>()
-  // const p_slide = useRef<boolean>()
-  // const p_imageOrientation = useRef<string>()
-  // const p_videoOrientation = useRef<string>()
-  // const p_imageType = useRef<string>()
-  // const p_strobe = useRef<boolean>()
-  // const p_strobeLayer = useRef<string>()
-  // const p_strobePulse = useRef<boolean>()
-  // const p_strobeDelayTF = useRef<string>()
-  // const p_strobeTF = useRef<string>()
-  // const p_zoom = useRef<boolean>()
-  // const p_horizTransType = useRef<string>()
-  // const p_vertTransType = useRef<string>()
-  // const p_panning = useRef<boolean>()
-  // const p_fadeInOut = useRef<boolean>()
-  // const r_parentHeight = useRef<number>()
-  // const r_parentWidth = useRef<number>()
-  // const r_backgroundRef = useRef<HTMLDivElement>()
-  // const r_contentRef = useRef<HTMLDivElement>()
-  // const r_image = useRef<
-  //   HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-  // >()
-  // const r_scale = useRef<number>()
-  // const r_timeouts = useRef<number[]>([])
-
-  // const r_prevBackgroundType = useRef<string>()
-  // const r_prevHasStarted = useRef<boolean>()
-
-  // console.log('44------------------------44')
-  // if (props.uuid !== pr_uuid.current) {
-  //   console.log('UUID PROP CHANGED')
-  //   pr_uuid.current = props.uuid
-  // }
-  // if (props.isOverlay !== pr_isOverlay.current) {
-  //   console.log('IS_OVERLAY PROP CHANGED')
-  //   pr_isOverlay.current = props.isOverlay
-  // }
-  // if (props.image !== pr_image.current) {
-  //   console.log('IMAGE PROP CHANGED')
-  //   pr_image.current = props.image
-  // }
-  // if (props.fitParent !== pr_fitParent.current) {
-  //   console.log('FIT_PARENT PROP CHANGED')
-  //   pr_fitParent.current = props.fitParent
-  // }
-  // if (props.currentAudio !== pr_currentAudio.current) {
-  //   console.log('CURRENT_AUDIO PROP CHANGED')
-  //   pr_currentAudio.current = props.currentAudio
-  // }
-  // if (props.gridCoordinates !== pr_gridCoordinates.current) {
-  //   console.log('GRID_COORDINATES PROP CHANGED')
-  //   pr_gridCoordinates.current = props.gridCoordinates
-  // }
-  // if (props.timeToNextFrame !== pr_timeToNextFrame.current) {
-  //   console.log('TIME_TO_NEXT_FRAME PROP CHANGED')
-  //   pr_timeToNextFrame.current = props.timeToNextFrame
-  // }
-  // if (props.toggleStrobe !== pr_toggleStrobe.current) {
-  //   console.log('TOGGLE_STROBE PROP CHANGED')
-  //   pr_toggleStrobe.current = props.toggleStrobe
-  // }
-  // if (props.pictureGrid !== pr_pictureGrid.current) {
-  //   console.log('PICTURE_GRID PROP CHANGED')
-  //   pr_pictureGrid.current = props.pictureGrid
-  // }
-  // if (props.removeChild !== pr_removeChild.current) {
-  //   console.log('REMOVE_CHILD PROP CHANGED')
-  //   pr_removeChild.current = props.removeChild
-  // }
-  // if (props.className !== pr_className.current) {
-  //   console.log('CLASS_NAME PROP CHANGED')
-  //   pr_className.current = props.className
-  // }
-  // if (props.onLoaded !== pr_onLoaded.current) {
-  //   console.log('ON_LOADED PROP CHANGED')
-  //   pr_onLoaded.current = props.onLoaded
-  // }
-  // if (props.setSceneCopy !== pr_setSceneCopy.current) {
-  //   console.log('SET_SCENE_COPY PROP CHANGED')
-  //   pr_setSceneCopy.current = props.setSceneCopy
-  // }
-  // if (props.setVideo !== pr_setVideo.current) {
-  //   console.log('SET_VIDEO PROP CHANGED')
-  //   pr_setVideo.current = props.setVideo
-  // }
-  // if( p_hasStarted.current !== _hasStarted.current){
-  //   console.log('HAS_STARTED CHANGED')
-  //   p_hasStarted.current = _hasStarted.current
-  // }
-  // if( p_firstImageLoaded.current !== _firstImageLoaded.current){
-  //   console.log('FIRST_IMAGE_LOADED CHANGED')
-  //   p_firstImageLoaded.current = _firstImageLoaded.current
-  // }
-  // if( p_sceneID.current !== sceneID){
-  //   console.log('SCENE_ID CHANGED')
-  //   p_sceneID.current = sceneID
-  // }
-  // if( p_cloneGridVideoElements.current !== _cloneGridVideoElements.current){
-  //   console.log('CLONE_GRID_VIDEO_ELEMENTS CHANGED')
-  //   p_cloneGridVideoElements.current = _cloneGridVideoElements.current
-  // }
-  // if( p_backgroundType.current !== _backgroundType.current){
-  //   console.log('BACKGROUND_TYPE CHANGED')
-  //   p_backgroundType.current = _backgroundType.current
-  // }
-  // if( p_backgroundColor.current !== _backgroundColor.current){
-  //   console.log('BACKGROUND_COLOR CHANGED')
-  //   p_backgroundColor.current = _backgroundColor.current
-  // }
-  // if( p_backgroundColorSet.current !== _backgroundColorSet.current){
-  //   console.log('BACKGROUND_COLOR_SET CHANGED')
-  //   p_backgroundColorSet.current = _backgroundColorSet.current
-  // }
-  // if( p_backgroundBlur.current !== _backgroundBlur.current){
-  //   console.log('BACKGROUND_BLUR CHANGED')
-  //   p_backgroundBlur.current = _backgroundBlur.current
-  // }
-  // if( p_videoVolume.current !== _videoVolume.current){
-  //   console.log('VIDEO_VOLUME CHANGED')
-  //   p_videoVolume.current = _videoVolume.current
-  // }
-  // if( p_crossFade.current !== _crossFade.current){
-  //   console.log('CROSS_FADE CHANGED')
-  //   p_crossFade.current = _crossFade.current
-  // }
-  // if( p_crossFadeAudio.current !== _crossFadeAudio.current){
-  //   console.log('CROSS_FADE_AUDIO CHANGED')
-  //   p_crossFadeAudio.current = _crossFadeAudio.current
-  // }
-  // if( p_slide.current !== _slide.current){
-  //   console.log('SLIDE CHANGED')
-  //   p_slide.current = _slide.current
-  // }
-  // if( p_imageOrientation.current !== _imageOrientation.current){
-  //   console.log('IMAGE_ORIENTATION CHANGED')
-  //   p_imageOrientation.current = _imageOrientation.current
-  // }
-  // if( p_videoOrientation.current !== _videoOrientation.current){
-  //   console.log('VIDEO_ORIENTATION CHANGED')
-  //   p_videoOrientation.current = _videoOrientation.current
-  // }
-  // if( p_imageType.current !== _imageType.current){
-  //   console.log('IMAGE_TYPE CHANGED')
-  //   p_imageType.current = _imageType.current
-  // }
-  // if( p_strobe.current !== _strobe.current){
-  //   console.log('STROBE CHANGED')
-  //   p_strobe.current = _strobe.current
-  // }
-  // if( p_strobeLayer.current !== _strobeLayer.current){
-  //   console.log('STROBE_LAYER CHANGED')
-  //   p_strobeLayer.current = _strobeLayer.current
-  // }
-  // if( p_strobePulse.current !== _strobePulse.current) {
-  //   console.log('STROBE_PULSE CHANGED')
-  //   p_strobePulse.current = _strobePulse.current
-  // }
-  // if( p_strobeDelayTF.current !== _strobeDelayTF.current){
-  //   console.log('STROBE_DELAY_TF CHANGED')
-  //   p_strobeDelayTF.current = _strobeDelayTF.current
-  // }
-  // if( p_strobeTF.current !== _strobeTF.current){
-  //   console.log('STROBE_TF CHANGED')
-  //   p_strobeTF.current = _strobeTF.current
-  // }
-  // if( p_zoom.current !== _zoom.current){
-  //   console.log('ZOOM CHANGED')
-  //   p_zoom.current = _zoom.current
-  // }
-  // if( p_horizTransType.current !== _horizTransType.current){
-  //   console.log('HORIZ_TRANS_TYPE CHANGED')
-  //   p_horizTransType.current = _horizTransType.current
-  // }
-  // if( p_vertTransType.current !== _vertTransType.current){
-  //   console.log('VERT_TRANS_TYPE CHANGED')
-  //   p_vertTransType.current = _vertTransType.current
-  // }
-  // if( p_panning.current !== _panning.current){
-  //   console.log('PANNING CHANGED')
-  //   p_panning.current = _panning.current
-  // }
-  // if( p_fadeInOut.current !== _fadeInOut.current){
-  //   console.log('FADE_IN_OUT CHANGED')
-  //   p_fadeInOut.current = _fadeInOut.current
-  // }
-  // if(r_parentHeight.current !== _parentHeight.current){
-  //   console.log('PARENT_HEIGHT CHANGED')
-  //   r_parentHeight.current = _parentHeight.current
-  // }
-  // if(r_parentWidth.current !== _parentWidth.current){
-  //   console.log('PARENT_WIDTH CHANGED')
-  //   r_parentWidth.current = _parentWidth.current
-  // }
-  // if(r_backgroundRef.current !== _backgroundRef.current){
-  //   console.log('BACKGROUND_REF CHANGED')
-  //   r_backgroundRef.current = _backgroundRef.current
-  // }
-  // if(r_contentRef.current !== _contentRef.current){
-  //   console.log('CONTENT_REF CHANGED')
-  //   r_contentRef.current = _contentRef.current
-  // }
-  // if(r_image.current !== _image.current){
-  //   console.log('IMAGE CHANGED')
-  //   r_image.current = _image.current
-  // }
-  // if(r_scale.current !== _scale.current){
-  //   console.log('SCALE CHANGED')
-  //   r_scale.current = _scale.current
-  // }
-  // if(r_timeouts.current !== _timeouts.current){
-  //   console.log('TIMEOUTS CHANGED')
-  //   r_timeouts.current = _timeouts.current
-  // }
-  // if(r_prevBackgroundType.current !== _prevBackgroundType.current){
-  //   console.log('PREV_BACKGROUND_TYPE CHANGED')
-  //   r_prevBackgroundType.current = _prevBackgroundType.current
-  // }
-  // if(r_prevHasStarted.current !== _prevHasStarted.current){
-  //   console.log('PREV_HAS_STARTED CHANGED')
-  //   r_prevHasStarted.current = _prevHasStarted.current
-  // }
-  // console.log('44------------------------44')
-  // END LOG COMPONENT CHANGES
-
-  if (!props.image) {
-    return (
-      <div
-        className={props.className}
-        style={{
-          zIndex: 2,
-          margin: '-5px -10px -10px -5px',
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          overflow: 'hidden'
-        }}
-      >
-        <Box
-          component="div"
-          ref={_contentRef}
-          style={{
-            height: '100%',
-            width: '100%',
-            zIndex: 2,
-            overflow: 'hidden',
-            backgroundPosition: 'center',
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            position: 'absolute'
-          }}
-        />
-        <Box
-          component="div"
-          ref={_backgroundRef}
-          style={{
-            height: '100%',
-            width: '100%',
-            zIndex: 1,
-            backgroundSize: 'cover',
-            overflow: 'hidden'
-          }}
-        />
-      </div>
-    )
-  } else if (props.pictureGrid) {
-    return <animated.div className={props.className} ref={_contentRef} />
-  }
-
-  let backgroundStyle = {}
-  if (_backgroundType.current === BT.color) {
-    backgroundStyle = { backgroundColor: _backgroundColor.current }
-  } else if (_backgroundType.current === BT.colorSet) {
-    backgroundStyle = {
-      backgroundColor: getRandomListItem(_backgroundColorSet.current)
+  useEffect(() => {
+    if (
+      _hidden.current ||
+      data.type !== 'video' ||
+      _prevIsPlaying.current === isPlaying
+    ) {
+      return
     }
-  } else if (_backgroundType.current === BT.colorRand) {
-    backgroundStyle = {
-      backgroundColor: getRandomColor()
+
+    _prevIsPlaying.current = isPlaying
+    const fn = isPlaying ? playVideo : pauseVideo
+    const foregroundVideo = _foregroundVideo.current as HTMLVideoElement
+    if (view.backgroundType === BT.blur) {
+      const backgroundVideo = _backgroundVideo.current as HTMLVideoElement
+      fn(backgroundVideo)
     }
-  } else if (_backgroundType.current === BT.blur) {
-    backgroundStyle = {
-      filter: 'blur(' + _backgroundBlur.current + 'px)'
+    fn(foregroundVideo)
+  }, [isPlaying, data.type, view.backgroundType, index])
+
+  useEffect(() => {
+    if (_prevShow.current !== show) {
+      if (show) {
+        _hidden.current = false
+        if (data.type === 'video') {
+          const playbackRate = view.video?.speed ?? 1
+          const foregroundVideo = _foregroundVideo.current as HTMLVideoElement
+          foregroundVideo.volume = view.video?.volume ?? 0
+          foregroundVideo.playbackRate = playbackRate
+          if (view.backgroundType === BT.blur) {
+            const backgroundVideo = _backgroundVideo.current as HTMLVideoElement
+            backgroundVideo.playbackRate = playbackRate
+            playVideo(backgroundVideo)
+          }
+          playVideo(foregroundVideo)
+        }
+        if (data.type === 'iframe') {
+          const foregroundIFrame =
+            _foregroundIFrame.current as HTMLIFrameElement
+          const foregroundWindow = foregroundIFrame.contentWindow as Window
+          const foregroundStart = foregroundWindow.document.getElementById(
+            'intro-start'
+          ) as HTMLElement
+          if (view.backgroundType === BT.blur) {
+            const backgroundIFrame =
+              _backgroundIFrame.current as HTMLIFrameElement
+            const backgroundWindow = backgroundIFrame.contentWindow as Window
+            const backgroundStart = backgroundWindow.document.getElementById(
+              'intro-start'
+            ) as HTMLElement
+            backgroundStart.click()
+          }
+          foregroundStart.click()
+        }
+      } else {
+        if (data.type === 'video') {
+          const foregroundVideo = _foregroundVideo.current as HTMLVideoElement
+          foregroundVideo.volume = 0
+        }
+      }
     }
-  }
-  if (_slide.current) {
-    backgroundStyle = {
-      ...backgroundStyle,
-      overflow: 'hidden'
+
+    _prevShow.current = show
+  }, [show, data.type, view, index])
+
+  const imageMeasurements: ImageMeasurements = useMemo(() => {
+    const imageWidth = data.width as number
+    const imageHeight = data.height as number
+    return {
+      imageType: view.imageType,
+      imageWidth: transform.rotate ? imageHeight : imageWidth,
+      imageHeight: transform.rotate ? imageWidth : imageHeight,
+      parentWidth: foregroundBounds.width,
+      parentHeight: foregroundBounds.height
     }
-  }
-  let viewDiv
+  }, [
+    data.height,
+    data.width,
+    transform.rotate,
+    view.imageType,
+    foregroundBounds.width,
+    foregroundBounds.height
+  ])
+
   const imageClassName = props.gridCoordinates
     ? 'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
     : undefined
+
   const backgroundClassName =
     !props.pictureGrid &&
-    _backgroundType.current === BT.blur &&
+    view.backgroundType === BT.blur &&
     props.gridCoordinates
       ? 'copy-bg-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
       : undefined
 
-  let imageDiv = (
-    <animated.div
-      id="image"
-      className={imageClassName}
-      ref={_contentRef}
-      style={{
-        height: '100%',
-        width: '100%',
-        zIndex: 2,
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        position: 'absolute'
-      }}
+  const effectClassName =
+    imageStyling.containerClassName == null ? classes.imageContainer : undefined
+  return (
+    <ImageTransition
+      show={show}
+      isPlaying={isPlaying}
+      zIndex={zIndex}
+      slide={effects.slide}
+      crossFade={effects.crossFade}
+      onHide={onHideEvent}
     >
-      <canvas ref={_canvas} width={750} height={750} />
-    </animated.div>
-  )
-  const backgroundDiv = (
-    <animated.div
-      ref={_backgroundRef}
-      className={backgroundClassName}
-      style={{
-        height: '100%',
-        width: '100%',
-        zIndex: -1,
-        position: 'absolute',
-        backgroundSize: 'cover',
-        ...backgroundStyle
-      }}
-    />
-  )
-  if (_strobe.current && _strobeLayer.current === SL.image) {
-    if (
-      _strobePulse.current
-        ? _strobeDelayTF.current === TF.scene
-        : _strobeTF.current === TF.scene
-    ) {
-      imageDiv = (
-        <StrobeImage
-          sceneID={sceneID as number}
-          timeToNextFrame={props.timeToNextFrame as number}
-          currentAudio={props.currentAudio}
-        >
-          {imageDiv}
-        </StrobeImage>
-      )
-    } else {
-      imageDiv = (
+      <Strobe
+        show={show}
+        isPlaying={isPlaying}
+        data={effects.strobe}
+        enable={enableStobeTopOrBottom}
+        zIndex={5}
+      />
+      <FadeInOut show={show} isPlaying={isPlaying} data={effects.fadeInOut}>
         <Strobe
-          sceneID={sceneID as number}
-          currentAudio={props.currentAudio}
+          show={show}
+          isPlaying={isPlaying}
+          data={effects.strobe}
+          enable={enableStrobeImage}
           zIndex={2}
-          toggleStrobe={props.toggleStrobe as boolean}
-          timeToNextFrame={props.timeToNextFrame as number}
-          strobeFunction={strobeImage}
         >
-          {imageDiv}
+          <div
+            ref={foregroundRef}
+            className={cx(
+              classes.imageContainer,
+              imageClassName,
+              imageStyling.containerClassName
+            )}
+            style={{
+              overflow: 'hidden'
+            }}
+          >
+            <ZoomMove
+              show={show}
+              isPlaying={isPlaying}
+              data={effects.zoomMove}
+              className={effectClassName}
+            >
+              <Panning
+                show={show}
+                isPlaying={isPlaying}
+                data={effects.panning}
+                measurements={imageMeasurements}
+                className={effectClassName}
+              >
+                {foregroundComponent}
+              </Panning>
+            </ZoomMove>
+          </div>
         </Strobe>
-      )
-    }
-  }
-  if (
-    _zoom.current ||
-    _horizTransType.current !== HTF.none ||
-    _vertTransType.current !== VTF.none
-  ) {
-    imageDiv = (
-      <ZoomMove
-        sceneID={sceneID as number}
-        reset={
-          !_panning.current &&
-          !_fadeInOut.current &&
-          !_slide.current &&
-          !_crossFade.current
-        }
-        timeToNextFrame={props.timeToNextFrame as number}
-        currentAudio={props.currentAudio}
-      >
-        {imageDiv}
-      </ZoomMove>
-    )
-  }
-  if (_fadeInOut.current) {
-    imageDiv = (
-      <FadeInOut
-        toggleFade={props.toggleStrobe as boolean}
-        currentAudio={props.currentAudio}
-        timeToNextFrame={props.timeToNextFrame as number}
-        sceneID={sceneID as number}
-        fadeFunction={strobeImage}
-      >
-        {imageDiv}
       </FadeInOut>
-    )
-  }
-  if (_panning.current) {
-    imageDiv = (
-      <Panning
-        image={props.image}
-        parentHeight={
-          _parentHeight.current
-            ? _parentHeight.current
-            : _contentRef.current!.parentElement!.offsetHeight
-        }
-        parentWidth={
-          _parentWidth.current
-            ? _parentWidth.current
-            : _contentRef.current!.parentElement!.offsetWidth
-        }
-        togglePan={props.toggleStrobe as boolean}
-        currentAudio={props.currentAudio}
-        timeToNextFrame={props.timeToNextFrame as number}
-        sceneID={sceneID as number}
-        panFunction={strobeImage}
-      >
-        {imageDiv}
-      </Panning>
-    )
-  }
-  viewDiv = (
-    <React.Fragment>
-      {imageDiv}
-      {_strobe.current && _strobeLayer.current === SL.background && (
-        <Strobe
-          sceneID={sceneID as number}
-          currentAudio={props.currentAudio}
-          zIndex={1}
-          toggleStrobe={props.toggleStrobe as boolean}
-          timeToNextFrame={props.timeToNextFrame as number}
-        />
+      <Strobe
+        show={show}
+        isPlaying={isPlaying}
+        data={effects.strobe}
+        enable={enableStrobeBackground}
+        zIndex={1}
+      />
+      {view.backgroundStyle != null && (
+        <div
+          ref={backgroundRef}
+          className={cx(classes.backgroundContainer, backgroundClassName)}
+          style={view.backgroundStyle}
+        >
+          {backgroundComponent}
+        </div>
       )}
-      {backgroundDiv}
-    </React.Fragment>
+    </ImageTransition>
   )
-  if (_crossFade.current) {
-    viewDiv = (
-      <CrossFade
-        image={props.image}
-        sceneID={sceneID as number}
-        timeToNextFrame={props.timeToNextFrame as number}
-        currentAudio={props.currentAudio}
-      >
-        {viewDiv}
-      </CrossFade>
-    )
-  }
-  if (_slide.current) {
-    viewDiv = (
-      <Slide
-        image={props.image}
-        sceneID={sceneID as number}
-        timeToNextFrame={props.timeToNextFrame as number}
-        currentAudio={props.currentAudio}
-      >
-        {viewDiv}
-      </Slide>
-    )
-  }
-
-  const renderDiv = (
-    <animated.div
-      style={{
-        zIndex: 2,
-        margin: '-5px -10px -10px -5px',
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        overflow: 'hidden'
-      }}
-    >
-      {viewDiv}
-    </animated.div>
-  )
-
-  if (props.setSceneCopy) {
-    // console.log('INVOKE SET_SCENE_COPY')
-    setTimeout(() => {
-      if (props.setSceneCopy != null) {
-        props.setSceneCopy(renderDiv)
-      }
-    })
-  }
-
-  return renderDiv
 }
 
 ;(ImageView as any).displayName = 'ImageView'
+
+export default React.memo(ImageView)
