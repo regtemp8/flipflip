@@ -3,7 +3,6 @@ import type CaptionScript from './CaptionScript'
 import {
   type EntryState,
   type EntryUpdate,
-  setEntrySlice,
   getEntry,
   setEntry,
   updateEntry
@@ -40,7 +39,7 @@ function createCaptionScriptSlice(
         state,
         action: PayloadAction<EntryState<CaptionScript>>
       ) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setCaptionScript: (state, action: PayloadAction<CaptionScript>) => {
         setEntry(state, action.payload)

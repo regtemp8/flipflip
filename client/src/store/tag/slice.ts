@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type Tag from './Tag'
-import { type EntryState, setEntrySlice, setEntry } from '../EntryState'
+import { type EntryState, setEntry } from '../EntryState'
 
 export const initialTagState: EntryState<Tag> = {
   name: 'tagSlice',
@@ -20,7 +20,7 @@ function createTagSlice(tagState?: EntryState<Tag>) {
     initialState,
     reducers: {
       setTagSlice: (state, action: PayloadAction<EntryState<Tag>>) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setTag: (state, action: PayloadAction<Tag>) => {
         if (!action.payload.name) {

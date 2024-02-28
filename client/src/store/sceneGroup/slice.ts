@@ -4,8 +4,7 @@ import {
   deleteEntry,
   type EntryState,
   type EntryUpdate,
-  setEntry,
-  setEntrySlice
+  setEntry
 } from '../EntryState'
 
 export const initialSceneGroupState: EntryState<SceneGroup> = {
@@ -31,7 +30,7 @@ function createSceneGroupSlice(sceneGroupState?: EntryState<SceneGroup>) {
         state,
         action: PayloadAction<EntryState<SceneGroup>>
       ) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setSceneGroup: (state, action: PayloadAction<SceneGroup>) => {
         setEntry(state, action.payload)

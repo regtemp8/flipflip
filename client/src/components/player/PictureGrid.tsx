@@ -3,12 +3,15 @@ import { makeStyles } from 'tss-react/mui'
 
 import Masonry from '@mui/lab/Masonry'
 
-import ImageView from './ImageView'
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { setPlayerState } from '../../store/player/slice'
-import { selectAppConfigDisplaySettingsMaxInHistory } from '../../store/app/selectors'
+import {
+  selectAppConfigDisplaySettingsMaxInHistory,
+  selectAppConfigDisplaySettingsMaxInMemory
+} from '../../store/app/selectors'
 import { selectConstants } from '../../store/constants/selectors'
+import { HTMLContentElement } from './HTMLContentElement'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   content: {
@@ -35,7 +38,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface PictureGridProps {
-  pictures: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>
+  pictures: Array<HTMLContentElement>
 }
 
 function PictureGrid(props: PictureGridProps) {
@@ -45,6 +48,10 @@ function PictureGrid(props: PictureGridProps) {
   )
   const { masonryDefaultHeight, masonryDefaultColumns } =
     useAppSelector(selectConstants())
+
+  const maxInMemory = useAppSelector(
+    selectAppConfigDisplaySettingsMaxInMemory()
+  )
 
   useEffect(() => {
     for (let i = 0; i < maxPictures; i++) {
@@ -58,12 +65,22 @@ function PictureGrid(props: PictureGridProps) {
             firstImageLoaded: true,
             mainLoaded: true,
             isEmpty: false,
-            hasStarted: true
+            hasStarted: true,
+            loader: {
+              iframeCount: 0,
+              onlyIframes: false,
+              loadingCount: 0,
+              readyToLoad: [...Array(maxInMemory).keys()],
+              shownIndex: -1,
+              imageViews: [],
+              displayIndex: 0,
+              zIndex: 0
+            }
           }
         })
       )
     }
-  }, [maxPictures, dispatch])
+  }, [maxPictures, maxInMemory, dispatch])
 
   const { classes } = useStyles()
   const pictures = Array.from(props.pictures).reverse()
@@ -78,15 +95,7 @@ function PictureGrid(props: PictureGridProps) {
           defaultHeight={masonryDefaultHeight}
         >
           {pictures.map((p, x) => (
-            <ImageView
-              key={x}
-              className={classes.image}
-              uuid={'picture-grid-img-' + x}
-              image={p}
-              fitParent
-              removeChild
-              pictureGrid
-            />
+            <p>TODO build picture grid</p>
           ))}
         </Masonry>
       </div>

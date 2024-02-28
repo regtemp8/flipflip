@@ -11,7 +11,8 @@ import {
 } from 'flipflip-common'
 import { initialSystemConstants } from './store/constants/SystemConstants'
 
-class FlipFlipService {
+export class FlipFlipService {
+  public static devServerURL?: string
   private static instance: FlipFlipService
   private readonly ws: WebSocket
 
@@ -21,8 +22,10 @@ class FlipFlipService {
   public readonly clipboard: ClipboardService
 
   private constructor() {
-    const url = window.location.origin.replace('http', 'ws')
-    this.ws = new WebSocket(url)
+    const origin =
+      FlipFlipService.devServerURL ??
+      window.location.origin.replace('http', 'ws')
+    this.ws = new WebSocket(`${origin}/flipflip`)
     this.api = new FlipFlipAPI(this.ws)
     this.events = new FlipFlipEvents(this.ws)
     this.worker = new FlipFlipWorker(this.ws)
@@ -605,7 +608,7 @@ class FlipFlipAPI {
     )
   }
 
-  public async recursiveReaddir(
+  public async readDirectoryFiles(
     url: string,
     blacklist: string[],
     sourceBlacklist: string[],
@@ -613,7 +616,7 @@ class FlipFlipAPI {
     local: boolean
   ): Promise<any> {
     return await this.invoke(
-      IPC.recursiveReaddir,
+      IPC.readDirectoryFiles,
       url,
       blacklist,
       sourceBlacklist,
@@ -625,6 +628,12 @@ class FlipFlipAPI {
   public async getContext(): Promise<SystemConstants> {
     return await this.invoke(IPC.getContext).then((args: any[] | undefined) =>
       args != null ? (args[0] as SystemConstants) : initialSystemConstants
+    )
+  }
+
+  public async proxyNimjaURL(url: string): Promise<string> {
+    return await this.invoke(IPC.proxyNimjaURL, url).then(
+      (args: any[] | undefined) => (args != null ? (args[0] as string) : '')
     )
   }
 

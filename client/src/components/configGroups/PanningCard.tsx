@@ -219,7 +219,7 @@ function PanningCard(props: PanningCardProps) {
             selector: selectScenePanVertTransRandom(props.sceneID),
             action: setScenePanVertTransRandom(props.sceneID)
           }}
-          imageWidth={{
+          imageHeight={{
             selector: selectScenePanVertTransImg(props.sceneID),
             action: setScenePanVertTransImg(props.sceneID)
           }}

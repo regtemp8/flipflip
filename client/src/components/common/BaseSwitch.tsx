@@ -18,9 +18,9 @@ export default function BaseSwitch(props: BaseSwitchProps) {
   const value = useAppSelector(props.selector)
 
   let onChange: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void
-  if (props.onChange) {
+  if (props.onChange != null) {
     onChange = props.onChange
-  } else if (props.action) {
+  } else if (props.action != null) {
     onChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
       dispatch(props.action!(checked))
     }
@@ -42,14 +42,14 @@ export default function BaseSwitch(props: BaseSwitchProps) {
   }
 
   const renderLabel = () => {
-    return props.label ? (
+    return props.label != null ? (
       <FormControlLabel control={renderSwitch()} label={props.label} />
     ) : (
       renderSwitch()
     )
   }
 
-  return props.tooltip ? (
+  return props.tooltip != null ? (
     <Tooltip disableInteractive title={props.tooltip}>
       {renderLabel()}
     </Tooltip>

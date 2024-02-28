@@ -46,33 +46,6 @@ export default function Meta(props: MetaProps) {
   const tutorial = useAppSelector(selectAppTutorial())
   const route = useAppSelector(selectAppLastRoute())
 
-  // START LOG COMPONENT CHANGES
-  // const p_initialized = useRef<boolean>()
-  // const p_theme = useRef<ThemeOptions>()
-  // const p_tutorial = useRef<string>()
-  // const p_route = useRef<Route>()
-
-  // console.log('00------------------------00')
-  // if(p_initialized.current !== initialized){
-  //   console.log('INITIALIZED CHANGED')
-  // }
-  // if(p_theme.current !== theme){
-  //   console.log('THEME CHANGED')
-  // }
-  // if(p_tutorial.current !== tutorial){
-  //   console.log('TUTORIAL CHANGED')
-  // }
-  // if(p_route.current !== route){
-  //   console.log('ROUTE CHANGED')
-  // }
-
-  // console.log('00------------------------00')
-  // p_initialized.current = initialized
-  // p_theme.current = theme
-  // p_tutorial.current = tutorial
-  // p_route.current = route
-  // END LOG COMPONENT CHANGES
-
   const startScene = useCallback(
     (sceneName: string) => {
       dispatch(startFromScene(sceneName))

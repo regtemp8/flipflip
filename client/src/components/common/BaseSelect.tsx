@@ -21,7 +21,7 @@ export interface BaseSelectProps extends ReduxProps<string> {
 export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
   const dispatch = useAppDispatch()
   let value = useAppSelector(props.selector)
-  if (props.valueMapper) {
+  if (props.valueMapper != null) {
     value = props.valueMapper(value)
   }
 

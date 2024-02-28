@@ -1,11 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type Playlist from './Playlist'
-import {
-  type EntryState,
-  type EntryUpdate,
-  setEntrySlice,
-  setEntry
-} from '../EntryState'
+import { type EntryState, type EntryUpdate, setEntry } from '../EntryState'
 
 export const initialPlaylistState: EntryState<Playlist> = {
   name: 'playlistSlice',
@@ -30,7 +25,7 @@ function createPlaylistSlice(playlistState?: EntryState<Playlist>) {
         state,
         action: PayloadAction<EntryState<Playlist>>
       ) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setPlaylist: (state, action: PayloadAction<Playlist>) => {
         setEntry(state, action.payload)

@@ -23,7 +23,8 @@ import BaseTextField from '../common/text/BaseTextField'
 import { SGT, SP } from 'flipflip-common'
 import {
   selectAppTutorial,
-  selectAppSpecialMode
+  selectAppSpecialMode,
+  selectAppConfigDisplaySettingsFullScreen
 } from '../../store/app/selectors'
 import {
   selectSceneGridName,
@@ -39,6 +40,7 @@ import { generateScenes } from '../../store/scene/thunks'
 import { playGrid } from '../../store/player/thunks'
 import GridCellSetup from './GridCellSetup'
 import { convertGridIDToSceneID } from '../../data/utils'
+import { setFullScreen } from '../../data/actions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -146,6 +148,7 @@ function GridSetup(props: GridSetupProps) {
   const name = useAppSelector(selectSceneGridName(props.gridID))
   const height = useAppSelector(selectSceneGridHeight(props.gridID))
   const width = useAppSelector(selectSceneGridWidth(props.gridID))
+  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
 
   const [isEditingName, setIsEditingName] = useState(false)
   const [isEditing, setIsEditing] = useState([-1, -1])
@@ -186,7 +189,6 @@ function GridSetup(props: GridSetupProps) {
   const onChangeWidth = onChangeNumber(1, 5, onUpdateWidth)
 
   const startEditingGridCell = (row: number, col: number) => {
-    console.log(`EDIT ${row}, ${col}`)
     setIsEditing([row, col])
   }
 
@@ -212,6 +214,7 @@ function GridSetup(props: GridSetupProps) {
     // Regenerate scene(s) before playback
     dispatch(generateScenes(convertGridIDToSceneID(props.gridID)))
     dispatch(playGrid(props.gridID))
+    setFullScreen(fullScreen)
   }
 
   const { classes } = useStyles()

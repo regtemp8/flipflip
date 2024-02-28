@@ -29,13 +29,6 @@ export function setNextID<T extends Identifiable>(
   }
 }
 
-export function setEntrySlice<T extends Identifiable>(
-  state: EntryState<T>,
-  slice: EntryState<T>
-) {
-  Object.assign(state, slice)
-}
-
 export function getEntry<T extends Identifiable>(
   state: EntryState<T>,
   id: number

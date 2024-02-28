@@ -79,7 +79,6 @@ import {
   selectSceneLibraryID,
   selectSceneAudioEnabled
 } from '../../store/scene/selectors'
-import { setConfigDisplaySettingsFullScreen } from '../../store/app/slice'
 import {
   clipVideo,
   blacklistFile,
@@ -388,6 +387,25 @@ function PlayerBars(props: PlayerBarsProps) {
   const _tagDrawerTimeout = useRef<any>()
   const _showVideoControls = useRef(false)
 
+  const {
+    historyPaths,
+    historyOffset,
+    imagePlayerDeleteHack,
+    imagePlayerAdvanceHacks,
+    historyBack,
+    historyForward,
+    goBack,
+    play,
+    pause,
+    isPlaying,
+    navigateTagging,
+    hasStarted,
+    mainVideo,
+    onRecentPictureGrid,
+    recentPictureGrid,
+    sceneID
+  } = props
+
   const canChangeSource = useCallback(() => {
     return (
       !isDownloadScene && !isAudioScene && !isScriptScene && allTags != null
@@ -398,10 +416,7 @@ function PlayerBars(props: PlayerBarsProps) {
     (sourceURL: string) => {
       let url = sourceURL
       if (!url) {
-        url =
-          props.historyPaths[
-            props.historyPaths.length - 1 + props.historyOffset
-          ].src
+        url = historyPaths[historyPaths.length - 1 + historyOffset].src
       }
       const isFile = url.startsWith('file://')
       const path = urlToPath(url, isWin32)
@@ -416,7 +431,7 @@ function PlayerBars(props: PlayerBarsProps) {
         flipflip().clipboard.copyTextToClipboard(imagePath)
       }
     },
-    [isWin32, props.historyOffset, props.historyPaths]
+    [isWin32, historyOffset, historyPaths]
   )
 
   const doDelete = useCallback(
@@ -429,61 +444,49 @@ function PlayerBars(props: PlayerBarsProps) {
         )
         console.error(errorMessage)
       } else {
-        props.imagePlayerDeleteHack.fire()
+        imagePlayerDeleteHack.fire()
         onCloseDialog()
       }
     },
-    [props.imagePlayerDeleteHack]
+    [imagePlayerDeleteHack]
   )
 
-  const historyBack = useCallback(() => {
+  const historyGoBack = useCallback(() => {
     if (
       !drawerHover ||
       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
     ) {
-      if (props.historyOffset > -(props.historyPaths.length - 1)) {
-        props.historyBack()
+      if (historyOffset > -(historyPaths.length - 1)) {
+        historyBack()
       }
     }
-  }, [drawerHover, props])
+  }, [drawerHover, historyOffset, historyPaths, historyBack])
 
-  const historyForward = useCallback(() => {
+  const historyGoForward = useCallback(() => {
     if (
       !drawerHover ||
       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
     ) {
-      if (props.historyOffset >= 0) {
-        props.imagePlayerAdvanceHacks[0][0].fire()
+      if (historyOffset >= 0) {
+        imagePlayerAdvanceHacks[0][0].fire()
       } else {
-        props.historyForward()
+        historyForward()
       }
     }
-  }, [drawerHover, props])
+  }, [drawerHover, historyOffset, imagePlayerAdvanceHacks, historyForward])
 
   const prevSource = useCallback(() => {
-    props.navigateTagging(-1)
-  }, [props])
+    navigateTagging(-1)
+  }, [navigateTagging])
 
   const nextSource = useCallback(() => {
-    props.navigateTagging(1)
-  }, [props])
-
-  const setFullscreen = useCallback(
-    (fullScreen: boolean) => {
-      dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
-      setFullScreen(fullScreen)
-    },
-    [dispatch]
-  )
-
-  const toggleFullscreen = useCallback(() => {
-    setFullscreen(!fullScreen)
-  }, [fullScreen, setFullscreen])
+    navigateTagging(1)
+  }, [navigateTagging])
 
   const navigateBack = useCallback(async () => {
     setFullScreen(false)
-    props.goBack()
-  }, [props])
+    goBack()
+  }, [goBack])
 
   const onDeletePath = useCallback(
     async (path: string) => {
@@ -507,8 +510,7 @@ function PlayerBars(props: PlayerBarsProps) {
       !drawerHover ||
       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
     ) {
-      const img =
-        props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+      const img = historyPaths[historyPaths.length - 1 + historyOffset]
       const url = img.src
       const isFile = url.startsWith('file://')
       const path = urlToPath(url, isWin32)
@@ -516,13 +518,7 @@ function PlayerBars(props: PlayerBarsProps) {
         onDeletePath(path)
       }
     }
-  }, [
-    drawerHover,
-    isWin32,
-    onDeletePath,
-    props.historyOffset,
-    props.historyPaths
-  ])
+  }, [drawerHover, isWin32, onDeletePath, historyOffset, historyPaths])
 
   const onBlacklistFile = useCallback(
     (source: string, fileToBlacklist: string) => {
@@ -537,8 +533,7 @@ function PlayerBars(props: PlayerBarsProps) {
   )
 
   const onBlacklist = useCallback(() => {
-    const img =
-      props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+    const img = historyPaths[historyPaths.length - 1 + historyOffset]
     if (img == null) return
     const source = img.getAttribute('source')
     const url = img.src
@@ -551,17 +546,17 @@ function PlayerBars(props: PlayerBarsProps) {
     ) {
       onBlacklistFile(source, isFile ? path : url)
     }
-  }, [isWin32, onBlacklistFile, props.historyOffset, props.historyPaths])
+  }, [isWin32, onBlacklistFile, historyOffset, historyPaths])
 
   const setPlayPause = useCallback(
-    (play: boolean) => {
-      if (play) {
-        props.play()
+    (doPlay: boolean) => {
+      if (doPlay) {
+        play()
       } else {
-        props.pause()
+        pause()
       }
     },
-    [props]
+    [play, pause]
   )
 
   const playPause = useCallback(() => {
@@ -569,15 +564,15 @@ function PlayerBars(props: PlayerBarsProps) {
       !drawerHover ||
       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
     ) {
-      setPlayPause(!props.isPlaying)
+      setPlayPause(!isPlaying)
     }
-  }, [drawerHover, props.isPlaying, setPlayPause])
+  }, [drawerHover, isPlaying, setPlayPause])
 
   useEffect(() => {
     const abortController = new AbortController()
     flipflip().events.onPlayerPlayPause(playPause, abortController)
-    flipflip().events.onPlayerHistoryBack(historyBack, abortController)
-    flipflip().events.onPlayerHistoryForward(historyForward, abortController)
+    flipflip().events.onPlayerHistoryBack(historyGoBack, abortController)
+    flipflip().events.onPlayerHistoryForward(historyGoForward, abortController)
     flipflip().events.onPlayerNavigateBack(navigateBack, abortController)
     flipflip().events.onPlayerDelete(doDelete, abortController)
     flipflip().events.onPlayerPrevSource(prevSource, abortController)
@@ -591,28 +586,20 @@ function PlayerBars(props: PlayerBarsProps) {
     flipflip().events.onGotoClipSource((sourceURL: string) => {
       dispatch(clipVideo(sourceURL, []))
     }, abortController)
-    flipflip().events.onRecentPictureGrid(
-      props.onRecentPictureGrid,
-      abortController
-    )
-
-    setFullscreen(fullScreen)
+    flipflip().events.onRecentPictureGrid(onRecentPictureGrid, abortController)
 
     const onClick = (e: MouseEvent) => {
       if (
         isAudioScene ||
-        props.recentPictureGrid ||
+        recentPictureGrid ||
         drawerHover ||
         tagDrawerHover ||
         appBarHover
       ) {
         return
       }
-      if (
-        (!props.isPlaying || clickToProgressWhilePlaying) &&
-        props.hasStarted
-      ) {
-        props.imagePlayerAdvanceHacks[0][0].fire()
+      if ((!isPlaying || clickToProgressWhilePlaying) && hasStarted) {
+        imagePlayerAdvanceHacks[0][0].fire()
         // TODO Improve this to be able to advance specific grids
         /* for (let x of props.imagePlayerAdvanceHacks) {
           for (let y of x) {
@@ -623,7 +610,7 @@ function PlayerBars(props: PlayerBarsProps) {
     }
 
     const onScroll = (e: WheelEvent) => {
-      if (props.recentPictureGrid || drawerHover) return
+      if (recentPictureGrid || drawerHover) return
       const volumeChange = (e.deltaY / 100) * -5
       let newVolume = parseInt(videoVolume as any) + volumeChange
       if (newVolume < 0) {
@@ -631,11 +618,11 @@ function PlayerBars(props: PlayerBarsProps) {
       } else if (newVolume > 100) {
         newVolume = 100
       }
-      if (props.mainVideo) {
-        props.mainVideo.volume = newVolume / 100
+      if (mainVideo) {
+        mainVideo.volume = newVolume / 100
       }
 
-      dispatch(setSceneVideoVolume({ id: props.sceneID, value: newVolume }))
+      dispatch(setSceneVideoVolume({ id: sceneID, value: newVolume }))
     }
     const showContextMenu = async (e: MouseEvent) => {
       if (tutorial != null) return
@@ -668,13 +655,13 @@ function PlayerBars(props: PlayerBarsProps) {
         case 'ArrowLeft':
           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
             e.preventDefault()
-            historyBack()
+            historyGoBack()
           }
           break
         case 'ArrowRight':
           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
             e.preventDefault()
-            historyForward()
+            historyGoForward()
           }
           break
         case 'Escape':
@@ -690,7 +677,7 @@ function PlayerBars(props: PlayerBarsProps) {
         case 'f':
           if (e.ctrlKey) {
             e.preventDefault()
-            toggleFullscreen()
+            toggleFullScreen()
           }
           break
         case 'b':
@@ -759,8 +746,8 @@ function PlayerBars(props: PlayerBarsProps) {
     doDelete,
     drawerHover,
     fullScreen,
-    historyBack,
-    historyForward,
+    historyGoBack,
+    historyGoForward,
     isAudioScene,
     navigateBack,
     nextSource,
@@ -768,16 +755,14 @@ function PlayerBars(props: PlayerBarsProps) {
     onDelete,
     playPause,
     prevSource,
-    props.hasStarted,
-    props.imagePlayerAdvanceHacks,
-    props.isPlaying,
-    props.mainVideo,
-    props.onRecentPictureGrid,
-    props.recentPictureGrid,
-    props.sceneID,
-    setFullscreen,
+    hasStarted,
+    imagePlayerAdvanceHacks,
+    isPlaying,
+    mainVideo,
+    onRecentPictureGrid,
+    recentPictureGrid,
+    sceneID,
     tagDrawerHover,
-    toggleFullscreen,
     tutorial,
     videoVolume
   ])
@@ -842,11 +827,6 @@ function PlayerBars(props: PlayerBarsProps) {
 
   const onFinishDeletePath = () => {
     doDelete(deletePath as string)
-  }
-
-  const toggleFull = async () => {
-    const fullScreen = toggleFullScreen()
-    dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
   }
 
   const inheritClipTags =
@@ -937,7 +917,7 @@ function PlayerBars(props: PlayerBarsProps) {
                 edge="start"
                 color="inherit"
                 aria-label="FullScreen"
-                onClick={toggleFull}
+                onClick={toggleFullScreen}
                 size="large"
               >
                 <FullscreenIcon fontSize="large" />
@@ -955,7 +935,7 @@ function PlayerBars(props: PlayerBarsProps) {
                   edge="start"
                   color="inherit"
                   aria-label="Backward"
-                  onClick={historyBack}
+                  onClick={historyGoBack}
                   size="large"
                 >
                   <ForwardIcon
@@ -980,7 +960,7 @@ function PlayerBars(props: PlayerBarsProps) {
                   edge="start"
                   color="inherit"
                   aria-label="Forward"
-                  onClick={historyForward}
+                  onClick={historyGoForward}
                   size="large"
                 >
                   <ForwardIcon

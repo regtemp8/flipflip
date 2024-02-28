@@ -11,6 +11,18 @@ contextBridge.exposeInMainWorld('flipflip', {
     },
     openExternal: (url: string): void => {
       ipcRenderer.send(SDO.openExternal, url)
+    },
+    cancelLoginCode: (): void => {
+      ipcRenderer.send(SDO.cancelLoginCode)
+    },
+    verifyLoginCode: (code: string): void => {
+      ipcRenderer.send(SDO.verifyLoginCode, code)
+    },
+    onShowLoginCodeDialog: (callback: () => void): void => {
+      ipcRenderer.on(SDO.showLoginCodeDialog, callback)
+    },
+    onCloseLoginCodeDialog: (callback: () => void): void => {
+      ipcRenderer.on(SDO.closeLoginCodeDialog, callback)
     }
   }
 })

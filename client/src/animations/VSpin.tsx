@@ -1,27 +1,20 @@
 import React, { type PropsWithChildren, useState } from 'react'
-import { Spring, animated } from 'react-spring/renderprops'
+import { animated, useSpring } from '@react-spring/web'
 
 export default function VSpin(props: PropsWithChildren<any>) {
   const [toggle, setToggle] = useState(false)
+  const toggleSpin = () => setToggle((value) => !value)
+
+  const degrees = toggle ? 360 : 0
+  const animation = useSpring({
+    from: { transform: 'rotateX(0deg)' },
+    to: { transform: `rotateX(${degrees}deg)` }
+  })
 
   return (
-    <Spring
-      from={{ transform: 'rotateX(0deg)' }}
-      to={{
-        transform: toggle ? 'rotateX(360deg)' : 'rotateX(0deg)'
-      }}
-    >
-      {(animation) => (
-        <animated.div
-          style={animation}
-          onMouseEnter={() => {
-            setToggle(!toggle)
-          }}
-        >
-          {props.children}
-        </animated.div>
-      )}
-    </Spring>
+    <animated.div style={animation} onMouseEnter={toggleSpin}>
+      {props.children}
+    </animated.div>
   )
 }
 

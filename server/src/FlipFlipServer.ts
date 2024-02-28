@@ -1,16 +1,17 @@
 import fs from 'fs'
+import https from 'https'
 import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
 import express, { type Express, RequestHandler, Response } from 'express'
 import session from 'express-session'
 import yaml from 'js-yaml'
-import ws from 'ws'
 import { randomUUID } from 'crypto'
 import { createServer, Server } from '@httptoolkit/httpolyglot'
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import DeviceDetector from 'device-detector-js'
-import { SystemConstants, WebSocketMessage } from 'flipflip-common'
+import { SystemConstants, isAudio, isVideo } from 'flipflip-common'
+import Login from 'flipflip-login/src/Login'
 import ServerDetails from 'flipflip-server-details/src/ServerDetails'
 import App from 'flipflip-client/src/App'
 import createEmotionServer from '@emotion/server/create-instance'
@@ -18,12 +19,19 @@ import {
   createEmotionCache,
   createReduxStore
 } from 'flipflip-client/src/server/renderer'
-import { getContext, getServerURL, isLinux, isMacOSX, isWin32 } from './utils'
+import {
+  getContext,
+  getSaveDir,
+  getServerURL,
+  isLinux,
+  isMacOSX,
+  isWin32
+} from './utils'
 import AppStorage from './data/AppStorage'
 import fileRegistry from './FileRegistry'
 import security from './SecurityService'
-import webSocketMessage from './websocket/WebSocketMessageService'
 import { AddressInfo } from 'net'
+import webSocketServer from './FlipFlipWebSocketServer'
 
 interface ServerConfig {
   host?: string
@@ -35,17 +43,18 @@ interface Config {
 }
 
 class FlipFlipServer {
-  private static readonly DEFAULT_HOST = '0.0.0.0'
-  private static readonly SERVER_DETAILS_BUNDLE = '/static/js/main.cada8c62.js'
   private static instance: FlipFlipServer
 
   private server: Server
-  private wsServer: ws.Server
   private sessionParser: RequestHandler
-  private writePermissions: boolean[]
+  private readonly defaultHost
+  private readonly loginBundle
+  private readonly serverDetailsBundle
 
   private constructor() {
-    this.writePermissions = [true]
+    this.defaultHost = '0.0.0.0'
+    this.loginBundle = '/static/js/main.dbd4deaf.js'
+    this.serverDetailsBundle = '/static/js/main.34d1f89f.js'
   }
 
   public static getInstance(): FlipFlipServer {
@@ -75,6 +84,20 @@ class FlipFlipServer {
     }
   }
 
+  private calcVideoChunkSize(userAgent: string) {
+    const detector = new DeviceDetector()
+    const result = detector.parse(userAgent)
+    switch (result.device.type) {
+      case 'tablet':
+        return 768 * 1024
+      case 'desktop':
+      case 'television':
+        return 1024 * 1024
+      default:
+        return 256 * 1024
+    }
+  }
+
   private initSessionParser(): RequestHandler {
     return session({
       secret: security().generateSecret(),
@@ -82,6 +105,36 @@ class FlipFlipServer {
       saveUninitialized: true,
       cookie: { secure: true }
     })
+  }
+
+  private getContentType(path: string): string {
+    const contentTypes = new Map<string, string>()
+    contentTypes.set('.txt', 'text/plain')
+    contentTypes.set('.mp3', 'audio/mpeg')
+    contentTypes.set('.m4a', 'audio/mp4')
+    contentTypes.set('.wav', 'audio/wav')
+    contentTypes.set('.ogg', 'audio/ogg')
+    contentTypes.set('.gif', 'image/gif')
+    contentTypes.set('.png', 'image/png')
+    contentTypes.set('.jpeg', 'image/jpeg')
+    contentTypes.set('.jpg', 'image/jpeg')
+    contentTypes.set('.webp', 'image/webp')
+    contentTypes.set('.avif', 'image/avif')
+    contentTypes.set('.tiff', 'image/tiff')
+    contentTypes.set('.svg', 'image/svg+xml')
+    contentTypes.set('.mp4', 'video/mp4')
+    contentTypes.set('.mkv', 'video/matroska')
+    contentTypes.set('.webm', 'video/webm')
+    contentTypes.set('.ogv', 'video/ogg')
+    contentTypes.set('.mov', 'video/quicktime')
+    contentTypes.set('.m4v', 'video/mp4')
+    contentTypes.set('.asx', 'video/x-ms-asf')
+    contentTypes.set('.m3u8', 'application/x-mpegURL')
+    contentTypes.set('.pls', 'audio/x-scpls')
+    contentTypes.set('.xspf', 'application/xspf+xml')
+
+    const ext = path.substring(path.lastIndexOf('.'))
+    return contentTypes.get(ext) ?? 'application/octet-stream'
   }
 
   private initAPI(): Express {
@@ -93,20 +146,32 @@ class FlipFlipServer {
         res.redirect(301, getServerURL(req.hostname, port))
         return
       }
+      if (process.env.NODE_ENV === 'development') {
+        // code in this block is not included in webpack production build
+        if (process.env.DEV === 'true') {
+          req.session.authenticated = true
+        }
+      }
 
       const url = new URL(req.url, `https://${req.headers.host}`)
       const allowedURLs = [
         '/details',
-        '/login',
+        '/login/code',
+        '/login/token',
         '/favicon.ico',
-        FlipFlipServer.SERVER_DETAILS_BUNDLE,
+        this.loginBundle,
+        this.serverDetailsBundle,
         '/img/flipflip_logo.png'
       ]
       if (
         req.session?.authenticated !== true &&
         !allowedURLs.includes(url.pathname)
       ) {
-        res.status(401).end()
+        if (url.pathname === '/') {
+          res.redirect('/login/code')
+        } else {
+          res.status(401).end()
+        }
       } else {
         next()
       }
@@ -118,14 +183,71 @@ class FlipFlipServer {
         res.status(404).end()
         return
       }
-      fs.readFile(path, (err, data) => {
-        if (err == null) {
-          res.send(data)
+
+      const supportsRange = isVideo(path, true) || isAudio(path, true)
+      const { size } = fs.statSync(path)
+      let start = 0
+      let end = size - 1
+      let status = 200
+      if (supportsRange && req.headers.range != null) {
+        status = 206
+        const range = req.headers.range
+          .replace(/bytes=/, '')
+          .split('-')
+          .map((value) => parseInt(value, 10))
+          .filter((value) => !isNaN(value))
+
+        const userAgent = req.headers['user-agent']
+        const chunk = this.calcVideoChunkSize(userAgent)
+        start = range[0]
+        end = range.length === 2 ? range[1] : Math.min(start + chunk, end)
+        if (start < 0 || start >= size || end >= size || start > end) {
+          res.appendHeader('Content-Range', `bytes */${size}`).status(416).end()
+          return
         } else {
-          res.statusMessage = `${err.name} - ${err.message}`
-          res.status(503).end()
+          res.appendHeader('Content-Range', `bytes ${start}-${end}/${size}`)
         }
-      })
+      }
+      if (supportsRange) {
+        res.appendHeader('Accept-Ranges', 'bytes')
+      }
+
+      const contentType = this.getContentType(path)
+      res
+        .appendHeader('Content-Type', contentType)
+        .appendHeader('Content-Length', `${end - start + 1}`)
+        .status(status)
+
+      fs.createReadStream(path, { start, end }).pipe(res)
+    })
+    api.get('/nimja/visual/:id', (req, res) => {
+      const baseURL = 'https://hypno.nimja.com'
+      const url = req.originalUrl.replace('/nimja', baseURL)
+      https
+        .get(url, (response) => {
+          const data: Uint8Array[] = []
+          response.on('data', (chunk) => {
+            data.push(chunk)
+          })
+
+          response.on('end', () => {
+            let html = Buffer.concat(data).toString()
+            html = html.replace('<head>', `<head><base href="${baseURL}/">`)
+            html = html.replace(
+              '<link rel="manifest" href="/site.webmanifest">',
+              ''
+            )
+            res
+              .appendHeader('Content-Type', 'text/html')
+              .status(200)
+              .send(html)
+              .end()
+          })
+        })
+        .on('error', (error) => {
+          res.statusMessage = `${error.name} - ${error.message}`
+          res.status(503).end()
+        })
     })
     api.get('/', (req, res) => {
       const cache = createEmotionCache()
@@ -179,7 +301,7 @@ class FlipFlipServer {
           return res.status(500).send('Oops, better luck next time!')
         }
 
-        const scriptTag = `<script defer="defer" src="${FlipFlipServer.SERVER_DETAILS_BUNDLE}"`
+        const scriptTag = `<script defer="defer" src="${this.serverDetailsBundle}"`
         data = data.replace(scriptTag, scriptTag + ` nonce="${nonce}"`)
 
         const newDetailsDiv = `<div id="details">${renderOutput}</div>`
@@ -199,7 +321,37 @@ class FlipFlipServer {
           .send(data)
       })
     })
-    api.get('/login', (req, res) => {
+    api.get('/login/code', async (req, res) => {
+      const storage = new AppStorage(1)
+      const theme = storage.initialState.theme
+      const nonce = Buffer.from(randomUUID()).toString('base64')
+      const element = React.createElement(Login, { theme, nonce })
+      const renderOutput = ReactDOMServer.renderToString(element)
+      const htmlFilePath = path.join(__dirname, 'public', 'login.html')
+      fs.readFile(htmlFilePath, 'utf8', (err, data) => {
+        if (err) {
+          console.error('Something went wrong:', err)
+          return res.status(500).send('Oops, better luck next time!')
+        }
+
+        const scriptTag = `<script defer="defer" src="${this.loginBundle}"`
+        data = data.replace(scriptTag, scriptTag + ` nonce="${nonce}"`)
+
+        const newLoginDiv = `<div id="login">${renderOutput}</div>`
+        const themeData = `<script nonce="${nonce}">window.flipflipTheme = ${JSON.stringify(
+          theme
+        )}; window.flipflipNonce = '${nonce}'</script>`
+        data = data.replace('<div id="login"></div>', newLoginDiv + themeData)
+
+        return res
+          .setHeader(
+            'Content-Security-Policy',
+            `default-src 'self'; style-src 'nonce-${nonce}' https://fonts.googleapis.com 'sha256-N/V+KmgnmpQtoPBNwft+a2OHHPzy8+KPWY+ksThFrZ0=' 'unsafe-hashes'; script-src 'nonce-${nonce}'; font-src https://fonts.gstatic.com; object-src 'none'; require-trusted-types-for 'script'; base-uri 'none'`
+          )
+          .send(data)
+      })
+    })
+    api.get('/login/token', (req, res) => {
       const token = req.query.token as string
       security()
         .verifyToken(token)
@@ -226,7 +378,7 @@ class FlipFlipServer {
       config.server = {}
     }
     if (config.server.host == null) {
-      config.server.host = FlipFlipServer.DEFAULT_HOST
+      config.server.host = this.defaultHost
     }
     if (config.server.port == null) {
       config.server.port = 0
@@ -235,79 +387,58 @@ class FlipFlipServer {
     return config
   }
 
-  private initWebSocketServer(): ws.Server {
-    const wsServer = new ws.Server({ noServer: true })
-    wsServer.on('connection', (socket: ws.WebSocket) => {
-      const canWrite = this.writePermissions.shift() ?? false
-      if (canWrite) {
-        socket.storage = new AppStorage(1)
-      }
-      socket.on('close', () => {
-        if (socket.storage != null) {
-          this.writePermissions.push(true)
-        }
-      })
-      socket.on('message', (message: ws.RawData) => {
-        let buffer: Buffer
-        if (message instanceof Buffer) {
-          buffer = message
-        } else if (message instanceof ArrayBuffer) {
-          buffer = Buffer.from(message)
-        } else {
-          buffer = Buffer.concat(message)
-        }
+  public init(listener: () => void) {
+    const saveDir = getSaveDir()
+    if (!fs.existsSync(saveDir)) {
+      fs.mkdirSync(saveDir, { recursive: true })
+    }
 
-        const text = buffer.toString('utf-8')
-        const websocketMessage = JSON.parse(text) as WebSocketMessage
-        webSocketMessage().handle(websocketMessage, socket)
-      })
-    })
+    this.sessionParser = this.initSessionParser()
+    webSocketServer().init({ noServer: true })
 
-    return wsServer
-  }
-
-  public init(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.sessionParser = this.initSessionParser()
-      this.wsServer = this.initWebSocketServer()
-
-      const privateKey = security().readPrivateKey()
-      const certificate = security().readCertificate()
-      const options = { key: privateKey, cert: certificate }
-      this.server = createServer(options, this.initAPI())
-      this.server.on('upgrade', (request, socket, head) => {
-        const response = {} as Response
-        this.sessionParser(request, response, () => {
-          if (request.session.authenticated !== true) {
+    security().generateCertificates()
+    const privateKey = security().readPrivateKey()
+    const certificate = security().readCertificate()
+    const options = { key: privateKey, cert: certificate }
+    this.server = createServer(options, this.initAPI())
+    this.server.on('upgrade', (request, socket, head) => {
+      const response = {} as Response
+      this.sessionParser(request, response, () => {
+        if (request.url === '/flipflip') {
+          let unauthorized = request.session.authenticated !== true
+          if (process.env.NODE_ENV === 'development') {
+            // code in this block is not included in webpack production build
+            if (process.env.DEV === 'true') {
+              unauthorized = false
+            }
+          }
+          if (unauthorized) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
             socket.destroy()
             return
           }
-
-          this.wsServer.handleUpgrade(request, socket, head, (ws) => {
-            this.wsServer.emit('connection', ws, request)
-          })
-        })
-      })
-
-      const config = this.loadConfig()
-      const { host, port } = config.server as ServerConfig
-      this.server.listen(port, host, () => {
-        if (isWin32 === false && isLinux === false && isMacOSX === false) {
-          console.log(`Unsupported platform: ${process.platform}`)
-          this.server.close()
-          reject()
-        } else {
-          resolve()
         }
+
+        webSocketServer().handleUpgrade(request, socket, head)
       })
+    })
+
+    const config = this.loadConfig()
+    const { host, port } = config.server as ServerConfig
+    this.server.listen(port, host, () => {
+      if (isWin32 === false && isLinux === false && isMacOSX === false) {
+        console.log(`Unsupported platform: ${process.platform}`)
+        this.server.close()
+      } else {
+        listener()
+      }
     })
   }
 
   public getServerURL() {
     const { host } = this.loadConfig().server
     const { port } = this.server.address() as AddressInfo
-    const allNetworkInterfaces = host === FlipFlipServer.DEFAULT_HOST
+    const allNetworkInterfaces = host === this.defaultHost
     return allNetworkInterfaces
       ? getServerURL('localhost', port)
       : getServerURL(host, port)
@@ -333,7 +464,7 @@ class FlipFlipServer {
   public getNetworkURLs() {
     const url = this.getServerURL()
     const { host, port } = this.loadConfig().server
-    const allNetworkInterfaces = host === FlipFlipServer.DEFAULT_HOST
+    const allNetworkInterfaces = host === this.defaultHost
     const urls: Array<{ name: string; url: string }> = []
     if (allNetworkInterfaces) {
       urls.push({ name: 'Local', url })

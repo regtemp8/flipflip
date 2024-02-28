@@ -102,4 +102,5 @@ coverage
 
 client/build/*
 common/build/*
+login/build/*
 server-details/build/*

@@ -27,9 +27,29 @@ import type WeightGroup from '../store/scene/WeightGroup'
 import type Scene from '../store/scene/Scene'
 import type Clip from '../store/clip/Clip'
 import type Audio from '../store/audio/Audio'
-import type TimingSettings from '../store/scene/TimingSettings'
 import Tag from '../store/tag/Tag'
 import flipflip from '../FlipFlipService'
+
+export function getBrowserName() {
+  const agent = window.navigator.userAgent.toLowerCase()
+  if (agent.indexOf('chrome') > -1 && window.chrome != null) {
+    return 'chrome'
+  } else if (agent.indexOf('safari') > -1) {
+    return 'safari'
+  } else if (agent.indexOf('edge') > -1) {
+    return 'edge'
+  } else if (agent.indexOf('edg') > -1) {
+    return 'chromium based edge'
+  } else if (agent.indexOf('firefox') > -1) {
+    return 'firefox'
+  } else if (agent.indexOf('opr') > -1 && window.opr != null) {
+    return 'opera'
+  } else if (agent.indexOf('trident') > -1) {
+    return 'ie'
+  } else {
+    return 'other'
+  }
+}
 
 const gridIDPrefix = '999'
 export function convertGridIDToSceneID(gridID: number): number {
@@ -317,8 +337,17 @@ export function getRandomIndex(list: any[]) {
   return Math.floor(Math.random() * list.length)
 }
 
-export function getRandomNumber(min: number, max: number) {
+export function getRandomInteger(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+export function getRandomFloat(min: number, max: number, decimals: number) {
+  const float = Math.random() * (max - min) + min
+  return parseFloat(float.toFixed(decimals))
+}
+
+export function getRandomBoolean() {
+  return Math.random() < 0.5
 }
 
 export function getRandomListItem(list: any[], count: number = 1) {
@@ -924,51 +953,6 @@ export function applyEffects(scene: Scene, base64String: string) {
   }
 
   return scene
-}
-
-export function getDuration(
-  timing: TimingSettings,
-  timeToNextFrame: number,
-  bpm?: number,
-  min?: number
-) {
-  const time = min
-    ? (value: number) => Math.max(value, min)
-    : (value: number) => value
-  let duration: number
-  switch (timing.timingFunction) {
-    case TF.constant:
-      duration = time(timing.time)
-      break
-    case TF.random:
-      duration =
-        Math.floor(
-          Math.random() * (time(timing.timeMax) - time(timing.timeMin) + 1)
-        ) + time(timing.timeMin)
-      break
-    case TF.sin:
-      const sinRate = (Math.abs(timing.sinRate - 100) + 2) * 1000
-      duration =
-        Math.floor(
-          Math.abs(Math.sin(Date.now() / sinRate)) *
-            (time(timing.timeMax) - time(timing.timeMin) + 1)
-        ) + time(timing.timeMin)
-      break
-    case TF.bpm:
-      const bpmMulti = timing.bpmMulti / 10
-      duration = 60000 / ((bpm || 60) * bpmMulti)
-      // If we cannot parse this, default to 1s
-      if (!duration) {
-        duration = 1000
-      }
-      break
-    case TF.scene:
-      duration = timeToNextFrame
-      break
-    default:
-      duration = NaN
-  }
-  return duration
 }
 
 const captionProgramDefaults = {

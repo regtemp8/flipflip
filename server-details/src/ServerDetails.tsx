@@ -15,6 +15,7 @@ import { CacheProvider } from '@emotion/react'
 import { CenteredBox } from './CenteredBox'
 import { NetworkURLTable } from './NetworkURLTable'
 import { createEmotionCache } from './server/renderer'
+import { LoginCodeDialog } from './LoginCodeDialog'
 
 export interface ServerDetailsProps {
   theme?: ThemeOptions
@@ -43,7 +44,7 @@ export default function ServerDetails(props: ServerDetailsProps) {
             <CardContent>
               <CenteredBox>
                 <Avatar
-                  src="img/flipflip_logo.png"
+                  src="/img/flipflip_logo.png"
                   sx={{ height: 72, width: 72, mb: 1, my: 'auto' }}
                 />
               </CenteredBox>
@@ -56,6 +57,7 @@ export default function ServerDetails(props: ServerDetailsProps) {
               )}
             </CardContent>
           </Card>
+          <LoginCodeDialog />
         </Container>
       </ThemeProvider>
     </CacheProvider>

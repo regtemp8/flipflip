@@ -3,15 +3,9 @@ import React, {
   useEffect,
   useRef,
   useState,
-  CSSProperties,
   useCallback
 } from 'react'
-import {
-  ForwardedProps,
-  UseTransitionResult,
-  animated,
-  useTransition
-} from 'react-spring'
+import { animated, useTransition } from '@react-spring/web'
 
 import { type Theme, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
@@ -69,30 +63,31 @@ interface AudioAlertLayerProps {
 }
 
 function AudioAlertLayer(props: PropsWithChildren<AudioAlertLayerProps>) {
-  const fadeTransitions: UseTransitionResult<
-    boolean,
-    ForwardedProps<CSSProperties>
-  >[] = useTransition(props.visible, (visible: any) => visible, {
-    from: {
-      // Base values, optional
-      opacity: 0
+  const [transitions] = useTransition(
+    props.visible,
+    {
+      from: {
+        // Base values, optional
+        opacity: 0
+      },
+      enter: {
+        // Styles apply for entering elements
+        opacity: 1
+      },
+      leave: {
+        // Styles apply for leaving elements
+        opacity: 0
+      },
+      config: {
+        duration: 2000
+      }
     },
-    enter: {
-      // Styles apply for entering elements
-      opacity: 1
-    },
-    leave: {
-      // Styles apply for leaving elements
-      opacity: 0
-    },
-    config: {
-      duration: 2000
-    }
-  })
+    [props.visible]
+  )
 
   return (
-    <React.Fragment>
-      {fadeTransitions.map((transition) => {
+    <>
+      {transitions((style, item, transition) => {
         return (
           <animated.div
             key={transition.key}
@@ -100,14 +95,14 @@ function AudioAlertLayer(props: PropsWithChildren<AudioAlertLayerProps>) {
               zIndex: 10,
               position: 'absolute',
               bottom: 0,
-              ...transition.props
+              ...style
             }}
           >
             {transition.item === true && props.children}
           </animated.div>
         )
       })}
-    </React.Fragment>
+    </>
   )
 }
 

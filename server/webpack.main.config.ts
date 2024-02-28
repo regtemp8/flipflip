@@ -43,6 +43,14 @@ export const mainConfig: Configuration = {
         {
           from: '../server-details/build/index.html',
           to: 'public/server-details.html'
+        },
+        {
+          from: '../login/build/static/js',
+          to: 'public/static/js'
+        },
+        {
+          from: '../login/build/index.html',
+          to: 'public/login.html'
         }
       ]
     }),

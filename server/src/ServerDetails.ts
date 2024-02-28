@@ -3,6 +3,7 @@ import { SDO } from 'flipflip-common'
 import security from './SecurityService'
 import windowManager from './WindowManager'
 import server from './FlipFlipServer'
+import login from './LoginCode'
 
 const isValidSender = (event: IpcMainEvent) => {
   const url = new URL(event.senderFrame.url)
@@ -18,18 +19,30 @@ export function initIpcEvents() {
     return server().getNetworkURLs()
   })
 
-  const generateMagicLink = async (url: string): Promise<string> => {
-    const token = await security().generateToken()
-    return `${url}/login?token=${token}`
-  }
-
   ipcMain.handle(SDO.getMagicLink, (event: IpcMainEvent, url: string) => {
-    return isValidSender(event) ? generateMagicLink(url) : Promise.resolve('')
+    return isValidSender(event)
+      ? security().generateMagicLink(url)
+      : Promise.resolve('')
   })
 
   ipcMain.on(SDO.openExternal, (event: IpcMainEvent, url: string) => {
     if (isValidSender(event)) {
-      generateMagicLink(url).then((link) => windowManager().openExternal(link))
+      security()
+        .generateMagicLink(url)
+        .then((link) => windowManager().openExternal(link))
+    }
+  })
+
+  ipcMain.on(SDO.verifyLoginCode, (event: IpcMainEvent, code: string) => {
+    if (isValidSender(event)) {
+      const verified = security().verifyCode(code)
+      login().done(verified)
+    }
+  })
+
+  ipcMain.on(SDO.cancelLoginCode, (event: IpcMainEvent) => {
+    if (isValidSender(event)) {
+      login().done(false)
     }
   })
 }

@@ -1,6 +1,6 @@
-import { promises, copyFileSync, mkdirSync, existsSync, readFileSync } from 'fs'
+import { promises, copyFileSync, existsSync, readFileSync } from 'fs'
 import { getBackups, cleanBackups } from './Backup'
-import { getContext, getPortablePath, getSaveDir, getSavePath } from '../utils'
+import { getContext, getPortablePath, getSavePath } from '../utils'
 import {
   removeDuplicatesBy,
   defaultTheme,
@@ -49,38 +49,42 @@ export default class AppStorage {
   constructor(windowId: number) {
     this.appVersion = PACKAGE_JSON_VERSION_WEBPACK_ENTRY
     this.initialState.version = this.appVersion
-    const saveDir = getSaveDir()
     const savePath = getSavePath()
     const portablePath = getPortablePath()
     try {
-      mkdirSync(saveDir)
-    } catch (e) {
-      // who cares
-    }
-    try {
-      let data
+      const noData = {}
+      let data: any = noData
       let portableMode = false
-      if (!existsSync(savePath) && existsSync(portablePath)) {
+      const portablePathExists = existsSync(portablePath)
+      const savePathExists = existsSync(savePath)
+      if (portablePathExists) {
         data = JSON.parse(readFileSync(portablePath, 'utf-8'))
         if (data.config.generalSettings.portableMode === false) {
-          data = JSON.parse(readFileSync(savePath, 'utf-8'))
+          data = savePathExists
+            ? JSON.parse(readFileSync(savePath, 'utf-8'))
+            : noData
         } else {
           portableMode = true
         }
-      } else {
+      } else if (savePathExists) {
         data = JSON.parse(readFileSync(savePath, 'utf-8'))
         if (data.config.generalSettings.portableMode === true) {
           portableMode = true
-          data = JSON.parse(readFileSync(portablePath, 'utf-8'))
+          data = portablePathExists
+            ? JSON.parse(readFileSync(portablePath, 'utf-8'))
+            : noData
         }
       }
 
-      if (portableMode) {
-        if (existsSync(`${portablePath}.new`)) console.warn('FOUND OLD SAVE')
-      } else {
-        if (existsSync(`${savePath}.new`)) console.warn('FOUND OLD SAVE')
+      if (
+        (portableMode && existsSync(`${portablePath}.new`)) ||
+        existsSync(`${savePath}.new`)
+      ) {
+        console.warn('FOUND OLD SAVE')
       }
-
+      if (data === noData) {
+        return
+      }
       if (data.version !== this.appVersion) {
         // Preserve the existing file - so as not to destroy user's data
         archiveFile(portableMode ? portablePath : savePath)

@@ -3,7 +3,6 @@ import type Audio from './Audio'
 import {
   type EntryState,
   type EntryUpdate,
-  setEntrySlice,
   getEntry,
   setEntry
 } from '../EntryState'
@@ -26,7 +25,7 @@ function createAudioSlice(audio?: EntryState<Audio>) {
     initialState,
     reducers: {
       setAudioSlice: (state, action: PayloadAction<EntryState<Audio>>) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setAudio: (state, action: PayloadAction<Audio>) => {
         setEntry(state, action.payload)

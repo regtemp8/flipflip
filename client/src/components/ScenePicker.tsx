@@ -397,7 +397,7 @@ const useStyles = makeStyles()((theme: Theme) => {
     },
     tab: {
       width: drawerWidth,
-      height: theme.spacing(12),
+      height: theme.spacing(10),
       transition: theme.transitions.create(
         ['width', 'margin', 'background', 'opacity'],
         {
@@ -406,7 +406,7 @@ const useStyles = makeStyles()((theme: Theme) => {
         }
       ),
       '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        background: 'rgba(0, 0, 0, 0.1)',
         opacity: 1,
         transition: theme.transitions.create(['background', 'opacity'], {
           easing: theme.transitions.easing.sharp,
@@ -708,7 +708,6 @@ function ScenePicker() {
   }
 
   const onToggleDelete = (sceneID: number) => {
-    console.log('onToggleDelete(' + sceneID + ')')
     const newDeleteScenes = Array.from(scenesToDelete as number[])
     if (newDeleteScenes.includes(sceneID)) {
       newDeleteScenes.splice(newDeleteScenes.indexOf(sceneID), 1)

@@ -22,8 +22,7 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
         .api.getSystemFonts()
         .then(
           (res: string[]) => {
-            if (!_promise.current?.hasCanceled) {
-              console.log(res)
+            if (_promise.current?.hasCanceled === false) {
               setSystemFonts(res)
             }
           },

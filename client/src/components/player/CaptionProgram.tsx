@@ -4,7 +4,6 @@ import Sound from 'react-sound'
 
 import captionProgramDefaults, {
   CancelablePromise,
-  getDuration,
   getMsTimestampValue,
   getRandomListItem,
   getTimingFromString,
@@ -32,6 +31,8 @@ import {
 import { selectAudioBPM } from '../../store/audio/selectors'
 import flipflip from '../../FlipFlipService'
 import { RootState } from '../../store/store'
+import { HTMLContentElement } from './HTMLContentElement'
+import DurationCalculator from '../../data/DurationCalculator'
 
 const splitFirstWord = function (s: string) {
   const firstSpaceIndex = s.indexOf(' ')
@@ -56,7 +57,7 @@ export interface CaptionProgramProps {
   sceneID: number
   captionScriptID: number
   currentAudio?: number
-  currentImage?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  currentImage?: HTMLContentElement
   persist: boolean
   repeat: string
   scale: number
@@ -129,6 +130,15 @@ export default function CaptionProgram(props: CaptionProgramProps) {
   const _lastTimestamp = useRef<number>()
   const _timestampTimeout = useRef<number>()
 
+  const _capDuration = useRef(new DurationCalculator())
+  const _capDelayDuration = useRef(new DurationCalculator())
+  const _blinkDuration = useRef(new DurationCalculator())
+  const _blinkDelayDuration = useRef(new DurationCalculator())
+  const _blinkGroupDelayDuration = useRef(new DurationCalculator())
+  const _countDuration = useRef(new DurationCalculator())
+  const _countDelayDuration = useRef(new DurationCalculator())
+  const _countGroupDelayDuration = useRef(new DurationCalculator())
+
   const getPhrase = useCallback(
     (value: string) => {
       const registerRegex = /^\$(\d)$/.exec(value)
@@ -179,7 +189,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             if (state.countProgress) {
               setState({ ...state, countProgress: false })
             }
-            const duration = getDuration(
+            const duration = _capDuration.current.calc(
               {
                 timingFunction: state.captionTF,
                 time: state.captionDuration[0],
@@ -198,7 +208,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             )
             const delay = timestamp
               ? 0
-              : getDuration(
+              : _capDelayDuration.current.calc(
                   {
                     timingFunction: state.captionDelayTF,
                     time: state.captionDelay[0],
@@ -262,7 +272,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             if (state.countProgress) {
               setState({ ...state, countProgress: false })
             }
-            const duration = getDuration(
+            const duration = _capDuration.current.calc(
               {
                 timingFunction: state.captionTF,
                 time: state.captionDuration[0],
@@ -281,7 +291,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             )
             const delay = timestamp
               ? 0
-              : getDuration(
+              : _capDelayDuration.current.calc(
                   {
                     timingFunction: state.captionDelayTF,
                     time: state.captionDelay[0],
@@ -357,7 +367,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               const j = i
               i += 1
               fns.push(() => {
-                const duration = getDuration(
+                const duration = _blinkDuration.current.calc(
                   {
                     timingFunction: state.blinkTF,
                     time: state.blinkDuration[0],
@@ -384,7 +394,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
                 } else if (state.blinkDelayTF === TF.scene) {
                   showTextFn(() => (_sceneCommand.current = fns[j + 1]))
                 } else {
-                  const delay = getDuration(
+                  const delay = _blinkDelayDuration.current.calc(
                     {
                       timingFunction: state.blinkDelayTF,
                       time: state.blinkDelay[0],
@@ -409,7 +419,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               state.blinkDelayTF !== TF.scene &&
               !timestamp
             ) {
-              const delay = getDuration(
+              const delay = _blinkGroupDelayDuration.current.calc(
                 {
                   timingFunction: state.blinkGroupDelayTF,
                   time: state.blinkGroupDelay[0],
@@ -509,7 +519,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               const j = i
               i += 1
               fns.push(() => {
-                const duration = getDuration(
+                const duration = _countDuration.current.calc(
                   {
                     timingFunction: state.countTF,
                     time: state.countDuration[0],
@@ -557,7 +567,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
                 } else if (state.countDelayTF === TF.scene) {
                   showTextFn(() => (_sceneCommand.current = fns[j + 1]))
                 } else {
-                  const delay = getDuration(
+                  const delay = _countDelayDuration.current.calc(
                     {
                       timingFunction: state.countDelayTF,
                       time: state.countDelay[0],
@@ -582,7 +592,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               state.countDelayTF !== TF.scene &&
               !timestamp
             ) {
-              const delay = getDuration(
+              const delay = _countGroupDelayDuration.current.calc(
                 {
                   timingFunction: state.countGroupDelayTF,
                   time: state.countGroupDelay[0],

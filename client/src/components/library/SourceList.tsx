@@ -559,7 +559,6 @@ function SourceList(props: SourceListProps) {
 
   useEffect(() => {
     if (firstSourceURL === '') {
-      console.log('setIsEditing')
       setIsEditing(props.sources[0])
     }
   }, [props.sources, firstSourceURL])
@@ -647,7 +646,6 @@ function SourceList(props: SourceListProps) {
   }
 
   const onStartEdit = (sourceID: number) => {
-    console.log('START EDIT: ' + sourceID)
     setIsEditing(sourceID)
   }
 
@@ -727,7 +725,6 @@ function SourceList(props: SourceListProps) {
 
   const VirtualList = (props: any) => {
     const { tutorial, height, width, yOffset, sources } = props
-    console.log('VIRTUAL LIST: ' + JSON.stringify(sources))
     return (
       <FixedSizeList
         height={tutorial ? 60 : height}
@@ -789,7 +786,6 @@ function SourceList(props: SourceListProps) {
   }
 
   const { classes } = useStyles()
-  console.log('SOURCES UNDEFINED: ' + (props.sources === undefined))
   if (props.sources.length === 0) {
     return (
       <React.Fragment>

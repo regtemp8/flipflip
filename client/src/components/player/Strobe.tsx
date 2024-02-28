@@ -1,193 +1,103 @@
-import React, {
-  type PropsWithChildren,
-  CSSProperties,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
-import {
-  UseTransitionResult,
-  ForwardedProps,
-  animated,
-  useTransition
-} from 'react-spring'
+import React, { useRef, type PropsWithChildren, useEffect } from 'react'
+import { animated, useSpring } from '@react-spring/web'
+import { type Theme } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
+import { StrobeData } from '../../store/player/ContentPreloadService'
+import { getEaseFunction } from '../../data/utils'
 
-import { SC, SL, TF } from 'flipflip-common'
-import * as utils from '../../data/utils'
-import { useAppSelector } from '../../store/hooks'
-import { selectSceneStrobeOptions } from '../../store/scene/selectors'
-import { selectAudioBPM } from '../../store/audio/selectors'
-import { selectUndefined } from '../../store/app/selectors'
+const useStyles = makeStyles()((theme: Theme) => {
+  return {
+    strobeContainer: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    }
+  }
+})
+
+interface EffectProps {
+  zIndex: number
+  show: boolean
+  isPlaying: boolean
+  data: StrobeData
+}
+
+function Effect(props: PropsWithChildren<EffectProps>) {
+  const { data, show, isPlaying, zIndex, children } = props
+  const { classes } = useStyles()
+
+  const _prevShow = useRef<boolean>(false)
+
+  const play = _prevShow.current !== show && show
+  _prevShow.current = show
+
+  const [style, api] = useSpring(
+    () => ({
+      from: { opacity: data.opacity, background: '' },
+      to: async (next) => {
+        let easing: ((time: number) => number) | undefined = undefined
+        if (data.easing != null) {
+          const { ea, exp, amp, per, ov } = data.easing
+          easing = getEaseFunction(ea, exp, amp, per, ov)
+        }
+
+        for (const { opacity, color, delay, duration } of data.loops) {
+          api.set({ background: color })
+          await next({
+            opacity,
+            reset: true,
+            delay,
+            config: { duration, easing }
+          })
+        }
+      },
+      immediate: !play
+    }),
+    [play, data]
+  )
+
+  useEffect(() => {
+    if (isPlaying) {
+      api.resume()
+    } else {
+      api.pause()
+    }
+  }, [isPlaying, api])
+
+  return (
+    <animated.div
+      className={classes.strobeContainer}
+      style={{
+        zIndex,
+        ...style
+      }}
+    >
+      {children}
+    </animated.div>
+  )
+}
 
 export interface StrobeProps {
-  sceneID: number
-  toggleStrobe: boolean
-  timeToNextFrame: number
-  currentAudio?: number
+  show: boolean
+  isPlaying: boolean
   zIndex: number
-  strobeFunction?: Function
+  data?: StrobeData
+  enable: (data: StrobeData) => boolean
 }
 
 export default function Strobe(props: PropsWithChildren<StrobeProps>) {
-  const strobe = useAppSelector(selectSceneStrobeOptions(props.sceneID))
-  const bpmSelector =
-    props.currentAudio != null
-      ? selectAudioBPM(props.currentAudio)
-      : selectUndefined
-  const bpm = useAppSelector(bpmSelector)
-
-  const [toggleStrobe, setToggleStrobe] = useState(false)
-  const [duration, setDuration] = useState(0)
-  const _strobeTimeout = useRef<number>()
-
-  const getStrobeColor = () => {
-    let color = null
-    if (strobe.colorType === SC.color) {
-      color = strobe.color
-    } else if (strobe.colorType === SC.colorSet) {
-      if (strobe.colorSet.length > 0) {
-        color = utils.getRandomListItem(strobe.colorSet)
-      }
-    } else {
-      color = utils.getRandomColor()
-    }
-    const validColor = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g.exec(color)
-    return validColor ? color : ''
+  const { data, show, isPlaying, zIndex, children } = props
+  if (data != null && props.enable(data)) {
+    return (
+      <Effect data={data} zIndex={zIndex} show={show} isPlaying={isPlaying}>
+        {children}
+      </Effect>
+    )
+  } else {
+    return <>{children}</>
   }
-
-  const getDuration = useCallback(() => {
-    return utils.getDuration(strobe.timing, props.timeToNextFrame, bpm, 10)
-  }, [strobe.timing, props.timeToNextFrame, bpm])
-
-  const getDelay = useCallback(() => {
-    return utils.getDuration(strobe.delay, props.timeToNextFrame, bpm)
-  }, [strobe.delay, props.timeToNextFrame, bpm])
-
-  const strobeOnce = useCallback(() => {
-    const duration = getDuration()
-    setDuration(duration)
-    const delay = strobe.strobePulse ? getDelay() : duration
-    setToggleStrobe(!toggleStrobe)
-    if (props.strobeFunction) {
-      props.strobeFunction()
-    }
-    return delay
-  }, [getDelay, getDuration, props, strobe.strobePulse, toggleStrobe])
-
-  const strobeLoop = useCallback(() => {
-    const delay = strobeOnce()
-    _strobeTimeout.current = window.setTimeout(strobeLoop, delay)
-  }, [strobeOnce])
-
-  useEffect(() => {
-    if (
-      strobe.strobePulse
-        ? strobe.delay.timingFunction !== TF.scene
-        : strobe.timing.timingFunction !== TF.scene
-    ) {
-      strobeLoop()
-    }
-
-    return () => {
-      clearTimeout(_strobeTimeout.current)
-      _strobeTimeout.current = undefined
-    }
-  }, [
-    strobe.delay.timingFunction,
-    strobe.strobePulse,
-    strobe.timing.timingFunction,
-    strobeLoop
-  ])
-
-  useEffect(() => {
-    clearTimeout(_strobeTimeout.current)
-    if (
-      strobe.strobePulse
-        ? strobe.delay.timingFunction !== TF.scene
-        : strobe.timing.timingFunction !== TF.scene
-    ) {
-      strobeLoop()
-    }
-  }, [
-    strobe.timing.timingFunction,
-    strobe.delay.timingFunction,
-    strobe.strobePulse,
-    strobeLoop
-  ])
-
-  useEffect(() => {
-    if (
-      strobe.strobePulse
-        ? strobe.delay.timingFunction === TF.scene
-        : strobe.timing.timingFunction === TF.scene
-    ) {
-      strobeOnce()
-    }
-  }, [
-    strobe.strobePulse,
-    strobe.delay.timingFunction,
-    strobe.timing.timingFunction,
-    strobeOnce
-  ])
-
-  const strobeTransitions: UseTransitionResult<
-    boolean,
-    ForwardedProps<CSSProperties>
-  >[] = useTransition(
-    toggleStrobe,
-    (toggle: any) => {
-      return toggle
-    },
-    {
-      from: {
-        backgroundColor:
-          strobe.strobeLayer === SL.image ? '' : getStrobeColor(),
-        opacity: strobe.strobeLayer === SL.bottom ? strobe.strobeOpacity : 1
-      },
-      enter: {
-        opacity: 0
-      },
-      leave: {
-        opacity: 0
-      },
-      reset: true,
-      unique: true,
-      config: {
-        duration,
-        easing: utils.getEaseFunction(
-          strobe.easing.ease,
-          strobe.easing.exp,
-          strobe.easing.amp,
-          strobe.easing.per,
-          strobe.easing.ov
-        )
-      }
-    }
-  )
-
-  return (
-    <React.Fragment>
-      {strobeTransitions.map((transition) => {
-        return (
-          <animated.div
-            key={transition.key}
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              zIndex: props.zIndex,
-              ...transition.props
-            }}
-          >
-            {props.children}
-          </animated.div>
-        )
-      })}
-    </React.Fragment>
-  )
 }
 
 ;(Strobe as any).displayName = 'Strobe'
