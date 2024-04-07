@@ -5,6 +5,7 @@ import crypto, { randomInt, randomUUID } from 'crypto'
 import selfsigned from 'selfsigned'
 import { Request } from 'electron'
 import { getSaveDir } from './utils'
+import server from './FlipFlipServer'
 
 interface ActiveJWTToken {
   sub: string
@@ -170,15 +171,14 @@ class SecurityService {
 
   public verifyCertificate(request: Request): number {
     let valid = false
-    const isOK = request.verificationResult === 'OK'
-    const hostname = request.hostname
-    if (
-      isOK === false &&
-      (hostname === 'localhost' || hostname === '127.0.0.1')
-    ) {
-      const data = this.sanitizeCertificate(request.validatedCertificate.data)
-      const localData = this.sanitizeCertificate(this.readCertificate())
-      valid = data === localData
+    if (request.verificationResult !== 'OK') {
+      const hostname = request.hostname
+      const serverHostName = new URL(server().getServerURL()).hostname
+      if(hostname === serverHostName) {
+        const data = this.sanitizeCertificate(request.validatedCertificate.data)
+        const localData = this.sanitizeCertificate(this.readCertificate())
+        valid = data === localData
+      }
     }
 
     const verified = 0
