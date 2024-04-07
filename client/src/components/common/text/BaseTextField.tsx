@@ -52,7 +52,7 @@ export default function BaseTextField<
   ) => {
     let value = event.target.value !== '' ? Number(event.target.value) : min
     value = Math.max(value, min)
-    if (props?.inputProps?.max) {
+    if (props?.inputProps?.max != null) {
       value = Math.min(value, props.inputProps.max)
     }
 
@@ -71,10 +71,10 @@ export default function BaseTextField<
 
   const renderTextField = () => {
     let inputProps: any
-    if (props.inputProps) {
+    if (props.inputProps != null) {
       const { className, min, max, step, type, labelledBy } = props.inputProps
       inputProps = { className, min, max, step, type }
-      if (labelledBy) {
+      if (labelledBy != null) {
         inputProps['aria-labelledby'] = labelledBy
       }
     }
@@ -97,7 +97,7 @@ export default function BaseTextField<
     )
   }
 
-  return props.tooltip ? (
+  return props.tooltip != null ? (
     <Tooltip disableInteractive title={props.tooltip}>
       {renderTextField()}
     </Tooltip>

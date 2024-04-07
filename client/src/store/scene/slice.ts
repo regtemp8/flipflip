@@ -4,7 +4,6 @@ import type WeightGroup from './WeightGroup'
 import {
   type EntryState,
   type EntryUpdate,
-  setEntrySlice,
   getEntry,
   setEntry,
   deleteEntry
@@ -32,7 +31,7 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
     initialState,
     reducers: {
       setSceneSlice: (state, action: PayloadAction<EntryState<Scene>>) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setScene: (state, action: PayloadAction<Scene>) => {
         setEntry(state, action.payload)
@@ -1332,13 +1331,15 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        getEntry(state, action.payload.id).sources.push(action.payload.value)
+        getEntry(state, action.payload.id).sources.unshift(action.payload.value)
       },
       setSceneAddSources: (
         state,
         action: PayloadAction<EntryUpdate<number[]>>
       ) => {
-        getEntry(state, action.payload.id).sources.push(...action.payload.value)
+        getEntry(state, action.payload.id).sources.unshift(
+          ...action.payload.value
+        )
       },
       setSceneRemoveSources: (
         state,

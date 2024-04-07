@@ -41,13 +41,12 @@ export const sourceScraperSlice = createSlice({
       state,
       action: PayloadAction<Record<number, ScrapedSources>>
     ) => {
-      Object.assign(state, action.payload)
+      return action.payload
     },
     setSourceScraperSources: (
       state,
       action: PayloadAction<EntryUpdate<ScrapedSources>>
     ) => {
-      console.log(action.payload.value)
       state[action.payload.id] = action.payload.value
     },
     setSourceScraperSourcesWorker: (

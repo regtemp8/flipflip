@@ -65,8 +65,10 @@ function ColorSetPicker(props: ColorSetPickerProps) {
   const onCloseColorPicker = () => {
     const index = pickerIndex as number
     const color = pickerColor as string
-    currentColors[index] = color
-    dispatch(props.action(currentColors))
+    const newColors = [...currentColors]
+    newColors[index] = color
+
+    dispatch(props.action(newColors))
     setPickerIndex(undefined)
     setPickerColor(undefined)
     setPickerAnchorEl(undefined)

@@ -274,7 +274,7 @@ const IPC = {
   twitterOAuth: 'ipc.twitterOAuth',
   redditOAuth: 'ipc.redditOAuth',
   getFileUrl: 'ipc.getFileUrl',
-  recursiveReaddir: 'ipc.recursiveReaddir',
+  readDirectoryFiles: 'ipc.readDirectoryFiles',
   getContext: 'ipc.getContext',
   loadInWorker: 'ipc.loadInWorker',
   gridNavigateBack: 'ipc.gridNavigateBack',
@@ -294,12 +294,24 @@ const IPC = {
   workerReceiveMessage: 'ipc.workerReceiveMessage',
   workerSendMessage: 'ipc.workerSendMessage',
   workerResponse: 'ipc.workerResponse',
+  proxyNimjaURL: 'ipc.proxyNimjaURL',
 };
 
 const SDO = {
+  // Server Details Operations
   getNetworkURLs: 'sdo.getNetworkURLs',
   getMagicLink: 'sdo.getMagicLink',
   openExternal: 'sdo.openExternal',
+  cancelLoginCode: 'sdo.cancelLoginCode',
+  verifyLoginCode: 'sdo.verifyLoginCode',
+  showLoginCodeDialog: 'sdo.showLoginCodeDialog',
+  closeLoginCodeDialog: 'sdo.closeLoginCodeDialog',
+};
+
+const LC = {
+  // Login Code
+  code: 'lc.code',
+  redirect: 'lc.redirect',
 };
 
 const MO = {
@@ -606,6 +618,7 @@ export {
   IG,
   IPC,
   SDO,
+  LC,
   IT,
   LT,
   MO,

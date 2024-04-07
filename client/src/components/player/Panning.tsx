@@ -1,522 +1,189 @@
-import React, {
-  type PropsWithChildren,
-  CSSProperties,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
-import {
-  UseTransitionResult,
-  ForwardedProps,
-  animated,
-  useTransition
-} from 'react-spring'
+import React, { useRef, type PropsWithChildren, useMemo } from 'react'
+import { animated, useSpring } from '@react-spring/web'
 
-import { HTF, TF, VTF } from 'flipflip-common'
-import { getDuration, getEaseFunction } from '../../data/utils'
-import { useAppSelector } from '../../store/hooks'
+import { getEaseFunction } from '../../data/utils'
 import {
-  selectScenePanning,
-  selectScenePanTF,
-  selectScenePanDuration,
-  selectScenePanDurationMin,
-  selectScenePanDurationMax,
-  selectScenePanSinRate,
-  selectScenePanBPMMulti,
-  selectScenePanHorizTransType,
-  selectScenePanHorizTransImg,
-  selectScenePanHorizTransLevel,
-  selectScenePanHorizTransLevelMin,
-  selectScenePanHorizTransLevelMax,
-  selectScenePanHorizTransRandom,
-  selectScenePanVertTransType,
-  selectScenePanVertTransImg,
-  selectScenePanVertTransLevel,
-  selectScenePanVertTransLevelMin,
-  selectScenePanVertTransLevelMax,
-  selectScenePanVertTransRandom,
-  selectScenePanEndEase,
-  selectScenePanEndExp,
-  selectScenePanEndAmp,
-  selectScenePanEndPer,
-  selectScenePanEndOv,
-  selectScenePanStartEase,
-  selectScenePanStartExp,
-  selectScenePanStartAmp,
-  selectScenePanStartPer,
-  selectScenePanStartOv
-} from '../../store/scene/selectors'
-import { selectAudioBPM } from '../../store/audio/selectors'
-import { selectUndefined } from '../../store/app/selectors'
+  PanningData,
+  PanningLoopData
+} from '../../store/player/ContentPreloadService'
+import { IT } from 'flipflip-common'
+
+const toTranslate = (
+  data: PanningLoopData,
+  measurements: ImageMeasurements
+) => {
+  let x = data.translateX
+  let amountX = x?.amount
+  if (x != null && x.unit === 'px') {
+    // amountX is either 1 or -1 depending on its direction
+    amountX = x.amount
+    const direction = amountX
+    const { imageType, imageWidth, imageHeight } = measurements
+    const parentWidth = measurements.parentWidth as number
+    const parentHeight = measurements.parentHeight as number
+    if (imageType === IT.fitBestClip) {
+      const heightRatio = parentHeight / imageHeight
+      const widthRatio = parentWidth / imageWidth
+      if (widthRatio > heightRatio) {
+        amountX = 0
+      } else {
+        amountX = (imageWidth * heightRatio - parentWidth) / 2
+      }
+    } else if (imageType === IT.fitHeight) {
+      const heightRatio = parentHeight / imageHeight
+      amountX = (imageWidth * heightRatio - parentWidth) / 2
+    } else if (imageType === IT.center) {
+      amountX = (imageWidth - parentWidth) / 2
+    }
+    if (amountX <= 0) {
+      x = undefined
+    } else {
+      amountX *= direction
+    }
+  }
+
+  let y = data.translateY
+  let amountY = y?.amount
+  if (y != null && y.unit === 'px') {
+    // amountY is either 1 or -1 depending on its direction
+    amountY = y.amount
+    const direction = amountY
+    const { imageType, imageWidth, imageHeight } = measurements
+    const parentWidth = measurements.parentWidth ?? window.innerWidth
+    const parentHeight = measurements.parentHeight ?? window.innerHeight
+    if (imageType === IT.fitBestClip) {
+      const heightRatio = parentHeight / imageHeight
+      const widthRatio = parentWidth / imageWidth
+      if (heightRatio > widthRatio) {
+        amountY = 0
+      } else {
+        amountY = (imageHeight * widthRatio - parentHeight) / 2
+      }
+    } else if (imageType === IT.fitWidth) {
+      const widthRatio = parentWidth / imageWidth
+      amountY = (imageHeight * widthRatio - parentHeight) / 2
+    } else if (imageType === IT.center) {
+      amountY = (imageHeight - parentHeight) / 2
+    }
+    if (amountY <= 0) {
+      y = undefined
+    } else {
+      amountY *= direction
+    }
+  }
+
+  if (x != null && y != null) {
+    return `translate(${amountX}${x.unit},${amountY}${y.unit})`
+  } else if (x != null) {
+    return `translateX(${amountX}${x.unit})`
+  } else if (y != null) {
+    return `translateY(${amountY}${y.unit})`
+  } else {
+    return undefined
+  }
+}
+
+interface EffectProps {
+  data: PanningData
+  measurements: ImageMeasurements
+  show: boolean
+  isPlaying: boolean
+  className?: string
+}
+
+function Effect(props: PropsWithChildren<EffectProps>) {
+  const { data, measurements, show, isPlaying, className, children } = props
+
+  const _prevShow = useRef<boolean>(false)
+  const _reset = useRef<boolean>(false)
+
+  const animation = useMemo(() => {
+    let to: any[] | undefined = undefined
+    const from = toTranslate(data.start, measurements)
+    if (from != null) {
+      let startEasing: ((time: number) => number) | undefined = undefined
+      if (data.startEasing != null) {
+        const { ea, exp, amp, per, ov } = data.startEasing
+        startEasing = getEaseFunction(ea, exp, amp, per, ov)
+      }
+
+      let endEasing: ((time: number) => number) | undefined = undefined
+      if (data.endEasing != null) {
+        const { ea, exp, amp, per, ov } = data.endEasing
+        endEasing = getEaseFunction(ea, exp, amp, per, ov)
+      }
+
+      to = data.loops.map((loop, index) => {
+        const panIn = index % 2 === 0
+        const easing = panIn ? startEasing : endEasing
+        const translate = toTranslate(loop, measurements) as string
+        return {
+          transform: translate,
+          config: { duration: loop.duration, easing }
+        }
+      })
+    }
+
+    return {
+      from: {
+        transform: from
+      },
+      to
+    }
+  }, [data, measurements])
+
+  _reset.current = _prevShow.current !== show
+  _prevShow.current = show
+
+  const style = useSpring({
+    ...animation,
+    reset: _reset.current,
+    pause: !isPlaying
+  })
+
+  return (
+    <animated.div
+      className={className}
+      style={animation.from.transform != null ? style : undefined}
+    >
+      {children}
+    </animated.div>
+  )
+}
+
+export interface ImageMeasurements {
+  imageType: string
+  imageWidth: number
+  imageHeight: number
+  parentWidth?: number
+  parentHeight?: number
+}
 
 export interface PanningProps {
-  togglePan: boolean
-  currentAudio?: number
-  timeToNextFrame: number
-  sceneID: number
-  panFunction: Function
-  image?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-  parentHeight?: number
-  parentWidth?: number
+  data?: PanningData
+  measurements: ImageMeasurements
+  className?: string
+  show: boolean
+  isPlaying: boolean
 }
 
 export default function Panning(props: PropsWithChildren<PanningProps>) {
-  const panning = useAppSelector(selectScenePanning(props.sceneID))
-  const panTF = useAppSelector(selectScenePanTF(props.sceneID))
-  const panDuration = useAppSelector(selectScenePanDuration(props.sceneID))
-  const panDurationMin = useAppSelector(
-    selectScenePanDurationMin(props.sceneID)
-  )
-  const panDurationMax = useAppSelector(
-    selectScenePanDurationMax(props.sceneID)
-  )
-  const panSinRate = useAppSelector(selectScenePanSinRate(props.sceneID))
-  const panBPMMulti = useAppSelector(selectScenePanBPMMulti(props.sceneID))
-  const panHorizTransType = useAppSelector(
-    selectScenePanHorizTransType(props.sceneID)
-  )
-  const panHorizTransImg = useAppSelector(
-    selectScenePanHorizTransImg(props.sceneID)
-  )
-  const panHorizTransLevel = useAppSelector(
-    selectScenePanHorizTransLevel(props.sceneID)
-  )
-  const panHorizTransLevelMin = useAppSelector(
-    selectScenePanHorizTransLevelMin(props.sceneID)
-  )
-  const panHorizTransLevelMax = useAppSelector(
-    selectScenePanHorizTransLevelMax(props.sceneID)
-  )
-  const panHorizTransRandom = useAppSelector(
-    selectScenePanHorizTransRandom(props.sceneID)
-  )
-  const panVertTransType = useAppSelector(
-    selectScenePanVertTransType(props.sceneID)
-  )
-  const panVertTransImg = useAppSelector(
-    selectScenePanVertTransImg(props.sceneID)
-  )
-  const panVertTransLevel = useAppSelector(
-    selectScenePanVertTransLevel(props.sceneID)
-  )
-  const panVertTransLevelMin = useAppSelector(
-    selectScenePanVertTransLevelMin(props.sceneID)
-  )
-  const panVertTransLevelMax = useAppSelector(
-    selectScenePanVertTransLevelMax(props.sceneID)
-  )
-  const panVertTransRandom = useAppSelector(
-    selectScenePanVertTransRandom(props.sceneID)
-  )
-  const panEndEase = useAppSelector(selectScenePanEndEase(props.sceneID))
-  const panEndExp = useAppSelector(selectScenePanEndExp(props.sceneID))
-  const panEndAmp = useAppSelector(selectScenePanEndAmp(props.sceneID))
-  const panEndPer = useAppSelector(selectScenePanEndPer(props.sceneID))
-  const panEndOv = useAppSelector(selectScenePanEndOv(props.sceneID))
-  const panStartEase = useAppSelector(selectScenePanStartEase(props.sceneID))
-  const panStartExp = useAppSelector(selectScenePanStartExp(props.sceneID))
-  const panStartAmp = useAppSelector(selectScenePanStartAmp(props.sceneID))
-  const panStartPer = useAppSelector(selectScenePanStartPer(props.sceneID))
-  const panStartOv = useAppSelector(selectScenePanStartOv(props.sceneID))
-  const bpmSelector =
-    props.currentAudio != null
-      ? selectAudioBPM(props.currentAudio)
-      : selectUndefined
-  const bpm = useAppSelector(bpmSelector)
-
-  const [togglePan, setTogglePan] = useState(false)
-  const [duration, setDuration] = useState(0)
-
-  const _panTimeout = useRef<number>()
-  const _panOut = useRef(false)
-  const _lastToggle = useRef<any>()
-  const _lastHorizRandom = useRef(0)
-  const _lastVertRandom = useRef(0)
-
-  const calcDuration = useCallback(() => {
+  const { data, measurements, show, isPlaying, className, children } = props
+  if (data != null) {
     return (
-      getDuration(
-        {
-          timingFunction: panTF,
-          time: panDuration,
-          timeMin: panDurationMin,
-          timeMax: panDurationMax,
-          sinRate: panSinRate,
-          bpmMulti: panBPMMulti
-        },
-        props.timeToNextFrame,
-        bpm,
-        10
-      ) / 2
+      <Effect
+        data={data}
+        measurements={measurements}
+        show={show}
+        isPlaying={isPlaying}
+        className={className}
+      >
+        {children}
+      </Effect>
     )
-  }, [
-    bpm,
-    panBPMMulti,
-    panDuration,
-    panDurationMax,
-    panDurationMin,
-    panSinRate,
-    panTF,
-    props.timeToNextFrame
-  ])
-
-  const panIn = useCallback(() => {
-    const duration = calcDuration()
-    setTogglePan(true)
-    setDuration(duration)
-    props.panFunction()
-    return duration
-  }, [calcDuration, props])
-
-  const panOut = useCallback(() => {
-    const duration = calcDuration()
-    setTogglePan(false)
-    setDuration(duration)
-    props.panFunction()
-    return duration
-  }, [calcDuration, props])
-
-  const panLoop = useCallback(
-    (doPanIn: boolean) => {
-      const delay = doPanIn ? panIn() : panOut()
-      _panTimeout.current = window.setTimeout(() => panLoop(!doPanIn), delay)
-    },
-    [panIn, panOut]
-  )
-
-  useEffect(() => {
-    _panOut.current = false
-    _lastHorizRandom.current = 0
-    _lastVertRandom.current = 0
-    if (panning && panTF !== TF.scene) {
-      panLoop(true)
-    }
-
-    return () => {
-      clearTimeout(_panTimeout.current)
-      _panTimeout.current = undefined
-      _panOut.current = false
-      _lastToggle.current = undefined
-      _lastHorizRandom.current = 0
-      _lastVertRandom.current = 0
-    }
-  }, [panLoop, panTF, panning])
-
-  useEffect(() => {
-    if (panning) {
-      clearTimeout(_panTimeout.current)
-      if (panTF !== TF.scene) {
-        panLoop(true)
-      }
-    }
-  }, [panLoop, panTF, panning])
-
-  const sceneTiming = panTF === TF.scene
-  if (props.togglePan !== _lastToggle.current) {
-    _panOut.current = false
-    _lastToggle.current = props.togglePan
-  }
-  const image = props.image
-
-  let horizTransLevel = 0
-  let horizPix = false
-  if (panHorizTransType !== HTF.none) {
-    if (image && panHorizTransImg) {
-      const height = image.offsetHeight
-      const width = image.offsetWidth
-      const parentHeight = props.parentHeight
-        ? props.parentHeight
-        : window.innerHeight
-      const parentWidth = props.parentWidth
-        ? props.parentWidth
-        : window.innerWidth
-      const heightDiff = Math.max(height - parentHeight, 0)
-      const widthDiff = Math.max(width - parentWidth - heightDiff, 0)
-      horizTransLevel = widthDiff / 2
-      horizPix = true
-    } else {
-      horizTransLevel = panHorizTransLevel
-      if (panHorizTransRandom) {
-        horizTransLevel =
-          Math.floor(
-            Math.random() * (panHorizTransLevelMax - panHorizTransLevelMin + 1)
-          ) + panHorizTransLevelMin
-      }
-    }
-    if (panHorizTransType === HTF.left) {
-      horizTransLevel = -horizTransLevel
-    } else if (panHorizTransType === HTF.right) {
-      // Already set
-    } else if (panHorizTransType === HTF.random) {
-      if ((sceneTiming && _panOut.current) || (!sceneTiming && togglePan)) {
-        const type = Math.floor(Math.random() * 2)
-        if (type) {
-          horizTransLevel = -horizTransLevel
-        } else {
-          // Already set
-        }
-        _lastHorizRandom.current = type
-      } else {
-        if (_lastHorizRandom.current === 0) {
-          // Already set
-        } else {
-          horizTransLevel = -horizTransLevel
-        }
-      }
-    }
-  }
-  const horizSuffix = horizPix ? 'px' : '%'
-
-  let vertTransLevel = 0
-  let vertPix = false
-  if (panVertTransType !== VTF.none) {
-    if (image && panVertTransImg) {
-      const height = image.offsetHeight
-      const width = image.offsetWidth
-      const parentHeight = props.parentHeight
-        ? props.parentHeight
-        : window.innerHeight
-      const parentWidth = props.parentWidth
-        ? props.parentWidth
-        : window.innerWidth
-      const widthDiff = Math.max(width - parentWidth, 0)
-      const heightDiff = Math.max(height - parentHeight - widthDiff, 0)
-      vertTransLevel = heightDiff / 2
-      vertPix = true
-    } else {
-      vertTransLevel = panVertTransLevel
-      if (panVertTransRandom) {
-        vertTransLevel =
-          Math.floor(
-            Math.random() * (panVertTransLevelMax - panVertTransLevelMin + 1)
-          ) + panVertTransLevelMin
-      }
-    }
-    if (panVertTransType === VTF.up) {
-      vertTransLevel = -vertTransLevel
-    } else if (panVertTransType === VTF.down) {
-      // Already set
-    } else if (panVertTransType === VTF.random) {
-      if ((sceneTiming && _panOut.current) || (!sceneTiming && togglePan)) {
-        const type = Math.floor(Math.random() * 2)
-        if (type) {
-          vertTransLevel = -vertTransLevel
-        } else {
-          // Already set
-        }
-        _lastVertRandom.current = type
-      } else {
-        if (_lastVertRandom.current === 0) {
-          // Already set
-        } else {
-          vertTransLevel = -vertTransLevel
-        }
-      }
-    }
-  }
-  const vertSuffix = vertPix ? 'px' : '%'
-
-  const horizTransLevelNeg = -horizTransLevel
-  const vertTransLevelNeg = -vertTransLevel
-
-  const transitionParams: { items: boolean | null; values: object } = {
-    items: false,
-    values: {}
-  }
-  if (sceneTiming) {
-    transitionParams.items = _panOut.current ? null : props.togglePan
-    transitionParams.values = {
-      from: {
-        transform: _panOut.current
-          ? 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-      },
-      enter: {
-        transform: _panOut.current
-          ? 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-      },
-      leave: {
-        transform: _panOut.current
-          ? 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-      },
-      config: {
-        duration: calcDuration(),
-        easing: _panOut.current
-          ? getEaseFunction(
-              panEndEase,
-              panEndExp,
-              panEndAmp,
-              panEndPer,
-              panEndOv
-            )
-          : getEaseFunction(
-              panStartEase,
-              panStartExp,
-              panStartAmp,
-              panStartPer,
-              panStartOv
-            )
-      }
-    }
   } else {
-    transitionParams.items = togglePan
-    transitionParams.values = {
-      from: {
-        transform: togglePan
-          ? 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-      },
-      enter: {
-        transform: togglePan
-          ? 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-      },
-      leave: {
-        transform: togglePan
-          ? 'translate(' +
-            horizTransLevelNeg +
-            horizSuffix +
-            ', ' +
-            vertTransLevelNeg +
-            vertSuffix +
-            ')'
-          : 'translate(' +
-            horizTransLevel +
-            horizSuffix +
-            ', ' +
-            vertTransLevel +
-            vertSuffix +
-            ')'
-      },
-      config: {
-        duration,
-        easing: togglePan
-          ? getEaseFunction(
-              panStartEase,
-              panStartExp,
-              panStartAmp,
-              panStartPer,
-              panStartOv
-            )
-          : getEaseFunction(
-              panEndEase,
-              panEndExp,
-              panEndAmp,
-              panEndPer,
-              panEndOv
-            )
-      }
-    }
+    return <>{children}</>
   }
-
-  const panTransitions: UseTransitionResult<
-    boolean,
-    ForwardedProps<CSSProperties>
-  >[] = useTransition(
-    transitionParams.items,
-    (toggle: any) => toggle,
-    transitionParams.values
-  )
-  if (sceneTiming) {
-    clearTimeout(_panTimeout.current)
-    if (_panOut.current) {
-      props.panFunction()
-      _panTimeout.current = window.setTimeout(() => {
-        _panOut.current = false
-      }, calcDuration())
-    } else {
-      _panTimeout.current = window.setTimeout(() => {
-        _panOut.current = true
-        setTogglePan(!togglePan)
-      }, calcDuration())
-    }
-  }
-
-  return (
-    <React.Fragment>
-      {panTransitions.map((transition) => {
-        return (
-          <animated.div
-            key={transition.key}
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              zIndex: 2,
-              ...transition.props
-            }}
-          >
-            {props.children}
-          </animated.div>
-        )
-      })}
-    </React.Fragment>
-  )
 }
 
 ;(Panning as any).displayName = 'Panning'

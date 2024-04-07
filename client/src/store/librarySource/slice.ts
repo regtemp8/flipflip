@@ -3,7 +3,6 @@ import type LibrarySource from './LibrarySource'
 import {
   type EntryState,
   type EntryUpdate,
-  setEntrySlice,
   setEntry,
   createEntries
 } from '../EntryState'
@@ -33,7 +32,7 @@ function createLibrarySourceSlice(
         state,
         action: PayloadAction<EntryState<LibrarySource>>
       ) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setLibrarySource: (state, action: PayloadAction<LibrarySource>) => {
         setEntry(state, action.payload)

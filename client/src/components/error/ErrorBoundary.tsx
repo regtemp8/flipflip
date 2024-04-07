@@ -31,7 +31,7 @@ export default class ErrorBoundary extends React.Component<
         <ErrorCard
           error={this.state.error as Error}
           info={this.state.info as React.ErrorInfo}
-          onClearError={this.clearError}
+          onClearError={this.clearError.bind(this)}
         />
       )
     } else {

@@ -24,6 +24,9 @@ on:
       depends-on-client:
         required: false
         type: boolean
+      depends-on-login:
+        required: false
+        type: boolean
       depends-on-server-details:
         required: false
         type: boolean
@@ -52,6 +55,11 @@ jobs:
         uses: ./.github/actions/build-dependency
         with:
           working-directory: ./client
+      - name: Build Login Dependency
+        if: ${{ inputs.depends-on-login == true }}
+        uses: ./.github/actions/build-dependency
+        with:
+          working-directory: ./login
       - name: Build Server Details Dependency
         if: ${{ inputs.depends-on-server-details == true }}
         uses: ./.github/actions/build-dependency

@@ -8,7 +8,6 @@ import {
   type EntryUpdate,
   getEntry,
   setEntry,
-  setEntrySlice,
   type Identifiable
 } from '../EntryState'
 
@@ -45,7 +44,7 @@ function createSceneGridSlice(sceneGridState?: EntryState<SceneGrid>) {
         state,
         action: PayloadAction<EntryState<SceneGrid>>
       ) => {
-        setEntrySlice(state, action.payload)
+        return action.payload
       },
       setSceneGrid: (state, action: PayloadAction<SceneGrid>) => {
         setEntry(state, action.payload)

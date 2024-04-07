@@ -38,13 +38,13 @@ import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt'
 import { getTimestamp, getTimestampValue } from '../../data/utils'
 import { VCT } from 'flipflip-common'
 import { selectClipTagsIncludes } from '../../store/clip/selectors'
-import ImageView from '../player/ImageView'
 import VideoControl from '../player/VideoControl'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   selectAppTags,
   selectAppTutorial,
-  selectAppIsLibrary
+  selectAppIsLibrary,
+  selectAppConfigDisplaySettingsMaxInMemory
 } from '../../store/app/selectors'
 import {
   selectLibrarySourceURL,
@@ -284,6 +284,9 @@ function VideoClipper() {
 
   const tags = useAppSelector(selectAppTags())
   const isLibrary = useAppSelector(selectAppIsLibrary())
+  const maxInMemory = useAppSelector(
+    selectAppConfigDisplaySettingsMaxInMemory()
+  )
 
   const closeEdit = useCallback(() => {
     dispatch(setVideoClipperResetState())
@@ -395,6 +398,16 @@ function VideoClipper() {
           sceneID,
           nextSceneID: -1,
           overlays: [],
+          loader: {
+            iframeCount: 0,
+            onlyIframes: false,
+            loadingCount: 0,
+            readyToLoad: [...Array(maxInMemory).keys()],
+            shownIndex: -1,
+            imageViews: [],
+            displayIndex: 0,
+            zIndex: 0
+          },
           firstImageLoaded: true,
           mainLoaded: true,
           isEmpty: false,
@@ -403,7 +416,7 @@ function VideoClipper() {
       })
     )
     setIsTagging(!isTagging)
-  }, [dispatch, isTagging, sceneID])
+  }, [dispatch, maxInMemory, isTagging, sceneID])
 
   useEffect(() => {
     const onScroll = (e: WheelEvent) => {
@@ -675,12 +688,7 @@ function VideoClipper() {
           <main className={classes.videoContent}>
             <div className={classes.appBar} />
             <Container maxWidth={false} className={classes.container}>
-              {isTagging && (
-                <ImageView uuid="video-clipper" image={video} fitParent />
-              )}
-              {!isTagging && (
-                <ImageView uuid="video-clipper" image={video} fitParent />
-              )}
+              <video src={video.src}></video>
             </Container>
             {!isTagging && <div className={classes.drawerSpacer} />}
             {isTagging && (
@@ -984,8 +992,8 @@ function VideoClipper() {
                   <VideoControl
                     video={video}
                     volume={videoVolume}
-                    clipID={!editingClipID ? null : editingClipID}
-                    clipValue={!editingClipID ? null : editingValue}
+                    clipID={editingClipID}
+                    clipValue={!editingClipID ? undefined : editingValue}
                     clips={clips}
                     useHotkeys
                     onChangeVolume={onChangeVolume}

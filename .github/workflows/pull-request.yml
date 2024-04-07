@@ -19,6 +19,12 @@ jobs:
       display-name: Client
       working-directory: ./client
       depends-on-common: true
+  login:
+    uses: ./.github/workflows/module-check.yml
+    with:
+      display-name: Login
+      working-directory: ./login
+      depends-on-common: true
   server-details:
     uses: ./.github/workflows/module-check.yml
     with:
@@ -32,4 +38,5 @@ jobs:
       build-task: package
       depends-on-common: true
       depends-on-client: true
+      depends-on-login: true
       depends-on-server-details: true

@@ -8,6 +8,7 @@ import { getTagEntries } from '../tag/selectors'
 import Clip from '../clip/Clip'
 import { selectSceneSources } from '../scene/selectors'
 import Tag from '../tag/Tag'
+import { HTMLContentElement } from '../../components/player/HTMLContentElement'
 
 export const selectLibrarySource = (id: number) => {
   return (state: RootState) => state.librarySource.entries[id]
@@ -63,13 +64,7 @@ export const selectLibrarySourceSubtitleFile = (id: number) => {
   return (state: RootState) => state.librarySource.entries[id].subtitleFile
 }
 
-export const selectCurrentImageTags = (
-  currentImage:
-    | HTMLImageElement
-    | HTMLVideoElement
-    | HTMLIFrameElement
-    | undefined
-) => {
+export const selectCurrentImageTags = (currentImage?: HTMLContentElement) => {
   return createSelector(
     [
       (state) => currentImage,
@@ -78,7 +73,7 @@ export const selectCurrentImageTags = (
       getClipEntries
     ],
     (currentImage, sources, tagEntries, clipEntries) => {
-      if (currentImage === undefined) return []
+      if (currentImage == null) return []
 
       const source = currentImage.getAttribute('source')
       const clipIDAttr = currentImage.getAttribute('clip')

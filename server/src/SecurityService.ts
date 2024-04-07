@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import jwt, { SignOptions } from 'jsonwebtoken'
-import crypto, { randomUUID } from 'crypto'
+import crypto, { randomInt, randomUUID } from 'crypto'
 import selfsigned from 'selfsigned'
 import { Request } from 'electron'
 import { getSaveDir } from './utils'
@@ -24,6 +24,7 @@ class SecurityService {
 
   private jwtSecret: string
   private jwtTokens: ActiveJWTToken[]
+  private activeCode: ActiveJWTToken | undefined
 
   private constructor() {
     this.jwtSecret = this.generateSecret()
@@ -40,6 +41,13 @@ class SecurityService {
 
   public generateSecret(): string {
     return crypto.randomBytes(256).toString('base64')
+  }
+
+  public generateCode(): string {
+    const sub = [...Array(8).keys()].map(() => randomInt(0, 10)).join('')
+    const timestamp = new Date().getTime()
+    this.activeCode = { sub, timestamp }
+    return sub.substring(0, 4) + '-' + sub.substring(4)
   }
 
   public generateToken(): Promise<string> {
@@ -61,6 +69,31 @@ class SecurityService {
         }
       )
     })
+  }
+
+  public magicLink(url: string, token: string): Promise<string> {
+    return Promise.resolve(`${url}/login/token?token=${token}`)
+  }
+
+  public generateMagicLink(url: string): Promise<string> {
+    return security()
+      .generateToken()
+      .then((token) => this.magicLink(url, token))
+  }
+
+  public deactivateCode() {
+    this.activeCode = undefined
+  }
+
+  public verifyCode(code: string): boolean {
+    const valid =
+      this.activeCode != null &&
+      this.activeCode.timestamp + SecurityService.EXPIRES_IN >
+        new Date().getTime() &&
+      this.activeCode.sub === code
+
+    this.activeCode = undefined
+    return valid
   }
 
   public verifyToken(token: string): Promise<boolean> {

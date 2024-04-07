@@ -26,7 +26,6 @@ import Player from './Player'
 import type ChildCallbackHack from './ChildCallbackHack'
 import { IdleTimer } from './IdleTimer'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { setConfigDisplaySettingsFullScreen } from '../../store/app/slice'
 import { setRouteGoBack } from '../../store/app/thunks'
 import {
   selectSceneGridCellMatchesSceneCopy,
@@ -35,8 +34,11 @@ import {
   selectSceneGridCellSceneID,
   selectSceneGridName
 } from '../../store/sceneGrid/selectors'
-import { type PlayerOverlayState } from '../../store/player/slice'
-import { selectGridPlayerFirstNotLoaded } from '../../store/player/selectors'
+import {
+  selectGridPlayerFirstNotLoaded,
+  selectPlayerOverlayGrid,
+  selectPlayerOverlaySceneID
+} from '../../store/player/selectors'
 import flipflip from '../../FlipFlipService'
 import { setFullScreen, toggleFullScreen } from '../../data/actions'
 
@@ -135,7 +137,6 @@ function GridCellPlayer(props: GridCellPlayerProps) {
   const { classes } = useStyles()
   const { gridID, row, col, width, height, uuid, allLoaded } = props
 
-  //console.log('ALL LOADED: ' + allLoaded)
   const sceneID = useAppSelector(selectSceneGridCellSceneID(gridID, row, col))
   const sceneCopy = useAppSelector(
     selectSceneGridCellSceneCopy(gridID, row, col)
@@ -223,7 +224,6 @@ function GridCellPlayer(props: GridCellPlayerProps) {
 export interface GridPlayerProps {
   parentUUID: string
   overlayIndex: number
-  gridConfig: PlayerOverlayState
   advanceHacks?: ChildCallbackHack[]
   hideBars?: boolean
   setProgress?: (total: number, current: number, message: string[]) => void
@@ -236,12 +236,18 @@ function GridPlayer(props: GridPlayerProps) {
     selectGridPlayerFirstNotLoaded(props.overlayIndex, props.parentUUID)
   )
   const allLoaded = firstNotLoaded[0] === -1 && firstNotLoaded[1] === -1
-  const name = useAppSelector(selectSceneGridName(props.gridConfig.sceneID))
+  const sceneID = useAppSelector(
+    selectPlayerOverlaySceneID(props.overlayIndex, props.parentUUID)
+  )
+  const grid = useAppSelector(
+    selectPlayerOverlayGrid(props.overlayIndex, props.parentUUID)
+  )
+  const name = useAppSelector(selectSceneGridName(sceneID))
 
   const [appBarHover, setAppBarHover] = useState(false)
   const [hideCursor, setHideCursor] = useState(false)
   const [sceneCopyGrid, setSceneCopyGrid] = useState(
-    props.gridConfig.grid.map((r) => r.map((c) => null)) as React.ReactNode[][]
+    grid.map((r) => r.map((c) => null)) as React.ReactNode[][]
   )
 
   const _idleTimerRef = useRef<any>()
@@ -296,13 +302,7 @@ function GridPlayer(props: GridPlayerProps) {
     _appBarTimeout.current = window.setTimeout(closeAppBar, 1000)
   }
 
-  const toggleFull = async () => {
-    const fullScreen = toggleFullScreen()
-    dispatch(setConfigDisplaySettingsFullScreen(fullScreen))
-  }
-
   const { classes } = useStyles()
-  const grid = props.gridConfig.grid
   const height = grid && grid.length > 0 && grid[0].length > 0 ? grid.length : 1
   const width =
     grid && grid.length > 0 && grid[0].length > 0 ? grid[0].length : 1
@@ -367,7 +367,7 @@ function GridPlayer(props: GridPlayerProps) {
                   edge="start"
                   color="inherit"
                   aria-label="FullScreen"
-                  onClick={toggleFull}
+                  onClick={toggleFullScreen}
                   size="large"
                 >
                   <FullscreenIcon fontSize="large" />
@@ -399,13 +399,13 @@ function GridPlayer(props: GridPlayerProps) {
             {[...Array(height).keys()].map((row) => (
               <React.Fragment key={row}>
                 {[...Array(width).keys()].map((col) => {
-                  const uuid = props.gridConfig.grid[row][col]
+                  const uuid = grid[row][col]
                   const showProgress =
                     firstNotLoaded[0] === row && firstNotLoaded[1] === col
                   return (
                     <GridCellPlayer
                       key={col}
-                      gridID={props.gridConfig.sceneID}
+                      gridID={sceneID}
                       row={row}
                       col={col}
                       width={width}

@@ -1271,7 +1271,7 @@ export function setSceneSwapSources(oldSourceID: number, newSourceID: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const scene = getActiveScene(state) as Scene
-    const sources = scene.sources
+    const sources = [...scene.sources]
     const oldSourceIndex = sources.indexOf(oldSourceID)
     const newSourceIndex = sources.indexOf(newSourceID)
     arrayMove(sources, oldSourceIndex, newSourceIndex)
@@ -1296,7 +1296,6 @@ export function setVideoClipperSceneVideoVolume(videoVolume: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const scene = getVideoClipperScene(state)
-    console.log('ID: ' + scene.id)
     dispatch(setSceneVideoVolume({ id: scene.id, value: videoVolume }))
   }
 }
