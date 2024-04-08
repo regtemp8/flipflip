@@ -38,6 +38,12 @@ jobs:
     - name: Build Client
       working-directory: ./client
       run: yarn build
+    - name: Install Login
+      working-directory: ./login
+      run: yarn install
+    - name: Build Login
+      working-directory: ./login
+      run: yarn build
     - name: Install Server Details
       working-directory: ./server-details
       run: yarn install
