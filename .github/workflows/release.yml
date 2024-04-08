@@ -55,8 +55,6 @@ jobs:
       uses: stevenbenitez/get-package-version-action@v1
       with:
         path: ./server
-    - name: Set Version
-      run: echo "VERSION=${{ steps.get-package-version.outputs.version }}" >> $GITHUB_ENV
     - name: Install Server
       working-directory: ./server
       run: yarn install
@@ -70,6 +68,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./server/out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}/FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ env.VERSION }}.zip
-        asset_name: FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ env.VERSION }}.zip
+        asset_path: ./server/out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}/FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ steps.get-package-version.outputs.version }}.zip
+        asset_name: FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ steps.get-package-version.outputs.version }}.zip
         asset_content_type: application/zip
