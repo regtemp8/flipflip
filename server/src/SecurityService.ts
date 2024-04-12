@@ -174,7 +174,7 @@ class SecurityService {
     if (request.verificationResult !== 'OK') {
       const hostname = request.hostname
       const serverHostName = new URL(server().getServerURL()).hostname
-      if(hostname === serverHostName) {
+      if (hostname === serverHostName) {
         const data = this.sanitizeCertificate(request.validatedCertificate.data)
         const localData = this.sanitizeCertificate(this.readCertificate())
         valid = data === localData

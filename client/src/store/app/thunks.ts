@@ -59,7 +59,9 @@ import {
   setProgress,
   importScriptToScriptor,
   addToScriptsAtStart,
-  setLibraryRemove
+  setLibraryRemove,
+  setConfigServerSettingsOnBlur,
+  setConfigServerSettingsChanged
 } from './slice'
 import {
   toAppStorage,
@@ -252,7 +254,23 @@ export function saveAppStorageInterval() {
       if (shouldSaveState(oldState, newState) && now - lastSaved > 3000) {
         lastSaved = now
         oldState = newState
-        flipflip().api.saveAppStorage(toAppStorage(newState))
+        flipflip()
+          .api.saveAppStorage(toAppStorage(newState))
+          .then((saved) => {
+            const { changed, onBlur } = newState.app.config.serverSettings
+            if (saved && onBlur && changed) {
+              dispatch(setConfigServerSettingsChanged(false))
+              dispatch(
+                setSystemSnack({
+                  message:
+                    'Server settings changed. Restart FlipFlip to apply the new settings.',
+                  severity: SS.success
+                })
+              )
+            }
+
+            dispatch(setConfigServerSettingsOnBlur(false))
+          })
       }
     }, 500)
   }

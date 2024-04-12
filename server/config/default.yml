@@ -1,9 +1,0 @@
-# Uncomment to enable static server host and port
-server:
-  # The IP Address the server listens on
-  # Listens on all network interfaces (0.0.0.0) by default
-  # To limit access to just this device use localhost (127.0.0.1)
-  # host: 127.0.0.1
-  # The port the server listens on
-  # Listens on a random port (0) by default
-  port: 59779

@@ -1,7 +1,7 @@
 import { Alert, type AlertColor, Slide, Snackbar } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { selectAppSystemSnack } from '../store/app/selectors'
-import { closeMessage } from '../store/app/slice'
+import { closeSystemSnack } from '../store/app/slice'
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />
@@ -22,10 +22,10 @@ export default function SystemSnack() {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       autoHideDuration={2000}
       key={message + new Date()}
-      onClose={() => dispatch(closeMessage())}
+      onClose={() => dispatch(closeSystemSnack())}
       TransitionComponent={TransitionUp}
     >
-      <Alert onClose={() => dispatch(closeMessage())} severity={severity}>
+      <Alert onClose={() => dispatch(closeSystemSnack())} severity={severity}>
         {message}
       </Alert>
     </Snackbar>

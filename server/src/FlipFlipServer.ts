@@ -4,7 +4,6 @@ import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
 import express, { type Express, RequestHandler, Response } from 'express'
 import session from 'express-session'
-import yaml from 'js-yaml'
 import { randomUUID } from 'crypto'
 import { createServer, Server } from '@httptoolkit/httpolyglot'
 import React from 'react'
@@ -32,15 +31,10 @@ import fileRegistry from './FileRegistry'
 import security from './SecurityService'
 import { AddressInfo } from 'net'
 import webSocketServer from './FlipFlipWebSocketServer'
-
-interface ServerConfig {
-  host?: string
-  port?: number
-}
-
-interface Config {
-  server?: ServerConfig
-}
+import {
+  ServerSettings,
+  initialServerSettings
+} from 'flipflip-common/build/main/lib/storage/ServerSettings'
 
 class FlipFlipServer {
   private static instance: FlipFlipServer
@@ -368,23 +362,11 @@ class FlipFlipServer {
     return api
   }
 
-  private loadConfig(): Config {
-    const configContents = fs.readFileSync(
-      path.join('config', 'default.yml'),
-      'utf-8'
+  private loadConfig(): ServerSettings {
+    return (
+      new AppStorage(1).initialState.config.serverSettings ??
+      initialServerSettings
     )
-    const config = (yaml.load(configContents) ?? {}) as Config
-    if (config.server == null) {
-      config.server = {}
-    }
-    if (config.server.host == null) {
-      config.server.host = this.defaultHost
-    }
-    if (config.server.port == null) {
-      config.server.port = 0
-    }
-
-    return config
   }
 
   public init(listener: () => void) {
@@ -423,8 +405,7 @@ class FlipFlipServer {
       })
     })
 
-    const config = this.loadConfig()
-    const { host, port } = config.server as ServerConfig
+    const { host, port } = this.loadConfig()
     this.server.listen(port, host, () => {
       if (isWin32 === false && isLinux === false && isMacOSX === false) {
         console.log(`Unsupported platform: ${process.platform}`)
@@ -436,7 +417,7 @@ class FlipFlipServer {
   }
 
   public getServerURL() {
-    const { host } = this.loadConfig().server
+    const { host } = this.loadConfig()
     const { port } = this.server.address() as AddressInfo
     const allNetworkInterfaces = host === this.defaultHost
     return allNetworkInterfaces
@@ -463,7 +444,7 @@ class FlipFlipServer {
 
   public getNetworkURLs() {
     const url = this.getServerURL()
-    const { host, port } = this.loadConfig().server
+    const { host, port } = this.loadConfig()
     const allNetworkInterfaces = host === this.defaultHost
     const urls: Array<{ name: string; url: string }> = []
     if (allNetworkInterfaces) {

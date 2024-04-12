@@ -12,6 +12,7 @@ import {
 } from './GeneralSettings';
 import { initialRemoteSettings, type RemoteSettings } from './RemoteSettings';
 import { initialSceneSettings, type SceneSettings } from './SceneSettings';
+import { ServerSettings } from './ServerSettings';
 import { initialTutorials, type Tutorials } from './Tutorials';
 
 export type Config = {
@@ -23,6 +24,7 @@ export type Config = {
   tutorials: Tutorials;
   clientID: string;
   newWindowAlerted: boolean;
+  serverSettings?: ServerSettings;
 };
 
 export const initialConfig: Config = {

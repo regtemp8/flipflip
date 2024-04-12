@@ -26,7 +26,8 @@ import {
   SceneGroup,
   Audio,
   CaptionScript,
-  Playlist
+  Playlist,
+  newAppStorage
 } from 'flipflip-common'
 
 declare const PACKAGE_JSON_VERSION_WEBPACK_ENTRY: string
@@ -600,6 +601,9 @@ export default class AppStorage {
         })
     }
 
+    if (saved) {
+      this.initialState = newAppStorage(state)
+    }
     return saved
   }
 

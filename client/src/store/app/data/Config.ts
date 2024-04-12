@@ -11,10 +11,12 @@ import { initialGeneralSettings } from './GeneralSettings'
 import type Tutorials from './Tutorials'
 import { initialTutorials } from './Tutorials'
 import { copy, OT } from 'flipflip-common'
+import ServerSettings, { initialServerSettings } from './ServerSettings'
 
 export default interface Config {
   defaultScene: SceneSettings
   remoteSettings: RemoteSettings
+  serverSettings: ServerSettings
   caching: CacheSettings
   displaySettings: DisplaySettings
   generalSettings: GeneralSettings
@@ -26,6 +28,7 @@ export default interface Config {
 export const initialConfig: Config = {
   defaultScene: initialSceneSettings,
   remoteSettings: initialRemoteSettings,
+  serverSettings: initialServerSettings,
   caching: initialCacheSettings,
   displaySettings: initialDisplaySettings,
   generalSettings: initialGeneralSettings,
@@ -48,6 +51,13 @@ export function newConfig(init?: Partial<Config>) {
       config.remoteSettings[key] = initialRemoteSettings[key]
     }
   }
+
+  for (const key of Object.keys(initialServerSettings)) {
+    if (config.serverSettings[key] == null) {
+      config.serverSettings[key] = initialServerSettings[key]
+    }
+  }
+
   for (const key of Object.keys(initialCacheSettings)) {
     if (config.caching[key] == null) {
       config.caching[key] = initialCacheSettings[key]

@@ -1,5 +1,3 @@
-import fs from 'fs'
-import path from 'path'
 import type { ForgeConfig } from '@electron-forge/shared-types'
 import { MakerZIP } from '@electron-forge/maker-zip'
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives'
@@ -35,16 +33,7 @@ const config: ForgeConfig = {
         ]
       }
     })
-  ],
-  hooks: {
-    postPackage: async (forgeConfig, packageResult) => {
-      for (const output of packageResult.outputPaths) {
-        await fs.promises.cp('config', path.join(output, 'config'), {
-          recursive: true
-        })
-      }
-    }
-  }
+  ]
 }
 
 export default config

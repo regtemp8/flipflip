@@ -28,7 +28,8 @@ import {
   IF,
   IPC,
   Audio,
-  newAudio
+  newAudio,
+  type AppStorage as AppStorageData
 } from 'flipflip-common'
 import AppStorage from '../data/AppStorage'
 import SystemFonts from 'system-font-families'
@@ -145,7 +146,7 @@ class WebSocketMessageService {
   ): Promise<unknown[]> {
     const { message, socket } = params
     if (socket.storage != null) {
-      const state = message.args[0]
+      const state = message.args[0] as Partial<AppStorageData>
       return await socket.storage.save(state, false).then(
         (saved) => [saved],
         () => []
