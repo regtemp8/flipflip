@@ -1,7 +1,7 @@
 {
   "name": "server",
   "productName": "server",
-  "version": "4.0.0-beta1",
+  "version": "4.0.0-beta2",
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {
@@ -34,7 +34,6 @@
     "@types/express-session": "^1.17.10",
     "@types/fs-extra": "^11.0.4",
     "@types/get-folder-size": "^3.0.4",
-    "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9",
     "@types/node": "^20.10.8",
     "@types/react": "^18",
@@ -76,7 +75,6 @@
     "get-folder-size": "^4.0.0",
     "imgur": "^2.3.0",
     "instagram-private-api": "^1.45.3",
-    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "music-metadata": "^7.14.0",

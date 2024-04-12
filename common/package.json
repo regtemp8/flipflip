@@ -1,6 +1,6 @@
 {
   "name": "flipflip-common",
-  "version": "1.0.0",
+  "version": "4.0.0-beta2",
   "description": "Data shared between client and server",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",

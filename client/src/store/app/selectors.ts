@@ -711,6 +711,14 @@ export const selectAppConfigRemoteSettingsPiwigoPassword = () => {
     state.app.config.remoteSettings.piwigoPassword
 }
 
+export const selectAppConfigServerSettingsHost = () => {
+  return (state: RootState): string => state.app.config.serverSettings.host
+}
+
+export const selectAppConfigServerSettingsPort = () => {
+  return (state: RootState): number => state.app.config.serverSettings.port
+}
+
 export const selectAppConfigNewWindowAlerted = () => {
   return (state: RootState): boolean => state.app.config.newWindowAlerted
 }

@@ -23,6 +23,7 @@ export * from './lib/storage/SceneGrid';
 export * from './lib/storage/SceneGridCell';
 export * from './lib/storage/SceneGroup';
 export * from './lib/storage/SceneSettings';
+export * from './lib/storage/ServerSettings';
 export * from './lib/storage/ScriptPlaylist';
 export * from './lib/storage/Tag';
 export * from './lib/storage/Tutorials';

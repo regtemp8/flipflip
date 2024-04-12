@@ -11,6 +11,7 @@ import ThemeCard from '../configGroups/ThemeCard'
 import WatermarkCard from '../configGroups/WatermarkCard'
 import { useAppSelector } from '../../store/hooks'
 import { selectConstants } from '../../store/constants/selectors'
+import ServerSettingsCard from '../configGroups/ServerSettingsCard'
 
 export default function GeneralConfig() {
   const { masonryDefaultHeight, masonryDefaultColumns } =
@@ -49,6 +50,11 @@ export default function GeneralConfig() {
           <Card>
             <CardContent>
               <APICard />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <ServerSettingsCard />
             </CardContent>
           </Card>
           <Card>

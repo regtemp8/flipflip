@@ -1075,13 +1075,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/js-yaml@npm:^4.0.9":
-  version: 4.0.9
-  resolution: "@types/js-yaml@npm:4.0.9"
-  checksum: 10c0/24de857aa8d61526bbfbbaa383aa538283ad17363fcd5bb5148e2c7f604547db36646440e739d78241ed008702a8920665d1add5618687b6743858fae00da211
-  languageName: node
-  linkType: hard
-
 "@types/json-schema@npm:*, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
@@ -8203,7 +8196,6 @@ __metadata:
     "@types/express-session": "npm:^1.17.10"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/get-folder-size": "npm:^3.0.4"
-    "@types/js-yaml": "npm:^4.0.9"
     "@types/jsonwebtoken": "npm:^9"
     "@types/node": "npm:^20.10.8"
     "@types/react": "npm:^18"
@@ -8233,7 +8225,6 @@ __metadata:
     get-folder-size: "npm:^4.0.0"
     imgur: "npm:^2.3.0"
     instagram-private-api: "npm:^1.45.3"
-    js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     moment: "npm:^2.30.1"
     music-metadata: "npm:^7.14.0"
