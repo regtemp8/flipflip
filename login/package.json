@@ -1,6 +1,6 @@
 {
   "name": "flipflip-login",
-  "version": "4.0.0",
+  "version": "4.0.0-beta2",
   "private": true,
   "devDependencies": {
     "@types/eslint": "^8",

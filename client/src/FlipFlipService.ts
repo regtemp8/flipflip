@@ -63,8 +63,12 @@ class FlipFlipAPI {
     )
   }
 
-  public saveAppStorage(state: any): void {
-    this.send(IPC.appStorageSave, state)
+  public saveAppStorage(state: any): Promise<boolean> {
+    return this.invoke(IPC.appStorageSave, state).then(
+      (args: any[] | undefined) => {
+        return args != null && args.length > 0 && args[0] === true
+      }
+    )
   }
 
   public async backupAppStorage(): Promise<void> {

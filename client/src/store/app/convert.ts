@@ -16,7 +16,8 @@ import {
   type AudioPlaylist as AudioPlaylistStorage,
   type ScriptPlaylist as ScriptPlaylistStorage,
   type Route as RouteStorage,
-  type DisplaySettings as DisplaySettingsStorage
+  type DisplaySettings as DisplaySettingsStorage,
+  type ServerSettings as ServerSettingsStorage
 } from 'flipflip-common'
 
 import { type RootState } from '../store'
@@ -53,6 +54,7 @@ import type SceneGroup from '../sceneGroup/SceneGroup'
 import { newSceneGroup } from '../sceneGroup/SceneGroup'
 import { newRoute } from './data/Route'
 import DisplaySettings from './data/DisplaySettings'
+import ServerSettings, { initialServerSettings } from './data/ServerSettings'
 
 export function toAppStorage(state: RootState): AppStorage {
   return {
@@ -94,6 +96,10 @@ export function toConfigStorage(
       ...config.displaySettings,
       alwaysOnTop: false,
       showMenu: true
+    },
+    serverSettings: {
+      host: config.serverSettings.host,
+      port: config.serverSettings.port
     },
     defaultScene: toSceneSettingsStorage(config.defaultScene, state)
   }
@@ -323,6 +329,7 @@ function fromConfigStorage(
       overlaySlice
     ),
     remoteSettings: { ...s.remoteSettings },
+    serverSettings: fromServerSettings(s.serverSettings),
     caching: { ...s.caching },
     displaySettings: fromDisplaySettings(s.displaySettings),
     generalSettings: { ...s.generalSettings },
@@ -567,6 +574,15 @@ function fromDisplaySettings(s: DisplaySettingsStorage): DisplaySettings {
     maxInHistory,
     maxLoadingAtOnce,
     ignoredTags
+  }
+}
+
+function fromServerSettings(s?: ServerSettingsStorage): ServerSettings {
+  return {
+    host: s?.host ?? initialServerSettings.host,
+    port: s?.port ?? initialServerSettings.port,
+    changed: false,
+    onBlur: false
   }
 }
 

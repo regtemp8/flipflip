@@ -1408,6 +1408,34 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.remoteSettings.piwigoPassword = action.payload
       },
+      setConfigServerSettingsHost: (state, action: PayloadAction<string>) => {
+        if (!state.config.serverSettings.changed) {
+          state.config.serverSettings.changed =
+            state.config.serverSettings.host !== action.payload
+        }
+
+        state.config.serverSettings.host = action.payload
+      },
+      setConfigServerSettingsPort: (state, action: PayloadAction<number>) => {
+        if (!state.config.serverSettings.changed) {
+          state.config.serverSettings.changed =
+            state.config.serverSettings.port !== action.payload
+        }
+
+        state.config.serverSettings.port = action.payload
+      },
+      setConfigServerSettingsOnBlur: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
+        state.config.serverSettings.onBlur = action.payload
+      },
+      setConfigServerSettingsChanged: (
+        state,
+        action: PayloadAction<boolean>
+      ) => {
+        state.config.serverSettings.changed = action.payload
+      },
       setThemeMode: (state, action: PayloadAction<boolean>) => {
         if (action.payload) {
           state.theme.palette!.mode = 'dark'
@@ -1473,11 +1501,14 @@ function createAppSlice(app?: App) {
       },
       closeMessage: (state, action: PayloadAction<void>) => {
         state.systemMessage = undefined
-        state.systemSnack = undefined
-        state.systemSnackSeverity = undefined
       },
       systemMessage: (state, action: PayloadAction<string>) => {
         state.systemMessage = action.payload
+      },
+      closeSystemSnack: (state, action: PayloadAction<void>) => {
+        state.systemSnackOpen = false
+        state.systemSnack = undefined
+        state.systemSnackSeverity = undefined
       },
       systemSnack: (
         state,
@@ -1991,6 +2022,10 @@ export const {
   setConfigRemoteSettingsPiwigoHost,
   setConfigRemoteSettingsPiwigoUsername,
   setConfigRemoteSettingsPiwigoPassword,
+  setConfigServerSettingsHost,
+  setConfigServerSettingsPort,
+  setConfigServerSettingsOnBlur,
+  setConfigServerSettingsChanged,
   setThemeMode,
   setThemePalettePrimary,
   setThemePaletteSecondary,
@@ -2001,6 +2036,7 @@ export const {
   setResetAllTutorials,
   closeMessage,
   systemMessage,
+  closeSystemSnack,
   systemSnack,
   addRoutes,
   setRoute,
