@@ -1,7 +1,7 @@
 {
   "name": "server",
   "productName": "server",
-  "version": "4.0.0-beta2",
+  "version": "4.0.0-beta3",
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {

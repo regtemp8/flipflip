@@ -29,6 +29,7 @@ import SystemMessageDialog from './SystemMessageDialog'
 import SystemSnack from './SystemSnack'
 import flipflip from '../FlipFlipService'
 import { CacheProvider, EmotionCache } from '@emotion/react'
+import DisplaySetup from './config/DisplaySetup'
 
 export interface MetaProps {
   cache: EmotionCache
@@ -96,6 +97,8 @@ export default function Meta(props: MetaProps) {
       return <VideoClipper />
     } else if (isRoute(route, 'grid')) {
       return <GridSetup gridID={route.value as number} />
+    } else if (isRoute(route, 'display')) {
+      return <DisplaySetup displayID={route.value as number} />
     } else if (
       isRoute(route, 'play') ||
       isRoute(route, 'libraryplay') ||

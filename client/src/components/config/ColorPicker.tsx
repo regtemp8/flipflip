@@ -81,7 +81,8 @@ function ColorPicker(props: ColorPickerProps) {
   }
 
   const onChangeColor = (color: any) => {
-    dispatch(props.action(color.hex))
+    const value = color?.hex ?? color
+    dispatch(props.action(value))
   }
 
   const { classes } = useStyles()

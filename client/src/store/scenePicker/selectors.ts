@@ -10,7 +10,12 @@ import { selectScenes } from '../scene/selectors'
 import Scene from '../scene/Scene'
 import SceneGrid from '../sceneGrid/SceneGrid'
 import { selectSceneGrids } from '../sceneGrid/selectors'
-import { convertGridIDToSceneID } from '../../data/utils'
+import {
+  convertDisplayIDToSceneID,
+  convertGridIDToSceneID
+} from '../../data/utils'
+import { selectDisplays } from '../display/selectors'
+import Display from '../display/Display'
 
 const getScenePickerFilters = (state: RootState) => state.scenePicker.filters
 export const selectScenePickerFilters = () => {
@@ -72,6 +77,21 @@ export const selectScenePickerUngroupedGrids = () => {
   )
 }
 
+export const selectScenePickerUngroupedDisplays = () => {
+  return createSelector(
+    [selectGroupedScenes(SG.display), selectDisplays(), getScenePickerFilters],
+    (groupedScenes, displays, filters) => {
+      return displays
+        .filter(
+          (s) =>
+            !groupedScenes.includes(convertDisplayIDToSceneID(s.id)) &&
+            isDisplayDisplay(s, filters)
+        )
+        .map((s) => s.id)
+    }
+  )
+}
+
 export const selectScenePickerSceneGroups = () => {
   return createSelector([selectSceneGroups()], (groups) =>
     groups.filter((s) => s.type === SG.scene).map((s) => s.id)
@@ -87,6 +107,12 @@ export const selectScenePickerGeneratorGroups = () => {
 export const selectScenePickerGridGroups = () => {
   return createSelector([selectSceneGroups()], (groups) =>
     groups.filter((s) => s.type === SG.grid).map((s) => s.id)
+  )
+}
+
+export const selectScenePickerDisplayGroups = () => {
+  return createSelector([selectSceneGroups()], (groups) =>
+    groups.filter((s) => s.type === SG.display).map((s) => s.id)
   )
 }
 
@@ -145,6 +171,10 @@ export const selectScenePickerGeneratorCount = () => {
   )
 }
 
+export const selectScenePickerDisplayCount = () => {
+  return (state: RootState) => state.app.displays.length
+}
+
 export const selectScenePickerGridCount = () => {
   return (state: RootState) => state.app.grids.length
 }
@@ -165,6 +195,13 @@ const isDisplayGrid = (grid: SceneGrid, filters: string[]) => {
   return (
     filters.length === 0 ||
     (grid.name !== undefined && nameMatchesFilter(grid.name, filters))
+  )
+}
+
+const isDisplayDisplay = (display: Display, filters: string[]) => {
+  return (
+    filters.length === 0 ||
+    (display.name !== undefined && nameMatchesFilter(display.name, filters))
   )
 }
 
