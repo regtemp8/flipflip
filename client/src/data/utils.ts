@@ -71,6 +71,26 @@ export function convertSceneIDToGridID(sceneID: number): number | undefined {
     : undefined
 }
 
+const displayIDPrefix = '8888'
+export function convertDisplayIDToSceneID(displayID: number): number {
+  return Number(displayIDPrefix + displayID)
+}
+
+export function isSceneIDADisplayID(sceneID: number): boolean {
+  return isSceneIDTextADisplayID(sceneID.toString())
+}
+
+function isSceneIDTextADisplayID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(displayIDPrefix)
+}
+
+export function convertSceneIDToDisplayID(sceneID: number): number | undefined {
+  const sceneIDText = sceneID.toString()
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(displayIDPrefix.length))
+    : undefined
+}
+
 export function flatten(array: any[]) {
   let values
   try {

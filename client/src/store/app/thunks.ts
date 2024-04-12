@@ -18,7 +18,8 @@ import {
   isSceneIDAGridID,
   randomizeList,
   applyEffects,
-  getEffects
+  getEffects,
+  convertSceneIDToDisplayID
 } from '../../data/utils'
 import {
   setAppSlice,
@@ -61,7 +62,9 @@ import {
   addToScriptsAtStart,
   setLibraryRemove,
   setConfigServerSettingsOnBlur,
-  setConfigServerSettingsChanged
+  setConfigServerSettingsChanged,
+  addToDisplays,
+  removeFromDisplays
 } from './slice'
 import {
   toAppStorage,
@@ -196,6 +199,14 @@ import { getFileName } from '../../components/player/Scrapers'
 import { setVideoClipperSourceID } from '../videoClipper/slice'
 import { setCaptionScriptorCaptionScriptID } from '../captionScriptor/slice'
 import flipflip from '../../FlipFlipService'
+import { newDisplay } from '../display/Display'
+import { deleteDisplay, setDisplay } from '../display/slice'
+import {
+  incrementIDValue,
+  incrementIDsList,
+  incrementSliceIDs
+} from '../../data/import'
+import Overlay from '../overlay/Overlay'
 
 export function fetchAppStorage() {
   return async function fetchAppStorageThunk(
@@ -362,6 +373,12 @@ export function routeToGrid(id: number) {
   }
 }
 
+export function routeToDisplay(id: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    dispatch(setRoute([newRoute({ kind: 'display', value: id })]))
+  }
+}
+
 export function addGenerator() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
@@ -384,6 +401,25 @@ export function addGenerator() {
         : undefined
     dispatch(setTutorial(newTutorial))
     dispatch(routeToScene(scene.id))
+  }
+}
+
+export function addDisplay() {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const state = getState()
+    const display = newDisplay({
+      id: state.display.nextID,
+      name: 'New Display'
+    })
+
+    dispatch(setDisplay(display))
+    dispatch(addToDisplays(display.id))
+    dispatch(setSpecialMode(SP.autoEdit))
+    // TODO add tutorial for displays
+    // const newTutorial =
+    //   state.app.config.tutorials.display == null ? DT.welcome : undefined
+    // dispatch(setTutorial(newTutorial))
+    dispatch(routeToDisplay(display.id))
   }
 }
 
@@ -466,13 +502,21 @@ export function deleteScenes(sceneIDs: number[]) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const deleteScenes: number[] = []
     const deleteGrids: number[] = []
+    const deleteDisplays: number[] = []
     for (const sceneID of sceneIDs) {
       const gridID = convertSceneIDToGridID(sceneID)
       if (gridID != null) {
         deleteGrids.push(gridID)
-      } else {
-        deleteScenes.push(sceneID)
+        continue
       }
+
+      const displayID = convertSceneIDToDisplayID(sceneID)
+      if (displayID != null) {
+        deleteDisplays.push(displayID)
+        continue
+      }
+
+      deleteScenes.push(sceneID)
     }
 
     let state = getState()
@@ -480,6 +524,8 @@ export function deleteScenes(sceneIDs: number[]) {
     deleteScenes.forEach((id) => dispatch(deleteScene(id)))
     dispatch(removeFromGrids(deleteGrids))
     deleteGrids.forEach((id) => dispatch(deleteSceneGrid(id)))
+    dispatch(removeFromDisplays(deleteDisplays))
+    deleteGrids.forEach((id) => dispatch(deleteDisplay(id)))
 
     state = getState()
     const scenes = state.app.scenes.map((s) => state.scene.entries[s])
@@ -1184,61 +1230,53 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
     const captionScriptNextID = state.captionScript.nextID
     const overlayNextID = state.overlay.nextID
 
-    const incrementIDsList = (
-      list: number[],
-      slice: EntryState<any>,
-      increment: number
-    ) => {
-      return list.filter((s) => slice.entries[s]).map((s) => s + increment)
-    }
-
-    const incrementIDValue = (
-      value: number,
-      slice: EntryState<any>,
-      increment: number,
-      defaultValue: number
-    ) => {
-      return slice.entries[value] ? value + increment : defaultValue
-    }
-
     Object.values(slice.scene.entries).forEach((s) => {
-      s.sources = incrementIDsList(
+      s.sources = incrementIDsList<LibrarySource>(
         s.sources,
         slice.librarySource,
         librarySourceNextID
       )
-      s.overlays = incrementIDsList(s.overlays, slice.overlay, overlayNextID)
+      s.overlays = incrementIDsList<Overlay>(
+        s.overlays,
+        slice.overlay,
+        overlayNextID
+      )
       s.audioPlaylists.forEach(
-        (p) => (p.audios = incrementIDsList(p.audios, slice.audio, audioNextID))
+        (p) =>
+          (p.audios = incrementIDsList<Audio>(
+            p.audios,
+            slice.audio,
+            audioNextID
+          ))
       )
       s.scriptPlaylists.forEach(
         (p) =>
-          (p.scripts = incrementIDsList(
+          (p.scripts = incrementIDsList<CaptionScript>(
             p.scripts,
             slice.captionScript,
             captionScriptNextID
           ))
       )
 
-      s.libraryID = incrementIDValue(
+      s.libraryID = incrementIDValue<LibrarySource>(
         s.libraryID,
         slice.librarySource,
         librarySourceNextID,
         -1
       )
-      s.nextSceneID = incrementIDValue(
+      s.nextSceneID = incrementIDValue<Scene>(
         s.nextSceneID,
         slice.scene,
         sceneNextID,
         0
       )
-      s.nextSceneRandomID = incrementIDValue(
+      s.nextSceneRandomID = incrementIDValue<Scene>(
         s.nextSceneRandomID,
         slice.scene,
         sceneNextID,
         0
       )
-      s.nextSceneRandoms = incrementIDsList(
+      s.nextSceneRandoms = incrementIDsList<Scene>(
         s.nextSceneRandoms,
         slice.scene,
         sceneNextID
@@ -1246,9 +1284,9 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
     })
 
     Object.values(slice.librarySource.entries).forEach((s) => {
-      s.tags = incrementIDsList(s.tags, slice.tag, tagNextID)
-      s.clips = incrementIDsList(s.clips, slice.clip, clipNextID)
-      s.disabledClips = incrementIDsList(
+      s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID)
+      s.clips = incrementIDsList<Clip>(s.clips, slice.clip, clipNextID)
+      s.disabledClips = incrementIDsList<Clip>(
         s.disabledClips,
         slice.clip,
         clipNextID
@@ -1256,54 +1294,53 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
     })
 
     Object.values(slice.clip.entries).forEach(
-      (s) => (s.tags = incrementIDsList(s.tags, slice.tag, tagNextID))
+      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
     )
     Object.values(slice.audio.entries).forEach(
-      (s) => (s.tags = incrementIDsList(s.tags, slice.tag, tagNextID))
+      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
     )
     Object.values(slice.captionScript.entries).forEach(
-      (s) => (s.tags = incrementIDsList(s.tags, slice.tag, tagNextID))
+      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
     )
 
     Object.values(slice.sceneGrid.entries)
       .flatMap((s) => s.grid)
       .flatMap((s) => s)
       .forEach((s) => {
-        s.sceneID = incrementIDValue(s.sceneID, slice.scene, sceneNextID, 0)
+        s.sceneID = incrementIDValue<Scene>(
+          s.sceneID,
+          slice.scene,
+          sceneNextID,
+          0
+        )
       })
 
     Object.values(slice.overlay.entries).forEach((s) => {
       if (isSceneIDAGridID(s.sceneID)) {
         const gridID = convertSceneIDToGridID(s.sceneID) as number
-        s.sceneID = incrementIDValue(
+        s.sceneID = incrementIDValue<SceneGrid>(
           gridID,
           slice.sceneGrid,
           convertGridIDToSceneID(sceneGridNextID),
           0
         )
       } else {
-        s.sceneID = incrementIDValue(s.sceneID, slice.scene, sceneNextID, 0)
+        s.sceneID = incrementIDValue<Scene>(
+          s.sceneID,
+          slice.scene,
+          sceneNextID,
+          0
+        )
       }
     })
 
-    const incrementSliceIDs = (slice: EntryState<any>, increment: number) => {
-      slice.nextID += increment
-      const keys = Object.keys(slice.entries).map((k) => Number(k))
-      for (const key of keys) {
-        const entry = slice.entries[key]
-        delete slice.entries[key]
-        entry.id += increment
-        slice.entries[entry.id] = entry
-      }
-    }
-
-    incrementSliceIDs(slice.scene, sceneNextID)
-    incrementSliceIDs(slice.librarySource, librarySourceNextID)
-    incrementSliceIDs(slice.clip, clipNextID)
-    incrementSliceIDs(slice.audio, audioNextID)
-    incrementSliceIDs(slice.captionScript, captionScriptNextID)
-    incrementSliceIDs(slice.sceneGrid, sceneGridNextID)
-    incrementSliceIDs(slice.overlay, overlayNextID)
+    incrementSliceIDs<Scene>(slice.scene, sceneNextID)
+    incrementSliceIDs<LibrarySource>(slice.librarySource, librarySourceNextID)
+    incrementSliceIDs<Clip>(slice.clip, clipNextID)
+    incrementSliceIDs<Audio>(slice.audio, audioNextID)
+    incrementSliceIDs<CaptionScript>(slice.captionScript, captionScriptNextID)
+    incrementSliceIDs<SceneGrid>(slice.sceneGrid, sceneGridNextID)
+    incrementSliceIDs<Overlay>(slice.overlay, overlayNextID)
 
     Object.values(slice.scene.entries).forEach((s) => dispatch(setScene(s)))
     Object.values(slice.librarySource.entries).forEach((s) =>
