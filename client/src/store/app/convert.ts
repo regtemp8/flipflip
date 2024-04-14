@@ -17,7 +17,9 @@ import {
   type ScriptPlaylist as ScriptPlaylistStorage,
   type Route as RouteStorage,
   type DisplaySettings as DisplaySettingsStorage,
-  type ServerSettings as ServerSettingsStorage
+  type ServerSettings as ServerSettingsStorage,
+  type Display as DisplayStorage,
+  type DisplayView as DisplayViewStorage
 } from 'flipflip-common'
 
 import { type RootState } from '../store'
@@ -55,6 +57,8 @@ import { newSceneGroup } from '../sceneGroup/SceneGroup'
 import { newRoute } from './data/Route'
 import DisplaySettings from './data/DisplaySettings'
 import ServerSettings, { initialServerSettings } from './data/ServerSettings'
+import Display, { newDisplay } from '../display/Display'
+import View, { newView } from '../displayView/View'
 
 export function toAppStorage(state: RootState): AppStorage {
   return {
@@ -228,6 +232,48 @@ function toTagStorage(
   state: RootState | AppStorageImport
 ): TagStorage {
   return state.tag.entries[id]
+}
+
+export function toDisplayStorage(id: number, state: RootState): DisplayStorage {
+  const display = state.display.entries[id]
+  return {
+    ...display,
+    views: display.views.map((id) => toDisplayViewStorage(id, state))
+  }
+}
+
+export function toDisplayViewStorage(
+  id: number,
+  state: RootState
+): DisplayViewStorage {
+  const view = state.displayView.entries[id]
+  return { ...view }
+}
+
+export function fromDisplayStorage(
+  s: DisplayStorage,
+  displaySlice: EntryState<Display>,
+  displayViewSlice: EntryState<View>
+): number {
+  const mapper = (f: DisplayStorage): Display => {
+    return newDisplay({
+      id: f.id,
+      name: f.name,
+      views: f.views.map((s) => fromDisplayViewStorage(s, displayViewSlice)),
+      selectedView: f.selectedView,
+      displayViewsListYOffset: f.displayViewsListYOffset
+    })
+  }
+
+  return from<DisplayStorage, Display>(s, displaySlice, mapper)
+}
+
+function fromDisplayViewStorage(
+  s: DisplayViewStorage,
+  displayViewSlice: EntryState<View>
+): number {
+  const mapper = (f: DisplayViewStorage): View => newView(f as View)
+  return from<DisplayViewStorage, View>(s, displayViewSlice, mapper)
 }
 
 export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
@@ -973,9 +1019,9 @@ function from<F extends Identifiable, T extends Identifiable>(
   mapper: (from: F) => T,
   ids?: Map<number, number>
 ): number {
-  const isNewEntry = !state.entries[from.id]
+  const isNewEntry = state.entries[from.id] == null
   if (isNewEntry) {
-    if (ids) {
+    if (ids != null) {
       ids.set(from.id, from.id)
     }
 

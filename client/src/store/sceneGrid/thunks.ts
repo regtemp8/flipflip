@@ -10,7 +10,7 @@ export function removeSceneGrid(id: number) {
     dispatch(deleteSceneGrid(id))
     const overlaySceneID = parseInt('999' + id.toString())
     const overlayIDs = Object.values(state.overlay.entries)
-      .filter((o) => (o.sceneID = overlaySceneID))
+      .filter((o) => o.sceneID === overlaySceneID)
       .map((o) => o.id)
     for (const overlayID of overlayIDs) {
       Object.values(state.scene.entries).forEach((s) => {

@@ -21,6 +21,10 @@ import type Clip from './clip/Clip'
 import type CaptionScript from './captionScript/CaptionScript'
 import type Audio from './audio/Audio'
 import type App from './app/data/App'
+import View from './displayView/View'
+import Display from './display/Display'
+import { initialDisplayViewState } from './displayView/slice'
+import { initialDisplayState } from './display/slice'
 
 export interface AppStorageImport {
   app: App
@@ -34,6 +38,8 @@ export interface AppStorageImport {
   sceneGrid: EntryState<SceneGrid>
   sceneGroup: EntryState<SceneGroup>
   tag: EntryState<Tag>
+  display: EntryState<Display>
+  displayView: EntryState<View>
 }
 
 export const initialAppStorageImport: AppStorageImport = {
@@ -47,5 +53,7 @@ export const initialAppStorageImport: AppStorageImport = {
   scene: initialSceneState,
   sceneGrid: initialSceneGridState,
   sceneGroup: initialSceneGroupState,
-  tag: initialTagState
+  tag: initialTagState,
+  display: initialDisplayState,
+  displayView: initialDisplayViewState
 }

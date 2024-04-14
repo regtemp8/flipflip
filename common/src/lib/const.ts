@@ -326,6 +326,7 @@ const MO = {
   playlistDuplicates: 'mo.playlistduplicates',
   gooninatorImport: 'mo.gooninatorimport',
   urlImport: 'mo.urlimport',
+  urlDisplayImport: 'mo.urlDisplayImport',
   libraryImport: 'mo.libraryImport',
   newWindowAlert: 'mo.nwalert',
   removeAllAlert: 'mo.raalert',
@@ -391,6 +392,7 @@ const SG = {
   scene: 'sg.scene',
   generator: 'sg.generator',
   grid: 'sg.grid',
+  display: 'sg.display',
 };
 
 const DONE = 'done';

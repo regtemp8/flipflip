@@ -1146,3 +1146,4 @@ export const selectAppScriptYOffset = () => {
 export const getAppGrids = (state: RootState) => state.app.grids
 export const getAppScenes = (state: RootState) => state.app.scenes
 export const getAppSceneGroups = (state: RootState) => state.app.sceneGroups
+export const getAppDisplays = (state: RootState) => state.app.displays

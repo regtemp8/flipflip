@@ -1546,8 +1546,16 @@ function createAppSlice(app?: App) {
       addToGrids: (state, action: PayloadAction<number>) => {
         state.grids.push(action.payload)
       },
+      addToDisplays: (state, action: PayloadAction<number>) => {
+        state.displays.push(action.payload)
+      },
       removeFromGrids: (state, action: PayloadAction<number[]>) => {
         state.grids = state.grids.filter((s) => !action.payload.includes(s))
+      },
+      removeFromDisplays: (state, action: PayloadAction<number[]>) => {
+        state.displays = state.displays.filter(
+          (s) => !action.payload.includes(s)
+        )
       },
       addToSceneGroups: (state, action: PayloadAction<number>) => {
         state.sceneGroups.push(action.payload)
@@ -2047,7 +2055,9 @@ export const {
   addToScenes,
   removeFromScenes,
   addToGrids,
+  addToDisplays,
   removeFromGrids,
+  removeFromDisplays,
   addToSceneGroups,
   removeFromSceneGroups,
   setLibrary,

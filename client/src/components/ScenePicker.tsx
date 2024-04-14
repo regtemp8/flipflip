@@ -62,6 +62,7 @@ import DragHandleIcon from '@mui/icons-material/DragHandle'
 import FolderIcon from '@mui/icons-material/Folder'
 import GetAppIcon from '@mui/icons-material/GetApp'
 import GridOnIcon from '@mui/icons-material/GridOn'
+import TvIcon from '@mui/icons-material/Tv'
 import HelpIcon from '@mui/icons-material/Help'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
@@ -75,7 +76,10 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
 
-import { convertGridIDToSceneID } from '../data/utils'
+import {
+  convertDisplayIDToSceneID,
+  convertGridIDToSceneID
+} from '../data/utils'
 import { en, MO, SF, SG, SPT } from 'flipflip-common'
 import Jiggle from '../animations/Jiggle'
 import VSpin from '../animations/VSpin'
@@ -114,7 +118,9 @@ import {
   removeSceneGroup,
   doneTutorial,
   sortScenes,
-  importScenes
+  importScenes,
+  addDisplay,
+  routeToDisplay
 } from '../store/app/thunks'
 import { setSceneGroupName } from '../store/sceneGroup/actions'
 import {
@@ -127,15 +133,18 @@ import { selectSceneGridName } from '../store/sceneGrid/selectors'
 import {
   selectScenePickerGeneratorGroups,
   selectScenePickerGridGroups,
+  selectScenePickerDisplayGroups,
   selectScenePickerGroupItems,
   selectScenePickerSceneGroups,
   selectScenePickerUngroupedGenerators,
   selectScenePickerUngroupedScenes,
   selectScenePickerUngroupedGrids,
+  selectScenePickerUngroupedDisplays,
   selectScenePickerSceneCount,
   selectScenePickerGeneratorCount,
   selectScenePickerGridCount,
-  selectScenePickerAllScenesCount
+  selectScenePickerAllScenesCount,
+  selectScenePickerDisplayCount
 } from '../store/scenePicker/selectors'
 import {
   onScenePickerChangeSceneGroupItemsSort,
@@ -144,6 +153,8 @@ import {
   routeToRandomScene
 } from '../store/scenePicker/thunks'
 import flipflip from '../FlipFlipService'
+import { selectDisplayName } from '../store/display/selectors'
+import { importDisplay } from '../store/display/thunks'
 
 const drawerWidth = 240
 
@@ -333,7 +344,7 @@ const useStyles = makeStyles()((theme: Theme) => {
     generateTooltip: {
       top: 'auto',
       right: 28,
-      bottom: 140,
+      bottom: 195,
       left: 'auto',
       position: 'fixed',
       borderRadius: '50%',
@@ -341,6 +352,16 @@ const useStyles = makeStyles()((theme: Theme) => {
       height: theme.spacing(5)
     },
     gridTooltip: {
+      top: 'auto',
+      right: 28,
+      bottom: 140,
+      left: 'auto',
+      position: 'fixed',
+      borderRadius: '50%',
+      width: theme.spacing(5),
+      height: theme.spacing(5)
+    },
+    displayTooltip: {
       top: 'auto',
       right: 28,
       bottom: 85,
@@ -363,20 +384,23 @@ const useStyles = makeStyles()((theme: Theme) => {
         duration: theme.transitions.duration.enteringScreen
       })
     },
-    addSceneButton: {
-      marginBottom: 170
-    },
-    addGeneratorButton: {
-      marginBottom: 115
-    },
-    addGridButton: {
+    addDisplayButton: {
       marginBottom: 60
     },
-    importSceneButton: {
+    addGridButton: {
+      marginBottom: 115
+    },
+    addGeneratorButton: {
+      marginBottom: 170
+    },
+    addSceneButton: {
       marginBottom: 225
     },
+    importSceneButton: {
+      marginBottom: 280
+    },
     deleteScenesButton: {
-      marginBottom: 280,
+      marginBottom: 335,
       backgroundColor: theme.palette.error.main
     },
     addButtonClose: {
@@ -434,6 +458,9 @@ const useStyles = makeStyles()((theme: Theme) => {
     gridTab: {
       ariaControls: 'vertical-tabpanel-2'
     },
+    displayTab: {
+      ariaControls: 'vertical-tabpanel-2'
+    },
     fill: {
       flexGrow: 1
     },
@@ -469,12 +496,21 @@ interface SceneCardProps {
   toDelete: boolean
   action: (id: number) => void
   grid?: boolean
+  display?: boolean
 }
 
 function SceneCard(props: SceneCardProps) {
-  const { sceneID, grid, toDelete, action } = props
+  const { sceneID, display, grid, toDelete, action } = props
   const { classes } = useStyles()
-  const nameSelector = grid ? selectSceneGridName : selectSceneName
+  let nameSelector
+  if (grid) {
+    nameSelector = selectSceneGridName
+  } else if (display) {
+    nameSelector = selectDisplayName
+  } else {
+    nameSelector = selectSceneName
+  }
+
   const name = useAppSelector(nameSelector(sceneID))
   return (
     <Jiggle
@@ -605,14 +641,17 @@ function ScenePicker() {
   const sceneGroups = useAppSelector(selectScenePickerSceneGroups())
   const generatorGroups = useAppSelector(selectScenePickerGeneratorGroups())
   const gridGroups = useAppSelector(selectScenePickerGridGroups())
+  const displayGroups = useAppSelector(selectScenePickerDisplayGroups())
   const ungroupedScenes = useAppSelector(selectScenePickerUngroupedScenes())
   const ungroupedGenerators = useAppSelector(
     selectScenePickerUngroupedGenerators()
   )
   const ungroupedGrids = useAppSelector(selectScenePickerUngroupedGrids())
+  const ungroupedDisplays = useAppSelector(selectScenePickerUngroupedDisplays())
   const sceneCount = useAppSelector(selectScenePickerSceneCount())
   const generatorCount = useAppSelector(selectScenePickerGeneratorCount())
   const gridCount = useAppSelector(selectScenePickerGridCount())
+  const displayCount = useAppSelector(selectScenePickerDisplayCount())
   const allScenesCount = useAppSelector(selectScenePickerAllScenesCount())
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -693,6 +732,10 @@ function ScenePicker() {
     setOpenMenu(MO.urlImport)
   }
 
+  const onImportDisplay = () => {
+    setOpenMenu(MO.urlDisplayImport)
+  }
+
   const onDeleteScenes = () => {
     setOpenMenu(undefined)
     setScenesToDelete([])
@@ -741,6 +784,38 @@ function ScenePicker() {
           try {
             const json = JSON.parse(text)
             dispatch(importScenes(json, importSources))
+            onCloseDialog()
+          } catch (e) {
+            dispatch(systemMessage('This is not a valid JSON file'))
+          }
+        })
+    }
+  }
+
+  const onFinishImportDisplay = (importFile: string) => {
+    if (importFile.startsWith('http')) {
+      wretch(importFile)
+        .get()
+        .text((text) => {
+          let json
+          try {
+            json = JSON.parse(text)
+            dispatch(importDisplay(json))
+            onCloseDialog()
+          } catch (e) {
+            dispatch(systemMessage('This is not a valid JSON file'))
+          }
+        })
+        .catch((e) => {
+          dispatch(systemMessage('Error accessing URL'))
+        })
+    } else {
+      flipflip()
+        .api.readTextFile(importFile)
+        .then((text) => {
+          try {
+            const json = JSON.parse(text)
+            dispatch(importDisplay(json))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
@@ -825,7 +900,7 @@ function ScenePicker() {
     if (openMenu === MO.new) {
       let parent: any = e.target
       do {
-        let className = parent.className
+        let className = parent.className ?? ''
         if (typeof className !== 'string' && className.baseVal != null) {
           className = className.baseVal
         }
@@ -907,8 +982,36 @@ function ScenePicker() {
     )
   }
 
+  const renderDisplayCard = (displayID: number) => {
+    const sceneID = convertDisplayIDToSceneID(displayID)
+    return (
+      <SceneCard
+        display
+        key={sceneID}
+        sceneID={displayID}
+        toDelete={scenesToDelete != null && scenesToDelete.includes(sceneID)}
+        action={
+          scenesToDelete == null
+            ? () => dispatch(routeToDisplay(displayID))
+            : () => onToggleDelete(sceneID)
+        }
+      />
+    )
+  }
+
+  const getCard = (type: string) => {
+    switch (type) {
+      case SG.grid:
+        return renderGridCard
+      case SG.display:
+        return renderDisplayCard
+      default:
+        return renderSceneCard
+    }
+  }
+
   const renderUngroupedSortable = (type: string, ungrouped: number[]) => {
-    const renderCard = type === SG.grid ? renderGridCard : renderSceneCard
+    const renderCard = getCard(type)
     return (
       <Sortable
         className={classes.sceneList}
@@ -941,7 +1044,7 @@ function ScenePicker() {
   }
 
   const renderSceneGroupsSortable = (type: string, sceneGroups: number[]) => {
-    const renderCard = type === SG.grid ? renderGridCard : renderSceneCard
+    const renderCard = getCard(type)
     return (
       <Sortable
         options={{
@@ -1106,6 +1209,17 @@ function ScenePicker() {
               className={cx(
                 classes.tab,
                 classes.gridTab,
+                !open && classes.tabClose
+              )}
+            />
+            <Tab
+              id="vertical-tab-3"
+              aria-controls="vertical-tabpanel-3"
+              icon={<TvIcon />}
+              label={open ? `Displays (${displayCount})` : ''}
+              className={cx(
+                classes.tab,
+                classes.displayTab,
                 !open && classes.tabClose
               )}
             />
@@ -1329,6 +1443,12 @@ function ScenePicker() {
               {renderSceneGroupsSortable(SG.grid, gridGroups)}
             </Box>
           )}
+          {openTab === 3 && (
+            <Box>
+              {renderUngroupedSortable(SG.display, ungroupedDisplays)}
+              {renderSceneGroupsSortable(SG.display, displayGroups)}
+            </Box>
+          )}
         </Container>
       </main>
 
@@ -1378,14 +1498,18 @@ function ScenePicker() {
                   </Fab>
                 </Tooltip>
               )}
-              <Tooltip disableInteractive title="Import Scene" placement="left">
+              <Tooltip
+                disableInteractive
+                title={`Import ${openTab === 3 ? 'Display' : 'Scene'}`}
+                placement="left"
+              >
                 <Fab
                   className={cx(
                     classes.addButton,
                     classes.importSceneButton,
                     openMenu !== MO.new && classes.addButtonClose
                   )}
-                  onClick={onImportScene}
+                  onClick={openTab === 3 ? onImportDisplay : onImportScene}
                   size="small"
                 >
                   <GetAppIcon className={classes.icon} />
@@ -1456,11 +1580,28 @@ function ScenePicker() {
                   </Fab>
                 </span>
               </Tooltip>
+              <Tooltip disableInteractive title="Add Display" placement="left">
+                <span className={classes.displayTooltip}>
+                  <Fab
+                    className={cx(
+                      classes.addButton,
+                      classes.addDisplayButton,
+                      openMenu !== MO.new && classes.addButtonClose
+                    )}
+                    onClick={() => {
+                      dispatch(addDisplay())
+                    }}
+                    size="small"
+                  >
+                    <TvIcon className={classes.icon} />
+                  </Fab>
+                </span>
+              </Tooltip>
               <Tooltip disableInteractive title="Add Group" placement="left">
                 <Fab
                   className={cx(
                     classes.addButton,
-                    classes.addGridButton,
+                    classes.addDisplayButton,
                     openMenu === MO.new && classes.addButtonClose
                   )}
                   onClick={onAddGroup}
@@ -1619,6 +1760,49 @@ function ScenePicker() {
             color="primary"
             disabled={importFile.length === 0}
             onClick={() => onFinishImportScene(importFile, importSources)}
+          >
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openMenu === MO.urlDisplayImport}
+        onClose={onCloseDialog}
+        aria-labelledby="import-title"
+        aria-describedby="import-description"
+      >
+        <DialogTitle id="import-title">Import Display</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="import-description">
+            To import a display, enter the URL or open a local file.
+          </DialogContentText>
+          <TextField
+            variant="standard"
+            label="Import File"
+            fullWidth
+            placeholder="Paste URL Here"
+            margin="dense"
+            value={importFile}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip disableInteractive title="Open File">
+                    <IconButton onClick={onOpenImportFile} size="large">
+                      <FolderIcon />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              )
+            }}
+            onChange={onChangeImportFile}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onCloseDialog}>Cancel</Button>
+          <Button
+            color="primary"
+            disabled={importFile.length === 0}
+            onClick={() => onFinishImportDisplay(importFile)}
           >
             Import
           </Button>

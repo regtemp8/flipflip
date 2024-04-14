@@ -21,6 +21,8 @@ import audioLibrarySlice from '../store/audioLibrary/slice'
 import sourceScraperSlice from '../store/sourceScraper/slice'
 import createConstantsReducer from '../store/constants/slice'
 import { fromAppStorage } from '../store/app/convert'
+import createDisplayReducer from '../store/display/slice'
+import createDisplayViewReducer from '../store/displayView/slice'
 
 export function createEmotionCache(): EmotionCache {
   return createCache({ key: 'css' })
@@ -43,6 +45,8 @@ export function createReduxStore(
       scene: createSceneReducer(state?.scene),
       sceneGrid: createSceneGridReducer(state?.sceneGrid),
       sceneGroup: createSceneGroupReducer(state?.sceneGroup),
+      display: createDisplayReducer(), // TODO store displays
+      displayView: createDisplayViewReducer(), // TODO store displays
       tag: createTagReducer(state?.tag),
       constants: createConstantsReducer(constants),
       // components
