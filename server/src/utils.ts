@@ -7,8 +7,13 @@ import {
   getSourceType,
   en,
   ST,
-  type SystemConstants
+  type SystemConstants,
+  IF,
+  isImageOrVideo,
+  isImage,
+  isVideo
 } from 'flipflip-common'
+import { ProxyRequest } from './ProxyService'
 
 export const isWin32 = process.platform === 'win32'
 export const isMacOSX = process.platform === 'darwin'
@@ -45,6 +50,18 @@ export function getPortablePathExists(): boolean {
   return fs.existsSync(getPortablePath())
 }
 
+export function getCachePath(
+  baseDir: string,
+  source?: string,
+  typeDir?: string
+) {
+  if (typeDir == null && source != null) {
+    typeDir = (en.get(getSourceType(source)) as string).toLowerCase()
+  }
+
+  return cachePath(baseDir, source, typeDir)
+}
+
 export function cachePath(
   baseDir: string,
   source?: string,
@@ -55,9 +72,6 @@ export function cachePath(
       baseDir += path.sep
     }
     if (source != null) {
-      if (typeDir == null) {
-        typeDir = en.get(getSourceType(source))?.toLowerCase()
-      }
       if (source !== ST.video && source !== ST.playlist) {
         return (
           baseDir +
@@ -146,4 +160,25 @@ export function toArrayBuffer(buf: Buffer): ArrayBuffer {
 
 export function getServerURL(host: string, port: number) {
   return `https://${host}:${port}`
+}
+
+export function filterRequestsToJustPlayable(
+  imageTypeFilter: string,
+  requests: ProxyRequest[],
+  strict: boolean
+): ProxyRequest[] {
+  switch (imageTypeFilter) {
+    default:
+    case IF.any:
+      return requests.filter((r) => isImageOrVideo(r.url, strict))
+    case IF.stills:
+    case IF.images:
+      return requests.filter((r) => isImage(r.url, strict))
+    case IF.animated:
+      return requests.filter(
+        (r) => r.url.toLowerCase().endsWith('.gif') || isVideo(r.url, strict)
+      )
+    case IF.videos:
+      return requests.filter((r) => isVideo(r.url, strict))
+  }
 }

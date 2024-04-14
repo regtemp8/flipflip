@@ -4,7 +4,8 @@ import { getAppSceneGroups } from '../app/selectors'
 import { createSelector } from '@reduxjs/toolkit'
 import { getSceneEntries } from '../scene/selectors'
 import { getSceneGridEntries } from '../sceneGrid/selectors'
-import { convertSceneIDToGridID } from '../../data/utils'
+import { getDisplayEntries } from '../display/selectors'
+import { getPlaylistEntries } from '../playlist/selectors'
 
 export const selectSceneGroupName = (id: number) => {
   return (state: RootState): string => getEntry(state.sceneGroup, id).name
@@ -36,10 +37,20 @@ export const selectSceneGroupScenes = (id: number) => {
 export const selectSceneGroupGrids = (id: number) => {
   return createSelector(
     [getSceneGroupScenes(id), getSceneGridEntries],
-    (ids, entries) =>
-      ids.map((id) => {
-        const gridID = convertSceneIDToGridID(id) as number
-        return entries[gridID]
-      })
+    (ids, entries) => ids.map((id) => entries[id])
+  )
+}
+
+export const selectSceneGroupDisplays = (id: number) => {
+  return createSelector(
+    [getSceneGroupScenes(id), getDisplayEntries],
+    (ids, entries) => ids.map((id) => entries[id])
+  )
+}
+
+export const selectSceneGroupPlaylists = (id: number) => {
+  return createSelector(
+    [getSceneGroupScenes(id), getPlaylistEntries],
+    (ids, entries) => ids.map((id) => entries[id])
   )
 }

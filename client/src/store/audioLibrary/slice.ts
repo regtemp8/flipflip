@@ -47,6 +47,9 @@ export const audioLibrarySlice = createSlice({
     },
     setSelectedTags: (state, action: PayloadAction<string[]>) => {
       state.selectedTags = action.payload
+    },
+    setAudioLibraryPlaylistID: (state, action: PayloadAction<string>) => {
+      state.playlistID = Number(action.payload)
     }
   }
 })
@@ -59,7 +62,8 @@ export const {
   setPlaylistID,
   setDrawerOpen,
   setImportURL,
-  setSelectedTags
+  setSelectedTags,
+  setAudioLibraryPlaylistID
 } = audioLibrarySlice.actions
 
 export default audioLibrarySlice.reducer

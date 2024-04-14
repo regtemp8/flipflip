@@ -1,26 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { cx } from '@emotion/css'
-import AddIcon from '@mui/icons-material/Add'
-import ListIcon from '@mui/icons-material/List'
-import {
-  Button,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  Divider,
-  Fab,
-  Grid,
-  IconButton,
-  MenuItem,
-  type Theme,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
-import { addOverlay, removeOverlay } from '../../store/overlay/thunks'
 import {
   setSceneBackForth,
   setSceneBackForthBPMMulti,
@@ -34,23 +16,15 @@ import {
   setSceneBackgroundColorSet,
   setSceneBackgroundType,
   setSceneImageType,
-  setSceneNextSceneAllImages,
-  setSceneNextSceneTime,
-  setSceneOverlayEnabled,
-  setScenePersistAudio,
-  setScenePersistText,
   setSceneTimingBPMMulti,
   setSceneTimingDuration,
   setSceneTimingDurationMax,
   setSceneTimingDurationMin,
   setSceneTimingSinRate,
-  setSceneTimingTF,
-  setSceneNextSceneRandoms,
-  setSceneNextSceneID
+  setSceneTimingTF
 } from '../../store/scene/actions'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import {
-  selectAppScenes,
   selectAppLastRouteIsPlayer,
   selectAppTutorial
 } from '../../store/app/selectors'
@@ -68,14 +42,6 @@ import {
   selectSceneBackgroundType,
   selectSceneHasBPM,
   selectSceneImageType,
-  selectSceneNextSceneID,
-  selectSceneNextSceneRandoms,
-  selectSceneNextSceneAllImages,
-  selectSceneNextSceneTime,
-  selectSceneOverlays,
-  selectSceneOverlayEnabled,
-  selectScenePersistAudio,
-  selectScenePersistText,
   selectSceneTimingBPMMulti,
   selectSceneTimingDuration,
   selectSceneTimingDurationMax,
@@ -87,13 +53,9 @@ import { en, BT, IT, SDT } from 'flipflip-common'
 import BaseSelect from '../common/BaseSelect'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
-import MillisTextField from '../common/text/MillisTextField'
 import TimingCard from '../common/TimingCard'
 import ColorPicker from '../config/ColorPicker'
 import ColorSetPicker from '../config/ColorSetPicker'
-import MultiSceneSelect from './MultiSceneSelect'
-import SceneSelect from './SceneSelect'
-import OverlayCard from './OverlayCard'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -162,56 +124,56 @@ export interface SceneOptionCardProps {
 }
 
 function SceneOptionCard(props: SceneOptionCardProps) {
-  const [randomSceneList, setRandomSceneList] = useState<number[]>()
+  // const [randomSceneList, setRandomSceneList] = useState<number[]>()
 
-  const dispatch = useAppDispatch()
-  const scenes = useAppSelector(selectAppScenes())
+  // const dispatch = useAppDispatch()
+  // const scenes = useAppSelector(selectAppScenes())
   const tutorial = useAppSelector(selectAppTutorial())
   const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
   const backForth = useAppSelector(selectSceneBackForth(props.sceneID))
-  const nextSceneID = useAppSelector(selectSceneNextSceneID(props.sceneID))
-  const nextSceneRandoms = useAppSelector(
-    selectSceneNextSceneRandoms(props.sceneID)
-  )
-  const nextSceneAllImages = useAppSelector(
-    selectSceneNextSceneAllImages(props.sceneID)
-  )
-  const overlays = useAppSelector(selectSceneOverlays(props.sceneID))
-  const overlayEnabled = useAppSelector(
-    selectSceneOverlayEnabled(props.sceneID)
-  )
+  // const nextSceneID = useAppSelector(selectSceneNextSceneID(props.sceneID))
+  // const nextSceneRandoms = useAppSelector(
+  //   selectSceneNextSceneRandoms(props.sceneID)
+  // )
+  // const nextSceneAllImages = useAppSelector(
+  //   selectSceneNextSceneAllImages(props.sceneID)
+  // )
+  // const overlays = useAppSelector(selectSceneOverlays(props.sceneID))
+  // const overlayEnabled = useAppSelector(
+  //   selectSceneOverlayEnabled(props.sceneID)
+  // )
   const backgroundType = useAppSelector(
     selectSceneBackgroundType(props.sceneID)
   )
 
-  const onAddOverlay = () => {
-    dispatch(addOverlay(props.sceneID))
-  }
+  // const onAddOverlay = () => {
+  //   dispatch(addOverlay(props.sceneID))
+  // }
 
-  const onRandomSceneDialog = () => {
-    if (randomSceneList) {
-      setRandomSceneList(undefined)
-    } else {
-      setRandomSceneList(nextSceneRandoms)
-    }
-  }
+  // const onRandomSceneDialog = () => {
+  //   if (randomSceneList) {
+  //     setRandomSceneList(undefined)
+  //   } else {
+  //     setRandomSceneList(nextSceneRandoms)
+  //   }
+  // }
 
-  const changeRandomScenes = (sceneIDs: number[]) => {
-    setRandomSceneList(sceneIDs)
-  }
+  // const changeRandomScenes = (sceneIDs: number[]) => {
+  //   setRandomSceneList(sceneIDs)
+  // }
 
-  const onSelectNone = () => {
-    setRandomSceneList([])
-  }
+  // const onSelectNone = () => {
+  //   setRandomSceneList([])
+  // }
 
-  const onSelectAll = () => {
-    setRandomSceneList(scenes)
-  }
+  // const onSelectAll = () => {
+  //   setRandomSceneList(scenes)
+  // }
 
-  const onSaveRandomScene = () => {
-    dispatch(setSceneNextSceneRandoms(nextSceneRandoms, props.sceneID))
-    onRandomSceneDialog()
-  }
+  // const onSaveRandomScene = () => {
+  //   dispatch(setSceneNextSceneRandoms(nextSceneRandoms, props.sceneID))
+  //   onRandomSceneDialog()
+  // }
 
   const { classes } = useStyles()
   return (
@@ -384,7 +346,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
           </Grid>
         </Grid>
       </Grid>
-      {!props.isTagging && (
+      {/* {!props.isTagging && (
         <React.Fragment>
           <Grid item xs={12}>
             <Divider />
@@ -551,7 +513,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
             }}
           />
         )
-      })}
+      })} */}
     </Grid>
   )
 }

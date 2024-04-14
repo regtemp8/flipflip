@@ -7,9 +7,13 @@ import {
 } from 'instagram-private-api'
 import { type InstagramItems } from 'flipflip-common'
 
-export default class InstagramClient {
+export class InstagramClient {
+  private static instance: InstagramClient
+
   client: IgApiClient | undefined
   init: boolean | undefined
+
+  private constructor() {}
 
   initializeIpcEvents(): void {
     // ipcMain.handle(IPC.igLogin, this.onRequestLogin)
@@ -17,9 +21,6 @@ export default class InstagramClient {
     // ipcMain.handle(IPC.igSendSecurityCode, this.onRequestSendSecurityCode)
     // ipcMain.handle(IPC.igChallenge, this.onRequestChallenge)
     // ipcMain.handle(IPC.igSerializeCookieJar, this.onRequestSerializeCookieJar)
-    // ipcMain.handle(IPC.igSavedItems, this.onRequestSavedItems)
-    // ipcMain.handle(IPC.igUserFeedItems, this.onRequestUserFeedItems)
-    // ipcMain.handle(IPC.igGetMore, this.onRequestGetMore)
     // ipcMain.handle(IPC.igFollowingFeed, this.onRequestFollowingFeed)
     // ipcMain.handle(
     //   IPC.igGetMoreFollowingFeed,
@@ -35,7 +36,7 @@ export default class InstagramClient {
     return this.client as IgApiClient
   }
 
-  async onRequestLogin(username: string, password: string): Promise<number> {
+  async login(username: string, password: string): Promise<number> {
     this.init = true
     const client = this.getClient()
     client.state.generateDevice(username)
@@ -73,12 +74,12 @@ export default class InstagramClient {
     }
   }
 
-  async onRequestSerializeCookieJar(): Promise<string> {
+  async serializeCookieJar(): Promise<string> {
     const cookies = await this.getClient().state.serializeCookieJar()
     return JSON.stringify(cookies)
   }
 
-  async onRequestSavedItems(): Promise<InstagramItems<SavedFeedResponseMedia>> {
+  async savedItems(): Promise<InstagramItems<SavedFeedResponseMedia>> {
     const saved = this.getClient().feed.saved()
     const items = await saved.items()
     return {
@@ -87,7 +88,7 @@ export default class InstagramClient {
     }
   }
 
-  async onRequestUserFeedItems(
+  async userFeedItems(
     username: string
   ): Promise<InstagramItems<UserFeedResponseItemsItem>> {
     const client = this.getClient()
@@ -102,7 +103,7 @@ export default class InstagramClient {
     }
   }
 
-  async onRequestGetMore(
+  async getMore(
     session: string,
     id: number | undefined,
     feedSession: string
@@ -159,4 +160,16 @@ export default class InstagramClient {
       return undefined
     }
   }
+
+  public static getInstance(): InstagramClient {
+    if (!InstagramClient.instance) {
+      InstagramClient.instance = new InstagramClient()
+    }
+
+    return InstagramClient.instance
+  }
+}
+
+export default function instagram() {
+  return InstagramClient.getInstance()
 }

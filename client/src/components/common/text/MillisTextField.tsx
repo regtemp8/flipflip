@@ -5,11 +5,13 @@ import BaseTextField from './BaseTextField'
 
 export interface MillisTextFieldProps extends ReduxProps<number> {
   label: string
+  fullWidth?: boolean
 }
 
 export default function MillisTextField(props: MillisTextFieldProps) {
   return (
     <BaseTextField
+      fullWidth={props.fullWidth}
       label={props.label}
       variant="outlined"
       margin="dense"

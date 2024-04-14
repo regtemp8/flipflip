@@ -237,7 +237,6 @@ const IPC = {
   deletePath: 'ipc.deletePath',
   mkdir: 'ipc.mkdir',
   writeFile: 'ipc.writeFile',
-  hasFiles: 'ipc.hasFiles',
   getDirectories: 'ipc.getDirectories',
   unlink: 'ipc.unlink',
   readdir: 'ipc.readdir',
@@ -248,19 +247,10 @@ const IPC = {
   igSendSecurityCode: 'ipc.igSendSecurityCode',
   igChallenge: 'ipc.igChallenge',
   igSerializeCookieJar: 'ipc.igSerializeCookieJar',
-  igSavedItems: 'ipc.igSavedItems',
-  igUserFeedItems: 'ipc.igUserFeedItems',
-  igGetMore: 'ipc.igGetMore',
   igFollowingFeed: 'ipc.igFollowingFeed',
   igGetMoreFollowingFeed: 'ipc.igGetMoreFollowingFeed',
-  imgurAlbumImages: 'ipc.imgurAlbumImages',
-  twitterLoadImages: 'ipc.twitterLoadImages',
   twitterFriendsList: 'ipc.twitterFriendsList',
-  redditGetSubreddit: 'ipc.redditGetSubreddit',
-  redditGetSavedContent: 'ipc.redditGetSavedContent',
-  redditGetUser: 'ipc.redditGetUser',
   redditGetSubscriptions: 'ipc.redditGetSubscriptions',
-  tumblrBlogPosts: 'ipc.tumblrBlogPosts',
   tumblrTotalBlogs: 'ipc.tumblrTotalBlogs',
   tumblrBlogs: 'ipc.tumblrBlogs',
   getFolderSize: 'ipc.getFolderSize',
@@ -274,7 +264,6 @@ const IPC = {
   twitterOAuth: 'ipc.twitterOAuth',
   redditOAuth: 'ipc.redditOAuth',
   getFileUrl: 'ipc.getFileUrl',
-  readDirectoryFiles: 'ipc.readDirectoryFiles',
   getContext: 'ipc.getContext',
   loadInWorker: 'ipc.loadInWorker',
   gridNavigateBack: 'ipc.gridNavigateBack',
@@ -295,6 +284,7 @@ const IPC = {
   workerSendMessage: 'ipc.workerSendMessage',
   workerResponse: 'ipc.workerResponse',
   proxyNimjaURL: 'ipc.proxyNimjaURL',
+  scrapeFiles: 'ipc.scrapeFiles',
 };
 
 const SDO = {
@@ -327,7 +317,9 @@ const MO = {
   gooninatorImport: 'mo.gooninatorimport',
   urlImport: 'mo.urlimport',
   urlDisplayImport: 'mo.urlDisplayImport',
+  urlPlaylistImport: 'mo.urlPlaylistImport',
   libraryImport: 'mo.libraryImport',
+  createPlaylist: 'mo.createPlaylist',
   newWindowAlert: 'mo.nwalert',
   removeAllAlert: 'mo.raalert',
   deleteAlert: 'mo.dalert',
@@ -393,6 +385,7 @@ const SG = {
   generator: 'sg.generator',
   grid: 'sg.grid',
   display: 'sg.display',
+  playlist: 'sg.playlist',
 };
 
 const DONE = 'done';
@@ -605,6 +598,21 @@ const SS = {
   success: 'success',
 };
 
+const MVF = {
+  // mirror view functions
+  none: 'mvf.none',
+  horizontal: 'mvf.horizontal',
+  vertical: 'mvf.vertical',
+};
+
+const PLT = {
+  // playlist type
+  audio: 'plt.audio',
+  display: 'plt.display',
+  scene: 'plt.scene',
+  script: 'plt.script',
+};
+
 export {
   AF,
   ALT,
@@ -654,4 +662,6 @@ export {
   VTF,
   WC,
   WF,
+  MVF,
+  PLT,
 };

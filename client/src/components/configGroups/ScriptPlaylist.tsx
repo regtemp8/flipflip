@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useState } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -18,7 +18,6 @@ import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import BuildIcon from '@mui/icons-material/Build'
-import ClearIcon from '@mui/icons-material/Clear'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import RepeatOneIcon from '@mui/icons-material/RepeatOne'
@@ -28,17 +27,16 @@ import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { addScript } from '../../store/app/slice'
-import {
-  setSceneScriptPlaylistToggleShuffle,
-  setSceneScriptPlaylistChangeRepeat,
-  setSceneRemoveScriptPlaylist,
-  setSceneScriptPlaylistRemoveScript,
-  setSceneScriptPlaylistSortScripts
-} from '../../store/scene/slice'
-import { playScript } from '../../store/scene/thunks'
-import { selectSceneScriptPlaylist } from '../../store/scene/selectors'
 import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
 import flipflip from '../../FlipFlipService'
+import { selectPlaylist } from '../../store/playlist/selectors'
+import {
+  setPlaylistChangeRepeat,
+  setPlaylistRemoveItem,
+  setPlaylistSortItems,
+  setPlaylistToggleShuffle
+} from '../../store/playlist/slice'
+import ScriptOptions from '../library/ScriptOptions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
@@ -81,26 +79,40 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface ScriptPlaylistItemProps {
-  sceneID: number
+  playlistID: number
   scriptID: number
+  index: number
+  sceneID: number
   scripts: number[]
-  onSourceOptions: (scriptID: number) => void
-  removeScript: (scriptID: number) => void
+  onSourceOptions: (id: number) => void
 }
 
 export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
+  const { playlistID, index } = props
   const dispatch = useAppDispatch()
   const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
     const sourceURL = url as string
     if (e.shiftKey && !e.ctrlKey) {
-      window.open(url, '_blank')?.focus()
+      flipflip()
+        .api.getFileUrl(sourceURL)
+        .then((fileURL) => window.open(fileURL, '_blank')?.focus())
     } else if (!e.shiftKey && e.ctrlKey) {
       flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
-      dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
+      // TODO make playScript work
+      // dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
     }
+  }
+
+  const removeScript = () => {
+    dispatch(
+      setPlaylistRemoveItem({
+        id: playlistID,
+        value: index
+      })
+    )
   }
 
   const { classes } = useStyles()
@@ -113,7 +125,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
           title={
             <div>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-              Library Tagging
+              Play Script
               <br />
               Shift+Click: Open Source
               <br />
@@ -137,11 +149,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
         >
           <BuildIcon />
         </IconButton>
-        <IconButton
-          edge="end"
-          onClick={() => props.removeScript(props.scriptID)}
-          size="large"
-        >
+        <IconButton edge="end" onClick={removeScript} size="large">
           <DeleteIcon color={'error'} />
         </IconButton>
       </ListItemSecondaryAction>
@@ -150,134 +158,109 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
 }
 
 export interface ScriptPlaylistProps {
-  sceneID: number
-  playlistIndex: number
-  onSourceOptions: (scriptID: number) => void
+  playlistID: number
 }
 
 function ScriptPlaylist(props: ScriptPlaylistProps) {
+  const { playlistID } = props
   const dispatch = useAppDispatch()
-  const playlist = useAppSelector(
-    selectSceneScriptPlaylist(props.sceneID, props.playlistIndex)
-  )
+  const playlist = useAppSelector(selectPlaylist(playlistID))
+
+  const [sourceOptions, setSourceOptions] = useState<number>()
+  const sceneID = 0
+  // const [sceneID, setSceneID] = useState<number>(0)
+
+  const onCloseSourceOptions = () => {
+    setSourceOptions(undefined)
+  }
+  const onSourceOptions = (scriptID: number) => {
+    setSourceOptions(scriptID)
+  }
 
   const toggleShuffle = () => {
-    dispatch(
-      setSceneScriptPlaylistToggleShuffle({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
+    dispatch(setPlaylistToggleShuffle(playlistID))
   }
 
   const changeRepeat = () => {
-    dispatch(
-      setSceneScriptPlaylistChangeRepeat({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
-  }
-
-  const removePlaylist = () => {
-    dispatch(
-      setSceneRemoveScriptPlaylist({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
-  }
-
-  const removeScript = (scriptID: number) => {
-    const scriptIndex = playlist.scripts.indexOf(scriptID)
-    dispatch(
-      setSceneScriptPlaylistRemoveScript({
-        id: props.sceneID,
-        value: { playlistIndex: props.playlistIndex, scriptIndex }
-      })
-    )
+    dispatch(setPlaylistChangeRepeat(playlistID))
   }
 
   const { classes } = useStyles()
   return (
-    <List disablePadding>
-      <Sortable
-        className={classes.scriptList}
-        options={{
-          animation: 150,
-          easing: 'cubic-bezier(1, 0, 0, 1)'
-        }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          dispatch(
-            setSceneScriptPlaylistSortScripts({
-              id: props.sceneID,
-              value: {
-                playlistIndex: props.playlistIndex,
-                oldIndex: evt.oldIndex,
-                newIndex: evt.newIndex
+    <>
+      <List disablePadding>
+        <Sortable
+          className={classes.scriptList}
+          options={{
+            animation: 150,
+            easing: 'cubic-bezier(1, 0, 0, 1)'
+          }}
+          onChange={(order: any, sortable: any, evt: any) => {
+            const { oldIndex, newIndex } = evt
+            dispatch(
+              setPlaylistSortItems({
+                id: props.playlistID,
+                value: { oldIndex, newIndex }
+              })
+            )
+          }}
+        >
+          {playlist.items.map((id, index) => (
+            <ScriptPlaylistItem
+              playlistID={playlistID}
+              scriptID={id}
+              key={index}
+              index={index}
+              sceneID={sceneID}
+              scripts={playlist.items}
+              onSourceOptions={onSourceOptions}
+            />
+          ))}
+        </Sortable>
+        <div className={classes.playlistAction}>
+          <div className={classes.left}>
+            <Tooltip
+              disableInteractive
+              title={'Shuffle ' + (playlist.shuffle ? '(On)' : '(Off)')}
+            >
+              <IconButton onClick={toggleShuffle} size="large">
+                <ShuffleIcon color={playlist.shuffle ? 'primary' : undefined} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              disableInteractive
+              title={
+                'Repeat ' +
+                (playlist.repeat === RP.none
+                  ? '(Off)'
+                  : playlist.repeat === RP.all
+                    ? '(All)'
+                    : '(One)')
               }
-            })
-          )
-        }}
-      >
-        {playlist.scripts.map((s, i) => (
-          <ScriptPlaylistItem
-            sceneID={props.sceneID}
-            scripts={playlist.scripts}
-            scriptID={s}
-            key={i}
-            onSourceOptions={props.onSourceOptions}
-            removeScript={removeScript}
-          />
-        ))}
-      </Sortable>
-      <div className={classes.playlistAction}>
-        <div className={classes.left}>
-          <Tooltip
-            disableInteractive
-            title={'Shuffle ' + (playlist.shuffle ? '(On)' : '(Off)')}
-          >
-            <IconButton onClick={toggleShuffle} size="large">
-              <ShuffleIcon color={playlist.shuffle ? 'primary' : undefined} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            disableInteractive
-            title={
-              'Repeat ' +
-              (playlist.repeat === RP.none
-                ? '(Off)'
-                : playlist.repeat === RP.all
-                  ? '(All)'
-                  : '(One)')
-            }
-          >
-            <IconButton onClick={changeRepeat} size="large">
-              {playlist.repeat === RP.none && <RepeatIcon />}
-              {playlist.repeat === RP.all && <RepeatIcon color={'primary'} />}
-              {playlist.repeat === RP.one && (
-                <RepeatOneIcon color={'primary'} />
-              )}
+            >
+              <IconButton onClick={changeRepeat} size="large">
+                {playlist.repeat === RP.none && <RepeatIcon />}
+                {playlist.repeat === RP.all && <RepeatIcon color={'primary'} />}
+                {playlist.repeat === RP.one && (
+                  <RepeatOneIcon color={'primary'} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </div>
+          <Tooltip disableInteractive title="Add Tracks">
+            <IconButton
+              onClick={() => dispatch(addScript(props.playlistID))}
+              size="large"
+            >
+              <AddIcon />
             </IconButton>
           </Tooltip>
         </div>
-        <Tooltip disableInteractive title="Add Tracks">
-          <IconButton
-            onClick={() => dispatch(addScript(props.playlistIndex))}
-            size="large"
-          >
-            <AddIcon />
-          </IconButton>
-        </Tooltip>
-        <div className={classes.right}>
-          <Tooltip disableInteractive title="Remove Playlist">
-            <IconButton onClick={removePlaylist} size="large">
-              <ClearIcon color={'error'} />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
-    </List>
+      </List>
+      {sourceOptions != null && (
+        <ScriptOptions scriptID={sourceOptions} onDone={onCloseSourceOptions} />
+      )}
+    </>
   )
 }
 

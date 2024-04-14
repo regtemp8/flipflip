@@ -1,8 +1,12 @@
 import Twitter from 'twitter'
 import { type TwitterItems, type TwitterFollowers } from 'flipflip-common'
 
-export default class TwitterClient {
-  twitter: Twitter | undefined
+export class TwitterClient {
+  private static instance: TwitterClient
+
+  private twitter: Twitter | undefined
+
+  private constructor() {}
 
   initializeIpcEvents(): void {
     // ipcMain.handle(IPC.twitterLoadImages, this.onRequestTwitterLoadImages)
@@ -27,7 +31,7 @@ export default class TwitterClient {
     return this.twitter
   }
 
-  async onRequestTwitterLoadImages(
+  async loadImages(
     consumerKey: string,
     consumerSecret: string,
     accessTokenKey: string,
@@ -119,4 +123,16 @@ export default class TwitterClient {
       cursor: data.next_cursor
     }
   }
+
+  public static getInstance(): TwitterClient {
+    if (!TwitterClient.instance) {
+      TwitterClient.instance = new TwitterClient()
+    }
+
+    return TwitterClient.instance
+  }
+}
+
+export default function twitter() {
+  return TwitterClient.getInstance()
 }

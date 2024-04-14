@@ -1,5 +1,4 @@
 import fs from 'fs'
-import https from 'https'
 import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
 import express, { type Express, RequestHandler, Response } from 'express'
@@ -35,6 +34,7 @@ import {
   ServerSettings,
   initialServerSettings
 } from 'flipflip-common/build/main/lib/storage/ServerSettings'
+import proxy from './ProxyService'
 
 class FlipFlipServer {
   private static instance: FlipFlipServer
@@ -214,34 +214,11 @@ class FlipFlipServer {
 
       fs.createReadStream(path, { start, end }).pipe(res)
     })
-    api.get('/nimja/visual/:id', (req, res) => {
-      const baseURL = 'https://hypno.nimja.com'
-      const url = req.originalUrl.replace('/nimja', baseURL)
-      https
-        .get(url, (response) => {
-          const data: Uint8Array[] = []
-          response.on('data', (chunk) => {
-            data.push(chunk)
-          })
-
-          response.on('end', () => {
-            let html = Buffer.concat(data).toString()
-            html = html.replace('<head>', `<head><base href="${baseURL}/">`)
-            html = html.replace(
-              '<link rel="manifest" href="/site.webmanifest">',
-              ''
-            )
-            res
-              .appendHeader('Content-Type', 'text/html')
-              .status(200)
-              .send(html)
-              .end()
-          })
-        })
-        .on('error', (error) => {
-          res.statusMessage = `${error.name} - ${error.message}`
-          res.status(503).end()
-        })
+    api.get('/proxy/:uuid', (req, res) => {
+      proxy().get(req.params.uuid, req, res)
+    })
+    api.get('/proxy/nimja/visual/:id', (req, res) => {
+      proxy().nimja(req, res)
     })
     api.get('/', (req, res) => {
       const cache = createEmotionCache()

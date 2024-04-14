@@ -3,6 +3,7 @@ import Display from './Display'
 import { RootState } from '../store'
 import { getAppDisplays } from '../app/selectors'
 import { getEntry } from '../EntryState'
+import { getDisplayViewEntries } from '../displayView/selectors'
 
 export const getDisplayEntries = (state: RootState): Record<number, Display> =>
   state.display.entries
@@ -11,6 +12,10 @@ export const selectDisplays = () => {
   return createSelector([getAppDisplays, getDisplayEntries], (ids, entries) =>
     ids.map((id) => entries[id] as Display)
   )
+}
+
+export const selectDisplay = (id: number) => {
+  return (state: RootState) => getEntry(state.display, id)
 }
 
 export const selectDisplayViews = (id: number) => {
@@ -42,6 +47,58 @@ export const selectDisplayVisibleViews = (id: number) => {
     [selectDisplayViews(id), (state: RootState) => state.displayView.entries],
     (viewIDs, entries) => {
       return viewIDs.filter((id) => entries[id].visible)
+    }
+  )
+}
+
+export const selectDisplayViewSyncOptions = (id: number) => {
+  return createSelector(
+    [selectDisplay(id), getDisplayViewEntries],
+    (display, viewEntries) => {
+      const { selectedView, views } = display
+      const optionKeys = views.filter((id) => id !== selectedView)
+      const options: Record<string, string> = {}
+      options['0'] = 'None'
+      for (const key of optionKeys) {
+        options[key.toString()] = viewEntries[key].name
+      }
+      return options
+    }
+  )
+}
+
+export const selectDisplaySelectOptions = (
+  onlyExtra?: boolean,
+  includeExtra?: boolean
+) => {
+  return createSelector(
+    [(state) => onlyExtra, (state) => includeExtra, selectDisplays()],
+    (onlyExtra, includeExtra, displays) => {
+      const options: Record<string, string> = {}
+      displays.forEach((s) => (options[s.id.toString()] = s.name))
+
+      if (includeExtra === true) {
+        options['0'] = 'None'
+        options['-1'] = 'Random'
+      } else if (onlyExtra === true) {
+        options['-1'] = '~~EMPTY~~'
+      } else {
+        options['0'] = 'None'
+      }
+
+      return options
+    }
+  )
+}
+
+export const selectMultiDisplaySelectOptions = () => {
+  return createSelector(
+    [selectDisplays()],
+    (displays: Display[]): Record<string, string> => {
+      const options: Record<string, string> = {}
+      displays.forEach((s) => (options[s.id.toString()] = s.name))
+
+      return options
     }
   )
 }

@@ -30,14 +30,14 @@ import { setAudioYOffset, removeAudios } from '../../store/app/slice'
 import { selectUndefined } from '../../store/app/selectors'
 import { updateAudio } from '../../store/audio/slice'
 import { setPlaylistsSwapPlaylist, swapAudios } from '../../store/app/thunks'
-import {
-  setPlaylistRemoveAudio,
-  setPlaylistsRemoveAudio
-} from '../../store/playlist/thunks'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectAppAudioYOffset } from '../../store/app/selectors'
 import { selectAudio, selectAudioUrl } from '../../store/audio/selectors'
 import flipflip from '../../FlipFlipService'
+import {
+  setPlaylistRemoveAudio,
+  setPlaylistsRemoveAudio
+} from '../../store/playlist/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -67,6 +67,8 @@ const useStyles = makeStyles()((theme: Theme) => ({
 interface SortableVirtualListProps {
   width: number
   height: number
+  audios: number[]
+  yOffset: number
 }
 
 export interface AudioSourceListProps {
@@ -239,8 +241,8 @@ function AudioSourceList(props: AudioSourceListProps) {
   const SortableVirtualList =
     SortableContainer<SortableVirtualListProps>(VirtualList)
 
-  function VirtualList(props: any) {
-    const { height, width } = props
+  function VirtualList(props: SortableVirtualListProps) {
+    const { height, width, audios, yOffset } = props
 
     return (
       <FixedSizeList
@@ -248,8 +250,8 @@ function AudioSourceList(props: AudioSourceListProps) {
         width={width}
         initialScrollOffset={yOffset}
         itemSize={56}
-        itemCount={props.audios.length}
-        itemData={props.audios}
+        itemCount={audios.length}
+        itemData={audios}
         itemKey={(index: number, data: any) => index}
         overscanCount={10}
       >
@@ -270,7 +272,7 @@ function AudioSourceList(props: AudioSourceListProps) {
           isSelect={props.isSelect}
           lastSelected={audioID === lastSelected}
           audioID={audioID}
-          audios={props.audios}
+          audios={value.data}
           style={value.style}
           onClickAlbum={props.onClickAlbum}
           onClickArtist={props.onClickArtist}
@@ -342,6 +344,8 @@ function AudioSourceList(props: AudioSourceListProps) {
               distance={5}
               height={height - 1}
               width={width}
+              audios={props.audios}
+              yOffset={yOffset}
               onSortEnd={onSortEnd}
             />
           </List>

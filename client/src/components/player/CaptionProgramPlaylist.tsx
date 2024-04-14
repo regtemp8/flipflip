@@ -9,12 +9,12 @@ import {
   selectSceneIsScriptScene,
   selectSceneScriptStartIndex
 } from '../../store/scene/selectors'
-import type ScriptPlaylist from '../../store/scene/ScriptPlaylist'
 import { HTMLContentElement } from './HTMLContentElement'
+import { selectPlaylist } from '../../store/playlist/selectors'
 
 export interface CaptionProgramPlaylistProps {
   playlistIndex: number
-  playlist: ScriptPlaylist
+  playlistID: number
   currentAudio: number
   currentImage?: HTMLContentElement
   scale: number
@@ -31,6 +31,7 @@ export interface CaptionProgramPlaylistProps {
 export default function CaptionProgramPlaylist(
   props: CaptionProgramPlaylistProps
 ) {
+  const playlist = useAppSelector(selectPlaylist(props.playlistID))
   const isScriptScene = useAppSelector(selectSceneIsScriptScene(props.sceneID))
   const scriptStartIndex = useAppSelector(
     selectSceneScriptStartIndex(props.sceneID)
@@ -42,44 +43,44 @@ export default function CaptionProgramPlaylist(
   const [playingScripts, setPlayingScripts] = useState<number[]>([])
 
   const restart = useCallback(() => {
-    let scripts = props.playlist.scripts
-    if (props.playlist.shuffle) {
+    let scripts = playlist.items
+    if (playlist.shuffle) {
       scripts = randomizeList(Array.from(scripts))
     }
     setPlayingScripts(scripts)
-  }, [props.playlist.scripts, props.playlist.shuffle])
+  }, [playlist.items, playlist.shuffle])
 
   const prevTrack = useCallback(() => {
     let prevTrack = currentIndex - 1
     if (prevTrack < 0) {
-      prevTrack = props.playlist.scripts.length - 1
+      prevTrack = playlist.items.length - 1
     }
     setCurrentIndex(prevTrack)
-  }, [currentIndex, props.playlist.scripts.length])
+  }, [currentIndex, playlist.items.length])
 
   const nextTrack = useCallback(() => {
     let nextTrack = currentIndex + 1
-    if (nextTrack >= props.playlist.scripts.length) {
-      if (props.playlist.repeat === RP.none) {
-        nextTrack = props.playlist.scripts.length
+    if (nextTrack >= playlist.items.length) {
+      if (playlist.repeat === RP.none) {
+        nextTrack = playlist.items.length
       } else {
         nextTrack = 0
       }
     }
     setCurrentIndex(nextTrack)
-  }, [currentIndex, props.playlist.repeat, props.playlist.scripts.length])
+  }, [currentIndex, playlist.repeat, playlist.items.length])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case '[':
           e.preventDefault()
-          props.orderScriptTags(props.playlist.scripts[currentIndex])
+          props.orderScriptTags(playlist.items[currentIndex])
           prevTrack()
           break
         case ']':
           e.preventDefault()
-          props.orderScriptTags(props.playlist.scripts[currentIndex])
+          props.orderScriptTags(playlist.items[currentIndex])
           nextTrack()
           break
       }
@@ -95,23 +96,31 @@ export default function CaptionProgramPlaylist(
         window.removeEventListener('keydown', onKeyDown)
       }
     }
-  }, [currentIndex, isScriptScene, nextTrack, prevTrack, props, restart])
+  }, [
+    currentIndex,
+    isScriptScene,
+    nextTrack,
+    prevTrack,
+    props,
+    restart,
+    playlist.items
+  ])
 
   useEffect(() => {
     if (!props.persist) {
       restart()
     }
-  }, [props.playlist, props.persist, restart])
+  }, [playlist, props.persist, restart])
 
   let script = playingScripts[currentIndex]
-  if (!script) script = props.playlist.scripts[currentIndex]
+  if (!script) script = playlist.items[currentIndex]
   if (!script) return <div />
   return (
     <CaptionProgram
       sceneID={props.sceneID}
       captionScriptID={script}
       persist={props.persist}
-      repeat={props.playlist.repeat}
+      repeat={playlist.repeat}
       scale={props.scale}
       singleTrack={playingScripts.length === 1}
       nextTrack={nextTrack}

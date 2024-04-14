@@ -1,4 +1,4 @@
-import fs, { Dirent } from 'fs'
+import fs from 'fs'
 import type ws from 'ws'
 import { move, outputFile } from 'fs-extra'
 import { IAudioMetadata, parseBuffer, parseFile } from 'music-metadata'
@@ -6,11 +6,10 @@ import rimraf from 'rimraf'
 import { cleanBackups, getBackups } from '../data/Backup'
 import fontList from 'font-list'
 import {
-  cachePath,
+  getCachePath,
   getFilesRecursively,
   generateThumbnailFile,
   getContext,
-  isWin32,
   isMacOSX,
   pathSep
 } from '../utils'
@@ -19,23 +18,50 @@ import {
   type Config,
   type WebSocketMessage,
   isText,
-  filterPathsToJustPlayable,
   isAudio,
   isImage,
   isVideo,
   isVideoPlaylist,
-  urlToPath,
-  IF,
   IPC,
   Audio,
   newAudio,
-  type AppStorage as AppStorageData
+  type AppStorage as AppStorageData,
+  ST,
+  getFileName,
+  getSourceType,
+  LibrarySource,
+  ScraperHelpers
 } from 'flipflip-common'
 import AppStorage from '../data/AppStorage'
 import SystemFonts from 'system-font-families'
-import fileRegistry from '../FileRegistry'
 import windowManager from '../WindowManager'
-import fileUrl from 'file-url'
+import {
+  loadLocalDirectory,
+  loadRemoteImageURLList,
+  loadVideo,
+  loadPlaylist,
+  loadNimja,
+  loadBDSMlr,
+  loadDanbooru,
+  loadDeviantArt,
+  loadE621,
+  loadEHentai,
+  loadGelbooru1,
+  loadGelbooru2,
+  loadHydrus,
+  loadImageFap,
+  loadImgur,
+  loadInstagram,
+  loadLuscious,
+  loadPiwigo,
+  loadRedGifs,
+  loadReddit,
+  loadSexCom,
+  loadTumblr,
+  loadTwitter,
+  getFileURL,
+  WorkerFunction
+} from './Scrapers'
 
 interface WebSocketMessageParams {
   message: WebSocketMessage
@@ -80,7 +106,6 @@ class WebSocketMessageService {
     this.handlers[IPC.deletePath] = this.deletePath
     this.handlers[IPC.mkdir] = this.makeDirectory
     this.handlers[IPC.writeFile] = this.writeFile
-    this.handlers[IPC.hasFiles] = this.hasFiles
     this.handlers[IPC.getDirectories] = this.getDirectories
     this.handlers[IPC.unlink] = this.unlinkPath
     this.handlers[IPC.readdir] = this.readDirectory
@@ -96,9 +121,9 @@ class WebSocketMessageService {
     // this.handlers[IPC.twitterOAuth] = getTwitterOAuth
     // this.handlers[IPC.redditOAuth] = getRedditOAuth
     this.handlers[IPC.getFileUrl] = this.getFileUrl
-    this.handlers[IPC.readDirectoryFiles] = this.readDirectoryFiles
     this.handlers[IPC.getContext] = this.getContext
     this.handlers[IPC.proxyNimjaURL] = this.proxyNimjaURL
+    this.handlers[IPC.scrapeFiles] = this.scrapeFiles
     // this.handlers[IPC.loadInWorker] = getLoadInWorker
     // this.handlers[IPC.workerSendMessage] = getWorkerSendMessage
 
@@ -296,7 +321,7 @@ class WebSocketMessageService {
     return await new Promise((resolve) => {
       const source = params.message.args[0] as string
       if (fs.existsSync(source)) {
-        windowManager().openExternal(source)
+        windowManager().showItemInFolder(source)
       }
 
       resolve([])
@@ -405,7 +430,8 @@ class WebSocketMessageService {
         message.args.length >= 2 ? (message.args[1] as string) : undefined
       const typeDir =
         message.args.length >= 3 ? (message.args[2] as string) : undefined
-      const path = cachePath(baseDir, source, typeDir)
+
+      const path = getCachePath(baseDir, source, typeDir)
       resolve([path])
     })
   }
@@ -444,14 +470,6 @@ class WebSocketMessageService {
       () => [],
       () => []
     )
-  }
-
-  private async hasFiles(params: WebSocketMessageParams): Promise<unknown[]> {
-    return await new Promise((resolve) => {
-      const path = params.message.args[0] as string
-      const hasFiles = fs.existsSync(path) && fs.readdirSync(path).length > 0
-      resolve([hasFiles])
-    })
   }
 
   private async getDirectories(
@@ -884,62 +902,8 @@ class WebSocketMessageService {
   private getFileUrl(params: WebSocketMessageParams): Promise<unknown[]> {
     return new Promise((resolve) => {
       const path = params.message.args[0] as string
-      const url = fileUrl(path)
-      const uuid = fileRegistry().set(url)
-      resolve([`https://${params.host}/file/${uuid}`])
+      resolve([getFileURL(path, params.host)])
     })
-  }
-
-  private async readDirectoryFiles(
-    params: WebSocketMessageParams
-  ): Promise<unknown[]> {
-    const { message } = params
-    const url = message.args[0] as string
-    // const blacklist = message.args[1] as string[]
-    const sourceBlacklist = message.args[2] as string[]
-    const filter = message.args[3] as string
-    const local = message.args[4] as boolean
-
-    return await fs.promises
-      .readdir(url, { withFileTypes: true })
-      .then((dirents: Dirent[]) => {
-        const rawFiles = dirents
-          .filter((dirent) => dirent.isFile())
-          .map((file) => file.path + pathSep + file.name)
-        const collator = new Intl.Collator(undefined, {
-          numeric: true,
-          sensitivity: 'base'
-        })
-        let sources: string[] = filterPathsToJustPlayable(
-          filter,
-          rawFiles,
-          true
-        )
-          .map((p: string) => fileUrl(p))
-          .sort((a: string, b: string) => collator.compare(a, b))
-
-        if (sourceBlacklist != null && sourceBlacklist.length > 0) {
-          sources = sources.filter(
-            (url: string) =>
-              !sourceBlacklist.includes(url) &&
-              !sourceBlacklist.includes(urlToPath(url, isWin32))
-          )
-        }
-
-        sources = sources.map((url) => {
-          const uuid = fileRegistry().set(url)
-          return `https://${params.host}/file/${uuid}`
-        })
-
-        const count = local
-          ? filterPathsToJustPlayable(IF.any, rawFiles, true).length
-          : undefined
-        return [{ sources, count }]
-      })
-      .catch((error) => {
-        console.error(error)
-        return [{ sources: [], count: 0 }]
-      })
   }
 
   private async getContext(): Promise<unknown[]> {
@@ -955,25 +919,190 @@ class WebSocketMessageService {
       let url = params.message.args[0] as string
       url = url.replace(
         'https://hypno.nimja.com',
-        `https://${params.host}/nimja`
+        `https://${params.host}/proxy/nimja`
       )
       resolve([url])
     })
   }
 
-  // function getLoadInWorker (message: WebSocketMessage) {
-  //   const event = message.args[0]
-  //   const args = message.args[1]
-  //   // loadInWorker(event, args, ev.sender.id)
-  // }
+  private async scrapeFiles(
+    params: WebSocketMessageParams
+  ): Promise<unknown[]> {
+    return await new Promise((resolve) => {
+      const cachePath = (config: Config, source: LibrarySource) => {
+        const path =
+          getCachePath(config.caching.directory, source.url) +
+          getFileName(source.url, pathSep)
+        return config.caching.enabled && fs.existsSync(path) ? path : undefined
+      }
 
-  // function getWorkerSendMessage (
-  //   message: WebSocketMessage
-  // ) {
-  //   const webContentsId = message.args[0]
-  //   const data = message.args[1]
-  //   workerResponse(webContentsId, data)
-  // }
+      const args = params.message.args
+      const allURLs = args[0] as Record<string, string[]>
+      const allPosts = args[1] as Record<string, string>
+      const config = args[2] as Config
+      const source = args[3] as LibrarySource
+      const filter = args[4] as string
+      const weight = args[5] as string
+      const helpers = args[6] as ScraperHelpers
+
+      const sourceType = getSourceType(source.url)
+      if (sourceType === ST.local) {
+        // Local files
+        loadLocalDirectory(
+          allURLs,
+          allPosts,
+          config,
+          source,
+          filter,
+          weight,
+          helpers,
+          '',
+          params.host,
+          resolve
+        )
+      } else if (sourceType === ST.list) {
+        // Image List
+        helpers.next = null
+        loadRemoteImageURLList(
+          allURLs,
+          allPosts,
+          config,
+          source,
+          filter,
+          weight,
+          helpers,
+          resolve
+        )
+      } else if (sourceType === ST.video) {
+        const path = cachePath(config, source) ?? ''
+        loadVideo(
+          allURLs,
+          allPosts,
+          config,
+          source,
+          filter,
+          weight,
+          helpers,
+          path,
+          params.host,
+          resolve
+        )
+      } else if (sourceType === ST.playlist) {
+        const path = cachePath(config, source) ?? ''
+        loadPlaylist(
+          allURLs,
+          allPosts,
+          config,
+          source,
+          filter,
+          weight,
+          helpers,
+          path,
+          resolve
+        )
+      } else if (sourceType === ST.nimja) {
+        loadNimja(
+          allURLs,
+          allPosts,
+          config,
+          source,
+          filter,
+          weight,
+          helpers,
+          params.host,
+          resolve
+        )
+      } else {
+        // Paging sources
+        let workerFunction: WorkerFunction
+        if (sourceType === ST.tumblr) {
+          workerFunction = loadTumblr
+        } else if (sourceType === ST.reddit) {
+          workerFunction = loadReddit
+        } else if (sourceType === ST.redgifs) {
+          workerFunction = loadRedGifs
+        } else if (sourceType === ST.imagefap) {
+          workerFunction = loadImageFap
+        } else if (sourceType === ST.sexcom) {
+          workerFunction = loadSexCom
+        } else if (sourceType === ST.imgur) {
+          workerFunction = loadImgur
+        } else if (sourceType === ST.twitter) {
+          workerFunction = loadTwitter
+        } else if (sourceType === ST.deviantart) {
+          workerFunction = loadDeviantArt
+        } else if (sourceType === ST.instagram) {
+          workerFunction = loadInstagram
+        } else if (sourceType === ST.danbooru) {
+          workerFunction = loadDanbooru
+        } else if (sourceType === ST.e621) {
+          workerFunction = loadE621
+        } else if (sourceType === ST.luscious) {
+          workerFunction = loadLuscious
+        } else if (sourceType === ST.gelbooru1) {
+          workerFunction = loadGelbooru1
+        } else if (sourceType === ST.gelbooru2) {
+          workerFunction = loadGelbooru2
+        } else if (sourceType === ST.ehentai) {
+          workerFunction = loadEHentai
+        } else if (sourceType === ST.bdsmlr) {
+          workerFunction = loadBDSMlr
+        } else if (sourceType === ST.hydrus) {
+          workerFunction = loadHydrus
+        } else if (sourceType === ST.piwigo) {
+          workerFunction = loadPiwigo
+        }
+        if (helpers.next === -1) {
+          helpers.next = 0
+          const cacheDir = getCachePath(config.caching.directory, source.url)
+
+          if (
+            config.caching.enabled &&
+            fs.existsSync(cacheDir) &&
+            fs.readdirSync(cacheDir).length > 0
+          ) {
+            // If the cache directory exists, use it
+            loadLocalDirectory(
+              allURLs,
+              allPosts,
+              config,
+              source,
+              filter,
+              weight,
+              helpers,
+              cacheDir,
+              params.host,
+              resolve
+            )
+          } else {
+            workerFunction(
+              allURLs,
+              allPosts,
+              config,
+              source,
+              filter,
+              weight,
+              helpers,
+              params.host,
+              resolve
+            )
+          }
+        } else {
+          workerFunction(
+            allURLs,
+            allPosts,
+            config,
+            source,
+            filter,
+            weight,
+            helpers,
+            params.host,
+            resolve
+          )
+        }
+      }
+    }).then((result) => [result])
+  }
 
   public handle(
     message: WebSocketMessage,

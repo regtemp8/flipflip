@@ -25,6 +25,10 @@ import View from './displayView/View'
 import Display from './display/Display'
 import { initialDisplayViewState } from './displayView/slice'
 import { initialDisplayState } from './display/slice'
+import { initialScenePlaylistItemState } from './scenePlaylistItem/slice'
+import { ScenePlaylistItem } from './scenePlaylistItem/ScenePlaylistItem'
+import { DisplayPlaylistItem } from './displayPlaylistItem/DisplayPlaylistItem'
+import { initialDisplayPlaylistItemState } from './displayPlaylistItem/slice'
 
 export interface AppStorageImport {
   app: App
@@ -37,6 +41,8 @@ export interface AppStorageImport {
   scene: EntryState<Scene>
   sceneGrid: EntryState<SceneGrid>
   sceneGroup: EntryState<SceneGroup>
+  scenePlaylistItem: EntryState<ScenePlaylistItem>
+  displayPlaylistItem: EntryState<DisplayPlaylistItem>
   tag: EntryState<Tag>
   display: EntryState<Display>
   displayView: EntryState<View>
@@ -53,6 +59,8 @@ export const initialAppStorageImport: AppStorageImport = {
   scene: initialSceneState,
   sceneGrid: initialSceneGridState,
   sceneGroup: initialSceneGroupState,
+  scenePlaylistItem: initialScenePlaylistItemState,
+  displayPlaylistItem: initialDisplayPlaylistItemState,
   tag: initialTagState,
   display: initialDisplayState,
   displayView: initialDisplayViewState

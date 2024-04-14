@@ -287,6 +287,13 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     )
   }
 
+  const isChecked = useCallback(
+    (id: number) => {
+      return specialMode != null && props.selected.includes(id)
+    },
+    [specialMode, props.selected]
+  )
+
   function Row(props: any) {
     const { index } = props
     const SortableItem = SortableElement<{ index: any; value: any }>(
@@ -296,7 +303,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
         return (
           <ScriptSourceListItem
             key={index}
-            checked={specialMode ? props.selected.includes(scriptID) : false}
+            checked={isChecked(scriptID)}
             index={index}
             isEditing={isEditing}
             lastSelected={scriptID === lastSelected}

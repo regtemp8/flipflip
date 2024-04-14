@@ -19,7 +19,8 @@ import {
   randomizeList,
   applyEffects,
   getEffects,
-  convertSceneIDToDisplayID
+  convertSceneIDToDisplayID,
+  getRandomColor
 } from '../../data/utils'
 import {
   setAppSlice,
@@ -64,7 +65,8 @@ import {
   setConfigServerSettingsOnBlur,
   setConfigServerSettingsChanged,
   addToDisplays,
-  removeFromDisplays
+  removeFromDisplays,
+  removeFromPlaylists
 } from './slice'
 import {
   toAppStorage,
@@ -83,7 +85,7 @@ import { newCaptionScript } from '../captionScript/CaptionScript'
 import Playlist, { newPlaylist } from '../playlist/Playlist'
 import {
   setPlaylist,
-  setPlaylistAudios,
+  setPlaylistAddItems,
   setPlaylistSlice
 } from '../playlist/slice'
 import type Scene from '../scene/Scene'
@@ -97,7 +99,8 @@ import {
   setSceneRemoveOverlay,
   setSceneSlice,
   setSceneSources,
-  setSceneScriptPlaylistScripts
+  setSceneRemoveAudioPlaylist,
+  setSceneRemoveScriptPlaylist
 } from '../scene/slice'
 import { setVideoClipperSceneVideoVolume } from '../scene/thunks'
 import type SceneGrid from '../sceneGrid/SceneGrid'
@@ -169,6 +172,7 @@ import {
   newPlaylist as newPlaylistStorage,
   copy,
   getFileGroup,
+  getFileName,
   getSourceType,
   ASF,
   SP,
@@ -193,20 +197,29 @@ import {
   SF,
   SS,
   PR,
-  en
+  PLT
 } from 'flipflip-common'
-import { getFileName } from '../../components/player/Scrapers'
 import { setVideoClipperSourceID } from '../videoClipper/slice'
 import { setCaptionScriptorCaptionScriptID } from '../captionScriptor/slice'
 import flipflip from '../../FlipFlipService'
 import { newDisplay } from '../display/Display'
-import { deleteDisplay, setDisplay } from '../display/slice'
+import { newView } from '../displayView/View'
+import { deleteDisplay, setDisplay, setDisplaySlice } from '../display/slice'
 import {
   incrementIDValue,
   incrementIDsList,
   incrementSliceIDs
 } from '../../data/import'
 import Overlay from '../overlay/Overlay'
+import {
+  resetDisplayViewPlaylistID,
+  setDisplayView,
+  setDisplayViewSlice
+} from '../displayView/slice'
+import { deletePlaylist } from '../playlist/slice'
+import { setScenePlaylistItemSlice } from '../scenePlaylistItem/slice'
+import { setDisplayPlaylistItemSlice } from '../displayPlaylistItem/slice'
+import { setPlayersState } from '../player/slice'
 
 export function fetchAppStorage() {
   return async function fetchAppStorageThunk(
@@ -232,6 +245,10 @@ export function setAppStorage(appStorage: AppStorage, dispatch: AppDispatch) {
   dispatch(setSceneGridSlice(state.sceneGrid))
   dispatch(setSceneGroupSlice(state.sceneGroup))
   dispatch(setTagSlice(state.tag))
+  dispatch(setDisplayViewSlice(state.displayView))
+  dispatch(setDisplaySlice(state.display))
+  dispatch(setScenePlaylistItemSlice(state.scenePlaylistItem))
+  dispatch(setDisplayPlaylistItemSlice(state.displayPlaylistItem))
 }
 
 function shouldSaveState(prev: RootState, next: RootState) {
@@ -379,6 +396,12 @@ export function routeToDisplay(id: number) {
   }
 }
 
+export function routeToPlaylist(id: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    dispatch(setRoute([newRoute({ kind: 'playlist', value: id })]))
+  }
+}
+
 export function addGenerator() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
@@ -407,9 +430,15 @@ export function addGenerator() {
 export function addDisplay() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
+    const viewID = state.displayView.nextID
+    const view = newView({ id: viewID, color: getRandomColor() })
+    dispatch(setDisplayView(view))
+
     const display = newDisplay({
       id: state.display.nextID,
-      name: 'New Display'
+      name: 'New Display',
+      views: [viewID],
+      selectedView: viewID
     })
 
     dispatch(setDisplay(display))
@@ -718,6 +747,13 @@ export function setRouteGoBack() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const route = getAppLastRoute(state.app) as Route
+    if (
+      getAppIsRoute(route, 'play') ||
+      getAppIsRoute(route, 'gridplay') ||
+      getAppIsRoute(route, 'libraryplay')
+    ) {
+      dispatch(setPlayersState({}))
+    }
     if (getAppIsRoute(route, 'libraryplay')) {
       let librarySource
       const scene = getActiveScene(state) as Scene
@@ -1214,6 +1250,7 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
           slice.tag,
           slice.clip,
           slice.overlay,
+          slice.playlist,
           slice.audio,
           slice.captionScript
         )
@@ -1226,6 +1263,7 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
     const sceneNextID = state.scene.nextID
     const sceneGridNextID = state.sceneGrid.nextID
     const tagNextID = state.tag.nextID
+    const playlistNextID = state.playlist.nextID
     const audioNextID = state.audio.nextID
     const captionScriptNextID = state.captionScript.nextID
     const overlayNextID = state.overlay.nextID
@@ -1241,23 +1279,16 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
         slice.overlay,
         overlayNextID
       )
-      s.audioPlaylists.forEach(
-        (p) =>
-          (p.audios = incrementIDsList<Audio>(
-            p.audios,
-            slice.audio,
-            audioNextID
-          ))
+      s.audioPlaylists = incrementIDsList<Playlist>(
+        s.audioPlaylists,
+        slice.playlist,
+        playlistNextID
       )
-      s.scriptPlaylists.forEach(
-        (p) =>
-          (p.scripts = incrementIDsList<CaptionScript>(
-            p.scripts,
-            slice.captionScript,
-            captionScriptNextID
-          ))
+      s.scriptPlaylists = incrementIDsList<Playlist>(
+        s.scriptPlaylists,
+        slice.playlist,
+        playlistNextID
       )
-
       s.libraryID = incrementIDValue<LibrarySource>(
         s.libraryID,
         slice.librarySource,
@@ -1337,6 +1368,7 @@ export function importScenes(scenesToImport: any, importToLibrary: boolean) {
     incrementSliceIDs<Scene>(slice.scene, sceneNextID)
     incrementSliceIDs<LibrarySource>(slice.librarySource, librarySourceNextID)
     incrementSliceIDs<Clip>(slice.clip, clipNextID)
+    incrementSliceIDs<Playlist>(slice.playlist, playlistNextID)
     incrementSliceIDs<Audio>(slice.audio, audioNextID)
     incrementSliceIDs<CaptionScript>(slice.captionScript, captionScriptNextID)
     incrementSliceIDs<SceneGrid>(slice.sceneGrid, sceneGridNextID)
@@ -1645,7 +1677,7 @@ export function addPlaylist(name: string, selected: number[]) {
     const playlist = newPlaylist({
       id: state.playlist.nextID,
       name,
-      audios: selected
+      items: selected
     })
     dispatch(setPlaylist(playlist))
 
@@ -1655,15 +1687,47 @@ export function addPlaylist(name: string, selected: number[]) {
   }
 }
 
-export function removePlaylist(name: string) {
+export function removePlaylist(identifier: number | string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    const playlists = state.app.playlists
-      .map((id) => state.playlist.entries[id])
-      .filter((p) => p.name !== name)
-      .map((p) => p.id)
+    const id =
+      typeof identifier === 'string'
+        ? Object.values(state.playlist.entries).find(
+            (p) => p.name === identifier
+          )?.id
+        : (identifier as number)
 
-    dispatch(setPlaylists(playlists))
+    if (id == null) {
+      console.error(`Could not find playlist for identifier ${identifier}`)
+      return
+    }
+
+    const type = state.playlist.entries[id].type
+    if (type === PLT.scene) {
+      const viewIDs = Object.values(state.displayView.entries)
+        .filter((entry) => entry.playlistID === id)
+        .map((entry) => entry.id)
+
+      dispatch(resetDisplayViewPlaylistID(viewIDs))
+    } else if (type === PLT.audio) {
+      Object.values(state.scene.entries).forEach((entry) => {
+        const value = entry.audioPlaylists.indexOf(id)
+        if (value !== -1) {
+          dispatch(setSceneRemoveAudioPlaylist({ id: entry.id, value }))
+        }
+      })
+    } else if (type === PLT.script) {
+      Object.values(state.scene.entries).forEach((entry) => {
+        const value = entry.scriptPlaylists.indexOf(id)
+        if (value !== -1) {
+          dispatch(setSceneRemoveScriptPlaylist({ id: entry.id, value }))
+        }
+      })
+    }
+
+    dispatch(removeFromPlaylists(id))
+    dispatch(deletePlaylist(id))
+    dispatch(setRouteGoBack())
   }
 }
 
@@ -1673,18 +1737,18 @@ export function sortPlaylist(
   ascending: boolean
 ) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const state = getState()
-    const playlist = state.app.playlists
-      .map((id) => state.playlist.entries[id])
-      .find((p) => p.name === playlistName)
-    if (playlist) {
-      const sorted = playlist.audios
-        .map((aID) => state.audio.entries[aID])
-        .sort(audioSortFunction(algorithm, ascending))
-        .map((a) => a.id)
-
-      dispatch(setPlaylistAudios({ id: playlist.id, value: sorted }))
-    }
+    // TODO where is this used?
+    // const state = getState()
+    // const playlist = state.app.playlists
+    //   .map((id) => state.playlist.entries[id])
+    //   .find((p) => p.name === playlistName)
+    // if (playlist) {
+    //   const sorted = playlist.audios
+    //     .map((aID) => state.audio.entries[aID])
+    //     .sort(audioSortFunction(algorithm, ascending))
+    //     .map((a) => a.id)
+    //   dispatch(setPlaylistAudios({ id: playlist.id, value: sorted }))
+    // }
   }
 }
 
@@ -1694,14 +1758,15 @@ export function setPlaylistsSwapPlaylist(
   newSourceId: number
 ) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const state = getState()
-    const playlist = state.app.playlists
-      .map((id) => state.playlist.entries[id])
-      .find((p) => p.name === playlistName) as Playlist
-    const oldPlaylistIndex = playlist.audios.indexOf(oldSourceId)
-    const newPlaylistIndex = playlist.audios.indexOf(newSourceId)
-    arrayMove(playlist.audios, oldPlaylistIndex, newPlaylistIndex)
-    dispatch(setPlaylistAudios({ id: playlist.id, value: playlist.audios }))
+    // TODO where is this used?
+    // const state = getState()
+    // const playlist = state.app.playlists
+    //   .map((id) => state.playlist.entries[id])
+    //   .find((p) => p.name === playlistName) as Playlist
+    // const oldPlaylistIndex = playlist.audios.indexOf(oldSourceId)
+    // const newPlaylistIndex = playlist.audios.indexOf(newSourceId)
+    // arrayMove(playlist.audios, oldPlaylistIndex, newPlaylistIndex)
+    // dispatch(setPlaylistAudios({ id: playlist.id, value: playlist.audios }))
   }
 }
 
@@ -1861,25 +1926,17 @@ export function detectBPMs() {
   }
 }
 
-export function importScriptFromLibrary(ids: number[]) {
+export function importScriptFromLibrary(items: number[]) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    ids = ids.filter(
+    items = items.filter(
       (id) =>
         state.app.scripts.includes(id) && !!state.captionScript.entries[id]
     )
 
-    const playlistIndex = state.app.route[state.app.route.length - 1]
-      .value as number
-    const scene = getActiveScene(state) as Scene
-    const scripts = scene.scriptPlaylists[playlistIndex].scripts.concat(ids)
-    dispatch(
-      setSceneScriptPlaylistScripts({
-        sceneID: scene.id,
-        playlistIndex,
-        scripts
-      })
-    )
+    const lastRoute = state.app.route.length - 1
+    const id = state.app.route[lastRoute].value as number
+    dispatch(setPlaylistAddItems({ id, value: items }))
     dispatch(setRouteGoBack())
   }
 }
@@ -2790,9 +2847,8 @@ export function setLibraryRemoveVisible(displayIDs: number[]) {
 
     const cachePath = async (url: string): Promise<string> => {
       const baseDir = state.app.config.caching.directory
-      const typeDir = (en.get(getSourceType(url)) as string).toLowerCase()
       return flipflip()
-        .api.cachePath(baseDir, url, typeDir)
+        .api.cachePath(baseDir, url)
         .then((path) => path as string)
     }
 

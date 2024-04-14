@@ -1,6 +1,5 @@
 /// <reference path="../global.d.ts" />
-import { getFileName } from '../components/player/Scrapers'
-import { ASF, SF } from 'flipflip-common'
+import { getFileName, ASF, SF } from 'flipflip-common'
 import type Audio from '../store/audio/Audio'
 import type LibrarySource from '../store/librarySource/LibrarySource'
 import type CaptionScript from '../store/captionScript/CaptionScript'

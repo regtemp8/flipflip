@@ -72,13 +72,13 @@ import SortIcon from '@mui/icons-material/Sort'
 import { red } from '@mui/material/colors'
 
 import { getCachePath } from '../../data/utils'
-import { en, AF, ASF, ALT, MO, SP, PR } from 'flipflip-common'
+import { en, AF, ASF, ALT, MO, SP, PR, PLT } from 'flipflip-common'
 import type Audio from '../../store/audio/Audio'
 import LibrarySearch from './LibrarySearch'
 import AudioSourceList from './AudioSourceList'
 import AudioArtistList from './AudioArtistList'
 import AudioAlbumList from './AudioAlbumList'
-import PlaylistSelect from '../configGroups/PlaylistSelect'
+import PlaylistSelect from '../common/PlaylistSelect'
 import PlaylistList from './PlaylistList'
 import AudioEdit from './AudioEdit'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
@@ -134,20 +134,22 @@ import {
   selectAudioLibraryOpenMenu,
   selectAudioLibraryPlaylistID,
   selectAudioLibrarySelectedTags,
-  selectCommonAudio
+  selectCommonAudio,
+  selectAudioLibraryPlaylistIDText
 } from '../../store/audioLibrary/selectors'
 import {
   setLoadingSources,
   setOpenMenu,
-  setSelectedTags
+  setSelectedTags,
+  setAudioLibraryPlaylistID
 } from '../../store/audioLibrary/slice'
 import {
-  setPlaylistAddAudios,
-  setPlaylistAddAudiosUnique
+  setPlaylistAddItems,
+  setPlaylistAddItemsUnique
 } from '../../store/playlist/slice'
 import {
-  changePlaylistId,
   closeDialog,
+  createAudioLibraryPlaylist,
   goBack
 } from '../../store/audioLibrary/thunks'
 import flipflip from '../../FlipFlipService'
@@ -657,22 +659,16 @@ function AudioLibrary() {
     }
   }
 
-  const onChoosePlaylist = (playlistID: number) => {
-    dispatch(changePlaylistId(playlistID))
-  }
-
   const onSkipDuplicates = () => {
     dispatch(
-      setPlaylistAddAudiosUnique({ id: playlistID as number, value: selected })
+      setPlaylistAddItemsUnique({ id: playlistID as number, value: selected })
     )
     dispatch(goBack())
     onCloseDialog()
   }
 
   const onAddDuplicates = () => {
-    dispatch(
-      setPlaylistAddAudios({ id: playlistID as number, value: selected })
-    )
+    dispatch(setPlaylistAddItems({ id: playlistID as number, value: selected }))
     dispatch(goBack())
     onCloseDialog()
   }
@@ -1523,7 +1519,12 @@ function AudioLibrary() {
           open={openMenu === MO.playlist}
           onClose={onCloseDialog}
         >
-          <PlaylistSelect menuIsOpen autoFocus onChange={onChoosePlaylist} />
+          <PlaylistSelect
+            type={PLT.audio}
+            selector={selectAudioLibraryPlaylistIDText()}
+            action={setAudioLibraryPlaylistID}
+            create={createAudioLibraryPlaylist()}
+          />
         </Menu>
       )}
 

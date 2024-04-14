@@ -243,10 +243,10 @@ export default interface Scene {
   libraryID: number
   audioScene: boolean
   audioEnabled: boolean
-  audioPlaylists: AudioPlaylist[]
+  audioPlaylists: number[]
   audioStartIndex: number
   textEnabled: boolean
-  scriptPlaylists: ScriptPlaylist[]
+  scriptPlaylists: number[]
   scriptStartIndex: number
   regenerate: boolean
   generatorWeights?: WeightGroup[]

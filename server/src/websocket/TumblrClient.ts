@@ -1,7 +1,11 @@
 import { type Client, createClient } from 'tumblr.js'
 
-export default class TumblrClient {
-  client: Client | undefined
+export class TumblrClient {
+  private static instance: TumblrClient
+
+  private client: Client | undefined
+
+  private constructor() {}
 
   initializeIpcEvents(): void {
     // ipcMain.handle(IPC.tumblrBlogPosts, this.onRequestTumblrBlogPosts)
@@ -27,18 +31,18 @@ export default class TumblrClient {
     return this.client
   }
 
-  async onRequestTumblrBlogPosts(
+  async getBlogPosts(
     consumerKey: string,
     consumerSecret: string,
     token: string,
     tokenSecret: string,
     blogID: string,
     offset: number
-  ): Promise<unknown[]> {
+  ): Promise<string[]> {
     return await this.getClient(consumerKey, consumerSecret, token, tokenSecret)
       .blogPosts(blogID, { offset })
       .then((data) => {
-        const images = []
+        const images: string[] = []
         for (const post of data.posts) {
           // Sometimes photos are listed separately
           if (post.photos != null) {
@@ -116,4 +120,16 @@ export default class TumblrClient {
       return following
     })
   }
+
+  public static getInstance(): TumblrClient {
+    if (!TumblrClient.instance) {
+      TumblrClient.instance = new TumblrClient()
+    }
+
+    return TumblrClient.instance
+  }
+}
+
+export default function tumblr() {
+  return TumblrClient.getInstance()
 }

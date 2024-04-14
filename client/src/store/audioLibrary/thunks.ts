@@ -1,13 +1,14 @@
 import { type AppDispatch, type RootState } from '../store'
-import { MO, SP } from 'flipflip-common'
+import { MO, PLT, SP } from 'flipflip-common'
 import {
   setOpenMenu,
   setPlaylistID,
   setDrawerOpen,
   setImportURL,
-  setSelectedTags
+  setSelectedTags,
+  setAudioLibraryPlaylistID
 } from './slice'
-import { setPlaylistAddAudios } from '../playlist/slice'
+import { setPlaylistAddItems } from '../playlist/slice'
 import {
   setAudioSelected,
   batchEdit,
@@ -15,6 +16,7 @@ import {
   addToPlaylist
 } from '../app/slice'
 import { setRouteGoBack } from '../app/thunks'
+import { addPlaylist } from '../playlist/thunks'
 
 export function changePlaylistId(playlistID: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
@@ -25,7 +27,7 @@ export function changePlaylistId(playlistID: number) {
       const state = getState()
       const playlist = state.playlist.entries[playlistID]
       for (const id of state.app.audioSelected) {
-        if (playlist.audios.includes(id)) {
+        if (playlist.items.includes(id)) {
           // If so, show alert before adding to playlist
           dispatch(setOpenMenu(MO.playlistDuplicates))
           dispatch(setPlaylistID(playlistID))
@@ -35,7 +37,7 @@ export function changePlaylistId(playlistID: number) {
 
       // Otherwise, add tracks to playlist
       dispatch(
-        setPlaylistAddAudios({ id: playlistID, value: state.app.audioSelected })
+        setPlaylistAddItems({ id: playlistID, value: state.app.audioSelected })
       )
       dispatch(goBack())
       dispatch(closeDialog())
@@ -70,5 +72,12 @@ export function goBack() {
     } else {
       dispatch(setRouteGoBack())
     }
+  }
+}
+
+export function createAudioLibraryPlaylist() {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const value = dispatch(addPlaylist(PLT.audio))
+    dispatch(setAudioLibraryPlaylistID(value.toString()))
   }
 }

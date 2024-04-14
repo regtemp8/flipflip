@@ -150,19 +150,19 @@ function createAppSlice(app?: App) {
         state,
         action: PayloadAction<number>
       ) => {
-        state.config.defaultScene.timingDuration = action.payload
+        state.config.defaultScene.timingConstant = action.payload
       },
       setConfigDefaultSceneTimingDurationMax: (
         state,
         action: PayloadAction<number>
       ) => {
-        state.config.defaultScene.timingDurationMax = action.payload
+        state.config.defaultScene.timingMax = action.payload
       },
       setConfigDefaultSceneTimingDurationMin: (
         state,
         action: PayloadAction<number>
       ) => {
-        state.config.defaultScene.timingDurationMin = action.payload
+        state.config.defaultScene.timingMin = action.payload
       },
       setConfigDefaultSceneTimingSinRate: (
         state,
@@ -1582,6 +1582,13 @@ function createAppSlice(app?: App) {
       addToScriptsAtStart: (state, action: PayloadAction<number[]>) => {
         state.scripts.unshift(...action.payload)
       },
+      addToPlaylists: (state, action: PayloadAction<number[]>) => {
+        state.playlists.push(...action.payload)
+      },
+      removeFromPlaylists: (state, action: PayloadAction<number>) => {
+        const index = state.playlists.indexOf(action.payload)
+        state.playlists.splice(index, 1)
+      },
       moveScenes: (
         state,
         action: PayloadAction<{ oldIndex: number; newIndex: number }>
@@ -1595,6 +1602,20 @@ function createAppSlice(app?: App) {
       ) => {
         const { oldIndex, newIndex } = action.payload
         arrayMove(state.grids, oldIndex, newIndex)
+      },
+      moveDisplays: (
+        state,
+        action: PayloadAction<{ oldIndex: number; newIndex: number }>
+      ) => {
+        const { oldIndex, newIndex } = action.payload
+        arrayMove(state.displays, oldIndex, newIndex)
+      },
+      movePlaylists: (
+        state,
+        action: PayloadAction<{ oldIndex: number; newIndex: number }>
+      ) => {
+        const { oldIndex, newIndex } = action.payload
+        arrayMove(state.playlists, oldIndex, newIndex)
       },
       moveSceneGroups: (
         state,
@@ -2066,8 +2087,12 @@ export const {
   addToAudios,
   addToScripts,
   addToScriptsAtStart,
+  addToPlaylists,
+  removeFromPlaylists,
   moveScenes,
   moveGrids,
+  moveDisplays,
+  movePlaylists,
   moveSceneGroups,
   setSystemSnack,
   addTracks,

@@ -249,7 +249,7 @@ function AudioOptions(props: AudioOptionsProps) {
           </Grid>
           <Grid item xs={12}>
             <AudioControl
-              sceneID={props.sceneID}
+              sceneID={props.sceneID ?? 0}
               audioID={props.audioID}
               audioEnabled={true}
               singleTrack={true}

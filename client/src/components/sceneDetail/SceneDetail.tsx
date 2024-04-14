@@ -109,7 +109,6 @@ import {
   generateScenes,
   addSource,
   deleteScene,
-  exportScene,
   cloneScene,
   resetScene,
   saveAsScene,
@@ -1063,7 +1062,8 @@ function SceneDetail(props: SceneDetailProps) {
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Export Scene'}>
             <ListItemButton
               onClick={() => {
-                dispatch(exportScene(props.sceneID))
+                // TODO export subset of AppStorage
+                // dispatch(exportScene(props.sceneID))
               }}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&

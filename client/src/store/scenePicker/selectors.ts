@@ -4,18 +4,18 @@ import { SG } from 'flipflip-common'
 import {
   selectSceneGroups,
   selectSceneGroupScenes,
-  selectSceneGroupGrids
+  selectSceneGroupGrids,
+  selectSceneGroupDisplays,
+  selectSceneGroupPlaylists
 } from '../sceneGroup/selectors'
 import { selectScenes } from '../scene/selectors'
 import Scene from '../scene/Scene'
 import SceneGrid from '../sceneGrid/SceneGrid'
 import { selectSceneGrids } from '../sceneGrid/selectors'
-import {
-  convertDisplayIDToSceneID,
-  convertGridIDToSceneID
-} from '../../data/utils'
 import { selectDisplays } from '../display/selectors'
 import Display from '../display/Display'
+import { selectPlaylists } from '../playlist/selectors'
+import Playlist from '../playlist/Playlist'
 
 const getScenePickerFilters = (state: RootState) => state.scenePicker.filters
 export const selectScenePickerFilters = () => {
@@ -68,9 +68,7 @@ export const selectScenePickerUngroupedGrids = () => {
     (groupedScenes, grids, filters) => {
       return grids
         .filter(
-          (s) =>
-            !groupedScenes.includes(convertGridIDToSceneID(s.id)) &&
-            isDisplayGrid(s, filters)
+          (s) => !groupedScenes.includes(s.id) && isDisplayGrid(s, filters)
         )
         .map((s) => s.id)
     }
@@ -83,9 +81,24 @@ export const selectScenePickerUngroupedDisplays = () => {
     (groupedScenes, displays, filters) => {
       return displays
         .filter(
-          (s) =>
-            !groupedScenes.includes(convertDisplayIDToSceneID(s.id)) &&
-            isDisplayDisplay(s, filters)
+          (s) => !groupedScenes.includes(s.id) && isDisplayDisplay(s, filters)
+        )
+        .map((s) => s.id)
+    }
+  )
+}
+
+export const selectScenePickerUngroupedPlaylists = () => {
+  return createSelector(
+    [
+      selectGroupedScenes(SG.playlist),
+      selectPlaylists(),
+      getScenePickerFilters
+    ],
+    (groupedScenes, playlists, filters) => {
+      return playlists
+        .filter(
+          (s) => !groupedScenes.includes(s.id) && isDisplayPlaylist(s, filters)
         )
         .map((s) => s.id)
     }
@@ -116,6 +129,12 @@ export const selectScenePickerDisplayGroups = () => {
   )
 }
 
+export const selectScenePickerPlaylistGroups = () => {
+  return createSelector([selectSceneGroups()], (groups) =>
+    groups.filter((s) => s.type === SG.playlist).map((s) => s.id)
+  )
+}
+
 export const selectScenePickerGroupItems = (groupID: number, type: string) => {
   switch (type) {
     case SG.scene:
@@ -124,6 +143,10 @@ export const selectScenePickerGroupItems = (groupID: number, type: string) => {
       return selectScenePickerGridGroupItems(groupID)
     case SG.generator:
       return selectScenePickerGeneratorGroupItems(groupID)
+    case SG.display:
+      return selectScenePickerDisplayGroupItems(groupID)
+    case SG.playlist:
+      return selectScenePickerPlaylistGroupItems(groupID)
     default:
       throw new Error('Invalid type: ' + type)
   }
@@ -157,6 +180,22 @@ const selectScenePickerGridGroupItems = (groupID: number) => {
   )
 }
 
+const selectScenePickerDisplayGroupItems = (groupID: number) => {
+  return createSelector(
+    [selectSceneGroupDisplays(groupID), getScenePickerFilters],
+    (displays, filters) =>
+      displays?.filter((s) => isDisplayDisplay(s, filters)).map((s) => s.id)
+  )
+}
+
+const selectScenePickerPlaylistGroupItems = (groupID: number) => {
+  return createSelector(
+    [selectSceneGroupPlaylists(groupID), getScenePickerFilters],
+    (playlists, filters) =>
+      playlists?.filter((s) => isDisplayPlaylist(s, filters)).map((s) => s.id)
+  )
+}
+
 export const selectScenePickerSceneCount = () => {
   return createSelector(
     [selectScenes()],
@@ -173,6 +212,10 @@ export const selectScenePickerGeneratorCount = () => {
 
 export const selectScenePickerDisplayCount = () => {
   return (state: RootState) => state.app.displays.length
+}
+
+export const selectScenePickerPlaylistCount = () => {
+  return (state: RootState) => state.app.playlists.length
 }
 
 export const selectScenePickerGridCount = () => {
@@ -194,14 +237,21 @@ const isDisplayScene = (scene: Scene, filters: string[]) => {
 const isDisplayGrid = (grid: SceneGrid, filters: string[]) => {
   return (
     filters.length === 0 ||
-    (grid.name !== undefined && nameMatchesFilter(grid.name, filters))
+    (grid.name != null && nameMatchesFilter(grid.name, filters))
   )
 }
 
 const isDisplayDisplay = (display: Display, filters: string[]) => {
   return (
     filters.length === 0 ||
-    (display.name !== undefined && nameMatchesFilter(display.name, filters))
+    (display.name != null && nameMatchesFilter(display.name, filters))
+  )
+}
+
+const isDisplayPlaylist = (playlist: Playlist, filters: string[]) => {
+  return (
+    filters.length === 0 ||
+    (playlist.name != null && nameMatchesFilter(playlist.name, filters))
   )
 }
 
