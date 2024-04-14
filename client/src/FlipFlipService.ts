@@ -2,14 +2,19 @@ import {
   SystemConstants,
   InstagramItems,
   TwitterFollowers,
-  TwitterItems,
   AppStorage,
   initialAppStorage,
   Config as ConfigStorage,
+  LibrarySource as LibrarySourceStorage,
   WebSocketMessage,
-  IPC
+  IPC,
+  ScraperHelpers,
+  ScrapeResult
 } from 'flipflip-common'
 import { initialSystemConstants } from './store/constants/SystemConstants'
+import Config from './store/app/data/Config'
+import { toConfigStorage } from './store/app/convert'
+import { RootState } from './store/store'
 
 export class FlipFlipService {
   public static devServerURL?: string
@@ -214,12 +219,6 @@ class FlipFlipAPI {
     await this.invoke(IPC.writeFile, path, data)
   }
 
-  public async hasFiles(path: string): Promise<boolean> {
-    return await this.invoke(IPC.hasFiles, path).then(
-      (args: any[] | undefined) => (args != null ? (args[0] as boolean) : false)
-    )
-  }
-
   public async getDirectories(path: string): Promise<string[]> {
     return await this.invoke(IPC.getDirectories, path).then(
       (args: any[] | undefined) => (args != null ? (args[0] as string[]) : [])
@@ -280,41 +279,6 @@ class FlipFlipAPI {
     )
   }
 
-  public async igSavedItems(): Promise<
-    InstagramItems<Record<string, unknown>>
-  > {
-    return await this.invoke(IPC.igSavedItems).then(
-      (args: any[] | undefined) =>
-        args != null
-          ? (args[0] as InstagramItems<Record<string, unknown>>)
-          : { items: [], feed: 'saved' }
-    )
-  }
-
-  public async igUserFeedItems(
-    username: string
-  ): Promise<InstagramItems<Record<string, unknown>>> {
-    return await this.invoke(IPC.igUserFeedItems, username).then(
-      (args: any[] | undefined) =>
-        args != null
-          ? (args[0] as InstagramItems<Record<string, unknown>>)
-          : { items: [], feed: username }
-    )
-  }
-
-  public async igGetMore(
-    session: string,
-    id: number | undefined,
-    feedSession: string
-  ): Promise<InstagramItems<Record<string, unknown>> | undefined> {
-    return await this.invoke(IPC.igGetMore, session, id, feedSession).then(
-      (args: any[] | undefined) =>
-        args != null
-          ? (args[0] as InstagramItems<Record<string, unknown>>)
-          : undefined
-    )
-  }
-
   public async igFollowingFeed(
     userId: number
   ): Promise<InstagramItems<Record<string, unknown>>> {
@@ -343,37 +307,6 @@ class FlipFlipAPI {
     )
   }
 
-  public async imgurAlbumImages(album: string): Promise<string[]> {
-    return await this.invoke(IPC.imgurAlbumImages, album).then(
-      (args: any[] | undefined) => (args != null ? (args[0] as string[]) : [])
-    )
-  }
-
-  public async twitterLoadImages(
-    consumerKey: string,
-    consumerSecret: string,
-    accessTokenKey: string,
-    accessTokenSecret: string,
-    screenName: string,
-    excludeReplies: boolean,
-    includeRetweets: boolean,
-    maxId: number
-  ): Promise<TwitterItems> {
-    return await this.invoke(
-      IPC.twitterLoadImages,
-      consumerKey,
-      consumerSecret,
-      accessTokenKey,
-      accessTokenSecret,
-      screenName,
-      excludeReplies,
-      includeRetweets,
-      maxId
-    ).then((args: any[] | undefined) =>
-      args != null ? (args[0] as TwitterItems) : { images: [], lastID: 0 }
-    )
-  }
-
   public async twitterFriendsList(
     consumerKey: string,
     consumerSecret: string,
@@ -395,61 +328,6 @@ class FlipFlipAPI {
     )
   }
 
-  public async redditGetSubreddit(
-    redditUserAgent: string,
-    redditClientID: string,
-    redditRefreshToken: string,
-    redditFunc: string,
-    url: string,
-    after: any,
-    redditTime: string | undefined
-  ): Promise<any> {
-    return await this.invoke(
-      IPC.redditGetSubreddit,
-      redditUserAgent,
-      redditClientID,
-      redditRefreshToken,
-      redditFunc,
-      url,
-      after,
-      redditTime
-    )
-  }
-
-  public async redditGetSavedContent(
-    redditUserAgent: string,
-    redditClientID: string,
-    redditRefreshToken: string,
-    url: string,
-    after: any
-  ): Promise<any> {
-    return await this.invoke(
-      IPC.redditGetSavedContent,
-      redditUserAgent,
-      redditClientID,
-      redditRefreshToken,
-      url,
-      after
-    )
-  }
-
-  public async redditGetUser(
-    redditUserAgent: string,
-    redditClientID: string,
-    redditRefreshToken: string,
-    url: string,
-    after: any
-  ): Promise<any> {
-    return await this.invoke(
-      IPC.redditGetUser,
-      redditUserAgent,
-      redditClientID,
-      redditRefreshToken,
-      url,
-      after
-    )
-  }
-
   public async redditGetSubscriptions(
     redditUserAgent: string,
     redditClientID: string,
@@ -463,25 +341,6 @@ class FlipFlipAPI {
       redditRefreshToken,
       after
     )
-  }
-
-  public async tumblrBlogPosts(
-    consumerKey: string,
-    consumerSecret: string,
-    token: string,
-    tokenSecret: string,
-    blogID: string,
-    offset: number
-  ): Promise<any[]> {
-    return await this.invoke(
-      IPC.tumblrBlogPosts,
-      consumerKey,
-      consumerSecret,
-      token,
-      tokenSecret,
-      blogID,
-      offset
-    ).then((args: any[] | undefined) => args ?? [])
   }
 
   public async tumblrTotalBlogs(
@@ -612,23 +471,6 @@ class FlipFlipAPI {
     )
   }
 
-  public async readDirectoryFiles(
-    url: string,
-    blacklist: string[],
-    sourceBlacklist: string[],
-    filter: string,
-    local: boolean
-  ): Promise<any> {
-    return await this.invoke(
-      IPC.readDirectoryFiles,
-      url,
-      blacklist,
-      sourceBlacklist,
-      filter,
-      local
-    ).then((args: any[] | undefined) => (args != null ? args[0] : undefined))
-  }
-
   public async getContext(): Promise<SystemConstants> {
     return await this.invoke(IPC.getContext).then((args: any[] | undefined) =>
       args != null ? (args[0] as SystemConstants) : initialSystemConstants
@@ -641,8 +483,28 @@ class FlipFlipAPI {
     )
   }
 
-  public loadInWorker(event: string, args?: any[]): void {
-    this.send(IPC.loadInWorker, event, args)
+  public scrapeFiles(
+    allURLs: Record<string, string[]>,
+    allPosts: Record<string, string>,
+    config: Config,
+    source: LibrarySourceStorage,
+    filter: string,
+    weight: string,
+    helpers: ScraperHelpers,
+    state: RootState
+  ): Promise<ScrapeResult | undefined> {
+    return this.invoke(
+      IPC.scrapeFiles,
+      allURLs,
+      allPosts,
+      toConfigStorage(config, state),
+      source,
+      filter,
+      weight,
+      helpers
+    ).then((args: any[] | undefined) =>
+      args != null ? (args[0] as ScrapeResult) : undefined
+    )
   }
 
   private send(operation: string, ...args: any[]): void {

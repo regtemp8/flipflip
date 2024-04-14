@@ -1,10 +1,17 @@
 import { type AppDispatch, type RootState } from '../store'
 import { SG } from 'flipflip-common'
 import { getRandomListItem } from '../../data/utils'
-import { moveScenes, moveGrids, moveSceneGroups } from '../app/slice'
+import {
+  moveScenes,
+  moveGrids,
+  moveDisplays,
+  movePlaylists,
+  moveSceneGroups
+} from '../app/slice'
 import { routeToScene } from '../app/thunks'
 import {
   setSceneGroupAddScene,
+  setSceneGroupMoveScenes,
   setSceneGroupRemoveScene
 } from '../sceneGroup/slice'
 
@@ -26,8 +33,7 @@ export function onScenePickerChangeSceneGroupItemsSort(
 ) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    const groupType = state.sceneGroup.entries[sceneGroupID].type
-    const items = groupType === SG.grid ? state.app.grids : state.app.scenes
+    const items = state.sceneGroup.entries[sceneGroupID].scenes
 
     let oldIndex = null
     let newIndex = null
@@ -35,24 +41,25 @@ export function onScenePickerChangeSceneGroupItemsSort(
       oldIndex = items.indexOf(filteredItems[evtOldIndex])
       newIndex = items.indexOf(filteredItems[evtNewIndex])
     } else if (orderLength > filteredItems.length) {
-      oldIndex = items.indexOf(evtItemID)
-      if (evtNewIndex === 0) {
-        newIndex = 0
-      } else if (evtNewIndex === filteredItems.length) {
-        newIndex = items.indexOf(filteredItems[evtNewIndex - 1]) + 1
-      } else {
-        newIndex = items.indexOf(filteredItems[evtNewIndex])
-        if (oldIndex < newIndex) newIndex--
-      }
       if (evtItemID) {
         dispatch(setSceneGroupAddScene({ id: sceneGroupID, value: evtItemID }))
+      }
+
+      oldIndex = items.length
+      newIndex = items.indexOf(filteredItems[evtNewIndex])
+      if (newIndex === -1) {
+        newIndex = null
       }
     } else if (orderLength < filteredItems.length) {
       dispatch(setSceneGroupRemoveScene({ id: sceneGroupID, value: evtItemID }))
     }
     if (oldIndex != null && newIndex != null) {
-      const moveItems = groupType === SG.grid ? moveGrids : moveScenes
-      dispatch(moveItems({ oldIndex, newIndex }))
+      dispatch(
+        setSceneGroupMoveScenes({
+          id: sceneGroupID,
+          value: { oldIndex, newIndex }
+        })
+      )
     }
   }
 }
@@ -85,19 +92,48 @@ export function onScenePickerChangeUngroupedSort(
 ) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
-    const items = type === SG.grid ? state.app.grids : state.app.scenes
+    const items = getItems(type, state)
     let oldIndex = null
     let newIndex = null
     if (evtType === 'update') {
       oldIndex = items.indexOf(filteredItems[evtOldIndex])
       newIndex = items.indexOf(filteredItems[evtNewIndex])
-    } else if (filteredItems.length === orderLength) {
+    } else if (orderLength > filteredItems.length) {
       oldIndex = items.indexOf(evtItemID)
       newIndex = items.indexOf(filteredItems[evtNewIndex])
+      if (newIndex === -1) {
+        newIndex = items.length - 1
+      }
     }
     if (oldIndex != null && newIndex != null) {
-      const moveItems = type === SG.grid ? moveGrids : moveScenes
+      const moveItems = getMoveItemsAction(type)
       dispatch(moveItems({ oldIndex, newIndex }))
     }
+  }
+}
+
+const getItems = (type: string, state: RootState) => {
+  switch (type) {
+    case SG.grid:
+      return state.app.grids
+    case SG.display:
+      return state.app.displays
+    case SG.playlist:
+      return state.app.playlists
+    default:
+      return state.app.scenes
+  }
+}
+
+const getMoveItemsAction = (type: string) => {
+  switch (type) {
+    case SG.grid:
+      return moveGrids
+    case SG.display:
+      return moveDisplays
+    case SG.playlist:
+      return movePlaylists
+    default:
+      return moveScenes
   }
 }

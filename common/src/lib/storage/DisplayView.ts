@@ -1,3 +1,6 @@
+import { MVF } from '../const';
+import { copy } from '../utils';
+
 export type DisplayView = {
   id: number;
   name: string;
@@ -9,6 +12,10 @@ export type DisplayView = {
   color: string;
   opacity: number;
   visible: boolean;
+  playlistID: number;
+  sync: boolean;
+  syncWithView: number;
+  mirrorSyncedView: string;
 };
 
 export const initialView: DisplayView = {
@@ -22,19 +29,12 @@ export const initialView: DisplayView = {
   color: '',
   opacity: 100,
   visible: true,
+  playlistID: 0,
+  sync: false,
+  syncWithView: 0,
+  mirrorSyncedView: MVF.none,
 };
 
 export function newDisplayView(init?: Partial<DisplayView>) {
-  return {
-    id: init?.id ?? initialView.id,
-    name: init?.name ?? initialView.name,
-    x: init?.x ?? initialView.x,
-    y: init?.y ?? initialView.y,
-    z: init?.z ?? initialView.z,
-    width: init?.width ?? initialView.width,
-    height: init?.height ?? initialView.height,
-    color: init?.color ?? initialView.color,
-    opacity: init?.opacity ?? initialView.opacity,
-    visible: init?.visible ?? initialView.visible,
-  };
+  return Object.assign(copy<DisplayView>(initialView), init);
 }

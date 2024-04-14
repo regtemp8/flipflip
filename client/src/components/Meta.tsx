@@ -8,7 +8,6 @@ import ScenePicker from './ScenePicker'
 import ConfigForm from './config/ConfigForm'
 import Library from './library/Library'
 import TagManager from './library/TagManager'
-import GridSetup from './config/GridSetup'
 import VideoClipper from './config/VideoClipper'
 import Player from './player/Player'
 import SceneDetail from './sceneDetail/SceneDetail'
@@ -30,6 +29,7 @@ import SystemSnack from './SystemSnack'
 import flipflip from '../FlipFlipService'
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import DisplaySetup from './config/DisplaySetup'
+import PlaylistSetup from './config/PlaylistSetup'
 
 export interface MetaProps {
   cache: EmotionCache
@@ -77,7 +77,7 @@ export default function Meta(props: MetaProps) {
 
   // Returns true if the last route matches the given kind
   const isRoute = (route: Route, kind: string): boolean => {
-    return route && route.kind === kind
+    return route.kind === kind
   }
 
   const renderRoute = (route?: Route) => {
@@ -95,14 +95,16 @@ export default function Meta(props: MetaProps) {
       return <TagManager />
     } else if (isRoute(route, 'clip')) {
       return <VideoClipper />
-    } else if (isRoute(route, 'grid')) {
+    } /*else if (isRoute(route, 'grid')) {
       return <GridSetup gridID={route.value as number} />
-    } else if (isRoute(route, 'display')) {
+    }*/ else if (isRoute(route, 'display')) {
       return <DisplaySetup displayID={route.value as number} />
+    } else if (isRoute(route, 'playlist')) {
+      return <PlaylistSetup playlistID={route.value as number} />
     } else if (
       isRoute(route, 'play') ||
-      isRoute(route, 'libraryplay') ||
-      isRoute(route, 'gridplay')
+      isRoute(route, 'libraryplay') /*||
+      isRoute(route, 'gridplay')*/
     ) {
       return <Player uuid={route.value as string} preventSleep />
     } else if (isRoute(route, 'config')) {
@@ -110,7 +112,7 @@ export default function Meta(props: MetaProps) {
     } else if (isRoute(route, 'scriptor')) {
       return <CaptionScriptor />
     } else {
-      return null // never reached
+      return <ScenePicker />
     }
   }
 

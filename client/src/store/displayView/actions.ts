@@ -23,3 +23,15 @@ export const setDisplayViewColor = (id: number) => (value: string) =>
 
 export const setDisplayViewOpacity = (id: number) => (value: number) =>
   slice.setDisplayViewOpacity({ id, value })
+
+export const setDisplayViewSync = (id: number) => (value: boolean) =>
+  slice.setDisplayViewSync({ id, value })
+
+export const setDisplayViewSyncWithView = (id: number) => (value: string) =>
+  slice.setDisplayViewSyncWithView({ id, value: Number(value) })
+
+export const setDisplayViewMirrorSyncedView = (id: number) => (value: string) =>
+  slice.setDisplayViewMirrorSyncedView({ id, value })
+
+export const setDisplayViewScenePlaylistID = (id: number) => (value: string) =>
+  slice.setDisplayViewScenePlaylistID({ id, value: Number(value) })

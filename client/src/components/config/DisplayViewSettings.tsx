@@ -1,4 +1,4 @@
-import { type Theme } from '@mui/material'
+import { Collapse, InputAdornment, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
   setDisplayViewHeight,
@@ -6,31 +6,45 @@ import {
   setDisplayViewY,
   setDisplayViewWidth,
   setDisplayViewOpacity,
-  setDisplayViewZ
+  setDisplayViewZ,
+  setDisplayViewSync,
+  setDisplayViewScenePlaylistID
 } from '../../store/displayView/actions'
 import {
   selectDisplayViewHeight,
   selectDisplayViewOpacity,
+  selectDisplayViewSync,
   selectDisplayViewWidth,
   selectDisplayViewX,
   selectDisplayViewY,
-  selectDisplayViewZ
+  selectDisplayViewZ,
+  selectDisplayViewScenePlaylistID
 } from '../../store/displayView/selectors'
 import BaseSlider from '../common/slider/BaseSlider'
+import BaseSwitch from '../common/BaseSwitch'
+import { useAppSelector } from '../../store/hooks'
+import DisplayViewSyncOptions from './DisplayViewSyncOptions'
+import { PLT } from 'flipflip-common'
+import { createScenePlaylist } from '../../store/displayView/thunks'
+import PlaylistSelect from '../common/PlaylistSelect'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   endInput: {
     paddingLeft: theme.spacing(1),
     paddingTop: 0
+  },
+  fullWidth: {
+    width: '100%'
   }
 }))
 
 export interface DisplayViewSettingsProps {
+  displayID: number
   viewID: number
 }
 
 function DisplayViewSettings(props: DisplayViewSettingsProps) {
-  const { viewID } = props
+  const { displayID, viewID } = props
   const { classes } = useStyles()
   const xSelector = selectDisplayViewX(viewID)
   const ySelector = selectDisplayViewY(viewID)
@@ -38,13 +52,16 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
   const widthSelector = selectDisplayViewWidth(viewID)
   const heightSelector = selectDisplayViewHeight(viewID)
   const opacitySelector = selectDisplayViewOpacity(viewID)
+  const syncSelector = selectDisplayViewSync(viewID)
   const xAction = setDisplayViewX(viewID)
   const yAction = setDisplayViewY(viewID)
   const zAction = setDisplayViewZ(viewID)
   const widthAction = setDisplayViewWidth(viewID)
   const heightAction = setDisplayViewHeight(viewID)
   const opacityAction = setDisplayViewOpacity(viewID)
+  const syncAction = setDisplayViewSync(viewID)
 
+  const sync = useAppSelector(syncSelector)
   return (
     <>
       <BaseSlider
@@ -97,7 +114,18 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
         }}
         textField={{
           className: classes.endInput,
-          step: 1
+          step: 1,
+          InputProps: {
+            endAdornment: (
+              <InputAdornment
+                position="end"
+                disableTypography
+                sx={{ color: 'transparent' }}
+              >
+                %
+              </InputAdornment>
+            )
+          }
         }}
       />
       <BaseSlider
@@ -154,6 +182,23 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
           step: 5
         }}
       />
+      <BaseSwitch
+        label="Sync"
+        tooltip="Synchronize this view with another view"
+        selector={syncSelector}
+        action={syncAction}
+      />
+      <Collapse in={sync}>
+        <DisplayViewSyncOptions displayID={displayID} viewID={viewID} />
+      </Collapse>
+      <Collapse in={!sync}>
+        <PlaylistSelect
+          type={PLT.scene}
+          selector={selectDisplayViewScenePlaylistID(viewID)}
+          action={setDisplayViewScenePlaylistID(viewID)}
+          create={createScenePlaylist(viewID)}
+        />
+      </Collapse>
     </>
   )
 }

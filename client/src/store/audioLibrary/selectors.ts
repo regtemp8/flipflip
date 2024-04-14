@@ -27,6 +27,10 @@ export function selectAudioLibraryPlaylistID() {
   return (state: RootState) => state.audioLibrary.playlistID
 }
 
+export function selectAudioLibraryPlaylistIDText() {
+  return (state: RootState) => state.audioLibrary.playlistID?.toString() ?? ''
+}
+
 export function selectAudioLibrarySelectedTags() {
   return (state: RootState) => state.audioLibrary.selectedTags
 }
@@ -48,7 +52,7 @@ export function selectAudioLibraryDisplaySources() {
           .find((f) => f.startsWith('playlist:'))
           ?.replace('playlist:', '')
         const playlist = playlists.find((p) => p.name === playlistName)
-        const library = playlist ? playlist.audios : audios
+        const library = playlist?.items ?? audios
         for (const sourceID of library) {
           const source = audioEntries[sourceID] as Audio
           let matchesFilter = true
@@ -122,7 +126,7 @@ export function selectAudioLibraryDisplaySources() {
               filter = filter.replace('playlist:', '')
               const playlist = playlists.find((p) => p.name === filter)
               if (playlist) {
-                matchesFilter = playlist.audios.includes(source.id)
+                matchesFilter = playlist.items.includes(source.id)
               } else {
                 matchesFilter = false
               }
@@ -225,30 +229,34 @@ export function selectAudioLibraryDisplaySources() {
       } else {
         displaySources = audios
       }
+
       return displaySources
     }
   )
 }
 
 export function selectCommonAudio() {
-  return (state: RootState) => {
-    const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
-    const common = newAudio()
-    for (const id of state.app.audioSelected) {
-      const source: any = state.audio.entries[id]
+  return createSelector(
+    [(state: RootState) => state.app.audioSelected, getAudioEntries],
+    (selected, entries) => {
+      const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
+      const common = newAudio()
+      for (const id of selected) {
+        const source: any = entries[id]
+        for (const key of keys) {
+          if (common[key] === undefined) {
+            common[key] = source[key]
+          } else if (common[key] != null && common[key] !== source[key]) {
+            common[key] = undefined
+          }
+        }
+      }
       for (const key of keys) {
-        if (common[key] === undefined) {
-          common[key] = source[key]
-        } else if (common[key] != null && common[key] !== source[key]) {
+        if (common[key] == null) {
           common[key] = undefined
         }
       }
+      return common
     }
-    for (const key of keys) {
-      if (common[key] == null) {
-        common[key] = undefined
-      }
-    }
-    return common
-  }
+  )
 }

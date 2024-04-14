@@ -1111,3 +1111,17 @@ export const setSceneGeneratorMax =
   (id: number) =>
   (value: number): PayloadAction<EntryUpdate<number> | number> =>
     slice.setSceneGeneratorMax({ id, value })
+
+export const setSceneAudioPlaylist =
+  (id: number, index: number) => (playlistID: string) =>
+    slice.setSceneAudioPlaylist({
+      id,
+      value: { index, playlistID: Number(playlistID) }
+    })
+
+export const setSceneScriptPlaylist =
+  (id: number, index: number) => (playlistID: string) =>
+    slice.setSceneScriptPlaylist({
+      id,
+      value: { index, playlistID: Number(playlistID) }
+    })

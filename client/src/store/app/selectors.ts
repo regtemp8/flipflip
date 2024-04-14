@@ -800,6 +800,10 @@ export const selectAppScenes = () => {
   return (state: RootState): number[] => state.app.scenes
 }
 
+export const selectAppDisplays = () => {
+  return (state: RootState): number[] => state.app.displays
+}
+
 export const getLibrarySource = (
   state: RootState
 ): LibrarySource | undefined => {
@@ -1147,3 +1151,4 @@ export const getAppGrids = (state: RootState) => state.app.grids
 export const getAppScenes = (state: RootState) => state.app.scenes
 export const getAppSceneGroups = (state: RootState) => state.app.sceneGroups
 export const getAppDisplays = (state: RootState) => state.app.displays
+export const getAppPlaylists = (state: RootState) => state.app.playlists

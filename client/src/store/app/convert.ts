@@ -14,12 +14,17 @@ import {
   type Tag as TagStorage,
   type Overlay as OverlayStorage,
   type AudioPlaylist as AudioPlaylistStorage,
+  type DisplayPlaylist as DisplayPlaylistStorage,
+  type ScenePlaylist as ScenePlaylistStorage,
   type ScriptPlaylist as ScriptPlaylistStorage,
   type Route as RouteStorage,
   type DisplaySettings as DisplaySettingsStorage,
   type ServerSettings as ServerSettingsStorage,
   type Display as DisplayStorage,
-  type DisplayView as DisplayViewStorage
+  type DisplayView as DisplayViewStorage,
+  PLT,
+  SG,
+  MVF
 } from 'flipflip-common'
 
 import { type RootState } from '../store'
@@ -32,8 +37,6 @@ import { newApp } from './data/App'
 import type Config from './data/Config'
 import { newConfig } from './data/Config'
 import type SceneSettings from './data/SceneSettings'
-import type AudioPlaylist from '../scene/AudioPlaylist'
-import type ScriptPlaylist from '../scene/ScriptPlaylist'
 import type Audio from '../audio/Audio'
 import { newAudio } from '../audio/Audio'
 import type Tag from '../tag/Tag'
@@ -59,6 +62,13 @@ import DisplaySettings from './data/DisplaySettings'
 import ServerSettings, { initialServerSettings } from './data/ServerSettings'
 import Display, { newDisplay } from '../display/Display'
 import View, { newView } from '../displayView/View'
+import {
+  convertSceneIDToGridID,
+  getRandomColor,
+  isSceneIDAGridID
+} from '../../data/utils'
+import { ScenePlaylistItem } from '../scenePlaylistItem/ScenePlaylistItem'
+import { DisplayPlaylistItem } from '../displayPlaylistItem/DisplayPlaylistItem'
 
 export function toAppStorage(state: RootState): AppStorage {
   return {
@@ -74,15 +84,18 @@ export function toAppStorage(state: RootState): AppStorage {
       .map((id) => state.captionScript.entries[id].url || '')
       .filter((url) => url !== ''),
     config: toConfigStorage(state.app.config, state),
-    sceneGroups: state.app.sceneGroups.map((id) =>
-      toSceneGroupStorage(id, state)
-    ),
+    sceneGroups: state.app.sceneGroups
+      .map((id) => toSceneGroupStorage(id, state))
+      .filter((s) => s != null)
+      .map((s) => s as SceneGroup),
     scenes: state.app.scenes.map((id) => toSceneStorage(id, state)),
     grids: state.app.grids.map((id) => toSceneGridStorage(id, state)),
     library: state.app.library.map((id) => toLibrarySourceStorage(id, state)),
     audios: state.app.audios.map((id) => toAudioStorage(id, state)),
     scripts: state.app.scripts.map((id) => toCaptionScriptStorage(id, state)),
-    playlists: state.app.playlists.map((id) => toPlaylistStorage(id, state)),
+    playlists: state.app.playlists
+      .filter((id) => state.playlist.entries[id].type === PLT.audio)
+      .map((id) => toPlaylistStorage(id, state)),
     tags: state.app.tags.map((id) => toTagStorage(id, state)),
     displayedSources: state.app.displayedSources.map((id) =>
       toLibrarySourceStorage(id, state)
@@ -129,8 +142,26 @@ function toSceneSettingsStorage(
   }
 }
 
-function toSceneGroupStorage(id: number, state: RootState): SceneGroupStorage {
-  return state.sceneGroup.entries[id]
+function toSceneGroupStorage(
+  id: number,
+  state: RootState
+): SceneGroupStorage | undefined {
+  const group = state.sceneGroup.entries[id]
+  if (group.type === SG.display) {
+    // TODO save displays
+    return undefined
+  } else if (group.type === SG.playlist) {
+    // TODO save display and scene playlists
+    return {
+      ...group,
+      scenes: group.scenes.filter((id) => {
+        const type = state.playlist.entries[id].type
+        return type === PLT.audio || type === PLT.script
+      })
+    }
+  } else {
+    return group
+  }
 }
 
 export function toSceneStorage(id: number, state: RootState): SceneStorage {
@@ -139,12 +170,14 @@ export function toSceneStorage(id: number, state: RootState): SceneStorage {
     ...scene,
     sources: scene.sources.map((id) => toLibrarySourceStorage(id, state)),
     overlays: scene.overlays.map((id) => toOverlayStorage(id, state)),
-    audioPlaylists: scene.audioPlaylists.map((playlist) =>
-      toAudioPlaylistStorage(playlist, state)
-    ),
-    scriptPlaylists: scene.scriptPlaylists.map((playlist) =>
-      toScriptPlaylistStorage(playlist, state)
-    )
+    audioPlaylists: scene.audioPlaylists
+      .map((id) => toAudioPlaylistStorage(id, state))
+      .filter((playlist) => playlist != null)
+      .map((playlist) => playlist as AudioPlaylistStorage),
+    scriptPlaylists: scene.scriptPlaylists
+      .map((id) => toScriptPlaylistStorage(id, state))
+      .filter((playlist) => playlist != null)
+      .map((playlist) => playlist as ScriptPlaylistStorage)
   }
 }
 
@@ -152,24 +185,64 @@ function toOverlayStorage(id: number, state: RootState): OverlayStorage {
   return state.overlay.entries[id]
 }
 
-function toAudioPlaylistStorage(
-  playlist: AudioPlaylist,
+export function toAudioPlaylistStorage(
+  id: number,
   state: RootState
-): AudioPlaylistStorage {
-  return {
-    ...playlist,
-    audios: playlist.audios.map((id) => toAudioStorage(id, state))
-  }
+): AudioPlaylistStorage | undefined {
+  const playlist = state.playlist.entries[id]
+  return playlist != null
+    ? {
+        shuffle: playlist.shuffle,
+        repeat: playlist.repeat,
+        name: playlist.name,
+        audios: playlist.items.map((id) => toAudioStorage(id, state))
+      }
+    : undefined
 }
 
-function toScriptPlaylistStorage(
-  playlist: ScriptPlaylist,
+export function toDisplayPlaylistStorage(
+  id: number,
   state: RootState
-): ScriptPlaylistStorage {
-  return {
-    ...playlist,
-    scripts: playlist.scripts.map((id) => toCaptionScriptStorage(id, state))
-  }
+): DisplayPlaylistStorage | undefined {
+  const playlist = state.playlist.entries[id]
+  return playlist != null
+    ? {
+        shuffle: playlist.shuffle,
+        repeat: playlist.repeat,
+        name: playlist.name,
+        displays: playlist.items.map((id) => toDisplayStorage(id, state))
+      }
+    : undefined
+}
+
+export function toScenePlaylistStorage(
+  id: number,
+  state: RootState
+): ScenePlaylistStorage | undefined {
+  const playlist = state.playlist.entries[id]
+  return playlist != null
+    ? {
+        shuffle: playlist.shuffle,
+        repeat: playlist.repeat,
+        name: playlist.name,
+        scenes: playlist.items.map((id) => toSceneStorage(id, state))
+      }
+    : undefined
+}
+
+export function toScriptPlaylistStorage(
+  id: number,
+  state: RootState
+): ScriptPlaylistStorage | undefined {
+  const playlist = state.playlist.entries[id]
+  return playlist != null
+    ? {
+        shuffle: playlist.shuffle,
+        repeat: playlist.repeat,
+        name: playlist.name,
+        scripts: playlist.items.map((id) => toCaptionScriptStorage(id, state))
+      }
+    : undefined
 }
 
 export function toSceneGridStorage(
@@ -224,7 +297,8 @@ function toCaptionScriptStorage(
 }
 
 function toPlaylistStorage(id: number, state: RootState): PlaylistStorage {
-  return state.playlist.entries[id]
+  const { name, items } = state.playlist.entries[id]
+  return { id, name, audios: items }
 }
 
 function toTagStorage(
@@ -306,6 +380,7 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
     slice.captionScript
   )
 
+  appStorage.playlists.map((s) => fromPlaylistStorage(s, slice.playlist))
   slice.app = newApp({
     ...appStorage,
     config: fromConfigStorage(
@@ -326,6 +401,7 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
         slice.tag,
         slice.clip,
         slice.overlay,
+        slice.playlist,
         slice.audio,
         slice.captionScript
       )
@@ -336,9 +412,7 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
     library,
     audios,
     scripts,
-    playlists: appStorage.playlists.map((s) =>
-      fromPlaylistStorage(s, slice.playlist)
-    ),
+    playlists: [],
     tags: appStorage.tags.map((s) => fromTagStorage(s, slice.tag)),
     route: appStorage.route.map((s) => fromRouteStorage(s)),
     displayedSources: appStorage.displayedSources
@@ -356,6 +430,28 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
     }
   }
 
+  convertScenesToDisplays(
+    slice.display,
+    slice.displayView,
+    slice.playlist,
+    slice.scene,
+    slice.sceneGrid,
+    slice.scenePlaylistItem,
+    slice.overlay,
+    slice.displayPlaylistItem
+  )
+  slice.app.displays = convertSceneGridsToDisplays(
+    slice.display,
+    slice.displayView,
+    slice.playlist,
+    slice.scene,
+    slice.sceneGrid,
+    slice.scenePlaylistItem,
+    slice.overlay
+  )
+  slice.app.playlists = Object.keys(slice.playlist.entries).map((id) =>
+    Number(id)
+  )
   return slice
 }
 
@@ -640,9 +736,11 @@ function fromPlaylistStorage(
   s: PlaylistStorage,
   playlistSlice: EntryState<Playlist>
 ) {
-  return from<PlaylistStorage, Playlist>(s, playlistSlice, (f) =>
-    newPlaylist(f as Playlist)
-  )
+  return from<PlaylistStorage, Playlist>(s, playlistSlice, (f) => {
+    const { id, audios } = f
+    const name = f.name ?? `Playlist #${id}`
+    return newPlaylist({ id, name, items: audios, type: PLT.audio })
+  })
 }
 
 function fromAudioStorage(
@@ -715,9 +813,15 @@ export function fromSceneGridStorage(
   s: SceneGridStorage,
   sceneGridSlice: EntryState<SceneGrid>
 ) {
-  return from<SceneGridStorage, SceneGrid>(s, sceneGridSlice, (f) =>
-    newSceneGrid(f as SceneGrid)
-  )
+  return from<SceneGridStorage, SceneGrid>(s, sceneGridSlice, (f) => {
+    const grid = newSceneGrid(f as SceneGrid)
+    for (const row of grid.grid) {
+      for (const cell of row) {
+        cell.sceneID = Number(cell.sceneID)
+      }
+    }
+    return grid
+  })
 }
 
 function fromClipStorage(
@@ -751,6 +855,7 @@ export function fromSceneStorage(
   tagSlice: EntryState<Tag>,
   clipSlice: EntryState<Clip>,
   overlaySlice: EntryState<Overlay>,
+  playlistSlice: EntryState<Playlist>,
   audioSlice: EntryState<Audio>,
   captionScriptSlice: EntryState<CaptionScript>
 ) {
@@ -959,12 +1064,17 @@ export function fromSceneStorage(
       audioScene: f.audioScene,
       audioEnabled: f.audioEnabled,
       audioPlaylists: f.audioPlaylists.map((s) =>
-        fromAudioPlaylistStorage(s, audioSlice, tagSlice)
+        fromAudioPlaylistStorage(s, playlistSlice, audioSlice, tagSlice)
       ),
       audioStartIndex: f.audioStartIndex,
       textEnabled: f.textEnabled,
       scriptPlaylists: f.scriptPlaylists.map((s) =>
-        fromScriptPlaylistStorage(s, captionScriptSlice, tagSlice)
+        fromScriptPlaylistStorage(
+          s,
+          playlistSlice,
+          captionScriptSlice,
+          tagSlice
+        )
       ),
       scriptStartIndex: f.scriptStartIndex,
       regenerate: f.regenerate,
@@ -985,27 +1095,140 @@ function fromOverlayStorage(
   )
 }
 
-function fromAudioPlaylistStorage(
+export function fromAudioPlaylistStorage(
   s: AudioPlaylistStorage,
+  playlistSlice: EntryState<Playlist>,
   audioSlice: EntryState<Audio>,
   tagSlice: EntryState<Tag>
 ) {
-  return {
-    ...s,
-    audios: s.audios.map((a) => fromAudioStorage(a, audioSlice, tagSlice))
+  const { audios, repeat, shuffle } = s
+  const id = playlistSlice.nextID
+  const name = s.name ?? `Playlist #${id}`
+  const exists = Object.values(playlistSlice.entries).find(
+    (e) => e.name === name
+  )
+  if (exists == null) {
+    playlistSlice.entries[id] = newPlaylist({
+      id,
+      name,
+      repeat,
+      shuffle,
+      type: PLT.audio,
+      items: audios.map((a) => fromAudioStorage(a, audioSlice, tagSlice))
+    })
+
+    playlistSlice.nextID++
+    return id
+  } else {
+    return exists.id
   }
 }
 
-function fromScriptPlaylistStorage(
+export function fromDisplayPlaylistStorage(
+  s: DisplayPlaylistStorage,
+  playlistSlice: EntryState<Playlist>,
+  displaySlice: EntryState<Display>,
+  displayViewSlice: EntryState<View>
+) {
+  const { displays, repeat, shuffle } = s
+  const id = playlistSlice.nextID
+  const name = s.name ?? ''
+  const exists = Object.values(playlistSlice.entries).find(
+    (e) => e.name === name
+  )
+  if (exists == null) {
+    playlistSlice.entries[id] = newPlaylist({
+      id,
+      name,
+      repeat,
+      shuffle,
+      type: PLT.audio,
+      items: displays.map((s) =>
+        fromDisplayStorage(s, displaySlice, displayViewSlice)
+      )
+    })
+
+    playlistSlice.nextID++
+    return id
+  } else {
+    return exists.id
+  }
+}
+
+export function fromScenePlaylistStorage(
+  s: ScenePlaylistStorage,
+  playlistSlice: EntryState<Playlist>,
+  sceneSlice: EntryState<Scene>,
+  librarySourceSlice: EntryState<LibrarySource>,
+  tagSlice: EntryState<Tag>,
+  clipSlice: EntryState<Clip>,
+  overlaySlice: EntryState<Overlay>,
+  audioSlice: EntryState<Audio>,
+  captionScriptSlice: EntryState<CaptionScript>
+) {
+  const { scenes, repeat, shuffle } = s
+  const id = playlistSlice.nextID
+  const name = s.name ?? ''
+  const exists = Object.values(playlistSlice.entries).find(
+    (e) => e.name === name
+  )
+  if (exists == null) {
+    playlistSlice.entries[id] = newPlaylist({
+      id,
+      name,
+      repeat,
+      shuffle,
+      type: PLT.scene,
+      items: scenes.map((s) =>
+        fromSceneStorage(
+          s,
+          sceneSlice,
+          librarySourceSlice,
+          tagSlice,
+          clipSlice,
+          overlaySlice,
+          playlistSlice,
+          audioSlice,
+          captionScriptSlice
+        )
+      )
+    })
+
+    playlistSlice.nextID++
+    return id
+  } else {
+    return exists.id
+  }
+}
+
+export function fromScriptPlaylistStorage(
   s: ScriptPlaylistStorage,
+  playlistSlice: EntryState<Playlist>,
   captionScriptSlice: EntryState<CaptionScript>,
   tagSlice: EntryState<Tag>
 ) {
-  return {
-    ...s,
-    scripts: s.scripts.map((a) =>
-      fromCaptionScriptStorage(a, captionScriptSlice, tagSlice)
-    )
+  const { scripts, repeat, shuffle } = s
+  const id = playlistSlice.nextID
+  const name = s.name ?? `Playlist #${id}`
+  const exists = Object.values(playlistSlice.entries).find(
+    (e) => e.name === name
+  )
+  if (exists == null) {
+    playlistSlice.entries[id] = newPlaylist({
+      id,
+      name,
+      repeat,
+      shuffle,
+      type: PLT.script,
+      items: scripts.map((s) =>
+        fromCaptionScriptStorage(s, captionScriptSlice, tagSlice)
+      )
+    })
+
+    playlistSlice.nextID++
+    return id
+  } else {
+    return exists.id
   }
 }
 
@@ -1042,4 +1265,582 @@ function from<F extends Identifiable, T extends Identifiable>(
 
 function equals<F, T>(t1: F, t2: T) {
   return JSON.stringify(t1) === JSON.stringify(t2)
+}
+
+function convertScenesToDisplays(
+  displaySlice: EntryState<Display>,
+  viewSlice: EntryState<View>,
+  playlistSlice: EntryState<Playlist>,
+  sceneSlice: EntryState<Scene>,
+  sceneGridSlice: EntryState<SceneGrid>,
+  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>,
+  overlaySlice: EntryState<Overlay>,
+  displayPlaylistItemSlice: EntryState<DisplayPlaylistItem>
+) {
+  Object.values(sceneSlice.entries).forEach((scene) => {
+    const playlistName = scene.id.toString()
+    const exists = Object.values(playlistSlice.entries).find(
+      (p) => p.type === PLT.scene && p.name === playlistName
+    )
+
+    let scenePlaylistID: number
+    if (exists != null) {
+      scenePlaylistID = exists.id
+    } else {
+      const scenePlaylist = newPlaylist({
+        id: playlistSlice.nextID,
+        name: playlistName,
+        type: PLT.scene
+      })
+      playlistSlice.nextID++
+      scenePlaylistID = convertToScenePlaylist(
+        scene.id,
+        [],
+        scenePlaylist,
+        playlistSlice,
+        sceneSlice,
+        scenePlaylistItemSlice
+      )
+    }
+
+    const scenePlaylist = playlistSlice.entries[scenePlaylistID]
+    if (
+      scenePlaylist.items.length === 1 &&
+      (!scene.overlayEnabled || scene.overlays.length === 0)
+    ) {
+      delete playlistSlice.entries[scenePlaylistID]
+      return
+    }
+
+    const displayPlaylist = newPlaylist({
+      id: playlistSlice.nextID,
+      name: `${scene.name} #${playlistSlice.nextID}`,
+      type: PLT.display
+    })
+    playlistSlice.nextID++
+    let displayDuration = 0
+    let sceneName = ''
+    let views: View[] = []
+    let overlaysSize: number[][] | undefined = undefined
+    let scenePlaylists: Playlist[][][] = []
+    scenePlaylist.items.forEach((itemID) => {
+      const item = scenePlaylistItemSlice.entries[itemID]
+      let sceneID = item.sceneID
+      if (sceneID === -1) {
+        sceneID =
+          item.randomScenes.length > 0
+            ? item.randomScenes[0]
+            : Number(Object.keys(sceneSlice.entries)[0])
+      }
+
+      const scene = sceneSlice.entries[sceneID]
+      const newOverlaysSize = getOverlaysSize(
+        scene.overlays,
+        overlaySlice,
+        sceneGridSlice
+      )
+      if (
+        overlaysSize == null ||
+        hasOverlaysSizeChanged(overlaysSize, newOverlaysSize)
+      ) {
+        overlaysSize = newOverlaysSize
+        if (views.length > 0) {
+          views.forEach((view) => (viewSlice.entries[view.id] = view))
+          const display = newDisplay({
+            id: displaySlice.nextID,
+            name: `${sceneName} ${displaySlice.nextID}`,
+            views: views.map((view) => view.id),
+            selectedView: views[0].id
+          })
+
+          displaySlice.entries[display.id] = display
+          displaySlice.nextID++
+
+          const item: DisplayPlaylistItem = {
+            id: displayPlaylistItemSlice.nextID,
+            displayID: display.id,
+            randomDisplays: [],
+            duration: displayDuration
+          }
+
+          displayPlaylistItemSlice.entries[item.id] = item
+          displayPlaylistItemSlice.nextID++
+          displayPlaylist.items.push(item.id)
+          displayDuration = 0
+          views = []
+        }
+
+        sceneName = scene.name
+        scenePlaylists = []
+        const mainPlaylist = newPlaylist({
+          id: playlistSlice.nextID,
+          name: `${scene.name} 011`,
+          type: PLT.scene
+        })
+        playlistSlice.entries[mainPlaylist.id] = mainPlaylist
+        playlistSlice.nextID++
+        scenePlaylists[0] = []
+        scenePlaylists[0][0] = []
+        scenePlaylists[0][0][0] = mainPlaylist
+        const mainView = newView({
+          id: viewSlice.nextID,
+          name: 'View 011',
+          width: 100,
+          height: 100,
+          color: getRandomColor(),
+          playlistID: mainPlaylist.id
+        })
+        views.push(mainView)
+        viewSlice.nextID++
+        for (let i = 0; i < overlaysSize.length; i++) {
+          scenePlaylists[i + 1] = []
+          const item = scenePlaylistItemSlice.entries[itemID]
+          const scene = sceneSlice.entries[item.sceneID]
+          const overlayID = scene.overlays[i]
+          const { opacity, sceneID } = overlaySlice.entries[overlayID]
+          const gridID = convertSceneIDToGridID(sceneID)
+          if (gridID != null) {
+            const grid = sceneGridSlice.entries[gridID]
+            const rows = grid.grid.length
+            const cols = grid.grid[0].length
+            const width = 100 / cols
+            const height = 100 / rows
+            const viewGrid: View[][] = []
+            for (let r = 0; r < rows; r++) {
+              viewGrid[r] = []
+              scenePlaylists[i + 1][r] = []
+              for (let c = 0; c < cols; c++) {
+                const cell = grid.grid[r][c]
+                const sync = cell.sceneCopy.length === 2
+                let playlistID = 0
+                if (!sync) {
+                  const overlayPlaylist = newPlaylist({
+                    id: playlistSlice.nextID,
+                    name: `${sceneSlice.entries[cell.sceneID].name} ${i + 1}${
+                      r + 1
+                    }${c + 1}`,
+                    type: PLT.scene
+                  })
+                  playlistSlice.entries[overlayPlaylist.id] = overlayPlaylist
+                  playlistSlice.nextID++
+                  scenePlaylists[i + 1][r][c] = overlayPlaylist
+                  playlistID = overlayPlaylist.id
+                }
+
+                const view = newView({
+                  id: viewSlice.nextID,
+                  name: `View ${i + 1}${r + 1}${c + 1}`,
+                  x: c * width,
+                  y: r * height,
+                  z: i + 1,
+                  width,
+                  height,
+                  color: getRandomColor(),
+                  playlistID,
+                  opacity,
+                  sync,
+                  mirrorSyncedView: cell.mirror ? MVF.vertical : MVF.none
+                })
+                viewGrid[r][c] = view
+                views.push(view)
+                viewSlice.nextID++
+              }
+            }
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const view = viewGrid[r][c]
+                if (view.sync) {
+                  const cell = grid.grid[r][c]
+                  const [syncRow, syncCol] = cell.sceneCopy
+                  view.syncWithView = viewGrid[syncRow][syncCol].id
+                }
+              }
+            }
+          } else if (sceneID !== 0) {
+            const overlayPlaylist = newPlaylist({
+              id: playlistSlice.nextID,
+              name: `${sceneSlice.entries[sceneID].name} 111`,
+              type: PLT.scene
+            })
+            playlistSlice.entries[overlayPlaylist.id] = overlayPlaylist
+            playlistSlice.nextID++
+            scenePlaylists[i + 1][0][0] = overlayPlaylist
+
+            const view = newView({
+              id: viewSlice.nextID,
+              name: `View ${i + 1}00`,
+              z: i + 1,
+              width: 100,
+              height: 100,
+              color: getRandomColor(),
+              playlistID: overlayPlaylist.id,
+              opacity
+            })
+            views.push(view)
+            viewSlice.nextID++
+          }
+        }
+      }
+
+      displayDuration += item.duration
+      scenePlaylists[0][0][0].items.push(itemID)
+      for (let i = 1; i < scenePlaylists.length; i++) {
+        const overlayID = scene.overlays[i - 1]
+        const overlay = overlaySlice.entries[overlayID]
+        const gridID = convertSceneIDToGridID(overlay.sceneID)
+        for (let r = 0; r < scenePlaylists[i].length; r++) {
+          for (let c = 0; c < scenePlaylists[i][r].length; c++) {
+            const sceneID =
+              gridID != null
+                ? sceneGridSlice.entries[gridID].grid[r][c].sceneID
+                : overlay.sceneID
+
+            const playlistItem: ScenePlaylistItem = {
+              id: scenePlaylistItemSlice.nextID,
+              sceneID,
+              randomScenes: [],
+              duration: item.duration,
+              playAfterAllImages: false
+            }
+
+            scenePlaylistItemSlice.nextID++
+            scenePlaylistItemSlice.entries[playlistItem.id] = playlistItem
+            scenePlaylists[i][r][c].items.push(playlistItem.id)
+          }
+        }
+      }
+    })
+
+    if (displayPlaylist.items.length > 0 || views.length > 1) {
+      views.forEach((view) => (viewSlice.entries[view.id] = view))
+      const display = newDisplay({
+        id: displaySlice.nextID,
+        name: `${sceneName} ${displaySlice.nextID}`,
+        views: views.map((view) => view.id),
+        selectedView: views[0].id
+      })
+
+      displaySlice.entries[display.id] = display
+      displaySlice.nextID++
+
+      const item: DisplayPlaylistItem = {
+        id: displayPlaylistItemSlice.nextID,
+        displayID: display.id,
+        randomDisplays: [],
+        duration: displayDuration
+      }
+
+      displayPlaylistItemSlice.entries[item.id] = item
+      displayPlaylistItemSlice.nextID++
+      displayPlaylist.items.push(item.id)
+    }
+    if (displayPlaylist.items.length > 1) {
+      playlistSlice.entries[displayPlaylist.id] = displayPlaylist
+    }
+  })
+}
+
+function getOverlaysSize(
+  overlays: number[],
+  overlaySlice: EntryState<Overlay>,
+  sceneGridSlice: EntryState<SceneGrid>
+) {
+  const overlaysSize: number[][] = []
+  for (const id of overlays) {
+    let size: number[]
+    const overlay = overlaySlice.entries[id]
+    const gridID = convertSceneIDToGridID(overlay.sceneID)
+    if (gridID != null) {
+      const grid = sceneGridSlice.entries[gridID]
+      size = [grid.grid.length, grid.grid[0].length]
+    } else {
+      size = [1, 1]
+    }
+
+    overlaysSize.push(size)
+  }
+
+  return overlaysSize
+}
+
+function hasOverlaysSizeChanged(
+  overlaysSize: number[][],
+  newOverlaysSize: number[][]
+) {
+  if (overlaysSize.length !== newOverlaysSize.length) return true
+
+  for (let i = 0; i < overlaysSize.length; i++) {
+    const oldSize = overlaysSize[i]
+    const newSize = newOverlaysSize[i]
+    if (oldSize[0] !== newSize[0] || oldSize[1] !== newSize[1]) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function convertSceneGridsToDisplays(
+  displaySlice: EntryState<Display>,
+  viewSlice: EntryState<View>,
+  playlistSlice: EntryState<Playlist>,
+  sceneSlice: EntryState<Scene>,
+  sceneGridSlice: EntryState<SceneGrid>,
+  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>,
+  overlaySlice: EntryState<Overlay>
+): number[] {
+  Object.values(sceneGridSlice.entries).forEach((grid) => {
+    const gridName = grid.name ?? `Grid ${grid.id}`
+    const display = newDisplay({
+      id: displaySlice.nextID,
+      name: gridName
+    })
+
+    const rows = grid.grid.length
+    const cols = grid.grid[0].length
+    const height = 100 / rows
+    const width = 100 / cols
+    const views: View[][][] = []
+    for (let r = 0; r < rows; r++) {
+      views[r] = []
+      for (let c = 0; c < cols; c++) {
+        views[r][c] = []
+        const cell = grid.grid[r][c]
+        const playlistName = cell.sceneID.toString()
+        const exists = Object.values(playlistSlice.entries).find(
+          (p) => p.type === PLT.scene && p.name === playlistName
+        )
+
+        let playlistID: number
+        if (exists != null) {
+          playlistID = exists.id
+        } else {
+          const playlist = newPlaylist({
+            id: playlistSlice.nextID,
+            name: playlistName,
+            type: PLT.scene
+          })
+          playlistID = convertToScenePlaylist(
+            cell.sceneID,
+            [],
+            playlist,
+            playlistSlice,
+            sceneSlice,
+            scenePlaylistItemSlice
+          )
+        }
+
+        let maxOverlaysCount = 0
+        const opacities: number[] = []
+        const playlist = playlistSlice.entries[playlistID]
+        playlist.items.forEach((itemID) => {
+          const { sceneID, randomScenes } =
+            scenePlaylistItemSlice.entries[itemID]
+          let id: number
+          if (sceneID !== -1) {
+            id = sceneID
+          } else if (randomScenes.length > 0) {
+            id = randomScenes[0]
+          } else {
+            id = Number(Object.keys(sceneSlice.entries)[0])
+          }
+
+          const { overlays, overlayEnabled } = sceneSlice.entries[id]
+          if (overlayEnabled && overlays.length > maxOverlaysCount) {
+            for (let i = maxOverlaysCount; i < overlays.length; i++) {
+              opacities.push(overlaySlice.entries[overlays[i]].opacity)
+            }
+
+            maxOverlaysCount = overlays.length
+          }
+        })
+
+        const playlistIDs = [playlistID]
+        for (let z = 0; z < maxOverlaysCount; z++) {
+          const overlayPlaylist = newPlaylist({
+            id: playlistSlice.nextID,
+            name: `${sceneSlice.entries[cell.sceneID].name} ${z + 1}${r + 1}${
+              c + 1
+            }`,
+            type: PLT.scene
+          })
+          playlistSlice.entries[overlayPlaylist.id] = overlayPlaylist
+          playlistSlice.nextID++
+          playlistIDs.push(overlayPlaylist.id)
+        }
+
+        maxOverlaysCount++
+        for (let z = 0; z < maxOverlaysCount; z++) {
+          const opacity = z === 0 ? 100 : opacities[z - 1]
+          const view = newView({
+            id: viewSlice.nextID,
+            name: `View ${z}${r + 1}${c + 1}`,
+            color: getRandomColor(),
+            x: c * width,
+            y: r * height,
+            z,
+            width,
+            height,
+            opacity,
+            playlistID: playlistIDs[z]
+          })
+
+          viewSlice.entries[view.id] = view
+          viewSlice.nextID++
+          display.views.push(view.id)
+          views[r][c][z] = view
+        }
+
+        playlistIDs.shift()
+        for (const itemID of playlist.items) {
+          const { duration, sceneID, randomScenes } =
+            scenePlaylistItemSlice.entries[itemID]
+          let id: number
+          if (sceneID !== -1) {
+            id = sceneID
+          } else if (randomScenes.length > 0) {
+            id = randomScenes[0]
+          } else {
+            id = Number(Object.keys(sceneSlice.entries)[0])
+          }
+
+          const { overlays, overlayEnabled } = sceneSlice.entries[id]
+          if (overlayEnabled) {
+            for (let i = 0; i < overlays.length; i++) {
+              const id = overlaySlice.entries[overlays[i]].sceneID
+              const sceneID = isSceneIDAGridID(id) ? 0 : id
+              let item = Object.values(scenePlaylistItemSlice.entries).find(
+                (value) =>
+                  value.sceneID === sceneID && value.duration === duration
+              )
+              if (item == null) {
+                item = {
+                  id: scenePlaylistItemSlice.nextID,
+                  sceneID,
+                  randomScenes: [],
+                  duration,
+                  playAfterAllImages: false
+                }
+                scenePlaylistItemSlice.nextID++
+                scenePlaylistItemSlice.entries[item.id] = item
+              }
+              playlistSlice.entries[playlistIDs[i]].items.push(item.id)
+            }
+          }
+          const rest = overlayEnabled ? overlays.length : 0
+          for (let i = rest; i < playlistIDs.length; i++) {
+            let item = Object.values(scenePlaylistItemSlice.entries).find(
+              (value) => value.sceneID === 0 && value.duration === duration
+            )
+            if (item == null) {
+              item = {
+                id: scenePlaylistItemSlice.nextID,
+                sceneID: 0,
+                randomScenes: [],
+                duration,
+                playAfterAllImages: false
+              }
+              scenePlaylistItemSlice.nextID++
+              scenePlaylistItemSlice.entries[item.id] = item
+            }
+
+            scenePlaylistItemSlice.nextID++
+            scenePlaylistItemSlice.entries[item.id] = item
+            playlistSlice.entries[playlistIDs[i]].items.push(item.id)
+          }
+        }
+      }
+    }
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cell = grid.grid[r][c]
+        const sync = cell.sceneCopy.length > 0
+        if (sync) {
+          const copy = grid.grid[r][c].sceneCopy
+          const copyViews = views[copy[0]][copy[1]]
+          for (let z = 0; z < copyViews.length; z++) {
+            const copyView = copyViews[z]
+            const view = views[r][c][z]
+            view.sync = true
+            view.syncWithView = copyView.id
+            view.color = copyView.color
+            view.mirrorSyncedView = cell.mirror ? MVF.vertical : MVF.none
+          }
+        }
+      }
+    }
+
+    display.selectedView = display.views[0]
+    displaySlice.entries[display.id] = display
+    displaySlice.nextID++
+  })
+
+  Object.values(playlistSlice.entries)
+    .filter((p) => p.type === PLT.scene)
+    .forEach((p) => {
+      const sceneID = Number(p.name)
+      if (!isNaN(sceneID) && sceneID > 0) {
+        const { name } = sceneSlice.entries[sceneID]
+        p.name = `${name} #${p.id}`
+      }
+    })
+  return Object.keys(displaySlice.entries).map((id) => Number(id))
+}
+
+function convertToScenePlaylist(
+  sceneID: number,
+  randomScenes: number[],
+  playlist: Playlist,
+  playlistSlice: EntryState<Playlist>,
+  sceneSlice: EntryState<Scene>,
+  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>
+): number {
+  if (
+    playlist.items
+      .map((id) => scenePlaylistItemSlice.entries[id].sceneID)
+      .includes(sceneID)
+  ) {
+    // recursion detected, prevent infinite loop
+    sceneID = 0
+  }
+  if (sceneID === 0) {
+    if (playlist.items.length > 0) {
+      playlistSlice.entries[playlist.id] = playlist
+      playlistSlice.nextID++
+      return playlist.id
+    } else {
+      return 0
+    }
+  }
+
+  let scene
+  if (sceneID !== -1) {
+    scene = sceneSlice.entries[sceneID]
+  } else if (randomScenes.length > 0) {
+    scene = sceneSlice.entries[randomScenes[0]]
+  } else {
+    scene = sceneSlice.entries[Number(Object.keys(sceneSlice.entries)[0])]
+  }
+
+  const item: ScenePlaylistItem = {
+    id: scenePlaylistItemSlice.nextID,
+    sceneID,
+    randomScenes,
+    duration: scene.nextSceneTime,
+    playAfterAllImages: false // TODO support playAfterAllImages
+  }
+
+  scenePlaylistItemSlice.entries[item.id] = item
+  scenePlaylistItemSlice.nextID++
+  playlist.items.push(item.id)
+
+  return convertToScenePlaylist(
+    scene.nextSceneID,
+    scene.nextSceneRandoms,
+    playlist,
+    playlistSlice,
+    sceneSlice,
+    scenePlaylistItemSlice
+  )
 }

@@ -188,4 +188,8 @@ export const en = new Map<string, string>([
   ['ea.backIn', 'Back In'],
   ['ea.backOut', 'Back Out'],
   ['ea.backInOut', 'Back InOut'],
+
+  ['mvf.none', 'None'],
+  ['mvf.horizontal', 'Horizontal'],
+  ['mvf.vertical', 'Vertical'],
 ]);

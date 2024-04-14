@@ -4,6 +4,23 @@ export function copy<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
+export function getFileName(url: string, pathSep: string, extension = true) {
+  let sep;
+  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
+    sep = '/';
+  } else {
+    sep = pathSep;
+  }
+  url = url.substring(url.lastIndexOf(sep) + 1);
+  if (url.includes('?')) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  if (!extension) {
+    url = url.substring(0, url.lastIndexOf('.'));
+  }
+  return url;
+}
+
 export function urlToPath(url: string, isWin32: boolean): string {
   const path = new URL(url).pathname;
   if (isWin32) {
@@ -198,6 +215,7 @@ export function getFileGroup(url: string, pathSep: string) {
         .replace(/pictures\//, '')
         .replace(/gallery\//, '')
         .replace(/organizer\//, '')
+        .replace(/gallery\.php\?gid=/, '')
         .replace(/video\.php\?vid=/, '')
         .split('/')[0];
     case ST.sexcom:

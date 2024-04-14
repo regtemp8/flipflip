@@ -5,16 +5,15 @@ import type Audio from './Audio'
 import { newAudio } from './Audio'
 import { extractMusicMetadata } from '../../data/utils'
 import { setAudiosAddAtStart } from '../app/slice'
-import { setRouteGoBack, getActiveScene } from '../app/thunks'
+import { setRouteGoBack } from '../app/thunks'
 import {
   setError,
   setLoadingMetadata,
   setLoadingSources
 } from '../audioLibrary/slice'
-import { setSceneAudioPlaylistAddAudios } from '../scene/slice'
 import { setAudio, setAudioMarked, setAudioTags } from './slice'
-import Scene from '../scene/Scene'
 import flipflip from '../../FlipFlipService'
+import { setPlaylistAddItems } from '../playlist/slice'
 
 export function onAddAudioUrl(importURL: string, cachePath: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
@@ -150,10 +149,9 @@ export function importAudioFromLibrary(selected: number[]) {
     const state = getState()
     const audios = selected.filter((id) => state.audio.entries[id])
 
-    const playlistIndex = state.app.route[state.app.route.length - 1]
-      .value as number
-    const sceneID = (getActiveScene(state) as Scene).id
-    dispatch(setSceneAudioPlaylistAddAudios({ sceneID, playlistIndex, audios }))
+    const lastRoute = state.app.route.length - 1
+    const playlistID = state.app.route[lastRoute].value as number
+    dispatch(setPlaylistAddItems({ id: playlistID, value: audios }))
     dispatch(setRouteGoBack())
   }
 }

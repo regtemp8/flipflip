@@ -53,7 +53,11 @@ export const sourceScraperSlice = createSlice({
       state,
       action: PayloadAction<EntryUpdate<string>>
     ) => {
-      state[action.payload.id].workerUUID = action.payload.value
+      const { id, value } = action.payload
+      const entry = state[id]
+      if (entry != null) {
+        entry.workerUUID = value
+      }
     },
     setSourceScraperShiftPromiseQueue: (
       state,

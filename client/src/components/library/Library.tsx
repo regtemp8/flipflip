@@ -108,7 +108,6 @@ import {
 } from '../../store/app/selectors'
 import {
   setRouteGoBack,
-  exportLibrary,
   importFromLibrary,
   setLibraryRemoveVisible,
   markOffline,
@@ -117,7 +116,6 @@ import {
   importTumblr,
   // importTwitter,
   updateVideoMetadata,
-  importLibrary,
   doneTutorial,
   sortSources
 } from '../../store/app/thunks'
@@ -625,11 +623,11 @@ function Library() {
     if (importFile.startsWith('http')) {
       wretch(importFile)
         .get()
-        .text((text) => {
-          let json
+        .text((/*text*/) => {
           try {
-            json = JSON.parse(text)
-            dispatch(importLibrary(json))
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importLibrary(json))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
@@ -639,8 +637,9 @@ function Library() {
           dispatch(systemMessage('Error accessing URL'))
         })
     } else {
-      const text = await flipflip().api.readTextFile(importFile)
-      dispatch(importLibrary(JSON.parse(text)))
+      // const text = await flipflip().api.readTextFile(importFile)
+      // TODO import as subset of AppStorage
+      // dispatch(importLibrary(JSON.parse(text)))
       onCloseDialog()
     }
   }
@@ -1037,7 +1036,8 @@ function Library() {
           >
             <ListItemButton
               onClick={() => {
-                dispatch(exportLibrary())
+                // TODO export subset of AppStorage
+                // dispatch(exportLibrary())
               }}
             >
               <ListItemIcon>
