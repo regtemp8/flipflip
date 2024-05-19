@@ -13,12 +13,13 @@ jobs:
             arch: [x64, arm64]
     env:
       PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win32' || 'darwin') }}
+      PLATFORM_NAME: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'windows' || 'macos') }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18.x
+        node-version: 20.x
     - name: Enable Yarn
       run: |
         corepack enable
@@ -69,5 +70,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ./server/out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}/FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ steps.get-package-version.outputs.version }}.zip
-        asset_name: FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-${{ steps.get-package-version.outputs.version }}.zip
+        asset_name: FlipFlip-${{ env.PLATFORM_NAME }}-${{ matrix.arch }}-${{ steps.get-package-version.outputs.version }}.zip
         asset_content_type: application/zip
