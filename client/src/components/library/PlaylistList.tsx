@@ -14,7 +14,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import { useAppSelector } from '../../store/hooks'
-import { selectAppPlaylistThumbs } from '../../store/playlist/selectors'
+import { selectPlaylistThumbs } from '../../store/playlist/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -59,7 +59,7 @@ export interface PlaylistListProps {
 }
 
 function PlaylistList(props: PlaylistListProps) {
-  const playlistThumbs = useAppSelector(selectAppPlaylistThumbs())
+  const playlistThumbs = useAppSelector(selectPlaylistThumbs())
   const [hover, setHover] = useState<any>()
 
   const onMouseEnter = (album: string) => {

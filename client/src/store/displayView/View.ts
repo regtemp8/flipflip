@@ -1,4 +1,4 @@
-import { copy } from 'flipflip-common'
+import { MVF, copy } from 'flipflip-common'
 
 export default interface View {
   id: number
@@ -11,6 +11,10 @@ export default interface View {
   color: string
   opacity: number
   visible: boolean
+  playlistID: number
+  sync: boolean
+  syncWithView: number
+  mirrorSyncedView: string
 }
 
 export const initialView: View = {
@@ -23,7 +27,11 @@ export const initialView: View = {
   height: 10,
   color: '',
   opacity: 100,
-  visible: true
+  visible: true,
+  playlistID: 0,
+  sync: false,
+  syncWithView: 0,
+  mirrorSyncedView: MVF.none
 }
 
 export function newView(init?: Partial<View>) {

@@ -10,7 +10,9 @@ import {
   setSceneAddScriptPlaylist,
   setSceneSources,
   setSceneAddSources,
-  setSceneVideoVolume
+  setSceneVideoVolume,
+  setSceneAudioPlaylist,
+  setSceneScriptPlaylist
 } from './slice'
 import type LibrarySource from '../librarySource/LibrarySource'
 import { newLibrarySource } from '../librarySource/LibrarySource'
@@ -44,7 +46,9 @@ import {
   GT,
   SP,
   SS,
-  WeightGroup
+  WeightGroup,
+  PLT,
+  SG
 } from 'flipflip-common'
 import {
   addRoutes,
@@ -72,6 +76,11 @@ import {
 import { getVideoClipperScene } from './selectors'
 import { getActiveScene } from '../app/thunks'
 import flipflip from '../../FlipFlipService'
+import { newPlaylist } from '../playlist/Playlist'
+import { setPlaylist } from '../playlist/slice'
+import { addPlaylist } from '../playlist/thunks'
+import SceneGrid from '../sceneGrid/SceneGrid'
+import { setSceneGroupRemoveScene } from '../sceneGroup/slice'
 
 export function startFromScene(sceneName: string) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
@@ -786,6 +795,14 @@ export function playAudio(audioID: number, displayed: number[]) {
       return
     }
 
+    const tempPlaylist = newPlaylist({
+      id: state.playlist.nextID,
+      name: 'audio_playlist_temp',
+      type: PLT.audio,
+      items: displayed
+    })
+    dispatch(setPlaylist(tempPlaylist))
+
     const startIndex = displayed.indexOf(source.id)
     const tempScene = newScene({
       id: state.scene.nextID,
@@ -793,7 +810,7 @@ export function playAudio(audioID: number, displayed: number[]) {
       libraryID,
       audioScene: true,
       audioEnabled: true,
-      audioPlaylists: [{ audios: displayed, shuffle: false, repeat: RP.all }],
+      audioPlaylists: [tempPlaylist.id],
       audioStartIndex: startIndex,
       strobe: true,
       strobeTime: 10000,
@@ -840,16 +857,21 @@ export function playScript(
       return
     }
 
-    const startIndex = displayed.indexOf(source.id)
+    const tempPlaylist = newPlaylist({
+      id: state.playlist.nextID,
+      name: 'script_playlist_temp',
+      type: PLT.script,
+      items: displayed
+    })
+    dispatch(setPlaylist(tempPlaylist))
+
     const tempScene = copy<Scene>(state.scene.entries[sceneID])
     tempScene.id = state.scene.nextID
     tempScene.libraryID = libraryID
     tempScene.scriptScene = true
     tempScene.textEnabled = true
-    tempScene.scriptPlaylists = [
-      { scripts: displayed, shuffle: false, repeat: RP.all }
-    ]
-    tempScene.scriptStartIndex = startIndex
+    tempScene.scriptPlaylists = [tempPlaylist.id]
+    tempScene.scriptStartIndex = displayed.indexOf(scriptID)
 
     dispatch(setScene(tempScene))
     dispatch(
@@ -976,14 +998,19 @@ export function addSource(type: string, sceneID?: number, ...args: any[]) {
               })
             )
           )
+
+          const playlist = newPlaylist({
+            id: state.playlist.nextID,
+            type: PLT.script,
+            items: [scriptID],
+            shuffle: false,
+            repeat: RP.none
+          })
+          dispatch(setPlaylist(playlist))
           dispatch(
             setSceneAddScriptPlaylist({
               id: sceneID,
-              value: {
-                scripts: [scriptID],
-                shuffle: false,
-                repeat: RP.none
-              }
+              value: playlist.id
             })
           )
         }
@@ -1080,29 +1107,37 @@ export function deleteScene(sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     dispatch(removeFromScenes([sceneID]))
     const state = getState()
+    state.app.sceneGroups
+      .map((id) => state.sceneGroup.entries[id])
+      .filter((s) => s.type === SG.scene && s.scenes.includes(sceneID))
+      .forEach((s) =>
+        dispatch(setSceneGroupRemoveScene({ id: s.id, value: sceneID }))
+      )
+
     state.app.scenes
       .map((id) => state.scene.entries[id])
       .forEach((scene) => {
-        if (scene.nextSceneID === sceneID) {
-          scene.nextSceneID = 0
+        const sceneCopy = copy<Scene>(scene)
+        if (sceneCopy.nextSceneID === sceneID) {
+          sceneCopy.nextSceneID = 0
         }
 
-        const nextSceneRandomsLength = scene.nextSceneRandoms.length
-        scene.nextSceneRandoms = scene.nextSceneRandoms.filter(
+        const nextSceneRandomsLength = sceneCopy.nextSceneRandoms.length
+        sceneCopy.nextSceneRandoms = sceneCopy.nextSceneRandoms.filter(
           (id) => id !== sceneID
         )
-        const overlaysLength = scene.overlays.length
-        scene.overlays = scene.overlays
+        const overlaysLength = sceneCopy.overlays.length
+        sceneCopy.overlays = sceneCopy.overlays
           .map((id) => state.overlay.entries[id])
           .filter((o) => o.sceneID !== sceneID)
           .map((o) => o.id)
 
         if (
-          scene.nextSceneID === 0 ||
-          scene.nextSceneRandoms.length < nextSceneRandomsLength ||
-          scene.overlays.length < overlaysLength
+          sceneCopy.nextSceneID === 0 ||
+          sceneCopy.nextSceneRandoms.length < nextSceneRandomsLength ||
+          sceneCopy.overlays.length < overlaysLength
         ) {
-          dispatch(setScene(scene))
+          dispatch(setScene(sceneCopy))
         }
       })
 
@@ -1110,17 +1145,18 @@ export function deleteScene(sceneID: number) {
       .map((id) => state.sceneGrid.entries[id])
       .forEach((grid) => {
         let updated = false
-        for (const row of grid.grid) {
-          for (let cell of row) {
-            if (cell.sceneID === sceneID) {
-              cell = newSceneGridCell()
+        const gridCopy = copy<SceneGrid>(grid)
+        for (let r = 0; r < gridCopy.grid.length; r++) {
+          for (let c = 0; c < gridCopy.grid[r].length; c++) {
+            if (gridCopy.grid[r][c].sceneID === sceneID) {
+              gridCopy.grid[r][c] = newSceneGridCell()
               updated = true
             }
           }
         }
 
         if (updated) {
-          dispatch(setSceneGrid(grid))
+          dispatch(setSceneGrid(gridCopy))
         }
       })
 
@@ -1297,5 +1333,19 @@ export function setVideoClipperSceneVideoVolume(videoVolume: number) {
     const state = getState()
     const scene = getVideoClipperScene(state)
     dispatch(setSceneVideoVolume({ id: scene.id, value: videoVolume }))
+  }
+}
+
+export function createSceneAudioPlaylist(id: number, index: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const playlistID = dispatch(addPlaylist(PLT.audio))
+    dispatch(setSceneAudioPlaylist({ id, value: { index, playlistID } }))
+  }
+}
+
+export function createSceneScriptPlaylist(id: number, index: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const playlistID = dispatch(addPlaylist(PLT.script))
+    dispatch(setSceneScriptPlaylist({ id, value: { index, playlistID } }))
   }
 }

@@ -612,8 +612,8 @@ function ScriptLibrary() {
         classes={{
           paper: cx(
             classes.drawerPaper,
-            !open && classes.drawerPaperClose,
-            specialMode && classes.drawerPaperHidden
+            !open && specialMode == null && classes.drawerPaperClose,
+            specialMode != null && classes.drawerPaperHidden
           )
         }}
         open={drawerOpen}

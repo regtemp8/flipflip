@@ -45,7 +45,9 @@ import {
   type Theme,
   Toolbar,
   Tooltip,
-  Typography
+  Typography,
+  List,
+  Stack
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -61,8 +63,10 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import DragHandleIcon from '@mui/icons-material/DragHandle'
 import FolderIcon from '@mui/icons-material/Folder'
 import GetAppIcon from '@mui/icons-material/GetApp'
-import GridOnIcon from '@mui/icons-material/GridOn'
 import TvIcon from '@mui/icons-material/Tv'
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay'
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+import DescriptionIcon from '@mui/icons-material/Description'
 import HelpIcon from '@mui/icons-material/Help'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
@@ -78,9 +82,10 @@ import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
 
 import {
   convertDisplayIDToSceneID,
-  convertGridIDToSceneID
+  convertGridIDToSceneID,
+  convertPlaylistIDToSceneID
 } from '../data/utils'
-import { en, MO, SF, SG, SPT } from 'flipflip-common'
+import { en, MO, PLT, SF, SG, SPT } from 'flipflip-common'
 import Jiggle from '../animations/Jiggle'
 import VSpin from '../animations/VSpin'
 import SceneSearch from './SceneSearch'
@@ -93,7 +98,6 @@ import {
 import { useAppSelector, useAppDispatch } from '../store/hooks'
 import {
   selectAppCanGenerate,
-  selectAppCanGrid,
   selectAppAudioLibraryCount,
   selectAppScriptLibraryCount,
   selectAppLibraryCount,
@@ -104,7 +108,6 @@ import {
 } from '../store/app/selectors'
 import {
   addGenerator,
-  addGrid,
   addSceneGroup,
   addScene,
   routeToAudios,
@@ -118,9 +121,9 @@ import {
   removeSceneGroup,
   doneTutorial,
   sortScenes,
-  importScenes,
   addDisplay,
-  routeToDisplay
+  routeToDisplay,
+  routeToPlaylist
 } from '../store/app/thunks'
 import { setSceneGroupName } from '../store/sceneGroup/actions'
 import {
@@ -132,19 +135,19 @@ import { selectSceneName } from '../store/scene/selectors'
 import { selectSceneGridName } from '../store/sceneGrid/selectors'
 import {
   selectScenePickerGeneratorGroups,
-  selectScenePickerGridGroups,
   selectScenePickerDisplayGroups,
   selectScenePickerGroupItems,
   selectScenePickerSceneGroups,
   selectScenePickerUngroupedGenerators,
   selectScenePickerUngroupedScenes,
-  selectScenePickerUngroupedGrids,
   selectScenePickerUngroupedDisplays,
   selectScenePickerSceneCount,
   selectScenePickerGeneratorCount,
-  selectScenePickerGridCount,
   selectScenePickerAllScenesCount,
-  selectScenePickerDisplayCount
+  selectScenePickerDisplayCount,
+  selectScenePickerPlaylistCount,
+  selectScenePickerPlaylistGroups,
+  selectScenePickerUngroupedPlaylists
 } from '../store/scenePicker/selectors'
 import {
   onScenePickerChangeSceneGroupItemsSort,
@@ -154,7 +157,12 @@ import {
 } from '../store/scenePicker/thunks'
 import flipflip from '../FlipFlipService'
 import { selectDisplayName } from '../store/display/selectors'
-import { importDisplay } from '../store/display/thunks'
+import {
+  selectPlaylistName,
+  selectPlaylistType
+} from '../store/playlist/selectors'
+import { addPlaylist } from '../store/playlist/thunks'
+import { PlaylistType } from '../store/playlist/Playlist'
 
 const drawerWidth = 240
 
@@ -354,7 +362,7 @@ const useStyles = makeStyles()((theme: Theme) => {
     gridTooltip: {
       top: 'auto',
       right: 28,
-      bottom: 140,
+      bottom: 195,
       left: 'auto',
       position: 'fixed',
       borderRadius: '50%',
@@ -362,6 +370,16 @@ const useStyles = makeStyles()((theme: Theme) => {
       height: theme.spacing(5)
     },
     displayTooltip: {
+      top: 'auto',
+      right: 28,
+      bottom: 140,
+      left: 'auto',
+      position: 'fixed',
+      borderRadius: '50%',
+      width: theme.spacing(5),
+      height: theme.spacing(5)
+    },
+    playlistTooltip: {
       top: 'auto',
       right: 28,
       bottom: 85,
@@ -384,11 +402,14 @@ const useStyles = makeStyles()((theme: Theme) => {
         duration: theme.transitions.duration.enteringScreen
       })
     },
-    addDisplayButton: {
+    addPlaylistButton: {
       marginBottom: 60
     },
-    addGridButton: {
+    addDisplayButton: {
       marginBottom: 115
+    },
+    addGridButton: {
+      marginBottom: 170
     },
     addGeneratorButton: {
       marginBottom: 170
@@ -459,7 +480,10 @@ const useStyles = makeStyles()((theme: Theme) => {
       ariaControls: 'vertical-tabpanel-2'
     },
     displayTab: {
-      ariaControls: 'vertical-tabpanel-2'
+      ariaControls: 'vertical-tabpanel-3'
+    },
+    playlistTab: {
+      ariaControls: 'vertical-tabpanel-4'
     },
     fill: {
       flexGrow: 1
@@ -529,6 +553,44 @@ function SceneCard(props: SceneCardProps) {
             <Typography component="h2" variant="h6">
               {name}
             </Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+    </Jiggle>
+  )
+}
+
+interface PlaylistCardProps {
+  playlistID: number
+  toDelete: boolean
+  action: () => void
+}
+
+function PlaylistCard(props: PlaylistCardProps) {
+  const { playlistID, toDelete, action } = props
+  const { classes } = useStyles()
+
+  const type = useAppSelector(selectPlaylistType(playlistID))
+  const name = useAppSelector(selectPlaylistName(playlistID))
+  return (
+    <Jiggle
+      id={playlistID.toString()}
+      bounce
+      disable={toDelete}
+      className={classes.scene}
+    >
+      <Card className={cx(toDelete && classes.deleteScene)}>
+        <CardActionArea onClick={action}>
+          <CardContent>
+            <Stack alignItems="center" direction="row" gap={2}>
+              {type === PLT.audio && <AudiotrackIcon />}
+              {type === PLT.display && <TvIcon />}
+              {type === PLT.scene && <MovieIcon />}
+              {type === PLT.script && <DescriptionIcon />}
+              <Typography component="h2" variant="h6">
+                {name}
+              </Typography>
+            </Stack>
           </CardContent>
         </CardActionArea>
       </Card>
@@ -614,7 +676,7 @@ function SceneGroup(props: SceneGroupProps) {
               evt.type,
               evt.oldIndex,
               evt.newIndex,
-              evt.itemID,
+              Number(evt.item.id),
               order.length
             )
           )
@@ -630,7 +692,7 @@ function ScenePicker() {
   const { classes } = useStyles()
   const dispatch = useAppDispatch()
   const canGenerate = useAppSelector(selectAppCanGenerate())
-  const canGrid = useAppSelector(selectAppCanGrid())
+  // const canGrid = useAppSelector(selectAppCanGrid())
   const newWindowAlerted = useAppSelector(selectAppConfigNewWindowAlerted())
   const audioLibraryCount = useAppSelector(selectAppAudioLibraryCount())
   const scriptLibraryCount = useAppSelector(selectAppScriptLibraryCount())
@@ -640,18 +702,23 @@ function ScenePicker() {
   const version = useAppSelector(selectAppVersion())
   const sceneGroups = useAppSelector(selectScenePickerSceneGroups())
   const generatorGroups = useAppSelector(selectScenePickerGeneratorGroups())
-  const gridGroups = useAppSelector(selectScenePickerGridGroups())
+  // const gridGroups = useAppSelector(selectScenePickerGridGroups())
   const displayGroups = useAppSelector(selectScenePickerDisplayGroups())
+  const playlistGroups = useAppSelector(selectScenePickerPlaylistGroups())
   const ungroupedScenes = useAppSelector(selectScenePickerUngroupedScenes())
   const ungroupedGenerators = useAppSelector(
     selectScenePickerUngroupedGenerators()
   )
-  const ungroupedGrids = useAppSelector(selectScenePickerUngroupedGrids())
+  // const ungroupedGrids = useAppSelector(selectScenePickerUngroupedGrids())
   const ungroupedDisplays = useAppSelector(selectScenePickerUngroupedDisplays())
+  const ungroupedPlaylists = useAppSelector(
+    selectScenePickerUngroupedPlaylists()
+  )
   const sceneCount = useAppSelector(selectScenePickerSceneCount())
   const generatorCount = useAppSelector(selectScenePickerGeneratorCount())
-  const gridCount = useAppSelector(selectScenePickerGridCount())
+  // const gridCount = useAppSelector(selectScenePickerGridCount())
   const displayCount = useAppSelector(selectScenePickerDisplayCount())
+  const playlistCount = useAppSelector(selectScenePickerPlaylistCount())
   const allScenesCount = useAppSelector(selectScenePickerAllScenesCount())
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -664,6 +731,7 @@ function ScenePicker() {
   const [importFile, setImportFile] = useState('')
   const [importSources, setImportSources] = useState(false)
   const [isEditing, setIsEditing] = useState(-1)
+  const [createPlaylistType, setCreatePlaylistType] = useState<PlaylistType>()
 
   useEffect(() => {
     dispatch(setTutorialStart())
@@ -736,6 +804,10 @@ function ScenePicker() {
     setOpenMenu(MO.urlDisplayImport)
   }
 
+  const onImportPlaylist = () => {
+    setOpenMenu(MO.urlPlaylistImport)
+  }
+
   const onDeleteScenes = () => {
     setOpenMenu(undefined)
     setScenesToDelete([])
@@ -764,11 +836,11 @@ function ScenePicker() {
     if (importFile.startsWith('http')) {
       wretch(importFile)
         .get()
-        .text((text) => {
-          let json
+        .text((/*text*/) => {
           try {
-            json = JSON.parse(text)
-            dispatch(importScenes(json, importSources))
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importScenes(json, importSources))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
@@ -780,10 +852,11 @@ function ScenePicker() {
     } else {
       flipflip()
         .api.readTextFile(importFile)
-        .then((text) => {
+        .then((/*text*/) => {
           try {
-            const json = JSON.parse(text)
-            dispatch(importScenes(json, importSources))
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importScenes(json, importSources))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
@@ -796,11 +869,11 @@ function ScenePicker() {
     if (importFile.startsWith('http')) {
       wretch(importFile)
         .get()
-        .text((text) => {
-          let json
+        .text((/*text*/) => {
           try {
-            json = JSON.parse(text)
-            dispatch(importDisplay(json))
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importDisplay(json))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
@@ -812,16 +885,56 @@ function ScenePicker() {
     } else {
       flipflip()
         .api.readTextFile(importFile)
-        .then((text) => {
+        .then((/*text*/) => {
           try {
-            const json = JSON.parse(text)
-            dispatch(importDisplay(json))
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importDisplay(json))
             onCloseDialog()
           } catch (e) {
             dispatch(systemMessage('This is not a valid JSON file'))
           }
         })
     }
+  }
+
+  const onFinishImportPlaylist = (importFile: string) => {
+    if (importFile.startsWith('http')) {
+      wretch(importFile)
+        .get()
+        .text((/*text*/) => {
+          try {
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importPlaylist(json))
+            onCloseDialog()
+          } catch (e) {
+            dispatch(systemMessage('This is not a valid JSON file'))
+          }
+        })
+        .catch((e) => {
+          dispatch(systemMessage('Error accessing URL'))
+        })
+    } else {
+      flipflip()
+        .api.readTextFile(importFile)
+        .then((/*text*/) => {
+          try {
+            // const json = JSON.parse(text)
+            // TODO import as subset of AppStorage
+            // dispatch(importPlaylist(json))
+            onCloseDialog()
+          } catch (e) {
+            dispatch(systemMessage('This is not a valid JSON file'))
+          }
+        })
+    }
+  }
+
+  const onFinishCreatePlaylist = () => {
+    dispatch(addPlaylist(createPlaylistType as PlaylistType))
+    setCreatePlaylistType(undefined)
+    setOpenMenu(undefined)
   }
 
   const onNewWindow = () => {
@@ -875,13 +988,13 @@ function ScenePicker() {
   }
 
   const onAddGroup = () => {
-    if (openTab === 0) {
-      dispatch(addSceneGroup(SG.scene))
-    } else if (openTab === 1) {
-      dispatch(addSceneGroup(SG.generator))
-    } else if (openTab === 2) {
-      dispatch(addSceneGroup(SG.grid))
-    }
+    const groups = [SG.scene, SG.generator, SG.grid, SG.display, SG.playlist]
+    const group = groups[openTab]
+    dispatch(addSceneGroup(group))
+  }
+
+  const onAddPlaylist = () => {
+    setOpenMenu(MO.createPlaylist)
   }
 
   const beginEditingName = (groupID: number) => {
@@ -999,12 +1112,30 @@ function ScenePicker() {
     )
   }
 
+  const renderPlaylistCard = (playlistID: number) => {
+    const sceneID = convertPlaylistIDToSceneID(playlistID)
+    return (
+      <PlaylistCard
+        key={sceneID}
+        playlistID={playlistID}
+        toDelete={scenesToDelete != null && scenesToDelete.includes(sceneID)}
+        action={
+          scenesToDelete == null
+            ? () => dispatch(routeToPlaylist(playlistID))
+            : () => onToggleDelete(sceneID)
+        }
+      />
+    )
+  }
+
   const getCard = (type: string) => {
     switch (type) {
       case SG.grid:
         return renderGridCard
       case SG.display:
         return renderDisplayCard
+      case SG.playlist:
+        return renderPlaylistCard
       default:
         return renderSceneCard
     }
@@ -1032,7 +1163,7 @@ function ScenePicker() {
               evt.type,
               evt.oldIndex,
               evt.newIndex,
-              evt.item.id,
+              Number(evt.item.id),
               order.length
             )
           )
@@ -1078,6 +1209,18 @@ function ScenePicker() {
   }
 
   const open = drawerOpen
+  let importAction: () => void
+  let importTitle = 'Import '
+  if (openTab === 2) {
+    importAction = onImportDisplay
+    importTitle += 'Display'
+  } else if (openTab === 3) {
+    importAction = onImportPlaylist
+    importTitle += 'Playlist'
+  } else {
+    importAction = onImportScene
+    importTitle += 'Scene'
+  }
   return (
     <div className={classes.root} onClick={onClickCloseMenu}>
       <AppBar
@@ -1201,7 +1344,7 @@ function ScenePicker() {
                 !open && classes.tabClose
               )}
             />
-            <Tab
+            {/* <Tab
               id="vertical-tab-2"
               aria-controls="vertical-tabpanel-2"
               icon={<GridOnIcon />}
@@ -1211,7 +1354,7 @@ function ScenePicker() {
                 classes.gridTab,
                 !open && classes.tabClose
               )}
-            />
+            /> */}
             <Tab
               id="vertical-tab-3"
               aria-controls="vertical-tabpanel-3"
@@ -1220,6 +1363,17 @@ function ScenePicker() {
               className={cx(
                 classes.tab,
                 classes.displayTab,
+                !open && classes.tabClose
+              )}
+            />
+            <Tab
+              id="vertical-tab-4"
+              aria-controls="vertical-tabpanel-4"
+              icon={<PlaylistPlayIcon />}
+              label={open ? `Playlists (${playlistCount})` : ''}
+              className={cx(
+                classes.tab,
+                classes.playlistTab,
                 !open && classes.tabClose
               )}
             />
@@ -1437,16 +1591,22 @@ function ScenePicker() {
               {renderSceneGroupsSortable(SG.generator, generatorGroups)}
             </Box>
           )}
-          {openTab === 2 && (
+          {/* {openTab === 2 && (
             <Box>
               {renderUngroupedSortable(SG.grid, ungroupedGrids)}
               {renderSceneGroupsSortable(SG.grid, gridGroups)}
             </Box>
-          )}
-          {openTab === 3 && (
+          )} */}
+          {openTab === 2 && (
             <Box>
               {renderUngroupedSortable(SG.display, ungroupedDisplays)}
               {renderSceneGroupsSortable(SG.display, displayGroups)}
+            </Box>
+          )}
+          {openTab === 3 && (
+            <Box>
+              {renderUngroupedSortable(SG.playlist, ungroupedPlaylists)}
+              {renderSceneGroupsSortable(SG.playlist, playlistGroups)}
             </Box>
           )}
         </Container>
@@ -1498,18 +1658,14 @@ function ScenePicker() {
                   </Fab>
                 </Tooltip>
               )}
-              <Tooltip
-                disableInteractive
-                title={`Import ${openTab === 3 ? 'Display' : 'Scene'}`}
-                placement="left"
-              >
+              <Tooltip disableInteractive title={importTitle} placement="left">
                 <Fab
                   className={cx(
                     classes.addButton,
                     classes.importSceneButton,
                     openMenu !== MO.new && classes.addButtonClose
                   )}
-                  onClick={openTab === 3 ? onImportDisplay : onImportScene}
+                  onClick={importAction}
                   size="small"
                 >
                   <GetAppIcon className={classes.icon} />
@@ -1555,7 +1711,7 @@ function ScenePicker() {
                   </Fab>
                 </span>
               </Tooltip>
-              <Tooltip
+              {/* <Tooltip
                 disableInteractive
                 title="Add Scene Grid"
                 placement="left"
@@ -1579,7 +1735,7 @@ function ScenePicker() {
                     <GridOnIcon className={classes.icon} />
                   </Fab>
                 </span>
-              </Tooltip>
+              </Tooltip> */}
               <Tooltip disableInteractive title="Add Display" placement="left">
                 <span className={classes.displayTooltip}>
                   <Fab
@@ -1597,11 +1753,26 @@ function ScenePicker() {
                   </Fab>
                 </span>
               </Tooltip>
+              <Tooltip disableInteractive title="Add Playlist" placement="left">
+                <span className={classes.playlistTooltip}>
+                  <Fab
+                    className={cx(
+                      classes.addButton,
+                      classes.addPlaylistButton,
+                      openMenu !== MO.new && classes.addButtonClose
+                    )}
+                    onClick={onAddPlaylist}
+                    size="small"
+                  >
+                    <PlaylistPlayIcon className={classes.icon} />
+                  </Fab>
+                </span>
+              </Tooltip>
               <Tooltip disableInteractive title="Add Group" placement="left">
                 <Fab
                   className={cx(
                     classes.addButton,
-                    classes.addDisplayButton,
+                    classes.addPlaylistButton,
                     openMenu === MO.new && classes.addButtonClose
                   )}
                   onClick={onAddGroup}
@@ -1805,6 +1976,110 @@ function ScenePicker() {
             onClick={() => onFinishImportDisplay(importFile)}
           >
             Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openMenu === MO.urlPlaylistImport}
+        onClose={onCloseDialog}
+        aria-labelledby="import-title"
+        aria-describedby="import-description"
+      >
+        <DialogTitle id="import-title">Import Playlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="import-description">
+            To import a playlist, enter the URL or open a local file.
+          </DialogContentText>
+          <TextField
+            variant="standard"
+            label="Import File"
+            fullWidth
+            placeholder="Paste URL Here"
+            margin="dense"
+            value={importFile}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip disableInteractive title="Open File">
+                    <IconButton onClick={onOpenImportFile} size="large">
+                      <FolderIcon />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              )
+            }}
+            onChange={onChangeImportFile}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onCloseDialog}>Cancel</Button>
+          <Button
+            color="primary"
+            disabled={importFile.length === 0}
+            onClick={() => onFinishImportPlaylist(importFile)}
+          >
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openMenu === MO.createPlaylist}
+        onClose={onCloseDialog}
+        aria-labelledby="create-playlist-title"
+        aria-describedby="create-playlist-description"
+      >
+        <DialogTitle id="create-playlist-title">Create Playlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="create-playlist-description">
+            Choose the type of playlist you want to create.
+          </DialogContentText>
+          <List>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.audio)}
+              selected={createPlaylistType === PLT.audio}
+            >
+              <ListItemIcon>
+                <AudiotrackIcon />
+              </ListItemIcon>
+              <ListItemText primary="Audio Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.display)}
+              selected={createPlaylistType === PLT.display}
+            >
+              <ListItemIcon>
+                <TvIcon />
+              </ListItemIcon>
+              <ListItemText primary="Display Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.scene)}
+              selected={createPlaylistType === PLT.scene}
+            >
+              <ListItemIcon>
+                <MovieIcon />
+              </ListItemIcon>
+              <ListItemText primary="Scene Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.script)}
+              selected={createPlaylistType === PLT.script}
+            >
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Script Playlist" />
+            </ListItemButton>
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onCloseDialog}>Cancel</Button>
+          <Button
+            color="primary"
+            disabled={createPlaylistType == null}
+            onClick={() => onFinishCreatePlaylist()}
+          >
+            Create
           </Button>
         </DialogActions>
       </Dialog>

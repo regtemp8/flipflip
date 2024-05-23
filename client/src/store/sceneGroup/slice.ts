@@ -6,6 +6,7 @@ import {
   type EntryUpdate,
   setEntry
 } from '../EntryState'
+import { arrayMove } from '../../data/utils'
 
 export const initialSceneGroupState: EntryState<SceneGroup> = {
   name: 'sceneGroupSlice',
@@ -57,6 +58,16 @@ function createSceneGroupSlice(sceneGroupState?: EntryState<SceneGroup>) {
         const scenes = state.entries[action.payload.id].scenes
         const index = scenes.indexOf(action.payload.value)
         scenes.splice(index, 1)
+      },
+      setSceneGroupMoveScenes: (
+        state,
+        action: PayloadAction<
+          EntryUpdate<{ oldIndex: number; newIndex: number }>
+        >
+      ) => {
+        const { id, value } = action.payload
+        const scenes = state.entries[id].scenes
+        arrayMove(scenes, value.oldIndex, value.newIndex)
       }
     }
   })
@@ -68,5 +79,6 @@ export const {
   deleteSceneGroup,
   setSceneGroupName,
   setSceneGroupAddScene,
-  setSceneGroupRemoveScene
+  setSceneGroupRemoveScene,
+  setSceneGroupMoveScenes
 } = createSceneGroupSlice().actions

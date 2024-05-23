@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { CSSProperties, ChangeEvent, useState } from 'react'
 import {
   IconButton,
   ListItem,
@@ -13,12 +13,12 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   selectDisplayViewColor,
   selectDisplayViewName,
-  selectDisplayViewSetupVisible
+  selectDisplayViewVisible
 } from '../../store/displayView/selectors'
 import { setDisplayViewColor } from '../../store/displayView/actions'
 import { setDisplayViewName } from '../../store/displayView/slice'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { setDisplayViewSetupVisible } from '../../store/displayView/slice'
+import { setDisplayViewVisible } from '../../store/displayView/slice'
 import ColorPickerMinimal from './ColorPickerMinimal'
 import { setDisplaySelectedView } from '../../store/display/slice'
 import { cx } from '@emotion/css'
@@ -133,13 +133,15 @@ export interface DisplayViewListItemProps {
   viewID: number
   displayID: number
   selected: boolean
+  style: CSSProperties
+  getScrollTop: () => number | undefined
 }
 
 function DisplayViewListItem(props: DisplayViewListItemProps) {
   const { index, viewID, displayID, selected } = props
   const dispatch = useAppDispatch()
   const name = useAppSelector(selectDisplayViewName(viewID))
-  const visible = useAppSelector(selectDisplayViewSetupVisible(viewID))
+  const visible = useAppSelector(selectDisplayViewVisible(viewID))
 
   const [editingName, setEditingName] = useState<string>()
 
@@ -160,16 +162,20 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
   }
 
   const toggleVisibility = () => {
-    dispatch(setDisplayViewSetupVisible({ id: viewID, value: !visible }))
+    dispatch(setDisplayViewVisible({ id: viewID, value: !visible }))
   }
 
   const onItemClick = () => {
-    dispatch(setDisplaySelectedView({ id: displayID, value: viewID }))
+    const yOffset = props.getScrollTop()
+    dispatch(
+      setDisplaySelectedView({ id: displayID, value: { viewID, yOffset } })
+    )
   }
 
   const { classes } = useStyles()
   return (
     <div
+      style={props.style}
       className={
         selected
           ? classes.selected

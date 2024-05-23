@@ -1,8 +1,13 @@
 import Snoowrap from 'snoowrap'
 import { RF } from 'flipflip-common'
+import { Timespan } from 'snoowrap/dist/objects/Subreddit'
 
-export default class RedditClient {
-  reddit: Snoowrap | undefined
+export class RedditClient {
+  private static instance: RedditClient
+
+  private reddit: Snoowrap | undefined
+
+  private constructor() {}
 
   initializeIpcEvents(): void {
     // ipcMain.handle(IPC.redditGetSubreddit, this.onRequestRedditGetSubreddit)
@@ -33,15 +38,15 @@ export default class RedditClient {
     return this.reddit
   }
 
-  async onRequestRedditGetSubreddit(
+  async getSubreddit(
     redditUserAgent: string,
     redditClientID: string,
     redditRefreshToken: string,
     redditFunc: string,
     url: string,
     after: string,
-    redditTime: 'hour' | 'day' | 'week' | 'month' | 'year' | 'all' | undefined
-  ): Promise<unknown[]> {
+    redditTime?: string
+  ): Promise<Snoowrap.Listing<Snoowrap.Submission>> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
@@ -54,7 +59,7 @@ export default class RedditClient {
       case RF.top:
         return await client
           .getSubreddit(url)
-          .getTop({ time: redditTime ?? 'day', after })
+          .getTop({ time: (redditTime ?? 'day') as Timespan, after })
       case RF.controversial:
         return await client.getSubreddit(url).getControversial({ after })
       case RF.rising:
@@ -65,28 +70,35 @@ export default class RedditClient {
     }
   }
 
-  async onRequestRedditGetSavedContent(
+  async getSavedContent(
     redditUserAgent: string,
     redditClientID: string,
     redditRefreshToken: string,
     url: string,
     after: string
-  ): Promise<unknown[]> {
+  ): Promise<Snoowrap.Submission[]> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
       redditRefreshToken
     )
-    return await client.getUser(url).getSavedContent({ after })
+    return await client
+      .getUser(url)
+      .getSavedContent({ after })
+      .then((list) =>
+        list
+          .filter((content) => content instanceof Snoowrap.Submission)
+          .map((content) => content as Snoowrap.Submission)
+      )
   }
 
-  async onRequestRedditGetUser(
+  async getUser(
     redditUserAgent: string,
     redditClientID: string,
     redditRefreshToken: string,
     url: string,
     after: string
-  ): Promise<unknown[]> {
+  ): Promise<Snoowrap.Listing<Snoowrap.Submission>> {
     const client = this.getClient(
       redditUserAgent,
       redditClientID,
@@ -108,4 +120,16 @@ export default class RedditClient {
     )
     return client.getSubscriptions({ limit: 20, after })
   }
+
+  public static getInstance(): RedditClient {
+    if (!RedditClient.instance) {
+      RedditClient.instance = new RedditClient()
+    }
+
+    return RedditClient.instance
+  }
+}
+
+export default function reddit() {
+  return RedditClient.getInstance()
 }

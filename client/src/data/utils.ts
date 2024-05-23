@@ -20,7 +20,8 @@ import {
   TT,
   VO,
   VTF,
-  WF
+  WF,
+  ScraperHelpers
 } from 'flipflip-common'
 import type LibrarySource from '../store/librarySource/LibrarySource'
 import type WeightGroup from '../store/scene/WeightGroup'
@@ -88,6 +89,28 @@ export function convertSceneIDToDisplayID(sceneID: number): number | undefined {
   const sceneIDText = sceneID.toString()
   return isSceneIDTextADisplayID(sceneIDText)
     ? Number(sceneIDText.substring(displayIDPrefix.length))
+    : undefined
+}
+
+const playlistIDPrefix = '77777'
+export function convertPlaylistIDToSceneID(displayID: number): number {
+  return Number(playlistIDPrefix + displayID)
+}
+
+export function isSceneIDAPlaylistID(sceneID: number): boolean {
+  return isSceneIDTextAPlaylistID(sceneID.toString())
+}
+
+function isSceneIDTextAPlaylistID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(playlistIDPrefix)
+}
+
+export function convertSceneIDToPlaylistID(
+  sceneID: number
+): number | undefined {
+  const sceneIDText = sceneID.toString()
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(playlistIDPrefix.length))
     : undefined
 }
 
@@ -1050,6 +1073,7 @@ const captionProgramDefaults = {
 }
 export default captionProgramDefaults
 
+// TODO does this still work OR need something else to cancel IPC.scrapeFiles?
 // Inspired by https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
 /**
  * This object is a custom Promise wrapper which enables the ability to cancel the promise.
@@ -1062,7 +1086,7 @@ export default captionProgramDefaults
 
 interface CancelablePromiseData {
   data: string[]
-  helpers?: { next: any; count: number; retries: number; uuid: string }
+  helpers?: ScraperHelpers
 }
 
 export class CancelablePromise extends Promise<CancelablePromiseData> {

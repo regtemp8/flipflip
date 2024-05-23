@@ -1,9 +1,8 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent, useCallback, useEffect, useState } from 'react'
+import React, { MouseEvent, useState } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
-  Avatar,
   Badge,
   Chip,
   Fab,
@@ -11,7 +10,6 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
   type Theme,
@@ -21,37 +19,18 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
-import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import BuildIcon from '@mui/icons-material/Build'
-import ClearIcon from '@mui/icons-material/Clear'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 
-import { arrayMove, getTimestamp, randomizeList } from '../../data/utils'
+import { getTimestamp } from '../../data/utils'
 import { RP } from 'flipflip-common'
-import AudioControl from './AudioControl'
 import SourceIcon from '../library/SourceIcon'
-import { setAudioVolume } from '../../store/audio/actions'
 import { addTracks } from '../../store/app/slice'
-import {
-  setSceneAudioPlaylistToggleShuffle,
-  setSceneAudioPlaylistChangeRepeat,
-  setSceneRemoveAudioPlaylist,
-  setSceneAudioPlaylistRemoveAudio,
-  setSceneAudioPlaylistSwapAudios
-} from '../../store/scene/slice'
-import { playAudio } from '../../store/scene/thunks'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { orderAudioTags } from '../../store/tag/thunks'
 import TagChip from '../library/TagChip'
-import {
-  selectSceneIsAudioScene,
-  selectSceneAudioEnabled,
-  selectSceneAudioStartIndex,
-  selectSceneAudioPlaylistDuration
-} from '../../store/scene/selectors'
 import {
   selectAudioTrackNum,
   selectAudioComment,
@@ -61,8 +40,15 @@ import {
   selectAudioUrl,
   selectAudioDuration
 } from '../../store/audio/selectors'
-import { default as AudioPlaylistData } from '../../store/scene/AudioPlaylist'
 import flipflip from '../../FlipFlipService'
+import {
+  setPlaylistChangeRepeat,
+  setPlaylistRemoveItem,
+  setPlaylistSortItems,
+  setPlaylistToggleShuffle
+} from '../../store/playlist/slice'
+import { selectPlaylist } from '../../store/playlist/selectors'
+import AudioOptions from '../library/AudioOptions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   audioList: {
@@ -118,35 +104,15 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-interface AudioListItemProps {
-  audioID: number
-}
-
-function AudioListItem(props: AudioListItemProps) {
-  const name = useAppSelector(selectAudioName(props.audioID))
-  const thumb = useAppSelector(selectAudioThumb(props.audioID))
-  const { classes } = useStyles()
-  return (
-    <ListItem disableGutters>
-      <ListItemIcon>
-        <Avatar alt={name} src={thumb} className={classes.thumb}>
-          {thumb == null && <AudiotrackIcon className={classes.mediaIcon} />}
-        </Avatar>
-      </ListItemIcon>
-      <ListItemText primary={name} />
-    </ListItem>
-  )
-}
-
 interface PlaylistItemProps {
   audioID: number
   audios: number[]
-  removeTrack: (audioID: number) => void
+  removeTrack: (index: number) => void
   onSourceOptions: (audioID: number) => void
 }
 
 function PlaylistItem(props: PlaylistItemProps) {
-  const dispatch = useAppDispatch()
+  // const dispatch = useAppDispatch()
   const trackNum = useAppSelector(selectAudioTrackNum(props.audioID))
   const comment = useAppSelector(selectAudioComment(props.audioID))
   const tags = useAppSelector(selectAudioTags(props.audioID))
@@ -158,11 +124,14 @@ function PlaylistItem(props: PlaylistItemProps) {
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
     const sourceURL = url as string
     if (e.shiftKey && !e.ctrlKey) {
-      window.open(url, '_blank')?.focus()
+      flipflip()
+        .api.getFileUrl(sourceURL)
+        .then((fileURL) => window.open(fileURL, '_blank')?.focus())
     } else if (!e.shiftKey && e.ctrlKey) {
       flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
-      dispatch(playAudio(props.audioID, props.audios))
+      // TODO get playAudio to work
+      // dispatch(playAudio(props.audioID, props.audios))
     }
   }
 
@@ -199,7 +168,7 @@ function PlaylistItem(props: PlaylistItemProps) {
               ) : (
                 <div>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                  Library Tagging
+                  Play Audio
                   <br />
                   Shift+Click: Open Source
                   <br />
@@ -238,7 +207,7 @@ function PlaylistItem(props: PlaylistItemProps) {
         </IconButton>
         <IconButton
           edge="end"
-          onClick={() => props.removeTrack(props.audioID)}
+          onClick={() => props.removeTrack(props.audios.indexOf(props.audioID))}
           size="large"
         >
           <DeleteIcon color={'error'} />
@@ -249,216 +218,39 @@ function PlaylistItem(props: PlaylistItemProps) {
 }
 
 export interface AudioPlaylistProps {
-  sceneID: number
-  playlistIndex: number
-  playlist: AudioPlaylistData
-  startPlaying: boolean
-  onAddTracks: (playlistIndex: number) => void
-  onSourceOptions: (audioID: number) => void
-  persist?: boolean
-  shorterSeek?: boolean
-  showMsTimestamp?: boolean
-  scenePaths?: any[]
-  goBack?: () => void
-  onPlaying?: (position: number, duration: number) => void
-  setCurrentAudio?: (audioID: number) => void
+  playlistID: number
 }
 
 function AudioPlaylist(props: AudioPlaylistProps) {
+  const sceneID = 0
+  // const [sceneID, setSceneID] = useState<number>(0)
+  const [sourceOptions, setSourceOptions] = useState<number>()
+
+  const onSourceOptionsDone = () => {
+    setSourceOptions(undefined)
+  }
+  const onSourceOptions = (audioID: number) => {
+    setSourceOptions(audioID)
+  }
+
   const dispatch = useAppDispatch()
-  const isAudioScene = useAppSelector(selectSceneIsAudioScene(props.sceneID))
-  const audioEnabled = useAppSelector(selectSceneAudioEnabled(props.sceneID))
-  const audioStartIndex = useAppSelector(
-    selectSceneAudioStartIndex(props.sceneID)
-  )
-  const audioPlaylistDuration = useAppSelector(
-    selectSceneAudioPlaylistDuration(props.sceneID, props.playlistIndex)
-  )
-
-  const [currentIndex, setCurrentIndex] = useState(
-    props.playlistIndex === 0 ? audioStartIndex : 0
-  )
-  const [playingAudios, setPlayingAudios] = useState<number[]>([])
-
-  const restart = useCallback(() => {
-    let audios = props.playlist.audios
-    if (props.startPlaying) {
-      if (props.playlist.shuffle) {
-        audios = randomizeList(Array.from(audios))
-      }
-      setPlayingAudios(audios)
-    }
-    if (props.setCurrentAudio) {
-      let audio = audios[currentIndex]
-      if (!audio) audio = props.playlist.audios[currentIndex]
-      props.setCurrentAudio(audio)
-    }
-  }, [currentIndex, props])
-
-  const prevTrack = useCallback(() => {
-    let prevTrack = currentIndex - 1
-    if (prevTrack < 0) {
-      prevTrack = playingAudios.length - 1
-    }
-    if (props.setCurrentAudio) {
-      props.setCurrentAudio(playingAudios[prevTrack])
-    }
-    setCurrentIndex(prevTrack)
-  }, [currentIndex, playingAudios, props])
-
-  const nextTrack = useCallback(() => {
-    let nextTrack = currentIndex + 1
-    if (nextTrack >= playingAudios.length) {
-      nextTrack = 0
-    }
-    if (props.setCurrentAudio) {
-      props.setCurrentAudio(playingAudios[nextTrack])
-    }
-    setCurrentIndex(nextTrack)
-  }, [currentIndex, playingAudios, props])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case '[':
-          e.preventDefault()
-          dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
-          prevTrack()
-          break
-        case ']':
-          e.preventDefault()
-          dispatch(orderAudioTags(props.playlist.audios[currentIndex]))
-          nextTrack()
-          break
-      }
-    }
-
-    if (props.playlistIndex === 0 && isAudioScene) {
-      window.addEventListener('keydown', onKeyDown, false)
-    }
-    restart()
-
-    return () => {
-      if (props.playlistIndex === 0 && isAudioScene) {
-        window.removeEventListener('keydown', onKeyDown)
-      }
-    }
-  }, [
-    currentIndex,
-    dispatch,
-    isAudioScene,
-    nextTrack,
-    prevTrack,
-    props.playlist.audios,
-    props.playlistIndex,
-    restart
-  ])
-
-  useEffect(() => {
-    if (!props.persist) {
-      restart()
-    }
-  }, [props.persist, props.sceneID, restart])
+  const playlist = useAppSelector(selectPlaylist(props.playlistID))
 
   const toggleShuffle = () => {
-    dispatch(
-      setSceneAudioPlaylistToggleShuffle({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
+    dispatch(setPlaylistToggleShuffle(props.playlistID))
   }
 
   const changeRepeat = () => {
-    dispatch(
-      setSceneAudioPlaylistChangeRepeat({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
+    dispatch(setPlaylistChangeRepeat(props.playlistID))
   }
 
-  const removePlaylist = () => {
-    dispatch(
-      setSceneRemoveAudioPlaylist({
-        id: props.sceneID,
-        value: props.playlistIndex
-      })
-    )
-  }
-
-  const removeTrack = (audioID: number) => {
-    const audioIndex = props.playlist.audios.indexOf(audioID)
-    dispatch(
-      setSceneAudioPlaylistRemoveAudio({
-        id: props.sceneID,
-        value: { playlistIndex: props.playlistIndex, audioIndex }
-      })
-    )
+  const removeTrack = (index: number) => {
+    dispatch(setPlaylistRemoveItem({ id: props.playlistID, value: index }))
   }
 
   const { classes } = useStyles()
-  if (props.startPlaying) {
-    let audioID = playingAudios[currentIndex]
-    if (!audioID) audioID = props.playlist.audios[currentIndex]
-    if (!audioID) return <div />
-    return (
-      <React.Fragment>
-        <AudioListItem audioID={audioID} />
-        <AudioControl
-          sceneID={props.sceneID}
-          audioID={audioID}
-          audioEnabled={props.persist ?? audioEnabled}
-          singleTrack={playingAudios.length === 1}
-          lastTrack={currentIndex === playingAudios.length - 1}
-          repeat={props.playlist.repeat}
-          scenePaths={props.scenePaths ?? []}
-          shorterSeek={props.shorterSeek}
-          showMsTimestamp={props.showMsTimestamp}
-          startPlaying={props.startPlaying}
-          nextTrack={nextTrack}
-          prevTrack={prevTrack}
-          onPlaying={props.onPlaying}
-          audioVolumeAction={setAudioVolume(playingAudios[currentIndex])}
-          goBack={props.goBack}
-        />
-        <div className={classes.playlistAction}>
-          <Tooltip
-            disableInteractive
-            title={'Shuffle ' + (props.playlist.shuffle ? '(On)' : '(Off)')}
-          >
-            <IconButton onClick={toggleShuffle} size="large">
-              <ShuffleIcon
-                color={props.playlist.shuffle ? 'primary' : undefined}
-              />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            disableInteractive
-            title={
-              'Repeat ' +
-              (props.playlist.repeat === RP.none
-                ? '(Off)'
-                : props.playlist.repeat === RP.all
-                  ? '(All)'
-                  : '(One)')
-            }
-          >
-            <IconButton onClick={changeRepeat} size="large">
-              {props.playlist.repeat === RP.none && <RepeatIcon />}
-              {props.playlist.repeat === RP.all && (
-                <RepeatIcon color={'primary'} />
-              )}
-              {props.playlist.repeat === RP.one && (
-                <RepeatOneIcon color={'primary'} />
-              )}
-            </IconButton>
-          </Tooltip>
-        </div>
-      </React.Fragment>
-    )
-  } else {
-    return (
+  return (
+    <>
       <List disablePadding>
         <Sortable
           className={classes.audioList}
@@ -467,61 +259,50 @@ function AudioPlaylist(props: AudioPlaylistProps) {
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
           onChange={(order: any, sortable: any, evt: any) => {
-            const newAudios = Array.from(props.playlist.audios)
-            arrayMove(newAudios, evt.oldIndex, evt.newIndex)
+            const { oldIndex, newIndex } = evt
             dispatch(
-              setSceneAudioPlaylistSwapAudios({
-                id: props.sceneID,
-                value: {
-                  playlistIndex: props.playlistIndex,
-                  oldIndex: evt.oldIndex,
-                  newIndex: evt.newIndex
-                }
+              setPlaylistSortItems({
+                id: props.playlistID,
+                value: { oldIndex, newIndex }
               })
             )
           }}
         >
-          {props.playlist &&
-            props.playlist.audios &&
-            props.playlist.audios.map((audioID: number, index: number) => (
-              <PlaylistItem
-                key={index}
-                audioID={audioID}
-                audios={props.playlist.audios}
-                onSourceOptions={props.onSourceOptions}
-                removeTrack={removeTrack}
-              />
-            ))}
+          {playlist.items.map((audioID: number, index: number) => (
+            <PlaylistItem
+              key={index}
+              audioID={audioID}
+              audios={playlist.items}
+              onSourceOptions={onSourceOptions}
+              removeTrack={removeTrack}
+            />
+          ))}
         </Sortable>
         <div className={classes.playlistAction}>
           <div className={classes.left}>
             <Tooltip
               disableInteractive
-              title={'Shuffle ' + (props.playlist.shuffle ? '(On)' : '(Off)')}
+              title={'Shuffle ' + (playlist.shuffle ? '(On)' : '(Off)')}
             >
               <IconButton onClick={toggleShuffle} size="large">
-                <ShuffleIcon
-                  color={props.playlist.shuffle ? 'primary' : undefined}
-                />
+                <ShuffleIcon color={playlist.shuffle ? 'primary' : undefined} />
               </IconButton>
             </Tooltip>
             <Tooltip
               disableInteractive
               title={
                 'Repeat ' +
-                (props.playlist.repeat === RP.none
+                (playlist.repeat === RP.none
                   ? '(Off)'
-                  : props.playlist.repeat === RP.all
+                  : playlist.repeat === RP.all
                     ? '(All)'
                     : '(One)')
               }
             >
               <IconButton onClick={changeRepeat} size="large">
-                {props.playlist.repeat === RP.none && <RepeatIcon />}
-                {props.playlist.repeat === RP.all && (
-                  <RepeatIcon color={'primary'} />
-                )}
-                {props.playlist.repeat === RP.one && (
+                {playlist.repeat === RP.none && <RepeatIcon />}
+                {playlist.repeat === RP.all && <RepeatIcon color={'primary'} />}
+                {playlist.repeat === RP.one && (
                   <RepeatOneIcon color={'primary'} />
                 )}
               </IconButton>
@@ -529,29 +310,23 @@ function AudioPlaylist(props: AudioPlaylistProps) {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={() => dispatch(addTracks(props.playlistIndex))}
+              onClick={() => dispatch(addTracks(props.playlistID))}
               size="large"
             >
               <AddIcon />
             </IconButton>
           </Tooltip>
-          <div className={classes.right}>
-            <Chip
-              label={getTimestamp(audioPlaylistDuration)}
-              color="default"
-              size="small"
-              variant="outlined"
-            />
-            <Tooltip disableInteractive title="Remove Playlist">
-              <IconButton onClick={removePlaylist} size="large">
-                <ClearIcon color={'error'} />
-              </IconButton>
-            </Tooltip>
-          </div>
         </div>
       </List>
-    )
-  }
+      {sourceOptions != null && (
+        <AudioOptions
+          sceneID={sceneID}
+          audioID={sourceOptions}
+          onDone={onSourceOptionsDone}
+        />
+      )}
+    </>
+  )
 }
 
 ;(AudioPlaylist as any).displayName = 'AudioPlaylist'

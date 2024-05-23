@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import {
   Collapse,
@@ -6,24 +6,32 @@ import {
   Fab,
   Grid,
   type Theme,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 
-import { RP } from 'flipflip-common'
-import AudioPlaylist from '../player/AudioPlaylist'
-import AudioOptions from '../library/AudioOptions'
+import { PLT } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
 import {
   selectSceneAudioEnabled,
   selectSceneAudioPlaylists
 } from '../../store/scene/selectors'
-import { setSceneAddAudioPlaylist } from '../../store/scene/slice'
-import { setSceneAudioEnabled } from '../../store/scene/actions'
+import {
+  setSceneAddAudioPlaylist,
+  setSceneRemoveAudioPlaylist
+} from '../../store/scene/slice'
+import {
+  setSceneAudioEnabled,
+  setSceneAudioPlaylist
+} from '../../store/scene/actions'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import PlaylistSelect from '../common/PlaylistSelect'
+import { createSceneAudioPlaylist } from '../../store/scene/thunks'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   addButton: {
@@ -50,95 +58,79 @@ function AudioCard(props: AudioCardProps) {
     selectSceneAudioPlaylists(props.sceneID)
   )
 
-  const [sourceOptions, setSourceOptions] = useState<number>()
-
-  const onSourceOptionsDone = () => {
-    setSourceOptions(undefined)
-  }
-  const onSourceOptions = (audioID: number) => {
-    setSourceOptions(audioID)
-  }
-
   const onAddPlaylist = () => {
     dispatch(
       setSceneAddAudioPlaylist({
         id: props.sceneID,
-        value: { audios: [], shuffle: false, repeat: RP.all }
+        value: 0
+      })
+    )
+  }
+
+  const onDeletePlaylist = (index: number) => {
+    dispatch(
+      setSceneRemoveAudioPlaylist({
+        id: props.sceneID,
+        value: index
       })
     )
   }
 
   const { classes } = useStyles()
   return (
-    <Grid container alignItems="center">
-      <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs>
-            <Collapse in={!props.persist}>
-              <BaseSwitch
-                label="Audio Tracks"
-                selector={selectSceneAudioEnabled(props.sceneID)}
-                action={setSceneAudioEnabled(props.sceneID)}
-              />
-            </Collapse>
-          </Grid>
-          <Grid item>
-            <Collapse in={audioEnabled && !props.startPlaying}>
-              <Tooltip disableInteractive title={'Add Playlist'}>
-                <Fab
-                  className={classes.addButton}
-                  onClick={onAddPlaylist}
-                  size="small"
-                >
-                  <AddIcon />
-                </Fab>
-              </Tooltip>
-            </Collapse>
-          </Grid>
+    <>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs>
+          <Collapse in={!props.persist}>
+            <BaseSwitch
+              label="Audio Tracks"
+              selector={selectSceneAudioEnabled(props.sceneID)}
+              action={setSceneAudioEnabled(props.sceneID)}
+            />
+          </Collapse>
+        </Grid>
+        <Grid item>
+          <Collapse in={audioEnabled && !props.startPlaying}>
+            <Tooltip disableInteractive title={'Add Playlist'}>
+              <Fab
+                className={classes.addButton}
+                onClick={onAddPlaylist}
+                size="small"
+              >
+                <AddIcon />
+              </Fab>
+            </Tooltip>
+          </Collapse>
         </Grid>
       </Grid>
-      {audioPlaylists.map((playlist, i) => (
-        <React.Fragment key={i}>
-          <Grid item xs={12}>
-            <Collapse in={audioEnabled || props.persist}>
-              <AudioPlaylist
-                sceneID={props.sceneID}
-                playlistIndex={i}
-                playlist={playlist}
-                scenePaths={props.scenePaths}
-                shorterSeek={props.shorterSeek}
-                showMsTimestamp={props.showMsTimestamp}
-                startPlaying={props.startPlaying}
-                persist={props.persist}
-                onSourceOptions={onSourceOptions}
-                setCurrentAudio={
-                  i === 0 && props.setCurrentAudio
-                    ? props.setCurrentAudio
-                    : undefined
-                }
-                goBack={props.goBack}
-                onPlaying={props.onPlaying}
-                onAddTracks={(playlistIndex: number) => {}} // TODO what to do here?
-              />
-            </Collapse>
-          </Grid>
-          {i !== audioPlaylists.length - 1 && (
-            <Grid item xs={12}>
-              <Collapse in={audioEnabled}>
-                <Divider />
-              </Collapse>
-            </Grid>
-          )}
-        </React.Fragment>
-      ))}
-      {sourceOptions != null && (
-        <AudioOptions
-          sceneID={props.sceneID}
-          audioID={sourceOptions}
-          onDone={onSourceOptionsDone}
-        />
-      )}
-    </Grid>
+      <Collapse in={audioEnabled || props.persist}>
+        <Grid container spacing={1} sx={{ mt: 2 }}>
+          {audioPlaylists.map((playlist, i) => (
+            <>
+              <Grid item xs>
+                <PlaylistSelect
+                  type={PLT.audio}
+                  selector={() => playlist.toString()}
+                  action={setSceneAudioPlaylist(props.sceneID, i)}
+                  create={createSceneAudioPlaylist(props.sceneID, i)}
+                  hideLabel
+                />
+              </Grid>
+              <Grid item>
+                <IconButton onClick={() => onDeletePlaylist(i)}>
+                  <DeleteIcon color="error" />
+                </IconButton>
+              </Grid>
+              {i !== audioPlaylists.length - 1 && (
+                <Grid item xs={12}>
+                  <Divider />
+                </Grid>
+              )}
+            </>
+          ))}
+        </Grid>
+      </Collapse>
+    </>
   )
 }
 

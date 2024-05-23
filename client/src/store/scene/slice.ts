@@ -8,10 +8,6 @@ import {
   setEntry,
   deleteEntry
 } from '../EntryState'
-import type ScriptPlaylist from './ScriptPlaylist'
-import type AudioPlaylist from './AudioPlaylist'
-import { RP } from 'flipflip-common'
-import { arrayMove } from '../../data/utils'
 
 export const initialSceneState: EntryState<Scene> = {
   name: 'sceneSlice',
@@ -1171,46 +1167,17 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       },
       setSceneScriptPlaylists: (
         state,
-        action: PayloadAction<EntryUpdate<ScriptPlaylist[]>>
+        action: PayloadAction<EntryUpdate<number[]>>
       ) => {
-        const scene = getEntry(state, action.payload.id)
-        scene.scriptPlaylists = action.payload.value
+        const { id, value } = action.payload
+        getEntry(state, id).scriptPlaylists = value
       },
       setSceneAddAudioPlaylist: (
         state,
-        action: PayloadAction<EntryUpdate<AudioPlaylist>>
-      ) => {
-        getEntry(state, action.payload.id).audioPlaylists.push(
-          action.payload.value
-        )
-      },
-      setSceneAudioPlaylistToggleShuffle: (
-        state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        const playlist = getEntry(state, action.payload.id).audioPlaylists[
-          action.payload.value
-        ]
-        playlist.shuffle = !playlist.shuffle
-      },
-      setSceneAudioPlaylistChangeRepeat: (
-        state,
-        action: PayloadAction<EntryUpdate<number>>
-      ) => {
-        const playlist = getEntry(state, action.payload.id).audioPlaylists[
-          action.payload.value
-        ]
-        switch (playlist.repeat) {
-          case RP.none:
-            playlist.repeat = RP.all
-            break
-          case RP.all:
-            playlist.repeat = RP.one
-            break
-          case RP.one:
-            playlist.repeat = RP.none
-            break
-        }
+        const { id, value } = action.payload
+        getEntry(state, id).audioPlaylists.push(value)
       },
       setSceneRemoveAudioPlaylist: (
         state,
@@ -1221,69 +1188,12 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
           1
         )
       },
-      setSceneAudioPlaylistRemoveAudio: (
-        state,
-        action: PayloadAction<
-          EntryUpdate<{ playlistIndex: number; audioIndex: number }>
-        >
-      ) => {
-        const { playlistIndex, audioIndex } = action.payload.value
-        getEntry(state, action.payload.id).audioPlaylists[
-          playlistIndex
-        ].audios.splice(audioIndex, 1)
-      },
-      setSceneAudioPlaylistSwapAudios: (
-        state,
-        action: PayloadAction<
-          EntryUpdate<{
-            playlistIndex: number
-            oldIndex: number
-            newIndex: number
-          }>
-        >
-      ) => {
-        const { playlistIndex, oldIndex, newIndex } = action.payload.value
-        const audios = getEntry(state, action.payload.id).audioPlaylists[
-          playlistIndex
-        ].audios
-        arrayMove(audios, oldIndex, newIndex)
-      },
       setSceneAddScriptPlaylist: (
         state,
-        action: PayloadAction<EntryUpdate<ScriptPlaylist>>
-      ) => {
-        getEntry(state, action.payload.id).scriptPlaylists.push(
-          action.payload.value
-        )
-      },
-      setSceneScriptPlaylistToggleShuffle: (
-        state,
         action: PayloadAction<EntryUpdate<number>>
       ) => {
-        const playlist = getEntry(state, action.payload.id).scriptPlaylists[
-          action.payload.value
-        ]
-        playlist.shuffle = !playlist.shuffle
-      },
-      setSceneScriptPlaylistChangeRepeat: (
-        state,
-        action: PayloadAction<EntryUpdate<number>>
-      ) => {
-        const playlist = getEntry(state, action.payload.id).scriptPlaylists[
-          action.payload.value
-        ]
-        const repeat = playlist.repeat
-        switch (repeat) {
-          case RP.none:
-            playlist.repeat = RP.all
-            break
-          case RP.all:
-            playlist.repeat = RP.one
-            break
-          case RP.one:
-            playlist.repeat = RP.none
-            break
-        }
+        const { id, value } = action.payload
+        getEntry(state, id).scriptPlaylists.push(value)
       },
       setSceneRemoveScriptPlaylist: (
         state,
@@ -1293,33 +1203,6 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
           action.payload.value,
           1
         )
-      },
-      setSceneScriptPlaylistRemoveScript: (
-        state,
-        action: PayloadAction<
-          EntryUpdate<{ playlistIndex: number; scriptIndex: number }>
-        >
-      ) => {
-        const { playlistIndex, scriptIndex } = action.payload.value
-        getEntry(state, action.payload.id).scriptPlaylists[
-          playlistIndex
-        ].scripts.splice(scriptIndex, 1)
-      },
-      setSceneScriptPlaylistSortScripts: (
-        state,
-        action: PayloadAction<
-          EntryUpdate<{
-            playlistIndex: number
-            oldIndex: number
-            newIndex: number
-          }>
-        >
-      ) => {
-        const { playlistIndex, oldIndex, newIndex } = action.payload.value
-        const scripts = getEntry(state, action.payload.id).scriptPlaylists[
-          playlistIndex
-        ].scripts
-        arrayMove(scripts, oldIndex, newIndex)
       },
       setSceneSources: (
         state,
@@ -1356,29 +1239,23 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       changeAudioRoute: (state, action: PayloadAction<EntryUpdate<number>>) => {
         getEntry(state, action.payload.id).libraryID = action.payload.value
       },
-      setSceneAudioPlaylistAddAudios: (
+      setSceneAudioPlaylist: (
         state,
-        action: PayloadAction<{
-          sceneID: number
-          playlistIndex: number
-          audios: number[]
-        }>
+        action: PayloadAction<
+          EntryUpdate<{ index: number; playlistID: number }>
+        >
       ) => {
-        const { sceneID, playlistIndex, audios } = action.payload
-        state.entries[sceneID].audioPlaylists[playlistIndex].audios.push(
-          ...audios
-        )
+        const { id, value } = action.payload
+        getEntry(state, id).audioPlaylists[value.index] = value.playlistID
       },
-      setSceneScriptPlaylistScripts: (
+      setSceneScriptPlaylist: (
         state,
-        action: PayloadAction<{
-          sceneID: number
-          playlistIndex: number
-          scripts: number[]
-        }>
+        action: PayloadAction<
+          EntryUpdate<{ index: number; playlistID: number }>
+        >
       ) => {
-        const { sceneID, playlistIndex, scripts } = action.payload
-        state.entries[sceneID].scriptPlaylists[playlistIndex].scripts = scripts
+        const { id, value } = action.payload
+        getEntry(state, id).scriptPlaylists[value.index] = value.playlistID
       }
     }
   })
@@ -1583,23 +1460,15 @@ export const {
   setSceneRemoveOverlay,
   setSceneScriptPlaylists,
   setSceneAddAudioPlaylist,
-  setSceneAudioPlaylistToggleShuffle,
-  setSceneAudioPlaylistChangeRepeat,
   setSceneRemoveAudioPlaylist,
-  setSceneAudioPlaylistRemoveAudio,
-  setSceneAudioPlaylistSwapAudios,
   setSceneAddScriptPlaylist,
-  setSceneScriptPlaylistToggleShuffle,
-  setSceneScriptPlaylistChangeRepeat,
   setSceneRemoveScriptPlaylist,
-  setSceneScriptPlaylistRemoveScript,
-  setSceneScriptPlaylistSortScripts,
   setSceneSources,
   setSceneAddSource,
   setSceneAddSources,
   setSceneRemoveSources,
   setSceneRemoveAllSources,
   changeAudioRoute,
-  setSceneAudioPlaylistAddAudios,
-  setSceneScriptPlaylistScripts
+  setSceneAudioPlaylist,
+  setSceneScriptPlaylist
 } = createSceneSlice().actions

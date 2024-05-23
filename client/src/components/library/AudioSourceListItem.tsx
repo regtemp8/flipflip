@@ -25,9 +25,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { getTimestamp } from '../../data/utils'
 import { grey } from '@mui/material/colors'
 import SourceIcon from './SourceIcon'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { systemMessage } from '../../store/app/slice'
-import { playAudio } from '../../store/scene/thunks'
+import { useAppSelector } from '../../store/hooks'
 import TagChip from './TagChip'
 import flipflip from '../../FlipFlipService'
 import {
@@ -203,7 +201,7 @@ export interface AudioSourceListItemProps {
 }
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
-  const dispatch = useAppDispatch()
+  // const dispatch = useAppDispatch()
   const url = useAppSelector(selectAudioUrl(props.audioID))
   const marked = useAppSelector(selectAudioMarked(props.audioID))
   const trackNum = useAppSelector(selectAudioTrackNum(props.audioID))
@@ -221,23 +219,22 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
     if (e.shiftKey && e.ctrlKey && e.altKey) {
       props.onDelete(props.audioID)
     } else if (e.shiftKey && !e.ctrlKey) {
-      openExternalURL(sourceURL)
+      flipflip()
+        .api.getFileUrl(sourceURL)
+        .then((fileURL) => window.open(fileURL, '_blank')?.focus())
     } else if (!e.shiftKey && e.ctrlKey) {
       flipflip().api.showItemInFolder(sourceURL)
     } else if (!e.shiftKey && !e.ctrlKey) {
-      props.savePosition()
-      try {
-        dispatch(playAudio(props.audioID, props.audios))
-      } catch (e) {
-        dispatch(
-          systemMessage('The source ' + sourceURL + " isn't in your Library")
-        )
-      }
+      // TODO get playAudio to work
+      // props.savePosition()
+      // try {
+      //   dispatch(playAudio(props.audioID, props.audios))
+      // } catch (e) {
+      //   dispatch(
+      //     systemMessage('The source ' + sourceURL + " isn't in your Library")
+      //   )
+      // }
     }
-  }
-
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
   }
 
   const { classes } = useStyles()
@@ -294,7 +291,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                   ) : (
                     <div>
                       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                      Library Tagging
+                      Play Audio
                       <br />
                       Shift+Click: Open Source
                       <br />

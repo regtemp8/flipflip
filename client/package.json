@@ -75,7 +75,7 @@
     "use-stay-awake": "^0.1.7",
     "uuid": "^9.0.1",
     "web-audio-beat-detector": "^8.1.55",
-    "wretch": "^2.7.0"
+    "wretch": "^2.8.1"
   },
   "eslintConfig": {
     "extends": [
@@ -106,5 +106,5 @@
       "<rootDir>/node_modules/(?!wretch)"
     ]
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.2.1"
 }

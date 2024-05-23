@@ -73,20 +73,29 @@ function createDisplaySlice(displayState?: EntryState<Display>) {
       },
       setDisplaySelectedView: (
         state,
-        action: PayloadAction<EntryUpdate<number | undefined>>
-      ) => {
-        const { id, value } = action.payload
-        getEntry(state, id).selectedView = value
-      },
-      swapDisplayViews: (
-        state,
-        action: PayloadAction<EntryUpdate<number[]>>
+        action: PayloadAction<EntryUpdate<{ viewID: number; yOffset?: number }>>
       ) => {
         const { id, value } = action.payload
         const entry = getEntry(state, id)
-        const oldID = entry.views[value[0]]
-        entry.views[value[0]] = entry.views[value[1]]
-        entry.views[value[1]] = oldID
+        entry.selectedView = value.viewID
+        if (value.yOffset != null) {
+          entry.displayViewsListYOffset = value.yOffset
+        }
+      },
+      swapDisplayViews: (
+        state,
+        action: PayloadAction<
+          EntryUpdate<{ oldIndex: number; newIndex: number; yOffset?: number }>
+        >
+      ) => {
+        const { id, value } = action.payload
+        const entry = getEntry(state, id)
+        const { oldIndex, newIndex, yOffset } = value
+        const viewID = entry.views.splice(oldIndex, 1)[0]
+        entry.views.splice(newIndex, 0, viewID)
+        if (yOffset != null) {
+          entry.displayViewsListYOffset = yOffset
+        }
       }
     }
   })

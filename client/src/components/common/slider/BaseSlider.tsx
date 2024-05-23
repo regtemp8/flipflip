@@ -3,7 +3,8 @@ import {
   Slider as MaterialSlider,
   Grid,
   InputAdornment,
-  Typography
+  Typography,
+  InputProps
 } from '@mui/material'
 import { type Mark } from '@mui/base/useSlider'
 import { type Variant } from '@mui/material/styles/createTypography'
@@ -26,6 +27,7 @@ export interface BaseSliderProps extends ReduxProps<number> {
     className: string
     step?: number
     min?: number
+    InputProps?: InputProps
   }
   label?: {
     text: string
@@ -122,7 +124,7 @@ export default function BaseSlider(props: BaseSliderProps) {
                       <InputAdornment position="end">%</InputAdornment>
                     )
                   }
-                : undefined
+                : props.textField?.InputProps
             }
             inputProps={{
               className: props.textField?.className,

@@ -14,8 +14,6 @@ import {
 import { toLibrarySourceStorage } from '../app/convert'
 import { getAppScenes } from '../app/selectors'
 import type SceneSettings from '../app/data/SceneSettings'
-import type AudioPlaylist from './AudioPlaylist'
-import type ScriptPlaylist from './ScriptPlaylist'
 import type WeightGroup from './WeightGroup'
 import { getSceneGridEntries, selectSceneGrids } from '../sceneGrid/selectors'
 import { getLibrarySourceEntries } from '../librarySource/selectors'
@@ -57,11 +55,13 @@ export const selectSceneHasBPM = (id?: number) => {
 
     const scene = getEntry(state.scene, id)
     const playlists = scene?.audioPlaylists
+    const playlistID = playlists.length > 0 ? playlists[0] : undefined
+    const items =
+      playlistID != null ? state.playlist.entries[playlistID].items : undefined
     return (
-      playlists !== undefined &&
-      playlists.length > 0 &&
-      playlists[0].audios.length > 0 &&
-      state.audio.entries[playlists[0].audios[0]]?.bpm !== undefined
+      items != null &&
+      items.length > 0 &&
+      state.audio.entries[items[0]]?.bpm != null
     )
   }
 }
@@ -975,12 +975,12 @@ export const selectSceneAudioEnabled = (id: number) => {
 }
 
 export const selectSceneAudioPlaylists = (id: number) => {
-  return (state: RootState): AudioPlaylist[] =>
+  return (state: RootState): number[] =>
     getEntry(state.scene, id).audioPlaylists
 }
 
 export const selectSceneScriptPlaylist = (id: number, index: number) => {
-  return (state: RootState): ScriptPlaylist =>
+  return (state: RootState): number =>
     getEntry(state.scene, id).scriptPlaylists[index]
 }
 
@@ -1039,7 +1039,7 @@ export const selectSceneIsDownloadScene = (id: number) => {
 }
 
 export const selectSceneScriptPlaylists = (id: number) => {
-  return (state: RootState): ScriptPlaylist[] =>
+  return (state: RootState): number[] =>
     getEntry(state.scene, id).scriptPlaylists
 }
 
@@ -1278,20 +1278,6 @@ export const selectVideoClipperSceneID = () => {
 
 export const selectVideoClipperSceneVideoVolume = () => {
   return (state: RootState) => getVideoClipperScene(state).videoVolume
-}
-
-export const selectSceneAudioPlaylistDuration = (
-  id: number,
-  playlistIndex: number
-) => {
-  return (state: RootState): number => {
-    const scene = getEntry(state.scene, id)
-    const playlist = scene.audioPlaylists[playlistIndex]
-    return playlist.audios?.reduce(
-      (total, audioID) => total + (state.audio.entries[audioID]?.duration ?? 0),
-      0
-    )
-  }
 }
 
 export const selectSceneGeneratorWeightsValid = (id: number) => {

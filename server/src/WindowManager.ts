@@ -211,6 +211,10 @@ class WindowManager {
     shell.openExternal(url)
   }
 
+  public showItemInFolder(path: string) {
+    shell.showItemInFolder(path)
+  }
+
   public showLoginCodeDialog() {
     this.window.focus()
     this.window.webContents.send(SDO.showLoginCodeDialog)

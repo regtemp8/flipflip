@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import crypto from 'crypto'
 import { urlToPath } from 'flipflip-common'
 import { isWin32 } from './utils'
 
@@ -25,9 +25,13 @@ class FileRegistry {
 
   public set(url: string): string {
     const extension = url.substring(url.lastIndexOf('.'))
-    const alias = randomUUID() + extension
-    const path = urlToPath(url, isWin32)
-    this.registry.set(alias, path)
+    const hash = crypto.createHash('sha256').update(url).digest('hex')
+    const alias = hash + extension
+    if (!this.registry.has(alias)) {
+      const path = urlToPath(url, isWin32)
+      this.registry.set(alias, path)
+    }
+
     return alias
   }
 }

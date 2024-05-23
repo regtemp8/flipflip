@@ -23,6 +23,8 @@ import createConstantsReducer from '../store/constants/slice'
 import { fromAppStorage } from '../store/app/convert'
 import createDisplayReducer from '../store/display/slice'
 import createDisplayViewReducer from '../store/displayView/slice'
+import createScenePlaylistItemReducer from '../store/scenePlaylistItem/slice'
+import createDisplayPlaylistItemReducer from '../store/displayPlaylistItem/slice'
 
 export function createEmotionCache(): EmotionCache {
   return createCache({ key: 'css' })
@@ -42,11 +44,17 @@ export function createReduxStore(
       librarySource: createLibrarySourceReducer(state?.librarySource),
       overlay: createOverlayReducer(state?.overlay),
       playlist: createPlaylistReducer(state?.playlist),
+      displayPlaylistItem: createDisplayPlaylistItemReducer(
+        state?.displayPlaylistItem
+      ),
+      scenePlaylistItem: createScenePlaylistItemReducer(
+        state?.scenePlaylistItem
+      ),
       scene: createSceneReducer(state?.scene),
       sceneGrid: createSceneGridReducer(state?.sceneGrid),
       sceneGroup: createSceneGroupReducer(state?.sceneGroup),
-      display: createDisplayReducer(), // TODO store displays
-      displayView: createDisplayViewReducer(), // TODO store displays
+      display: createDisplayReducer(state?.display),
+      displayView: createDisplayViewReducer(state?.displayView),
       tag: createTagReducer(state?.tag),
       constants: createConstantsReducer(constants),
       // components

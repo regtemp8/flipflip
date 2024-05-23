@@ -36,8 +36,8 @@ import { makeStyles } from 'tss-react/mui'
 import FolderIcon from '@mui/icons-material/Folder'
 
 import { getCachePath, getTimestamp } from '../../data/utils'
-import { getFileName } from '../player/Scrapers'
 import {
+  getFileName,
   getSourceType,
   urlToPath,
   en,

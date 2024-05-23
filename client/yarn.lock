@@ -7223,7 +7223,7 @@ __metadata:
     use-stay-awake: "npm:^0.1.7"
     uuid: "npm:^9.0.1"
     web-audio-beat-detector: "npm:^8.1.55"
-    wretch: "npm:^2.7.0"
+    wretch: "npm:^2.8.1"
   languageName: unknown
   linkType: soft
 
@@ -14807,10 +14807,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wretch@npm:^2.7.0":
-  version: 2.8.0
-  resolution: "wretch@npm:2.8.0"
-  checksum: 10c0/2c745cc46afe5b3fe8adff66262f59bf77efead94be53c6fc3426d8c30cd28ea207fcd17816af84115c5e3ac02b7124be18f3dfddcc23084edbc5f7157b6beca
+"wretch@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "wretch@npm:2.8.1"
+  checksum: 10c0/047ff5fc249cadeb29e8254f08e9ab4a1d439304d9251d6d733ec82bc7ae8b583a9a1757e038f07768c6bd9bb932e24520dd62624fdab72955804d8fa480b13b
   languageName: node
   linkType: hard
 

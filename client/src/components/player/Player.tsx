@@ -10,8 +10,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
-import { getFileGroup, urlToPath, WC } from 'flipflip-common'
-import { getFileName } from './Scrapers'
+import { getFileName, getFileGroup, urlToPath, WC } from 'flipflip-common'
 import AudioAlert from './AudioAlert'
 import CaptionProgramPlaylist from './CaptionProgramPlaylist'
 import ChildCallbackHack from './ChildCallbackHack'
@@ -958,11 +957,11 @@ function Player(props: PlayerProps) {
 
       {showCaptionProgram &&
         (textEnabled && persistText ? scriptPlaylists : []).map(
-          (playlist, i) => (
+          (playlistID, i) => (
             <CaptionProgramPlaylist
               key={i}
               playlistIndex={i}
-              playlist={playlist}
+              playlistID={playlistID}
               currentAudio={currentAudio as number}
               currentImage={
                 historyPaths.length > 0

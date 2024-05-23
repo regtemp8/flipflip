@@ -44,7 +44,6 @@ import {
   addDisplayView,
   cloneDisplay,
   cloneDisplayView,
-  exportDisplay,
   removeDisplay,
   removeDisplayView
 } from '../../store/display/thunks'
@@ -109,30 +108,16 @@ const useStyles = makeStyles()((theme: Theme) => ({
     width: '100%',
     backgroundColor: theme.palette.background.default
   },
-  container: {
-    height: '100%',
-    padding: theme.spacing(0)
-  },
-  grid: {
-    flexGrow: 1,
-    display: 'grid',
-    height: '100%'
-  },
-  deleteButton: {
-    backgroundColor: theme.palette.error.dark,
-    margin: 0,
-    top: 'auto',
-    right: 20,
-    bottom: 20,
-    left: 'auto',
-    position: 'fixed',
-    zIndex: 3
-  },
-  deleteIcon: {
-    color: theme.palette.error.contrastText
-  },
   disable: {
     pointerEvents: 'none'
+  },
+  scrollableContent: {
+    height: `calc(100% - ${theme.spacing(5)})`,
+    padding: theme.spacing(2),
+    overflow: 'scroll',
+    '&:last-child': {
+      paddingBottom: theme.spacing(3)
+    }
   }
 }))
 
@@ -150,6 +135,7 @@ interface SortableVirtualListProps {
   yOffset: number
   views: number[]
   height: number
+  width: number
 }
 
 export interface DisplaySetupProps {
@@ -172,6 +158,32 @@ function DisplaySetup(props: DisplaySetupProps) {
   )
   const yOffset = useAppSelector(selectDisplayViewsListYOffset(props.displayID))
 
+  const getScrollTop = useCallback(() => {
+    let scrollTop: number | undefined = undefined
+    const sortableList = document.getElementById('sortable-list')
+    if (sortableList != null) {
+      const scrollElement = sortableList.firstElementChild
+      scrollTop = scrollElement?.scrollTop ?? 0
+    }
+
+    return scrollTop
+  }, [])
+
+  const savePosition = useCallback(() => {
+    const scrollTop = getScrollTop()
+    if (scrollTop != null) {
+      dispatch(
+        setDisplayViewsListYOffset({ id: props.displayID, value: scrollTop })
+      )
+    }
+  }, [dispatch, getScrollTop, props.displayID])
+
+  useEffect(() => {
+    return () => {
+      savePosition()
+    }
+  }, [savePosition])
+
   const beginEditingName = () => {
     setIsEditingName(true)
   }
@@ -193,7 +205,8 @@ function DisplaySetup(props: DisplaySetupProps) {
   }
 
   const onExportDisplay = () => {
-    dispatch(exportDisplay(props.displayID))
+    // TODO export subset of AppStorage
+    // dispatch(exportDisplay(props.displayID))
   }
 
   const onDeleteDisplay = () => {
@@ -227,8 +240,6 @@ function DisplaySetup(props: DisplaySetupProps) {
     )
   }
 
-  const onSortStart = () => {}
-
   const onSortEnd = ({
     oldIndex,
     newIndex
@@ -236,34 +247,21 @@ function DisplaySetup(props: DisplaySetupProps) {
     oldIndex: number
     newIndex: number
   }) => {
+    const yOffset = getScrollTop()
     dispatch(
-      swapDisplayViews({ id: props.displayID, value: [oldIndex, newIndex] })
+      swapDisplayViews({
+        id: props.displayID,
+        value: { oldIndex, newIndex, yOffset }
+      })
     )
   }
 
-  const savePosition = useCallback(() => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(
-        setDisplayViewsListYOffset({ id: props.displayID, value: scrollTop })
-      )
-    }
-  }, [dispatch, props.displayID])
-
-  useEffect(() => {
-    return () => {
-      savePosition()
-    }
-  }, [savePosition])
-
   const VirtualList = (props: any) => {
-    const { yOffset, views, height } = props
+    const { views, height, width, yOffset } = props
     return (
       <FixedSizeList
         height={height}
-        width="100%"
+        width={width}
         initialScrollOffset={yOffset}
         itemSize={56}
         itemCount={views.length}
@@ -289,6 +287,8 @@ function DisplaySetup(props: DisplaySetupProps) {
           viewID={viewID}
           displayID={props.displayID}
           selected={viewID === selectedView}
+          style={value.style}
+          getScrollTop={getScrollTop}
         />
       )
     }
@@ -398,7 +398,7 @@ function DisplaySetup(props: DisplaySetupProps) {
             flexDirection: 'column'
           }}
         >
-          <Card>
+          <Card sx={{ overflow: 'visible' }}>
             <CardActions>
               <Tooltip title="Clone Display">
                 <IconButton onClick={onCloneDisplay}>
@@ -417,7 +417,7 @@ function DisplaySetup(props: DisplaySetupProps) {
               </Tooltip>
             </CardActions>
           </Card>
-          <Card>
+          <Card sx={{ maxHeight: '50%' }}>
             <CardHeader
               title={
                 selectedViewName != null
@@ -434,30 +434,35 @@ function DisplaySetup(props: DisplaySetupProps) {
                 </IconButton>
               }
             />
-            <Collapse
-              in={selectedView != null && userExpandedSettings !== false}
-            >
-              <CardContent>
-                {selectedView && <DisplayViewSettings viewID={selectedView} />}
-              </CardContent>
-            </Collapse>
+            <CardContent className={classes.scrollableContent}>
+              <Collapse
+                in={selectedView != null && userExpandedSettings !== false}
+              >
+                {selectedView && (
+                  <DisplayViewSettings
+                    displayID={props.displayID}
+                    viewID={selectedView}
+                  />
+                )}
+              </Collapse>
+            </CardContent>
           </Card>
           <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
             <CardHeader title="Layers" />
             <CardContent sx={{ flexGrow: 1 }}>
-              <AutoSizer disableWidth>
-                {({ height }: { height: number }) => (
+              <AutoSizer>
+                {({ height, width }: { height: number; width: number }) => (
                   <List id="sortable-list" disablePadding>
                     <SortableVirtualList
                       helperContainer={() =>
                         document.getElementById('sortable-list') as HTMLElement
                       }
                       distance={5}
-                      onSortStart={onSortStart}
                       onSortEnd={onSortEnd}
                       yOffset={yOffset}
                       views={views}
                       height={height}
+                      width={width}
                     />
                   </List>
                 )}
@@ -471,7 +476,7 @@ function DisplaySetup(props: DisplaySetupProps) {
               </Tooltip>
               <Tooltip title="Clone View">
                 <span
-                  style={selectedView == null ? { pointerEvents: 'none' } : {}}
+                  className={selectedView == null ? classes.disable : undefined}
                 >
                   <IconButton
                     onClick={onCloneView}
@@ -483,7 +488,7 @@ function DisplaySetup(props: DisplaySetupProps) {
               </Tooltip>
               <Tooltip title="Delete View">
                 <span
-                  style={selectedView == null ? { pointerEvents: 'none' } : {}}
+                  className={selectedView == null ? classes.disable : undefined}
                 >
                   <IconButton
                     onClick={onDeleteView}

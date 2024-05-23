@@ -317,7 +317,7 @@ export class ContentPreloadService {
         const data = newContentData(proxyURL, 'iframe')
         this.dataCache.set(url, data)
         resolve(data)
-      } else if (isImage(url, true)) {
+      } else if (isImage(url, false)) {
         const image = new Image()
         const promise = new Promise((res, rej) => {
           image.onload = res

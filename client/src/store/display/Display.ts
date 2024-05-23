@@ -2,7 +2,7 @@ import { copy } from 'flipflip-common'
 
 export default interface Display {
   id: number
-  name?: string
+  name: string
   views: number[]
   selectedView?: number
   displayViewsListYOffset: number
@@ -10,6 +10,7 @@ export default interface Display {
 
 export const initialDisplay: Display = {
   id: 0,
+  name: '',
   views: [],
   displayViewsListYOffset: 0
 }

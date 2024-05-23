@@ -39,6 +39,9 @@ function createDisplaySlice(displayViewState?: EntryState<View>) {
       deleteDisplayView: (state, action: PayloadAction<number>) => {
         deleteEntry(state, action.payload)
       },
+      resetDisplayViewPlaylistID: (state, action: PayloadAction<number[]>) => {
+        action.payload.forEach((id) => (state.entries[id].playlistID = 0))
+      },
       setDisplayViewName: (
         state,
         action: PayloadAction<EntryUpdate<string>>
@@ -86,12 +89,40 @@ function createDisplaySlice(displayViewState?: EntryState<View>) {
         const { id, value } = action.payload
         getEntry(state, id).opacity = value
       },
-      setDisplayViewSetupVisible: (
+      setDisplayViewVisible: (
         state,
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
         const { id, value } = action.payload
         getEntry(state, id).visible = value
+      },
+      setDisplayViewSync: (
+        state,
+        action: PayloadAction<EntryUpdate<boolean>>
+      ) => {
+        const { id, value } = action.payload
+        getEntry(state, id).sync = value
+      },
+      setDisplayViewSyncWithView: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
+        const { id, value } = action.payload
+        getEntry(state, id).syncWithView = value
+      },
+      setDisplayViewMirrorSyncedView: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
+        const { id, value } = action.payload
+        getEntry(state, id).mirrorSyncedView = value
+      },
+      setDisplayViewScenePlaylistID: (
+        state,
+        action: PayloadAction<EntryUpdate<number>>
+      ) => {
+        const { id, value } = action.payload
+        getEntry(state, id).playlistID = value
       }
     }
   })
@@ -102,6 +133,7 @@ export const {
   setDisplayView,
   deleteDisplayViews,
   deleteDisplayView,
+  resetDisplayViewPlaylistID,
   setDisplayViewName,
   setDisplayViewX,
   setDisplayViewY,
@@ -110,5 +142,9 @@ export const {
   setDisplayViewHeight,
   setDisplayViewColor,
   setDisplayViewOpacity,
-  setDisplayViewSetupVisible
+  setDisplayViewVisible,
+  setDisplayViewSync,
+  setDisplayViewSyncWithView,
+  setDisplayViewMirrorSyncedView,
+  setDisplayViewScenePlaylistID
 } = createDisplaySlice().actions

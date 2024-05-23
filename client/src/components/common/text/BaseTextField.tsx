@@ -83,6 +83,7 @@ export default function BaseTextField<
       <TextField
         className={props.className}
         disabled={props.disabled}
+        fullWidth={props.fullWidth}
         multiline={props.multiline}
         variant={props.variant}
         label={props.label}
