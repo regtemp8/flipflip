@@ -205,6 +205,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
   searchBar: {
     float: 'right',
     display: 'flex',
+    alignItems: 'center',
     maxWidth: '100%'
   },
   searchCount: {
@@ -1611,9 +1612,11 @@ function AudioLibrary() {
                 isAudio
                 isClearable
                 onlyTags
+                fullWidth
                 showCheckboxes
                 hideSelectedOptions={false}
                 onUpdateFilters={onSelectTags}
+                inputVariant="standard"
               />
             )}
           </DialogContent>

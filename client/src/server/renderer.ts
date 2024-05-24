@@ -6,10 +6,8 @@ import createAudioReducer from '../store/audio/slice'
 import createCaptionScriptReducer from '../store/captionScript/slice'
 import createClipReducer from '../store/clip/slice'
 import createLibrarySourceReducer from '../store/librarySource/slice'
-import createOverlayReducer from '../store/overlay/slice'
 import createPlaylistReducer from '../store/playlist/slice'
 import createSceneReducer from '../store/scene/slice'
-import createSceneGridReducer from '../store/sceneGrid/slice'
 import createSceneGroupReducer from '../store/sceneGroup/slice'
 import createTagReducer from '../store/tag/slice'
 import playersSlice from '../store/player/slice'
@@ -42,7 +40,6 @@ export function createReduxStore(
       captionScript: createCaptionScriptReducer(state?.captionScript),
       clip: createClipReducer(state?.clip),
       librarySource: createLibrarySourceReducer(state?.librarySource),
-      overlay: createOverlayReducer(state?.overlay),
       playlist: createPlaylistReducer(state?.playlist),
       displayPlaylistItem: createDisplayPlaylistItemReducer(
         state?.displayPlaylistItem
@@ -51,7 +48,6 @@ export function createReduxStore(
         state?.scenePlaylistItem
       ),
       scene: createSceneReducer(state?.scene),
-      sceneGrid: createSceneGridReducer(state?.sceneGrid),
       sceneGroup: createSceneGroupReducer(state?.sceneGroup),
       display: createDisplayReducer(state?.display),
       displayView: createDisplayViewReducer(state?.displayView),

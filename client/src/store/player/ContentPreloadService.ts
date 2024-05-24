@@ -297,9 +297,17 @@ export class ContentPreloadService {
     this.durations.clear()
   }
 
-  public getData(uuid: string, state: RootState): Promise<ContentData> {
+  public onSceneChange(uuid: string, oldSceneID: number) {
+    this.sceneURLStates.delete(this.createSceneURLStateKey(uuid, oldSceneID))
+  }
+
+  public getData(
+    uuid: string,
+    sceneID: number,
+    state: RootState
+  ): Promise<ContentData> {
     return new Promise(async (resolve, reject) => {
-      const url = this.getURL(uuid, state)
+      const url = this.getURL(uuid, sceneID, state)
       if (url == null) {
         reject('failed to get URL')
         return
@@ -343,9 +351,18 @@ export class ContentPreloadService {
         // TODO parse URL and use path in case there are query params
         if (url.endsWith('.gif')) {
           const loader = new GIFDataLoader()
-          const { animated, duration } = await loader.getData(url)
-          data.animated = animated
-          data.duration = duration
+          try {
+            const { animated, duration } = await loader.getData(url)
+            data.animated = animated
+            data.duration = duration
+          } catch (error) {
+            if (error) {
+              this.dataCache.set(url, newContentData(url))
+            }
+
+            resolve({ url, error: true })
+            return
+          }
         }
 
         this.dataCache.set(url, data)
@@ -398,8 +415,11 @@ export class ContentPreloadService {
     })
   }
 
-  private getURL(uuid: string, state: RootState) {
-    const sceneID = state.players[uuid].sceneID
+  private createSceneURLStateKey(uuid: string, sceneID: number) {
+    return `${uuid}-${sceneID}`
+  }
+
+  private getURL(uuid: string, sceneID: number, state: RootState) {
     const allURLs = state.sourceScraper[sceneID].allURLs
     if (allURLs == null) {
       return undefined
@@ -420,7 +440,8 @@ export class ContentPreloadService {
     const sources = state.scene.entries[sceneID].sources.map(
       (id) => state.librarySource.entries[id]
     )
-    const urlState = this.sceneURLStates.get(uuid) ?? newURLState()
+    const sceneURLStateKey = this.createSceneURLStateKey(uuid, sceneID)
+    const urlState = this.sceneURLStates.get(sceneURLStateKey) ?? newURLState()
 
     // For source weighted
     if (weightFunction === WF.sources) {
@@ -569,7 +590,7 @@ export class ContentPreloadService {
       urlState.loadedURLs.push(url)
     }
 
-    this.sceneURLStates.set(uuid, urlState)
+    this.sceneURLStates.set(sceneURLStateKey, urlState)
     return url
   }
 
@@ -663,7 +684,7 @@ export class ContentPreloadService {
 
       const speed = this.calcVideoSpeed(scene)
       const timeToPlay = this.calcVideoTimeToPlay(scene, start, end)
-      if (timeToPlay > timeToNextFrame) {
+      if (timeToPlay > view.timeToNextFrame) {
         view.timeToNextFrame = timeToPlay
       }
 
@@ -694,7 +715,7 @@ export class ContentPreloadService {
     }
     if (data.animated === true) {
       const timeToPlay = this.calcGIFTimeToPlay(scene, data.duration as number)
-      if (timeToPlay > timeToNextFrame) {
+      if (timeToPlay > view.timeToNextFrame) {
         view.timeToNextFrame = timeToPlay
       }
     }
@@ -1472,6 +1493,7 @@ export class ContentPreloadService {
   }
 
   public getImageView(
+    sceneID: number,
     data: ContentData,
     effects: EffectsData,
     view: ViewData,
@@ -1506,6 +1528,7 @@ export class ContentPreloadService {
       }`
     }
     return {
+      sceneID,
       data,
       view,
       transform,

@@ -1085,6 +1085,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               return
             }
             if (nextSceneAtEnd) {
+              // TODO how is this going to work with scene playlists?
               dispatch(nextScene(props.sceneID))
               return
             }
@@ -1162,6 +1163,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             return
           }
           if (nextSceneAtEnd) {
+            // TODO how is this going to work with scene playlists?
             dispatch(nextScene(props.sceneID))
             if (!props.persist) return
           }

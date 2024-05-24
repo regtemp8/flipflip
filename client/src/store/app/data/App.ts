@@ -9,7 +9,6 @@ export default interface App {
   config: Config
   sceneGroups: number[] // Array of SceneGroup IDs
   scenes: number[] // Array of Scene IDs
-  grids: number[] // Array of SceneGrid IDs
   displays: number[] // Array of Display IDs
   library: number[] // Array of LibrarySource IDs
   audios: number[] // Array of Audio IDs
@@ -48,7 +47,6 @@ export const initialApp: App = {
   config: initialConfig,
   sceneGroups: [],
   scenes: [],
-  grids: [],
   displays: [],
   library: [],
   audios: [],

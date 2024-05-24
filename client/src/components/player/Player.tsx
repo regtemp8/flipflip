@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import { IdleTimer } from './IdleTimer'
 
 import {
@@ -14,7 +20,6 @@ import { getFileName, getFileGroup, urlToPath, WC } from 'flipflip-common'
 import AudioAlert from './AudioAlert'
 import CaptionProgramPlaylist from './CaptionProgramPlaylist'
 import ChildCallbackHack from './ChildCallbackHack'
-import GridPlayer from './GridPlayer'
 import PictureGrid from './PictureGrid'
 import PlayerBars from './PlayerBars'
 import SourceScraper from './SourceScraper'
@@ -29,7 +34,6 @@ import {
   selectUndefined
 } from '../../store/app/selectors'
 import {
-  selectSceneIsGridScene,
   selectSceneIsAudioScene,
   selectSceneIsScriptScene,
   selectSceneIsDownloadScene,
@@ -51,19 +55,11 @@ import {
   setRouteGoBack
 } from '../../store/app/thunks'
 import {
-  selectPlayerOverlaysLoaded,
-  selectPlayerCanStart,
   selectPlayerSceneID,
   selectPlayerMainLoaded,
   selectPlayerHasStarted,
-  selectPlayerNextSceneID,
-  selectPlayerIsEmpty,
-  selectPlayerOverlays
+  selectPlayerIsEmpty
 } from '../../store/player/selectors'
-import {
-  nextScene,
-  setPlayerHasStartedRecursive
-} from '../../store/player/thunks'
 import {
   selectAudioName,
   selectAudioThumb,
@@ -185,8 +181,6 @@ export interface PlayerProps {
   allLoaded?: boolean
   captionProgramJumpToHack?: ChildCallbackHack
   captionScale?: number
-  gridCoordinates?: number[]
-  gridView?: boolean
   preventSleep?: boolean
   getCurrentTimestamp?: () => number
   onCaptionError?: (e: string) => void
@@ -202,20 +196,13 @@ function Player(props: PlayerProps) {
   const dispatch = useAppDispatch()
   const { isWin32, pathSep } = useAppSelector(selectConstants())
   const sceneID = useAppSelector(selectPlayerSceneID(props.uuid))
-  const nextSceneID = useAppSelector(selectPlayerNextSceneID(props.uuid))
-  const overlays = useAppSelector(selectPlayerOverlays(props.uuid))
+  const nextSceneID = 0
   const mainLoaded = useAppSelector(selectPlayerMainLoaded(props.uuid))
   const hasStarted = useAppSelector(selectPlayerHasStarted(props.uuid))
   const isEmpty = useAppSelector(selectPlayerIsEmpty(props.uuid))
-  const areOverlaysLoaded = useAppSelector(
-    selectPlayerOverlaysLoaded(props.uuid),
-    (a, b) =>
-      a.length === b.length && a.every((value, index) => value === b[index])
-  )
-  const canStart = useAppSelector(selectPlayerCanStart(props.uuid))
 
   const watermark = useAppSelector(
-    selectAppConfigGeneralSettingsWatermarkSettings(props.gridView ?? false)
+    selectAppConfigGeneralSettingsWatermarkSettings(false)
   )
   const audioAlert = useAppSelector(selectAppConfigDisplaySettingsAudioAlert())
   const startImmediately = useAppSelector(
@@ -223,7 +210,6 @@ function Player(props: PlayerProps) {
   )
   const tutorial = useAppSelector(selectAppTutorial())
   const allTags = useAppSelector(selectPlayerAllTags())
-  const isGridScene = useAppSelector(selectSceneIsGridScene(sceneID))
   const isAudioScene = useAppSelector(selectSceneIsAudioScene(sceneID))
   const isScriptScene = useAppSelector(selectSceneIsScriptScene(sceneID))
   const isDownloadScene = useAppSelector(selectSceneIsDownloadScene(sceneID))
@@ -256,14 +242,13 @@ function Player(props: PlayerProps) {
   const audioAlbumSelector =
     currentAudio != null ? selectAudioAlbum(currentAudio) : selectUndefined
   const audioAlbum = useAppSelector(audioAlbumSelector)
+  const canStart = false
+  const isDisplayWithOneView = false
 
   const [isPlaying, setIsPlaying] = useState(true)
   const [historyOffset, setHistoryOffset] = useState(0)
   const [historyPaths, setHistoryPaths] = useState<HTMLContentElement[]>([])
   const [mainVideo, setMainVideo] = useState<HTMLVideoElement>()
-  const [overlayVideos, setOverlayVideos] = useState<
-    Array<Array<HTMLVideoElement | undefined>>
-  >([])
   const [timeToNextFrame, setTimeToNextFrame] = useState<number>()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
   const [thumbImage, setThumbImage] = useState<HTMLImageElement>()
@@ -280,9 +265,7 @@ function Player(props: PlayerProps) {
   const _toggleStrobe = useRef(false)
   const _currentTimestamp = useRef<number>()
   const _imagePlayerAdvanceHacks = useRef(
-    new Array<ChildCallbackHack[]>(overlays.length + 1).fill([
-      new ChildCallbackHack()
-    ])
+    new Array<ChildCallbackHack[]>(1).fill([new ChildCallbackHack()])
   )
 
   const _setHistoryOffset = useRef<(offset: number) => void>(setHistoryOffset)
@@ -307,16 +290,8 @@ function Player(props: PlayerProps) {
   const { uuid, allLoaded, captionScale, getCurrentTimestamp, onLoaded } = props
 
   const start = useCallback(
-    (
-      isMainLoaded: boolean,
-      areOverlaysLoaded: boolean[],
-      canStart: boolean,
-      force = false
-    ) => {
-      const isLoaded =
-        !force &&
-        isMainLoaded &&
-        (overlays.length === 0 || areOverlaysLoaded.every((b) => b))
+    (isMainLoaded: boolean, canStart: boolean, force = false) => {
+      const isLoaded = !force && isMainLoaded
       if (onLoaded && isLoaded) {
         onLoaded()
       }
@@ -325,46 +300,29 @@ function Player(props: PlayerProps) {
         force ||
         (canStart && ((isLoaded && allLoaded !== false) || startImmediately))
       ) {
-        dispatch(setPlayerHasStartedRecursive(uuid, true))
         dispatch(setPlayerMainLoaded({ uuid, value: true }))
         if (!_startTime.current) {
           _startTime.current = new Date().getTime()
         }
-        setTimeout(() => {
-          if (isGridScene) {
-            for (const r of _imagePlayerAdvanceHacks.current) {
-              for (const hack of r) {
-                hack.fire()
-              }
-            }
-          }
-        }, 200)
-      } else if (
-        !isGridScene &&
-        !isAudioScene &&
-        overlays.length === 0 &&
-        mainLoaded !== isLoaded
-      ) {
+      } else if (!isAudioScene && mainLoaded !== isLoaded) {
         dispatch(setPlayerMainLoaded({ uuid, value: isLoaded }))
       }
     },
     [
       dispatch,
       isAudioScene,
-      isGridScene,
       allLoaded,
       onLoaded,
       uuid,
       startImmediately,
-      mainLoaded,
-      overlays.length
+      mainLoaded
     ]
   )
 
   const play = useCallback(() => {
     setIsPlaying(true)
-    start(mainLoaded, areOverlaysLoaded, canStart)
-  }, [mainLoaded, areOverlaysLoaded, canStart, start])
+    start(mainLoaded, canStart)
+  }, [mainLoaded, canStart, start])
 
   const nextSceneLoop = useCallback(() => {
     if (
@@ -374,18 +332,11 @@ function Player(props: PlayerProps) {
       !nextSceneAllImages &&
       Math.abs(new Date().getTime() - _startTime.current) >= nextSceneTime
     ) {
-      dispatch(nextScene(props.uuid))
+      // dispatch(nextScene(props.uuid))
     } else if (!isPlaying && _startTime.current) {
       _startTime.current += 1000
     }
-  }, [
-    dispatch,
-    isPlaying,
-    isScriptScene,
-    nextSceneAllImages,
-    nextSceneTime,
-    props.uuid
-  ])
+  }, [isPlaying, isScriptScene, nextSceneAllImages, nextSceneTime])
 
   useEffect(() => {
     if (!props.preventSleep) {
@@ -447,56 +398,10 @@ function Player(props: PlayerProps) {
   }, [sceneID, allTags, nextSceneLoop, nextSceneID])
 
   useEffect(() => {
-    setOverlayVideos(
-      new Array<Array<HTMLVideoElement | undefined>>(overlays.length).fill([
-        undefined
-      ])
-    )
-  }, [overlays.length])
-
-  useEffect(() => {
-    if (props.allLoaded === false || hasStarted === false) {
-      start(mainLoaded, areOverlaysLoaded, canStart)
-    }
-  }, [
-    props.allLoaded,
-    hasStarted,
-    areOverlaysLoaded,
-    canStart,
-    start,
-    mainLoaded
-  ])
-
-  useEffect(() => {
-    if (canStart) {
-      start(mainLoaded, areOverlaysLoaded, canStart)
-    }
-  }, [canStart, areOverlaysLoaded, start, mainLoaded])
-
-  useEffect(() => {
     if (!isEmpty && mainLoaded) {
       play()
     }
   }, [play, isEmpty, mainLoaded])
-
-  useEffect(() => {
-    if (areOverlaysLoaded) {
-      play()
-    }
-  }, [play, areOverlaysLoaded])
-
-  const setOverlayVideo = (index: number, video?: HTMLVideoElement) => {
-    const newOV = Array.from(overlayVideos)
-    while (newOV.length <= index) {
-      newOV.push([undefined])
-    }
-    if (newOV[index][0] !== video) {
-      newOV[index][0] = video
-      setOverlayVideos(newOV)
-    }
-  }
-
-  const nop = () => {}
 
   const onPlaying = (position: number, duration: number) => {
     _currentTimestamp.current = position
@@ -510,24 +415,6 @@ function Player(props: PlayerProps) {
     setCurrentAudio(audioID)
     if (isAudioScene) {
       dispatch(changeAudioRoute({ id: sceneID as number, value: audioID }))
-    }
-  }
-
-  const setGridOverlayVideo = (
-    oIndex: number,
-    gIndex: number,
-    video: HTMLVideoElement
-  ) => {
-    const newOV = Array.from(overlayVideos)
-    while (newOV.length <= oIndex) {
-      newOV.push([undefined])
-    }
-    while (newOV[oIndex].length <= gIndex) {
-      newOV[oIndex].push(undefined)
-    }
-    if (newOV[oIndex][gIndex] !== video) {
-      newOV[oIndex][gIndex] = video
-      setOverlayVideos(newOV)
     }
   }
 
@@ -570,7 +457,6 @@ function Player(props: PlayerProps) {
   const navigateTagging = useCallback(
     (offset: number) => {
       dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: false }))
-      dispatch(setPlayerHasStartedRecursive(props.uuid, false))
       dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: false }))
       dispatch(setPlayerIsEmpty({ uuid: props.uuid, value: false }))
       setHistoryOffset(0)
@@ -590,26 +476,13 @@ function Player(props: PlayerProps) {
     textEnabled &&
     (scriptPlaylists.length > 0 || persistText)
 
-  let rootStyle: any
-  if (props.gridView) {
-    rootStyle = {
-      display: 'flex',
-      position: 'relative',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      overflow: 'hidden'
-    }
-  } else {
-    rootStyle = {
-      display: 'flex',
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0
-    }
+  let rootStyle: CSSProperties = {
+    display: 'flex',
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
   }
   if (tutorial != null) {
     rootStyle = {
@@ -618,16 +491,8 @@ function Player(props: PlayerProps) {
     }
   }
 
-  let playerStyle: any = {}
-  if (!props.gridView) {
-    playerStyle = {
-      position: 'fixed',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0
-    }
-  } else if (hasStarted) {
+  let playerStyle: CSSProperties = {}
+  if (hasStarted) {
     playerStyle = {
       position: 'relative',
       width: '100%',
@@ -737,7 +602,7 @@ function Player(props: PlayerProps) {
   const { classes } = useStyles()
   return (
     <div style={rootStyle}>
-      {!recentPictureGrid && !props.gridView && hasStarted && (
+      {!recentPictureGrid && hasStarted && (
         <div
           style={{
             zIndex: 999,
@@ -761,11 +626,7 @@ function Player(props: PlayerProps) {
       {!hasStarted && !isEmpty && !isDownloadScene && (
         <ProgressCard
           sceneID={sceneID as number}
-          start={
-            canStart
-              ? () => start(mainLoaded, areOverlaysLoaded, canStart, true)
-              : undefined
-          }
+          start={canStart ? () => start(mainLoaded, canStart, true) : undefined}
         />
       )}
       {isEmpty && (
@@ -797,7 +658,7 @@ function Player(props: PlayerProps) {
         </main>
       )}
 
-      {!props.gridView && (
+      {isDisplayWithOneView && (
         <PlayerBars
           hasStarted={hasStarted}
           historyPaths={historyPaths}
@@ -807,15 +668,14 @@ function Player(props: PlayerProps) {
           isEmpty={isEmpty}
           isPlaying={isPlaying}
           mainVideo={mainVideo}
-          overlayVideos={overlayVideos}
           sceneID={sceneID}
           title={
             allTags
               ? isAudioScene
                 ? currentAudio
-                  ? audioName
+                  ? (audioName as string)
                   : 'Loading...'
-                : firstSourceUrl
+                : (firstSourceUrl as string)
               : name
           }
           recentPictureGrid={recentPictureGrid}
@@ -850,13 +710,11 @@ function Player(props: PlayerProps) {
           (audioEnabled || persistAudio) && (
             <AudioAlert audioID={currentAudio} />
           )}
-        {!isGridScene && !isAudioScene && (
+        {!isAudioScene && (
           <SourceScraper
             uuid={props.uuid}
             currentAudio={currentAudio}
             opacity={recentPictureGrid ? 0 : 1}
-            gridCoordinates={props.gridCoordinates}
-            gridView={props.gridView ?? false}
             isPlaying={isPlaying}
             strobeLayer={strobe ? strobeLayer : undefined}
             historyOffset={historyOffset}
@@ -873,86 +731,6 @@ function Player(props: PlayerProps) {
             setTimeToNextFrame={_changeTimeToNextFrame.current}
           />
         )}
-
-        {!recentPictureGrid &&
-          !isAudioScene &&
-          !isEmpty &&
-          overlays.map((overlay, index) => {
-            let showProgress = mainLoaded && !hasStarted
-            if (showProgress) {
-              for (let x = 0; x < index; x++) {
-                if (!areOverlaysLoaded[x]) {
-                  showProgress = false
-                  break
-                }
-              }
-            }
-            if (!overlay.isGrid) {
-              while (_imagePlayerAdvanceHacks.current.length <= index + 1) {
-                _imagePlayerAdvanceHacks.current.push([new ChildCallbackHack()])
-              }
-              return (
-                <SourceScraper
-                  key={index}
-                  uuid={props.uuid}
-                  overlayIndex={index}
-                  opacity={overlay.opacity / 100}
-                  currentAudio={currentAudio}
-                  gridView={props.gridView ?? false}
-                  isPlaying={isPlaying && !isEmpty}
-                  historyOffset={0}
-                  advanceHack={_imagePlayerAdvanceHacks.current[index + 1][0]}
-                  setHistoryOffset={nop}
-                  setHistoryPaths={nop}
-                  setVideo={
-                    props.setVideo && !props.gridView
-                      ? props.setVideo
-                      : (video?: HTMLVideoElement) =>
-                          setOverlayVideo(index, video)
-                  }
-                />
-              )
-            } else if (overlay.isGrid && !props.gridView) {
-              while (_imagePlayerAdvanceHacks.current.length <= index + 1) {
-                _imagePlayerAdvanceHacks.current.push([new ChildCallbackHack()])
-              }
-              if (
-                _imagePlayerAdvanceHacks.current[index + 1].length !==
-                overlay.gridSize
-              ) {
-                _imagePlayerAdvanceHacks.current[index + 1] =
-                  new Array<ChildCallbackHack>(overlay.gridSize).fill(
-                    new ChildCallbackHack()
-                  )
-              }
-
-              return (
-                <div
-                  key={index}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    opacity: overlay.opacity / 100
-                  }}
-                >
-                  <GridPlayer
-                    hideBars
-                    parentUUID={props.uuid}
-                    overlayIndex={index}
-                    advanceHacks={_imagePlayerAdvanceHacks.current[index + 1]}
-                    setVideo={(gIndex: number, video: HTMLVideoElement) =>
-                      setGridOverlayVideo(index, gIndex, video)
-                    }
-                  />
-                </div>
-              )
-            } else {
-              return <div key={index} />
-            }
-          })}
       </div>
 
       {showCaptionProgram &&

@@ -70,7 +70,6 @@ import {
 import {
   selectSceneIsAudioScene,
   selectSceneVideoVolume,
-  selectSceneIsGridScene,
   selectSceneIsDownloadScene,
   selectSceneIsScriptScene,
   selectSceneNextSceneID,
@@ -319,8 +318,7 @@ export interface PlayerBarsProps {
   imagePlayerDeleteHack: ChildCallbackHack
   isEmpty: boolean
   isPlaying: boolean
-  mainVideo: HTMLVideoElement
-  overlayVideos: HTMLVideoElement[][]
+  mainVideo?: HTMLVideoElement
   persistAudio: boolean
   persistText: boolean
   recentPictureGrid: boolean
@@ -358,7 +356,7 @@ function PlayerBars(props: PlayerBarsProps) {
   )
   const tutorial = useAppSelector(selectAppTutorial())
   const isAudioScene = useAppSelector(selectSceneIsAudioScene(props.sceneID))
-  const isGridScene = useAppSelector(selectSceneIsGridScene(props.sceneID))
+  const isDisplayWithOneView = false
   const isDownloadScene = useAppSelector(
     selectSceneIsDownloadScene(props.sceneID)
   )
@@ -600,7 +598,7 @@ function PlayerBars(props: PlayerBarsProps) {
       }
       if ((!isPlaying || clickToProgressWhilePlaying) && hasStarted) {
         imagePlayerAdvanceHacks[0][0].fire()
-        // TODO Improve this to be able to advance specific grids
+        // TODO Improve this to be able to advance specific views within display
         /* for (let x of props.imagePlayerAdvanceHacks) {
           for (let y of x) {
             y.fire();
@@ -856,9 +854,7 @@ function PlayerBars(props: PlayerBarsProps) {
   }
 
   if (!_showVideoControls.current) {
-    _showVideoControls.current =
-      props.mainVideo != null ||
-      props.overlayVideos.find((a) => a != null) != null
+    _showVideoControls.current = props.mainVideo != null
   }
 
   return (
@@ -923,60 +919,57 @@ function PlayerBars(props: PlayerBarsProps) {
                 <FullscreenIcon fontSize="large" />
               </IconButton>
             </Tooltip>
-            {!isGridScene && (
-              <React.Fragment>
-                <Divider
-                  component="div"
-                  orientation="vertical"
-                  style={{ height: 48, margin: '0 14px 0 3px' }}
-                />
-                <IconButton
-                  disabled={!canGoBack}
-                  edge="start"
-                  color="inherit"
-                  aria-label="Backward"
-                  onClick={historyGoBack}
-                  size="large"
-                >
-                  <ForwardIcon
-                    fontSize="large"
-                    style={{ transform: 'rotate(180deg)' }}
-                  />
-                </IconButton>
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label={props.isPlaying ? 'Pause' : 'Play'}
-                  onClick={() => setPlayPause(!props.isPlaying)}
-                  size="large"
-                >
-                  {props.isPlaying ? (
-                    <PauseIcon fontSize="large" />
-                  ) : (
-                    <PlayArrowIcon fontSize="large" />
-                  )}
-                </IconButton>
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="Forward"
-                  onClick={historyGoForward}
-                  size="large"
-                >
-                  <ForwardIcon
-                    fontSize="large"
-                    style={
-                      canGoForward
-                        ? {}
-                        : {
-                            color: 'rgba(255, 255, 255, 0.3)',
-                            backgroundColor: 'transparent'
-                          }
-                    }
-                  />
-                </IconButton>
-              </React.Fragment>
-            )}
+            {/* TODO make historyGoBack, play/pause and historyGoForward work on display */}
+            <Divider
+              component="div"
+              orientation="vertical"
+              style={{ height: 48, margin: '0 14px 0 3px' }}
+            />
+            <IconButton
+              disabled={!canGoBack}
+              edge="start"
+              color="inherit"
+              aria-label="Backward"
+              onClick={historyGoBack}
+              size="large"
+            >
+              <ForwardIcon
+                fontSize="large"
+                style={{ transform: 'rotate(180deg)' }}
+              />
+            </IconButton>
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label={props.isPlaying ? 'Pause' : 'Play'}
+              onClick={() => setPlayPause(!props.isPlaying)}
+              size="large"
+            >
+              {props.isPlaying ? (
+                <PauseIcon fontSize="large" />
+              ) : (
+                <PlayArrowIcon fontSize="large" />
+              )}
+            </IconButton>
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="Forward"
+              onClick={historyGoForward}
+              size="large"
+            >
+              <ForwardIcon
+                fontSize="large"
+                style={
+                  canGoForward
+                    ? {}
+                    : {
+                        color: 'rgba(255, 255, 255, 0.3)',
+                        backgroundColor: 'transparent'
+                      }
+                }
+              />
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>
@@ -1027,14 +1020,13 @@ function PlayerBars(props: PlayerBarsProps) {
                       mainVideo={props.mainVideo}
                       mainClipID={clipID}
                       mainClipValue={clipValue}
-                      otherVideos={props.overlayVideos}
                       imagePlayerAdvanceHacks={props.imagePlayerAdvanceHacks}
                     />
                   </AccordionDetails>
                 </Accordion>
               )}
 
-              {!isAudioScene && !isGridScene && (
+              {!isAudioScene && !isDisplayWithOneView && (
                 <React.Fragment>
                   <Accordion TransitionProps={{ unmountOnExit: true }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -1113,7 +1105,7 @@ function PlayerBars(props: PlayerBarsProps) {
                 </React.Fragment>
               )}
 
-              {!isGridScene && (
+              {!isDisplayWithOneView && (
                 <Accordion
                   defaultExpanded={isAudioScene}
                   TransitionProps={{
@@ -1137,7 +1129,7 @@ function PlayerBars(props: PlayerBarsProps) {
                 </Accordion>
               )}
 
-              {!isAudioScene && !isGridScene && !props.persistText && (
+              {!isAudioScene && !isDisplayWithOneView && !props.persistText && (
                 <Accordion TransitionProps={{ unmountOnExit: true }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>Text Overlay</Typography>
@@ -1208,7 +1200,7 @@ function PlayerBars(props: PlayerBarsProps) {
                 {sources.length === 1 &&
                   getSourceType(videoSourceURL) === ST.video && (
                     <VideoControl
-                      video={props.mainVideo}
+                      video={props.mainVideo as HTMLVideoElement}
                       clipID={clipID}
                       clipValue={clipValue}
                       useHotkeys

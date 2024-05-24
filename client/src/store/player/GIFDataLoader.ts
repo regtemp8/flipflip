@@ -50,10 +50,6 @@ export default class GIFDataLoader {
 
         return data
       })
-      .catch((error) => {
-        console.error(error)
-        return { url }
-      })
   }
 
   private getGIFDuration(info: GIFInfo): number | undefined {

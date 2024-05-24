@@ -139,7 +139,8 @@ const useStyles = makeStyles()((theme: Theme) => ({
   searchBar: {
     float: 'right',
     display: 'flex',
-    maxWidth: '100%'
+    maxWidth: '100%',
+    alignItems: 'center'
   },
   searchCount: {
     color: theme.palette.primary.contrastText,
@@ -610,11 +611,7 @@ function ScriptLibrary() {
         )}
         variant="permanent"
         classes={{
-          paper: cx(
-            classes.drawerPaper,
-            !open && specialMode == null && classes.drawerPaperClose,
-            specialMode != null && classes.drawerPaperHidden
-          )
+          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
         }}
         open={drawerOpen}
       >
@@ -668,7 +665,7 @@ function ScriptLibrary() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <div className={cx(classes.root, classes.fill)}>
-          {!specialMode && <div className={classes.drawerSpacer} />}
+          <div className={classes.drawerSpacer} />
           <Container
             maxWidth={false}
             className={cx(
@@ -965,6 +962,8 @@ function ScriptLibrary() {
               showCheckboxes
               hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
+              fullWidth
+              inputVariant="standard"
             />
           )}
         </DialogContent>

@@ -11,15 +11,12 @@ import ImagePlayer from './ImagePlayer'
 
 export interface SourceScraperProps {
   uuid: string
-  overlayIndex?: number
   opacity?: number
   currentAudio?: number
   isPlaying: boolean
-  gridView: boolean
   historyOffset: number
   advanceHack: ChildCallbackHack
   deleteHack?: ChildCallbackHack
-  gridCoordinates?: number[]
   strobeLayer?: string
   setHistoryOffset: (historyOffset: number) => void
   setHistoryPaths: (historyPaths: HTMLContentElement[]) => void
@@ -30,8 +27,6 @@ export interface SourceScraperProps {
 
 export default function SourceScraper(props: SourceScraperProps) {
   const dispatch = useAppDispatch()
-  const isOverlay = props.overlayIndex != null
-
   const captcha = useAppSelector(selectPlayerCaptcha(props.uuid))
   const [load, setLoad] = useState(false)
 
@@ -47,7 +42,6 @@ export default function SourceScraper(props: SourceScraperProps) {
     dispatch(
       setPlayerCaptcha({
         uuid: props.uuid,
-        overlayIndex: props.overlayIndex,
         value: undefined
       })
     )
@@ -55,23 +49,12 @@ export default function SourceScraper(props: SourceScraperProps) {
   }
 
   let style: CSSProperties = { opacity: props.opacity }
-  if (props.gridView) {
-    style.position = 'absolute'
-    style.top = 0
-    style.bottom = 0
-    style.left = 0
-    style.right = 0
-    style.zIndex = isOverlay ? 4 : 'auto'
-  }
-
   return (
     <div style={style}>
       <ImagePlayer
         uuid={props.uuid}
-        overlayIndex={props.overlayIndex}
         currentAudio={props.currentAudio}
         isPlaying={props.isPlaying}
-        gridView={props.gridView}
         historyOffset={props.historyOffset}
         setHistoryOffset={props.setHistoryOffset}
         setHistoryPaths={props.setHistoryPaths}
@@ -79,7 +62,6 @@ export default function SourceScraper(props: SourceScraperProps) {
         deleteHack={props.deleteHack}
         strobeLayer={props.strobeLayer}
         setVideo={props.setVideo}
-        gridCoordinates={props.gridCoordinates}
         setSceneCopy={props.setSceneCopy}
         setTimeToNextFrame={props.setTimeToNextFrame}
       />

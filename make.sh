@@ -13,6 +13,7 @@ yarn build
 
 echo 'Build login'
 cd ../login
+npx update-browserslist-db@latest
 yarn install
 yarn build
 
@@ -25,3 +26,10 @@ echo 'Make server'
 cd ../server
 yarn install
 yarn make
+
+cd ..
+rm -rf common/node_modules
+rm -rf client/node_modules
+rm -rf login/node_modules
+rm -rf server-details/node_modules
+rm -rf server/node_modules

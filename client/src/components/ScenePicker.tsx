@@ -82,7 +82,6 @@ import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
 
 import {
   convertDisplayIDToSceneID,
-  convertGridIDToSceneID,
   convertPlaylistIDToSceneID
 } from '../data/utils'
 import { en, MO, PLT, SF, SG, SPT } from 'flipflip-common'
@@ -112,7 +111,6 @@ import {
   addScene,
   routeToAudios,
   routeToConfig,
-  routeToGrid,
   routeToLibrary,
   routeToScriptor,
   routeToScripts,
@@ -132,7 +130,6 @@ import {
 } from '../store/sceneGroup/selectors'
 import BaseTextField from './common/text/BaseTextField'
 import { selectSceneName } from '../store/scene/selectors'
-import { selectSceneGridName } from '../store/sceneGrid/selectors'
 import {
   selectScenePickerGeneratorGroups,
   selectScenePickerDisplayGroups,
@@ -359,16 +356,6 @@ const useStyles = makeStyles()((theme: Theme) => {
       width: theme.spacing(5),
       height: theme.spacing(5)
     },
-    gridTooltip: {
-      top: 'auto',
-      right: 28,
-      bottom: 195,
-      left: 'auto',
-      position: 'fixed',
-      borderRadius: '50%',
-      width: theme.spacing(5),
-      height: theme.spacing(5)
-    },
     displayTooltip: {
       top: 'auto',
       right: 28,
@@ -407,9 +394,6 @@ const useStyles = makeStyles()((theme: Theme) => {
     },
     addDisplayButton: {
       marginBottom: 115
-    },
-    addGridButton: {
-      marginBottom: 170
     },
     addGeneratorButton: {
       marginBottom: 170
@@ -476,14 +460,11 @@ const useStyles = makeStyles()((theme: Theme) => {
     generatorTab: {
       ariaControls: 'vertical-tabpanel-1'
     },
-    gridTab: {
+    displayTab: {
       ariaControls: 'vertical-tabpanel-2'
     },
-    displayTab: {
-      ariaControls: 'vertical-tabpanel-3'
-    },
     playlistTab: {
-      ariaControls: 'vertical-tabpanel-4'
+      ariaControls: 'vertical-tabpanel-3'
     },
     fill: {
       flexGrow: 1
@@ -519,22 +500,13 @@ interface SceneCardProps {
   sceneID: number
   toDelete: boolean
   action: (id: number) => void
-  grid?: boolean
   display?: boolean
 }
 
 function SceneCard(props: SceneCardProps) {
-  const { sceneID, display, grid, toDelete, action } = props
+  const { sceneID, display, toDelete, action } = props
   const { classes } = useStyles()
-  let nameSelector
-  if (grid) {
-    nameSelector = selectSceneGridName
-  } else if (display) {
-    nameSelector = selectDisplayName
-  } else {
-    nameSelector = selectSceneName
-  }
-
+  const nameSelector = display ? selectDisplayName : selectSceneName
   const name = useAppSelector(nameSelector(sceneID))
   return (
     <Jiggle
@@ -692,7 +664,6 @@ function ScenePicker() {
   const { classes } = useStyles()
   const dispatch = useAppDispatch()
   const canGenerate = useAppSelector(selectAppCanGenerate())
-  // const canGrid = useAppSelector(selectAppCanGrid())
   const newWindowAlerted = useAppSelector(selectAppConfigNewWindowAlerted())
   const audioLibraryCount = useAppSelector(selectAppAudioLibraryCount())
   const scriptLibraryCount = useAppSelector(selectAppScriptLibraryCount())
@@ -702,21 +673,18 @@ function ScenePicker() {
   const version = useAppSelector(selectAppVersion())
   const sceneGroups = useAppSelector(selectScenePickerSceneGroups())
   const generatorGroups = useAppSelector(selectScenePickerGeneratorGroups())
-  // const gridGroups = useAppSelector(selectScenePickerGridGroups())
   const displayGroups = useAppSelector(selectScenePickerDisplayGroups())
   const playlistGroups = useAppSelector(selectScenePickerPlaylistGroups())
   const ungroupedScenes = useAppSelector(selectScenePickerUngroupedScenes())
   const ungroupedGenerators = useAppSelector(
     selectScenePickerUngroupedGenerators()
   )
-  // const ungroupedGrids = useAppSelector(selectScenePickerUngroupedGrids())
   const ungroupedDisplays = useAppSelector(selectScenePickerUngroupedDisplays())
   const ungroupedPlaylists = useAppSelector(
     selectScenePickerUngroupedPlaylists()
   )
   const sceneCount = useAppSelector(selectScenePickerSceneCount())
   const generatorCount = useAppSelector(selectScenePickerGeneratorCount())
-  // const gridCount = useAppSelector(selectScenePickerGridCount())
   const displayCount = useAppSelector(selectScenePickerDisplayCount())
   const playlistCount = useAppSelector(selectScenePickerPlaylistCount())
   const allScenesCount = useAppSelector(selectScenePickerAllScenesCount())
@@ -988,7 +956,7 @@ function ScenePicker() {
   }
 
   const onAddGroup = () => {
-    const groups = [SG.scene, SG.generator, SG.grid, SG.display, SG.playlist]
+    const groups = [SG.scene, SG.generator, SG.display, SG.playlist]
     const group = groups[openTab]
     dispatch(addSceneGroup(group))
   }
@@ -1078,23 +1046,6 @@ function ScenePicker() {
     )
   }
 
-  const renderGridCard = (gridID: number) => {
-    const sceneID = convertGridIDToSceneID(gridID)
-    return (
-      <SceneCard
-        grid
-        key={sceneID}
-        sceneID={gridID}
-        toDelete={scenesToDelete != null && scenesToDelete.includes(sceneID)}
-        action={
-          scenesToDelete == null
-            ? () => dispatch(routeToGrid(gridID))
-            : () => onToggleDelete(sceneID)
-        }
-      />
-    )
-  }
-
   const renderDisplayCard = (displayID: number) => {
     const sceneID = convertDisplayIDToSceneID(displayID)
     return (
@@ -1130,8 +1081,6 @@ function ScenePicker() {
 
   const getCard = (type: string) => {
     switch (type) {
-      case SG.grid:
-        return renderGridCard
       case SG.display:
         return renderDisplayCard
       case SG.playlist:
@@ -1344,17 +1293,6 @@ function ScenePicker() {
                 !open && classes.tabClose
               )}
             />
-            {/* <Tab
-              id="vertical-tab-2"
-              aria-controls="vertical-tabpanel-2"
-              icon={<GridOnIcon />}
-              label={open ? `Scene Grids (${gridCount})` : ''}
-              className={cx(
-                classes.tab,
-                classes.gridTab,
-                !open && classes.tabClose
-              )}
-            /> */}
             <Tab
               id="vertical-tab-3"
               aria-controls="vertical-tabpanel-3"
@@ -1591,12 +1529,6 @@ function ScenePicker() {
               {renderSceneGroupsSortable(SG.generator, generatorGroups)}
             </Box>
           )}
-          {/* {openTab === 2 && (
-            <Box>
-              {renderUngroupedSortable(SG.grid, ungroupedGrids)}
-              {renderSceneGroupsSortable(SG.grid, gridGroups)}
-            </Box>
-          )} */}
           {openTab === 2 && (
             <Box>
               {renderUngroupedSortable(SG.display, ungroupedDisplays)}
@@ -1711,31 +1643,6 @@ function ScenePicker() {
                   </Fab>
                 </span>
               </Tooltip>
-              {/* <Tooltip
-                disableInteractive
-                title="Add Scene Grid"
-                placement="left"
-              >
-                <span
-                  className={classes.gridTooltip}
-                  style={!canGrid ? { pointerEvents: 'none' } : {}}
-                >
-                  <Fab
-                    className={cx(
-                      classes.addButton,
-                      classes.addGridButton,
-                      openMenu !== MO.new && classes.addButtonClose
-                    )}
-                    onClick={() => {
-                      dispatch(addGrid())
-                    }}
-                    disabled={!canGrid}
-                    size="small"
-                  >
-                    <GridOnIcon className={classes.icon} />
-                  </Fab>
-                </span>
-              </Tooltip> */}
               <Tooltip disableInteractive title="Add Display" placement="left">
                 <span className={classes.displayTooltip}>
                   <Fab

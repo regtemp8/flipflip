@@ -1,7 +1,7 @@
 {
   "name": "server",
   "productName": "server",
-  "version": "4.0.0-beta3",
+  "version": "4.0.0-beta4",
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {
@@ -95,5 +95,5 @@
     "twitter": "^1.7.1",
     "ws": "^8.16.0"
   },
-  "packageManager": "yarn@4.2.1"
+  "packageManager": "yarn@4.4.0"
 }

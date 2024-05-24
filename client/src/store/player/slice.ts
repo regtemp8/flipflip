@@ -8,7 +8,6 @@ import {
 
 export interface PlayerUpdate<T> {
   uuid: string
-  overlayIndex?: number
   value: T
 }
 
@@ -19,7 +18,26 @@ export interface ImageViewState {
   transform: TransformData
   view: ViewData
   effects: EffectsData
+  sceneID: number
   displayIndex?: number
+}
+
+export interface PlaylistItem {
+  sceneID: number
+  duration: number
+}
+
+export interface PlaylistItemState {
+  index: number
+  timeToNextScene: number
+}
+
+export interface PlaylistState {
+  playlistID: number
+  player: PlaylistItemState
+  loader: PlaylistItemState
+  items: PlaylistItem[]
+  repeat: number
 }
 
 export interface ImageViewLoaderState {
@@ -33,22 +51,8 @@ export interface ImageViewLoaderState {
   imageViews: Array<ImageViewState | undefined>
 }
 
-export interface PlayerOverlayState {
-  id: number
-  show: boolean
-  opacity: number
-  sceneID: number
-  isGrid: boolean
-  grid: string[][]
-  loaded: boolean
-  loader: ImageViewLoaderState
-  captcha?: PlayerCaptcha
-}
-
 export interface PlayerState {
-  sceneID: number
-  nextSceneID: number
-  overlays: PlayerOverlayState[]
+  playlist: PlaylistState
   firstImageLoaded: boolean
   mainLoaded: boolean
   loader: ImageViewLoaderState
@@ -75,9 +79,6 @@ export const playersSlice = createSlice({
     setPlayersState: (state, action: PayloadAction<PlayersState>) => {
       return action.payload
     },
-    setPlayerSceneID: (state, action: PayloadAction<string>) => {
-      state[action.payload].sceneID = state[action.payload].nextSceneID
-    },
     setPlayerFirstImageLoaded: (
       state,
       action: PayloadAction<PlayerUpdate<boolean>>
@@ -87,11 +88,8 @@ export const playersSlice = createSlice({
         state[action.payload.uuid].isEmpty = false
       }
     },
-    setPlayerHasStarted: (
-      state,
-      action: PayloadAction<PlayerUpdate<boolean>>
-    ) => {
-      state[action.payload.uuid].hasStarted = action.payload.value
+    setPlayerHasStarted: (state, action: PayloadAction<string[]>) => {
+      action.payload.forEach((uuid) => (state[uuid].hasStarted = true))
     },
     setPlayerIsEmpty: (state, action: PayloadAction<PlayerUpdate<boolean>>) => {
       state[action.payload.uuid].isEmpty = action.payload.value
@@ -104,16 +102,13 @@ export const playersSlice = createSlice({
     },
     setPlayersLoaded: (state, action: PayloadAction<number>) => {
       const sceneID = action.payload
-      Object.keys(state).forEach((uuid) => {
-        const player = state[uuid]
-        if (player.sceneID === sceneID) {
-          player.mainLoaded = true
-        }
-
-        player.overlays
-          .filter((s) => s.sceneID === sceneID)
-          .forEach((s) => (s.loaded = true))
-      })
+      Object.keys(state)
+        .filter((uuid) => {
+          const { playlist } = state[uuid]
+          const { index } = playlist.loader
+          return playlist.items[index].sceneID === sceneID
+        })
+        .forEach((uuid) => (state[uuid].mainLoaded = true))
     },
     setPlayerState: (
       state,
@@ -131,44 +126,41 @@ export const playersSlice = createSlice({
       state,
       action: PayloadAction<PlayerUpdate<PlayerCaptcha | undefined>>
     ) => {
-      const { uuid, overlayIndex, value } = action.payload
-      const player =
-        overlayIndex != null ? state[uuid].overlays[overlayIndex] : state[uuid]
-      player.captcha = value
+      const { uuid, value } = action.payload
+      state[uuid].captcha = value
     },
     setPlayerStartLoading: (
       state,
       action: PayloadAction<PlayerUpdate<number>>
     ) => {
-      const { uuid, value, overlayIndex } = action.payload
-      const loader =
-        overlayIndex != null
-          ? state[uuid].overlays[overlayIndex].loader
-          : state[uuid].loader
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       loader.loadingCount += value
       loader.readyToLoad.splice(0, value)
     },
     setPlayerLoadingComplete: (
       state,
-      action: PayloadAction<PlayerUpdate<number>>
+      action: PayloadAction<PlayerUpdate<number[]>>
     ) => {
-      const { uuid, value, overlayIndex } = action.payload
-      const loader =
-        overlayIndex != null
-          ? state[uuid].overlays[overlayIndex].loader
-          : state[uuid].loader
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       loader.loadingCount--
-      loader.readyToLoad.push(value)
+      loader.readyToLoad.push(...value)
+    },
+    setPlayerReadyToDisplay: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const player = state[uuid]
+      player.loader.loadingCount--
+      if (!player.firstImageLoaded) {
+        player.firstImageLoaded = true
+      }
     },
     setPlayerShownImageView: (
       state,
       action: PayloadAction<PlayerUpdate<number>>
     ) => {
-      const { uuid, value, overlayIndex } = action.payload
-      const loader =
-        overlayIndex != null
-          ? state[uuid].overlays[overlayIndex].loader
-          : state[uuid].loader
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       const oldShownIndex = loader.shownIndex
       const imageViews = loader.imageViews as ImageViewState[]
       if (oldShownIndex != null) {
@@ -181,18 +173,16 @@ export const playersSlice = createSlice({
     },
     setPlayerPushReadyToLoad: (
       state,
-      action: PayloadAction<PlayerUpdate<number[]>>
+      action: PayloadAction<PlayerUpdate<number>>
     ) => {
-      const { uuid, value, overlayIndex } = action.payload
-      const loader =
-        overlayIndex != null
-          ? state[uuid].overlays[overlayIndex].loader
-          : state[uuid].loader
-
-      loader.iframeCount -= value.filter(
-        (index) => loader.imageViews[index]?.data.type === 'iframe'
-      ).length
-      loader.readyToLoad.push(...value)
+      const { uuid, value } = action.payload
+      const { loader, playlist } = state[uuid]
+      if (loader.imageViews[value]?.data.type === 'iframe') {
+        loader.iframeCount--
+      }
+      if (playlist.repeat !== 0) {
+        loader.readyToLoad.push(value)
+      }
     },
     setPlayerSetImageView: (
       state,
@@ -200,62 +190,60 @@ export const playersSlice = createSlice({
         PlayerUpdate<{ index: number; view: ImageViewState }>
       >
     ) => {
-      const { uuid, value, overlayIndex } = action.payload
-      const loader =
-        overlayIndex != null
-          ? state[uuid].overlays[overlayIndex].loader
-          : state[uuid].loader
-
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       loader.imageViews[value.index] = value.view
     },
-    setPlayerReadyToDisplay: (
-      state,
-      action: PayloadAction<PlayerUpdate<undefined>>
-    ) => {
-      const { uuid, overlayIndex } = action.payload
-      const player = state[uuid]
-      const isPlayer = overlayIndex == null
-      const loader = isPlayer
-        ? player.loader
-        : player.overlays[overlayIndex].loader
-
-      loader.loadingCount--
-      if (isPlayer && !player.firstImageLoaded) {
-        player.firstImageLoaded = true
-      }
-    },
-    setPlayerIncrementDisplayIndex: (
-      state,
-      action: PayloadAction<PlayerUpdate<undefined>>
-    ) => {
-      const { uuid, overlayIndex } = action.payload
-      const player = state[uuid]
-      const isPlayer = overlayIndex == null
-      const loader = isPlayer
-        ? player.loader
-        : player.overlays[overlayIndex].loader
-
+    setPlayerIncrementDisplayIndex: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const { loader } = state[uuid]
       loader.displayIndex++
     },
-    setPlayerIncrementIFrameCount: (
-      state,
-      action: PayloadAction<PlayerUpdate<undefined>>
-    ) => {
-      const { uuid, overlayIndex } = action.payload
-      const player = state[uuid]
-      const isPlayer = overlayIndex == null
-      const loader = isPlayer
-        ? player.loader
-        : player.overlays[overlayIndex].loader
-
+    setPlayerIncrementIFrameCount: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const { loader } = state[uuid]
       loader.iframeCount++
+    },
+    setPlayerDecrementLoaderTimeToNextScene: (
+      state,
+      action: PayloadAction<PlayerUpdate<number>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].playlist.loader.timeToNextScene -= value
+    },
+    setPlayerLoaderPlaylist: (
+      state,
+      action: PayloadAction<PlayerUpdate<PlaylistItemState>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].playlist.loader = value
+    },
+    setPlayerPlaylist: (
+      state,
+      action: PayloadAction<PlayerUpdate<PlaylistState>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].playlist = value
+    },
+    setPlayerDecrementTimeToNextScene: (
+      state,
+      action: PayloadAction<PlayerUpdate<number>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].playlist.player.timeToNextScene -= value
+    },
+    setPlayerLoaderOnlyIframes: (
+      state,
+      action: PayloadAction<PlayerUpdate<boolean>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].loader.onlyIframes = value
     }
   }
 })
 
 export const {
   setPlayersState,
-  setPlayerSceneID,
   setPlayerFirstImageLoaded,
   setPlayerHasStarted,
   setPlayerIsEmpty,
@@ -271,7 +259,12 @@ export const {
   setPlayerSetImageView,
   setPlayerReadyToDisplay,
   setPlayerIncrementDisplayIndex,
-  setPlayerIncrementIFrameCount
+  setPlayerIncrementIFrameCount,
+  setPlayerDecrementLoaderTimeToNextScene,
+  setPlayerLoaderPlaylist,
+  setPlayerPlaylist,
+  setPlayerDecrementTimeToNextScene,
+  setPlayerLoaderOnlyIframes
 } = playersSlice.actions
 
 export default playersSlice.reducer

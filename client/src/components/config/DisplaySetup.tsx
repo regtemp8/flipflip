@@ -39,6 +39,7 @@ import {
   selectDisplaySelectedView,
   selectDisplayViewsListYOffset
 } from '../../store/display/selectors'
+import { selectAppConfigDisplaySettingsFullScreen } from '../../store/app/selectors'
 import { setDisplayName } from '../../store/display/actions'
 import {
   addDisplayView,
@@ -63,6 +64,8 @@ import {
   Publish
 } from '@mui/icons-material'
 import { MO } from 'flipflip-common'
+import { playDisplay } from '../../store/player/thunks'
+import { setFullScreen } from '../../data/actions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -157,6 +160,7 @@ function DisplaySetup(props: DisplaySetupProps) {
     selectDisplaySelectedViewName(props.displayID)
   )
   const yOffset = useAppSelector(selectDisplayViewsListYOffset(props.displayID))
+  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
 
   const getScrollTop = useCallback(() => {
     let scrollTop: number | undefined = undefined
@@ -197,7 +201,8 @@ function DisplaySetup(props: DisplaySetupProps) {
   }
 
   const onPlayDisplay = () => {
-    // TODO play display
+    dispatch(playDisplay(props.displayID))
+    setFullScreen(fullScreen)
   }
 
   const onCloneDisplay = () => {
@@ -395,7 +400,8 @@ function DisplaySetup(props: DisplaySetupProps) {
             height: 'calc(100% - 64px)',
             width: '25%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            zIndex: 11
           }}
         >
           <Card sx={{ overflow: 'visible' }}>
@@ -419,6 +425,7 @@ function DisplaySetup(props: DisplaySetupProps) {
           </Card>
           <Card sx={{ maxHeight: '50%' }}>
             <CardHeader
+              sx={{ pb: 0 }}
               title={
                 selectedViewName != null
                   ? `Settings - ${selectedViewName}`

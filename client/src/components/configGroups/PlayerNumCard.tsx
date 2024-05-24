@@ -146,6 +146,7 @@ function PlayerNumCard() {
               placeholder={'Search ...'}
               hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
+              inputVariant="standard"
             />
           </div>
         </Tooltip>

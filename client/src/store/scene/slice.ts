@@ -935,12 +935,6 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).persistText = action.payload.value
       },
-      setSceneOverlayEnabled: (
-        state,
-        action: PayloadAction<EntryUpdate<boolean>>
-      ) => {
-        getEntry(state, action.payload.id).overlayEnabled = action.payload.value
-      },
       setSceneNextSceneTime: (
         state,
         action: PayloadAction<EntryUpdate<number>>
@@ -1114,12 +1108,6 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
       ) => {
         getEntry(state, action.payload.id).crossFadeAudio = action.payload.value
       },
-      setSceneNextSceneID: (
-        state,
-        action: PayloadAction<EntryUpdate<number>>
-      ) => {
-        getEntry(state, action.payload.id).nextSceneID = action.payload.value
-      },
       setSceneAudioEnabled: (
         state,
         action: PayloadAction<EntryUpdate<boolean>>
@@ -1137,33 +1125,6 @@ function createSceneSlice(sceneState?: EntryState<Scene>) {
         action: PayloadAction<EntryUpdate<boolean>>
       ) => {
         getEntry(state, action.payload.id).textEnabled = action.payload.value
-      },
-      setSceneNextSceneRandoms: (
-        state,
-        action: PayloadAction<EntryUpdate<number[]>>
-      ) => {
-        getEntry(state, action.payload.id).nextSceneRandoms =
-          action.payload.value
-      },
-      setSceneAddOverlay: (
-        state,
-        action: PayloadAction<EntryUpdate<number>>
-      ) => {
-        const scene = getEntry(state, action.payload.id)
-        if (!scene.overlays) {
-          scene.overlays = []
-        }
-
-        scene.overlays.push(action.payload.value)
-      },
-      setSceneRemoveOverlay: (
-        state,
-        action: PayloadAction<EntryUpdate<number>>
-      ) => {
-        const scene = getEntry(state, action.payload.id)
-        scene.overlays = scene.overlays.filter(
-          (overlayID) => overlayID !== action.payload.value
-        )
       },
       setSceneScriptPlaylists: (
         state,
@@ -1422,7 +1383,6 @@ export const {
   setSceneNextSceneAllImages,
   setScenePersistAudio,
   setScenePersistText,
-  setSceneOverlayEnabled,
   setSceneNextSceneTime,
   setSceneBackgroundBlur,
   setSceneRegenerate,
@@ -1451,13 +1411,9 @@ export const {
   setSceneOrderFunction,
   setSceneCrossFade,
   setSceneCrossFadeAudio,
-  setSceneNextSceneID,
   setSceneAudioEnabled,
   setPlayerSceneAudioEnabled,
   setSceneTextEnabled,
-  setSceneNextSceneRandoms,
-  setSceneAddOverlay,
-  setSceneRemoveOverlay,
   setSceneScriptPlaylists,
   setSceneAddAudioPlaylist,
   setSceneRemoveAudioPlaylist,

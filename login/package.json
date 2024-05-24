@@ -1,6 +1,6 @@
 {
   "name": "flipflip-login",
-  "version": "4.0.0-beta3",
+  "version": "4.0.0-beta4",
   "private": true,
   "devDependencies": {
     "@types/eslint": "^8",
@@ -48,5 +48,5 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "yarn@4.2.1"
+  "packageManager": "yarn@4.4.0"
 }

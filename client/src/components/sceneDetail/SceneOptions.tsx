@@ -39,8 +39,7 @@ function SceneOptions(props: SceneOptionsProps) {
     tutorial === SDT.timing ||
     tutorial === SDT.backForth ||
     tutorial === SDT.imageSizing ||
-    tutorial === SDT.nextScene ||
-    tutorial === SDT.overlays
+    tutorial === SDT.nextScene
   const tutorial2 =
     tutorial === SDT.optionsRight ||
     tutorial === SDT.imageOptions ||

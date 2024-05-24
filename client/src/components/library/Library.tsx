@@ -180,6 +180,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
   searchBar: {
     float: 'right',
     display: 'flex',
+    alignItems: 'center',
     maxWidth: '100%'
   },
   searchCount: {
@@ -500,7 +501,7 @@ function Library() {
 
   const onBatchTag = () => {
     onCloseDialog()
-    dispatch(batchTag)
+    dispatch(batchTag())
   }
 
   const onFindMerges = () => {
@@ -1063,7 +1064,7 @@ function Library() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <div className={cx(classes.root, classes.fill)}>
-          {!specialMode && <div className={classes.drawerSpacer} />}
+          <div className={classes.drawerSpacer} />
           <Container
             maxWidth={false}
             className={cx(
@@ -1541,6 +1542,8 @@ function Library() {
               isClearable
               onlyTags
               showCheckboxes
+              fullWidth
+              inputVariant="standard"
               hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
             />

@@ -15,6 +15,7 @@ export default interface View {
   sync: boolean
   syncWithView: number
   mirrorSyncedView: string
+  playerUUID?: string
 }
 
 export const initialView: View = {

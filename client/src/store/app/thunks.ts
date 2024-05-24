@@ -12,10 +12,7 @@ import { analyze } from 'web-audio-beat-detector'
 import type Progress from './data/Progress'
 import {
   arrayMove,
-  convertGridIDToSceneID,
-  convertSceneIDToGridID,
   getCachePath,
-  isSceneIDAGridID,
   randomizeList,
   applyEffects,
   getEffects,
@@ -35,7 +32,6 @@ import {
   setConfigTutorialsAudios,
   setConfigTutorialsScripts,
   setConfigTutorialsScriptor,
-  setConfigTutorialsSceneGrid,
   setConfigTutorialsVideoClipper,
   setSpecialMode,
   setRoutePop,
@@ -43,16 +39,12 @@ import {
   setAppTags,
   addToTags,
   addToScenes,
-  addToGrids,
   addToSceneGroups,
-  removeFromGrids,
   removeFromScenes,
   removeFromSceneGroups,
   systemMessage,
   setSystemSnack,
   setLibrary,
-  addToLibrary,
-  addToAudios,
   addToScripts,
   addRoutes,
   setAudios,
@@ -72,8 +64,6 @@ import {
   toAppStorage,
   toLibrarySourceStorage,
   fromAppStorage,
-  fromSceneStorage,
-  fromSceneGridStorage,
   fromLibrarySourceStorage,
   toConfigStorage
 } from './convert'
@@ -82,7 +72,7 @@ import type Audio from '../audio/Audio'
 import { setAudioSlice, setAudioTags, setAudioToggleTag } from '../audio/slice'
 import type CaptionScript from '../captionScript/CaptionScript'
 import { newCaptionScript } from '../captionScript/CaptionScript'
-import Playlist, { newPlaylist } from '../playlist/Playlist'
+import { newPlaylist } from '../playlist/Playlist'
 import {
   setPlaylist,
   setPlaylistAddItems,
@@ -94,18 +84,12 @@ import { videoClipperSceneName } from '../scene/selectors'
 import {
   deleteScene,
   setScene,
-  setSceneNextSceneID,
-  setSceneNextSceneRandoms,
-  setSceneRemoveOverlay,
   setSceneSlice,
   setSceneSources,
   setSceneRemoveAudioPlaylist,
   setSceneRemoveScriptPlaylist
 } from '../scene/slice'
 import { setVideoClipperSceneVideoVolume } from '../scene/thunks'
-import type SceneGrid from '../sceneGrid/SceneGrid'
-import { newSceneGrid } from '../sceneGrid/SceneGrid'
-import { newSceneGridCell } from '../sceneGrid/SceneGridCell'
 import { newRoute } from '../app/data/Route'
 import type LibrarySource from '../librarySource/LibrarySource'
 import { newLibrarySource } from '../librarySource/LibrarySource'
@@ -138,14 +122,6 @@ import {
   setLibrarySourceDisabledClips,
   setLibrarySources
 } from '../librarySource/slice'
-import { deleteOverlay, setOverlaySlice, setOverlay } from '../overlay/slice'
-import {
-  deleteSceneGrid,
-  setSceneGrid,
-  setSceneGridCellSceneID,
-  setSceneGridSlice,
-  setSceneGridGrid
-} from '../sceneGrid/slice'
 import {
   setSceneGroupSlice,
   setSceneGroup,
@@ -185,7 +161,6 @@ import {
   ALT,
   SLT,
   CST,
-  SGT,
   VCT,
   ST,
   VO,
@@ -204,13 +179,7 @@ import { setCaptionScriptorCaptionScriptID } from '../captionScriptor/slice'
 import flipflip from '../../FlipFlipService'
 import { newDisplay } from '../display/Display'
 import { newView } from '../displayView/View'
-import { deleteDisplay, setDisplay, setDisplaySlice } from '../display/slice'
-import {
-  incrementIDValue,
-  incrementIDsList,
-  incrementSliceIDs
-} from '../../data/import'
-import Overlay from '../overlay/Overlay'
+import { setDisplay, setDisplaySlice } from '../display/slice'
 import {
   resetDisplayViewPlaylistID,
   setDisplayView,
@@ -239,10 +208,8 @@ export function setAppStorage(appStorage: AppStorage, dispatch: AppDispatch) {
   dispatch(setCaptionScriptSlice(state.captionScript))
   dispatch(setClipSlice(state.clip))
   dispatch(setLibrarySourceSlice(state.librarySource))
-  dispatch(setOverlaySlice(state.overlay))
   dispatch(setPlaylistSlice(state.playlist))
   dispatch(setSceneSlice(state.scene))
-  dispatch(setSceneGridSlice(state.sceneGrid))
   dispatch(setSceneGroupSlice(state.sceneGroup))
   dispatch(setTagSlice(state.tag))
   dispatch(setDisplayViewSlice(state.displayView))
@@ -257,13 +224,14 @@ function shouldSaveState(prev: RootState, next: RootState) {
     prev.audio !== next.audio ||
     prev.captionScript !== next.captionScript ||
     prev.clip !== next.clip ||
-    prev.constants !== next.constants ||
     prev.librarySource !== next.librarySource ||
-    prev.overlay !== next.overlay ||
     prev.playlist !== next.playlist ||
+    prev.displayPlaylistItem !== next.displayPlaylistItem ||
+    prev.scenePlaylistItem !== next.scenePlaylistItem ||
     prev.scene !== next.scene ||
-    prev.sceneGrid !== next.sceneGrid ||
     prev.sceneGroup !== next.sceneGroup ||
+    prev.display !== next.display ||
+    prev.displayView !== next.displayView ||
     prev.tag !== next.tag
   )
 }
@@ -384,12 +352,6 @@ export function routeToLibrary() {
   }
 }
 
-export function routeToGrid(id: number) {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
-    dispatch(setRoute([newRoute({ kind: 'grid', value: id })]))
-  }
-}
-
 export function routeToDisplay(id: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     dispatch(setRoute([newRoute({ kind: 'display', value: id })]))
@@ -452,25 +414,6 @@ export function addDisplay() {
   }
 }
 
-export function addGrid() {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const state = getState()
-    const grid = newSceneGrid({
-      id: state.sceneGrid.nextID,
-      name: 'New Grid',
-      grid: [[newSceneGridCell()]]
-    })
-
-    dispatch(setSceneGrid(grid))
-    dispatch(addToGrids(grid.id))
-    dispatch(setSpecialMode(SP.autoEdit))
-    const newTutorial =
-      state.app.config.tutorials.sceneGrid == null ? SGT.welcome : undefined
-    dispatch(setTutorial(newTutorial))
-    dispatch(routeToGrid(grid.id))
-  }
-}
-
 export function addScene() {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
@@ -487,7 +430,6 @@ export function addScene() {
       scene.timingFunction = TF.constant
       scene.timingConstant = 1000
       scene.nextSceneID = 0
-      scene.overlayEnabled = false
       scene.imageTypeFilter = IF.any
       scene.sourceOrderFunction = SOF.random
       scene.orderFunction = OF.random
@@ -530,15 +472,8 @@ export function addSceneGroup(type: string) {
 export function deleteScenes(sceneIDs: number[]) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const deleteScenes: number[] = []
-    const deleteGrids: number[] = []
     const deleteDisplays: number[] = []
     for (const sceneID of sceneIDs) {
-      const gridID = convertSceneIDToGridID(sceneID)
-      if (gridID != null) {
-        deleteGrids.push(gridID)
-        continue
-      }
-
       const displayID = convertSceneIDToDisplayID(sceneID)
       if (displayID != null) {
         deleteDisplays.push(displayID)
@@ -548,62 +483,10 @@ export function deleteScenes(sceneIDs: number[]) {
       deleteScenes.push(sceneID)
     }
 
-    let state = getState()
     dispatch(removeFromScenes(deleteScenes))
     deleteScenes.forEach((id) => dispatch(deleteScene(id)))
-    dispatch(removeFromGrids(deleteGrids))
-    deleteGrids.forEach((id) => dispatch(deleteSceneGrid(id)))
     dispatch(removeFromDisplays(deleteDisplays))
-    deleteGrids.forEach((id) => dispatch(deleteDisplay(id)))
-
-    state = getState()
-    const scenes = state.app.scenes.map((s) => state.scene.entries[s])
-    scenes
-      .filter((s) => deleteScenes.includes(s.nextSceneID))
-      .forEach((s) => dispatch(setSceneNextSceneID({ id: s.id, value: 0 })))
-
-    scenes.forEach((s) => {
-      const nextSceneRandoms = s.nextSceneRandoms.filter(
-        (s) => !deleteScenes.includes(s)
-      )
-      if (nextSceneRandoms.length < s.nextSceneRandoms.length) {
-        dispatch(
-          setSceneNextSceneRandoms({ id: s.id, value: nextSceneRandoms })
-        )
-      }
-    })
-
-    scenes.forEach((s) => {
-      s.overlays
-        .filter((o) => {
-          const id = state.overlay.entries[o].sceneID
-          if (deleteScenes.includes(id)) {
-            return true
-          }
-
-          const gridID = convertSceneIDToGridID(id)
-          return gridID != null && deleteGrids.includes(gridID)
-        })
-        .forEach((o) => {
-          dispatch(setSceneRemoveOverlay({ id: s.id, value: o }))
-          dispatch(deleteOverlay(o))
-        })
-    })
-
-    const grids = state.app.grids.map((s) => state.sceneGrid.entries[s])
-    for (const grid of grids) {
-      for (let row = 0; row < grid.grid.length; row++) {
-        const r = grid.grid[row]
-        for (let col = 0; col < r.length; col++) {
-          const cell = r[col]
-          if (deleteScenes.includes(cell.sceneID)) {
-            dispatch(
-              setSceneGridCellSceneID({ id: grid.id, row, col, value: -1 })
-            )
-          }
-        }
-      }
-    }
+    // TODO remove from playlists
 
     dispatch(setRoute([]))
     dispatch(setSpecialMode(undefined))
@@ -679,13 +562,6 @@ export function doneTutorial(tutorial: string) {
       } else {
         dispatch(setConfigTutorialsScriptor(tutorial))
       }
-    } else if (getAppIsRoute(route, 'grid')) {
-      if (tutorial === SGT.final) {
-        dispatch(setTutorial(undefined))
-        dispatch(setConfigTutorialsSceneGrid(DONE))
-      } else {
-        dispatch(setConfigTutorialsSceneGrid(tutorial))
-      }
     } else if (getAppIsRoute(route, 'clip')) {
       if (tutorial === VCT.final) {
         dispatch(setTutorial(undefined))
@@ -694,20 +570,6 @@ export function doneTutorial(tutorial: string) {
         dispatch(setConfigTutorialsVideoClipper(tutorial))
       }
     }
-  }
-}
-
-export function doneDimensionsTutorial(sceneGridID: number) {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
-    dispatch(doneTutorial(SGT.dimensions))
-    const state = getState()
-    const sceneID = state.app.scenes[0]
-    const newGrid = state.sceneGrid.entries[sceneGridID].grid
-    newGrid[0][0].sceneID = sceneID
-    newGrid[0][1].sceneID = sceneID
-    newGrid[1][0].sceneID = sceneID
-    newGrid[1][1].sceneID = sceneID
-    dispatch(setSceneGridGrid({ id: sceneGridID, value: newGrid }))
   }
 }
 
@@ -725,15 +587,6 @@ export function getActiveScene(state: RootState): Scene | undefined {
   return sceneID !== undefined ? state.scene.entries[sceneID] : undefined
 }
 
-export function getActiveGrid(state: RootState): SceneGrid | undefined {
-  for (const r of state.app.route.slice().reverse()) {
-    if (r.kind === 'grid') {
-      return state.sceneGrid.entries[r.value as number]
-    }
-  }
-  return undefined
-}
-
 export function getActiveSource(state: RootState): LibrarySource | undefined {
   for (const r of state.app.route.slice().reverse()) {
     if (r.kind === 'clip') {
@@ -749,7 +602,7 @@ export function setRouteGoBack() {
     const route = getAppLastRoute(state.app) as Route
     if (
       getAppIsRoute(route, 'play') ||
-      getAppIsRoute(route, 'gridplay') ||
+      getAppIsRoute(route, 'playdisplay') ||
       getAppIsRoute(route, 'libraryplay')
     ) {
       dispatch(setPlayersState({}))
@@ -787,10 +640,6 @@ export function setRouteGoBack() {
       }
 
       dispatch(setRoutePop(2))
-    } else if (getAppIsRoute(route, 'gridplay')) {
-      const sceneID = state.players[route.value as string].sceneID as number
-      dispatch(deleteScene(sceneID))
-      dispatch(setRoutePop(2))
     } else {
       dispatch(setRoutePop(1))
       dispatch(setSpecialMode(undefined))
@@ -813,6 +662,7 @@ export function restoreAppStorageFromBackup(backupFile: string) {
     dispatch: AppDispatch,
     getState: () => RootState
   ): Promise<void> => {
+    // TODO this should be handled by the server
     const state = getState()
     const text = await flipflip().api.readTextFile(backupFile)
     const data = JSON.parse(text)
@@ -914,8 +764,6 @@ export function playSceneFromLibrary(
       if (getLibrarySource(state) != null) {
         const activeScene = getActiveScene(state) as Scene
         applyEffects(tempScene, getEffects(activeScene))
-        tempScene.overlayEnabled = activeScene.overlayEnabled
-        tempScene.overlays = activeScene.overlays
         dispatch(setRoutePop(2))
         dispatch(deleteScene(activeScene.id))
       }
@@ -938,8 +786,6 @@ export function playSceneFromLibrary(
       if (getActiveScene(state)?.libraryID !== -1) {
         const activeScene = getActiveScene(state) as Scene
         applyEffects(tempScene, getEffects(activeScene))
-        tempScene.overlayEnabled = activeScene.overlayEnabled
-        tempScene.overlays = activeScene.overlays
         dispatch(setRoutePop(2))
         dispatch(deleteScene(activeScene.id))
       }
@@ -1063,8 +909,6 @@ export function downloadSource(sourceID: number) {
       if (getLibrarySource(state) != null) {
         const activeScene = getActiveScene(state) as Scene
         applyEffects(tempScene, getEffects(activeScene))
-        tempScene.overlayEnabled = activeScene.overlayEnabled
-        tempScene.overlays = activeScene.overlays
         dispatch(setRoutePop(2))
         dispatch(deleteScene(activeScene.id))
       }
@@ -1076,8 +920,6 @@ export function downloadSource(sourceID: number) {
       if (getActiveScene(state)?.libraryID !== -1) {
         const activeScene = getActiveScene(state) as Scene
         applyEffects(tempScene, getEffects(activeScene))
-        tempScene.overlayEnabled = activeScene.overlayEnabled
-        tempScene.overlays = activeScene.overlays
         dispatch(setRoutePop(2))
         dispatch(deleteScene(activeScene.id))
       }
@@ -1225,233 +1067,7 @@ export function cacheImage(i: HTMLImageElement | HTMLVideoElement) {
 
 export function importScenes(scenesToImport: any, importToLibrary: boolean) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    if (
-      !scenesToImport[0].id ||
-      !scenesToImport[0].name ||
-      !scenesToImport[0].sources
-    ) {
-      dispatch(systemMessage('Not a valid scene file'))
-      return
-    }
-
-    // map to redux state
-    const state = getState()
-    const slice = copy<AppStorageImport>(initialAppStorageImport)
-    for (let i = 0; i < scenesToImport.length; i++) {
-      if (scenesToImport[i].grid) {
-        const grid = newSceneGridStorage(scenesToImport[i])
-        fromSceneGridStorage(grid, slice.sceneGrid)
-      } else {
-        const scene = newSceneStorage(scenesToImport[i])
-        fromSceneStorage(
-          scene,
-          slice.scene,
-          slice.librarySource,
-          slice.tag,
-          slice.clip,
-          slice.overlay,
-          slice.playlist,
-          slice.audio,
-          slice.captionScript
-        )
-      }
-    }
-
-    // prepare for merge into existing slices
-    const clipNextID = state.clip.nextID
-    const librarySourceNextID = state.librarySource.nextID
-    const sceneNextID = state.scene.nextID
-    const sceneGridNextID = state.sceneGrid.nextID
-    const tagNextID = state.tag.nextID
-    const playlistNextID = state.playlist.nextID
-    const audioNextID = state.audio.nextID
-    const captionScriptNextID = state.captionScript.nextID
-    const overlayNextID = state.overlay.nextID
-
-    Object.values(slice.scene.entries).forEach((s) => {
-      s.sources = incrementIDsList<LibrarySource>(
-        s.sources,
-        slice.librarySource,
-        librarySourceNextID
-      )
-      s.overlays = incrementIDsList<Overlay>(
-        s.overlays,
-        slice.overlay,
-        overlayNextID
-      )
-      s.audioPlaylists = incrementIDsList<Playlist>(
-        s.audioPlaylists,
-        slice.playlist,
-        playlistNextID
-      )
-      s.scriptPlaylists = incrementIDsList<Playlist>(
-        s.scriptPlaylists,
-        slice.playlist,
-        playlistNextID
-      )
-      s.libraryID = incrementIDValue<LibrarySource>(
-        s.libraryID,
-        slice.librarySource,
-        librarySourceNextID,
-        -1
-      )
-      s.nextSceneID = incrementIDValue<Scene>(
-        s.nextSceneID,
-        slice.scene,
-        sceneNextID,
-        0
-      )
-      s.nextSceneRandomID = incrementIDValue<Scene>(
-        s.nextSceneRandomID,
-        slice.scene,
-        sceneNextID,
-        0
-      )
-      s.nextSceneRandoms = incrementIDsList<Scene>(
-        s.nextSceneRandoms,
-        slice.scene,
-        sceneNextID
-      )
-    })
-
-    Object.values(slice.librarySource.entries).forEach((s) => {
-      s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID)
-      s.clips = incrementIDsList<Clip>(s.clips, slice.clip, clipNextID)
-      s.disabledClips = incrementIDsList<Clip>(
-        s.disabledClips,
-        slice.clip,
-        clipNextID
-      )
-    })
-
-    Object.values(slice.clip.entries).forEach(
-      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
-    )
-    Object.values(slice.audio.entries).forEach(
-      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
-    )
-    Object.values(slice.captionScript.entries).forEach(
-      (s) => (s.tags = incrementIDsList<Tag>(s.tags, slice.tag, tagNextID))
-    )
-
-    Object.values(slice.sceneGrid.entries)
-      .flatMap((s) => s.grid)
-      .flatMap((s) => s)
-      .forEach((s) => {
-        s.sceneID = incrementIDValue<Scene>(
-          s.sceneID,
-          slice.scene,
-          sceneNextID,
-          0
-        )
-      })
-
-    Object.values(slice.overlay.entries).forEach((s) => {
-      if (isSceneIDAGridID(s.sceneID)) {
-        const gridID = convertSceneIDToGridID(s.sceneID) as number
-        s.sceneID = incrementIDValue<SceneGrid>(
-          gridID,
-          slice.sceneGrid,
-          convertGridIDToSceneID(sceneGridNextID),
-          0
-        )
-      } else {
-        s.sceneID = incrementIDValue<Scene>(
-          s.sceneID,
-          slice.scene,
-          sceneNextID,
-          0
-        )
-      }
-    })
-
-    incrementSliceIDs<Scene>(slice.scene, sceneNextID)
-    incrementSliceIDs<LibrarySource>(slice.librarySource, librarySourceNextID)
-    incrementSliceIDs<Clip>(slice.clip, clipNextID)
-    incrementSliceIDs<Playlist>(slice.playlist, playlistNextID)
-    incrementSliceIDs<Audio>(slice.audio, audioNextID)
-    incrementSliceIDs<CaptionScript>(slice.captionScript, captionScriptNextID)
-    incrementSliceIDs<SceneGrid>(slice.sceneGrid, sceneGridNextID)
-    incrementSliceIDs<Overlay>(slice.overlay, overlayNextID)
-
-    Object.values(slice.scene.entries).forEach((s) => dispatch(setScene(s)))
-    Object.values(slice.librarySource.entries).forEach((s) =>
-      dispatch(setLibrarySource(s))
-    )
-    Object.values(slice.clip.entries).forEach((s) => dispatch(setClip(s)))
-    Object.values(slice.captionScript.entries).forEach((s) =>
-      dispatch(setCaptionScript(s))
-    )
-    Object.values(slice.sceneGrid.entries).forEach((s) =>
-      dispatch(setSceneGrid(s))
-    )
-    Object.values(slice.overlay.entries).forEach((s) => dispatch(setOverlay(s)))
-
-    if (importToLibrary) {
-      const sourceURLs = state.app.library
-        .map((id) => state.librarySource.entries[id])
-        .map((s) => s.url)
-
-      const sources = Object.values(slice.librarySource.entries)
-        .filter((s) => !sourceURLs.includes(s.url))
-        .map((s) => s.id)
-      const audioURLs = state.app.audios.map(
-        (id) => state.audio.entries[id].url
-      )
-      const audios = Object.values(slice.audio.entries)
-        .filter((a) => !audioURLs.includes(a.url))
-        .map((a) => a.id)
-      const scriptURLs = state.app.scripts.map(
-        (id) => state.captionScript.entries[id].url
-      )
-      const scripts = Object.values(slice.captionScript.entries)
-        .filter((s) => !scriptURLs.includes(s.url))
-        .map((s) => s.id)
-
-      if (sources.length > 0 || audios.length > 0 || scripts.length > 0) {
-        let message = 'Added '
-        if (sources.length > 0) {
-          message += sources.length + ' new source'
-          if (sources.length > 1) {
-            message += 's'
-          }
-        }
-        if (audios.length > 0) {
-          if (!message.endsWith(' ')) {
-            message += ', '
-          }
-          message += audios.length + ' new audio'
-          if (audios.length > 1) {
-            message += 's'
-          }
-        }
-        if (scripts.length > 0) {
-          if (!message.endsWith(' ')) {
-            message += ', '
-          }
-          message += scripts.length + ' new script'
-          if (scripts.length > 1) {
-            message += 's'
-          }
-        }
-
-        dispatch(setSystemSnack({ message, severity: SS.info }))
-        dispatch(addToLibrary(sources))
-        dispatch(addToAudios(audios))
-        dispatch(addToScripts(scripts))
-      } else {
-        dispatch(
-          setSystemSnack({
-            message: 'No new sources detected',
-            severity: SS.info
-          })
-        )
-      }
-    }
-
-    dispatch(
-      setRoute([newRoute({ kind: 'scene', value: scenesToImport[0].id })])
-    )
+    // TODO rewrite importScenes use subset of AppStorage instead
   }
 }
 

@@ -59,9 +59,19 @@ function PictureGrid(props: PictureGridProps) {
         setPlayerState({
           uuid: 'picture-grid-img-' + i,
           value: {
-            sceneID: -1, // TODO fix this
-            nextSceneID: -1,
-            overlays: [],
+            playlist: {
+              playlistID: -1,
+              loader: {
+                index: 0,
+                timeToNextScene: 0
+              },
+              player: {
+                index: 0,
+                timeToNextScene: 0
+              },
+              items: [],
+              repeat: 0
+            },
             firstImageLoaded: true,
             mainLoaded: true,
             isEmpty: false,

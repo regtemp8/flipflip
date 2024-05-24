@@ -459,11 +459,6 @@ export const selectAppConfigDisplaySettingsAudioAlert = () => {
     state.app.config.displaySettings.audioAlert
 }
 
-export const selectAppConfigDisplaySettingsCloneGridVideoElements = () => {
-  return (state: RootState): boolean =>
-    state.app.config.displaySettings.cloneGridVideoElements
-}
-
 export const selectAppConfigDisplaySettingsIgnoredTags = () => {
   return (state: RootState): string[] =>
     state.app.config.displaySettings.ignoredTags
@@ -499,9 +494,9 @@ export const selectAppConfigGeneralSettingsWatermark = () => {
     state.app.config.generalSettings.watermark
 }
 
-export const selectAppConfigGeneralSettingsWatermarkGrid = () => {
+export const selectAppConfigGeneralSettingsWatermarkDisplay = () => {
   return (state: RootState): boolean =>
-    state.app.config.generalSettings.watermarkGrid
+    state.app.config.generalSettings.watermarkDisplay
 }
 
 export const selectAppConfigGeneralSettingsWatermarkCorner = () => {
@@ -544,16 +539,25 @@ export const selectAppConfigGeneralSettingsWatermarkSettings = (
     [
       (state) => gridView,
       selectAppConfigGeneralSettingsWatermark(),
-      selectAppConfigGeneralSettingsWatermarkGrid(),
+      selectAppConfigGeneralSettingsWatermarkDisplay(),
       selectAppConfigGeneralSettingsWatermarkFontFamily(),
       selectAppConfigGeneralSettingsWatermarkFontSize(),
       selectAppConfigGeneralSettingsWatermarkColor(),
       selectAppConfigGeneralSettingsWatermarkText(),
       selectAppConfigGeneralSettingsWatermarkCorner()
     ],
-    (gridView, enabled, isGrid, fontFamily, fontSize, color, text, corner) => {
+    (
+      gridView,
+      enabled,
+      isDisplay,
+      fontFamily,
+      fontSize,
+      color,
+      text,
+      corner
+    ) => {
       const settings: WatermarkSettings | undefined =
-        enabled && (!gridView || isGrid)
+        enabled && (!gridView || isDisplay)
           ? { fontFamily, fontSize, color, text, corner }
           : undefined
 
@@ -756,16 +760,12 @@ export const selectAppLastRouteIsConfig = () => {
 export const selectAppLastRouteIsPlayer = () => {
   return (state: RootState): boolean => {
     const kind = getAppLastRoute(state.app)?.kind ?? ''
-    return ['play', 'libraryplay', 'gridplay', 'scriptor'].includes(kind)
+    return ['play', 'libraryplay', 'playdisplay', 'scriptor'].includes(kind)
   }
 }
 
 export const selectAppCanGenerate = () => {
   return (state: RootState): boolean => state.app.library.length > 0
-}
-
-export const selectAppCanGrid = () => {
-  return (state: RootState): boolean => state.app.scenes.length > 0
 }
 
 export const selectAppAudioOpenTab = () => {
@@ -1147,7 +1147,6 @@ export const selectAppScriptYOffset = () => {
   return (state: RootState): number => state.app.scriptYOffset
 }
 
-export const getAppGrids = (state: RootState) => state.app.grids
 export const getAppScenes = (state: RootState) => state.app.scenes
 export const getAppSceneGroups = (state: RootState) => state.app.sceneGroups
 export const getAppDisplays = (state: RootState) => state.app.displays

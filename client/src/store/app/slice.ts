@@ -122,12 +122,6 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.nextSceneTime = action.payload
       },
-      setConfigDefaultSceneOverlayEnabled: (
-        state,
-        action: PayloadAction<boolean>
-      ) => {
-        state.config.defaultScene.overlayEnabled = action.payload
-      },
       setConfigDefaultScenePersistAudio: (
         state,
         action: PayloadAction<boolean>
@@ -1025,31 +1019,6 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.defaultScene.panVertTransLevelMax = action.payload
       },
-      setConfigDefaultSceneAddOverlay: (
-        state,
-        action: PayloadAction<number>
-      ) => {
-        state.config.defaultScene.overlays.push(action.payload)
-      },
-      setConfigDefaultSceneRemoveOverlay: (
-        state,
-        action: PayloadAction<number>
-      ) => {
-        const index = state.config.defaultScene.overlays.indexOf(action.payload)
-        state.config.defaultScene.overlays.splice(index, 1)
-      },
-      setConfigDefaultSceneNextSceneRandoms: (
-        state,
-        action: PayloadAction<number[]>
-      ) => {
-        state.config.defaultScene.nextSceneRandoms = action.payload
-      },
-      setConfigDefaultSceneNextSceneID: (
-        state,
-        action: PayloadAction<number>
-      ) => {
-        state.config.defaultScene.nextSceneID = action.payload
-      },
       setConfigTutorialsScenePicker: (state, action: PayloadAction<string>) => {
         state.config.tutorials.scenePicker = action.payload
       },
@@ -1076,9 +1045,6 @@ function createAppSlice(app?: App) {
       },
       setConfigTutorialsScriptor: (state, action: PayloadAction<string>) => {
         state.config.tutorials.scriptor = action.payload
-      },
-      setConfigTutorialsSceneGrid: (state, action: PayloadAction<string>) => {
-        state.config.tutorials.sceneGrid = action.payload
       },
       setConfigTutorialsVideoClipper: (
         state,
@@ -1123,12 +1089,6 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.displaySettings.audioAlert = action.payload
       },
-      setConfigDisplaySettingsCloneGridVideoElements: (
-        state,
-        action: PayloadAction<boolean>
-      ) => {
-        state.config.displaySettings.cloneGridVideoElements = action.payload
-      },
       setConfigDisplaySettingsIgnoredTags: (
         state,
         action: PayloadAction<string[]>
@@ -1171,11 +1131,11 @@ function createAppSlice(app?: App) {
       ) => {
         state.config.generalSettings.watermark = action.payload
       },
-      setConfigGeneralSettingsWatermarkGrid: (
+      setConfigGeneralSettingsWatermarkDisplay: (
         state,
         action: PayloadAction<boolean>
       ) => {
-        state.config.generalSettings.watermarkGrid = action.payload
+        state.config.generalSettings.watermarkDisplay = action.payload
       },
       setConfigGeneralSettingsWatermarkCorner: (
         state,
@@ -1482,7 +1442,6 @@ function createAppSlice(app?: App) {
         state.config.tutorials.scripts = DONE
         state.config.tutorials.scriptor = DONE
         state.config.tutorials.sceneGenerator = DONE
-        state.config.tutorials.sceneGrid = DONE
         state.config.tutorials.videoClipper = DONE
         state.tutorial = undefined
       },
@@ -1495,7 +1454,6 @@ function createAppSlice(app?: App) {
         state.config.tutorials.scripts = undefined
         state.config.tutorials.scriptor = undefined
         state.config.tutorials.sceneGenerator = undefined
-        state.config.tutorials.sceneGrid = undefined
         state.config.tutorials.videoClipper = undefined
         state.tutorial = undefined
       },
@@ -1543,14 +1501,8 @@ function createAppSlice(app?: App) {
       removeFromScenes: (state, action: PayloadAction<number[]>) => {
         state.scenes = state.scenes.filter((s) => !action.payload.includes(s))
       },
-      addToGrids: (state, action: PayloadAction<number>) => {
-        state.grids.push(action.payload)
-      },
       addToDisplays: (state, action: PayloadAction<number>) => {
         state.displays.push(action.payload)
-      },
-      removeFromGrids: (state, action: PayloadAction<number[]>) => {
-        state.grids = state.grids.filter((s) => !action.payload.includes(s))
       },
       removeFromDisplays: (state, action: PayloadAction<number[]>) => {
         state.displays = state.displays.filter(
@@ -1595,13 +1547,6 @@ function createAppSlice(app?: App) {
       ) => {
         const { oldIndex, newIndex } = action.payload
         arrayMove(state.scenes, oldIndex, newIndex)
-      },
-      moveGrids: (
-        state,
-        action: PayloadAction<{ oldIndex: number; newIndex: number }>
-      ) => {
-        const { oldIndex, newIndex } = action.payload
-        arrayMove(state.grids, oldIndex, newIndex)
       },
       moveDisplays: (
         state,
@@ -1818,7 +1763,6 @@ export const {
   setConfigDefaultSceneImageType,
   setConfigDefaultSceneNextSceneAllImages,
   setConfigDefaultSceneNextSceneTime,
-  setConfigDefaultSceneOverlayEnabled,
   setConfigDefaultScenePersistAudio,
   setConfigDefaultScenePersistText,
   setConfigDefaultSceneTimingBPMMulti,
@@ -1982,10 +1926,6 @@ export const {
   setConfigDefaultScenePanVertTransLevel,
   setConfigDefaultScenePanVertTransLevelMin,
   setConfigDefaultScenePanVertTransLevelMax,
-  setConfigDefaultSceneAddOverlay,
-  setConfigDefaultSceneRemoveOverlay,
-  setConfigDefaultSceneNextSceneRandoms,
-  setConfigDefaultSceneNextSceneID,
   setConfigTutorialsScenePicker,
   setConfigTutorialsSceneGenerator,
   setConfigTutorialsSceneDetail,
@@ -1994,7 +1934,6 @@ export const {
   setConfigTutorialsAudios,
   setConfigTutorialsScripts,
   setConfigTutorialsScriptor,
-  setConfigTutorialsSceneGrid,
   setConfigTutorialsVideoClipper,
   setConfigDisplaySettingsFullScreen,
   setConfigDisplaySettingsStartImmediately,
@@ -2002,7 +1941,6 @@ export const {
   setConfigDisplaySettingsClickToProgressWhilePlaying,
   setConfigDisplaySettingsEasingControls,
   setConfigDisplaySettingsAudioAlert,
-  setConfigDisplaySettingsCloneGridVideoElements,
   setConfigDisplaySettingsIgnoredTags,
   setConfigDisplaySettingsMinImageSize,
   setConfigDisplaySettingsMinVideoSize,
@@ -2010,7 +1948,7 @@ export const {
   setConfigDisplaySettingsMaxInMemory,
   setConfigDisplaySettingsMaxLoadingAtOnce,
   setConfigGeneralSettingsWatermark,
-  setConfigGeneralSettingsWatermarkGrid,
+  setConfigGeneralSettingsWatermarkDisplay,
   setConfigGeneralSettingsWatermarkCorner,
   setConfigGeneralSettingsWatermarkFontFamily,
   setConfigGeneralSettingsWatermarkColor,
@@ -2075,9 +2013,7 @@ export const {
   setAppScenes,
   addToScenes,
   removeFromScenes,
-  addToGrids,
   addToDisplays,
-  removeFromGrids,
   removeFromDisplays,
   addToSceneGroups,
   removeFromSceneGroups,
@@ -2090,7 +2026,6 @@ export const {
   addToPlaylists,
   removeFromPlaylists,
   moveScenes,
-  moveGrids,
   moveDisplays,
   movePlaylists,
   moveSceneGroups,

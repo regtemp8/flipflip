@@ -395,9 +395,19 @@ function VideoClipper() {
       setPlayerState({
         uuid: 'video-clipper',
         value: {
-          sceneID,
-          nextSceneID: -1,
-          overlays: [],
+          playlist: {
+            playlistID: -1,
+            loader: {
+              index: 0,
+              timeToNextScene: 0
+            },
+            player: {
+              index: 0,
+              timeToNextScene: 0
+            },
+            items: [{ sceneID, duration: 0 }],
+            repeat: 0
+          },
           loader: {
             iframeCount: 0,
             onlyIframes: false,

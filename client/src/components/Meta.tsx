@@ -9,7 +9,6 @@ import ConfigForm from './config/ConfigForm'
 import Library from './library/Library'
 import TagManager from './library/TagManager'
 import VideoClipper from './config/VideoClipper'
-import Player from './player/Player'
 import SceneDetail from './sceneDetail/SceneDetail'
 import Tutorial from './Tutorial'
 import AudioLibrary from './library/AudioLibrary'
@@ -30,17 +29,16 @@ import flipflip from '../FlipFlipService'
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import DisplaySetup from './config/DisplaySetup'
 import PlaylistSetup from './config/PlaylistSetup'
+import DisplayManager from './player/DisplayManager'
 
 export interface MetaProps {
   cache: EmotionCache
 }
 
 // TODO Be able to change audio/script playlists during playback
-//      Be able to right click on grid scenes as overlay
 //      Be able to modify source tags as popup during playback
-//      Generate different sources even for same scenes in grid
+//      Generate different sources even for same scenes
 //      Add configurable privacy screen with shortcut and ability to set image
-//      Add minimize shortcut key in same vain?
 export default function Meta(props: MetaProps) {
   const dispatch = useAppDispatch()
   const theme = useAppSelector(selectAppTheme())
@@ -95,18 +93,16 @@ export default function Meta(props: MetaProps) {
       return <TagManager />
     } else if (isRoute(route, 'clip')) {
       return <VideoClipper />
-    } /*else if (isRoute(route, 'grid')) {
-      return <GridSetup gridID={route.value as number} />
-    }*/ else if (isRoute(route, 'display')) {
+    } else if (isRoute(route, 'display')) {
       return <DisplaySetup displayID={route.value as number} />
     } else if (isRoute(route, 'playlist')) {
       return <PlaylistSetup playlistID={route.value as number} />
     } else if (
       isRoute(route, 'play') ||
-      isRoute(route, 'libraryplay') /*||
-      isRoute(route, 'gridplay')*/
+      isRoute(route, 'libraryplay') ||
+      isRoute(route, 'playdisplay')
     ) {
-      return <Player uuid={route.value as string} preventSleep />
+      return <DisplayManager displayID={route.value as number} />
     } else if (isRoute(route, 'config')) {
       return <ConfigForm />
     } else if (isRoute(route, 'scriptor')) {
@@ -129,11 +125,6 @@ export default function Meta(props: MetaProps) {
               <Tutorial
                 sceneID={
                   route != null && isRoute(route, 'scene')
-                    ? (route.value as number)
-                    : undefined
-                }
-                gridID={
-                  route != null && isRoute(route, 'grid')
                     ? (route.value as number)
                     : undefined
                 }
