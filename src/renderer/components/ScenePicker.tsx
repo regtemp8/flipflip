@@ -671,7 +671,7 @@ class ScenePicker extends React.Component {
                   </ListItem>
                 </Tooltip>
                 <Tooltip disableInteractive title={this.state.drawerOpen ? "" : "User Manual"}>
-                  <ListItem button onClick={this.openLink.bind(this,"https://ififfy.github.io/flipflip/#/")}>
+                  <ListItem button onClick={this.openLink.bind(this,"https://regtemp8.github.io/flipflip/#/")}>
                     <ListItemIcon>
                       <HelpIcon />
                     </ListItemIcon>
