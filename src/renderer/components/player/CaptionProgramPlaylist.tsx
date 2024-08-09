@@ -1,126 +1,128 @@
-import * as React from "react";
+import React, { useEffect, useState } from 'react'
 
-import {randomizeList} from "../../data/utils";
-import Audio from "../../data/Audio";
-import Scene from "../../data/Scene";
-import Tag from "../../data/Tag";
-import CaptionProgram from "./CaptionProgram";
-import ChildCallbackHack from "./ChildCallbackHack";
-import CaptionScript from "../../data/CaptionScript";
-import {RP} from "../../data/const";
+import { randomizeList } from '../../data/utils'
+import CaptionProgram from './CaptionProgram'
+import type ChildCallbackHack from './ChildCallbackHack'
+import { RP } from '../../data/const'
+import { useAppSelector } from '../../../store/hooks'
+import {
+  selectSceneIsScriptScene,
+  selectSceneScriptStartIndex
+} from '../../../store/scene/selectors'
+import type ScriptPlaylist from '../../../store/scene/ScriptPlaylist'
 
-export default class CaptionProgramPlaylist extends React.Component {
-  readonly props: {
-    playlistIndex: number,
-    playlist: { scripts: Array<CaptionScript>, shuffle: boolean, repeat: string },
-    currentAudio: Audio
-    currentImage: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement,
-    scale: number,
-    scene: Scene,
-    timeToNextFrame: number,
-    getTags(source: string, clipID?: string): Array<Tag>,
-    goBack(): void,
-    orderScriptTags(script: CaptionScript): void,
-    playNextScene(): void,
-    jumpToHack?: ChildCallbackHack,
-    persist?: boolean,
-    advance?(): void,
-    getCurrentTimestamp?(): number,
-    onError?(e: string): void,
-    systemMessage?(message: string): void,
-  };
-
-  readonly state = {
-    currentIndex: this.props.playlistIndex == 0 ? this.props.scene.scriptStartIndex : 0,
-    playingScripts: Array<CaptionScript>(),
-  }
-
-  render() {
-    let script = this.state.playingScripts[this.state.currentIndex];
-    if (!script) script = this.props.playlist.scripts[this.state.currentIndex];
-    if (!script) return <div/>;
-    return (
-      <CaptionProgram
-        captionScript={script}
-        persist={this.props.persist}
-        repeat={this.props.playlist.repeat}
-        scale={this.props.scale}
-        singleTrack={this.state.playingScripts.length == 1}
-        getTags={this.props.getTags}
-        goBack={this.props.goBack}
-        playNextScene={this.props.playNextScene}
-        nextTrack={this.nextTrack.bind(this)}
-        currentAudio={this.props.currentAudio}
-        getCurrentTimestamp={this.props.getCurrentTimestamp}
-        timeToNextFrame={this.props.timeToNextFrame}
-        currentImage={this.props.currentImage}
-        jumpToHack={this.props.jumpToHack}
-        advance={this.props.advance}
-        onError={this.props.onError}/>
-    );
-  }
-
-  componentDidUpdate(props: any) {
-    if (!this.props.persist && this.props.playlist !== props.playlist) {
-      this.restart();
-    }
-  }
-
-  componentDidMount() {
-    if (this.props.playlistIndex == 0 && this.props.scene.scriptScene) {
-      window.addEventListener('keydown', this.onKeyDown, false);
-    }
-    this.restart();
-  }
-
-  restart() {
-    let scripts = this.props.playlist.scripts;
-    if (this.props.playlist.shuffle) {
-      scripts = randomizeList(Array.from(scripts));
-    }
-    this.setState({playingScripts: scripts});
-  }
-
-  componentWillUnmount() {
-    if (this.props.playlistIndex == 0 && this.props.scene.scriptScene) {
-      window.removeEventListener('keydown', this.onKeyDown);
-    }
-  }
-
-  onKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case '[':
-        e.preventDefault();
-        this.props.orderScriptTags(this.props.playlist.scripts[this.state.currentIndex]);
-        this.prevTrack();
-        break;
-      case ']':
-        e.preventDefault();
-        this.props.orderScriptTags(this.props.playlist.scripts[this.state.currentIndex]);
-        this.nextTrack();
-        break;
-    }
-  }
-
-  prevTrack() {
-    let prevTrack = this.state.currentIndex - 1;
-    if (prevTrack < 0) {
-      prevTrack = this.props.playlist.scripts.length - 1;
-    }
-    this.setState({currentIndex: prevTrack});
-  }
-
-  nextTrack() {
-    let nextTrack = this.state.currentIndex + 1;
-    if (nextTrack >= this.props.playlist.scripts.length) {
-      if (this.props.playlist.repeat == RP.none) {
-        nextTrack = this.props.playlist.scripts.length;
-      } else {
-        nextTrack = 0;
-      }
-    }
-    this.setState({currentIndex: nextTrack});
-  }
+export interface CaptionProgramPlaylistProps {
+  playlistIndex: number
+  playlist: ScriptPlaylist
+  currentAudio: number
+  currentImage: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  scale: number
+  sceneID: number
+  timeToNextFrame: number
+  orderScriptTags: (scriptID: number) => void
+  jumpToHack?: ChildCallbackHack
+  persist: boolean
+  advance?: () => void
+  getCurrentTimestamp?: () => number
+  onError?: (e: string) => void
 }
 
-(CaptionProgramPlaylist as any).displayName="CaptionProgramPlaylist";
+export default function CaptionProgramPlaylist (
+  props: CaptionProgramPlaylistProps
+) {
+  const isScriptScene = useAppSelector(selectSceneIsScriptScene(props.sceneID))
+  const scriptStartIndex = useAppSelector(
+    selectSceneScriptStartIndex(props.sceneID)
+  )
+
+  const [currentIndex, setCurrentIndex] = useState(
+    props.playlistIndex === 0 ? scriptStartIndex : 0
+  )
+  const [playingScripts, setPlayingScripts] = useState<number[]>([])
+
+  useEffect(() => {
+    if (props.playlistIndex === 0 && isScriptScene) {
+      window.addEventListener('keydown', onKeyDown, false)
+    }
+    restart()
+
+    return () => {
+      if (props.playlistIndex === 0 && isScriptScene) {
+        window.removeEventListener('keydown', onKeyDown)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!props.persist) {
+      restart()
+    }
+  }, [props.playlist])
+
+  const restart = () => {
+    let scripts = props.playlist.scripts
+    if (props.playlist.shuffle) {
+      scripts = randomizeList(Array.from(scripts))
+    }
+    setPlayingScripts(scripts)
+  }
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case '[':
+        e.preventDefault()
+        props.orderScriptTags(props.playlist.scripts[currentIndex])
+        prevTrack()
+        break
+      case ']':
+        e.preventDefault()
+        props.orderScriptTags(props.playlist.scripts[currentIndex])
+        nextTrack()
+        break
+    }
+  }
+
+  const prevTrack = () => {
+    let prevTrack = currentIndex - 1
+    if (prevTrack < 0) {
+      prevTrack = props.playlist.scripts.length - 1
+    }
+    setCurrentIndex(prevTrack)
+  }
+
+  const nextTrack = () => {
+    let nextTrack = currentIndex + 1
+    if (nextTrack >= props.playlist.scripts.length) {
+      if (props.playlist.repeat === RP.none) {
+        nextTrack = props.playlist.scripts.length
+      } else {
+        nextTrack = 0
+      }
+    }
+    setCurrentIndex(nextTrack)
+  }
+
+  let script = playingScripts[currentIndex]
+  if (!script) script = props.playlist.scripts[currentIndex]
+  if (!script) return <div />
+  return (
+    <CaptionProgram
+      sceneID={props.sceneID}
+      captionScriptID={script}
+      persist={props.persist}
+      repeat={props.playlist.repeat}
+      scale={props.scale}
+      singleTrack={playingScripts.length === 1}
+      nextTrack={nextTrack.bind(this)}
+      currentAudio={props.currentAudio}
+      getCurrentTimestamp={props.getCurrentTimestamp}
+      timeToNextFrame={props.timeToNextFrame}
+      currentImage={props.currentImage}
+      jumpToHack={props.jumpToHack}
+      advance={props.advance}
+      onError={props.onError}
+    />
+  )
+}
+
+;(CaptionProgramPlaylist as any).displayName = 'CaptionProgramPlaylist'

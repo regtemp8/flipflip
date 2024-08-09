@@ -1,234 +1,297 @@
-import * as React from 'react';
-import {animated, useTransition} from "react-spring";
+import React, {
+  type PropsWithChildren,
+  useEffect,
+  useState,
+  useRef
+} from 'react'
+import { animated, useTransition } from 'react-spring'
 
-import {TF} from "../../data/const";
-import {getEaseFunction} from "../../data/utils";
-import Scene from "../../data/Scene";
-import Audio from "../../data/Audio";
+import { TF } from '../../data/const'
+import { getDuration, getEaseFunction } from '../../data/utils'
+import Audio from '../../../store/audio/Audio'
+import { useAppSelector } from '../../../store/hooks'
+import {
+  selectSceneFadeInOut,
+  selectSceneFadeIOPulse,
+  selectSceneFadeIOTF,
+  selectSceneFadeIODuration,
+  selectSceneFadeIODurationMin,
+  selectSceneFadeIODurationMax,
+  selectSceneFadeIOSinRate,
+  selectSceneFadeIOBPMMulti,
+  selectSceneFadeIODelayTF,
+  selectSceneFadeIODelay,
+  selectSceneFadeIODelayMin,
+  selectSceneFadeIODelayMax,
+  selectSceneFadeIODelaySinRate,
+  selectSceneFadeIODelayBPMMulti,
+  selectSceneFadeIOEndEase,
+  selectSceneFadeIOEndExp,
+  selectSceneFadeIOEndAmp,
+  selectSceneFadeIOEndPer,
+  selectSceneFadeIOEndOv,
+  selectSceneFadeIOStartEase,
+  selectSceneFadeIOStartExp,
+  selectSceneFadeIOStartAmp,
+  selectSceneFadeIOStartPer,
+  selectSceneFadeIOStartOv
+} from '../../../store/scene/selectors'
+import { selectAudioBPM } from '../../../store/audio/selectors'
 
-export default class FadeInOut extends React.Component {
-  readonly props: {
-    toggleFade: boolean,
-    currentAudio: Audio,
-    timeToNextFrame: number,
-    scene: Scene,
-    fadeFunction: Function,
-    children?: React.ReactNode,
-  };
-
-  readonly state = {
-    toggleFade: false,
-    duration: this.getDuration(),
-    delay: 0,
-  };
-
-  _fadeTimeout: number = null;
-  _fadeOut = false;
-
-  render() {
-    // TODO Fix with TF.scene
-    return (
-      <this.FadeInOutLayer>
-        {this.props.children}
-      </this.FadeInOutLayer>
-    );
-  }
-
-
-  _lastToggle: any = null;
-  FadeInOutLayer = (data: {children: React.ReactNode}) => {
-    const sceneTiming = this.props.scene.fadeIOTF == TF.scene;
-    if (this.props.toggleFade != this._lastToggle) {
-      this._fadeOut = false;
-      this._lastToggle = this.props.toggleFade;
-    }
-    let fadeTransitions: [{ item: any, props: any, key: any }];
-    if (sceneTiming) {
-      fadeTransitions = useTransition(
-        this._fadeOut ? null : this.props.toggleFade,
-        (toggle: any) => {
-          return toggle
-        },
-        {
-          from: {
-            opacity: this._fadeOut ? 1 : 0,
-          },
-          enter: {
-            opacity: this._fadeOut ? 0 : 1,
-          },
-          leave: {
-            opacity: this._fadeOut ? 1 : 0,
-          },
-          unique: true,
-          config: {
-            duration: this.getDuration(),
-            easing : this._fadeOut ? getEaseFunction(this.props.scene.fadeIOEndEase, this.props.scene.fadeIOEndExp, this.props.scene.fadeIOEndAmp, this.props.scene.fadeIOEndPer, this.props.scene.fadeIOEndOv) :
-              getEaseFunction(this.props.scene.fadeIOStartEase, this.props.scene.fadeIOStartExp, this.props.scene.fadeIOStartAmp, this.props.scene.fadeIOStartPer, this.props.scene.fadeIOStartOv)
-          },
-        }
-      );
-      clearTimeout(this._fadeTimeout);
-      if (this._fadeOut) {
-        this.props.fadeFunction();
-        this._fadeTimeout = setTimeout(() => {
-          this._fadeOut = false;
-        }, this.getDuration());
-      } else {
-        this._fadeTimeout = setTimeout(() => {
-          this._fadeOut = true;
-          this.setState({toggleFade: !this.state.toggleFade});
-        }, this.getDuration());
-      }
-    } else {
-      fadeTransitions = useTransition(
-        this.state.toggleFade,
-        (toggle: any) => {
-          return toggle
-        },
-        {
-          from: {
-            opacity: this.state.toggleFade ? 0 : 1,
-          },
-          enter: {
-            opacity: this.state.toggleFade ? 1 : 0,
-          },
-          leave: {
-            opacity: this.state.toggleFade ? 0 : 1,
-          },
-          unique: true,
-          config: {
-            duration: this.state.duration,
-            easing : this.state.toggleFade ? getEaseFunction(this.props.scene.panEndEase, this.props.scene.panEndExp, this.props.scene.panEndAmp, this.props.scene.panEndPer, this.props.scene.panEndOv) :
-              getEaseFunction(this.props.scene.panStartEase, this.props.scene.panStartExp, this.props.scene.panStartAmp, this.props.scene.panStartPer, this.props.scene.panStartOv)
-          },
-        }
-      );
-    }
-
-    return (
-      <React.Fragment>
-        {fadeTransitions.map(({item, props, key}) => {
-          return (
-            <animated.div
-              key={key}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                zIndex: 2,
-                ...props
-              }}>
-              {data.children}
-            </animated.div>
-          );
-        })}
-      </React.Fragment>
-    );
-  };
-
-  fade() {
-    const duration = this.getDuration();
-    const delay = this.props.scene.fadeIOPulse ? this.getDelay() : duration;
-    this.setState({toggleFade: !this.state.toggleFade, duration: duration, delay: delay});
-    this.props.fadeFunction();
-    return delay;
-  }
-
-  fadeLoop() {
-    const delay = this.fade();
-    this._fadeTimeout = setTimeout(this.fadeLoop.bind(this), delay);
-  }
-
-  componentDidMount() {
-    this._fadeOut = false;
-    if (this.props.scene.fadeInOut) {
-      if (this.props.scene.fadeIOPulse ? this.props.scene.fadeIODelayTF != TF.scene : this.props.scene.fadeIOTF != TF.scene) {
-        this.fadeLoop();
-      }
-    }
-  }
-
-  componentDidUpdate(props: any) {
-    if (this.props.scene.fadeInOut) {
-      if (this.props.scene.fadeIOTF != props.scene.fadeIOTF || this.props.scene.fadeIODelayTF != props.scene.fadeIODelayTF || this.props.scene.fadeIOPulse != props.scene.fadeIOPulse) {
-        clearTimeout(this._fadeTimeout);
-        if (this.props.scene.fadeIOPulse ? this.props.scene.fadeIODelayTF != TF.scene : this.props.scene.fadeIOTF != TF.scene) {
-          this.fadeLoop();
-        }
-      }
-    }
-  }
-
-  shouldComponentUpdate(props: any, state: any) {
-    return !props.fadeInOut ||
-      this.props.toggleFade != props.toggleFade ||
-      this.state.toggleFade != state.toggleFade;
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this._fadeTimeout);
-    this._fadeTimeout = null;
-    this._fadeOut = null;
-  }
-
-  getDuration() {
-    let duration;
-    switch (this.props.scene.fadeIOTF) {
-      case TF.constant:
-        duration = Math.max(this.props.scene.fadeIODuration, 10);
-        break;
-      case TF.random:
-        duration = Math.floor(Math.random() * (Math.max(this.props.scene.fadeIODurationMax, 10) - Math.max(this.props.scene.fadeIODurationMin, 10) + 1)) + Math.max(this.props.scene.fadeIODurationMin, 10);
-        break;
-      case TF.sin:
-        const sinRate = (Math.abs(this.props.scene.fadeIOSinRate - 100) + 2) * 1000;
-        duration = Math.floor(Math.abs(Math.sin(Date.now() / sinRate)) * (Math.max(this.props.scene.fadeIODurationMax, 10) - Math.max(this.props.scene.fadeIODurationMin, 10) + 1)) + Math.max(this.props.scene.fadeIODurationMin, 10);
-        break;
-      case TF.bpm:
-        const bpmMulti = this.props.scene.fadeIOBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
-        duration = 60000 / (bpm * bpmMulti);
-        // If we cannot parse this, default to 1s
-        if (!duration) {
-          duration = 1000;
-        }
-        break;
-      case TF.scene:
-        duration = this.props.timeToNextFrame;
-    }
-    duration = duration / 2;
-    return duration;
-  }
-
-  getDelay() {
-    let delay;
-    switch (this.props.scene.fadeIODelayTF) {
-      case TF.constant:
-        delay = this.props.scene.fadeIODelay;
-        break;
-      case TF.random:
-        delay = Math.floor(Math.random() * (this.props.scene.fadeIODelayMax - this.props.scene.fadeIODelayMin + 1)) + this.props.scene.fadeIODelayMin;
-        break;
-      case TF.sin:
-        const sinRate = (Math.abs(this.props.scene.fadeIODelaySinRate - 100) + 2) * 1000;
-        delay = Math.floor(Math.abs(Math.sin(Date.now() / sinRate)) * (this.props.scene.fadeIODelayMax - this.props.scene.fadeIODelayMin + 1)) + this.props.scene.fadeIODelayMin;
-        break;
-      case TF.bpm:
-        const bpmMulti = this.props.scene.fadeIODelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
-        delay = 60000 / (bpm * bpmMulti);
-        // If we cannot parse this, default to 1s
-        if (!delay) {
-          delay = 1000;
-        }
-        break;
-      case TF.scene:
-        delay = this.props.timeToNextFrame;
-    }
-    return delay;
-  }
+export interface FadeInOutProps {
+  toggleFade: boolean
+  currentAudio: number
+  timeToNextFrame: number
+  sceneID: number
+  fadeFunction: Function
 }
 
-(FadeInOut as any).displayName="FadeInOut";
+export default function FadeInOut (props: PropsWithChildren<FadeInOutProps>) {
+  const fadeInOut = useAppSelector(selectSceneFadeInOut(props.sceneID))
+  const fadeIOPulse = useAppSelector(selectSceneFadeIOPulse(props.sceneID))
+  const fadeIOTF = useAppSelector(selectSceneFadeIOTF(props.sceneID))
+  const fadeIODuration = useAppSelector(
+    selectSceneFadeIODuration(props.sceneID)
+  )
+  const fadeIODurationMin = useAppSelector(
+    selectSceneFadeIODurationMin(props.sceneID)
+  )
+  const fadeIODurationMax = useAppSelector(
+    selectSceneFadeIODurationMax(props.sceneID)
+  )
+  const fadeIOSinRate = useAppSelector(selectSceneFadeIOSinRate(props.sceneID))
+  const fadeIOBPMMulti = useAppSelector(
+    selectSceneFadeIOBPMMulti(props.sceneID)
+  )
+  const fadeIODelayTF = useAppSelector(selectSceneFadeIODelayTF(props.sceneID))
+  const fadeIODelay = useAppSelector(selectSceneFadeIODelay(props.sceneID))
+  const fadeIODelayMin = useAppSelector(
+    selectSceneFadeIODelayMin(props.sceneID)
+  )
+  const fadeIODelayMax = useAppSelector(
+    selectSceneFadeIODelayMax(props.sceneID)
+  )
+  const fadeIODelaySinRate = useAppSelector(
+    selectSceneFadeIODelaySinRate(props.sceneID)
+  )
+  const fadeIODelayBPMMulti = useAppSelector(
+    selectSceneFadeIODelayBPMMulti(props.sceneID)
+  )
+  const fadeIOEndEase = useAppSelector(selectSceneFadeIOEndEase(props.sceneID))
+  const fadeIOEndExp = useAppSelector(selectSceneFadeIOEndExp(props.sceneID))
+  const fadeIOEndAmp = useAppSelector(selectSceneFadeIOEndAmp(props.sceneID))
+  const fadeIOEndPer = useAppSelector(selectSceneFadeIOEndPer(props.sceneID))
+  const fadeIOEndOv = useAppSelector(selectSceneFadeIOEndOv(props.sceneID))
+  const fadeIOStartEase = useAppSelector(
+    selectSceneFadeIOStartEase(props.sceneID)
+  )
+  const fadeIOStartExp = useAppSelector(
+    selectSceneFadeIOStartExp(props.sceneID)
+  )
+  const fadeIOStartAmp = useAppSelector(
+    selectSceneFadeIOStartAmp(props.sceneID)
+  )
+  const fadeIOStartPer = useAppSelector(
+    selectSceneFadeIOStartPer(props.sceneID)
+  )
+  const fadeIOStartOv = useAppSelector(selectSceneFadeIOStartOv(props.sceneID))
+  const bpm = useAppSelector(selectAudioBPM(props.currentAudio))
+
+  const [toggleFade, setToggleFade] = useState(false)
+  const [duration, setDuration] = useState(0)
+
+  const _fadeTimeout = useRef<number>()
+  const _fadeOut = useRef(false)
+  const _lastToggle = useRef<any>()
+
+  useEffect(() => {
+    _fadeOut.current = false
+    if (
+      fadeInOut &&
+      (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene)
+    ) {
+      fadeLoop()
+    }
+
+    return () => {
+      clearTimeout(_fadeTimeout.current)
+      _fadeTimeout.current = undefined
+      _fadeOut.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (fadeInOut) {
+      clearTimeout(_fadeTimeout.current)
+      if (fadeIOPulse ? fadeIODelayTF !== TF.scene : fadeIOTF !== TF.scene) {
+        fadeLoop()
+      }
+    }
+  }, [fadeIOTF, fadeIODelayTF, fadeIOPulse])
+
+  const calcDuration = () => {
+    return (
+      getDuration(
+        {
+          timingFunction: fadeIOTF,
+          time: fadeIODuration,
+          timeMax: fadeIODurationMax,
+          timeMin: fadeIODurationMin,
+          sinRate: fadeIOSinRate,
+          bpmMulti: fadeIOBPMMulti
+        },
+        props.timeToNextFrame,
+        bpm,
+        10
+      ) / 2
+    )
+  }
+
+  const fade = () => {
+    const duration = calcDuration()
+    const delay = fadeIOPulse ? getDelay() : duration
+    setToggleFade(!toggleFade)
+    setDuration(duration)
+    props.fadeFunction()
+    return delay
+  }
+
+  const fadeLoop = () => {
+    const delay = fade()
+    _fadeTimeout.current = window.setTimeout(fadeLoop.bind(this), delay)
+  }
+
+  const getDelay = () => {
+    return getDuration(
+      {
+        timingFunction: fadeIODelayTF,
+        time: fadeIODelay,
+        timeMax: fadeIODelayMax,
+        timeMin: fadeIODelayMin,
+        sinRate: fadeIODelaySinRate,
+        bpmMulti: fadeIODelayBPMMulti
+      },
+      props.timeToNextFrame,
+      bpm
+    )
+  }
+
+  const sceneTiming = fadeIOTF === TF.scene
+  if (props.toggleFade !== _lastToggle.current) {
+    _fadeOut.current = false
+    _lastToggle.current = props.toggleFade
+  }
+  let fadeTransitions: [{ item: any, props: any, key: any }]
+  if (sceneTiming) {
+    fadeTransitions = useTransition(
+      _fadeOut.current ? null : props.toggleFade,
+      (toggle: any) => {
+        return toggle
+      },
+      {
+        from: {
+          opacity: _fadeOut.current ? 1 : 0
+        },
+        enter: {
+          opacity: _fadeOut.current ? 0 : 1
+        },
+        leave: {
+          opacity: _fadeOut.current ? 1 : 0
+        },
+        unique: true,
+        config: {
+          duration: calcDuration(),
+          easing: _fadeOut.current
+            ? getEaseFunction(
+              fadeIOEndEase,
+              fadeIOEndExp,
+              fadeIOEndAmp,
+              fadeIOEndPer,
+              fadeIOEndOv
+            )
+            : getEaseFunction(
+              fadeIOStartEase,
+              fadeIOStartExp,
+              fadeIOStartAmp,
+              fadeIOStartPer,
+              fadeIOStartOv
+            )
+        }
+      }
+    )
+    clearTimeout(_fadeTimeout.current)
+    if (_fadeOut.current) {
+      props.fadeFunction()
+      _fadeTimeout.current = window.setTimeout(() => {
+        _fadeOut.current = false
+      }, calcDuration())
+    } else {
+      _fadeTimeout.current = window.setTimeout(() => {
+        _fadeOut.current = true
+        setToggleFade(!toggleFade)
+      }, calcDuration())
+    }
+  } else {
+    fadeTransitions = useTransition(
+      toggleFade,
+      (toggle: any) => {
+        return toggle
+      },
+      {
+        from: {
+          opacity: toggleFade ? 0 : 1
+        },
+        enter: {
+          opacity: toggleFade ? 1 : 0
+        },
+        leave: {
+          opacity: toggleFade ? 0 : 1
+        },
+        unique: true,
+        config: {
+          duration,
+          easing: toggleFade
+            ? getEaseFunction(
+              fadeIOEndEase,
+              fadeIOEndExp,
+              fadeIOEndAmp,
+              fadeIOEndPer,
+              fadeIOEndOv
+            )
+            : getEaseFunction(
+              fadeIOStartEase,
+              fadeIOStartExp,
+              fadeIOStartAmp,
+              fadeIOStartPer,
+              fadeIOStartOv
+            )
+        }
+      }
+    )
+  }
+
+  return (
+    <React.Fragment>
+      {fadeTransitions.map((transition) => {
+        return (
+          <animated.div
+            key={transition.key}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              zIndex: 2,
+              ...transition.props
+            }}
+          >
+            {props.children}
+          </animated.div>
+        )
+      })}
+    </React.Fragment>
+  )
+}
+
+;(FadeInOut as any).displayName = 'FadeInOut'

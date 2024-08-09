@@ -3,18 +3,22 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import FadeInOut from "../FadeInOut";
 import TestProvider from "../../../../../test/util/TestProvider";
-import Scene from "../../../data/Scene";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../store/scene/Scene";
 
 describe("FadeInOut", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
+    const sceneID = 3
+    store.dispatch(setScene(newScene({id: sceneID})))
+
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <FadeInOut
           toggleFade={false}
           currentAudio={null}
           timeToNextFrame={0}
-          scene={scene}
+          sceneID={sceneID}
           fadeFunction={() => {}}
         >
           <p>Test</p>

@@ -1,13 +1,21 @@
 {
-    "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "jsx": "react",
-        "module": "ESNext",
-        "moduleResolution": "node",
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "sourceMap": true,
-        "target": "es2017"
-    },
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+    "target": "ESNext",
+    "strict": false,
+    "allowJs": true,
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": ["src/**/*"]
 }

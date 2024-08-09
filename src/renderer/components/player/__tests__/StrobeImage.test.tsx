@@ -3,14 +3,18 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import StrobeImage from "../StrobeImage";
 import TestProvider from "../../../../../test/util/TestProvider";
-import Scene from "../../../data/Scene";
+import store from "../../../../store/store";
+import { setScene } from "../../../../store/scene/slice";
+import { newScene } from "../../../../store/scene/Scene";
 
 describe("StrobeImage", () => {
   it("should match snapshot", () => {
-    const scene = new Scene();
+    const sceneID = 3
+    store.dispatch(setScene(newScene({id: sceneID})))
+
     const component = renderer.create(
-      <TestProvider>
-        <StrobeImage scene={scene} timeToNextFrame={0} currentAudio={null}>
+      <TestProvider store={store}>
+        <StrobeImage sceneID={sceneID} timeToNextFrame={0}>
           <p>Test</p>
         </StrobeImage>
       </TestProvider>

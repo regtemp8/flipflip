@@ -1,197 +1,170 @@
-import * as React from "react";
+import { Collapse, Grid, InputAdornment, type Theme } from '@mui/material'
 
+import createStyles from '@mui/styles/createStyles'
+import withStyles, { type WithStyles } from '@mui/styles/withStyles'
+
+import { type FontSettingsType } from '../../../store/captionScript/FontSettings'
+import ColorPicker from '../config/ColorPicker'
+
+import BaseTextField from '../common/text/BaseTextField'
+import BaseSwitch from '../common/BaseSwitch'
+import FontFamilySelect from '../common/FontFamilySelect'
 import {
-  Collapse,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  Switch,
-  TextField,
-  Theme,
-} from "@mui/material";
+  setCaptionScriptFontSettingsBorder,
+  setCaptionScriptFontSettingsColor,
+  setCaptionScriptFontSettingsBorderColor,
+  setCaptionScriptFontSettingsFontFamily,
+  setCaptionScriptFontSettingsFontSize,
+  setCaptionScriptFontSettingsBorderPx
+} from '../../../store/captionScript/actions'
+import {
+  selectCaptionScriptFontSettingsBorder,
+  selectCaptionScriptFontSettingsColor,
+  selectCaptionScriptFontSettingsBorderColor,
+  selectCaptionScriptFontSettingsFontFamily,
+  selectCaptionScriptFontSettingsFontSize,
+  selectCaptionScriptFontSettingsBorderPx
+} from '../../../store/captionScript/selectors'
+import { useAppSelector } from '../../../store/hooks'
 
-import createStyles from '@mui/styles/createStyles';
-import withStyles from '@mui/styles/withStyles';
-
-import {FontSettingsI} from "../../data/CaptionScript";
-import ColorPicker from "../config/ColorPicker";
-
-const styles = (theme: Theme) => createStyles({
-  fullWidth: {
-    width: '100%',
-  },
-  noPadding: {
-    padding: '0 !important',
-  },
-  endInput: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: 0,
-  },
-  fontDivider: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2),
-  },
-  fontProgress: {
-    position: 'absolute',
-  },
-});
-
-class FontOptions extends React.Component {
-  readonly props: {
-    classes: any,
-    name: string,
-    options: FontSettingsI,
-    systemFonts: Array<string>,
-    onUpdateOptions(fn: (options: FontSettingsI) => void): void,
-  };
-
-  render() {
-    const classes = this.props.classes;
-
-    let fontFamily = this.props.options.fontFamily;
-    if (!this.props.systemFonts.length) {
-      fontFamily = ""
-    } else if (fontFamily.includes(",")) {
-      for (let font of fontFamily.split(",")) {
-        if (this.props.systemFonts.includes(font)) {
-          fontFamily = font;
-          break;
-        }
-      }
+const styles = (theme: Theme) =>
+  createStyles({
+    fullWidth: {
+      width: '100%'
+    },
+    noPadding: {
+      padding: '0 !important'
+    },
+    endInput: {
+      paddingLeft: theme.spacing(1),
+      paddingTop: 0
+    },
+    fontDivider: {
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(2)
+    },
+    fontProgress: {
+      position: 'absolute'
     }
+  })
 
-    return (
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={9}>
-          <FormControl variant="standard" className={classes.fullWidth}>
-            <InputLabel>{this.props.name} Font</InputLabel>
-            <Select
-              variant="standard"
-              value={fontFamily}
-              disabled={this.props.systemFonts.length == 0}
-              style={{fontFamily: this.props.options.fontFamily}}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
-              }}
-              onChange={this.onInput.bind(this, 'fontFamily')}>
-              {this.props.systemFonts.map((f) =>
-                <MenuItem key={f} value={f} style={{fontFamily: f}}>{f}</MenuItem>
-              )}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
+export interface FontOptionsProps extends WithStyles<typeof styles> {
+  name: string
+  captionScriptID: number
+  type: FontSettingsType
+}
+
+function FontOptions (props: FontOptionsProps) {
+  const classes = props.classes
+  const border = useAppSelector(
+    selectCaptionScriptFontSettingsBorder(props.captionScriptID, props.type)
+  )
+
+  return (
+    <Grid container spacing={2} alignItems="center">
+      <Grid item xs={9}>
+        <FontFamilySelect
+          label={`${props.name} Font`}
+          controlClassName={classes.fullWidth}
+          selector={selectCaptionScriptFontSettingsFontFamily(
+            props.captionScriptID,
+            props.type
+          )}
+          action={setCaptionScriptFontSettingsFontFamily(
+            props.captionScriptID,
+            props.type
+          )}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <BaseTextField
+          variant="standard"
+          label="Size"
+          margin="dense"
+          selector={selectCaptionScriptFontSettingsFontSize(
+            props.captionScriptID,
+            props.type
+          )}
+          action={setCaptionScriptFontSettingsFontSize(
+            props.captionScriptID,
+            props.type
+          )}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">px</InputAdornment>
+          }}
+          inputProps={{
+            min: 1,
+            type: 'number'
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <ColorPicker
+          selector={selectCaptionScriptFontSettingsColor(
+            props.captionScriptID,
+            props.type
+          )}
+          action={setCaptionScriptFontSettingsColor(
+            props.captionScriptID,
+            props.type
+          )}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Border"
+          size="small"
+          selector={selectCaptionScriptFontSettingsBorder(
+            props.captionScriptID,
+            props.type
+          )}
+          action={setCaptionScriptFontSettingsBorder(
+            props.captionScriptID,
+            props.type
+          )}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <Collapse in={border}>
+          <BaseTextField
             variant="standard"
-            label="Size"
+            label="Width"
             margin="dense"
-            value={this.props.options.fontSize}
-            onChange={this.onIntInput.bind(this, 'fontSize')}
-            onBlur={this.blurIntKey.bind(this, 'fontSize')}
+            selector={selectCaptionScriptFontSettingsBorderPx(
+              props.captionScriptID,
+              props.type
+            )}
+            action={setCaptionScriptFontSettingsBorderPx(
+              props.captionScriptID,
+              props.type
+            )}
             InputProps={{
-              endAdornment: <InputAdornment position="end">px</InputAdornment>,
+              endAdornment: <InputAdornment position="end">px</InputAdornment>
             }}
             inputProps={{
               min: 1,
-              type: 'number',
-            }} />
-        </Grid>
-        <Grid item xs={12}>
-          <ColorPicker
-            currentColor={this.props.options.color}
-            onChangeColor={this.onInput.bind(this, 'color')}/>
-        </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Switch checked={this.props.options.border}
-                      size="small"
-                      onChange={this.onBoolInput.bind(this, 'border')}/>
-            }
-            label="Border"/>
-        </Grid>
-        <Grid item xs={3}>
-          <Collapse in={this.props.options.border}>
-            <TextField
-              variant="standard"
-              label="Width"
-              margin="dense"
-              value={this.props.options.borderpx}
-              onChange={this.onIntInput.bind(this, 'borderpx')}
-              onBlur={this.blurIntKey.bind(this, 'borderpx')}
-              InputProps={{
-                endAdornment: <InputAdornment position="end">px</InputAdornment>,
-              }}
-              inputProps={{
-                min: 1,
-                type: 'number',
-              }} />
-          </Collapse>
-        </Grid>
-        <Grid item xs={9}>
-          <Collapse in={this.props.options.border}>
-            {!this.props.options.border && (<div/>)}
-            {this.props.options.border && (
-              <ColorPicker
-                currentColor={this.props.options.borderColor}
-                onChangeColor={this.onInput.bind(this, 'borderColor')}/>
-            )}
-          </Collapse>
-        </Grid>
+              type: 'number'
+            }}
+          />
+        </Collapse>
       </Grid>
-    );
-  }
-
-  shouldComponentUpdate(props: any, state: any): boolean {
-    return this.props.options !== props.options || this.props.systemFonts !== props.systemFonts;
-  }
-
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min ? (e.currentTarget as any).min : null;
-    const max = (e.currentTarget as any).max ? (e.currentTarget as any).max : null;
-    if (min && (this.props.options as any)[key] < min) {
-      this.changeIntKey(key, min);
-    } else if (max && (this.props.options as any)[key] > max) {
-      this.changeIntKey(key, max);
-    }
-  }
-
-  onIntInput(key: string, e: MouseEvent) {
-    const input = (e.target as HTMLInputElement);
-    this.changeKey(key, input.value === '' ? '' : Number(input.value));
-  }
-
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = (e.target as HTMLInputElement);
-    const checked = input.checked;
-    this.changeKey(key, checked);
-  }
-
-  onInput(key: string, e: MouseEvent) {
-    const input = (e.target as HTMLInputElement);
-    this.changeKey(key, input.value);
-  }
-
-  changeIntKey(key:string, intString: string) {
-    this.changeKey(key, intString === '' ? '' : Number(intString));
-  }
-
-  changeKey(key: string, value: any) {
-    this.update((s) => s[key] = value);
-  }
-
-  update(fn: (scene: any) => void) {
-    this.props.onUpdateOptions(fn);
-  }
+      <Grid item xs={9}>
+        <Collapse in={border}>
+          <ColorPicker
+            selector={selectCaptionScriptFontSettingsBorderColor(
+              props.captionScriptID,
+              props.type
+            )}
+            action={setCaptionScriptFontSettingsBorderColor(
+              props.captionScriptID,
+              props.type
+            )}
+          />
+        </Collapse>
+      </Grid>
+    </Grid>
+  )
 }
 
-(FontOptions as any).displayName="FontOptions";
-export default withStyles(styles)(FontOptions as any);
+;(FontOptions as any).displayName = 'FontOptions'
+export default withStyles(styles)(FontOptions as any)

@@ -1,126 +1,142 @@
-const TF = {  // timing functions
+const TF = {
+  // timing functions
   constant: 'tf.c',
   random: 'tf.random',
   sin: 'tf.sin',
   bpm: 'tf.bpm',
-  scene: 'tf.scene',
-};
+  scene: 'tf.scene'
+}
 
-const WF = { // weight functions
+const WF = {
+  // weight functions
   sources: 'wf.s',
-  images: 'wf.i',
-};
+  images: 'wf.i'
+}
 
 const SOF = {
   ordered: 'sof.ordered',
-  random: 'sof.random',
-};
+  random: 'sof.random'
+}
 
 const OF = {
   strict: 'of.strict',
   ordered: 'of.ordered',
-  random: 'of.random',
-};
+  random: 'of.random'
+}
 
-const IF = { // image filters
+const IF = {
+  // image filters
   any: 'if.any',
   videos: 'if.videos',
   animated: 'if.gifs',
   images: 'if.images',
-  stills: 'if.stills',
-};
+  stills: 'if.stills'
+}
 
-const OT = { // orientation
+const OT = {
+  // orientation
   original: 'ot.original',
   onlyLandscape: 'ot.onlylandscape',
   onlyPortrait: 'ot.onlyportrait',
   forceLandscape: 'ot.forcelandscape',
-  forcePortrait: 'ot.forceportrait',
+  forcePortrait: 'ot.forceportrait'
 }
 
-const GO = { // GIF Options
+const GO = {
+  // GIF Options
   none: 'go.none',
   part: 'go.part',
   partr: 'go.partr',
   atLeast: 'go.atleast',
-  full: 'go.full',
-};
+  full: 'go.full'
+}
 
-const VO = { // Video Options
+const VO = {
+  // Video Options
   none: 'vo.none',
   part: 'vo.part',
   partr: 'vo.partr',
   atLeast: 'vo.atleast',
-  full: 'vo.full',
-};
-
-const RP = { // Audio Repeat Options
-  none: 'rp.none',
-  one: 'rp.one',
-  all: 'rp.all',
+  full: 'vo.full'
 }
 
-const BT = { // background type
+const RP = {
+  // Audio Repeat Options
+  none: 'rp.none',
+  one: 'rp.one',
+  all: 'rp.all'
+}
+
+const BT = {
+  // background type
   blur: 'bt.blur',
   color: 'bt.color',
   colorSet: 'bt.colorset',
   colorRand: 'bt.colorrand',
-  none: 'bt.none',
-};
+  none: 'bt.none'
+}
 
-const SC = { // strobe color type
+const SC = {
+  // strobe color type
   color: 'bt.color',
   colorSet: 'bt.colorset',
-  colorRand: 'bt.colorrand',
-};
+  colorRand: 'bt.colorrand'
+}
 
-const IT = { // image type
+const IT = {
+  // image type
   fitBestNoClip: 'it.fitBestNoClip',
   fitBestClip: 'it.fitBestClip',
   stretch: 'it.stretch',
   center: 'it.center',
   centerNoClip: 'it.centerNoClip',
   fitWidth: 'it.fitWidth',
-  fitHeight: 'it.fitHeight',
-};
+  fitHeight: 'it.fitHeight'
+}
 
-const HTF = { // horizontal translate functions
+const HTF = {
+  // horizontal translate functions
   none: 'htf.none',
   left: 'htf.left',
   right: 'htf.right',
-  random: 'htf.random',
-};
+  random: 'htf.random'
+}
 
-const VTF = { // vertical translate functions
+const VTF = {
+  // vertical translate functions
   none: 'vtf.none',
   up: 'vtf.up',
   down: 'vtf.down',
-  random: 'vtf.random',
-};
+  random: 'vtf.random'
+}
 
-const STF = { // Slide type function
+const STF = {
+  // Slide type function
   left: 'stf.left',
   right: 'stf.right',
   leftright: 'stf.leftright',
   up: 'stf.up',
   down: 'stf.down',
   updown: 'stf.updown',
-  random: 'stf.random',
-};
+  random: 'stf.random'
+}
 
-const GT = { // gooninator import type
+const GT = {
+  // gooninator import type
   tumblr: 'gt.tumblr',
-  local: 'gt.local',
-};
+  local: 'gt.local'
+}
 
-const TT = { // tag type
+const TT = {
+  // tag type
   weight: 'tt.weight',
   all: 'tt.all',
   none: 'tt.none',
   or: 'tt.or'
-};
+}
 
-const SF = { // sort function
+const SF = {
+  // sort function
   alpha: 'sf.alpha',
   alphaFull: 'sf.alphaFull',
   date: 'sf.date',
@@ -128,10 +144,11 @@ const SF = { // sort function
   type: 'sf.type',
   duration: 'sf.duration',
   resolution: 'sf.resolution',
-  random: 'sf.random',
-};
+  random: 'sf.random'
+}
 
-const ASF = { // audio sort function
+const ASF = {
+  // audio sort function
   url: 'asf.url',
   name: 'asf.name',
   artist: 'asf.artist',
@@ -140,10 +157,11 @@ const ASF = { // audio sort function
   duration: 'asf.duration',
   trackNum: 'asf.tracknum',
   playedCount: 'asf.playedcount',
-  random: 'asf.random',
-};
+  random: 'asf.random'
+}
 
-const ST = { // source types
+const ST = {
+  // source types
   local: 'st.local',
   video: 'st.video',
   playlist: 'st.playlist',
@@ -168,17 +186,19 @@ const ST = { // source types
   piwigo: 'st.piwigo',
   nimja: 'st.nimja',
   audio: 'st.audio'
-};
+}
 
-const SL = { // strobe layers
+const SL = {
+  // strobe layers
   top: 'sl.top',
   middle: 'sl.middle',
   image: 'sl.image',
   background: 'sl.background',
-  bottom: 'sl.bottom',
-};
+  bottom: 'sl.bottom'
+}
 
-const AF = { // add functions
+const AF = {
+  // add functions
   url: 'af.url',
   list: 'af.list',
   directory: 'af.directory',
@@ -186,15 +206,127 @@ const AF = { // add functions
   videoDir: 'af.videodir',
   library: 'af.library',
   audios: 'af.audio',
-  script: 'af.script',
-};
+  script: 'af.script'
+}
 
 const IPC = {
   newWindow: 'ipc.newWindow',
   startScene: 'ipc.startScene',
-};
+  getWindowId: 'ipc.getWindowId',
+  appStorageInitialState: 'ipc.appStorageInitialState',
+  appStorageSave: 'ipc.appStorageSave',
+  appStorageBackup: 'ipc.appStorageBackup',
+  errorReport: 'ipc.errorReport',
+  reloadWindow: 'ipc.reloadWindow',
+  openJsonFile: 'ipc.openJsonFile',
+  openSubtitleFile: 'ipc.openSubtitleFile',
+  openTextFile: 'ipc.openTextFile',
+  openDirectory: 'ipc.openDirectory',
+  openDirectories: 'ipc.openDirectories',
+  openVideos: 'ipc.openVideos',
+  openExternal: 'ipc.openExternal',
+  openPath: 'ipc.openPath',
+  readTextFile: 'ipc.readTextFile',
+  readBinaryFile: 'ipc.readBinaryFile',
+  showCurrentWindow: 'ipc.showCurrentWindow',
+  showItemInFolder: 'ipc.showItemInFolder',
+  loadThumb: 'ipc.loadThumb',
+  loadAudioSources: 'ipc.loadAudioSources',
+  loadScriptSources: 'ipc.loadScriptSources',
+  loadVideoSources: 'ipc.loadVideoSources',
+  buildMenu: 'ipc.buildMenu',
+  gridToggleFullScreen: 'ipc.gridToggleFullScreen',
+  gridSetAlwaysOnTop: 'ipc.gridSetAlwaysOnTop',
+  gridSetMenuBarVisibility: 'ipc.gridSetMenuBarVisibility',
+  gridSetFullScreen: 'ipc.gridSetFullScreen',
+  playerBack: 'ipc.playerBack',
+  playerToggleFullScreen: 'ipc.playerToggleFullScreen',
+  playerSetAlwaysOnTop: 'ipc.playerSetAlwaysOnTop',
+  playerSetMenuBarVisibility: 'ipc.playerSetMenuBarVisibility',
+  playerSetFullScreen: 'ipc.playerSetFullScreen',
+  playerBuildMenu: 'ipc.playerBuildMenu',
+  saveTextFile: 'ipc.saveTextFile',
+  saveJsonFile: 'ipc.saveJsonFile',
+  setProgressBar: 'ipc.setProgressBar',
+  getMemoryReport: 'ipc.getMemoryReport',
+  preventDisplaySleep: 'ipc.preventDisplaySleep',
+  stopPreventDisplaySleep: 'ipc.stopPreventDisplaySleep',
+  clearCaches: 'ipc.clearCaches',
+  getBackups: 'ipc.getBackups',
+  cachePath: 'ipc.cachePath',
+  copyTextToClipboard: 'ipc.copyTextToClipboard',
+  copyImageToClipboard: 'ipc.copyImageToClipboard',
+  tryCopyBufferToClipboard: 'ipc.tryCopyBufferToClipboard',
+  pathExists: 'ipc.pathExists',
+  deletePath: 'ipc.deletePath',
+  showContextMenu: 'ipc.showContextMenu',
+  mkdir: 'ipc.mkdir',
+  writeFile: 'ipc.writeFile',
+  hasFiles: 'ipc.hasFiles',
+  getDirectories: 'ipc.getDirectories',
+  unlink: 'ipc.unlink',
+  readdir: 'ipc.readdir',
+  move: 'ipc.move',
+  outputFile: 'ipc.outputFile',
+  igLogin: 'ipc.igLogin',
+  igTwoFactorLogin: 'ipc.igTwoFactorLogin',
+  igSendSecurityCode: 'ipc.igSendSecurityCode',
+  igChallenge: 'ipc.igChallenge',
+  igSerializeCookieJar: 'ipc.igSerializeCookieJar',
+  igSavedItems: 'ipc.igSavedItems',
+  igUserFeedItems: 'ipc.igUserFeedItems',
+  igGetMore: 'ipc.igGetMore',
+  igFollowingFeed: 'ipc.igFollowingFeed',
+  igGetMoreFollowingFeed: 'ipc.igGetMoreFollowingFeed',
+  imgurAlbumImages: 'ipc.imgurAlbumImages',
+  twitterLoadImages: 'ipc.twitterLoadImages',
+  twitterFriendsList: 'ipc.twitterFriendsList',
+  redditGetSubreddit: 'ipc.redditGetSubreddit',
+  redditGetSavedContent: 'ipc.redditGetSavedContent',
+  redditGetUser: 'ipc.redditGetUser',
+  redditGetSubscriptions: 'ipc.redditGetSubscriptions',
+  tumblrBlogPosts: 'ipc.tumblrBlogPosts',
+  tumblrTotalBlogs: 'ipc.tumblrTotalBlogs',
+  tumblrBlogs: 'ipc.tumblrBlogs',
+  getFolderSize: 'ipc.getFolderSize',
+  getSystemFonts: 'ipc.getSystemFonts',
+  parseMusicMetadataFile: 'ipc.parseMusicMetadataFile',
+  parseMusicMetadataBpm: 'ipc.parseMusicMetadataBpm',
+  parseMusicMetadataBuffer: 'ipc.parseMusicMetadataBuffer',
+  rimrafSync: 'ipc.rimrafSync',
+  cleanBackups: 'ipc.cleanBackups',
+  tumblrOAuth: 'ipc.tumblrOAuth',
+  twitterOAuth: 'ipc.twitterOAuth',
+  redditOAuth: 'ipc.redditOAuth',
+  getFileUrl: 'ipc.getFileUrl',
+  recursiveReaddir: 'ipc.recursiveReaddir',
+  getContext: 'ipc.getContext',
+  loadInWorker: 'ipc.loadInWorker',
+  gridNavigateBack: 'ipc.gridNavigateBack',
+  gridToggleFullscreen: 'ipc.gridToggleFullscreen',
+  gridToggleAlwaysOnTop: 'ipc.gridToggleAlwaysOnTop',
+  gridToggleMenuBarDisplay: 'ipc.gridToggleMenuBarDisplay',
+  playerPlayPause: 'ipc.playerPlayPause',
+  playerHistoryBack: 'ipc.playerHistoryBack',
+  playerHistoryForward: 'ipc.playerHistoryForward',
+  playerNavigateBack: 'ipc.playerNavigateBack',
+  playerToggleFullscreen: 'ipc.playerToggleFullscreen',
+  playerToggleAlwaysOnTop: 'ipc.playerToggleAlwaysOnTop',
+  playerToggleMenuBarDisplay: 'ipc.playerToggleMenuBarDisplay',
+  playerDelete: 'ipc.playerDelete',
+  playerPrevSource: 'ipc.playerPrevSource',
+  playerNextSource: 'ipc.playerNextSource',
+  blackListFile: 'ipc.blackListFile',
+  gotoTagSource: 'ipc.gotoTagSource',
+  gotoClipSource: 'ipc.gotoClipSource',
+  recentPictureGrid: 'ipc.recentPictureGrid',
+  workerReceiveMessage: 'ipc.workerReceiveMessage',
+  workerSendMessage: 'ipc.workerSendMessage',
+  workerResponse: 'ipc.workerResponse'
+}
 
-const MO = { // Menu/Modal Constants
+const MO = {
+  // Menu/Modal Constants
   new: 'mo.new',
   sort: 'mo.sort',
   batchClip: 'mo.batchclip',
@@ -223,10 +355,11 @@ const MO = { // Menu/Modal Constants
   load: 'mo.load',
   select: 'mo.select',
   piwigo: 'mo.piwigo',
-  effects: 'mo.effects',
-};
+  effects: 'mo.effects'
+}
 
-const PR = { // Global progress functions
+const PR = {
+  // Global progress functions
   cancel: 'pr.cancel',
   complete: 'pr.complete',
   audioOffline: 'pr.audioOffline',
@@ -236,49 +369,55 @@ const PR = { // Global progress functions
   tumblr: 'pr.tumblr',
   reddit: 'pr.reddit',
   twitter: 'pr.twitter',
-  instagram: 'pr.instagram',
-};
+  instagram: 'pr.instagram'
+}
 
-const IG = { // Instagram modes
+const IG = {
+  // Instagram modes
   tfa: 'ig.tfa',
-  checkpoint: 'ig.checkpoint',
-};
+  checkpoint: 'ig.checkpoint'
+}
 
-const RF = { // Reddit functions
+const RF = {
+  // Reddit functions
   hot: 'rf.hot',
   new: 'rf.new',
   top: 'rf.top',
   controversial: 'rf.cont',
-  rising: 'rf.rising',
-};
+  rising: 'rf.rising'
+}
 
-const RT = { // Reddit timespan
+const RT = {
+  // Reddit timespan
   hour: 'hour',
   day: 'day',
   week: 'week',
   month: 'month',
   year: 'year',
-  all: 'all',
-};
-
-const SG = { // Scene group types
-  scene: 'sg.scene',
-  generator: 'sg.generator',
-  grid: 'sg.grid',
+  all: 'all'
 }
 
-const DONE = 'done';
+const SG = {
+  // Scene group types
+  scene: 'sg.scene',
+  generator: 'sg.generator',
+  grid: 'sg.grid'
+}
 
-const SPT = { // Scene Picker Tutorials
+const DONE = 'done'
+
+const SPT = {
+  // Scene Picker Tutorials
   welcome: 'spt1',
   scenePicker: 'spt2',
   drawer: 'spt3',
   add1: 'spt4',
   add2: 'spt5',
-  done: DONE,
-};
+  done: DONE
+}
 
-const SDT = { // Scene Detail Tutorials
+const SDT = {
+  // Scene Detail Tutorials
   welcome: 'sdt1',
   title: 'sdt2',
   add1: 'sdt3',
@@ -312,49 +451,54 @@ const SDT = { // Scene Detail Tutorials
   fade1: 'sdt29',
   fade2: 'sdt30',
   play: 'sdt31',
-  done: DONE,
-};
+  done: DONE
+}
 
-const PT = { // Player Tutorials
+const PT = {
+  // Player Tutorials
   welcome: 'pt1',
   toolbar: 'pt2',
   sidebar: 'pt3',
   tagging: 'pt4',
   final: 'pt5',
-  done: DONE,
-};
+  done: DONE
+}
 
-const LT = { // Library Tutorials
+const LT = {
+  // Library Tutorials
   welcome: 'lt1',
   library: 'lt2',
   toolbar: 'lt3',
   sidebar1: 'lt4',
   sidebar2: 'lt5',
   final: 'lt6',
-  done: DONE,
-};
+  done: DONE
+}
 
-const ALT = { // Audio Library Tutorials
+const ALT = {
+  // Audio Library Tutorials
   welcome: 'alt1',
   library: 'alt2',
   toolbar: 'alt3',
   sidebar1: 'alt4',
   sidebar2: 'alt5',
   final: 'alt6',
-  done: DONE,
-};
+  done: DONE
+}
 
-const SLT = { // Script Library Tutorials
+const SLT = {
+  // Script Library Tutorials
   welcome: 'slt1',
   library: 'slt2',
   toolbar: 'slt3',
   sidebar1: 'slt4',
   sidebar2: 'slt5',
   final: 'slt6',
-  done: DONE,
-};
+  done: DONE
+}
 
-const CST = { // Caption Scriptor Tutorials
+const CST = {
+  // Caption Scriptor Tutorials
   welcome: 'cst1',
   code: 'cst2',
   player: 'cst3',
@@ -362,10 +506,11 @@ const CST = { // Caption Scriptor Tutorials
   menu: 'cst5',
   actions: 'cst6',
   final: 'cst7',
-  done: DONE,
-};
+  done: DONE
+}
 
-const SDGT = { // Scene Generator Tutorials
+const SDGT = {
+  // Scene Generator Tutorials
   welcome: 'sdgt1',
   buttons: 'sdgt2',
   edit1: 'sdgt3',
@@ -374,28 +519,31 @@ const SDGT = { // Scene Generator Tutorials
   generateError: 'sdgt5E',
   final: 'sdgt6',
   finalError: 'sdgt6E',
-  done: DONE,
-};
+  done: DONE
+}
 
-const SGT = { // Scene Grid Tutorials
+const SGT = {
+  // Scene Grid Tutorials
   welcome: 'sgt1',
   dimensions: 'sgt2',
   cells: 'sgt3',
   mirror: 'sgt4',
   final: 'sgdt5',
-  done: DONE,
-};
+  done: DONE
+}
 
-const VCT = { // Video Clipper Tutorials
+const VCT = {
+  // Video Clipper Tutorials
   welcome: 'vct1',
   controls: 'vct2',
   clips: 'vct3',
   clip: 'vct4',
   final: 'vct5',
-  done: DONE,
-};
+  done: DONE
+}
 
-const EA = { // Easings
+const EA = {
+  // Easings
   linear: 'ea.linear',
   sinIn: 'ea.sinIn',
   sinOut: 'ea.sinOut',
@@ -417,33 +565,37 @@ const EA = { // Easings
   elasticInOut: 'ea.elasticInOut',
   backIn: 'ea.backIn',
   backOut: 'ea.backOut',
-  backInOut: 'ea.backInOut',
+  backInOut: 'ea.backInOut'
 }
 
-const SP = { // Special modes
+const SP = {
+  // Special modes
   addToPlaylist: 'sp.addToPlaylist',
   autoEdit: 'sp.autoEdit',
   batchClip: 'sp.batchClip',
   batchTag: 'sp.batchTag',
   batchEdit: 'sp.batchEdit',
   select: 'sp.select',
-  selectSingle: 'sp.selectSingle',
+  selectSingle: 'sp.selectSingle'
 }
 
-const WC = { // Watermark corner
+const WC = {
+  // Watermark corner
   bottomRight: 'wc.bottomRight',
   bottomLeft: 'wc.bottomLeft',
   topRight: 'wc.topRight',
-  topLeft: 'wc.topLeft',
+  topLeft: 'wc.topLeft'
 }
 
-const PW = { // Piwigo types
+const PW = {
+  // Piwigo types
   apiTypeFavorites: 'pwg.users.favorites.getList',
   apiTypeCategory: 'pwg.categories.getImages',
-  apiTypeTag: 'pwg.tags.getImages',
+  apiTypeTag: 'pwg.tags.getImages'
 }
 
-const PWS = { // Piwigo sort types
+const PWS = {
+  // Piwigo sort types
   sortOptionAvailable: 'date_available',
   sortOptionCreated: 'date_creation',
   sortOptionName: 'name',
@@ -451,16 +603,62 @@ const PWS = { // Piwigo sort types
   sortOptionHit: 'hit',
   sortOptionID: 'id',
   sortOptionRating: 'rating_score',
-  sortOptionRandom: 'random',
+  sortOptionRandom: 'random'
 }
 
-const SS = { // MUI Snack Severity
+const SS = {
+  // MUI Snack Severity
   error: 'error',
   warning: 'warning',
   info: 'info',
-  success: 'success',
+  success: 'success'
 }
 
 export {
-  AF, ALT, ASF, BT, CST, DONE, EA, GO, GT, HTF, IF, IG, IPC, IT, LT, MO, OF, OT, PR, PT, PW, PWS, RF, RP, RT, SC, SDGT, SDT, SF, SG, SGT, SL, SLT, STF, SOF, SP, SPT, SS, ST, TF, TT, VCT, VO, VTF, WC, WF
-};
+  AF,
+  ALT,
+  ASF,
+  BT,
+  CST,
+  DONE,
+  EA,
+  GO,
+  GT,
+  HTF,
+  IF,
+  IG,
+  IPC,
+  IT,
+  LT,
+  MO,
+  OF,
+  OT,
+  PR,
+  PT,
+  PW,
+  PWS,
+  RF,
+  RP,
+  RT,
+  SC,
+  SDGT,
+  SDT,
+  SF,
+  SG,
+  SGT,
+  SL,
+  SLT,
+  STF,
+  SOF,
+  SP,
+  SPT,
+  SS,
+  ST,
+  TF,
+  TT,
+  VCT,
+  VO,
+  VTF,
+  WC,
+  WF
+}

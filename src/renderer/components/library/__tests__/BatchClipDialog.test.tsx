@@ -3,17 +3,16 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import BatchClipDialog from "../BatchClipDialog";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
 
 describe("BatchClipDialog", () => {
   it("should match snapshot", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <BatchClipDialog
             open={false}
-            library={[]}
             selected={[]}
             onCloseDialog={()=>{}}
-            onUpdateLibrary={(fn) => {}}
         />
       </TestProvider>
     );

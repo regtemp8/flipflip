@@ -1,48 +1,47 @@
-import * as React from 'react';
-import {Spring, animated} from "react-spring/renderprops";
+import React, { type PropsWithChildren, useState } from 'react'
+import { Spring, animated } from 'react-spring/renderprops'
 
-export default class Spin extends React.Component {
-  readonly props: {
-    className?: string,
-    title?: string,
-    style?: any,
-    onClick?(): void,
-    children?: React.ReactNode,
-  };
+export interface SpinProps {
+  className?: string
+  title?: string
+  style?: any
+  onClick?: () => void
+}
 
-  readonly state = {
-    toggle: false,
-  };
+export default function Spin (props: PropsWithChildren<SpinProps>) {
+  const [toggle, setToggle] = useState(false)
 
-  render() {
-    return (
-      <Spring
-        from={{transform: 'rotateY(0deg)'}}
-        to={{transform: this.state.toggle ? 'rotateY(180deg)' : 'rotateY(0deg)'}}
-      >
-      {props => (
+  return (
+    <Spring
+      from={{ transform: 'rotateY(0deg)' }}
+      to={{
+        transform: toggle ? 'rotateY(180deg)' : 'rotateY(0deg)'
+      }}
+    >
+      {(animation) => (
         <animated.div
-          className={this.props.className}
-          style={this.props.style ? {...props,...this.props.style} : props}
-          title={this.props.title}
-          onMouseEnter={() => {this.setState({toggle: !this.state.toggle})}}
-          onClick={this.props.onClick}>
+          className={props.className}
+          style={props.style ? { ...animation, ...props.style } : animation}
+          title={props.title}
+          onMouseEnter={() => {
+            setToggle(!toggle)
+          }}
+          onClick={props.onClick}
+        >
           <Spring
-            from={{transform: 'rotateY(0deg)'}}
-            to={{transform: this.state.toggle ? 'rotateY(-180deg)' : 'rotateY(0deg)'}}
+            from={{ transform: 'rotateY(0deg)' }}
+            to={{
+              transform: toggle ? 'rotateY(-180deg)' : 'rotateY(0deg)'
+            }}
           >
-            {props => (
-              <animated.div
-                style={props}>
-                {this.props.children}
-              </animated.div>
+            {(animation) => (
+              <animated.div style={animation}>{props.children}</animated.div>
             )}
           </Spring>
         </animated.div>
       )}
-    </Spring>)
-
-  }
+    </Spring>
+  )
 }
 
-(Spin as any).displayName="Spin";
+;(Spin as any).displayName = 'Spin'

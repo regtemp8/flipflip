@@ -3,11 +3,12 @@ import { describe, it, expect } from "@jest/globals";
 import renderer from "react-test-renderer";
 import AudioAlbumList from "../AudioAlbumList";
 import TestProvider from "../../../../../test/util/TestProvider";
+import store from "../../../../store/store";
 
 describe("AudioAlbumList", () => {
   it("should match snapshot", () => {
     const component = renderer.create(
-      <TestProvider>
+      <TestProvider store={store}>
         <AudioAlbumList
           sources={[]}
           showHelp={false}

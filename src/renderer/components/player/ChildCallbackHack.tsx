@@ -8,10 +8,10 @@
  * method as the listener.
  */
 export default class ChildCallbackHack {
-  listener?: (args?: any[]) => void;
-  args?: any[];
+  listener?: (args?: any[]) => void
+  args?: any[]
 
-  fire() {
-    if (this.listener) this.listener(this.args);
+  fire () {
+    if (this.listener) this.listener(this.args)
   }
 }
