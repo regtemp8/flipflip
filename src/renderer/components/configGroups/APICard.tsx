@@ -289,7 +289,7 @@ class APICard extends React.Component {
               underline="hover">Tumblr OAuth</Link>.
               Refer to the <Link
               href="#"
-              onClick={this.openLink.bind(this, "https://ififfy.github.io/flipflip/#/tumblr_api")}
+              onClick={this.openLink.bind(this, "https://regtemp8.github.io/flipflip/#/tumblr_api")}
               underline="hover">FlipFlip documentation</Link> for
               complete instructions.
             </DialogContentText>

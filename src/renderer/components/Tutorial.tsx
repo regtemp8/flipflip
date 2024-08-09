@@ -974,7 +974,7 @@ class Tutorial extends React.Component {
               <DialogContentText id="tutorial-description">
                 Be sure to check out the <Link
                 href="#"
-                onClick={this.openLink.bind(this, "https://ififfy.github.io/flipflip/#")}
+                onClick={this.openLink.bind(this, "https://regtemp8.github.io/flipflip/#")}
                 underline="hover">FlipFlip docs</Link> if you need any help.
               </DialogContentText>
               <DialogContentText id="tutorial-description">

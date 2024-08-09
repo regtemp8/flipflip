@@ -2,7 +2,7 @@
   "name": "flipflip",
   "version": "3.2.3",
   "main": "./dist/main.bundle.js",
-  "author": "ififfy",
+  "author": "regtemp8",
   "license": "MIT",
   "private": true,
   "scripts": {
