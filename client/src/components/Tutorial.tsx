@@ -1610,7 +1610,9 @@ function Tutorial(props: TutorialProps) {
               Be sure to check out the{' '}
               <Link
                 href="#"
-                onClick={() => openLink('https://regtemp8.github.io/flipflip/#')}
+                onClick={() =>
+                  openLink('https://regtemp8.github.io/flipflip/#')
+                }
                 underline="hover"
               >
                 FlipFlip docs

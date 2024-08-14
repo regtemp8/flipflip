@@ -36,6 +36,9 @@ import {
 } from 'flipflip-common/build/main/lib/storage/ServerSettings'
 import proxy from './ProxyService'
 
+declare const LOGIN_BUNDLE_WEBPACK_ENTRY: string
+declare const SERVER_DETAILS_BUNDLE_WEBPACK_ENTRY: string
+
 class FlipFlipServer {
   private static instance: FlipFlipServer
 
@@ -47,8 +50,9 @@ class FlipFlipServer {
 
   private constructor() {
     this.defaultHost = '0.0.0.0'
-    this.loginBundle = '/static/js/main.dbd4deaf.js'
-    this.serverDetailsBundle = '/static/js/main.34d1f89f.js'
+    this.loginBundle = '/static/js/' + LOGIN_BUNDLE_WEBPACK_ENTRY
+    this.serverDetailsBundle =
+      '/static/js/' + SERVER_DETAILS_BUNDLE_WEBPACK_ENTRY
   }
 
   public static getInstance(): FlipFlipServer {
