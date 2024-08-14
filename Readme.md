@@ -13,20 +13,19 @@
 
 ## Links
 
-* **[Download Latest Release (Mac/Windows/Linux)](https://github.com/regtemp8/flipflip/releases/latest)**
+* **[Download Latest Release (Mac/Windows/Linux)](https://github.com/regtemp8/flipflip/releases)**
 * **[User manual](https://regtemp8.github.io/flipflip/)**
 * **[Subreddit](https://www.reddit.com/r/flipflip/)**
 
 ## Features
 * Local files as well as Tumblr, ~~Reddit~~, ~~Twitter~~, Instagram, Imgur, DeviantArt, Booru & More
 * Animated GIF and video support
-* Grid view with cloneable grid cells
-* Multiple windows
-* Visual effects (zoom/transition, cross-fade, slide, strobe/pulse, fade in/out, panning, overlay)
+* Display editor to configure views: x, y, z coordinates, opacity, mirror other view
+* Visual effects: zoom/transition, cross-fade, slide, strobe/pulse, fade in/out, panning
 * Randomized and ordered playback
 * Timing control
-* Caption scripting support
 * Audio track/playlist support and Audio Library to organize tracks
+* Caption scripting support and Script Library to organize scripts
 * Library and Tagging to organize sources and generate slideshows
 * Easy to share!
 
