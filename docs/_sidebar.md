@@ -33,6 +33,9 @@
 - [Import/Export](v4/import_export.md)
 - [Caption Scriptor Tool](v4/scriptor.md)
 - [Caption Script Format](v4/caption_script.md)
+- [Screen Capture](screen_capture.md)
+- [Developers](developers.md)
+- [Changelog](changelog.md)
 
 - v3.x.x
 
@@ -71,7 +74,3 @@
   - [Import/Export](v3/import_export.md)
   - [Caption Scriptor Tool](v3/scriptor.md)
   - [Caption Script Format](v3/caption_script.md)
-
-- [Screen Capture](screen_capture.md)
-- [Developers](developers.md)
-- [Changelog](changelog.md)
