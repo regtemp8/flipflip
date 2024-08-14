@@ -1,11 +1,8 @@
 import path from 'path'
 import type { Configuration } from 'webpack'
-import { DefinePlugin } from 'webpack'
 
 import { rules } from './webpack.rules'
-import { plugins } from './webpack.plugins'
-
-import * as packageJson from './package.json'
+import { definePlugin, plugins } from './webpack.plugins'
 
 // eslint-disable-next-line import/default
 import CopyPlugin from 'copy-webpack-plugin'
@@ -54,9 +51,7 @@ export const mainConfig: Configuration = {
         }
       ]
     }),
-    new DefinePlugin({
-      PACKAGE_JSON_VERSION_WEBPACK_ENTRY: JSON.stringify(packageJson.version)
-    })
+    definePlugin
   ],
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
