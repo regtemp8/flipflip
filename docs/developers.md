@@ -14,17 +14,31 @@ Then, in a Bash shell, run the following:
 ```sh
 git clone https://github.com/regtemp8/flipflip.git
 cd flipflip
-yarn install --dev
 
 # terminal 1:
-yarn development
+cd common
+yarn install
+yarn build:module
+yarn build:main
+
+cd ../login
+yarn install
+yarn build
+
+cd ../server-details
+yarn install
+yarn build
+
+cd ../server
+yarn install
+yarn dev
 
 # terminal 2:
+cd client
+yarn install
 yarn start
 
-# app is now running, and you can reload at any time.
-# uncomment the "open the dev tools" line in main.ts to get developer
-# tools on launch.
+# app is now running, and it reloads any time client changes.
 ```
 
 ## Making changes
