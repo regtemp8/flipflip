@@ -39,14 +39,6 @@ While a Scene is playing, you can right click on an image to get more informatio
 
 <img src="doc_images/image_context_menu.png" alt="Image Context Menu" class="col-xs-10 col-xl-7">
 
-## New Window
-To open additional windows for playing scenes, click the `New Window` button ( 
-<img style="vertical-align: -5px" src="doc_icons/new.svg" alt="Play" width="20" height="20"> ) on the home page.
-You will be warned that any changes made in this new window will not be saved. Extra windows hide access to the
-Library, Preferences, and to adding new scenes. Click a Scene and edit/start as you would usually.
-
-<img src="doc_images/new_window.png" alt="New Window" class="col-xs-10 col-xl-7">
-
 ## Player Hotkeys
 A number of hotkeys are available for quickly performing user actions. These functions are also available in the menu.
 These hotkeys only work for the window in focus.
@@ -70,5 +62,5 @@ Use the arrow keys (← / →) to navigate through playback history. Use `Space`
 | Ctrl+T        | Toggle Always On Top        |
 | Ctrl+G        | Toggle Menu Bar             |
 
-?> Note: Video controls only work for main Scene (not Overlays). Scrolling volume control only works while the sidebar is hidden.
+?> Note: Video controls only work for a single Scene. Scrolling volume control only works while the sidebar is hidden.
 

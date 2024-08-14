@@ -7,8 +7,8 @@
   - [Sources](v4/sources.md)
   - [Playing Scene](v4/playing_scene.md)
   - [Scene Generators](v4/scene_generators.md)
-  - [Scene Grid](v4/grid.md)
   - [Scene Groups](v4/groups.md)
+  - [Scene Playlists](v4/scene_playlists.md)
   
 - Library
 
