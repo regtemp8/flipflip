@@ -28,10 +28,7 @@
   - [Tagging](v4/script_tagging.md)
   - [Import from Library](v4/script_import_from_library.md)
 
-- Displays
-
-  - [Overview](v4/displays.md)
-  
+- [Displays](v4/displays.md)
 - [Settings](v4/config.md)
 - [Video Clipper](v4/clips.md)
 - [Import/Export](v4/import_export.md)
