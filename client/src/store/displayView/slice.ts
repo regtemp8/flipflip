@@ -123,6 +123,13 @@ function createDisplaySlice(displayViewState?: EntryState<View>) {
       ) => {
         const { id, value } = action.payload
         getEntry(state, id).playlistID = value
+      },
+      setDisplayViewPlayerUUID: (
+        state,
+        action: PayloadAction<EntryUpdate<string>>
+      ) => {
+        const { id, value } = action.payload
+        getEntry(state, id).playerUUID = value
       }
     }
   })
@@ -146,5 +153,6 @@ export const {
   setDisplayViewSync,
   setDisplayViewSyncWithView,
   setDisplayViewMirrorSyncedView,
-  setDisplayViewScenePlaylistID
+  setDisplayViewScenePlaylistID,
+  setDisplayViewPlayerUUID
 } = createDisplaySlice().actions

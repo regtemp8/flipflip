@@ -1,8 +1,7 @@
 import fs from 'fs'
-import { DefinePlugin } from 'webpack'
-
-import * as packageJson from './package.json'
 import type IForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import { DefinePlugin } from 'webpack'
+import * as packageJson from './package.json'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ForkTsCheckerWebpackPlugin: typeof IForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')

@@ -180,8 +180,6 @@ export default interface SceneSettings {
   videoSpeedMax: number
   videoSkip: number
   generatorMax: number
-  overlayEnabled: boolean
-  overlays: number[] // Array of Overlay IDs
   nextSceneID: number
   nextSceneTime: number
   nextSceneAllImages: boolean
@@ -374,8 +372,6 @@ export const initialSceneSettings: SceneSettings = {
   videoSpeedMax: 20,
   videoSkip: 10,
   generatorMax: 100,
-  overlayEnabled: false,
-  overlays: [],
   nextSceneID: 0,
   nextSceneTime: 900000,
   nextSceneAllImages: false,

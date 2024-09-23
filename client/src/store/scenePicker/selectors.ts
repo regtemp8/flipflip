@@ -4,14 +4,11 @@ import { SG } from 'flipflip-common'
 import {
   selectSceneGroups,
   selectSceneGroupScenes,
-  selectSceneGroupGrids,
   selectSceneGroupDisplays,
   selectSceneGroupPlaylists
 } from '../sceneGroup/selectors'
 import { selectScenes } from '../scene/selectors'
 import Scene from '../scene/Scene'
-import SceneGrid from '../sceneGrid/SceneGrid'
-import { selectSceneGrids } from '../sceneGrid/selectors'
 import { selectDisplays } from '../display/selectors'
 import Display from '../display/Display'
 import { selectPlaylists } from '../playlist/selectors'
@@ -62,19 +59,6 @@ export const selectScenePickerUngroupedGenerators = () => {
   )
 }
 
-export const selectScenePickerUngroupedGrids = () => {
-  return createSelector(
-    [selectGroupedScenes(SG.grid), selectSceneGrids(), getScenePickerFilters],
-    (groupedScenes, grids, filters) => {
-      return grids
-        .filter(
-          (s) => !groupedScenes.includes(s.id) && isDisplayGrid(s, filters)
-        )
-        .map((s) => s.id)
-    }
-  )
-}
-
 export const selectScenePickerUngroupedDisplays = () => {
   return createSelector(
     [selectGroupedScenes(SG.display), selectDisplays(), getScenePickerFilters],
@@ -117,12 +101,6 @@ export const selectScenePickerGeneratorGroups = () => {
   )
 }
 
-export const selectScenePickerGridGroups = () => {
-  return createSelector([selectSceneGroups()], (groups) =>
-    groups.filter((s) => s.type === SG.grid).map((s) => s.id)
-  )
-}
-
 export const selectScenePickerDisplayGroups = () => {
   return createSelector([selectSceneGroups()], (groups) =>
     groups.filter((s) => s.type === SG.display).map((s) => s.id)
@@ -139,8 +117,6 @@ export const selectScenePickerGroupItems = (groupID: number, type: string) => {
   switch (type) {
     case SG.scene:
       return selectScenePickerSceneGroupItems(groupID)
-    case SG.grid:
-      return selectScenePickerGridGroupItems(groupID)
     case SG.generator:
       return selectScenePickerGeneratorGroupItems(groupID)
     case SG.display:
@@ -169,14 +145,6 @@ const selectScenePickerGeneratorGroupItems = (groupID: number) => {
       scenes
         ?.filter((s) => isGeneratorScene(s) && isDisplayScene(s, filters))
         .map((s) => s.id)
-  )
-}
-
-const selectScenePickerGridGroupItems = (groupID: number) => {
-  return createSelector(
-    [selectSceneGroupGrids(groupID), getScenePickerFilters],
-    (grids, filters) =>
-      grids?.filter((s) => isDisplayGrid(s, filters)).map((s) => s.id)
   )
 }
 
@@ -218,10 +186,6 @@ export const selectScenePickerPlaylistCount = () => {
   return (state: RootState) => state.app.playlists.length
 }
 
-export const selectScenePickerGridCount = () => {
-  return (state: RootState) => state.app.grids.length
-}
-
 export const selectScenePickerAllScenesCount = () => {
   return (state: RootState) => state.app.scenes.length
 }
@@ -232,13 +196,6 @@ const isGeneratorScene = (scene: Scene) => {
 
 const isDisplayScene = (scene: Scene, filters: string[]) => {
   return filters.length === 0 || nameMatchesFilter(scene.name, filters)
-}
-
-const isDisplayGrid = (grid: SceneGrid, filters: string[]) => {
-  return (
-    filters.length === 0 ||
-    (grid.name != null && nameMatchesFilter(grid.name, filters))
-  )
 }
 
 const isDisplayDisplay = (display: Display, filters: string[]) => {

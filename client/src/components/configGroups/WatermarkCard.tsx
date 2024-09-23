@@ -15,7 +15,7 @@ import BaseSelect from '../common/BaseSelect'
 import { useAppSelector } from '../../store/hooks'
 import {
   setConfigGeneralSettingsWatermark,
-  setConfigGeneralSettingsWatermarkGrid,
+  setConfigGeneralSettingsWatermarkDisplay,
   setConfigGeneralSettingsWatermarkCorner,
   setConfigGeneralSettingsWatermarkFontFamily,
   setConfigGeneralSettingsWatermarkColor,
@@ -24,7 +24,7 @@ import {
 } from '../../store/app/slice'
 import {
   selectAppConfigGeneralSettingsWatermark,
-  selectAppConfigGeneralSettingsWatermarkGrid,
+  selectAppConfigGeneralSettingsWatermarkDisplay,
   selectAppConfigGeneralSettingsWatermarkCorner,
   selectAppConfigGeneralSettingsWatermarkFontFamily,
   selectAppConfigGeneralSettingsWatermarkColor,
@@ -88,10 +88,10 @@ function WatermarkCard() {
           <Grid item xs={12} sm={6}>
             {watermark && (
               <BaseSwitch
-                label="Show on Grids"
-                tooltip="When enabled, watermark will display on Grid Scenes"
-                selector={selectAppConfigGeneralSettingsWatermarkGrid()}
-                action={setConfigGeneralSettingsWatermarkGrid}
+                label="Show on Displays"
+                tooltip="When enabled, watermark will show on each Scene in a Display"
+                selector={selectAppConfigGeneralSettingsWatermarkDisplay()}
+                action={setConfigGeneralSettingsWatermarkDisplay}
               />
             )}
           </Grid>

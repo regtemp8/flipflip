@@ -227,12 +227,9 @@ export default interface Scene {
   panEndOv: number
 
   overrideIgnore: boolean
-  gridScene: boolean
   scriptScene: boolean
   downloadScene: boolean
   generatorMax: number
-  overlayEnabled: boolean
-  overlays: number[] // Array of Overlay IDs
   nextSceneID: number
   nextSceneTime: number
   nextSceneAllImages: boolean
@@ -438,12 +435,9 @@ export const initialScene: Scene = {
   panEndPer: 6,
   panEndOv: 3,
   overrideIgnore: false,
-  gridScene: false,
   scriptScene: false,
   downloadScene: false,
   generatorMax: 100,
-  overlayEnabled: false,
-  overlays: [],
   nextSceneID: 0,
   nextSceneTime: 900000,
   nextSceneAllImages: false,

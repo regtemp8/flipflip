@@ -1,8 +1,15 @@
-import React, { useState } from 'react'
+import React, { SyntheticEvent, useState } from 'react'
 import { cx } from '@emotion/css'
-import Select, { MultiValue, components } from 'react-select'
-import CreatableSelect from 'react-select/creatable'
-import { Checkbox, type Theme } from '@mui/material'
+import {
+  Autocomplete,
+  AutocompleteChangeDetails,
+  AutocompleteChangeReason,
+  AutocompleteInputChangeReason,
+  FilterOptionsState,
+  TextField,
+  TextFieldVariants,
+  type Theme
+} from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
 import { useAppSelector } from '../../store/hooks'
@@ -21,31 +28,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
     color: grey[900]
   }
 }))
-
-function Option(props: any) {
-  return (
-    <div>
-      <components.Option {...props}>
-        {props.showCheckboxes && (
-          <Checkbox
-            className={props.classes.select}
-            checked={props.isSelected}
-            onChange={() => null}
-          />
-        )}
-        <label>{props.label}</label>
-      </components.Option>
-    </div>
-  )
-}
-
-function MultiValueComponent(props: any) {
-  return (
-    <components.MultiValue {...props}>
-      <span>{props.data.label}</span>
-    </components.MultiValue>
-  )
-}
 
 export interface LibrarySearchProps {
   displaySources: number[]
@@ -67,6 +49,7 @@ export interface LibrarySearchProps {
   showCheckboxes?: boolean
   fullWidth?: boolean
   withBrackets?: boolean
+  inputVariant?: TextFieldVariants
   onUpdateFilters: (filter: string[]) => void
 }
 
@@ -94,12 +77,18 @@ function LibrarySearch(props: LibrarySearchProps) {
   })
 
   const handleChange = (
-    search: MultiValue<{ label: string; value: string }>
+    event: SyntheticEvent<Element, Event>,
+    value: (string | { value: string; label: string })[],
+    reason: AutocompleteChangeReason,
+    details?: AutocompleteChangeDetails<{ value: string; label: string }>
   ) => {
-    if (search == null) {
+    if (value == null) {
       props.onUpdateFilters([])
     } else {
       let filters = Array<string>()
+      const search = value.map((v) =>
+        typeof v === 'string' ? { value: v, label: '' } : v
+      )
       for (const s of search) {
         if (
           !props.isCreatable ||
@@ -124,54 +113,93 @@ function LibrarySearch(props: LibrarySearchProps) {
     }
   }
 
-  const handleInputChange = (searchInput: string) => {
+  const handleInputChange = (
+    event: SyntheticEvent<Element, Event>,
+    searchInput: string,
+    reason: AutocompleteInputChangeReason
+  ) => {
     setSearchInput(searchInput)
   }
 
-  const { classes } = useStyles()
-  if (props.isCreatable) {
-    return (
-      <CreatableSelect
-        className={cx(
-          classes.searchSelect,
-          'CreatableSelect',
-          !props.fullWidth && classes.limitWidth
-        )}
-        value={defaultValues}
-        options={options}
-        components={{ DropdownIndicator: null }}
-        menuIsOpen={props.menuIsOpen}
-        autoFocus={props.autoFocus}
-        inputValue={searchInput}
-        isClearable
-        isMulti
-        controlShouldRenderValue={props.controlShouldRenderValue}
-        placeholder={props.placeholder}
-        formatCreateLabel={(input: string) => 'Search for ' + input}
-        onChange={handleChange}
-        onInputChange={handleInputChange}
-      />
-    )
-  } else {
-    return (
-      <Select
-        className={classes.select}
-        value={defaultValues}
-        options={options}
-        components={{ Option, MultiValue: MultiValueComponent }}
-        menuIsOpen={props.menuIsOpen}
-        autoFocus={props.autoFocus}
-        isClearable={props.isClearable}
-        isMulti
-        controlShouldRenderValue={props.controlShouldRenderValue}
-        hideSelectedOptions={props.hideSelectedOptions}
-        closeMenuOnSelect={false}
-        backspaceRemovesValue={false}
-        placeholder={props.placeholder}
-        onChange={handleChange}
-      />
-    )
+  const handleFilterOptions = (
+    options: { value: string; label: string }[],
+    params: FilterOptionsState<{ value: string; label: string }>
+  ) => {
+    const { inputValue } = params
+    const filtered = options
+      .filter((option) => {
+        const value =
+          typeof option === 'string'
+            ? option
+            : (option as { label: string; value: string }).value
+        return defaultValues.find((v) => v.value === value) == null
+      })
+      .filter((option) => {
+        const label =
+          typeof option === 'string'
+            ? option
+            : (option as { label: string; value: string }).label
+        return label.includes(inputValue)
+      })
+
+    const missing =
+      props.isCreatable &&
+      options.find(
+        (option) =>
+          (typeof option === 'string' && inputValue === option) ||
+          inputValue === (option as { label: string; value: string }).label
+      ) == null
+    if (inputValue !== '' && missing) {
+      filtered.push({
+        value: inputValue,
+        label: `Search for "${inputValue}"`
+      })
+    }
+
+    return filtered
   }
+
+  const { classes } = useStyles()
+  return (
+    <Autocomplete
+      multiple
+      autoHighlight
+      freeSolo={props.isCreatable}
+      handleHomeEndKeys
+      className={cx(
+        classes.searchSelect,
+        'CreatableSelect',
+        !props.fullWidth && classes.limitWidth
+      )}
+      value={defaultValues}
+      options={options}
+      isOptionEqualToValue={(option, value) => {
+        const optionValue = typeof option === 'string' ? option : option.value
+        const valueValue = typeof value === 'string' ? value : value.value
+        return optionValue === valueValue
+      }}
+      filterOptions={props.isCreatable ? handleFilterOptions : undefined}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant={props.inputVariant}
+          placeholder={props.placeholder}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&.Mui-focused fieldset': {
+                borderColor: 'white'
+              }
+            }
+          }}
+        />
+      )}
+      onChange={handleChange}
+      onInputChange={props.isCreatable ? handleInputChange : undefined}
+      open={props.menuIsOpen}
+      autoFocus={props.autoFocus}
+      disableCloseOnSelect={props.showCheckboxes}
+    />
+  )
 }
 
 ;(LibrarySearch as any).displayName = 'LibrarySearch'

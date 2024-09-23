@@ -60,7 +60,10 @@ export const selectDisplayViewSyncOptions = (id: number) => {
       const options: Record<string, string> = {}
       options['0'] = 'None'
       for (const key of optionKeys) {
-        options[key.toString()] = viewEntries[key].name
+        const { sync, name } = viewEntries[key]
+        if (!sync) {
+          options[key.toString()] = name
+        }
       }
       return options
     }

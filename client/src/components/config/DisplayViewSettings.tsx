@@ -1,4 +1,4 @@
-import { Collapse, InputAdornment, type Theme } from '@mui/material'
+import { Collapse, Grid, InputAdornment, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
   setDisplayViewHeight,
@@ -63,143 +63,160 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
 
   const sync = useAppSelector(syncSelector)
   return (
-    <>
-      <BaseSlider
-        selector={xSelector}
-        action={xAction}
-        min={0}
-        max={100}
-        labelledBy="display-view-x-slider"
-        format={{ type: 'percent' }}
-        label={{
-          text: 'X:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 5
-        }}
-      />
-      <BaseSlider
-        selector={ySelector}
-        action={yAction}
-        min={0}
-        max={100}
-        labelledBy="display-view-y-slider"
-        format={{ type: 'percent' }}
-        label={{
-          text: 'Y:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 5
-        }}
-      />
-      <BaseSlider
-        selector={zSelector}
-        action={zAction}
-        min={0}
-        max={10}
-        labelledBy="display-view-z-slider"
-        label={{
-          text: 'Z:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 1,
-          InputProps: {
-            endAdornment: (
-              <InputAdornment
-                position="end"
-                disableTypography
-                sx={{ color: 'transparent' }}
-              >
-                %
-              </InputAdornment>
-            )
-          }
-        }}
-      />
-      <BaseSlider
-        selector={widthSelector}
-        action={widthAction}
-        min={0}
-        max={100}
-        labelledBy="display-view-width-slider"
-        format={{ type: 'percent' }}
-        label={{
-          text: 'Width:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 5
-        }}
-      />
-      <BaseSlider
-        selector={heightSelector}
-        action={heightAction}
-        min={0}
-        max={100}
-        labelledBy="display-view-height-slider"
-        format={{ type: 'percent' }}
-        label={{
-          text: 'Height:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 5
-        }}
-      />
-      <BaseSlider
-        selector={opacitySelector}
-        action={opacityAction}
-        min={0}
-        max={100}
-        labelledBy="display-view-opacity-slider"
-        format={{ type: 'percent' }}
-        label={{
-          text: 'Opacity:',
-          variant: 'body1',
-          color: 'text.primary',
-          appendValue: true
-        }}
-        textField={{
-          className: classes.endInput,
-          step: 5
-        }}
-      />
-      <BaseSwitch
-        label="Sync"
-        tooltip="Synchronize this view with another view"
-        selector={syncSelector}
-        action={syncAction}
-      />
-      <Collapse in={sync}>
-        <DisplayViewSyncOptions displayID={displayID} viewID={viewID} />
-      </Collapse>
-      <Collapse in={!sync}>
-        <PlaylistSelect
-          type={PLT.scene}
-          selector={selectDisplayViewScenePlaylistID(viewID)}
-          action={setDisplayViewScenePlaylistID(viewID)}
-          create={createScenePlaylist(viewID)}
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <BaseSwitch
+          label="Sync"
+          tooltip="Synchronize this view with another view"
+          selector={syncSelector}
+          action={syncAction}
         />
-      </Collapse>
-    </>
+      </Grid>
+      <Grid item xs={12}>
+        <Collapse in={sync}>
+          <DisplayViewSyncOptions displayID={displayID} viewID={viewID} />
+        </Collapse>
+        <Collapse in={!sync}>
+          <PlaylistSelect
+            type={PLT.scene}
+            includeSingles
+            selector={selectDisplayViewScenePlaylistID(viewID)}
+            action={setDisplayViewScenePlaylistID(viewID)}
+            create={createScenePlaylist(viewID)}
+          />
+        </Collapse>
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={xSelector}
+          action={xAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-x-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'X:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={ySelector}
+          action={yAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-y-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Y:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={zSelector}
+          action={zAction}
+          min={0}
+          max={10}
+          labelledBy="display-view-z-slider"
+          label={{
+            text: 'Z:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 1,
+            InputProps: {
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  disableTypography
+                  sx={{ color: 'transparent' }}
+                >
+                  %
+                </InputAdornment>
+              )
+            }
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={widthSelector}
+          action={widthAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-width-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Width:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={heightSelector}
+          action={heightAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-height-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Height:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <BaseSlider
+          selector={opacitySelector}
+          action={opacityAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-opacity-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Opacity:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid>
+    </Grid>
   )
 }
 

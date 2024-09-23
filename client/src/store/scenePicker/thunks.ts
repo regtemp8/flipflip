@@ -3,7 +3,6 @@ import { SG } from 'flipflip-common'
 import { getRandomListItem } from '../../data/utils'
 import {
   moveScenes,
-  moveGrids,
   moveDisplays,
   movePlaylists,
   moveSceneGroups
@@ -114,8 +113,6 @@ export function onScenePickerChangeUngroupedSort(
 
 const getItems = (type: string, state: RootState) => {
   switch (type) {
-    case SG.grid:
-      return state.app.grids
     case SG.display:
       return state.app.displays
     case SG.playlist:
@@ -127,8 +124,6 @@ const getItems = (type: string, state: RootState) => {
 
 const getMoveItemsAction = (type: string) => {
   switch (type) {
-    case SG.grid:
-      return moveGrids
     case SG.display:
       return moveDisplays
     case SG.playlist:

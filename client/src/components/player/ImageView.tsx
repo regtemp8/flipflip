@@ -8,7 +8,6 @@ import React, {
 } from 'react'
 import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import { ResizeObserver } from '@juggle/resize-observer'
 import { BT, IT, SL } from 'flipflip-common'
 import {
   ContentData,
@@ -23,7 +22,7 @@ import ZoomMove from './ZoomMove'
 import FadeInOut from './FadeInOut'
 import Panning, { ImageMeasurements } from './Panning'
 import ImageTransition from './ImageTransition'
-import useMeasure from 'react-use-measure'
+import { RectReadOnly } from 'react-use-measure'
 
 const playVideo = (video: HTMLVideoElement): void => {
   video.play().catch((err) => console.warn(err))
@@ -161,6 +160,7 @@ interface ImageStyling {
 
 export interface ImageViewProps {
   index: number
+  sceneID: number
   show: boolean
   isPlaying: boolean
   zIndex: number
@@ -168,18 +168,28 @@ export interface ImageViewProps {
   transform: TransformData
   view: ViewData
   effects: EffectsData
+  bounds: RectReadOnly
   displayIndex?: number
-  fitParent: boolean
-  gridCoordinates?: number[]
   pictureGrid?: boolean
-  onLoad: (index: number, duration: number, displayIndex?: number) => void
-  onError: (index: number) => void
+  onLoad: (
+    index: number,
+    duration: number,
+    sceneID: number,
+    displayIndex?: number
+  ) => void
+  onError: (
+    index: number,
+    duration: number,
+    sceneID: number,
+    displayIndex?: number
+  ) => void
   onHide: (index: number) => void
 }
 
 function ImageView(props: ImageViewProps) {
   const {
     index,
+    sceneID,
     show,
     isPlaying,
     zIndex,
@@ -188,19 +198,12 @@ function ImageView(props: ImageViewProps) {
     view,
     effects,
     displayIndex,
+    bounds,
     onLoad,
     onError,
     onHide
   } = props
   const { classes } = useStyles()
-  const [backgroundRef, backgroundBounds] = useMeasure({
-    polyfill: ResizeObserver,
-    offsetSize: true
-  })
-  const [foregroundRef, foregroundBounds] = useMeasure({
-    polyfill: ResizeObserver,
-    offsetSize: true
-  })
 
   const _prevURL = useRef<string>()
   const _prevShow = useRef<boolean>(false)
@@ -220,8 +223,8 @@ function ImageView(props: ImageViewProps) {
       const className = classes.rotate
       const imgWidth = data.width as number
       const imgHeight = data.height as number
-      const parentWidth = foregroundBounds.width
-      const parentHeight = foregroundBounds.height
+      const parentWidth = bounds.width
+      const parentHeight = bounds.height
       switch (view.imageType) {
         case IT.fitBestNoClip: {
           return {
@@ -280,8 +283,8 @@ function ImageView(props: ImageViewProps) {
         case IT.fitBestClip:
           const imgWidth = data.width as number
           const imgHeight = data.height as number
-          const parentWidth = foregroundBounds.width
-          const parentHeight = foregroundBounds.height
+          const parentWidth = bounds.width
+          const parentHeight = bounds.height
           const heightRatio = parentHeight / imgWidth
           const widthRatio = parentWidth / imgHeight
           const className =
@@ -308,8 +311,8 @@ function ImageView(props: ImageViewProps) {
     transform.rotate,
     data.height,
     data.width,
-    foregroundBounds.height,
-    foregroundBounds.width,
+    bounds.height,
+    bounds.width,
     classes.fitCenter,
     classes.fitContain,
     classes.fitFill,
@@ -326,8 +329,8 @@ function ImageView(props: ImageViewProps) {
     if (transform.rotate) {
       const imgWidth = data.width as number
       const imgHeight = data.height as number
-      const parentWidth = backgroundBounds.width
-      const parentHeight = backgroundBounds.height
+      const parentWidth = bounds.width
+      const parentHeight = bounds.height
       const heightRatio = parentHeight / imgWidth
       const widthRatio = parentWidth / imgHeight
       const style =
@@ -345,8 +348,8 @@ function ImageView(props: ImageViewProps) {
     classes.fitCover,
     classes.rotate,
     transform.rotate,
-    backgroundBounds.height,
-    backgroundBounds.width,
+    bounds.height,
+    bounds.width,
     data.height,
     data.width
   ])
@@ -372,16 +375,16 @@ function ImageView(props: ImageViewProps) {
   const onLoadEvent = useCallback(() => {
     if (_loading.current) {
       _loading.current = false
-      onLoad(index, view.timeToNextFrame, displayIndex)
+      onLoad(index, view.timeToNextFrame, sceneID, displayIndex)
     }
-  }, [onLoad, index, view.timeToNextFrame, displayIndex])
+  }, [onLoad, index, view.timeToNextFrame, sceneID, displayIndex])
 
   const onErrorEvent = useCallback(() => {
     if (_loading.current) {
       _loading.current = false
-      onError(index)
+      onError(index, view.timeToNextFrame, sceneID, displayIndex)
     }
-  }, [onError, index])
+  }, [onError, index, view.timeToNextFrame, sceneID, displayIndex])
 
   const onLoadIFrame = useCallback(
     (event: SyntheticEvent<HTMLIFrameElement>) => {
@@ -650,28 +653,17 @@ function ImageView(props: ImageViewProps) {
       imageType: view.imageType,
       imageWidth: transform.rotate ? imageHeight : imageWidth,
       imageHeight: transform.rotate ? imageWidth : imageHeight,
-      parentWidth: foregroundBounds.width,
-      parentHeight: foregroundBounds.height
+      parentWidth: bounds.width,
+      parentHeight: bounds.height
     }
   }, [
     data.height,
     data.width,
     transform.rotate,
     view.imageType,
-    foregroundBounds.width,
-    foregroundBounds.height
+    bounds.width,
+    bounds.height
   ])
-
-  const imageClassName = props.gridCoordinates
-    ? 'copy-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-    : undefined
-
-  const backgroundClassName =
-    !props.pictureGrid &&
-    view.backgroundType === BT.blur &&
-    props.gridCoordinates
-      ? 'copy-bg-' + props.gridCoordinates[0] + '-' + props.gridCoordinates[1]
-      : undefined
 
   const effectClassName =
     imageStyling.containerClassName == null ? classes.imageContainer : undefined
@@ -700,10 +692,8 @@ function ImageView(props: ImageViewProps) {
           zIndex={2}
         >
           <div
-            ref={foregroundRef}
             className={cx(
               classes.imageContainer,
-              imageClassName,
               imageStyling.containerClassName
             )}
             style={{
@@ -738,8 +728,7 @@ function ImageView(props: ImageViewProps) {
       />
       {view.backgroundStyle != null && (
         <div
-          ref={backgroundRef}
-          className={cx(classes.backgroundContainer, backgroundClassName)}
+          className={classes.backgroundContainer}
           style={view.backgroundStyle}
         >
           {backgroundComponent}

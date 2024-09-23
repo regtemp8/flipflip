@@ -5,22 +5,14 @@ import { getEntry } from '../EntryState'
 import { AppStorageImport, initialAppStorageImport } from '../AppStorageImport'
 import type TimingSettings from './TimingSettings'
 import type Scene from './Scene'
-import {
-  areWeightsValid,
-  convertGridIDToSceneID,
-  convertSceneIDToGridID,
-  getEffects
-} from '../../data/utils'
+import { areWeightsValid, getEffects } from '../../data/utils'
 import { toLibrarySourceStorage } from '../app/convert'
 import { getAppScenes } from '../app/selectors'
 import type SceneSettings from '../app/data/SceneSettings'
 import type WeightGroup from './WeightGroup'
-import { getSceneGridEntries, selectSceneGrids } from '../sceneGrid/selectors'
 import { getLibrarySourceEntries } from '../librarySource/selectors'
 import { getClipEntries } from '../clip/selectors'
 import { getTagEntries } from '../tag/selectors'
-import { getOverlayEntries } from '../overlay/selectors'
-import Overlay from '../overlay/Overlay'
 import { copy } from 'flipflip-common'
 
 const getSceneOrSceneSettings = (
@@ -799,16 +791,6 @@ export const selectScenePersistText = (id?: number) => {
     getSceneOrSceneSettings(state, id).persistText
 }
 
-export const selectSceneOverlays = (id?: number) => {
-  return (state: RootState): number[] =>
-    getSceneOrSceneSettings(state, id).overlays
-}
-
-export const selectSceneOverlayEnabled = (id?: number) => {
-  return (state: RootState): boolean =>
-    getSceneOrSceneSettings(state, id).overlayEnabled
-}
-
 export const selectSceneNextSceneTime = (id?: number) => {
   return (state: RootState): number =>
     getSceneOrSceneSettings(state, id).nextSceneTime
@@ -1018,11 +1000,6 @@ export const selectSceneGeneratorMax = (id: number) => {
   return (state: RootState): number => getEntry(state.scene, id).generatorMax
 }
 
-export const selectSceneIsGridScene = (id: number) => {
-  return (state: RootState): boolean =>
-    getEntry(state.scene, id).gridScene ?? false
-}
-
 export const selectSceneIsAudioScene = (id: number) => {
   return (state: RootState): boolean =>
     getEntry(state.scene, id).audioScene ?? false
@@ -1063,9 +1040,6 @@ export interface SceneStrobeOptions {
   easing: EasingOptions
 }
 
-const selectScene = (id: number) => (state: RootState) =>
-  state.scene.entries[id]
-
 export const selectSceneFadeIODelayTF = (id: number) => {
   return (state: RootState): string => getEntry(state.scene, id).fadeIODelayTF
 }
@@ -1095,22 +1069,6 @@ export const selectSceneFadeIODelayBPMMulti = (id: number) => {
 export const selectSceneScriptStartIndex = (id: number) => {
   return (state: RootState): number =>
     getEntry(state.scene, id).scriptStartIndex
-}
-
-export const selectSceneOtherSceneNames = (id: number) => {
-  return createSelector(
-    [selectScene(id), getOverlayEntries, getSceneGridEntries, getSceneEntries],
-    (scene, overlayEntries, gridEntries, sceneEntries) => {
-      const overlays = scene?.overlays ?? []
-      return overlays.map((id) => {
-        const overlay = overlayEntries[id] as Overlay
-        const gridID = convertSceneIDToGridID(overlay.sceneID)
-        return gridID !== undefined
-          ? gridEntries[gridID]?.name
-          : sceneEntries[overlay.sceneID]?.name
-      })
-    }
-  )
 }
 
 export const selectSceneLibraryID = (id: number) => {
@@ -1198,18 +1156,16 @@ export const selectNextSceneWeightFunction = (id: number) => {
 export const selectSceneSelectOptions = (
   onlyExtra?: boolean,
   includeExtra?: boolean,
-  includeGrids?: boolean
+  includeRandom?: boolean
 ) => {
   return createSelector(
     [
       (state) => onlyExtra,
       (state) => includeExtra,
-      (state) => includeGrids,
       getActiveSceneID,
-      selectScenes(),
-      selectSceneGrids()
+      selectScenes()
     ],
-    (onlyExtra, includeExtra, includeGrids, sceneID, scenes, grids) => {
+    (onlyExtra, includeExtra, sceneID, scenes) => {
       const options: Record<string, string> = {}
       scenes
         .filter((s) => {
@@ -1224,17 +1180,10 @@ export const selectSceneSelectOptions = (
           }
         })
 
-      if (includeGrids === true) {
-        grids.forEach((s) => {
-          const sceneID = convertGridIDToSceneID(s.id)
-          if (s.name !== undefined) {
-            options[sceneID.toString()] = s.name
-          }
-        })
-      }
-
       if (includeExtra === true) {
         options['0'] = 'None'
+        options['-1'] = 'Random'
+      } else if (includeRandom === true) {
         options['-1'] = 'Random'
       } else if (onlyExtra === true) {
         options['-1'] = '~~EMPTY~~'

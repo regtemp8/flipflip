@@ -1,6 +1,6 @@
 {
   "name": "flipflip-client",
-  "version": "4.0.0-beta3",
+  "version": "4.0.0-beta4",
   "private": true,
   "type": "commonjs",
   "scripts": {
@@ -61,7 +61,6 @@
     "react-redux": "^8.1.3",
     "react-screen-wake-lock": "^3.0.2",
     "react-scripts": "5.0.1",
-    "react-select": "^5.4.0",
     "react-sortable-hoc": "^2.0.0",
     "react-sortablejs": "^1.5.1",
     "react-sound": "^1.2.0",
@@ -106,5 +105,5 @@
       "<rootDir>/node_modules/(?!wretch)"
     ]
   },
-  "packageManager": "yarn@4.2.1"
+  "packageManager": "yarn@4.4.0"
 }

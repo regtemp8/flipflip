@@ -176,7 +176,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             <Grid item xs={12}>
               <BaseSwitch
                 label="Re-Generate on Playback"
-                tooltip="When enabled, this scene will be automatically regenerated with each playback (even if used as an overlay for another scene)"
+                tooltip="When enabled, this scene will be automatically regenerated with each playback"
                 selector={selectSceneRegenerate(props.sceneID)}
                 action={setSceneRegenerate(props.sceneID)}
               />

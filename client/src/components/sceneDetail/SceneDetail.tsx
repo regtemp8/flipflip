@@ -1120,7 +1120,7 @@ function SceneDetail(props: SceneDetailProps) {
             <DialogContent>
               <DialogContentText id="delete-description">
                 Are you sure you want to delete {name}? It will be automatically
-                removed from all overlays/grids.
+                removed from all playlists.
               </DialogContentText>
             </DialogContent>
             <DialogActions>

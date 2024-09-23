@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { AppDispatch, RootState } from '../store'
 import { LibrarySource, ScrapeResult, newLibrarySource } from 'flipflip-common'
-import { PlayerState, setPlayersLoaded } from '../player/slice'
+import { setPlayersLoaded } from '../player/slice'
 import { randomizeList } from '../../data/utils'
 import { getSourceType, ST, SOF } from 'flipflip-common'
 import {
@@ -20,54 +20,25 @@ import { toLibrarySourceStorage } from '../app/convert'
 import flipflip from '../../FlipFlipService'
 import { loadImageViews } from '../player/thunks'
 
-function getPlayerSceneID(
-  player: PlayerState,
-  isNextSceneID: boolean,
-  overlayIndex?: number
-) {
-  if (isNextSceneID) {
-    return player.nextSceneID
-  } else if (overlayIndex != null) {
-    return player.overlays[overlayIndex].sceneID
-  } else {
-    return player.sceneID
-  }
-}
-
 function isPlayerStopped(
   dispatch: AppDispatch,
   state: RootState,
   playerUUID: string,
-  sceneID: number,
-  isNextSceneID: boolean,
-  overlayIndex?: number
+  sceneID: number
 ) {
   const player = state.players[playerUUID]
-  const playerStopped =
-    player == null ||
-    sceneID !== getPlayerSceneID(player, isNextSceneID, overlayIndex)
+  let playerStopped = player == null
+  if (!playerStopped) {
+    const loaderSceneID =
+      player.playlist.items[player.playlist.loader.index].sceneID
+    playerStopped = sceneID !== loaderSceneID
+  }
   if (playerStopped) {
     // this player stopped, but there might be other players who do need sources
-    let newPlayerUUID = Object.keys(state.players).find(
-      (uuid) => state.players[uuid].sceneID === sceneID
-    )
-    if (newPlayerUUID == null) {
-      newPlayerUUID = Object.keys(state.players).find(
-        (uuid) =>
-          state.players[uuid].overlays.find((s) => s.sceneID === sceneID) !=
-          null
-      )
-    }
-    if (newPlayerUUID == null) {
-      newPlayerUUID = Object.keys(state.players).find((uuid) => {
-        const p = state.players[uuid]
-        return (
-          // only return true for next scene if current scene is loaded
-          p.nextSceneID === sceneID &&
-          state.sourceScraper[p.sceneID as number].completed
-        )
-      })
-    }
+    let newPlayerUUID = Object.keys(state.players).find((uuid) => {
+      const playlist = state.players[uuid].playlist
+      return playlist.items[playlist.loader.index].sceneID === sceneID
+    })
 
     dispatch(setSourceScraperSourcesWorker({ id: sceneID, value: '' }))
     if (newPlayerUUID != null) {
@@ -78,24 +49,10 @@ function isPlayerStopped(
   return playerStopped
 }
 
-function promiseLoop(
-  playerUUID: string,
-  sceneID: number,
-  isNextSceneID: boolean,
-  overlayIndex?: number
-) {
+function promiseLoop(playerUUID: string, sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    if (
-      isPlayerStopped(
-        dispatch,
-        state,
-        playerUUID,
-        sceneID,
-        isNextSceneID,
-        overlayIndex
-      )
-    ) {
+    if (isPlayerStopped(dispatch, state, playerUUID, sceneID)) {
       return
     }
 
@@ -104,7 +61,7 @@ function promiseLoop(
     const promiseQueue = state.sourceScraper[sceneID].promiseQueue
     if (captcha != null && promiseQueue.length === 0) {
       setTimeout(() => {
-        dispatch(promiseLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
+        dispatch(promiseLoop(playerUUID, sceneID))
       }, 2000)
     }
 
@@ -117,16 +74,7 @@ function promiseLoop(
     const workerUUID = state.sourceScraper[sceneID].workerUUID
     const receiveMessage = async (message?: ScrapeResult) => {
       const state = getState()
-      if (
-        isPlayerStopped(
-          dispatch,
-          state,
-          playerUUID,
-          sceneID,
-          isNextSceneID,
-          overlayIndex
-        )
-      ) {
+      if (isPlayerStopped(dispatch, state, playerUUID, sceneID)) {
         return
       }
 
@@ -139,7 +87,6 @@ function promiseLoop(
         dispatch(
           setPlayerCaptcha({
             uuid: playerUUID,
-            overlayIndex,
             value: {
               captcha: object.captcha,
               source: object?.source,
@@ -154,7 +101,7 @@ function promiseLoop(
         console.error(
           'Error retrieving ' +
             object?.source?.url +
-            (next > 0 ? ' Page ' + next : '')
+            (typeof next === 'number' && next > 0 ? ' Page ' + next : '')
         )
         console.error(object.error)
       }
@@ -187,16 +134,20 @@ function promiseLoop(
           dispatch(
             setCount(source.url, helpers?.count ?? 0, helpers?.next == null)
           )
-          if (!isNextSceneID) {
-            dispatch(loadImageViews(playerUUID, overlayIndex))
-          }
+
+          Object.entries(state.players)
+            .filter((e) => {
+              const playlist = e[1].playlist
+              return playlist.items[playlist.loader.index].sceneID === sceneID
+            })
+            .forEach((e) => {
+              dispatch(loadImageViews(e[0]))
+            })
         }
 
         setTimeout(
           () => {
-            dispatch(
-              promiseLoop(playerUUID, sceneID, isNextSceneID, overlayIndex)
-            )
+            dispatch(promiseLoop(playerUUID, sceneID))
           },
           object?.timeout != null ? object.timeout : 1000
         )
@@ -225,24 +176,10 @@ function promiseLoop(
   }
 }
 
-function sourceLoop(
-  playerUUID: string,
-  sceneID: number,
-  isNextSceneID: boolean,
-  overlayIndex?: number
-) {
+function sourceLoop(playerUUID: string, sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    if (
-      isPlayerStopped(
-        dispatch,
-        state,
-        playerUUID,
-        sceneID,
-        isNextSceneID,
-        overlayIndex
-      )
-    ) {
+    if (isPlayerStopped(dispatch, state, playerUUID, sceneID)) {
       return
     }
 
@@ -250,9 +187,7 @@ function sourceLoop(
     const { total, current } = scraperState.progress as ScraperProgress
     if (current === total) {
       dispatch(setSourceScraperSourcesWorker({ id: sceneID, value: '' }))
-      if (!isNextSceneID) {
-        dispatch(setPlayersLoaded(sceneID))
-      }
+      dispatch(setPlayersLoaded(sceneID))
       dispatch(scrapeSources(playerUUID))
       return
     }
@@ -268,20 +203,13 @@ function sourceLoop(
     }
 
     const scene = state.scene.entries[sceneID]
-    if (!isNextSceneID) {
-      let message = d ? [d.url] : ['']
-      if (overlayIndex != null) {
-        const name = scene.name
-        message = ["Loading '" + name + "'...", ...message]
-      }
-
-      dispatch(
-        setSourceScraperProgress({
-          id: sceneID,
-          value: { total, current: current + 1, message }
-        })
-      )
-    }
+    let message = d ? [d.url] : ['']
+    dispatch(
+      setSourceScraperProgress({
+        id: sceneID,
+        value: { total, current: current + 1, message }
+      })
+    )
     if (!scene.playVideoClips && d.clips.length > 0) {
       d.clips = []
     }
@@ -289,16 +217,7 @@ function sourceLoop(
     const workerUUID = state.sourceScraper[sceneID].workerUUID
     const receiveMessage = (message?: ScrapeResult) => {
       const state = getState()
-      if (
-        isPlayerStopped(
-          dispatch,
-          state,
-          playerUUID,
-          sceneID,
-          isNextSceneID,
-          overlayIndex
-        )
-      ) {
+      if (isPlayerStopped(dispatch, state, playerUUID, sceneID)) {
         return
       }
 
@@ -307,21 +226,18 @@ function sourceLoop(
         return
       }
 
-      if (!isNextSceneID) {
-        const captcha = state.players[playerUUID]?.captcha
-        if (object?.captcha != null && captcha == null) {
-          dispatch(
-            setPlayerCaptcha({
-              uuid: playerUUID,
-              overlayIndex,
-              value: {
-                captcha: object.captcha,
-                source: object?.source,
-                helpers: object?.helpers
-              }
-            })
-          )
-        }
+      const captcha = state.players[playerUUID]?.captcha
+      if (object?.captcha != null && captcha == null) {
+        dispatch(
+          setPlayerCaptcha({
+            uuid: playerUUID,
+            value: {
+              captcha: object.captcha,
+              source: object?.source,
+              helpers: object?.helpers
+            }
+          })
+        )
       }
 
       if (object?.error != null) {
@@ -329,7 +245,7 @@ function sourceLoop(
         console.error(
           'Error retrieving ' +
             object?.source?.url +
-            (next > 0 ? ' Page ' + next : '')
+            (typeof next === 'number' && next > 0 ? ' Page ' + next : '')
         )
         console.error(object.error)
       }
@@ -362,14 +278,20 @@ function sourceLoop(
           dispatch(
             setCount(source.url, helpers?.count ?? 0, helpers?.next == null)
           )
-          if (!isNextSceneID) {
-            dispatch(loadImageViews(playerUUID, overlayIndex))
-          }
+
+          Object.entries(state.players)
+            .filter((e) => {
+              const playlist = e[1].playlist
+              return playlist.items[playlist.loader.index].sceneID === sceneID
+            })
+            .forEach((e) => {
+              dispatch(loadImageViews(e[0]))
+            })
         }
 
         const timeout = object?.timeout != null ? object.timeout : 1000
         setTimeout(() => {
-          dispatch(sourceLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
+          dispatch(sourceLoop(playerUUID, sceneID))
         }, timeout)
       }
     }
@@ -391,12 +313,7 @@ function sourceLoop(
   }
 }
 
-function startScrape(
-  playerUUID: string,
-  sceneID: number,
-  isNextSceneID: boolean,
-  overlayIndex?: number
-) {
+function startScrape(playerUUID: string, sceneID: number) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
     const pathSep = state.constants.pathSep
@@ -426,7 +343,7 @@ function startScrape(
     }
 
     dispatch(setSourceScraperSceneSources({ id: sceneID, value: sceneSources }))
-    dispatch(sourceLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
+    dispatch(sourceLoop(playerUUID, sceneID))
   }
 }
 
@@ -461,16 +378,14 @@ function shouldScrapePromises(
 function scheduleScrape(
   playerUUID: string,
   sceneID: number,
-  isNextSceneID: boolean,
-  workerUUID: string,
-  overlayIndex?: number
+  workerUUID: string
 ) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
-    if (!sceneID) {
-      return false
+    if (sceneID === 0) {
+      // 'None' scene
+      return
     }
 
-    let scheduled = false
     const state = getState()
     if (shouldStartScrape(sceneID, state.sourceScraper)) {
       dispatch(
@@ -486,41 +401,29 @@ function scheduleScrape(
         })
       )
       setTimeout(() => {
-        dispatch(startScrape(playerUUID, sceneID, isNextSceneID, overlayIndex))
+        dispatch(startScrape(playerUUID, sceneID))
       }, 200)
-      scheduled = true
     } else if (shouldContinueScrape(sceneID, state.sourceScraper)) {
       setTimeout(() => {
-        dispatch(sourceLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
+        dispatch(sourceLoop(playerUUID, sceneID))
       }, 200)
-      scheduled = true
     } else if (shouldScrapePromises(sceneID, state.sourceScraper)) {
       dispatch(
         setSourceScraperSourcesWorker({ id: sceneID, value: workerUUID })
       )
       setTimeout(() => {
-        dispatch(promiseLoop(playerUUID, sceneID, isNextSceneID, overlayIndex))
+        dispatch(promiseLoop(playerUUID, sceneID))
       }, 200)
-      scheduled = true
     }
-
-    return scheduled
   }
 }
 
 export function scrapeSources(playerUUID: string) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    const { sceneID, nextSceneID, overlays } = state.players[playerUUID]
+    const { playlist } = state.players[playerUUID]
+    const { sceneID } = playlist.items[playlist.loader.index]
     const workerUUID = uuidv4()
-    const scheduled = dispatch(
-      scheduleScrape(playerUUID, sceneID as number, false, workerUUID)
-    )
-    if (!scheduled) {
-      dispatch(scheduleScrape(playerUUID, nextSceneID, true, workerUUID))
-    }
-    overlays.forEach(({ sceneID }, index) => {
-      dispatch(scheduleScrape(playerUUID, sceneID, false, workerUUID, index))
-    })
+    dispatch(scheduleScrape(playerUUID, sceneID, workerUUID))
   }
 }

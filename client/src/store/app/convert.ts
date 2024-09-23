@@ -47,14 +47,10 @@ import type Clip from '../clip/Clip'
 import { newClip } from '../clip/Clip'
 import type LibrarySource from '../librarySource/LibrarySource'
 import { newLibrarySource } from '../librarySource/LibrarySource'
-import type Overlay from '../overlay/Overlay'
-import { newOverlay } from '../overlay/Overlay'
 import type Playlist from '../playlist/Playlist'
 import { newPlaylist } from '../playlist/Playlist'
 import type Scene from '../scene/Scene'
 import { newScene } from '../scene/Scene'
-import type SceneGrid from '../sceneGrid/SceneGrid'
-import { newSceneGrid } from '../sceneGrid/SceneGrid'
 import type SceneGroup from '../sceneGroup/SceneGroup'
 import { newSceneGroup } from '../sceneGroup/SceneGroup'
 import { newRoute } from './data/Route'
@@ -71,8 +67,9 @@ import { ScenePlaylistItem } from '../scenePlaylistItem/ScenePlaylistItem'
 import { DisplayPlaylistItem } from '../displayPlaylistItem/DisplayPlaylistItem'
 
 export function toAppStorage(state: RootState): AppStorage {
-  return {
+  const app: AppStorage = {
     ...state.app,
+    grids: [], // TODO remove field from AppStorage
     theme: state.app.theme as any,
     audioSelected: state.app.audioSelected
       .map((id) => state.audio.entries[id].url || '')
@@ -89,7 +86,6 @@ export function toAppStorage(state: RootState): AppStorage {
       .filter((s) => s != null)
       .map((s) => s as SceneGroup),
     scenes: state.app.scenes.map((id) => toSceneStorage(id, state)),
-    grids: state.app.grids.map((id) => toSceneGridStorage(id, state)),
     library: state.app.library.map((id) => toLibrarySourceStorage(id, state)),
     audios: state.app.audios.map((id) => toAudioStorage(id, state)),
     scripts: state.app.scripts.map((id) => toCaptionScriptStorage(id, state)),
@@ -101,6 +97,34 @@ export function toAppStorage(state: RootState): AppStorage {
       toLibrarySourceStorage(id, state)
     )
   }
+
+  const index = app.route.findIndex((route) => {
+    if (route.value != null) {
+      const id = route.value as number
+      if (route.kind === 'audios') {
+        return app.audios.find((audio) => audio.id === id) == null
+      } else if (route.kind === 'clip') {
+        return app.library.find((source) => source.id === id) == null
+      } else if (route.kind === 'scene') {
+        return app.scenes.find((scene) => scene.id === id) == null
+      } else if (route.kind === 'scripts' || route.kind === 'scriptor') {
+        return app.scripts.find((script) => script.id === id) == null
+      }
+    }
+
+    return (
+      route.kind === 'play' ||
+      route.kind === 'libraryplay' ||
+      route.kind === 'playdisplay' ||
+      route.kind === 'playlist' ||
+      route.kind === 'display'
+    )
+  })
+  if (index !== -1) {
+    app.route = app.route.slice(0, index)
+  }
+
+  return app
 }
 
 export function toConfigStorage(
@@ -109,10 +133,15 @@ export function toConfigStorage(
 ): ConfigStorage {
   return {
     ...config,
+    generalSettings: {
+      ...config.generalSettings,
+      watermarkGrid: config.generalSettings.watermarkDisplay
+    },
     displaySettings: {
       ...config.displaySettings,
       alwaysOnTop: false,
-      showMenu: true
+      showMenu: true,
+      cloneGridVideoElements: false // TODO remove field from AppStorage
     },
     serverSettings: {
       host: config.serverSettings.host,
@@ -131,7 +160,8 @@ function toSceneSettingsStorage(
     sources: sceneSettings.sources.map((id) =>
       toLibrarySourceStorage(id, state)
     ),
-    overlays: sceneSettings.overlays.map((id) => toOverlayStorage(id, state)),
+    overlayEnabled: false, // TODO remove field from SceneSettingsStorage
+    overlays: [], // TODO remove field from SceneSettingsStorage
     // only used for migrations
     overlaySceneID: 0,
     overlaySceneOpacity: 0,
@@ -168,8 +198,10 @@ export function toSceneStorage(id: number, state: RootState): SceneStorage {
   const scene = state.scene.entries[id]
   return {
     ...scene,
+    gridScene: false, // TODO remove field from SceneStorage
+    overlayEnabled: false, // TODO remove field from SceneStorage
+    overlays: [], // TODO remove field from SceneStorage
     sources: scene.sources.map((id) => toLibrarySourceStorage(id, state)),
-    overlays: scene.overlays.map((id) => toOverlayStorage(id, state)),
     audioPlaylists: scene.audioPlaylists
       .map((id) => toAudioPlaylistStorage(id, state))
       .filter((playlist) => playlist != null)
@@ -179,10 +211,6 @@ export function toSceneStorage(id: number, state: RootState): SceneStorage {
       .filter((playlist) => playlist != null)
       .map((playlist) => playlist as ScriptPlaylistStorage)
   }
-}
-
-function toOverlayStorage(id: number, state: RootState): OverlayStorage {
-  return state.overlay.entries[id]
 }
 
 export function toAudioPlaylistStorage(
@@ -243,13 +271,6 @@ export function toScriptPlaylistStorage(
         scripts: playlist.items.map((id) => toCaptionScriptStorage(id, state))
       }
     : undefined
-}
-
-export function toSceneGridStorage(
-  id: number,
-  state: RootState
-): SceneGridStorage {
-  return state.sceneGrid.entries[id]
 }
 
 export function toLibrarySourceStorage(
@@ -387,8 +408,7 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
       appStorage.config,
       slice.librarySource,
       slice.tag,
-      slice.clip,
-      slice.overlay
+      slice.clip
     ),
     sceneGroups: appStorage.sceneGroups.map((s) =>
       fromSceneGroupStorage(s, slice.sceneGroup)
@@ -400,14 +420,10 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
         slice.librarySource,
         slice.tag,
         slice.clip,
-        slice.overlay,
         slice.playlist,
         slice.audio,
         slice.captionScript
       )
-    ),
-    grids: appStorage.grids.map((s) =>
-      fromSceneGridStorage(s, slice.sceneGrid)
     ),
     library,
     audios,
@@ -423,31 +439,21 @@ export function fromAppStorage(appStorage: AppStorage): AppStorageImport {
     scriptSelected
   })
 
-  if (slice.app.route.length > 0) {
-    const lastRoute = slice.app.route[slice.app.route.length - 1]
-    if (['play', 'libraryplay', 'gridplay'].includes(lastRoute.kind)) {
-      slice.app.route.pop()
-    }
-  }
-
   convertScenesToDisplays(
+    appStorage,
     slice.display,
     slice.displayView,
     slice.playlist,
-    slice.scene,
-    slice.sceneGrid,
     slice.scenePlaylistItem,
-    slice.overlay,
     slice.displayPlaylistItem
   )
   slice.app.displays = convertSceneGridsToDisplays(
+    appStorage,
     slice.display,
     slice.displayView,
     slice.playlist,
     slice.scene,
-    slice.sceneGrid,
-    slice.scenePlaylistItem,
-    slice.overlay
+    slice.scenePlaylistItem
   )
   slice.app.playlists = Object.keys(slice.playlist.entries).map((id) =>
     Number(id)
@@ -459,22 +465,23 @@ function fromConfigStorage(
   s: ConfigStorage,
   librarySourceSlice: EntryState<LibrarySource>,
   tagSlice: EntryState<Tag>,
-  clipSlice: EntryState<Clip>,
-  overlaySlice: EntryState<Overlay>
+  clipSlice: EntryState<Clip>
 ) {
   return newConfig({
     defaultScene: fromSceneSettingsStorage(
       s.defaultScene,
       librarySourceSlice,
       tagSlice,
-      clipSlice,
-      overlaySlice
+      clipSlice
     ),
     remoteSettings: { ...s.remoteSettings },
     serverSettings: fromServerSettings(s.serverSettings),
     caching: { ...s.caching },
     displaySettings: fromDisplaySettings(s.displaySettings),
-    generalSettings: { ...s.generalSettings },
+    generalSettings: {
+      ...s.generalSettings,
+      watermarkDisplay: s.generalSettings.watermarkGrid
+    },
     tutorials: { ...s.tutorials },
     clientID: s.clientID,
     newWindowAlerted: s.newWindowAlerted
@@ -485,8 +492,7 @@ function fromSceneSettingsStorage(
   s: SceneSettingsStorage,
   librarySourceSlice: EntryState<LibrarySource>,
   tagSlice: EntryState<Tag>,
-  clipSlice: EntryState<Clip>,
-  overlaySlice: EntryState<Overlay>
+  clipSlice: EntryState<Clip>
 ) {
   return {
     sources: s.sources.map((s) =>
@@ -650,8 +656,6 @@ function fromSceneSettingsStorage(
     videoSpeedMax: s.videoSpeedMax,
     videoSkip: s.videoSkip,
     generatorMax: s.generatorMax,
-    overlayEnabled: s.overlayEnabled,
-    overlays: s.overlays.map((s) => fromOverlayStorage(s, overlaySlice)),
     nextSceneID: s.nextSceneID,
     nextSceneTime: s.nextSceneTime,
     nextSceneAllImages: s.nextSceneAllImages,
@@ -693,7 +697,6 @@ function fromDisplaySettings(s: DisplaySettingsStorage): DisplaySettings {
     startImmediately,
     easingControls,
     audioAlert,
-    cloneGridVideoElements,
     minImageSize,
     minVideoSize,
     maxInMemory,
@@ -709,7 +712,6 @@ function fromDisplaySettings(s: DisplaySettingsStorage): DisplaySettings {
     startImmediately,
     easingControls,
     audioAlert,
-    cloneGridVideoElements,
     minImageSize,
     minVideoSize,
     maxInMemory,
@@ -809,21 +811,6 @@ export function fromLibrarySourceStorage(
   )
 }
 
-export function fromSceneGridStorage(
-  s: SceneGridStorage,
-  sceneGridSlice: EntryState<SceneGrid>
-) {
-  return from<SceneGridStorage, SceneGrid>(s, sceneGridSlice, (f) => {
-    const grid = newSceneGrid(f as SceneGrid)
-    for (const row of grid.grid) {
-      for (const cell of row) {
-        cell.sceneID = Number(cell.sceneID)
-      }
-    }
-    return grid
-  })
-}
-
 function fromClipStorage(
   s: ClipStorage,
   clipSlice: EntryState<Clip>,
@@ -854,7 +841,6 @@ export function fromSceneStorage(
   librarySourceSlice: EntryState<LibrarySource>,
   tagSlice: EntryState<Tag>,
   clipSlice: EntryState<Clip>,
-  overlaySlice: EntryState<Overlay>,
   playlistSlice: EntryState<Playlist>,
   audioSlice: EntryState<Audio>,
   captionScriptSlice: EntryState<CaptionScript>
@@ -1051,8 +1037,6 @@ export function fromSceneStorage(
       scriptScene: f.scriptScene,
       downloadScene: f.downloadScene,
       generatorMax: f.generatorMax,
-      overlayEnabled: f.overlayEnabled,
-      overlays: f.overlays.map((s) => fromOverlayStorage(s, overlaySlice)),
       nextSceneID: f.nextSceneID,
       nextSceneTime: f.nextSceneTime,
       nextSceneAllImages: f.nextSceneAllImages,
@@ -1084,15 +1068,6 @@ export function fromSceneStorage(
   }
 
   return from<SceneStorage, Scene>(s, sceneSlice, mapper)
-}
-
-function fromOverlayStorage(
-  s: OverlayStorage,
-  overlaySlice: EntryState<Overlay>
-) {
-  return from<OverlayStorage, Overlay>(s, overlaySlice, (f) =>
-    newOverlay(f as Overlay)
-  )
 }
 
 export function fromAudioPlaylistStorage(
@@ -1162,7 +1137,6 @@ export function fromScenePlaylistStorage(
   librarySourceSlice: EntryState<LibrarySource>,
   tagSlice: EntryState<Tag>,
   clipSlice: EntryState<Clip>,
-  overlaySlice: EntryState<Overlay>,
   audioSlice: EntryState<Audio>,
   captionScriptSlice: EntryState<CaptionScript>
 ) {
@@ -1186,7 +1160,6 @@ export function fromScenePlaylistStorage(
           librarySourceSlice,
           tagSlice,
           clipSlice,
-          overlaySlice,
           playlistSlice,
           audioSlice,
           captionScriptSlice
@@ -1268,16 +1241,14 @@ function equals<F, T>(t1: F, t2: T) {
 }
 
 function convertScenesToDisplays(
+  appStorage: AppStorage,
   displaySlice: EntryState<Display>,
   viewSlice: EntryState<View>,
   playlistSlice: EntryState<Playlist>,
-  sceneSlice: EntryState<Scene>,
-  sceneGridSlice: EntryState<SceneGrid>,
   scenePlaylistItemSlice: EntryState<ScenePlaylistItem>,
-  overlaySlice: EntryState<Overlay>,
   displayPlaylistItemSlice: EntryState<DisplayPlaylistItem>
 ) {
-  Object.values(sceneSlice.entries).forEach((scene) => {
+  appStorage.scenes.forEach((scene) => {
     const playlistName = scene.id.toString()
     const exists = Object.values(playlistSlice.entries).find(
       (p) => p.type === PLT.scene && p.name === playlistName
@@ -1298,8 +1269,8 @@ function convertScenesToDisplays(
         [],
         scenePlaylist,
         playlistSlice,
-        sceneSlice,
-        scenePlaylistItemSlice
+        scenePlaylistItemSlice,
+        appStorage
       )
     }
 
@@ -1330,15 +1301,13 @@ function convertScenesToDisplays(
         sceneID =
           item.randomScenes.length > 0
             ? item.randomScenes[0]
-            : Number(Object.keys(sceneSlice.entries)[0])
+            : appStorage.scenes[0].id
       }
 
-      const scene = sceneSlice.entries[sceneID]
-      const newOverlaysSize = getOverlaysSize(
-        scene.overlays,
-        overlaySlice,
-        sceneGridSlice
-      )
+      const scene = appStorage.scenes.find(
+        (s) => s.id === sceneID
+      ) as SceneStorage
+      const newOverlaysSize = getOverlaysSize(scene.overlays, appStorage)
       if (
         overlaysSize == null ||
         hasOverlaysSizeChanged(overlaysSize, newOverlaysSize)
@@ -1395,12 +1364,15 @@ function convertScenesToDisplays(
         for (let i = 0; i < overlaysSize.length; i++) {
           scenePlaylists[i + 1] = []
           const item = scenePlaylistItemSlice.entries[itemID]
-          const scene = sceneSlice.entries[item.sceneID]
-          const overlayID = scene.overlays[i]
-          const { opacity, sceneID } = overlaySlice.entries[overlayID]
+          const scene = appStorage.scenes.find(
+            (s) => s.id === item.sceneID
+          ) as SceneStorage
+          const { opacity, sceneID } = scene.overlays[i]
           const gridID = convertSceneIDToGridID(sceneID)
           if (gridID != null) {
-            const grid = sceneGridSlice.entries[gridID]
+            const grid = appStorage.grids.find(
+              (g) => g.id === gridID
+            ) as SceneGridStorage
             const rows = grid.grid.length
             const cols = grid.grid[0].length
             const width = 100 / cols
@@ -1414,11 +1386,12 @@ function convertScenesToDisplays(
                 const sync = cell.sceneCopy.length === 2
                 let playlistID = 0
                 if (!sync) {
+                  const cellName = appStorage.scenes.find(
+                    (s) => s.id === cell.sceneID
+                  )?.name
                   const overlayPlaylist = newPlaylist({
                     id: playlistSlice.nextID,
-                    name: `${sceneSlice.entries[cell.sceneID].name} ${i + 1}${
-                      r + 1
-                    }${c + 1}`,
+                    name: `${cellName} ${i + 1}${r + 1}${c + 1}`,
                     type: PLT.scene
                   })
                   playlistSlice.entries[overlayPlaylist.id] = overlayPlaylist
@@ -1457,9 +1430,10 @@ function convertScenesToDisplays(
               }
             }
           } else if (sceneID !== 0) {
+            const name = appStorage.scenes.find((s) => s.id === sceneID)?.name
             const overlayPlaylist = newPlaylist({
               id: playlistSlice.nextID,
-              name: `${sceneSlice.entries[sceneID].name} 111`,
+              name: `${name} 111`,
               type: PLT.scene
             })
             playlistSlice.entries[overlayPlaylist.id] = overlayPlaylist
@@ -1485,15 +1459,16 @@ function convertScenesToDisplays(
       displayDuration += item.duration
       scenePlaylists[0][0][0].items.push(itemID)
       for (let i = 1; i < scenePlaylists.length; i++) {
-        const overlayID = scene.overlays[i - 1]
-        const overlay = overlaySlice.entries[overlayID]
+        const overlay = scene.overlays[i - 1]
         const gridID = convertSceneIDToGridID(overlay.sceneID)
+        const grid =
+          gridID != null
+            ? appStorage.grids.find((g) => g.id === gridID)
+            : undefined
         for (let r = 0; r < scenePlaylists[i].length; r++) {
           for (let c = 0; c < scenePlaylists[i][r].length; c++) {
             const sceneID =
-              gridID != null
-                ? sceneGridSlice.entries[gridID].grid[r][c].sceneID
-                : overlay.sceneID
+              grid != null ? grid.grid[r][c].sceneID : overlay.sceneID
 
             const playlistItem: ScenePlaylistItem = {
               id: scenePlaylistItemSlice.nextID,
@@ -1540,18 +1515,15 @@ function convertScenesToDisplays(
   })
 }
 
-function getOverlaysSize(
-  overlays: number[],
-  overlaySlice: EntryState<Overlay>,
-  sceneGridSlice: EntryState<SceneGrid>
-) {
+function getOverlaysSize(overlays: OverlayStorage[], appStorage: AppStorage) {
   const overlaysSize: number[][] = []
-  for (const id of overlays) {
+  for (const overlay of overlays) {
     let size: number[]
-    const overlay = overlaySlice.entries[id]
     const gridID = convertSceneIDToGridID(overlay.sceneID)
     if (gridID != null) {
-      const grid = sceneGridSlice.entries[gridID]
+      const grid = appStorage.grids.find(
+        (g) => g.id === gridID
+      ) as SceneGridStorage
       size = [grid.grid.length, grid.grid[0].length]
     } else {
       size = [1, 1]
@@ -1581,15 +1553,14 @@ function hasOverlaysSizeChanged(
 }
 
 function convertSceneGridsToDisplays(
+  appStorage: AppStorage,
   displaySlice: EntryState<Display>,
   viewSlice: EntryState<View>,
   playlistSlice: EntryState<Playlist>,
   sceneSlice: EntryState<Scene>,
-  sceneGridSlice: EntryState<SceneGrid>,
-  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>,
-  overlaySlice: EntryState<Overlay>
+  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>
 ): number[] {
-  Object.values(sceneGridSlice.entries).forEach((grid) => {
+  appStorage.grids.forEach((grid) => {
     const gridName = grid.name ?? `Grid ${grid.id}`
     const display = newDisplay({
       id: displaySlice.nextID,
@@ -1625,8 +1596,8 @@ function convertSceneGridsToDisplays(
             [],
             playlist,
             playlistSlice,
-            sceneSlice,
-            scenePlaylistItemSlice
+            scenePlaylistItemSlice,
+            appStorage
           )
         }
 
@@ -1645,10 +1616,12 @@ function convertSceneGridsToDisplays(
             id = Number(Object.keys(sceneSlice.entries)[0])
           }
 
-          const { overlays, overlayEnabled } = sceneSlice.entries[id]
+          const { overlays, overlayEnabled } = appStorage.scenes.find(
+            (s) => s.id === id
+          ) as SceneStorage
           if (overlayEnabled && overlays.length > maxOverlaysCount) {
             for (let i = maxOverlaysCount; i < overlays.length; i++) {
-              opacities.push(overlaySlice.entries[overlays[i]].opacity)
+              opacities.push(overlays[i].opacity)
             }
 
             maxOverlaysCount = overlays.length
@@ -1704,10 +1677,12 @@ function convertSceneGridsToDisplays(
             id = Number(Object.keys(sceneSlice.entries)[0])
           }
 
-          const { overlays, overlayEnabled } = sceneSlice.entries[id]
+          const { overlays, overlayEnabled } = appStorage.scenes.find(
+            (s) => s.id === id
+          ) as SceneStorage
           if (overlayEnabled) {
             for (let i = 0; i < overlays.length; i++) {
-              const id = overlaySlice.entries[overlays[i]].sceneID
+              const id = overlays[i].sceneID
               const sceneID = isSceneIDAGridID(id) ? 0 : id
               let item = Object.values(scenePlaylistItemSlice.entries).find(
                 (value) =>
@@ -1793,8 +1768,8 @@ function convertToScenePlaylist(
   randomScenes: number[],
   playlist: Playlist,
   playlistSlice: EntryState<Playlist>,
-  sceneSlice: EntryState<Scene>,
-  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>
+  scenePlaylistItemSlice: EntryState<ScenePlaylistItem>,
+  appStorage: AppStorage
 ): number {
   if (
     playlist.items
@@ -1814,15 +1789,13 @@ function convertToScenePlaylist(
     }
   }
 
-  let scene
-  if (sceneID !== -1) {
-    scene = sceneSlice.entries[sceneID]
-  } else if (randomScenes.length > 0) {
-    scene = sceneSlice.entries[randomScenes[0]]
-  } else {
-    scene = sceneSlice.entries[Number(Object.keys(sceneSlice.entries)[0])]
+  if (sceneID === -1 && randomScenes.length > 0) {
+    sceneID = randomScenes[0]
+  } else if (sceneID === -1) {
+    sceneID = appStorage.scenes[0].id
   }
 
+  const scene = appStorage.scenes.find((s) => s.id === sceneID) as SceneStorage
   const item: ScenePlaylistItem = {
     id: scenePlaylistItemSlice.nextID,
     sceneID,
@@ -1840,7 +1813,7 @@ function convertToScenePlaylist(
     scene.nextSceneRandoms,
     playlist,
     playlistSlice,
-    sceneSlice,
-    scenePlaylistItemSlice
+    scenePlaylistItemSlice,
+    appStorage
   )
 }

@@ -559,6 +559,19 @@ export default class AppStorage {
     state: Partial<AppStorageData>,
     quickSave: boolean
   ): Promise<boolean> {
+    // TODO remove when storing displays
+    const { grids, scenes } = this.initialState
+    state = { ...state, grids }
+    state.scenes.forEach((s) => {
+      const scene = scenes.find((x) => x.id === s.id)
+      if (scene == null) {
+        return
+      }
+
+      s.overlayEnabled = scene.overlayEnabled
+      s.overlays = scene.overlays
+    })
+
     let saved = false
     if (state.config.generalSettings.portableMode === true) {
       saved = await this.writeFileTransactional(

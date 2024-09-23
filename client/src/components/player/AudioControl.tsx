@@ -231,6 +231,7 @@ function AudioControl(props: AudioControlProps) {
     if (stopAtEnd && props.goBack) {
       props.goBack()
     } else if (nextSceneAtEnd) {
+      // TODO how is this going to work with scene playlists?
       dispatch(nextScene(props.sceneID))
       setPosition(0)
       setDuration(0)

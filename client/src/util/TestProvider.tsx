@@ -1,13 +1,15 @@
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import { createTheme } from '@mui/material'
-import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import defaultTheme from 'flipflip-common'
+import { CacheProvider, EmotionCache } from '@emotion/react'
 
 export default class TestProvider extends React.Component {
   readonly props: {
     children: any
     store: any
+    cache: EmotionCache
   }
 
   disableTransitions = {
@@ -31,9 +33,9 @@ export default class TestProvider extends React.Component {
     } as any)
     return (
       <Provider store={this.props.store}>
-        <StyledEngineProvider injectFirst>
+        <CacheProvider value={this.props.cache}>
           <ThemeProvider theme={theme}>{this.props.children}</ThemeProvider>
-        </StyledEngineProvider>
+        </CacheProvider>
       </Provider>
     )
   }

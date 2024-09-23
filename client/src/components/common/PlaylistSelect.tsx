@@ -40,6 +40,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export interface PlaylistSelectProps extends ReduxProps<string> {
   type: PlaylistType
   create: ThunkAction<void, RootState, undefined, AnyAction>
+  includeSingles?: boolean
   hideLabel?: boolean
 }
 
@@ -54,6 +55,14 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
   }
 
   const { classes } = useStyles()
+  // TODO work in progress
+  // const singles =
+  //   props.includeSingles === true
+  //     ? [
+  //         { id: 9990, value: 'Wallpapers' },
+  //         { id: 9991, value: 'Cars' }
+  //       ]
+  //     : undefined
   const label = `${playlistTypeDisplayNames[props.type]} Playlist`
   return (
     <Box className={classes.flex}>
@@ -84,6 +93,13 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
             {option.value}
           </MenuItem>
         ))}
+        {/* TODO work in progress */}
+        {/* {singles && <Divider>Single Scene</Divider>}
+        {singles?.map((option: SelectOption) => (
+          <MenuItem key={option.id} value={option.id}>
+            {option.value}
+          </MenuItem>
+        ))} */}
       </BaseSelect>
     </Box>
   )

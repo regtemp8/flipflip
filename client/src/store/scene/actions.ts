@@ -87,12 +87,6 @@ export const setSceneNextSceneTime =
     id !== undefined
       ? slice.setSceneNextSceneTime({ id, value })
       : app.setConfigDefaultSceneNextSceneTime(value)
-export const setSceneOverlayEnabled =
-  (id?: number) =>
-  (value: boolean): PayloadAction<EntryUpdate<boolean> | boolean> =>
-    id !== undefined
-      ? slice.setSceneOverlayEnabled({ id, value })
-      : app.setConfigDefaultSceneOverlayEnabled(value)
 export const setScenePersistAudio =
   (id?: number) =>
   (value: boolean): PayloadAction<EntryUpdate<boolean> | boolean> =>
@@ -1071,34 +1065,6 @@ export const setScenePanVertTransLevelMax =
     id !== undefined
       ? slice.setScenePanVertTransLevelMax({ id, value })
       : app.setConfigDefaultScenePanVertTransLevelMax(value)
-export const setSceneAddOverlay = (
-  overlayID: number,
-  sceneID?: number
-): PayloadAction<EntryUpdate<number> | number> =>
-  sceneID !== undefined
-    ? slice.setSceneAddOverlay({ id: sceneID, value: overlayID })
-    : app.setConfigDefaultSceneAddOverlay(overlayID)
-export const setSceneRemoveOverlay = (
-  overlayID: number,
-  sceneID?: number
-): PayloadAction<EntryUpdate<number> | number> =>
-  sceneID !== undefined
-    ? slice.setSceneRemoveOverlay({ id: sceneID, value: overlayID })
-    : app.setConfigDefaultSceneRemoveOverlay(overlayID)
-export const setSceneNextSceneRandoms = (
-  nextSceneRandoms: number[],
-  sceneID?: number
-): PayloadAction<EntryUpdate<number[]> | number[]> =>
-  sceneID !== undefined
-    ? slice.setSceneNextSceneRandoms({ id: sceneID, value: nextSceneRandoms })
-    : app.setConfigDefaultSceneNextSceneRandoms(nextSceneRandoms)
-export const setSceneNextSceneID = (
-  nextSceneID: number,
-  sceneID?: number
-): PayloadAction<EntryUpdate<number> | number> =>
-  sceneID !== undefined
-    ? slice.setSceneNextSceneID({ id: sceneID, value: nextSceneID })
-    : app.setConfigDefaultSceneNextSceneID(nextSceneID)
 export const setSceneAudioEnabled =
   (id: number) =>
   (value: boolean): PayloadAction<EntryUpdate<boolean> | boolean> =>

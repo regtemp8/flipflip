@@ -1,11 +1,7 @@
-import fs from 'fs'
 import path from 'path'
 import type { Configuration } from 'webpack'
-import { DefinePlugin } from 'webpack'
 
 import { rules } from './webpack.rules'
-
-import * as packageJson from './package.json'
 import { definePlugin } from './webpack.plugins'
 
 export const devConfig: Configuration = {

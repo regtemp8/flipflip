@@ -42,8 +42,12 @@ import PublishIcon from '@mui/icons-material/Publish'
 import { MO, PLT, SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { removePlaylist, setRouteGoBack } from '../../store/app/thunks'
-import { selectAppSpecialMode } from '../../store/app/selectors'
 import {
+  selectAppConfigDisplaySettingsFullScreen,
+  selectAppSpecialMode
+} from '../../store/app/selectors'
+import {
+  selectPlaylistIsEmpty,
   selectPlaylistName,
   selectPlaylistType
 } from '../../store/playlist/selectors'
@@ -54,6 +58,13 @@ import ScriptPlaylist from '../configGroups/ScriptPlaylist'
 import ScenePlaylist from './ScenePlaylist'
 import DisplayPlaylist from './DisplayPlaylist'
 import SceneSelect from '../configGroups/SceneSelect'
+import {
+  playAudioPlaylist,
+  playDisplayPlaylist,
+  playScenePlaylist,
+  playScriptPlaylist
+} from '../../store/player/thunks'
+import { setFullScreen } from '../../data/actions'
 
 const drawerWidth = 240
 
@@ -182,13 +193,14 @@ function PlaylistSetup(props: PlaylistSetupProps) {
   // TODO add playlist tutorials
   const name = useAppSelector(selectPlaylistName(playlistID))
   const type = useAppSelector(selectPlaylistType(playlistID))
-  const canPlay = false
+  const isEmpty = useAppSelector(selectPlaylistIsEmpty(playlistID))
   const autoEdit = useAppSelector(selectAppSpecialMode()) === SP.autoEdit
+  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string>()
-  const [sceneID, setSceneID] = useState<number>(0)
+  const [sceneID, setSceneID] = useState<number>(-1)
 
   useEffect(() => {
     if (autoEdit) {
@@ -197,8 +209,17 @@ function PlaylistSetup(props: PlaylistSetupProps) {
   }, [autoEdit, name])
 
   const onPlayPlaylist = () => {
-    // TODO play playlist
-    //setFullScreen(fullScreen)
+    if (type === PLT.audio) {
+      dispatch(playAudioPlaylist(playlistID, sceneID))
+    } else if (type === PLT.display) {
+      dispatch(playDisplayPlaylist(playlistID))
+    } else if (type === PLT.scene) {
+      dispatch(playScenePlaylist(playlistID))
+    } else if (type === PLT.script) {
+      dispatch(playScriptPlaylist(playlistID, sceneID))
+    }
+
+    setFullScreen(fullScreen)
   }
 
   const onToggleDrawer = () => {
@@ -291,12 +312,16 @@ function PlaylistSetup(props: PlaylistSetupProps) {
 
           {(type === PLT.audio || type === PLT.script) && (
             <Box className={classes.sceneSelect}>
-              <SceneSelect value={sceneID} onChange={setSceneID} />
+              <SceneSelect
+                value={sceneID}
+                onChange={setSceneID}
+                includeRandom
+              />
             </Box>
           )}
           <Fab
             className={classes.playButton}
-            disabled={!canPlay}
+            disabled={isEmpty}
             color="secondary"
             aria-label="Play"
             onClick={onPlayPlaylist}

@@ -26,8 +26,6 @@ import {
   filterSource,
   reduceList,
   randomizeList,
-  isSceneIDAGridID,
-  convertSceneIDToGridID,
   applyEffects,
   arrayMove
 } from '../../data/utils'
@@ -66,20 +64,12 @@ import { getSourceUrl } from '../../data/actions'
 import { setCaptionScript } from '../captionScript/slice'
 import { newTag } from '../tag/Tag'
 import { setTag } from '../tag/slice'
-import { setSceneGrid } from '../sceneGrid/slice'
-import { newSceneGridCell } from '../sceneGrid/SceneGridCell'
-import { toSceneGridStorage, toSceneStorage } from '../app/convert'
-import {
-  type Scene as SceneStorage,
-  type SceneGrid as SceneGridStorage
-} from 'flipflip-common'
 import { getVideoClipperScene } from './selectors'
 import { getActiveScene } from '../app/thunks'
 import flipflip from '../../FlipFlipService'
 import { newPlaylist } from '../playlist/Playlist'
 import { setPlaylist } from '../playlist/slice'
 import { addPlaylist } from '../playlist/thunks'
-import SceneGrid from '../sceneGrid/SceneGrid'
 import { setSceneGroupRemoveScene } from '../sceneGroup/slice'
 
 export function startFromScene(sceneName: string) {
@@ -113,73 +103,9 @@ export function generateScenes(
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     const generateScenes: Scene[] = []
-    if (id.toString().startsWith('999')) {
-      const gridID = Number(id.toString().replace('999', ''))
-      const sceneGrid = state.sceneGrid.entries[gridID]
-      for (const row of sceneGrid.grid) {
-        for (const cell of row) {
-          const gScene = state.scene.entries[cell.sceneID]
-          if (
-            gScene?.generatorWeights &&
-            gScene.regenerate &&
-            areWeightsValid(gScene)
-          ) {
-            generateScenes.push(gScene)
-          }
-          if (gScene && gScene.overlayEnabled) {
-            for (const overlayID of gScene.overlays) {
-              const overlay = state.overlay.entries[overlayID]
-              if (overlay.sceneID.toString().startsWith('999')) {
-                // No grid overlays within a grid
-              } else {
-                const oScene = state.scene.entries[overlay.sceneID]
-                if (
-                  oScene?.generatorWeights &&
-                  oScene.regenerate &&
-                  areWeightsValid(oScene)
-                ) {
-                  generateScenes.push(oScene)
-                }
-              }
-            }
-          }
-        }
-      }
-    } else {
-      const scene = state.scene.entries[id]
-      if ((scene.regenerate || force) && areWeightsValid(scene)) {
-        generateScenes.push(scene)
-      }
-      if (scene.overlayEnabled && children) {
-        for (const overlayID of scene.overlays) {
-          const overlay = state.overlay.entries[overlayID]
-          if (overlay.sceneID.toString().startsWith('999')) {
-            const id = Number(overlay.sceneID.toString().replace('999', ''))
-            const oScene = state.sceneGrid.entries[id]
-            for (const row of oScene.grid) {
-              for (const cell of row) {
-                const gScene = state.scene.entries[cell.sceneID]
-                if (
-                  gScene?.generatorWeights &&
-                  gScene.regenerate &&
-                  areWeightsValid(gScene)
-                ) {
-                  generateScenes.push(gScene)
-                }
-              }
-            }
-          } else {
-            const oScene = state.scene.entries[overlay.sceneID]
-            if (
-              oScene?.generatorWeights &&
-              oScene.regenerate &&
-              areWeightsValid(oScene)
-            ) {
-              generateScenes.push(oScene)
-            }
-          }
-        }
-      }
+    const scene = state.scene.entries[id]
+    if ((scene.regenerate || force) && areWeightsValid(scene)) {
+      generateScenes.push(scene)
     }
 
     const newScenes: Scene[] = []
@@ -1114,6 +1040,8 @@ export function deleteScene(sceneID: number) {
         dispatch(setSceneGroupRemoveScene({ id: s.id, value: sceneID }))
       )
 
+    // TODO remove scene from scene playlists
+
     state.app.scenes
       .map((id) => state.scene.entries[id])
       .forEach((scene) => {
@@ -1126,37 +1054,12 @@ export function deleteScene(sceneID: number) {
         sceneCopy.nextSceneRandoms = sceneCopy.nextSceneRandoms.filter(
           (id) => id !== sceneID
         )
-        const overlaysLength = sceneCopy.overlays.length
-        sceneCopy.overlays = sceneCopy.overlays
-          .map((id) => state.overlay.entries[id])
-          .filter((o) => o.sceneID !== sceneID)
-          .map((o) => o.id)
 
         if (
           sceneCopy.nextSceneID === 0 ||
-          sceneCopy.nextSceneRandoms.length < nextSceneRandomsLength ||
-          sceneCopy.overlays.length < overlaysLength
+          sceneCopy.nextSceneRandoms.length < nextSceneRandomsLength
         ) {
           dispatch(setScene(sceneCopy))
-        }
-      })
-
-    state.app.grids
-      .map((id) => state.sceneGrid.entries[id])
-      .forEach((grid) => {
-        let updated = false
-        const gridCopy = copy<SceneGrid>(grid)
-        for (let r = 0; r < gridCopy.grid.length; r++) {
-          for (let c = 0; c < gridCopy.grid[r].length; c++) {
-            if (gridCopy.grid[r][c].sceneID === sceneID) {
-              gridCopy.grid[r][c] = newSceneGridCell()
-              updated = true
-            }
-          }
-        }
-
-        if (updated) {
-          dispatch(setSceneGrid(gridCopy))
         }
       })
 
@@ -1167,77 +1070,7 @@ export function deleteScene(sceneID: number) {
 
 export function exportScene(sceneID: number) {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const state = getState()
-    const scenesToExport = Array<SceneStorage>()
-    const gridsToExport = Array<SceneGridStorage>()
-    const sceneCopy = toSceneStorage(sceneID, state)
-    sceneCopy.generatorWeights = undefined
-    sceneCopy.openTab = 3
-    sceneCopy.overlays = sceneCopy.overlays.filter((o) => o.sceneID !== 0)
-    scenesToExport.push(sceneCopy)
-
-    // Add overlays
-    if (sceneCopy.overlayEnabled) {
-      for (const o of sceneCopy.overlays) {
-        // If overlay is a grid, add grid scenes and their immediate overlays
-        const gridID = convertSceneIDToGridID(o.sceneID)
-        if (gridID != null) {
-          const grid = toSceneGridStorage(gridID, state)
-          if (grid && !gridsToExport.find((s) => s.id === gridID)) {
-            gridsToExport.push(grid)
-            for (const r of grid.grid) {
-              for (const c of r) {
-                if (c.sceneID !== -1) {
-                  const cell = toSceneStorage(c.sceneID, state)
-                  if (cell && !scenesToExport.find((s) => s.id === c.sceneID)) {
-                    cell.generatorWeights = undefined
-                    cell.openTab = 3
-                    scenesToExport.push(cell)
-                    if (cell.overlayEnabled) {
-                      for (const co of cell.overlays) {
-                        if (!isSceneIDAGridID(co.sceneID)) {
-                          const overlay = toSceneStorage(co.sceneID, state)
-                          if (
-                            overlay &&
-                            !scenesToExport.find((s) => s.id === co.sceneID)
-                          ) {
-                            overlay.generatorWeights = undefined
-                            overlay.openTab = 3
-                            overlay.overlays = []
-                            scenesToExport.push(overlay)
-                          }
-                        }
-                      }
-                    } else {
-                      cell.overlays = []
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } else {
-          // Otherwise, just add the overlay
-          const overlay = toSceneStorage(o.sceneID, state)
-          if (
-            overlay !== undefined &&
-            !scenesToExport.find((s) => s.id === o.sceneID)
-          ) {
-            overlay.generatorWeights = undefined
-            overlay.openTab = 3
-            overlay.overlays = []
-            scenesToExport.push(overlay)
-          }
-        }
-      }
-    } else {
-      sceneCopy.overlays = []
-    }
-
-    const allExports = (scenesToExport as any[]).concat(gridsToExport)
-    const sceneExport = JSON.stringify(allExports)
-    const fileName = sceneCopy.name + '_export.json'
-    flipflip().api.saveJsonFile(fileName, sceneExport)
+    // TODO rewrite export logic, use subset of AppStorage instead, so that when imported it can be migrated too
   }
 }
 

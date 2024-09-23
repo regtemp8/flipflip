@@ -1,48 +1,35 @@
-import { v4 as uuidv4 } from 'uuid'
-
-import { OF, PT, ST, getSourceType } from 'flipflip-common'
-import { setRoute, addRoutes, setTutorial } from '../app/slice'
-import { setScene } from '../scene/slice'
+import { OF, PLT, RP, ST, copy, getSourceType } from 'flipflip-common'
+import { addRoutes } from '../app/slice'
 import { type AppDispatch, type RootState } from '../store'
-import { newOverlay } from '../overlay/Overlay'
 import { newRoute } from '../app/data/Route'
-import type Scene from '../scene/Scene'
-import { newScene } from '../scene/Scene'
 import {
   type PlayersState,
   setPlayersState,
-  setPlayerStates,
-  PlayerOverlayState,
-  setPlayerHasStarted,
-  PlayerState,
-  PlayerUpdate,
   setPlayerStartLoading,
   setPlayerLoadingComplete,
   setPlayerSetImageView,
   setPlayerIncrementDisplayIndex,
-  setPlayerIncrementIFrameCount
+  setPlayerIncrementIFrameCount,
+  PlaylistState,
+  setPlayerDecrementTimeToNextScene,
+  setPlayerPlaylist,
+  setPlayerLoaderOnlyIframes,
+  setPlayerHasStarted
 } from './slice'
-import {
-  convertGridIDToSceneID,
-  convertSceneIDToGridID,
-  getRandomListItem,
-  isSceneIDAGridID
-} from '../../data/utils'
-import { type EntryState, getEntry } from '../EntryState'
-import { setOverlay } from '../overlay/slice'
+import { getRandomListItem, randomizeList } from '../../data/utils'
 import { scrapeSources } from '../sourceScraper/thunks'
 import preload from './ContentPreloadService'
 import { setSourceScraperState } from '../sourceScraper/slice'
-
-function getNextSceneID(scene: Scene, scenes: EntryState<Scene>): number {
-  if (scene.nextSceneID === -1) {
-    return scene.nextSceneRandoms.length === 0
-      ? getRandomListItem(Object.keys(scenes.entries).map((key) => Number(key)))
-      : getRandomListItem(scene.nextSceneRandoms)
-  } else {
-    return scene.nextSceneID
-  }
-}
+import { setDisplayView, setDisplayViewPlayerUUID } from '../displayView/slice'
+import { setDisplay } from '../display/slice'
+import { newDisplay } from '../display/Display'
+import { newView } from '../displayView/View'
+import { newPlaylist } from '../playlist/Playlist'
+import { newScenePlaylistItem } from '../scenePlaylistItem/ScenePlaylistItem'
+import { setScenePlaylistItem } from '../scenePlaylistItem/slice'
+import { setPlaylist } from '../playlist/slice'
+import Scene from '../scene/Scene'
+import { setScene } from '../scene/slice'
 
 function containsOnlyIframes(sceneID: number, state: RootState): boolean {
   return state.scene.entries[sceneID].sources
@@ -50,201 +37,230 @@ function containsOnlyIframes(sceneID: number, state: RootState): boolean {
     .every((s) => getSourceType(s.url) === ST.nimja)
 }
 
-function createPlayerState(
-  uuid: string,
-  scene: Scene,
-  playersState: PlayersState,
-  state: RootState
-) {
-  const nextSceneID = getNextSceneID(scene, state.scene)
-  const overlays =
-    scene.overlayEnabled && scene.overlays
-      ? scene.overlays.map((overlayID) => {
-          const grid: string[][] = []
-          const overlay = state.overlay.entries[overlayID]
-          let sceneID = overlay.sceneID
-          const isGrid = isSceneIDAGridID(overlay.sceneID)
-          if (isGrid) {
-            sceneID = convertSceneIDToGridID(overlay.sceneID) as number
-            const sceneGrid = state.sceneGrid.entries[sceneID]
-            for (const row of sceneGrid.grid) {
-              const gridRow: string[] = []
-              for (const col of row) {
-                const colUuid = uuidv4()
-                const colScene = state.scene.entries[col.sceneID]
-                createPlayerState(colUuid, colScene, playersState, state)
-                gridRow.push(colUuid)
-              }
-
-              grid.push(gridRow)
-            }
-          }
-
-          const overlayState: PlayerOverlayState = {
-            id: overlay.id,
-            show: true,
-            opacity: overlay.opacity,
-            sceneID,
-            isGrid,
-            grid,
-            loaded: false,
-            loader: {
-              zIndex: 0,
-              displayIndex: 0,
-              loadingCount: 0,
-              iframeCount: 0,
-              onlyIframes: containsOnlyIframes(sceneID, state),
-              readyToLoad: [
-                ...Array(state.app.config.displaySettings.maxInMemory).keys()
-              ],
-              imageViews: []
-            }
-          }
-
-          return overlayState
-        })
-      : []
-
-  playersState[uuid] = {
-    sceneID: scene.id,
-    nextSceneID,
-    overlays,
-    firstImageLoaded: false,
-    mainLoaded: scene.gridScene || scene.audioScene,
-    isEmpty: false,
-    hasStarted: scene.audioScene,
-    loader: {
-      zIndex: 0,
-      displayIndex: 0,
-      loadingCount: 0,
-      iframeCount: 0,
-      onlyIframes: containsOnlyIframes(scene.id, state),
-      readyToLoad: [
-        ...Array(state.app.config.displaySettings.maxInMemory).keys()
-      ],
-      imageViews: []
-    }
+function calcRepeats(playlistID: number, state: RootState) {
+  const { repeat } = state.playlist.entries[playlistID]
+  switch (repeat) {
+    case RP.all:
+      return -1
+    case RP.one:
+      return 2
+    default:
+      return 1
   }
 }
 
-export function nextScene(uuid: string = 'root') {
-  return function nextSceneThunk(
-    dispatch: AppDispatch,
-    getState: () => RootState
-  ) {
-    const state = getState()
-    const sceneID = state.players[uuid].nextSceneID
-    const scene = state.scene.entries[sceneID]
-    if (scene != null) {
-      const newPlayerState: PlayersState = {}
-      newPlayerState[uuid] = state.players[uuid]
-      createPlayerState(uuid, scene, newPlayerState, state)
-      const updates: PlayerUpdate<PlayerState>[] = Object.keys(
-        newPlayerState
-      ).map((uuid) => {
-        const value = newPlayerState[uuid]
-        value.hasStarted = true
-        value.firstImageLoaded = true
-        dispatch(scrapeSources(uuid))
-        return { uuid, value }
-      })
-
-      dispatch(setPlayerStates(updates))
-      if (uuid === 'root') {
-        dispatch(
-          setRoute([
-            newRoute({ kind: 'scene', value: sceneID }),
-            newRoute({ kind: 'play', value: uuid })
-          ])
-        )
+function createPlaylistItems(playlistID: number, state: RootState) {
+  const { items, shuffle } = state.playlist.entries[playlistID]
+  const playlistItems = items
+    .map((id) => state.scenePlaylistItem.entries[id])
+    .map((entry) => {
+      let { sceneID, duration } = entry
+      if (sceneID === -1) {
+        const randomScenes =
+          entry.randomScenes.length > 0 ? entry.randomScenes : state.app.scenes
+        sceneID = getRandomListItem(randomScenes)
       }
+
+      return { sceneID, duration }
+    })
+
+  if (shuffle && playlistItems.length > 1) {
+    randomizeList(playlistItems)
+  }
+
+  return playlistItems
+}
+
+function createPlaylist(playlistID: number, state: RootState): PlaylistState {
+  const playlistItems = createPlaylistItems(playlistID, state)
+  const timeToNextScene = playlistItems[0].duration
+  return {
+    playlistID,
+    player: {
+      index: 0,
+      timeToNextScene
+    },
+    loader: {
+      index: 0,
+      timeToNextScene
+    },
+    items: playlistItems,
+    repeat: calcRepeats(playlistID, state)
+  }
+}
+
+function advancePlaylist(
+  playlistState: PlaylistState,
+  type: 'player' | 'loader',
+  state: RootState
+): PlaylistState {
+  const newPlaylistState = copy<PlaylistState>(playlistState)
+  const itemState = playlistState[type]
+  const nextIndex = itemState.index + 1
+  const playlistItems = state.playlist.entries[playlistState.playlistID].items
+  if (nextIndex % playlistItems.length === 0) {
+    if (type === 'loader') {
+      // loader reached end of playlist, but player still needs the old playlist items
+      newPlaylistState.items.push(
+        ...createPlaylistItems(playlistState.playlistID, state)
+      )
+      newPlaylistState.loader.index = nextIndex
+      newPlaylistState.loader.timeToNextScene =
+        newPlaylistState.items[nextIndex].duration
+      newPlaylistState.repeat-- // TODO stop loading when repeat === 0
+    } else {
+      // player also reached end of playlist, remove old playlist items
+      newPlaylistState.items.splice(0, playlistItems.length)
+      newPlaylistState.loader.index -= playlistItems.length
+      newPlaylistState.player.index = 0
+      newPlaylistState.player.timeToNextScene =
+        newPlaylistState.items[0].duration
     }
+  } else {
+    newPlaylistState[type].index = nextIndex
+    newPlaylistState[type].timeToNextScene =
+      newPlaylistState.items[nextIndex].duration
   }
+
+  return newPlaylistState
 }
 
-export function playGrid(gridID: number) {
+export function playDisplay(displayID: number) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState()
-    const grid = state.sceneGrid.entries[gridID]
-    const overlayID = state.overlay.nextID
-    const tempOverlay = newOverlay({
-      id: overlayID,
-      sceneID: convertGridIDToSceneID(grid.id),
-      opacity: 100
-    })
-    dispatch(setOverlay(tempOverlay))
-
-    const tempScene = newScene({
-      id: state.scene.nextID,
-      name: grid.name,
-      overlayEnabled: true,
-      gridScene: true,
-      overlays: [overlayID]
-    })
-
-    dispatch(setScene(tempScene))
-
-    const uuid = 'root'
-    const playersState: PlayersState = {}
-    createPlayerState(uuid, tempScene, playersState, getState())
-    dispatch(setPlayersState(playersState))
-    dispatch(setSourceScraperState({}))
-    Object.keys(playersState).forEach((uuid) => dispatch(scrapeSources(uuid)))
-    dispatch(
-      addRoutes([
-        newRoute({ kind: 'scene', value: tempScene.id }),
-        newRoute({ kind: 'gridplay', value: uuid })
-      ])
-    )
-  }
-}
-
-export function playScene(id: number) {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
     const state = getState()
     dispatch(setSourceScraperState({}))
     preload().init()
 
-    const scene = getEntry(state.scene, id) as Scene
-    const tutorial =
-      state.app.config.tutorials.player == null ? PT.welcome : undefined
-
-    const uuid = 'root'
     const playersState: PlayersState = {}
-    createPlayerState(uuid, scene, playersState, state)
+    const { views } = state.display.entries[displayID]
+    views.forEach((viewID) => {
+      const view = state.displayView.entries[viewID]
+      if (view.sync) {
+        const uuid = `player-${view.syncWithView}`
+        dispatch(setDisplayViewPlayerUUID({ id: viewID, value: uuid }))
+      } else {
+        const uuid = `player-${viewID}`
+        dispatch(setDisplayViewPlayerUUID({ id: viewID, value: uuid }))
+        const playlist = createPlaylist(view.playlistID, state)
+        const sceneID = playlist.items[0].sceneID
+        playersState[uuid] = {
+          playlist,
+          firstImageLoaded: false,
+          mainLoaded: false,
+          isEmpty: false,
+          hasStarted: false,
+          loader: {
+            zIndex: 0,
+            displayIndex: 0,
+            loadingCount: 0,
+            iframeCount: 0,
+            onlyIframes: containsOnlyIframes(sceneID, state),
+            readyToLoad: [
+              ...Array(state.app.config.displaySettings.maxInMemory).keys()
+            ],
+            imageViews: []
+          }
+        }
+      }
+    })
+
     dispatch(setPlayersState(playersState))
     Object.keys(playersState).forEach((uuid) => dispatch(scrapeSources(uuid)))
-    dispatch(setTutorial(tutorial))
-    dispatch(addRoutes([newRoute({ kind: 'play', value: uuid })]))
+    dispatch(addRoutes([newRoute({ kind: 'playdisplay', value: displayID })]))
   }
 }
 
-export function setPlayerHasStartedRecursive(
-  uuid: string,
-  hasStarted: boolean
-) {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const state = getState()
-    state.players[uuid].overlays
-      .filter((s) => s.isGrid)
-      .flatMap((s) => s.grid)
-      .flatMap((s) => s)
-      .forEach((s) => dispatch(setPlayerHasStartedRecursive(s, hasStarted)))
-
-    dispatch(setPlayerHasStarted({ uuid, value: hasStarted }))
-  }
-}
-
-export function loadImageViews(uuid: string, overlayIndex?: number) {
+export function playScenePlaylist(playlistID: number) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    const maxLoadingAtOnce = state.app.config.displaySettings.maxLoadingAtOnce
-    const { mainLoaded } = state.players[uuid]
-    const { loader, sceneID } =
-      overlayIndex != null
-        ? state.players[uuid].overlays[overlayIndex]
-        : state.players[uuid]
+    const { name } = state.playlist.entries[playlistID]
+    const viewID = state.displayView.nextID
+    const view = newView({
+      id: viewID,
+      name,
+      width: 100,
+      height: 100,
+      playlistID
+    })
+    dispatch(setDisplayView(view))
 
+    const displayID = state.display.nextID
+    const display = newDisplay({ id: displayID, name, views: [viewID] })
+    dispatch(setDisplay(display))
+    dispatch(playDisplay(displayID))
+  }
+}
+
+export function playScene(sceneID: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const state = getState()
+    const { name } = state.scene.entries[sceneID]
+    const playlistItemID = state.scenePlaylistItem.nextID
+    const playlistItem = newScenePlaylistItem({
+      id: playlistItemID,
+      sceneID,
+      duration: Infinity
+    })
+    dispatch(setScenePlaylistItem(playlistItem))
+    const playlistID = state.playlist.nextID
+    const playlist = newPlaylist({
+      id: playlistID,
+      type: PLT.scene,
+      name,
+      items: [playlistItemID]
+    })
+    dispatch(setPlaylist(playlist))
+    dispatch(playScenePlaylist(playlistID))
+  }
+}
+
+export function playScriptPlaylist(playlistID: number, sceneID: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const state = getState()
+    if (sceneID === -1) {
+      sceneID = getRandomListItem(state.app.scenes)
+    }
+    const sceneCopy = copy<Scene>(state.scene.entries[sceneID])
+    sceneCopy.id = state.scene.nextID
+    sceneCopy.name = state.playlist.entries[playlistID].name
+    sceneCopy.textEnabled = true
+    sceneCopy.scriptPlaylists = [playlistID]
+    dispatch(setScene(sceneCopy))
+    dispatch(playScene(sceneCopy.id))
+  }
+}
+
+export function playAudioPlaylist(playlistID: number, sceneID: number) {
+  return (dispatch: AppDispatch, getState: () => RootState): void => {
+    const state = getState()
+    if (sceneID === -1) {
+      sceneID = getRandomListItem(state.app.scenes)
+    }
+    const sceneCopy = copy<Scene>(state.scene.entries[sceneID])
+    sceneCopy.id = state.scene.nextID
+    sceneCopy.name = state.playlist.entries[playlistID].name
+    sceneCopy.audioEnabled = true
+    sceneCopy.audioPlaylists = [playlistID]
+    dispatch(setScene(sceneCopy))
+    dispatch(playScene(sceneCopy.id))
+  }
+}
+
+export function playDisplayPlaylist(playlistID: number) {
+  // TODO implement display playlist feature
+  return (dispatch: AppDispatch, getState: () => RootState) => {}
+}
+
+export function loadImageViews(uuid: string) {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const player = state.players[uuid]
+    if (player == null) {
+      return
+    }
+
+    const maxLoadingAtOnce = state.app.config.displaySettings.maxLoadingAtOnce
+    const { mainLoaded, loader, playlist } = player
     const canLoad = Math.min(
       maxLoadingAtOnce - loader.loadingCount,
       loader.readyToLoad.length
@@ -253,15 +269,10 @@ export function loadImageViews(uuid: string, overlayIndex?: number) {
       return
     }
 
-    dispatch(
-      setPlayerStartLoading({
-        uuid,
-        overlayIndex,
-        value: canLoad
-      })
-    )
+    dispatch(setPlayerStartLoading({ uuid, value: canLoad }))
 
     const maxIframeCount = 2
+    const { sceneID } = playlist.items[playlist.loader.index]
     const scene = state.scene.entries[sceneID]
     const loadCriteria = {
       minImageSize: state.app.config.displaySettings.minImageSize,
@@ -275,11 +286,12 @@ export function loadImageViews(uuid: string, overlayIndex?: number) {
       videoOrientation: scene.videoOrientation
     }
 
+    let timeToNextScene = playlist.loader.timeToNextScene
     const promises = loader.readyToLoad
       .slice(0, canLoad)
       .map((index): Promise<boolean> => {
         return preload()
-          .getData(uuid, state)
+          .getData(uuid, sceneID, state)
           .then(
             (data) => {
               if (
@@ -288,26 +300,16 @@ export function loadImageViews(uuid: string, overlayIndex?: number) {
                 loader.imageViews[index]?.data.url === data.url
               ) {
                 // if url hasn't changed, then onload event isn't triggered
-                const payload = { uuid, overlayIndex, value: index }
+                const payload = { uuid, value: [index] }
                 dispatch(setPlayerLoadingComplete(payload))
                 return false
               }
               if (data.type === 'iframe') {
-                const { loader } =
-                  overlayIndex != null
-                    ? getState().players[uuid].overlays[overlayIndex]
-                    : getState().players[uuid]
-
+                const { loader } = getState().players[uuid]
                 if (loader.iframeCount < maxIframeCount) {
-                  dispatch(
-                    setPlayerIncrementIFrameCount({
-                      uuid,
-                      overlayIndex,
-                      value: undefined
-                    })
-                  )
+                  dispatch(setPlayerIncrementIFrameCount(uuid))
                 } else {
-                  const payload = { uuid, overlayIndex, value: index }
+                  const payload = { uuid, value: [index] }
                   dispatch(setPlayerLoadingComplete(payload))
                   return loader.onlyIframes
                 }
@@ -324,39 +326,42 @@ export function loadImageViews(uuid: string, overlayIndex?: number) {
               )
 
               const imageView = preload().getImageView(
+                sceneID,
                 data,
                 effects,
                 view,
                 transform
               )
-              if (scene.orderFunction === OF.strict) {
-                const { loader } =
-                  overlayIndex != null
-                    ? getState().players[uuid].overlays[overlayIndex]
-                    : getState().players[uuid]
 
-                imageView.displayIndex = loader.displayIndex
+              const latestState = getState()
+              const player = latestState.players[uuid]
+              const playlist = player.playlist
+              if (
+                playlist.items[playlist.loader.index].sceneID === sceneID &&
+                timeToNextScene > 0
+              ) {
+                timeToNextScene -= imageView.view.timeToNextFrame
+                if (scene.orderFunction === OF.strict) {
+                  imageView.displayIndex = player.loader.displayIndex
+                  dispatch(setPlayerIncrementDisplayIndex(uuid))
+                }
+
                 dispatch(
-                  setPlayerIncrementDisplayIndex({
+                  setPlayerSetImageView({
                     uuid,
-                    overlayIndex,
-                    value: undefined
+                    value: { index, view: imageView }
                   })
                 )
+
+                return true
+              } else {
+                const payload = { uuid, value: [index] }
+                dispatch(setPlayerLoadingComplete(payload))
+                return false
               }
-
-              dispatch(
-                setPlayerSetImageView({
-                  uuid,
-                  overlayIndex,
-                  value: { index, view: imageView }
-                })
-              )
-
-              return true
             },
             () => {
-              const payload = { uuid, overlayIndex, value: index }
+              const payload = { uuid, value: [index] }
               dispatch(setPlayerLoadingComplete(payload))
               return false
             }
@@ -371,14 +376,85 @@ export function loadImageViews(uuid: string, overlayIndex?: number) {
 
         const didLoad = values.filter((succeeded) => succeeded).length
         if (didLoad < canLoad) {
-          dispatch(loadImageViews(uuid, overlayIndex))
+          setTimeout(() => dispatch(loadImageViews(uuid)), 1000) // TODO remove setTimeout after debugging
         }
       },
       (): void => {
         if (mainLoaded) {
-          dispatch(loadImageViews(uuid, overlayIndex))
+          dispatch(loadImageViews(uuid))
         }
       }
     )
+  }
+}
+
+export function playerShouldDisplay(
+  uuid: string,
+  sceneID: number,
+  duration: number
+) {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const { playlist } = state.players[uuid]
+    const { sceneID: displaySceneID } = playlist.items[playlist.player.index]
+    const { sceneID: displayNextSceneID } =
+      playlist.items[(playlist.player.index + 1) % playlist.items.length]
+    return sceneID === displaySceneID || sceneID === displayNextSceneID
+  }
+}
+
+export function decreasePlayerLoaderPlaylistTimeLeft(
+  uuid: string,
+  sceneID: number,
+  duration: number
+) {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const playlist = state.players[uuid].playlist
+    if (playlist.loader.timeToNextScene - duration <= 0) {
+      const newPlaylist = advancePlaylist(playlist, 'loader', state)
+      dispatch(setPlayerPlaylist({ uuid, value: newPlaylist }))
+      const { sceneID } = newPlaylist.items[newPlaylist.loader.index]
+      dispatch(
+        setPlayerLoaderOnlyIframes({
+          uuid,
+          value: containsOnlyIframes(sceneID, state)
+        })
+      )
+      dispatch(scrapeSources(uuid))
+      preload().onSceneChange(uuid, sceneID)
+    } else {
+      const newPlaylist = copy<PlaylistState>(playlist)
+      newPlaylist.loader.timeToNextScene -= duration
+      dispatch(setPlayerPlaylist({ uuid, value: newPlaylist }))
+    }
+  }
+}
+
+export function updatePlayerPlaylist(uuid: string, duration: number) {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const { playlist } = state.players[uuid]
+    const { timeToNextScene } = playlist.player
+    if (timeToNextScene > 0) {
+      dispatch(setPlayerDecrementTimeToNextScene({ uuid, value: duration }))
+    }
+    if (timeToNextScene - duration <= 0) {
+      const value = advancePlaylist(playlist, 'player', state)
+      dispatch(setPlayerPlaylist({ uuid, value }))
+    }
+  }
+}
+
+export function setDisplayHasStarted(displayID: number) {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const uuids = state.display.entries[displayID].views
+      .filter((viewID) => !state.displayView.entries[viewID].sync)
+      .map((viewID) => state.displayView.entries[viewID].playerUUID)
+      .filter((playerUUID) => playerUUID != null)
+      .map((playerUUID) => playerUUID as string)
+
+    dispatch(setPlayerHasStarted(uuids))
   }
 }

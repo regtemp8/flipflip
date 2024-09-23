@@ -41,6 +41,10 @@ export const selectPlaylistName = (id: number) => {
   return (state: RootState) => getEntry(state.playlist, id).name
 }
 
+export const selectPlaylistIsEmpty = (id: number) => {
+  return (state: RootState) => getEntry(state.playlist, id).items.length === 0
+}
+
 export const selectAudioPlaylistDuration = (id: number) => {
   return (state: RootState): number => {
     const playlist = getEntry(state.playlist, id)

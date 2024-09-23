@@ -383,7 +383,6 @@ const SG = {
   // Scene group types
   scene: 'sg.scene',
   generator: 'sg.generator',
-  grid: 'sg.grid',
   display: 'sg.display',
   playlist: 'sg.playlist',
 };
@@ -419,7 +418,6 @@ const SDT = {
   backForth: 'sdt.33',
   imageSizing: 'sdt15',
   nextScene: 'sdt16',
-  overlays: 'sdt17',
   optionsRight: 'sdt18',
   imageOptions: 'sdt19',
   videoOptions: 'sdt20',
@@ -506,15 +504,7 @@ const SDGT = {
   done: DONE,
 };
 
-const SGT = {
-  // Scene Grid Tutorials
-  welcome: 'sgt1',
-  dimensions: 'sgt2',
-  cells: 'sgt3',
-  mirror: 'sgt4',
-  final: 'sgdt5',
-  done: DONE,
-};
+// TODO add Display Tutorials
 
 const VCT = {
   // Video Clipper Tutorials
@@ -646,7 +636,6 @@ export {
   SDT,
   SF,
   SG,
-  SGT,
   SL,
   SLT,
   STF,

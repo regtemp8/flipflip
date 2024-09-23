@@ -33,13 +33,11 @@ import {
   PT,
   SDGT,
   SDT,
-  SGT,
   SLT,
   SPT,
   TF,
   VCT
 } from 'flipflip-common'
-import { newSceneGridCell } from '../store/sceneGrid/SceneGridCell'
 import { setTutorial, setSkipAllTutorials } from '../store/app/slice'
 import { doneTutorial } from '../store/app/thunks'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -64,7 +62,6 @@ import {
   setSceneZoomTF,
   setSceneCrossFade
 } from '../store/scene/slice'
-import { setSceneGridGrid } from '../store/sceneGrid/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   deleteIcon: {
@@ -89,7 +86,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export interface TutorialProps {
   sceneID?: number
-  gridID?: number
 }
 
 function Tutorial(props: TutorialProps) {
@@ -193,12 +189,6 @@ function Tutorial(props: TutorialProps) {
               setNewTutorial(SDT.imageSizing)
               return
             case SDT.imageSizing:
-              setNewTutorial(SDT.nextScene)
-              return
-            case SDT.nextScene:
-              setNewTutorial(SDT.overlays)
-              return
-            case SDT.overlays:
               setNewTutorial(SDT.optionsRight)
               return
             case SDT.optionsRight:
@@ -421,28 +411,6 @@ function Tutorial(props: TutorialProps) {
           default:
             return
         }
-      case 'grid':
-        switch (tutorials.sceneGrid) {
-          case SGT.welcome:
-            setNewTutorial(SGT.dimensions)
-            return
-          case SGT.dimensions:
-            setNewTutorial(SGT.cells)
-            return
-          case SGT.cells:
-            setNewTutorial(SGT.mirror)
-            return
-          case SGT.mirror:
-            setNewTutorial(SGT.final)
-            return
-          case SGT.final:
-          case SGT.done:
-            // We're done, don't show
-            setNewTutorial(undefined)
-            return
-          default:
-            return
-        }
       case 'clip':
         switch (tutorials.videoClipper) {
           case VCT.welcome:
@@ -497,25 +465,6 @@ function Tutorial(props: TutorialProps) {
       case SDT.fade1: {
         const id = props.sceneID as number
         dispatch(setSceneCrossFade({ id, value: true }))
-        break
-      }
-      case SGT.dimensions: {
-        const id = props.gridID as number
-        dispatch(
-          setSceneGridGrid({
-            id,
-            value: [
-              [
-                newSceneGridCell({ sceneID: -1 }),
-                newSceneGridCell({ sceneID: -1 })
-              ],
-              [
-                newSceneGridCell({ sceneID: -1 }),
-                newSceneGridCell({ sceneID: -1 })
-              ]
-            ]
-          })
-        )
         break
       }
     }
@@ -594,8 +543,8 @@ function Tutorial(props: TutorialProps) {
           <DialogTitle id="tutorial-title">Scene Picker (Home)</DialogTitle>
           <DialogContent>
             <DialogContentText id="tutorial-description">
-              Your Scenes are divided into 3 different tabs: <b>Scenes</b>,{' '}
-              <b>Scene Generators</b>, and <b>Scene Grids</b>.
+              Your Scenes are divided into 2 different tabs: <b>Scenes</b> and{' '}
+              <b>Scene Generators</b>.
             </DialogContentText>
             <DialogContentText id="tutorial-description">
               From the sidebar, you can also access your Libraries, the Caption
@@ -937,8 +886,7 @@ function Tutorial(props: TutorialProps) {
           <DialogContent>
             <DialogContentText id="tutorial-description">
               This is the options tab. Here you can customize things like{' '}
-              <b>scene timing</b> and <b>image filters</b>, as well as setting
-              up <b>next scenes</b> and <b>overlays</b>.
+              <b>scene timing</b> and <b>image filters</b>.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -1031,67 +979,6 @@ function Tutorial(props: TutorialProps) {
             <DialogContentText id="tutorial-description">
               You can choose <b>how to size the images</b> and{' '}
               <b>what background to use</b>.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onContinue} color="primary">
-              Continue
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SDT.nextScene:
-      right = true
-      bottom = true
-      maxWidth = 'xs'
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Next Scene</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              You can <b>link scenes together</b>! Just choose the{' '}
-              <b>next scene</b> to play and{' '}
-              <b>
-                how many <u>ms</u>
-              </b>{' '}
-              it should start after. You can also choose to start the next scene
-              after all images in this scene have been shown or after a
-              particular audio track/caption script has finished. This section
-              will also allow you to persist this Scene's audio/text effects
-              even after transitioning to the Next Scene.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              <i>We'll leave this disabled for this tutorial</i>
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onContinue} color="primary">
-              Continue
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SDT.overlays:
-      right = true
-      bottom = true
-      maxWidth = 'xs'
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Overlays</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              You can <b>overlay scenes</b> on top of this one! Just{' '}
-              <b>add a scene</b> to overlay and choose its <b>opacity</b>.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              While FlipFlip doesn't impose any direct limit on the number of
-              overlays, please be aware that{' '}
-              <b>additional overlays will negatively impact performance</b>.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              <i>We'll leave this disabled for this tutorial</i>
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -2408,136 +2295,6 @@ function Tutorial(props: TutorialProps) {
           <DialogActions>
             <Button onClick={onContinue} color="primary">
               Back to Scene Detail
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-
-    case SGT.welcome:
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Scene Grid</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              Welcome to your your first <b>Scene Grid</b>!
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              Here, you can play your <b>Scenes</b> simultaneously in a{' '}
-              <b>grid format</b>.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onSkip} color="secondary">
-              Skip Tutorial
-            </Button>
-            <Button onClick={onContinue} color="primary">
-              Continue
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SGT.dimensions:
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Scene Grid</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              You can change the <b>dimensions of the grid in the top right</b>.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              <b>
-                Make this grid <u>2x2</u>
-              </b>
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onSkipStep} color="secondary">
-              Skip
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SGT.cells:
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Scene Grid</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              Now you have a <b>grid</b> of <b>4 Scenes</b>!
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              To change a grid cell, <b>click the cell</b> and{' '}
-              <b>select a Scene</b>. You can also keep the cell <b>EMPTY</b> if
-              you want.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              <i>
-                For the purpose of this tutorial, we've <b>filled the grid</b>{' '}
-                already
-              </i>
-              .
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onContinue} color="primary">
-              Continue
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SGT.mirror:
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Scene Grid</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              You can also <b>clone</b> your grid cells in{' '}
-              <b>other grid cells</b>.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              To clone a grid cell, add the scene, and then{' '}
-              <b>drag-n-drop it</b> onto where you want it cloned.
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              Cloned cells will be <b>color coded</b> and will allow you to{' '}
-              <b>toggle the mirror effect</b> (horizontal flip).
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              <i>We'll keep things as they are for this tutorial</i>.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onContinue} color="primary">
-              Continue
-            </Button>
-          </DialogActions>
-        </React.Fragment>
-      )
-      break
-    case SGT.final:
-      dialogBody = (
-        <React.Fragment>
-          <DialogTitle id="tutorial-title">Scene Grid</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="tutorial-description">
-              That's all there is to <b>Scene Grids</b>. You're ready to play
-              the grid!
-            </DialogContentText>
-            <DialogContentText id="tutorial-description">
-              Please be aware that <b>typical Scene controls and configs</b> are{' '}
-              <b>
-                <u>not</u> available
-              </b>{' '}
-              in the Scene Grid player.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onContinue} color="primary">
-              Back to Scene Grid
             </Button>
           </DialogActions>
         </React.Fragment>

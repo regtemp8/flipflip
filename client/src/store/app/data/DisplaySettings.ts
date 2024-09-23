@@ -7,7 +7,6 @@ export default interface DisplaySettings {
   startImmediately: boolean
   easingControls: boolean
   audioAlert: boolean
-  cloneGridVideoElements: boolean
 
   minImageSize: number
   minVideoSize: number
@@ -25,7 +24,6 @@ export const initialDisplaySettings: DisplaySettings = {
   startImmediately: false,
   easingControls: false,
   audioAlert: true,
-  cloneGridVideoElements: false,
 
   minVideoSize: 200,
   minImageSize: 200,

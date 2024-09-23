@@ -1,12 +1,17 @@
-import Select, { SingleValue } from 'react-select'
-
-import { type Theme } from '@mui/material'
+import {
+  Autocomplete,
+  AutocompleteChangeDetails,
+  AutocompleteChangeReason,
+  TextField,
+  type Theme
+} from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
 
 import { useAppSelector } from '../../store/hooks'
 import { selectSceneSelectOptions } from '../../store/scene/selectors'
+import { SyntheticEvent } from 'react'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -24,7 +29,7 @@ export interface SceneSelectProps {
   value: number
   menuIsOpen?: boolean
   autoFocus?: boolean
-  includeGrids?: boolean
+  includeRandom?: boolean
   includeExtra?: boolean
   onlyExtra?: boolean
   onChange: (sceneID: number) => void
@@ -35,31 +40,41 @@ function SceneSelect(props: SceneSelectProps) {
     selectSceneSelectOptions(
       props.onlyExtra,
       props.includeExtra,
-      props.includeGrids
+      props.includeRandom
     )
   )
   const optionsList = Object.keys(options).map((key) => {
     return { value: key, label: options[key] }
   })
 
-  const onChange = (e: SingleValue<{ label: string; value: string }>) => {
-    if (e != null) {
-      props.onChange(Number(e.value))
+  const onChange = (
+    event: SyntheticEvent<Element, Event>,
+    option: unknown,
+    reason: AutocompleteChangeReason,
+    details?: AutocompleteChangeDetails<unknown>
+  ) => {
+    if (option != null) {
+      const { value } = option as { value: string; label: string }
+      props.onChange(Number(value))
     }
   }
 
   const { classes } = useStyles()
   return (
-    <Select
+    <Autocomplete
       className={classes.select}
-      value={{
-        label: options[props.value.toString()],
-        value: props.value.toString()
-      }}
+      value={options[props.value.toString()]}
       options={optionsList}
-      backspaceRemovesValue={false}
-      menuIsOpen={props.menuIsOpen}
-      autoFocus={props.autoFocus}
+      renderInput={(params) => <TextField {...params} variant="standard" />}
+      renderOption={(props, option, { selected }) => {
+        const { ...optionProps } = props
+        const { value, label } = option as { value: string; label: string }
+        return (
+          <li key={value} {...optionProps}>
+            {label}
+          </li>
+        )
+      }}
       onChange={onChange}
     />
   )

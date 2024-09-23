@@ -7,8 +7,7 @@ import {
   selectAppConfigDisplaySettingsClickToProgress,
   selectAppConfigDisplaySettingsClickToProgressWhilePlaying,
   selectAppConfigDisplaySettingsEasingControls,
-  selectAppConfigDisplaySettingsAudioAlert,
-  selectAppConfigDisplaySettingsCloneGridVideoElements
+  selectAppConfigDisplaySettingsAudioAlert
 } from '../../store/app/selectors'
 import {
   setConfigDisplaySettingsFullScreen,
@@ -16,8 +15,7 @@ import {
   setConfigDisplaySettingsClickToProgress,
   setConfigDisplaySettingsClickToProgressWhilePlaying,
   setConfigDisplaySettingsEasingControls,
-  setConfigDisplaySettingsAudioAlert,
-  setConfigDisplaySettingsCloneGridVideoElements
+  setConfigDisplaySettingsAudioAlert
 } from '../../store/app/slice'
 import { useAppSelector } from '../../store/hooks'
 
@@ -80,14 +78,6 @@ export default function PlayerBoolCard() {
           tooltip="If enabled, track information will appear during playback whenever a new audio track starts."
           selector={selectAppConfigDisplaySettingsAudioAlert()}
           action={setConfigDisplaySettingsAudioAlert}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <BaseSwitch
-          label="Clone Grid Videos Directly"
-          tooltip="If enabled, cloned/mirrored grid cells will use a copy of the actual video file, instead of a canvas. This may improve video framerate, but will remove absolute synchronization"
-          selector={selectAppConfigDisplaySettingsCloneGridVideoElements()}
-          action={setConfigDisplaySettingsCloneGridVideoElements}
         />
       </Grid>
     </Grid>

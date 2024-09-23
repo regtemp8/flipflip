@@ -1242,7 +1242,6 @@ function CaptionScriptor() {
               {sceneID !== 0 && (
                 <Player
                   uuid="caption-scriptor"
-                  gridView={!fullscreen}
                   captionScale={fullscreen ? 1 : 0.3753}
                   onCaptionError={onError}
                   captionProgramJumpToHack={_captionProgramJumpToHack.current}

@@ -17,7 +17,7 @@ export default interface GeneralSettings {
   autoCleanBackupMonths: number
   cleanRetain: number
   watermark: boolean
-  watermarkGrid: boolean
+  watermarkDisplay: boolean
   watermarkCorner: string
   watermarkText: string
   watermarkFontFamily: string
@@ -40,7 +40,7 @@ export const initialGeneralSettings: GeneralSettings = {
   autoCleanBackupMonths: 6,
   cleanRetain: 1,
   watermark: false,
-  watermarkGrid: false,
+  watermarkDisplay: false,
   watermarkCorner: WC.bottomRight,
   watermarkText: '',
   watermarkFontFamily: 'Arial Black,Arial Bold,Gadget,sans-serif',

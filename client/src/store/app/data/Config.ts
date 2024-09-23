@@ -79,9 +79,6 @@ export function newConfig(init?: Partial<Config>) {
     }
   }
 
-  if (config.defaultScene && config.defaultScene.overlaySceneID !== 0) {
-    config.defaultScene.overlaySceneID = 0
-  }
   if (config.defaultScene && config.defaultScene.rotatePortrait) {
     config.defaultScene.videoOrientation = OT.forceLandscape
     config.defaultScene.rotatePortrait = false

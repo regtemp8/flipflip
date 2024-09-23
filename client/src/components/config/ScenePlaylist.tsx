@@ -186,7 +186,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
           </Grid>
           <Grid item xs={12}>
             <Collapse in={currentSceneID === -1}>
-              <Grid container spacing={1}>
+              <Grid container spacing={1} alignItems="center">
                 <Grid item xs={12}>
                   <Typography className={classes.selectText} variant="caption">
                     Select which scenes to include

@@ -328,7 +328,6 @@ function ConfigForm() {
                 tutorials.scripts == null &&
                 tutorials.scriptor == null &&
                 tutorials.sceneGenerator == null &&
-                tutorials.sceneGrid == null &&
                 tutorials.videoClipper == null
               }
               onClick={() => dispatch(setResetAllTutorials())}
