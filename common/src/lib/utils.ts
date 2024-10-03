@@ -4,6 +4,20 @@ export function copy<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
+const gridIDPrefix = '999'
+export function convertGridIDToSceneID(gridID: number): number {
+  return Number(gridIDPrefix + gridID)
+}
+
+export function getRandomColor() {
+  const letters = '0123456789ABCDEF'
+  let color = '#'
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
+}
+
 export function getFileName(url: string, pathSep: string, extension = true) {
   let sep;
   if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {

@@ -1,18 +1,19 @@
-import { Provider } from 'react-redux'
-import Meta from './components/Meta'
-import { RootState } from './store/store'
-import { EmotionCache } from '@emotion/react'
-import { ToolkitStore } from '@reduxjs/toolkit/dist/configureStore'
+import { Outlet } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import { Provider } from "react-redux";
+import store from "./store/store";
+import AuthLoader from "./AuthLoader";
 
-export interface AppProps {
-  store: ToolkitStore<RootState>
-  cache: EmotionCache
-}
-
-export default function App(props: AppProps) {
+const App = () => {
   return (
-    <Provider store={props.store}>
-      <Meta cache={props.cache} />
+    <Provider store={store}>
+      <AuthLoader>
+        <div className="w-full p-6">
+          <Navbar />
+          <Outlet />
+        </div>
+      </AuthLoader>
     </Provider>
-  )
-}
+  );
+};
+export default App

@@ -1,7 +1,8 @@
 .git
-.webpack
 .yarn
-icons
 node_modules
 out
+dist
+bin
+public
 .eslintrc.json

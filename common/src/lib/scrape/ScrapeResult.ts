@@ -1,4 +1,4 @@
-import { LibrarySource } from '../storage/LibrarySource';
+import { LibrarySource } from './LibrarySource';
 
 import { ScraperHelpers } from './ScraperHelpers';
 

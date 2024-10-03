@@ -1,10 +1,11 @@
-/// <reference path="../global.d.ts"/>
-import { createReduxStore } from '../server/renderer'
+import { configureStore } from '@reduxjs/toolkit'
+import authSlice from './auth/slice'
 
-const store = createReduxStore(
-  window.flipflipAppStorage,
-  window.flipflipConstants
-)
+const store = configureStore({
+    reducer: {
+      auth: authSlice
+    }
+  })
 
 export default store
 // Infer the `RootState` and `AppDispatch` types from the store itself

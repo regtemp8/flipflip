@@ -88,8 +88,10 @@ coverage
 # Vite
 */.vite/
 
-# Electron-Forge
-*/out/
+# Build output
+*/bin/**
+*/build/**
+*/dist/**
 
 # Yarn
 */.pnp.*
@@ -99,8 +101,3 @@ coverage
 !*/.yarn/releases
 !*/.yarn/sdks
 !*/.yarn/versions
-
-client/build/*
-common/build/*
-login/build/*
-server-details/build/*
