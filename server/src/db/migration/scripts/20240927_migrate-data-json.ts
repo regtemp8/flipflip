@@ -4,21 +4,25 @@ import path from 'path'
 import { Kysely } from 'kysely'
 import { generateUsername } from 'unique-username-generator'
 import generator from 'generate-password'
-import { DB, Tag as DBTag, DisplayView as DBDisplayView } from '../../types'
+import {
+  DB,
+  Tag as DBTag,
+  DisplayView as DBDisplayView
+} from '../../types/generated'
 import { AppStorage } from '../data/migrate-data-json/AppStorage'
 import { newConfig } from '../data/migrate-data-json/Config'
 import { Scene, newScene } from '../data/migrate-data-json/Scene'
-import { newSceneGroup } from '../data/migrate-data-json/SceneGroup'
-import { newSceneGrid } from '../data/migrate-data-json/SceneGrid'
-import { newAudio } from '../data/migrate-data-json/Audio'
-import { newCaptionScript } from '../data/migrate-data-json/CaptionScript'
-import { newPlaylist } from '../data/migrate-data-json/Playlist'
+import { SceneGroup, newSceneGroup } from '../data/migrate-data-json/SceneGroup'
+import { SceneGrid, newSceneGrid } from '../data/migrate-data-json/SceneGrid'
+import { Audio, newAudio } from '../data/migrate-data-json/Audio'
+import { CaptionScript, newCaptionScript } from '../data/migrate-data-json/CaptionScript'
+import { Playlist, newPlaylist } from '../data/migrate-data-json/Playlist'
 import {
   LibrarySource,
   newLibrarySource
 } from '../data/migrate-data-json/LibrarySource'
 import { Tag, newTag } from '../data/migrate-data-json/Tag'
-import { newRoute } from '../data/migrate-data-json/Route'
+import { Route, newRoute } from '../data/migrate-data-json/Route'
 import { getSaveDir } from '../../../utils'
 import { toNumber } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
@@ -28,7 +32,9 @@ import {
   MVF,
   PLT,
   RP,
+  SG,
   convertGridIDToSceneID,
+  convertPlaylistIDToSceneID,
   getRandomColor
 } from 'flipflip-common'
 
@@ -46,6 +52,8 @@ const readDataJsonFile = (): AppStorage | undefined => {
   let portableMode = false
   const savePath = getDataJsonPath()
   const portablePath = getDataJsonPortablePath()
+  console.log(savePath)
+  console.log(portablePath)
   if (!existsSync(savePath) && existsSync(portablePath)) {
     data = JSON.parse(readFileSync(portablePath, 'utf-8'))
     if (!data.config.generalSettings.portableMode) {
@@ -92,21 +100,21 @@ const readDataJsonFile = (): AppStorage | undefined => {
     openTab: data.openTab,
     displayedSources: [],
     config: newConfig(data.config),
-    scenes: data.scenes.map((s: any) => newScene(s)),
+    scenes: data.scenes.map((s: Partial<Scene>) => newScene(s)),
     sceneGroups: data.sceneGroups
-      ? data.sceneGroups.map((g: any) => newSceneGroup(g))
+      ? data.sceneGroups.map((g: Partial<SceneGroup>) => newSceneGroup(g))
       : [],
-    grids: data.grids.map((g: any) => newSceneGrid(g)),
-    audios: data.audios ? data.audios.map((a: any) => newAudio(a)) : [],
+    grids: data.grids.map((g: Partial<SceneGrid>) => newSceneGrid(g)),
+    audios: data.audios ? data.audios.map((a: Partial<Audio>) => newAudio(a)) : [],
     scripts: data.scripts
-      ? data.scripts.map((s: any) => newCaptionScript(s))
+      ? data.scripts.map((s: Partial<CaptionScript>) => newCaptionScript(s))
       : [],
     playlists: data.playlists
-      ? data.playlists.map((p: any) => newPlaylist(p))
+      ? data.playlists.map((p: Partial<Playlist>) => newPlaylist(p))
       : [],
-    library: data.library.map((s: any) => newLibrarySource(s)),
-    tags: data.tags.map((t: any) => newTag(t)),
-    route: data.route.map((s: any) => newRoute(s)),
+    library: data.library.map((s: Partial<LibrarySource>) => newLibrarySource(s)),
+    tags: data.tags.map((t: Partial<Tag>) => newTag(t)),
+    route: data.route.map((s: Partial<Route>) => newRoute(s)),
     libraryYOffset: 0,
     libraryFilters: [],
     librarySelected: [],
@@ -1026,7 +1034,7 @@ const sceneGroupInsert = async (
     console.log(`+ Insert scene group '${name}' (id: ${id})`)
     await trx
       .insertInto('sceneGroup')
-      .values({ id, name, type })
+      .values({ id, userId, name, type })
       .returningAll()
       .executeTakeFirstOrThrow()
   }
@@ -1140,6 +1148,11 @@ const audioPlaylistInsert = async (
   }
   for (const playlist of json.playlists) {
     const { id, name, audios } = playlist
+    const sceneGroupId = json.sceneGroups.find(
+      (group) =>
+        group.type === SG.playlist &&
+        group.scenes.includes(convertPlaylistIDToSceneID(id))
+    )?.id
 
     console.log(`+ Insert audio playlist`)
     await trx
@@ -1147,6 +1160,7 @@ const audioPlaylistInsert = async (
       .values({
         id,
         userId,
+        sceneGroupId,
         name: name ?? '',
         type: PLT.audio,
         repeat: RP.none,
@@ -1300,7 +1314,8 @@ const playlistInsert = async (
   trx: Kysely<DB>,
   playlist: PlaylistBase,
   userId: number,
-  type: PlaylistType
+  type: PlaylistType,
+  sceneGroupId?: number
 ) => {
   const { name, shuffle, repeat } = playlist
 
@@ -1309,6 +1324,7 @@ const playlistInsert = async (
     .insertInto('playlist')
     .values({
       userId,
+      sceneGroupId,
       type,
       name: name ?? '',
       shuffle: toNumber(shuffle),
@@ -1586,8 +1602,8 @@ const sceneInsert = async (
       regenerate
     } = scene
 
-    const sceneGroupId = json.sceneGroups.find((group) =>
-      group.scenes.includes(id)
+    const sceneGroupId = json.sceneGroups.find(
+      (group) => group.type === SG.scene && group.scenes.includes(id)
     )?.id
     console.log(`+ Insert scene '${name}' (id: ${id})`)
     await trx
@@ -1816,11 +1832,18 @@ const sceneInsert = async (
 
     for (let i = 0; i < scene.audioPlaylists.length; i++) {
       const playlist = scene.audioPlaylists[i]
+      const sceneGroupId = json.sceneGroups.find(
+        (group) =>
+          group.type === SG.playlist &&
+          group.scenes.includes(convertPlaylistIDToSceneID(id))
+      )?.id
+
       const insertedPlaylist = await playlistInsert(
         trx,
         playlist,
         userId,
-        PLT.audio
+        PLT.audio,
+        sceneGroupId
       )
       for (const audio of playlist.audios) {
         await audioPlaylistItemInsert(
@@ -1834,11 +1857,18 @@ const sceneInsert = async (
 
     for (let i = 0; i < scene.scriptPlaylists.length; i++) {
       const playlist = scene.scriptPlaylists[i]
+      const sceneGroupId = json.sceneGroups.find(
+        (group) =>
+          group.type === SG.playlist &&
+          group.scenes.includes(convertPlaylistIDToSceneID(id))
+      )?.id
+
       const insertedPlaylist = await playlistInsert(
         trx,
         playlist,
         userId,
-        PLT.script
+        PLT.script,
+        sceneGroupId
       )
       for (const script of playlist.scripts) {
         await captionScriptPlaylistItemInsert(

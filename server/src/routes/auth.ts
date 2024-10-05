@@ -8,7 +8,7 @@ import {
   findUserByUsername,
   updateUser
 } from '../db/UserRepository'
-import { User } from '../db/types'
+import { User } from '../db/types/generated'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
@@ -76,31 +76,32 @@ router.use((req: Request, res: Response, next: NextFunction) => {
   }
 })
 
-router.get('/authenticated', (req, res, next) => {
+router.get('/authenticated', (req, res) => {
   // if unauthorized then the middleware above will return 401
-  res.status(200).end()
+  res.status(200).send(true)
 })
 
-router.get('/connect', async (req, res, next) => {
-  const min = 111111
-  const max = 999999
-  const tokenValue = Math.floor(
-    Math.random() * (max - min + 1) + min
-  ).toString()
+router.get('/connect', async (req, res) => {
+  const digits = '0123456789'
+  let tokenValue = ''
+  for (let i = 0; i < 6; i++) {
+    tokenValue += digits[Math.floor(Math.random() * digits.length)]
+  }
+
   const tokenExpiry = Date.now() + 3 * 60 * 1000
   await updateUser(req.user as User, { tokenValue, tokenExpiry })
-  res.status(200).send({ token: tokenValue })
+  res.status(200).send(tokenValue)
 })
 
 router.post(
   '/login/password',
   passport.authenticate('local', { failureMessage: true }),
-  (req, res) => res.status(req.user ? 200 : 401).end()
+  (req, res) => res.status(req.user != null ? 200 : 401).send(req.user != null)
 )
 router.get(
   '/login/token',
   passport.authenticate('token', { failureMessage: true }),
-  (req, res) => res.status(req.user ? 200 : 401).end()
+  (req, res) => res.status(req.user != null ? 200 : 401).send(req.user != null)
 )
 
 router.post('/logout', (req, res, next) => {
@@ -108,7 +109,7 @@ router.post('/logout', (req, res, next) => {
     if (err) {
       return next(err)
     }
-    res.status(200).end()
+    res.status(200).send(false)
   })
 })
 

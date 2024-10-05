@@ -1,9 +1,10 @@
 import { Updateable } from 'kysely'
-import { db } from './database'
-import { User } from './types'
+import db from './database'
+import { User } from './types/generated'
 
 export async function findUserByUsername(username: string) {
-  return await db
+  return await db()
+    .query()
     .selectFrom('user')
     .where('username', '=', username)
     .selectAll()
@@ -11,7 +12,8 @@ export async function findUserByUsername(username: string) {
 }
 
 export async function findUserByTokenNotExpired(token: string) {
-  return await db
+  return await db()
+    .query()
     .selectFrom('user')
     .where('tokenValue', '=', token)
     .where('tokenExpiry', '>', Date.now())
@@ -21,7 +23,8 @@ export async function findUserByTokenNotExpired(token: string) {
 
 type UserUpdate = Updateable<User>
 export async function updateUser(user: User, update: UserUpdate) {
-  return await db
+  return await db()
+    .query()
     .updateTable('user')
     .set(update)
     .where('id', '=', user.id)

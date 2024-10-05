@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.0.0",
+  "version": "4.0.0-beta5",
   "main": "index.js",
   "license": "MIT",
   "type": "commonjs",
@@ -46,7 +46,7 @@
     "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",
     "test:format": "prettier --ignore-path .eslintignore --list-different \"**/*.+(js|ts|tsx|json)\"",
     "db:codegen-help": "kysely-codegen --help",
-    "db:codegen": "kysely-codegen --camel-case --dialect sqlite --env-file .env --out-file ./src/db/types.d.ts",
+    "db:codegen": "kysely-codegen --camel-case --dialect sqlite --env-file .env --out-file ./src/db/types/generated.d.ts",
     "db:verify": "yarn db:codegen --verify",
     "package": "cd ../client && yarn install && yarn build && cd ../server && rm -rf bin && yarn tsc && mv ../client/dist bin/public/ && pkg --debug ."
   },

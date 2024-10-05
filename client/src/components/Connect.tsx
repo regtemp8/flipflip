@@ -1,42 +1,84 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { connect } from "../api";
-import { IToken } from "../types/token";
+import {
+  Avatar,
+  Card,
+  Container,
+  Grid2,
+  CardContent,
+  Typography,
+  CircularProgress,
+  Paper
+} from '@mui/material'
+import { CenteredBox } from './common/CenteredBox'
+import { QRCodeSVG } from 'qrcode.react'
+import { useGetConnectTokenQuery } from '../store/api'
 
 export default function Connect() {
-  const [token, setToken] = useState<IToken>();
-  const navigate = useNavigate();
+  const { data } = useGetConnectTokenQuery()
 
-  // This method fetches the records from the database.
-  useEffect(() => {
-    connect(navigate).then((value?: IToken) => setToken(value))
-  }, []);
-
-
-  // This following section will display the table with the records of individuals.
   return (
-    <>
-      <h3 className="text-lg font-semibold p-4">Connect</h3>
-      <div className="border rounded-lg overflow-hidden">
-        <div className="relative w-full overflow-auto">
-          <table className="w-full caption-bottom text-sm">
-            <thead className="[&_tr]:border-b">
-              <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                  Token
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:last-child]:border-0">
-              <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                  {token?.token}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
-  );
+    <Container component="main">
+      <Card sx={{ p: 1, mt: 3 }}>
+        <CardContent>
+          <CenteredBox>
+            <Avatar
+              src="/img/flipflip_logo.png"
+              sx={{ height: 72, width: 72, my: 'auto' }}
+            />
+            <Typography
+              variant="h3"
+              component="div"
+              marginTop={4}
+              marginBottom={4}
+            >
+              Connect Devices
+            </Typography>
+            {data != null ? (
+              <Grid2 container spacing={2} alignSelf="stretch">
+                <Grid2 size={6}>
+                  <CenteredBox>
+                    <Typography variant="h6" component="div">
+                      Point the camera on your phone or tablet at this code.
+                    </Typography>
+                    <Paper
+                      elevation={0}
+                      sx={{ p: 2, backgroundColor: 'white' }}
+                    >
+                      <QRCodeSVG
+                        value={`http://localhost:5050/login/token?token=${data}`}
+                        size={256}
+                      />
+                    </Paper>
+                  </CenteredBox>
+                </Grid2>
+                <Grid2 size={6}>
+                  <CenteredBox>
+                    <Typography variant="h6" component="div">
+                      Sign in with a one-time token on another device.
+                    </Typography>
+                    <Typography
+                      component="div"
+                      marginBottom={2}
+                      sx={{
+                        mb: 2,
+                        letterSpacing: '0.25em',
+                        fontWeight: 'bold',
+                        fontSize: {
+                          xs: '2.25rem',
+                          sm: '3.75rem'
+                        }
+                      }}
+                    >
+                      {data}
+                    </Typography>
+                  </CenteredBox>
+                </Grid2>
+              </Grid2>
+            ) : (
+              <CircularProgress />
+            )}
+          </CenteredBox>
+        </CardContent>
+      </Card>
+    </Container>
+  )
 }

@@ -7,5 +7,8 @@ export * from './lib/twitter/TwitterFollowers';
 export * from './lib/twitter/TwitterItems';
 export * from './lib/instagram/InstagramItems';
 export * from './lib/SystemConstants';
+export * from './lib/json/Backup';
+export * from './lib/json/SceneGroup';
+export * from './lib/json/SceneGroupItem';
 export * from './lib/scrape/ScrapeResult';
 export * from './lib/scrape/ScraperHelpers';

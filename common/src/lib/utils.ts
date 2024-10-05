@@ -9,6 +9,63 @@ export function convertGridIDToSceneID(gridID: number): number {
   return Number(gridIDPrefix + gridID)
 }
 
+export function isSceneIDAGridID(sceneID: number): boolean {
+  return isSceneIDTextAGridID(sceneID.toString())
+}
+
+function isSceneIDTextAGridID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(gridIDPrefix)
+}
+
+export function convertSceneIDToGridID(sceneID: number): number | undefined {
+  const sceneIDText = sceneID.toString()
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(gridIDPrefix.length))
+    : undefined
+}
+
+const displayIDPrefix = '8888'
+export function convertDisplayIDToSceneID(displayID: number): number {
+  return Number(displayIDPrefix + displayID)
+}
+
+export function isSceneIDADisplayID(sceneID: number): boolean {
+  return isSceneIDTextADisplayID(sceneID.toString())
+}
+
+function isSceneIDTextADisplayID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(displayIDPrefix)
+}
+
+export function convertSceneIDToDisplayID(sceneID: number): number | undefined {
+  const sceneIDText = sceneID.toString()
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(displayIDPrefix.length))
+    : undefined
+}
+
+const playlistIDPrefix = '77777'
+export function convertPlaylistIDToSceneID(displayID: number): number {
+  return Number(playlistIDPrefix + displayID)
+}
+
+export function isSceneIDAPlaylistID(sceneID: number): boolean {
+  return isSceneIDTextAPlaylistID(sceneID.toString())
+}
+
+function isSceneIDTextAPlaylistID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(playlistIDPrefix)
+}
+
+export function convertSceneIDToPlaylistID(
+  sceneID: number
+): number | undefined {
+  const sceneIDText = sceneID.toString()
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(playlistIDPrefix.length))
+    : undefined
+}
+
 export function getRandomColor() {
   const letters = '0123456789ABCDEF'
   let color = '#'

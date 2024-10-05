@@ -1,11 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit'
-import authSlice from './auth/slice'
+import { setupListeners } from '@reduxjs/toolkit/query'
+import { flipflipApi } from './api'
+// import scenePickerSlice from './scenePicker/slice'
 
 const store = configureStore({
-    reducer: {
-      auth: authSlice
-    }
-  })
+  reducer: {
+    [flipflipApi.reducerPath]: flipflipApi.reducer
+    // components
+    // scenePicker: scenePickerSlice
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(flipflipApi.middleware)
+})
+
+setupListeners(store.dispatch)
 
 export default store
 // Infer the `RootState` and `AppDispatch` types from the store itself

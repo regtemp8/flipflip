@@ -1,5 +1,5 @@
 import { Kysely } from 'kysely'
-import { DB } from '../../types'
+import { DB } from '../../types/generated'
 
 const userTable = async (trx: Kysely<DB>) => {
   console.log('+ Create user table')
@@ -624,8 +624,12 @@ const sceneGroupTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('sceneGroup')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
+    .addForeignKeyConstraint('FK_sceneGroup_user_userId', ['userId'], 'user', [
+      'id'
+    ])
     .execute()
 }
 
@@ -820,6 +824,7 @@ const playlistTable = async (trx: Kysely<DB>) => {
     .createTable('playlist')
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
+    .addColumn('sceneGroupId', 'integer')
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('shuffle', 'boolean', (col) => col.notNull())
@@ -827,6 +832,12 @@ const playlistTable = async (trx: Kysely<DB>) => {
     .addForeignKeyConstraint('FK_playlist_user_userId', ['userId'], 'user', [
       'id'
     ])
+    .addForeignKeyConstraint(
+      'FK_playlist_sceneGroup_sceneGroupId',
+      ['sceneGroupId'],
+      'sceneGroup',
+      ['id']
+    )
     .execute()
 }
 
