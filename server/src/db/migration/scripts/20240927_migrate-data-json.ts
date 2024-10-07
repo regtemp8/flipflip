@@ -15,7 +15,10 @@ import { Scene, newScene } from '../data/migrate-data-json/Scene'
 import { SceneGroup, newSceneGroup } from '../data/migrate-data-json/SceneGroup'
 import { SceneGrid, newSceneGrid } from '../data/migrate-data-json/SceneGrid'
 import { Audio, newAudio } from '../data/migrate-data-json/Audio'
-import { CaptionScript, newCaptionScript } from '../data/migrate-data-json/CaptionScript'
+import {
+  CaptionScript,
+  newCaptionScript
+} from '../data/migrate-data-json/CaptionScript'
 import { Playlist, newPlaylist } from '../data/migrate-data-json/Playlist'
 import {
   LibrarySource,
@@ -105,14 +108,18 @@ const readDataJsonFile = (): AppStorage | undefined => {
       ? data.sceneGroups.map((g: Partial<SceneGroup>) => newSceneGroup(g))
       : [],
     grids: data.grids.map((g: Partial<SceneGrid>) => newSceneGrid(g)),
-    audios: data.audios ? data.audios.map((a: Partial<Audio>) => newAudio(a)) : [],
+    audios: data.audios
+      ? data.audios.map((a: Partial<Audio>) => newAudio(a))
+      : [],
     scripts: data.scripts
       ? data.scripts.map((s: Partial<CaptionScript>) => newCaptionScript(s))
       : [],
     playlists: data.playlists
       ? data.playlists.map((p: Partial<Playlist>) => newPlaylist(p))
       : [],
-    library: data.library.map((s: Partial<LibrarySource>) => newLibrarySource(s)),
+    library: data.library.map((s: Partial<LibrarySource>) =>
+      newLibrarySource(s)
+    ),
     tags: data.tags.map((t: Partial<Tag>) => newTag(t)),
     route: data.route.map((s: Partial<Route>) => newRoute(s)),
     libraryYOffset: 0,

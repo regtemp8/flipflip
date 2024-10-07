@@ -24,7 +24,7 @@ export default function PasswordForm() {
     try {
       const { data } = await passwordLogin(form)
       if (data) {
-        navigate('/')
+        navigate('/scenes')
       }
     } catch (error) {
       console.error('A problem occurred with your fetch operation: ', error)

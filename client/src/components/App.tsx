@@ -9,9 +9,10 @@ import store from '../store/store'
 import { Provider } from 'react-redux'
 import PrivateRoute from './common/PrivateRoute'
 import Login from './login/Login'
-import Connect from './Connect'
+import Account from './account/Account'
 import ScenePicker from './scenePicker/ScenePicker'
 import { defaultTheme } from '../theme'
+import SystemSnack from './SystemSnack'
 
 const App = () => {
   return (
@@ -31,14 +32,15 @@ const App = () => {
               />
               <Route path="/login" element={<Login />} />
               <Route
-                path="/connect"
+                path="/account/*"
                 element={
                   <PrivateRoute>
-                    <Connect />
+                    <Account />
                   </PrivateRoute>
                 }
               />
             </Routes>
+            <SystemSnack />
           </ErrorBoundary>
         </ThemeProvider>
       </CacheProvider>

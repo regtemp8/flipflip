@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Card,
   Container,
   Grid2,
@@ -8,11 +7,11 @@ import {
   CircularProgress,
   Paper
 } from '@mui/material'
-import { CenteredBox } from './common/CenteredBox'
+import { CenteredBox } from '../common/CenteredBox'
 import { QRCodeSVG } from 'qrcode.react'
-import { useGetConnectTokenQuery } from '../store/api'
+import { useGetConnectTokenQuery } from '../../store/api'
 
-export default function Connect() {
+function Connect() {
   const { data } = useGetConnectTokenQuery()
 
   return (
@@ -20,10 +19,6 @@ export default function Connect() {
       <Card sx={{ p: 1, mt: 3 }}>
         <CardContent>
           <CenteredBox>
-            <Avatar
-              src="/img/flipflip_logo.png"
-              sx={{ height: 72, width: 72, my: 'auto' }}
-            />
             <Typography
               variant="h3"
               component="div"
@@ -82,3 +77,6 @@ export default function Connect() {
     </Container>
   )
 }
+
+;(Connect as any).displayName = 'Connect'
+export default Connect

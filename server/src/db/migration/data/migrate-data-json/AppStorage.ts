@@ -1,4 +1,4 @@
-import { copy, defaultTheme } from 'flipflip-common'
+import { copy } from 'flipflip-common'
 
 import { type Audio } from './Audio'
 import { type CaptionScript } from './CaptionScript'
@@ -10,6 +10,7 @@ import { type Scene } from './Scene'
 import { type SceneGrid } from './SceneGrid'
 import { type SceneGroup } from './SceneGroup'
 import { type Tag } from './Tag'
+import { defaultTheme } from './theme'
 
 export type AppStorage = {
   version: string

@@ -2,6 +2,15 @@ import { Updateable } from 'kysely'
 import db from './database'
 import { User } from './types/generated'
 
+export async function findUserById(id: number) {
+  return await db()
+    .query()
+    .selectFrom('user')
+    .where('id', '=', id)
+    .selectAll()
+    .executeTakeFirst()
+}
+
 export async function findUserByUsername(username: string) {
   return await db()
     .query()

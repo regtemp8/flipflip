@@ -1,6 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Credentials } from '../types/credentials'
-import { Backup, SceneGroup, SceneGroupItem } from 'flipflip-common'
+import {
+  AccountChange,
+  Backup,
+  Message,
+  SceneGroup,
+  SceneGroupItem
+} from 'flipflip-common'
 
 const tagTypes = [
   'Authenticated',
@@ -55,6 +61,28 @@ export const flipflipApi = createApi({
       },
       invalidatesTags: ['Authenticated']
     }),
+    changeUsername: builder.mutation<Message, AccountChange>({
+      query(body) {
+        return {
+          url: `change-username`,
+          method: 'POST',
+          body
+        }
+      },
+      invalidatesTags: (result, error) =>
+        error == null ? ['Authenticated'] : []
+    }),
+    changePassword: builder.mutation<Message, AccountChange>({
+      query(body) {
+        return {
+          url: `change-password`,
+          method: 'POST',
+          body
+        }
+      },
+      invalidatesTags: (result, error) =>
+        error == null ? ['Authenticated'] : []
+    }),
     getConnectToken: builder.query<string, void>({
       query: () => `connect`,
       providesTags: ['ConnectToken']
@@ -81,7 +109,7 @@ export const flipflipApi = createApi({
       },
       invalidatesTags: tagTypes
     }),
-    getVersion: builder.query<string, void>({
+    getVersion: builder.query<Message, void>({
       query: () => `api/version`,
       providesTags: ['Version']
     }),
@@ -125,6 +153,8 @@ export const {
   usePasswordLoginMutation,
   useTokenLoginMutation,
   useLogoutMutation,
+  useChangeUsernameMutation,
+  useChangePasswordMutation,
   useGetConnectTokenQuery,
   useGetBackupsQuery,
   useRestoreBackupMutation,

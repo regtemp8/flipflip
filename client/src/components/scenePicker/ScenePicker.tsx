@@ -40,6 +40,7 @@ import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
 import MenuIcon from '@mui/icons-material/Menu'
 import MovieIcon from '@mui/icons-material/Movie'
 import MovieFilterIcon from '@mui/icons-material/MovieFilter'
+import PersonIcon from '@mui/icons-material/Person'
 import SettingsIcon from '@mui/icons-material/Settings'
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
 import { SPT } from 'flipflip-common'
@@ -49,6 +50,7 @@ import DisplaysTab from './DisplaysTab'
 import GeneratorsTab from './GeneratorsTab'
 import PlaylistsTab from './PlaylistsTab'
 import ScenesTab from './ScenesTab'
+import { useGetVersionQuery } from '../../store/api'
 
 const drawerWidth = 240
 
@@ -395,8 +397,7 @@ function ScenePicker() {
   const { classes } = useStyles()
   const { pathname } = useLocation()
 
-  // TODO add queries
-  const version = '4.0.0-beta5'
+  const {data: version} = useGetVersionQuery()
   const sceneCount = 0
   const generatorCount = 0
   const displayCount = 0
@@ -458,7 +459,7 @@ function ScenePicker() {
             noWrap
             className={classes.version}
           >
-            v{version}
+            {version?.success != null ? `v${version.success}` : ''}
           </Typography>
           <div className={classes.fill} />
           {newVersion !== '' && (
@@ -663,6 +664,18 @@ function ScenePicker() {
         <Divider />
 
         <div>
+          <Tooltip disableInteractive title={drawerOpen ? '' : 'Account'}>
+            <ListItemButton
+              component={(props) => (
+                <RouterLink to="account/connect" {...props} />
+              )}
+            >
+              <ListItemIcon>
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary="Account" />
+            </ListItemButton>
+          </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Settings'}>
             <ListItemButton
               component={(props) => <RouterLink to="settings" {...props} />}

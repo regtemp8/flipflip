@@ -6,9 +6,11 @@ import { UniqueTokenStrategy } from 'passport-unique-token/dist/strategy'
 import {
   findUserByTokenNotExpired,
   findUserByUsername,
+  findUserById,
   updateUser
 } from '../db/UserRepository'
 import { User } from '../db/types/generated'
+import { AccountChange, Message } from 'flipflip-common'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
@@ -104,13 +106,94 @@ router.get(
   (req, res) => res.status(req.user != null ? 200 : 401).send(req.user != null)
 )
 
-router.post('/logout', (req, res, next) => {
+router.get('/logout', (req, res, next) => {
   req.logout((err) => {
     if (err) {
       return next(err)
     }
     res.status(200).send(false)
   })
+})
+
+router.post('/change-username', async (req, res, next) => {
+  const change = req.body as AccountChange
+  if (change.new.trim().length === 0) {
+    const message: Message = {error: `New username can't be empty.`}
+    res.status(400).send(message)
+    return
+  }
+  if (change.new !== change.confirm) {
+    const message: Message = {error: 'New username could not be confirmed.'}
+    res.status(400).send(message)
+    return
+  }
+
+  const user = req.user as User
+  if (user?.username !== change.current) {
+    const message: Message = {error: 'Current username is invalid.'}
+    res.status(400).send(message)
+    return
+  }
+
+  await updateUser(user, { username: change.new })
+  req.logout((err) => {
+    if (err) {
+      return next(err)
+    }
+    const message: Message = {success: 'Your username has been changed successfully.'}
+    res.status(200).send(message)
+  })
+})
+
+router.post('/change-password', async (req, res, next) => {
+  const change = req.body as AccountChange
+  if(change.new.trim().length === 0) {
+    const message: Message = {error: `New password can't be empty.`}
+    res.status(400).send(message)
+    return
+  }
+  if (change.new !== change.confirm) {
+    const message: Message = {error: 'New password could not be confirmed.'}
+    res.status(400).send(message)
+    return
+  }
+
+  const user = await findUserById((req.user as User).id as number) as User
+  crypto.pbkdf2(
+    change.current,
+    user.salt,
+    310000,
+    32,
+    'sha256',
+    async (err, currentHashedPassword) => {
+      if (err) {
+        res.status(503).send(err)
+        return
+      }
+      if (!crypto.timingSafeEqual(user.hashedPassword, currentHashedPassword)) {
+        const message: Message = {error: 'Current password is invalid.'}
+        res.status(400).send(message)
+        return
+      }
+
+      const salt = crypto.randomBytes(16)
+      const hashedPassword = crypto.pbkdf2Sync(
+        change.new,
+        salt,
+        310000,
+        32,
+        'sha256'
+      )
+      await updateUser(user, { salt, hashedPassword })
+      req.logout((err) => {
+        if (err) {
+          return next(err)
+        }
+        const message: Message = {success: 'Your password has been changed successfully.'}
+        res.status(200).send(message)
+      })
+    }
+  )
 })
 
 export default router
