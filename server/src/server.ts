@@ -6,11 +6,15 @@ import connect from 'connect-sqlite3'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import auth from './routes/auth'
+import backups from './routes/backups'
+import systemFonts from './routes/systemFonts'
 import scenes from './routes/scenes'
 import generators from './routes/generators'
 import displays from './routes/displays'
 import playlists from './routes/playlists'
 import version from './routes/version'
+import tutorials from './routes/tutorials'
+import settings from './routes/settings'
 import db from './db/database'
 import { getSaveDir } from './utils'
 
@@ -29,8 +33,6 @@ const init = () => {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
-  const storeDir =
-    process.env.NODE_ENV === 'development' ? '/tmp' : getSaveDir()
   app.use(
     session({
       secret: 'keyboard cat',
@@ -38,18 +40,22 @@ const init = () => {
       saveUninitialized: false,
       store: new SQLiteStore({
         db: 'flipflip.db',
-        dir: storeDir
+        dir: getSaveDir()
       }) as session.Store
     })
   )
   app.use(passport.authenticate('session'))
   app.use(auth)
   app.use(express.static(path.join(__dirname, 'public')))
-  app.use('/api', version)
+  app.use('/api/version', version)
+  app.use('/api/tutorials', tutorials)
   app.use('/api/scenes', scenes)
   app.use('/api/generators', generators)
   app.use('/api/displays', displays)
   app.use('/api/playlists', playlists)
+  app.use('/api/settings', settings)
+  app.use('/api/backups', backups)
+  app.use('/api/system-fonts', systemFonts)
 
   // start the Express server
   app.listen(PORT, () => {

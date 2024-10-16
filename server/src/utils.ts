@@ -1,4 +1,10 @@
-export function getSaveDir() {
+export const isMacOSX = process.platform === 'darwin'
+
+export function getSaveDir(useNodeEnv: boolean = true) {
+  if (useNodeEnv && process.env.NODE_ENV === 'development') {
+    return '/tmp'
+  }
+
   let directory: string | undefined
   switch (process.platform) {
     case 'win32':

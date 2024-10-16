@@ -13,6 +13,7 @@ import Account from './account/Account'
 import ScenePicker from './scenePicker/ScenePicker'
 import { defaultTheme } from '../theme'
 import SystemSnack from './SystemSnack'
+import ConfigForm from './config/ConfigForm'
 
 const App = () => {
   return (
@@ -36,6 +37,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <Account />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/settings/*"
+                element={
+                  <PrivateRoute>
+                    <ConfigForm />
                   </PrivateRoute>
                 }
               />

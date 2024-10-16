@@ -9,7 +9,10 @@ import {
   Tag as DBTag,
   DisplayView as DBDisplayView
 } from '../../types/generated'
-import { AppStorage } from '../data/migrate-data-json/AppStorage'
+import {
+  AppStorage,
+  initialAppStorage
+} from '../data/migrate-data-json/AppStorage'
 import { newConfig } from '../data/migrate-data-json/Config'
 import { Scene, newScene } from '../data/migrate-data-json/Scene'
 import { SceneGroup, newSceneGroup } from '../data/migrate-data-json/SceneGroup'
@@ -32,17 +35,33 @@ import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
 import { WeightGroup } from '../data/migrate-data-json/WeightGroup'
 import {
+  BT,
+  EA,
+  GO,
+  HTF,
+  IF,
+  IT,
   MVF,
+  OF,
+  OT,
   PLT,
   RP,
+  SC,
   SG,
+  SL,
+  SOF,
+  STF,
+  TF,
+  VO,
+  VTF,
+  WF,
   convertGridIDToSceneID,
   convertPlaylistIDToSceneID,
   getRandomColor
 } from 'flipflip-common'
 
 const getDataJsonPath = () => {
-  return path.join(getSaveDir(), 'data.json')
+  return path.join(getSaveDir(false), 'data.json')
 }
 
 const getDataJsonPortablePath = () => {
@@ -93,7 +112,7 @@ const readDataJsonFile = (): AppStorage | undefined => {
   ]
   if (!supportedVersions.includes(data.version)) {
     throw new Error(
-      `Version ${data.version} is not supported. Please update FlipFlip to v3.2.2 or above.`
+      `Version ${data.version} is not supported. Please update FlipFlip data to v3.2.2 or above.`
     )
   }
 
@@ -466,7 +485,10 @@ const sceneSettingsInsert = async (
   json: AppStorage,
   userId: number
 ) => {
+  const sceneSettings = newScene(json.config.defaultScene)
   const {
+    name,
+    useWeights,
     timingFunction,
     timingConstant,
     timingMin,
@@ -645,16 +667,26 @@ const sceneSettingsInsert = async (
     strobeExp,
     strobeAmp,
     strobePer,
-    strobeOv
-  } = json.config.defaultScene
+    strobeOv,
+    overrideIgnore,
+    scriptScene,
+    downloadScene,
+    libraryID,
+    audioStartIndex,
+    scriptStartIndex,
+    audioScene,
+    audioEnabled,
+    textEnabled
+  } = sceneSettings
 
   console.log(`+ Insert scene settings`)
   await trx
     .insertInto('scene')
     .values({
       userId,
-      name: '',
-      useWeights: toNumber(false),
+      defaultScene: toNumber(true),
+      name,
+      useWeights: toNumber(useWeights),
       timingFunction,
       timingConstant,
       timingMin,
@@ -830,17 +862,19 @@ const sceneSettingsInsert = async (
       panEndAmp,
       panEndPer,
       panEndOv,
-      overrideIgnore: toNumber(false),
-      scriptScene: toNumber(false),
-      downloadScene: toNumber(false),
+      overrideIgnore: toNumber(overrideIgnore),
+      scriptScene: toNumber(scriptScene),
+      downloadScene: toNumber(downloadScene),
       generatorMax,
       persistAudio: toNumber(persistAudio),
       persistText: toNumber(persistText),
-      audioScene: toNumber(false),
-      audioEnabled: toNumber(false),
-      textEnabled: toNumber(false),
-      regenerate: toNumber(regenerate),
-      defaultScene: toNumber(true)
+      libraryId: libraryID,
+      audioScene: toNumber(audioScene),
+      audioEnabled: toNumber(audioEnabled),
+      audioStartIndex,
+      textEnabled: toNumber(textEnabled),
+      scriptStartIndex,
+      regenerate: toNumber(regenerate)
     })
     .execute()
 }
@@ -1988,7 +2022,7 @@ const displayInsert = async (
 
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
-    const json = readDataJsonFile()
+    const json = readDataJsonFile() ?? initialAppStorage
     const username = generateUsername()
     const password = generator.generate({
       numbers: true,
@@ -1996,25 +2030,23 @@ export async function up(db: Kysely<DB>): Promise<void> {
       excludeSimilarCharacters: true,
       strict: true
     })
-    const userId = await userInsert(trx, username, password)
 
-    if (json != null) {
-      await generalSettingsInsert(trx, json, userId)
-      await remoteSettingsInsert(trx, json, userId)
-      await cacheSettingsInsert(trx, json, userId)
-      const tags = await tagsInsert(trx, json, userId)
-      await displaySettingsInsert(trx, json, userId, tags)
-      await tutorialsInsert(trx, json, userId)
-      await themeInsert(trx, json, userId)
-      await audioInsert(trx, json, userId, tags)
-      await audioPlaylistInsert(trx, json, userId)
-      await captionScriptInsert(trx, json, userId, tags)
-      await libraryContentSourceInsert(trx, json, userId, tags)
-      await sceneGroupInsert(trx, json, userId)
-      await sceneInsert(trx, json, userId, tags)
-      await sceneSettingsInsert(trx, json, userId)
-      await displayInsert(trx, json, userId)
-    }
+    const userId = await userInsert(trx, username, password)
+    await generalSettingsInsert(trx, json, userId)
+    await remoteSettingsInsert(trx, json, userId)
+    await cacheSettingsInsert(trx, json, userId)
+    const tags = await tagsInsert(trx, json, userId)
+    await displaySettingsInsert(trx, json, userId, tags)
+    await tutorialsInsert(trx, json, userId)
+    await themeInsert(trx, json, userId)
+    await audioInsert(trx, json, userId, tags)
+    await audioPlaylistInsert(trx, json, userId)
+    await captionScriptInsert(trx, json, userId, tags)
+    await libraryContentSourceInsert(trx, json, userId, tags)
+    await sceneGroupInsert(trx, json, userId)
+    await sceneInsert(trx, json, userId, tags)
+    await sceneSettingsInsert(trx, json, userId)
+    await displayInsert(trx, json, userId)
 
     console.log(`
       +-----------------------------------------------------------------------------------------+

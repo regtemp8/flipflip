@@ -44,7 +44,7 @@ export interface AudioTag {
 }
 
 export interface CacheSettings {
-  directory: string | null
+  directory: string
   enabled: number
   id: number | null
   maxSize: number
@@ -215,7 +215,7 @@ export interface GeneralSettings {
   watermarkDisplay: number
   watermarkFontFamily: string
   watermarkFontSize: number
-  watermarkText: string | null
+  watermarkText: string
 }
 
 export interface IgnoredTag {
@@ -241,136 +241,136 @@ export interface Playlist {
 }
 
 export interface RemoteSettings {
-  hydrusApiKey: string | null
-  hydrusDomain: string | null
-  hydrusPort: number | null
-  hydrusProtocol: string | null
+  hydrusApiKey: string
+  hydrusDomain: string
+  hydrusPort: number
+  hydrusProtocol: string
   id: number | null
-  instagramPassword: string | null
-  instagramUsername: string | null
-  piwigoHost: string | null
-  piwigoPassword: string | null
-  piwigoProtocol: string | null
-  piwigoUsername: string | null
-  redditClientId: string | null
-  redditDeviceId: string | null
-  redditRefreshToken: string | null
-  redditUserAgent: string | null
+  instagramPassword: string
+  instagramUsername: string
+  piwigoHost: string
+  piwigoPassword: string
+  piwigoProtocol: string
+  piwigoUsername: string
+  redditClientId: string
+  redditDeviceId: string
+  redditRefreshToken: string
+  redditUserAgent: string
   silenceTumblrAlert: number
-  tumblrKey: string | null
-  tumblrOauthToken: string | null
-  tumblrOauthTokenSecret: string | null
-  tumblrSecret: string | null
-  twitterAccessTokenKey: string | null
-  twitterAccessTokenSecret: string | null
-  twitterConsumerKey: string | null
-  twitterConsumerSecret: string | null
+  tumblrKey: string
+  tumblrOauthToken: string
+  tumblrOauthTokenSecret: string
+  tumblrSecret: string
+  twitterAccessTokenKey: string
+  twitterAccessTokenSecret: string
+  twitterConsumerKey: string
+  twitterConsumerSecret: string
   userId: number
 }
 
 export interface Scene {
   audioEnabled: number
   audioScene: number
-  audioStartIndex: number | null
+  audioStartIndex: number
   backForth: number
-  backForthBpmMulti: number | null
-  backForthConstant: number | null
-  backForthMax: number | null
-  backForthMin: number | null
-  backForthSinRate: number | null
-  backForthTf: string | null
-  backgroundBlur: number | null
-  backgroundType: string | null
+  backForthBpmMulti: number
+  backForthConstant: number
+  backForthMax: number
+  backForthMin: number
+  backForthSinRate: number
+  backForthTf: string
+  backgroundBlur: number
+  backgroundType: string
   continueVideo: number
   crossFade: number
   crossFadeAudio: number
   defaultScene: number
   downloadScene: number
-  fadeAmp: number | null
-  fadeBpmMulti: number | null
-  fadeDuration: number | null
-  fadeDurationMax: number | null
-  fadeDurationMin: number | null
-  fadeEase: string | null
-  fadeExp: number | null
+  fadeAmp: number
+  fadeBpmMulti: number
+  fadeDuration: number
+  fadeDurationMax: number
+  fadeDurationMin: number
+  fadeEase: string
+  fadeExp: number
   fadeInOut: number
-  fadeIoBpmMulti: number | null
-  fadeIoDelay: number | null
-  fadeIoDelayBpmMulti: number | null
-  fadeIoDelayMax: number | null
-  fadeIoDelayMin: number | null
-  fadeIoDelaySinRate: number | null
-  fadeIoDelayTf: string | null
-  fadeIoDuration: number | null
-  fadeIoDurationMax: number | null
-  fadeIoDurationMin: number | null
-  fadeIoEndAmp: number | null
-  fadeIoEndEase: string | null
-  fadeIoEndExp: number | null
-  fadeIoEndOv: number | null
-  fadeIoEndPer: number | null
+  fadeIoBpmMulti: number
+  fadeIoDelay: number
+  fadeIoDelayBpmMulti: number
+  fadeIoDelayMax: number
+  fadeIoDelayMin: number
+  fadeIoDelaySinRate: number
+  fadeIoDelayTf: string
+  fadeIoDuration: number
+  fadeIoDurationMax: number
+  fadeIoDurationMin: number
+  fadeIoEndAmp: number
+  fadeIoEndEase: string
+  fadeIoEndExp: number
+  fadeIoEndOv: number
+  fadeIoEndPer: number
   fadeIoPulse: number
-  fadeIoSinRate: number | null
-  fadeIoStartAmp: number | null
-  fadeIoStartEase: string | null
-  fadeIoStartExp: number | null
-  fadeIoStartOv: number | null
-  fadeIoStartPer: number | null
-  fadeIoTf: string | null
-  fadeOv: number | null
-  fadePer: number | null
-  fadeSinRate: number | null
-  fadeTf: string | null
+  fadeIoSinRate: number
+  fadeIoStartAmp: number
+  fadeIoStartEase: string
+  fadeIoStartExp: number
+  fadeIoStartOv: number
+  fadeIoStartPer: number
+  fadeIoTf: string
+  fadeOv: number
+  fadePer: number
+  fadeSinRate: number
+  fadeTf: string
   forceAll: number
   forceAllSource: number
   fullSource: number
-  generatorMax: number | null
-  gifOption: string | null
-  gifTimingConstant: number | null
-  gifTimingMax: number | null
-  gifTimingMin: number | null
-  horizTransLevel: number | null
-  horizTransLevelMax: number | null
-  horizTransLevelMin: number | null
+  generatorMax: number
+  gifOption: string
+  gifTimingConstant: number
+  gifTimingMax: number
+  gifTimingMin: number
+  horizTransLevel: number
+  horizTransLevelMax: number
+  horizTransLevelMin: number
   horizTransRandom: number
-  horizTransType: string | null
+  horizTransType: string
   id: number | null
-  imageOrientation: string | null
-  imageType: string | null
-  imageTypeFilter: string | null
-  libraryId: number | null
+  imageOrientation: string
+  imageType: string
+  imageTypeFilter: string
+  libraryId: number
   name: string
-  orderFunction: string | null
+  orderFunction: string
   overrideIgnore: number
-  panBpmMulti: number | null
-  panDuration: number | null
-  panDurationMax: number | null
-  panDurationMin: number | null
-  panEndAmp: number | null
-  panEndEase: string | null
-  panEndExp: number | null
-  panEndOv: number | null
-  panEndPer: number | null
+  panBpmMulti: number
+  panDuration: number
+  panDurationMax: number
+  panDurationMin: number
+  panEndAmp: number
+  panEndEase: string
+  panEndExp: number
+  panEndOv: number
+  panEndPer: number
   panHorizTransImg: number
-  panHorizTransLevel: number | null
-  panHorizTransLevelMax: number | null
-  panHorizTransLevelMin: number | null
+  panHorizTransLevel: number
+  panHorizTransLevelMax: number
+  panHorizTransLevelMin: number
   panHorizTransRandom: number
-  panHorizTransType: string | null
+  panHorizTransType: string
   panning: number
-  panSinRate: number | null
-  panStartAmp: number | null
-  panStartEase: string | null
-  panStartExp: number | null
-  panStartOv: number | null
-  panStartPer: number | null
-  panTf: string | null
+  panSinRate: number
+  panStartAmp: number
+  panStartEase: string
+  panStartExp: number
+  panStartOv: number
+  panStartPer: number
+  panTf: string
   panVertTransImg: number
-  panVertTransLevel: number | null
-  panVertTransLevelMax: number | null
-  panVertTransLevelMin: number | null
+  panVertTransLevel: number
+  panVertTransLevelMax: number
+  panVertTransLevelMin: number
   panVertTransRandom: number
-  panVertTransType: string | null
+  panVertTransType: string
   persistAudio: number
   persistText: number
   playVideoClips: number
@@ -378,91 +378,91 @@ export interface Scene {
   regenerate: number
   sceneGroupId: number | null
   scriptScene: number
-  scriptStartIndex: number | null
-  skipVideoEnd: number | null
-  skipVideoStart: number | null
+  scriptStartIndex: number
+  skipVideoEnd: number
+  skipVideoStart: number
   slide: number
-  slideAmp: number | null
-  slideBpmMulti: number | null
-  slideDistance: number | null
-  slideDuration: number | null
-  slideDurationMax: number | null
-  slideDurationMin: number | null
-  slideEase: string | null
-  slideExp: number | null
-  slideOv: number | null
-  slidePer: number | null
-  slideSinRate: number | null
-  slideTf: string | null
-  slideType: string | null
-  sourceOrderFunction: string | null
+  slideAmp: number
+  slideBpmMulti: number
+  slideDistance: number
+  slideDuration: number
+  slideDurationMax: number
+  slideDurationMin: number
+  slideEase: string
+  slideExp: number
+  slideOv: number
+  slidePer: number
+  slideSinRate: number
+  slideTf: string
+  slideType: string
+  sourceOrderFunction: string
   strobe: number
-  strobeAmp: number | null
-  strobeBpmMulti: number | null
-  strobeColorType: string | null
-  strobeDelay: number | null
-  strobeDelayBpmMulti: number | null
-  strobeDelayMax: number | null
-  strobeDelayMin: number | null
-  strobeDelaySinRate: number | null
-  strobeDelayTf: string | null
-  strobeEase: string | null
-  strobeExp: number | null
-  strobeLayer: string | null
-  strobeOpacity: number | null
-  strobeOv: number | null
-  strobePer: number | null
+  strobeAmp: number
+  strobeBpmMulti: number
+  strobeColorType: string
+  strobeDelay: number
+  strobeDelayBpmMulti: number
+  strobeDelayMax: number
+  strobeDelayMin: number
+  strobeDelaySinRate: number
+  strobeDelayTf: string
+  strobeEase: string
+  strobeExp: number
+  strobeLayer: string
+  strobeOpacity: number
+  strobeOv: number
+  strobePer: number
   strobePulse: number
-  strobeSinRate: number | null
-  strobeTf: string | null
-  strobeTime: number | null
-  strobeTimeMax: number | null
-  strobeTimeMin: number | null
+  strobeSinRate: number
+  strobeTf: string
+  strobeTime: number
+  strobeTimeMax: number
+  strobeTimeMin: number
   textEnabled: number
-  timingBpmMulti: number | null
-  timingConstant: number | null
-  timingFunction: string | null
-  timingMax: number | null
-  timingMin: number | null
-  timingSinRate: number | null
-  transAmp: number | null
-  transBpmMulti: number | null
-  transDuration: number | null
-  transDurationMax: number | null
-  transDurationMin: number | null
-  transEase: string | null
-  transExp: number | null
-  transOv: number | null
-  transPer: number | null
-  transSinRate: number | null
-  transTf: string | null
+  timingBpmMulti: number
+  timingConstant: number
+  timingFunction: string
+  timingMax: number
+  timingMin: number
+  timingSinRate: number
+  transAmp: number
+  transBpmMulti: number
+  transDuration: number
+  transDurationMax: number
+  transDurationMin: number
+  transEase: string
+  transExp: number
+  transOv: number
+  transPer: number
+  transSinRate: number
+  transTf: string
   userId: number
   useWeights: number
-  vertTransLevel: number | null
-  vertTransLevelMax: number | null
-  vertTransLevelMin: number | null
+  vertTransLevel: number
+  vertTransLevelMax: number
+  vertTransLevelMin: number
   vertTransRandom: number
-  vertTransType: string | null
-  videoOption: string | null
-  videoOrientation: string | null
+  vertTransType: string
+  videoOption: string
+  videoOrientation: string
   videoRandomSpeed: number
-  videoSkip: number | null
-  videoSpeed: number | null
-  videoSpeedMax: number | null
-  videoSpeedMin: number | null
-  videoTimingConstant: number | null
-  videoTimingMax: number | null
-  videoTimingMin: number | null
-  videoVolume: number | null
-  weightFunction: string | null
+  videoSkip: number
+  videoSpeed: number
+  videoSpeedMax: number
+  videoSpeedMin: number
+  videoTimingConstant: number
+  videoTimingMax: number
+  videoTimingMin: number
+  videoVolume: number
+  weightFunction: string
   zoom: number
-  zoomEnd: number | null
-  zoomEndMax: number | null
-  zoomEndMin: number | null
+  zoomEnd: number
+  zoomEndMax: number
+  zoomEndMin: number
   zoomRandom: number
-  zoomStart: number | null
-  zoomStartMax: number | null
-  zoomStartMin: number | null
+  zoomStart: number
+  zoomStartMax: number
+  zoomStartMin: number
 }
 
 export interface SceneColor {
@@ -520,9 +520,9 @@ export interface Tag {
 
 export interface Theme {
   id: number | null
-  mode: string | null
-  primaryColor: string | null
-  secondaryColor: string | null
+  mode: string
+  primaryColor: string
+  secondaryColor: string
   userId: number
 }
 

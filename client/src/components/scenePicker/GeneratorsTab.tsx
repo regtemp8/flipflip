@@ -1,7 +1,7 @@
 import {
   useGetGeneratorGroupsQuery,
   useGetUngroupedGeneratorsQuery
-} from '../../store/api'
+} from '../../store/api/slice'
 import GroupedSortable from './GroupedSortable'
 import UngroupedSortable from './UngroupedSortable'
 import SceneCard from './SceneCard'

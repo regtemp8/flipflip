@@ -1,12 +1,12 @@
 import { PropsWithChildren } from 'react'
 import { Navigate } from 'react-router-dom'
-import { CircularProgress } from '@mui/material'
-import { useIsAuthenticatedQuery } from '../../store/api'
+import { LinearProgress } from '@mui/material'
+import { useIsAuthenticatedQuery } from '../../store/api/slice'
 
 export default function PrivateRoute({ children }: PropsWithChildren) {
   const { isSuccess, isError, isFetching } = useIsAuthenticatedQuery()
   if (isFetching) {
-    return <CircularProgress />
+    return <LinearProgress />
   } else if (isSuccess) {
     return children
   } else if (isError) {

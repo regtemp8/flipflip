@@ -4,7 +4,9 @@ import {
   Link as RouterLink,
   Route,
   Routes,
-  useLocation
+  useLocation,
+  Navigate,
+  useNavigate
 } from 'react-router-dom'
 import { cx } from '@emotion/css'
 
@@ -50,7 +52,7 @@ import DisplaysTab from './DisplaysTab'
 import GeneratorsTab from './GeneratorsTab'
 import PlaylistsTab from './PlaylistsTab'
 import ScenesTab from './ScenesTab'
-import { useGetVersionQuery } from '../../store/api'
+import { useGetVersionQuery } from '../../store/api/slice'
 
 const drawerWidth = 240
 
@@ -389,7 +391,8 @@ const useStyles = makeStyles()((theme: Theme) => {
 
 const tabRoutes = ['/scenes', '/generators', '/displays', '/playlists']
 const getOpenTab = (pathname: string) => {
-  return tabRoutes.findIndex((tab) => tab === pathname)
+  let index = tabRoutes.findIndex((tab) => tab === pathname)
+  return index === -1 ? 0 : index
 }
 
 function ScenePicker() {
@@ -397,7 +400,7 @@ function ScenePicker() {
   const { classes } = useStyles()
   const { pathname } = useLocation()
 
-  const {data: version} = useGetVersionQuery()
+  const { data: version } = useGetVersionQuery()
   const sceneCount = 0
   const generatorCount = 0
   const displayCount = 0
@@ -406,19 +409,13 @@ function ScenePicker() {
   const audioLibraryCount = 1
   const scriptLibraryCount = 1
 
-  const [openTab, setOpenTab] = useState(getOpenTab(pathname))
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [newVersion, setNewVersion] = useState('')
-
-  const onChangeTab = (e: SyntheticEvent, tab: number) => {
-    if (openTab !== tab) {
-      setOpenTab(tab)
-    }
-  }
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
   const openGitRelease = () => {}
 
+  const openTab = getOpenTab(pathname)
   return (
     <div className={classes.root}>
       <AppBar
@@ -519,7 +516,6 @@ function ScenePicker() {
           <Tabs
             orientation="vertical"
             value={openTab}
-            onChange={onChangeTab}
             aria-label="scene picker tabs"
             className={classes.tabs}
           >
@@ -666,9 +662,7 @@ function ScenePicker() {
         <div>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Account'}>
             <ListItemButton
-              component={(props) => (
-                <RouterLink to="account/connect" {...props} />
-              )}
+              component={(props) => <RouterLink to="account" {...props} />}
             >
               <ListItemIcon>
                 <PersonIcon />
@@ -732,7 +726,7 @@ function ScenePicker() {
             <Route path="/displays" element={<DisplaysTab />} />
             <Route path="/generators" element={<GeneratorsTab />} />
             <Route path="/playlists" element={<PlaylistsTab />} />
-            <Route index path="/scenes" element={<ScenesTab />} />
+            <Route path="*" element={<ScenesTab />} />
           </Routes>
         </Container>
       </main>

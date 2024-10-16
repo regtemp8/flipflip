@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react'
 import { Alert, AlertColor, Button, Grid2, TextField } from '@mui/material'
 import { AccountChange, Message } from 'flipflip-common'
-import { useChangePasswordMutation } from '../../store/api'
+import { useChangePasswordMutation } from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 import { showSystemSnack } from '../../store/systemSnack/store'
 

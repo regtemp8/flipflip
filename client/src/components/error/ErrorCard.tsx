@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -23,13 +23,13 @@ import {
 
 import { convertFromEpoch } from '../../utils'
 import { Backup } from 'flipflip-common'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   useGetBackupsQuery,
   useGetVersionQuery,
   useRestoreBackupMutation,
   useResetDataMutation
-} from '../../store/api'
+} from '../../store/api/slice'
 
 export interface ErrorCardProps {
   error: Error
@@ -39,6 +39,7 @@ export interface ErrorCardProps {
 
 export default function ErrorCard(props: ErrorCardProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const versionResult = useGetVersionQuery()
   const backupsResult = useGetBackupsQuery()
   const [restoreBackup] = useRestoreBackupMutation()
@@ -48,6 +49,18 @@ export default function ErrorCard(props: ErrorCardProps) {
   const [backupCheck, setBackupCheck] = useState(false)
   const [backup, setBackup] = useState<Backup>()
   const [backups, setBackups] = useState<Backup[]>([])
+
+  const _pathname = useRef<string>()
+
+  // clear error when going back
+  useEffect(() => {
+    if (_pathname.current == null) {
+      _pathname.current = location.pathname
+    }
+    if (_pathname.current !== location.pathname) {
+      clearError()
+    }
+  }, [location.pathname])
 
   const onSubmitIssue = () => {
     const version = versionResult.data
@@ -81,6 +94,7 @@ export default function ErrorCard(props: ErrorCardProps) {
 
   const clearError = () => {
     props.onClearError()
+    _pathname.current = undefined
     setResetCheck(false)
     setBackupCheck(false)
     setBackup(undefined)
@@ -88,7 +102,6 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const goBack = () => {
-    clearError()
     navigate(-1)
   }
 

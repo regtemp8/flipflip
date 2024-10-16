@@ -1,7 +1,7 @@
 import { Button, Grid2, TextField } from '@mui/material'
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTokenLoginMutation } from '../../store/api'
+import { useTokenLoginMutation } from '../../store/api/slice'
 
 export default function TokenForm() {
   const navigate = useNavigate()

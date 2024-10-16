@@ -7,7 +7,7 @@ interface ErrorBoundaryState {
   info?: React.ErrorInfo
 }
 
-export default class ErrorBoundary extends React.Component<React.PropsWithChildren> {
+class ErrorBoundary extends React.Component<React.PropsWithChildren> {
   readonly state: ErrorBoundaryState = { hasError: false }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
@@ -39,3 +39,4 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
 }
 
 ;(ErrorBoundary as any).displayName = 'ErrorBoundary'
+export default ErrorBoundary

@@ -118,19 +118,19 @@ router.get('/logout', (req, res, next) => {
 router.post('/change-username', async (req, res, next) => {
   const change = req.body as AccountChange
   if (change.new.trim().length === 0) {
-    const message: Message = {error: `New username can't be empty.`}
+    const message: Message = { error: `New username can't be empty.` }
     res.status(400).send(message)
     return
   }
   if (change.new !== change.confirm) {
-    const message: Message = {error: 'New username could not be confirmed.'}
+    const message: Message = { error: 'New username could not be confirmed.' }
     res.status(400).send(message)
     return
   }
 
   const user = req.user as User
   if (user?.username !== change.current) {
-    const message: Message = {error: 'Current username is invalid.'}
+    const message: Message = { error: 'Current username is invalid.' }
     res.status(400).send(message)
     return
   }
@@ -140,25 +140,27 @@ router.post('/change-username', async (req, res, next) => {
     if (err) {
       return next(err)
     }
-    const message: Message = {success: 'Your username has been changed successfully.'}
+    const message: Message = {
+      success: 'Your username has been changed successfully.'
+    }
     res.status(200).send(message)
   })
 })
 
 router.post('/change-password', async (req, res, next) => {
   const change = req.body as AccountChange
-  if(change.new.trim().length === 0) {
-    const message: Message = {error: `New password can't be empty.`}
+  if (change.new.trim().length === 0) {
+    const message: Message = { error: `New password can't be empty.` }
     res.status(400).send(message)
     return
   }
   if (change.new !== change.confirm) {
-    const message: Message = {error: 'New password could not be confirmed.'}
+    const message: Message = { error: 'New password could not be confirmed.' }
     res.status(400).send(message)
     return
   }
 
-  const user = await findUserById((req.user as User).id as number) as User
+  const user = (await findUserById((req.user as User).id as number)) as User
   crypto.pbkdf2(
     change.current,
     user.salt,
@@ -171,7 +173,7 @@ router.post('/change-password', async (req, res, next) => {
         return
       }
       if (!crypto.timingSafeEqual(user.hashedPassword, currentHashedPassword)) {
-        const message: Message = {error: 'Current password is invalid.'}
+        const message: Message = { error: 'Current password is invalid.' }
         res.status(400).send(message)
         return
       }
@@ -189,7 +191,9 @@ router.post('/change-password', async (req, res, next) => {
         if (err) {
           return next(err)
         }
-        const message: Message = {success: 'Your password has been changed successfully.'}
+        const message: Message = {
+          success: 'Your password has been changed successfully.'
+        }
         res.status(200).send(message)
       })
     }

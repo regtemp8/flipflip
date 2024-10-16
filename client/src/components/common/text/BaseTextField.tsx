@@ -1,8 +1,8 @@
 import React, { type ChangeEvent, type ReactNode } from 'react'
 import { TextField, type TextFieldVariants, Tooltip } from '@mui/material'
-import { useAppSelector, useAppDispatch } from '../../../store/hooks'
+import { useAppDispatch } from '../../../store/hooks'
 import type ReduxProps from '../ReduxProps'
-import { AnyAction } from 'redux'
+import { AppDispatch } from '../../../store/store'
 
 export interface BaseTextFieldProps<T, S> extends ReduxProps<T, S> {
   className?: string
@@ -37,13 +37,19 @@ export default function BaseTextField<
   S extends string | number | undefined
 >(props: BaseTextFieldProps<T, S>) {
   const min = props?.inputProps?.min ?? 0
-  const value = useAppSelector(props.selector)
+  const { data: value } = props.selector()
   const dispatch = useAppDispatch()
+
+  const getValue = (value?: S) => {
+    return props.inputProps?.type === 'number' ? (value ?? min) : (value ?? '')
+  }
 
   const onChangeText = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const action = props.action as (value: string) => AnyAction
+    const action = props.action as (
+      value: string
+    ) => (dispatch: AppDispatch) => void
     dispatch(action(event.target.value))
   }
 
@@ -56,7 +62,9 @@ export default function BaseTextField<
       value = Math.min(value, props.inputProps.max)
     }
 
-    const action = props.action as (value: number) => AnyAction
+    const action = props.action as (
+      value: number
+    ) => (dispatch: AppDispatch) => void
     dispatch(action(value))
   }
 
@@ -89,11 +97,13 @@ export default function BaseTextField<
         label={props.label}
         placeholder={props.placeholder}
         margin={props.margin}
-        value={value}
+        value={getValue(value)}
         onChange={onChange}
         onBlur={onBlur}
-        InputProps={props.InputProps}
-        inputProps={inputProps}
+        slotProps={{
+          input: props.InputProps,
+          htmlInput: inputProps
+        }}
       />
     )
   }

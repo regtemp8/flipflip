@@ -1,6 +1,7 @@
 import express from 'express'
 import { SG } from 'flipflip-common'
 import {
+  findPlaylistOptionsByType,
   findPlaylistsWithSceneGroup,
   findPlaylistsWithoutSceneGroup
 } from '../db/PlaylistRepository'
@@ -17,4 +18,11 @@ router.get('/ungrouped', async (req, res) => {
   res.status(200).send(items)
 })
 
+router.get('/options/:type', async (req, res) => {
+  const items = toSceneGroupItems(
+    await findPlaylistOptionsByType(req.params.type)
+  )
+  items.unshift({ id: 0, name: 'None' })
+  res.status(200).send(items)
+})
 export default router
