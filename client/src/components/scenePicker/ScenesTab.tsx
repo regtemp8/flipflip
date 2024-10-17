@@ -29,7 +29,12 @@ function ScenesTab() {
       {ungrouped.isSuccess && ungrouped.data.length > 0 && (
         <UngroupedSortable type={SG.scene}>
           {ungrouped.data.map((item) => (
-            <SceneCard sceneID={item.id} name={item.name} toDelete={false} />
+            <SceneCard
+              sceneID={item.id}
+              type={SG.scene}
+              name={item.name}
+              toDelete={false}
+            />
           ))}
         </UngroupedSortable>
       )}

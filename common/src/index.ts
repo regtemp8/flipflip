@@ -23,5 +23,7 @@ export * from './lib/json/Tag';
 export * from './lib/json/Clip';
 export * from './lib/json/ContentSource';
 export * from './lib/json/WeightGroup';
+export * from './lib/json/Display';
+export * from './lib/json/DisplayView';
 export * from './lib/scrape/ScrapeResult';
 export * from './lib/scrape/ScraperHelpers';

@@ -15,6 +15,7 @@ import ScenePicker from './scenePicker/ScenePicker'
 import { defaultTheme } from '../theme'
 import SystemSnack from './SystemSnack'
 import ConfigForm from './config/ConfigForm'
+import DisplaySetup from './config/DisplaySetup'
 
 const App = () => {
   return (
@@ -46,6 +47,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <SceneDetail />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/displays/:id/*"
+                element={
+                  <PrivateRoute>
+                    <DisplaySetup />
                   </PrivateRoute>
                 }
               />

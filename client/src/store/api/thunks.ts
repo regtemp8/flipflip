@@ -5,7 +5,9 @@ import {
   CacheSettings,
   Clip,
   ContentSource,
+  Display,
   DisplaySettings,
+  DisplayView,
   GeneralSettings,
   RemoteSettings,
   Scene,
@@ -19,6 +21,137 @@ export const refreshConnectToken = () => {
         forceRefetch: true
       })
     )
+  }
+}
+
+const updateLocalDisplayView = (
+  update: Pick<DisplayView, 'id'> & Partial<DisplayView>
+) => {
+  return flipflipApi.util.updateQueryData(
+    'getDisplayView',
+    update.id,
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
+}
+
+const updateRemoteDisplayView = debounce(
+  (
+    update: Pick<DisplayView, 'id'> & Partial<DisplayView>,
+    dispatch: AppDispatch
+  ) => {
+    dispatch(flipflipApi.endpoints.updateDisplayView.initiate(update))
+  },
+  250
+)
+
+const updateDisplayView = (
+  update: Pick<DisplayView, 'id'> & Partial<DisplayView>
+) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalDisplayView(update))
+    updateRemoteDisplayView(update, dispatch)
+  }
+}
+
+export const setDisplayViewColor = (id: number) => {
+  return (color: string) => {
+    return updateDisplayView({ id, color })
+  }
+}
+
+export const setDisplayViewHeight = (id: number) => {
+  return (height: number) => {
+    return updateDisplayView({ id, height })
+  }
+}
+
+export const setDisplayViewX = (id: number) => {
+  return (x: number) => {
+    return updateDisplayView({ id, x })
+  }
+}
+
+export const setDisplayViewY = (id: number) => {
+  return (y: number) => {
+    return updateDisplayView({ id, y })
+  }
+}
+
+export const setDisplayViewWidth = (id: number) => {
+  return (width: number) => {
+    return updateDisplayView({ id, width })
+  }
+}
+
+export const setDisplayViewOpacity = (id: number) => {
+  return (opacity: number) => {
+    return updateDisplayView({ id, opacity })
+  }
+}
+
+export const setDisplayViewZ = (id: number) => {
+  return (z: number) => {
+    return updateDisplayView({ id, z })
+  }
+}
+
+export const setDisplayViewSync = (id: number) => {
+  return (sync: boolean) => {
+    return updateDisplayView({ id, sync })
+  }
+}
+
+export const setDisplayViewMirrorSyncedView = (id: number) => {
+  return (mirrorSyncedView: string) => {
+    return updateDisplayView({ id, mirrorSyncedView })
+  }
+}
+
+export const setDisplayViewSyncWithView = (id: number) => {
+  return (syncWithView: string) => {
+    return updateDisplayView({ id, syncWithView: Number(syncWithView) })
+  }
+}
+
+export const setDisplayViewScenePlaylistID = (id: number) => {
+  return (playlistID: string) => {
+    return updateDisplayView({ id, playlistID: Number(playlistID) })
+  }
+}
+
+export const setDisplayViewName = (id: number, name: string) => {
+  return updateDisplayView({ id, name })
+}
+
+export const setDisplayViewVisible = (id: number, visible: boolean) => {
+  return updateDisplayView({ id, visible })
+}
+
+const updateLocalDisplay = (update: Pick<Display, 'id'> & Partial<Display>) => {
+  return flipflipApi.util.updateQueryData('getDisplay', update.id, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemoteDisplay = debounce(
+  (update: Pick<Display, 'id'> & Partial<Display>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updateDisplay.initiate(update))
+  },
+  250
+)
+
+const updateDisplay = (update: Pick<Display, 'id'> & Partial<Display>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalDisplay(update))
+    updateRemoteDisplay(update, dispatch)
+  }
+}
+
+export const setDisplayName = (id: number) => {
+  return (name: string) => {
+    return updateDisplay({ id, name })
   }
 }
 

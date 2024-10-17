@@ -9,6 +9,7 @@ import {
 import { makeStyles } from 'tss-react/mui'
 import Jiggle from '../animations/Jiggle'
 import { Link } from 'react-router-dom'
+import { SG } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -25,13 +26,20 @@ const useStyles = makeStyles()((theme: Theme) => {
 export interface SceneCardProps {
   sceneID: number
   name: string
+  type: string
   toDelete: boolean
 }
 
+const routes = new Map<string, string>()
+routes.set(SG.scene, '/scenes')
+routes.set(SG.generator, '/generators')
+routes.set(SG.display, '/displays')
+
 function SceneCard(props: SceneCardProps) {
-  const { sceneID, name, toDelete } = props
+  const { type, sceneID, name, toDelete } = props
   const { classes } = useStyles()
 
+  const route = routes.get(type)
   return (
     <Jiggle
       id={sceneID.toString()}
@@ -41,7 +49,7 @@ function SceneCard(props: SceneCardProps) {
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
         <CardActionArea
-          component={(props) => <Link to={`scenes/${sceneID}`} {...props} />}
+          component={(props) => <Link to={`${route}/${sceneID}`} {...props} />}
         >
           <CardContent>
             <Typography component="h2" variant="h6">

@@ -128,7 +128,12 @@ function SceneGroupCard(props: PropsWithChildren<SceneGroupCardProps>) {
               />
             ))
           : group.items.map((item) => (
-              <SceneCard sceneID={item.id} name={item.name} toDelete={false} />
+              <SceneCard
+                sceneID={item.id}
+                type={group.type}
+                name={item.name}
+                toDelete={false}
+              />
             ))}
       </Sortable>
     </>

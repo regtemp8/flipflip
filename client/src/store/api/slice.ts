@@ -16,7 +16,9 @@ import {
   Tag,
   ContentSource,
   Clip,
-  WeightGroup
+  WeightGroup,
+  Display,
+  DisplayView
 } from 'flipflip-common'
 
 // TODO check all tag types, you've added new ones
@@ -376,6 +378,17 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    createScenePlaylist: builder.mutation<void, void>({
+      query: () => ({
+        url: `api/scene-playlists`,
+        method: 'POST'
+      }),
+      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
     addSceneScriptPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
       query: ({ id }) => ({
         url: `api/scenes/${id}/script-playlists`,
@@ -478,6 +491,58 @@ export const flipflipApi = createApi({
           }
         })
       }
+    }),
+    getDisplay: builder.query<Display, number>({
+      query: (id) => `api/displays/${id}`,
+      providesTags: (display) =>
+        display != null ? [{ type: 'Display', id: display.id }] : []
+    }),
+    updateDisplay: builder.mutation<
+      void,
+      Pick<Display, 'id'> & Partial<Display>
+    >({
+      query: ({ id, ...patch }) => ({
+        url: `api/displays/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(flipflipApi.util.invalidateTags([{ type: 'Display', id }]))
+          }
+        })
+      }
+    }),
+    getDisplayView: builder.query<DisplayView, number>({
+      query: (id) => `api/display-views/${id}`,
+      providesTags: (view) =>
+        view != null ? [{ type: 'DisplayView', id: view.id }] : []
+    }),
+    updateDisplayView: builder.mutation<
+      void,
+      Pick<DisplayView, 'id'> & Partial<DisplayView>
+    >({
+      query: ({ id, ...patch }) => ({
+        url: `api/display-views/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'DisplayView', id }])
+            )
+          }
+        })
+      }
     })
   })
 })
@@ -535,5 +600,9 @@ export const {
   useGetClipQuery,
   useUpdateClipMutation,
   useGetContentSourceQuery,
-  useUpdateContentSourceMutation
+  useUpdateContentSourceMutation,
+  useGetDisplayQuery,
+  useUpdateDisplayMutation,
+  useGetDisplayViewQuery,
+  useCreateScenePlaylistMutation
 } = flipflipApi

@@ -9,7 +9,8 @@ import {
   Tutorials,
   ContentSource,
   Clip,
-  Tag
+  Tag,
+  Display
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -21,7 +22,8 @@ import {
   CacheSettings as CacheSettingsRow,
   ContentSource as ContentSourceRow,
   Clip as ClipRow,
-  Tag as TagRow
+  Tag as TagRow,
+  Display as DisplayRow
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
@@ -35,6 +37,7 @@ import { CacheSettingsUpdate } from './CacheSettingsRepository'
 import { ContentSourceUpdate } from './ContentSourceRepository'
 import { ClipUpdate } from './ClipRepository'
 import { TagUpdate } from './TagRepository'
+import { DisplayUpdate } from './DisplayRepository'
 
 export function toSceneGroups(rows: SceneGroupRow[], type: string) {
   const groups: Record<number, SceneGroup> = {}
@@ -1107,4 +1110,20 @@ export function toTagUpdate(tag: Partial<Tag>): TagUpdate {
     name,
     phraseString
   }
+}
+
+export function toDisplay(row: DisplayRow): Display {
+  const { id, name } = row
+
+  return {
+    id: id as number,
+    name,
+    views: []
+  }
+}
+
+export function toDisplayUpdate(display: Partial<Display>): DisplayUpdate {
+  const { name } = display
+
+  return { name }
 }

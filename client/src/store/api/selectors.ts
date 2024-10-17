@@ -2,12 +2,86 @@ import {
   useGetCacheSettingsQuery,
   useGetClipQuery,
   useGetContentSourceQuery,
+  useGetDisplayQuery,
   useGetDisplaySettingsQuery,
   useGetGeneralSettingsQuery,
   useGetRemoteSettingsQuery,
   useGetSceneQuery,
-  useGetThemeQuery
+  useGetThemeQuery,
+  useGetDisplayViewQuery
 } from './slice'
+
+export const useGetDisplayViewColorQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.color })
+  })
+}
+
+export const useGetDisplayViewHeightQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.height })
+  })
+}
+
+export const useGetDisplayViewOpacityQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.opacity })
+  })
+}
+
+export const useGetDisplayViewSyncQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.sync })
+  })
+}
+
+export const useGetDisplayViewMirrorSyncedViewQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.mirrorSyncedView })
+  })
+}
+
+export const useGetDisplayViewSyncWithViewQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.syncWithView?.toString() })
+  })
+}
+
+export const useGetDisplayViewWidthQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.width })
+  })
+}
+
+export const useGetDisplayViewXQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.x })
+  })
+}
+
+export const useGetDisplayViewYQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.y })
+  })
+}
+
+export const useGetDisplayViewZQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.z })
+  })
+}
+
+export const useGetDisplayViewScenePlaylistIDQuery = (id: number) => {
+  return useGetDisplayViewQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.playlistID?.toString() })
+  })
+}
+
+export const useGetDisplayNameQuery = (id: number) => {
+  return useGetDisplayQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.name })
+  })
+}
 
 export const useGetClipEnabledQuery = (id: number) => {
   return useGetClipQuery(id, {

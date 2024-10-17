@@ -214,7 +214,7 @@ function Account() {
               color="inherit"
               aria-label="Back"
               onClick={() => {
-                navigate('/')
+                navigate(-1)
               }}
               size="large"
             >
@@ -289,7 +289,9 @@ function Account() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={0}
-              component={(props) => <RouterLink to={tabRoutes[0]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[0]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-1"
@@ -302,7 +304,9 @@ function Account() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={1}
-              component={(props) => <RouterLink to={tabRoutes[1]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[1]} {...props} />
+              )}
             />
           </Tabs>
         </div>

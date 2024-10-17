@@ -4,11 +4,13 @@ import { flipflipApi } from './api/slice'
 import systemSnackSlice from './systemSnack/store'
 import sceneDetailSlice from './sceneDetail/slice'
 import scenePickerSlice from './scenePicker/slice'
+import displaySlice from './display/slice'
 
 const store = configureStore({
   reducer: {
     [flipflipApi.reducerPath]: flipflipApi.reducer,
     // components
+    display: displaySlice,
     sceneDetail: sceneDetailSlice,
     scenePicker: scenePickerSlice,
     systemSnack: systemSnackSlice

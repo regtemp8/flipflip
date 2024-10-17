@@ -738,7 +738,7 @@ function SceneDetail() {
               color="inherit"
               aria-label="Back"
               onClick={() => {
-                navigate('/')
+                navigate(-1)
               }}
               size="large"
             >
@@ -862,7 +862,9 @@ function SceneDetail() {
                 tutorial === SDT.options1 && classes.highlight,
                 tutorial === SDT.effects1 && classes.disable
               )}
-              component={(props) => <RouterLink to={tabRoutes[0]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[0]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-1"
@@ -876,7 +878,9 @@ function SceneDetail() {
                 tutorial === SDT.options1 && classes.disable,
                 tutorial === SDT.effects1 && classes.highlight
               )}
-              component={(props) => <RouterLink to={tabRoutes[1]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[1]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-2"
@@ -891,7 +895,9 @@ function SceneDetail() {
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
-              component={(props) => <RouterLink to={tabRoutes[2]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[2]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-3"
@@ -905,7 +911,9 @@ function SceneDetail() {
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
-              component={(props) => <RouterLink to={tabRoutes[3]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[3]} {...props} />
+              )}
             />
             {/* {generatorWeights && (
               <Tab
@@ -919,7 +927,7 @@ function SceneDetail() {
                   !open && classes.tabClose
                 )}
                 component={(props) => (
-                  <RouterLink to={tabRoutes[4]} {...props} />
+                  <RouterLink replace to={tabRoutes[4]} {...props} />
                 )}
               />
             )} */}

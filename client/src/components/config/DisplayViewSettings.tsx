@@ -1,0 +1,224 @@
+import { Collapse, Grid2, InputAdornment, type Theme } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
+import {
+  setDisplayViewHeight,
+  setDisplayViewX,
+  setDisplayViewY,
+  setDisplayViewWidth,
+  setDisplayViewOpacity,
+  setDisplayViewZ,
+  setDisplayViewSync,
+  setDisplayViewScenePlaylistID
+} from '../../store/api/thunks'
+import {
+  useGetDisplayViewHeightQuery,
+  useGetDisplayViewOpacityQuery,
+  useGetDisplayViewSyncQuery,
+  useGetDisplayViewWidthQuery,
+  useGetDisplayViewXQuery,
+  useGetDisplayViewYQuery,
+  useGetDisplayViewZQuery,
+  useGetDisplayViewScenePlaylistIDQuery
+} from '../../store/api/selectors'
+import BaseSlider from '../common/slider/BaseSlider'
+import BaseSwitch from '../common/BaseSwitch'
+import DisplayViewSyncOptions from './DisplayViewSyncOptions'
+import { PLT } from 'flipflip-common'
+import { useCreateScenePlaylistMutation } from '../../store/api/slice'
+import PlaylistSelect from '../common/PlaylistSelect'
+
+const useStyles = makeStyles()((theme: Theme) => ({
+  endInput: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: 0
+  },
+  fullWidth: {
+    width: '100%'
+  }
+}))
+
+export interface DisplayViewSettingsProps {
+  displayID: number
+  viewID: number
+}
+
+function DisplayViewSettings(props: DisplayViewSettingsProps) {
+  const { displayID, viewID } = props
+  const { classes } = useStyles()
+  const xSelector = () => useGetDisplayViewXQuery(viewID)
+  const ySelector = () => useGetDisplayViewYQuery(viewID)
+  const zSelector = () => useGetDisplayViewZQuery(viewID)
+  const widthSelector = () => useGetDisplayViewWidthQuery(viewID)
+  const heightSelector = () => useGetDisplayViewHeightQuery(viewID)
+  const opacitySelector = () => useGetDisplayViewOpacityQuery(viewID)
+  const syncSelector = () => useGetDisplayViewSyncQuery(viewID)
+  const xAction = setDisplayViewX(viewID)
+  const yAction = setDisplayViewY(viewID)
+  const zAction = setDisplayViewZ(viewID)
+  const widthAction = setDisplayViewWidth(viewID)
+  const heightAction = setDisplayViewHeight(viewID)
+  const opacityAction = setDisplayViewOpacity(viewID)
+  const syncAction = setDisplayViewSync(viewID)
+
+  const { data: sync } = syncSelector()
+  return (
+    <Grid2 container spacing={2}>
+      <Grid2 size={12}>
+        <BaseSwitch
+          label="Sync"
+          tooltip="Synchronize this view with another view"
+          selector={syncSelector}
+          action={syncAction}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <Collapse in={sync ?? false}>
+          <DisplayViewSyncOptions displayID={displayID} viewID={viewID} />
+        </Collapse>
+        <Collapse in={!sync}>
+          <PlaylistSelect
+            type={PLT.scene}
+            includeSingles
+            selector={() => useGetDisplayViewScenePlaylistIDQuery(viewID)}
+            action={setDisplayViewScenePlaylistID(viewID)}
+            create={() => {}}
+            // create={useCreateScenePlaylistMutation(viewID)}
+          />
+        </Collapse>
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={xSelector}
+          action={xAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-x-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'X:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={ySelector}
+          action={yAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-y-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Y:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={zSelector}
+          action={zAction}
+          min={0}
+          max={10}
+          labelledBy="display-view-z-slider"
+          label={{
+            text: 'Z:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 1,
+            InputProps: {
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  disableTypography
+                  sx={{ color: 'transparent' }}
+                >
+                  %
+                </InputAdornment>
+              )
+            }
+          }}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={widthSelector}
+          action={widthAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-width-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Width:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={heightSelector}
+          action={heightAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-height-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Height:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <BaseSlider
+          selector={opacitySelector}
+          action={opacityAction}
+          min={0}
+          max={100}
+          labelledBy="display-view-opacity-slider"
+          format={{ type: 'percent' }}
+          label={{
+            text: 'Opacity:',
+            variant: 'body1',
+            color: 'text.primary',
+            appendValue: true
+          }}
+          textField={{
+            className: classes.endInput,
+            step: 5
+          }}
+        />
+      </Grid2>
+    </Grid2>
+  )
+}
+
+;(DisplayViewSettings as any).displayName = 'DisplayViewSettings'
+export default DisplayViewSettings

@@ -14,7 +14,7 @@ export default function TokenForm() {
     try {
       const { data } = await tokenLogin(token)
       if (data) {
-        navigate('/scenes')
+        navigate('/')
       }
     } catch (error) {
       console.error('A problem occurred with your fetch operation: ', error)

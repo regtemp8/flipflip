@@ -244,7 +244,7 @@ function ConfigForm() {
               color="inherit"
               aria-label="Back"
               onClick={() => {
-                navigate('/')
+                navigate(-1)
               }}
               size="large"
             >
@@ -310,7 +310,9 @@ function ConfigForm() {
               )}
               tabIndex={0}
               disabled={scene == null}
-              component={(props) => <RouterLink to={tabRoutes[0]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[0]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-1"
@@ -324,7 +326,9 @@ function ConfigForm() {
               )}
               tabIndex={1}
               disabled={scene == null}
-              component={(props) => <RouterLink to={tabRoutes[1]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[1]} {...props} />
+              )}
             />
             <Tab
               id="vertical-tab-2"
@@ -337,7 +341,9 @@ function ConfigForm() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={2}
-              component={(props) => <RouterLink to={tabRoutes[2]} {...props} />}
+              component={(props) => (
+                <RouterLink replace to={tabRoutes[2]} {...props} />
+              )}
             />
           </Tabs>
         </div>
