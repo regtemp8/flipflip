@@ -41,7 +41,7 @@ function SceneCard(props: SceneCardProps) {
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
         <CardActionArea
-          component={(props) => <Link to={`${sceneID}`} {...props} />}
+          component={(props) => <Link to={`scenes/${sceneID}`} {...props} />}
         >
           <CardContent>
             <Typography component="h2" variant="h6">

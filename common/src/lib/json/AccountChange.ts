@@ -1,5 +1,5 @@
 export type AccountChange = {
-    current: string
-    new: string
-    confirm: string
-}
+  current: string;
+  new: string;
+  confirm: string;
+};

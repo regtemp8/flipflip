@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import debounce from 'debounce'
 import { Credentials } from '../../types/credentials'
 import {
   AccountChange,
@@ -13,7 +12,11 @@ import {
   SceneGroup,
   SceneGroupItem,
   ThemeSettings,
-  Tutorials
+  Tutorials,
+  Tag,
+  ContentSource,
+  Clip,
+  WeightGroup
 } from 'flipflip-common'
 
 // TODO check all tag types, you've added new ones
@@ -326,6 +329,21 @@ export const flipflipApi = createApi({
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
+    getSceneWeightGroups: builder.query<WeightGroup[], number>({
+      query: (id) => `api/scenes/${id}/weight-groups`,
+      providesTags: (weightGroups, error, id) =>
+        weightGroups != null ? [{ type: 'SceneWeightGroups', id }] : []
+    }),
+    getSceneScriptPlaylists: builder.query<string[], number>({
+      query: (id) => `api/scenes/${id}/script-playlists`,
+      providesTags: (playlists, error, id) =>
+        playlists != null ? [{ type: 'SceneScriptPlaylists', id }] : []
+    }),
+    getSceneAudioPlaylists: builder.query<string[], number>({
+      query: (id) => `api/scenes/${id}/audio-playlists`,
+      providesTags: (playlists, error, id) =>
+        playlists != null ? [{ type: 'SceneAudioPlaylists', id }] : []
+    }),
     getSceneDisableWeightOptions: builder.query<boolean, number>({
       query: (id) => `api/scenes/${id}/disable-weight-options`,
       providesTags: (result, error, id) =>
@@ -354,6 +372,109 @@ export const flipflipApi = createApi({
           // TODO implement userId checks (403)
           if (status === 412 || status === 403) {
             dispatch(flipflipApi.util.invalidateTags([{ type: 'Scene', id }]))
+          }
+        })
+      }
+    }),
+    addSceneScriptPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
+      query: ({ id }) => ({
+        url: `api/scenes/${id}/script-playlists`,
+        method: 'POST'
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    deleteSceneScriptPlaylist: builder.mutation<
+      void,
+      { sceneID: number; playlistID: number }
+    >({
+      query: ({ sceneID, playlistID }) => ({
+        url: `api/scenes/${sceneID}/script-playlists/${playlistID}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    addSceneAudioPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
+      query: ({ id }) => ({
+        url: `api/scenes/${id}/audio-playlists`,
+        method: 'POST'
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    deleteSceneAudioPlaylist: builder.mutation<
+      void,
+      { sceneID: number; playlistID: number }
+    >({
+      query: ({ sceneID, playlistID }) => ({
+        url: `api/scenes/${sceneID}/audio-playlists/${playlistID}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    getTag: builder.query<Tag, number>({
+      query: (id) => `api/tags/${id}`,
+      providesTags: (tag) => (tag != null ? [{ type: 'Tag', id: tag.id }] : [])
+    }),
+    getClip: builder.query<Clip, number>({
+      query: (id) => `api/clips/${id}`,
+      providesTags: (clip) =>
+        clip != null ? [{ type: 'Clip', id: clip.id }] : []
+    }),
+    updateClip: builder.mutation<void, Pick<Clip, 'id'> & Partial<Clip>>({
+      query: ({ id, ...patch }) => ({
+        url: `api/clips/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(flipflipApi.util.invalidateTags([{ type: 'Clip', id }]))
+          }
+        })
+      }
+    }),
+    getContentSource: builder.query<ContentSource, number>({
+      query: (id) => `api/content-sources/${id}`,
+      providesTags: (source) =>
+        source != null ? [{ type: 'ContentSource', id: source.id }] : []
+    }),
+    updateContentSource: builder.mutation<
+      void,
+      Pick<ContentSource, 'id'> & Partial<ContentSource>
+    >({
+      query: ({ id, ...patch }) => ({
+        url: `api/content-sources/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'ContentSource', id }])
+            )
           }
         })
       }
@@ -399,8 +520,20 @@ export const {
   useGetSystemFontsQuery,
   useDefaultConfigMutation,
   useGetSceneQuery,
+  useGetSceneWeightGroupsQuery,
+  useGetSceneScriptPlaylistsQuery,
+  useGetSceneAudioPlaylistsQuery,
   useGetSceneDisableWeightOptionsQuery,
   useGetSceneHasBPMQuery,
   useUpdateSceneMutation,
-  useGetSceneSettingsQuery
+  useGetSceneSettingsQuery,
+  useAddSceneScriptPlaylistMutation,
+  useDeleteSceneScriptPlaylistMutation,
+  useAddSceneAudioPlaylistMutation,
+  useDeleteSceneAudioPlaylistMutation,
+  useGetTagQuery,
+  useGetClipQuery,
+  useUpdateClipMutation,
+  useGetContentSourceQuery,
+  useUpdateContentSourceMutation
 } = flipflipApi

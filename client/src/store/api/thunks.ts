@@ -3,6 +3,8 @@ import { AppDispatch } from '../store'
 import { flipflipApi } from './slice'
 import {
   CacheSettings,
+  Clip,
+  ContentSource,
   DisplaySettings,
   GeneralSettings,
   RemoteSettings,
@@ -17,6 +19,105 @@ export const refreshConnectToken = () => {
         forceRefetch: true
       })
     )
+  }
+}
+
+const updateLocalClip = (update: Pick<Clip, 'id'> & Partial<Clip>) => {
+  return flipflipApi.util.updateQueryData('getClip', update.id, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemoteClip = debounce(
+  (update: Pick<Clip, 'id'> & Partial<Clip>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updateClip.initiate(update))
+  },
+  250
+)
+
+const updateClip = (update: Pick<Clip, 'id'> & Partial<Clip>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalClip(update))
+    updateRemoteClip(update, dispatch)
+  }
+}
+
+export const setClipEnabled = (id: number) => {
+  return (enabled: boolean) => {
+    return updateClip({ id, disabled: !enabled })
+  }
+}
+
+const updateLocalContentSource = (
+  update: Pick<ContentSource, 'id'> & Partial<ContentSource>
+) => {
+  return flipflipApi.util.updateQueryData(
+    'getContentSource',
+    update.id,
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
+}
+
+const updateRemoteContentSource = debounce(
+  (
+    update: Pick<ContentSource, 'id'> & Partial<ContentSource>,
+    dispatch: AppDispatch
+  ) => {
+    dispatch(flipflipApi.endpoints.updateContentSource.initiate(update))
+  },
+  250
+)
+
+const updateContentSource = (
+  update: Pick<ContentSource, 'id'> & Partial<ContentSource>
+) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalContentSource(update))
+    updateRemoteContentSource(update, dispatch)
+  }
+}
+
+export const setContentSourceDirOfSources = (id: number) => {
+  return (dirOfSources: boolean) => {
+    return updateContentSource({ id, dirOfSources })
+  }
+}
+
+export const setContentSourceSubtitleFile = (id: number) => {
+  return (subtitleFile: string) => {
+    return updateContentSource({ id, subtitleFile })
+  }
+}
+
+export const setContentSourceRedditFunc = (id: number) => {
+  return (redditFunc: string) => {
+    return updateContentSource({ id, redditFunc })
+  }
+}
+
+export const setContentSourceRedditTime = (id: number) => {
+  return (redditTime: string) => {
+    return updateContentSource({ id, redditTime })
+  }
+}
+
+export const setContentSourceIncludeReplies = (id: number) => {
+  return (includeReplies: boolean) => {
+    return updateContentSource({ id, includeReplies })
+  }
+}
+
+export const setContentSourceIncludeRetweets = (id: number) => {
+  return (includeRetweets: boolean) => {
+    return updateContentSource({ id, includeRetweets })
+  }
+}
+
+export const setContentSourceWeight = (id: number) => {
+  return (weight: number) => {
+    return updateContentSource({ id, weight })
   }
 }
 
@@ -37,6 +138,24 @@ const updateScene = (update: Pick<Scene, 'id'> & Partial<Scene>) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalScene(update))
     updateRemoteScene(update, dispatch)
+  }
+}
+
+export const setSceneGeneratorMax = (id: number) => {
+  return (generatorMax: number) => {
+    return updateScene({ id, generatorMax })
+  }
+}
+
+export const setSceneTextEnabled = (id: number) => {
+  return (textEnabled: boolean) => {
+    return updateScene({ id, textEnabled })
+  }
+}
+
+export const setSceneAudioEnabled = (id: number) => {
+  return (audioEnabled: boolean) => {
+    return updateScene({ id, audioEnabled })
   }
 }
 

@@ -63,4 +63,36 @@ router.patch('/:id', async (req, res) => {
   res.status(status).end()
 })
 
+router.get('/:id/weight-groups', (req, res) => {
+  res.status(501).end()
+})
+
+router.get('/:id/script-playlists', (req, res) => {
+  res.status(501).end()
+})
+
+router.post('/:id/script-playlists', (req, res) => {
+  // create playlist
+  res.status(501).end()
+})
+
+router.delete('/:id/script-playlists', (req, res) => {
+  // delete 1 playlist
+  res.status(501).end()
+})
+
+router.get('/:id/audio-playlists', (req, res) => {
+  res.status(501).end()
+})
+
+router.post('/:id/audio-playlists', (req, res) => {
+  // create playlist
+  res.status(501).end()
+})
+
+router.delete('/:id/audio-playlists', (req, res) => {
+  // delete 1 playlist
+  res.status(501).end()
+})
+
 export default router

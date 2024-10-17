@@ -1,5 +1,4 @@
 import { LibrarySource } from './LibrarySource';
-
 import { ScraperHelpers } from './ScraperHelpers';
 
 export type ScrapeResult = {

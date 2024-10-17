@@ -10,6 +10,7 @@ import { Provider } from 'react-redux'
 import PrivateRoute from './common/PrivateRoute'
 import Login from './login/Login'
 import Account from './account/Account'
+import SceneDetail from './sceneDetail/SceneDetail'
 import ScenePicker from './scenePicker/ScenePicker'
 import { defaultTheme } from '../theme'
 import SystemSnack from './SystemSnack'
@@ -23,14 +24,6 @@ const App = () => {
           <ErrorBoundary>
             <CssBaseline />
             <Routes>
-              <Route
-                path="/*"
-                element={
-                  <PrivateRoute>
-                    <ScenePicker />
-                  </PrivateRoute>
-                }
-              />
               <Route path="/login" element={<Login />} />
               <Route
                 path="/account/*"
@@ -45,6 +38,22 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <ConfigForm />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/scenes/:id/*"
+                element={
+                  <PrivateRoute>
+                    <SceneDetail />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/*"
+                element={
+                  <PrivateRoute>
+                    <ScenePicker />
                   </PrivateRoute>
                 }
               />

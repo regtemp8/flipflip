@@ -202,7 +202,7 @@ const tabRoutes = [
   '/settings/general'
 ]
 const getOpenTab = (pathname: string) => {
-  let index = tabRoutes.findIndex((tab) => tab === pathname)
+  const index = tabRoutes.findIndex((tab) => tab === pathname)
   return pathname.startsWith('/settings') && index === -1
     ? tabRoutes.length - 1
     : index

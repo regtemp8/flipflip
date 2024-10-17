@@ -391,7 +391,7 @@ const useStyles = makeStyles()((theme: Theme) => {
 
 const tabRoutes = ['/scenes', '/generators', '/displays', '/playlists']
 const getOpenTab = (pathname: string) => {
-  let index = tabRoutes.findIndex((tab) => tab === pathname)
+  const index = tabRoutes.findIndex((tab) => tab === pathname)
   return index === -1 ? 0 : index
 }
 

@@ -1,8 +1,8 @@
-import { SceneGroupItem } from "./SceneGroupItem"
+import { SceneGroupItem } from './SceneGroupItem';
 
 export type SceneGroup = {
-    id: number
-    type: string
-    name: string
-    items: SceneGroupItem[]
-  }
+  id: number;
+  type: string;
+  name: string;
+  items: SceneGroupItem[];
+};

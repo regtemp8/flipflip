@@ -15,6 +15,9 @@ import playlists from './routes/playlists'
 import version from './routes/version'
 import tutorials from './routes/tutorials'
 import settings from './routes/settings'
+import contentSources from './routes/contentSources'
+import clips from './routes/clips'
+import tags from './routes/tags'
 import db from './db/database'
 import { getSaveDir } from './utils'
 
@@ -56,6 +59,9 @@ const init = () => {
   app.use('/api/settings', settings)
   app.use('/api/backups', backups)
   app.use('/api/system-fonts', systemFonts)
+  app.use('/api/content-sources', contentSources)
+  app.use('/api/clips', clips)
+  app.use('/api/tags', tags)
 
   // start the Express server
   app.listen(PORT, () => {

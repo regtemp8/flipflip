@@ -189,7 +189,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 const tabRoutes = ['/account/connect', '/account/manage']
 const tabTitles = ['Connect Devices', 'Manage Account']
 const getOpenTab = (pathname: string) => {
-  let index = tabRoutes.findIndex((tab) => tab === pathname)
+  const index = tabRoutes.findIndex((tab) => tab === pathname)
   return pathname.startsWith('/account') && index === -1 ? 0 : index
 }
 
@@ -233,14 +233,16 @@ function Account() {
             {tabTitles[openTab]}
           </Typography>
           <div className={classes.fill} />
-          {openTab == 0 && <Fab
-            className={classes.playButton}
-            color="secondary"
-            aria-label="Refresh token"
-            onClick={() => dispatch(refreshConnectToken())}
-          >
-            <RefreshOutlinedIcon fontSize="large" />
-          </Fab>}
+          {openTab == 0 && (
+            <Fab
+              className={classes.playButton}
+              color="secondary"
+              aria-label="Refresh token"
+              onClick={() => dispatch(refreshConnectToken())}
+            >
+              <RefreshOutlinedIcon fontSize="large" />
+            </Fab>
+          )}
         </Toolbar>
       </AppBar>
 

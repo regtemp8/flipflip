@@ -35,26 +35,10 @@ import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
 import { WeightGroup } from '../data/migrate-data-json/WeightGroup'
 import {
-  BT,
-  EA,
-  GO,
-  HTF,
-  IF,
-  IT,
   MVF,
-  OF,
-  OT,
   PLT,
   RP,
-  SC,
   SG,
-  SL,
-  SOF,
-  STF,
-  TF,
-  VO,
-  VTF,
-  WF,
   convertGridIDToSceneID,
   convertPlaylistIDToSceneID,
   getRandomColor

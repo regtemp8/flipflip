@@ -290,7 +290,7 @@ function APICard() {
 
     // Tumblr oauth
     // TODO re-implement Tumblr oauth flow
-    let data: any | undefined = undefined
+    const data: any | undefined = undefined
     try {
       // data = await flipflip().api.tumblrOAuth(
       //   requestTokenUrl,
@@ -333,7 +333,7 @@ function APICard() {
         showError(e.message)
       })
 
-    let data: any | undefined = undefined
+    const data: any | undefined = undefined
     // TODO re-implement Reddit oauth flow
     try {
       // data = await flipflip().api.redditOAuth(
@@ -364,7 +364,7 @@ function APICard() {
     const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
 
     // Twitter OAuth
-    let data: any | undefined = undefined
+    const data: any | undefined = undefined
     try {
       // TODO re-implement twitter oauth flow
       // data = await flipflip().api.twitterOAuth(

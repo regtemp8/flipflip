@@ -1,5 +1,7 @@
 import {
   useGetCacheSettingsQuery,
+  useGetClipQuery,
+  useGetContentSourceQuery,
   useGetDisplaySettingsQuery,
   useGetGeneralSettingsQuery,
   useGetRemoteSettingsQuery,
@@ -7,6 +9,63 @@ import {
   useGetThemeQuery
 } from './slice'
 
+export const useGetClipEnabledQuery = (id: number) => {
+  return useGetClipQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.disabled === false })
+  })
+}
+
+export const useGetContentSourceDirOfSourcesQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.dirOfSources })
+  })
+}
+export const useGetContentSourceSubtitleFileQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.subtitleFile })
+  })
+}
+export const useGetContentSourceRedditFuncQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.redditFunc })
+  })
+}
+export const useGetContentSourceRedditTimeQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.redditTime })
+  })
+}
+export const useGetContentSourceIncludeRepliesQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.includeReplies })
+  })
+}
+export const useGetContentSourceIncludeRetweetsQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.includeRetweets })
+  })
+}
+export const useGetContentSourceWeightQuery = (id: number) => {
+  return useGetContentSourceQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.weight })
+  })
+}
+
+export const useGetSceneGeneratorMaxQuery = (id: number) => {
+  return useGetSceneQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.generatorMax })
+  })
+}
+export const useGetSceneAudioEnabledQuery = (id: number) => {
+  return useGetSceneQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.audioEnabled })
+  })
+}
+export const useGetSceneTextEnabledQuery = (id: number) => {
+  return useGetSceneQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.textEnabled })
+  })
+}
 export const useGetSceneBackForthQuery = (id: number) => {
   return useGetSceneQuery(id, {
     selectFromResult: ({ data }) => ({ data: data?.backForth })

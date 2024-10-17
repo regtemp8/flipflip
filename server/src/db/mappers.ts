@@ -6,7 +6,10 @@ import {
   SceneGroup,
   ThemeSettings,
   RemoteSettings,
-  Tutorials
+  Tutorials,
+  ContentSource,
+  Clip,
+  Tag
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -15,18 +18,23 @@ import {
   GeneralSettings as GeneralSettingsRow,
   DisplaySettings as DisplaySettingsRow,
   RemoteSettings as RemoteSettingsRow,
-  CacheSettings as CacheSettingsRow
+  CacheSettings as CacheSettingsRow,
+  ContentSource as ContentSourceRow,
+  Clip as ClipRow,
+  Tag as TagRow
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
-import { toBoolean, toNumber, toNumberOpt } from './utils'
+import { toBoolean, toNumberOpt } from './utils'
 import { SceneUpdate } from './SceneRepository'
-import { text } from 'stream/consumers'
 import { ThemeUpdate } from './ThemeRepository'
 import { GeneralSettingsUpdate } from './GeneralSettingsRepository'
 import { RemoteSettingsUpdate } from './RemoteSettingsRepository'
 import { DisplaySettingsUpdate } from './DisplaySettingsRepository'
 import { CacheSettingsUpdate } from './CacheSettingsRepository'
+import { ContentSourceUpdate } from './ContentSourceRepository'
+import { ClipUpdate } from './ClipRepository'
+import { TagUpdate } from './TagRepository'
 
 export function toSceneGroups(rows: SceneGroupRow[], type: string) {
   const groups: Record<number, SceneGroup> = {}
@@ -967,5 +975,136 @@ export function toCacheSettingsUpdate(
     enabled: toNumberOpt(enabled),
     directory,
     maxSize
+  }
+}
+
+export function toContentSource(row: ContentSourceRow): ContentSource {
+  const {
+    count,
+    countComplete,
+    id,
+    lastCheck,
+    localDirOfSources,
+    marked,
+    offline,
+    redditFunc,
+    redditTime,
+    twitterIncludeReplies,
+    twitterIncludeRetweets,
+    url,
+    videoDuration,
+    videoResolution,
+    videoSubtitleFile,
+    weight
+  } = row
+
+  return {
+    id: id as number,
+    url,
+    offline: toBoolean(offline),
+    marked: toBoolean(marked),
+    lastCheck: opt<number>(lastCheck),
+    tags: [],
+    clips: [],
+    disabledClips: [],
+    blacklist: [],
+    count,
+    countComplete: toBoolean(countComplete),
+    weight,
+    dirOfSources: toBoolean(localDirOfSources),
+    subtitleFile: opt<string>(videoSubtitleFile),
+    duration: opt<number>(videoDuration),
+    resolution: opt<number>(videoResolution),
+    redditFunc: opt<string>(redditFunc),
+    redditTime: opt<string>(redditTime),
+    includeRetweets: toBoolean(twitterIncludeRetweets),
+    includeReplies: toBoolean(twitterIncludeReplies)
+  }
+}
+
+function opt<T>(value: T | null): T | undefined {
+  return value ?? undefined
+}
+
+export function toContentSourceUpdate(
+  source: Partial<ContentSource>
+): ContentSourceUpdate {
+  const {
+    count,
+    countComplete,
+    lastCheck,
+    dirOfSources,
+    marked,
+    offline,
+    redditFunc,
+    redditTime,
+    includeReplies,
+    includeRetweets,
+    url,
+    duration,
+    resolution,
+    subtitleFile,
+    weight
+  } = source
+
+  return {
+    count,
+    countComplete: toNumberOpt(countComplete),
+    lastCheck,
+    localDirOfSources: toNumberOpt(dirOfSources),
+    marked: toNumberOpt(marked),
+    offline: toNumberOpt(offline),
+    redditFunc,
+    redditTime,
+    twitterIncludeReplies: toNumberOpt(includeReplies),
+    twitterIncludeRetweets: toNumberOpt(includeRetweets),
+    url,
+    videoDuration: duration,
+    videoResolution: resolution,
+    videoSubtitleFile: subtitleFile,
+    weight
+  }
+}
+
+export function toClip(row: ClipRow): Clip {
+  const { disabled, end, id, start, volume } = row
+
+  return {
+    id: id as number,
+    disabled: toBoolean(disabled),
+    start: opt<number>(start),
+    end: opt<number>(end),
+    volume: opt<number>(volume),
+    tags: []
+  }
+}
+
+export function toClipUpdate(clip: Partial<Clip>): ClipUpdate {
+  const { disabled, start, end, volume } = clip
+
+  return {
+    disabled: toNumberOpt(disabled),
+    end,
+    start,
+    volume
+  }
+}
+
+export function toTag(row: TagRow): Tag {
+  const { id, name, phraseString } = row
+
+  return {
+    id: id as number,
+    name,
+    phraseString: opt<string>(phraseString)
+  }
+}
+
+export function toTagUpdate(tag: Partial<Tag>): TagUpdate {
+  const { name, phraseString } = tag
+
+  return {
+    name,
+    phraseString
   }
 }

@@ -1,16 +1,16 @@
 export type DisplaySettings = {
-  fullScreen: boolean
-  clickToProgress: boolean
-  clickToProgressWhilePlaying: boolean
-  startImmediately: boolean
-  easingControls: boolean
-  audioAlert: boolean
+  fullScreen: boolean;
+  clickToProgress: boolean;
+  clickToProgressWhilePlaying: boolean;
+  startImmediately: boolean;
+  easingControls: boolean;
+  audioAlert: boolean;
 
-  minImageSize: number
-  minVideoSize: number
-  maxInMemory: number
-  maxInHistory: number
-  maxLoadingAtOnce: number
+  minImageSize: number;
+  minVideoSize: number;
+  maxInMemory: number;
+  maxInHistory: number;
+  maxLoadingAtOnce: number;
 
-  ignoredTags: string[]
-}
+  ignoredTags: string[];
+};

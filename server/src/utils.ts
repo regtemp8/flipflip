@@ -1,6 +1,6 @@
 export const isMacOSX = process.platform === 'darwin'
 
-export function getSaveDir(useNodeEnv: boolean = true) {
+export function getSaveDir(useNodeEnv = true) {
   if (useNodeEnv && process.env.NODE_ENV === 'development') {
     return '/tmp'
   }
