@@ -531,3 +531,12 @@ export async function updateScene(id: number, update: SceneUpdate) {
     .where('id', '=', id)
     .execute()
 }
+
+export async function findSceneIds(): Promise<number[]> {
+  return await db()
+    .query()
+    .selectFrom('scene')
+    .select('id')
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
+}

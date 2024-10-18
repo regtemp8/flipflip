@@ -1,7 +1,7 @@
 import { Button, Grid2, TextField } from '@mui/material'
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Credentials } from '../../types/credentials'
+import { Credentials } from '../../data/Credentials'
 import { usePasswordLoginMutation } from '../../store/api/slice'
 
 export default function PasswordForm() {

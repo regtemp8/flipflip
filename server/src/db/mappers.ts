@@ -10,7 +10,12 @@ import {
   ContentSource,
   Clip,
   Tag,
-  Display
+  Display,
+  Playlist,
+  SceneGroupItem,
+  Audio,
+  CaptionScript,
+  FontSettings
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -23,7 +28,11 @@ import {
   ContentSource as ContentSourceRow,
   Clip as ClipRow,
   Tag as TagRow,
-  Display as DisplayRow
+  Display as DisplayRow,
+  Playlist as PlaylistRow,
+  Audio as AudioRow,
+  CaptionScript as CaptionScriptRow,
+  FontSettings as FontSettingsRow
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
@@ -38,8 +47,19 @@ import { ContentSourceUpdate } from './ContentSourceRepository'
 import { ClipUpdate } from './ClipRepository'
 import { TagUpdate } from './TagRepository'
 import { DisplayUpdate } from './DisplayRepository'
+import { PlaylistUpdate } from './PlaylistRepository'
+import { PlaylistGroupRow } from './types/PlaylistGroupRow'
+import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
+import { AudioUpdate } from './AudioRepository'
+import {
+  CaptionScriptUpdate,
+  FontSettingsUpdate
+} from './CaptionScriptRepository'
 
-export function toSceneGroups(rows: SceneGroupRow[], type: string) {
+export function toSceneGroups(
+  rows: Array<SceneGroupRow | PlaylistGroupRow>,
+  type: string
+): Record<number, SceneGroup> {
   const groups: Record<number, SceneGroup> = {}
   for (const row of rows) {
     let group = groups[row.id as number]
@@ -60,12 +80,17 @@ export function toSceneGroups(rows: SceneGroupRow[], type: string) {
   return groups
 }
 
-export function toSceneGroupItems(rows: SceneGroupItemRow[]) {
+export function toSceneGroupItems(
+  rows: Array<SceneGroupItemRow | PlaylistGroupItemRow>
+): SceneGroupItem[] {
   return rows.map((row) => toSceneGroupItem(row))
 }
 
-export function toSceneGroupItem(row: SceneGroupItemRow) {
-  return { id: row.itemId as number, name: row.itemName }
+export function toSceneGroupItem(
+  row: SceneGroupItemRow | PlaylistGroupItemRow
+): SceneGroupItem {
+  const type = 'itemType' in row ? row.itemType : undefined
+  return { id: row.itemId as number, name: row.itemName, type }
 }
 
 export function toScene(row: SceneRow): Scene {
@@ -1126,4 +1151,213 @@ export function toDisplayUpdate(display: Partial<Display>): DisplayUpdate {
   const { name } = display
 
   return { name }
+}
+
+export function toPlaylist(row: PlaylistRow): Playlist {
+  const { id, name, repeat, shuffle, type } = row
+
+  return {
+    id: id as number,
+    name,
+    type,
+    items: [],
+    shuffle: toBoolean(shuffle),
+    repeat
+  }
+}
+
+export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
+  const { name, type, shuffle, repeat } = playlist
+
+  return {
+    name,
+    repeat,
+    shuffle: toNumberOpt(shuffle),
+    type
+  }
+}
+
+export function toAudio(row: AudioRow): Audio {
+  const {
+    album,
+    artist,
+    bpm,
+    comment,
+    duration,
+    id,
+    marked,
+    name,
+    nextSceneAtEnd,
+    playedCount,
+    speed,
+    stopAtEnd,
+    thumb,
+    tick,
+    tickBpmMulti,
+    tickDelay,
+    tickMaxDelay,
+    tickMinDelay,
+    tickMode,
+    tickSinRate,
+    trackNum,
+    url,
+    volume
+  } = row
+
+  return {
+    id: id as number,
+    url,
+    marked: toBoolean(marked),
+    tags: [],
+    volume,
+    speed,
+    stopAtEnd: toBoolean(stopAtEnd),
+    nextSceneAtEnd: toBoolean(nextSceneAtEnd),
+    tick: toBoolean(tick),
+    tickMode,
+    tickDelay,
+    tickMinDelay,
+    tickMaxDelay,
+    tickSinRate,
+    tickBPMMulti: tickBpmMulti,
+    bpm,
+    thumb: opt<string>(thumb),
+    name: opt<string>(name),
+    artist: opt<string>(artist),
+    album: opt<string>(album),
+    trackNum: opt<number>(trackNum),
+    duration: opt<number>(duration),
+    comment: opt<string>(comment),
+    playedCount
+  }
+}
+
+export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
+  const {
+    url,
+    marked,
+    volume,
+    speed,
+    stopAtEnd,
+    nextSceneAtEnd,
+    tick,
+    tickMode,
+    tickDelay,
+    tickMinDelay,
+    tickMaxDelay,
+    tickSinRate,
+    tickBPMMulti,
+    bpm,
+    thumb,
+    name,
+    artist,
+    album,
+    trackNum,
+    duration,
+    comment,
+    playedCount
+  } = audio
+
+  return {
+    album,
+    artist,
+    bpm,
+    comment,
+    duration,
+    marked: toNumberOpt(marked),
+    name,
+    nextSceneAtEnd: toNumberOpt(nextSceneAtEnd),
+    playedCount,
+    speed,
+    stopAtEnd: toNumberOpt(stopAtEnd),
+    thumb,
+    tick: toNumberOpt(tick),
+    tickBpmMulti: tickBPMMulti,
+    tickDelay,
+    tickMaxDelay,
+    tickMinDelay,
+    tickMode,
+    tickSinRate,
+    trackNum,
+    url,
+    volume
+  }
+}
+
+export function toCaptionScript(row: CaptionScriptRow): CaptionScript {
+  const {
+    id,
+    marked,
+    nextSceneAtEnd,
+    opacity,
+    script,
+    stopAtEnd,
+    syncWithAudio,
+    url
+  } = row
+
+  return {
+    id: id as number,
+    url: opt<string>(url),
+    script: opt<string>(script),
+    marked: toBoolean(marked),
+    tags: [],
+    opacity,
+    stopAtEnd: toBoolean(stopAtEnd),
+    nextSceneAtEnd: toBoolean(nextSceneAtEnd),
+    syncWithAudio: toBoolean(syncWithAudio)
+  }
+}
+
+export function toCaptionScriptUpdate(
+  captionScript: Partial<CaptionScript>
+): CaptionScriptUpdate {
+  const {
+    url,
+    script,
+    marked,
+    opacity,
+    stopAtEnd,
+    nextSceneAtEnd,
+    syncWithAudio
+  } = captionScript
+
+  return {
+    marked: toNumberOpt(marked),
+    nextSceneAtEnd: toNumberOpt(nextSceneAtEnd),
+    opacity,
+    script,
+    stopAtEnd: toNumberOpt(stopAtEnd),
+    syncWithAudio: toNumberOpt(syncWithAudio),
+    url
+  }
+}
+
+export function toFontSettings(row: FontSettingsRow): FontSettings {
+  const { border, borderColor, borderpx, color, fontFamily, fontSize } = row
+
+  return {
+    color,
+    fontSize,
+    fontFamily,
+    border: toBoolean(border),
+    borderpx,
+    borderColor
+  }
+}
+
+export function toFontSettingsUpdate(
+  fontSettings: Partial<FontSettings>
+): FontSettingsUpdate {
+  const { color, fontSize, fontFamily, border, borderpx, borderColor } =
+    fontSettings
+
+  return {
+    border: toNumberOpt(border),
+    borderColor,
+    borderpx,
+    color,
+    fontFamily,
+    fontSize
+  }
 }

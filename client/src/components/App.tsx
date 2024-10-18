@@ -16,6 +16,7 @@ import { defaultTheme } from '../theme'
 import SystemSnack from './SystemSnack'
 import ConfigForm from './config/ConfigForm'
 import DisplaySetup from './config/DisplaySetup'
+import PlaylistSetup from './config/PlaylistSetup'
 
 const App = () => {
   return (
@@ -55,6 +56,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <DisplaySetup />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/playlists/:id/*"
+                element={
+                  <PrivateRoute>
+                    <PlaylistSetup />
                   </PrivateRoute>
                 }
               />

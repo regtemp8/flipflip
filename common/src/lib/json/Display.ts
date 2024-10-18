@@ -1,5 +1,5 @@
 export type Display = {
-  id: number
-  name: string
-  views: number[]
-}
+  id: number;
+  name: string;
+  views: number[];
+};

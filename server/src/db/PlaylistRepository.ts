@@ -1,9 +1,13 @@
 import { PlaylistType } from 'flipflip-common'
 import db from './database'
-import { SceneGroupRow } from './types/SceneGroupRow'
-import { SceneGroupItemRow } from './types/SceneGroupItemRow'
+import { PlaylistGroupRow } from './types/PlaylistGroupRow'
+import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
+import { Playlist } from './types/generated'
+import { Updateable } from 'kysely'
 
-export async function findPlaylistsWithSceneGroup(): Promise<SceneGroupRow[]> {
+export async function findPlaylistsWithSceneGroup(): Promise<
+  PlaylistGroupRow[]
+> {
   return await db()
     .query()
     .selectFrom('playlist as p')
@@ -13,29 +17,71 @@ export async function findPlaylistsWithSceneGroup(): Promise<SceneGroupRow[]> {
       'sg.name',
       'sg.type',
       'p.id as itemId',
-      'p.name as itemName'
+      'p.name as itemName',
+      'p.type as itemType'
     ])
     .execute()
 }
 
 export async function findPlaylistsWithoutSceneGroup(): Promise<
-  SceneGroupItemRow[]
+  PlaylistGroupItemRow[]
 > {
   return await db()
     .query()
     .selectFrom('playlist as p')
-    .select(['p.id as itemId', 'p.name as itemName'])
+    .select(['p.id as itemId', 'p.name as itemName', 'p.type as itemType'])
     .where('p.sceneGroupId', 'is', null)
     .execute()
 }
 
 export async function findPlaylistOptionsByType(
   type: PlaylistType
-): Promise<SceneGroupItemRow[]> {
+): Promise<PlaylistGroupItemRow[]> {
   return await db()
     .query()
     .selectFrom('playlist as p')
-    .select(['p.id as itemId', 'p.name as itemName'])
+    .select(['p.id as itemId', 'p.name as itemName', 'p.type as itemType'])
     .where('p.type', '=', type)
     .execute()
+}
+
+export async function findPlaylistIds(): Promise<number[]> {
+  return await db()
+    .query()
+    .selectFrom('playlist')
+    .select('id')
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
+}
+
+export async function findPlaylistById(id: number): Promise<Playlist> {
+  return await db()
+    .query()
+    .selectFrom('playlist')
+    .selectAll()
+    .where('id', '=', id)
+    .executeTakeFirstOrThrow()
+}
+
+export type PlaylistUpdate = Updateable<Playlist>
+export async function updatePlaylist(id: number, update: PlaylistUpdate) {
+  return await db()
+    .query()
+    .updateTable('playlist')
+    .set(update)
+    .where('id', '=', id)
+    .execute()
+}
+
+export async function deletePlaylist(id: number) {
+  return await db()
+    .query()
+    .deleteFrom('playlist')
+    .where('id', '=', id)
+    .execute()
+}
+
+export async function clonePlaylist(id: number) {
+  // TODO clone, also all child items
+  return null
 }

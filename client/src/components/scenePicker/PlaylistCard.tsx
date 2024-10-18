@@ -14,6 +14,7 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { PLT } from 'flipflip-common'
 import Jiggle from '../animations/Jiggle'
+import { Link as RouterLink } from 'react-router-dom'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -32,11 +33,10 @@ export interface PlaylistCardProps {
   name: string
   type: string
   toDelete: boolean
-  action: () => void
 }
 
 function PlaylistCard(props: PlaylistCardProps) {
-  const { playlistID, name, type, toDelete, action } = props
+  const { playlistID, name, type, toDelete } = props
   const { classes } = useStyles()
 
   return (
@@ -47,8 +47,10 @@ function PlaylistCard(props: PlaylistCardProps) {
       className={classes.scene}
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
-        <CardActionArea onClick={action}>
-          <CardContent>
+      <CardActionArea
+          component={(props) => <RouterLink {...props} to={`/playlists/${playlistID}`}/>}
+        >          
+        <CardContent>
             <Stack alignItems="center" direction="row" gap={2}>
               {type === PLT.audio && <AudiotrackIcon />}
               {type === PLT.display && <TvIcon />}

@@ -1,3 +1,4 @@
+import { FontSettingsType } from 'flipflip-common'
 import {
   useGetCacheSettingsQuery,
   useGetClipQuery,
@@ -8,8 +9,149 @@ import {
   useGetRemoteSettingsQuery,
   useGetSceneQuery,
   useGetThemeQuery,
-  useGetDisplayViewQuery
+  useGetDisplayViewQuery,
+  useGetCaptionScriptFontSettingsQuery,
+  useGetCaptionScriptQuery,
+  useGetAudioQuery
 } from './slice'
+
+export const useGetAudioHasBPMQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.bpm != null })
+  })
+}
+
+export const useGetAudioTickTFQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickMode })
+  })
+}
+
+export const useGetAudioTickDurationQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickDelay })
+  })
+}
+
+export const useGetAudioTickDurationMinQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickMinDelay })
+  })
+}
+
+export const useGetAudioTickDurationMaxQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickMaxDelay })
+  })
+}
+
+export const useGetAudioTickSinRateQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickSinRate })
+  })
+}
+
+export const useGetAudioTickBPMMultiQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tickBPMMulti })
+  })
+}
+
+export const useGetAudioStopAtEndQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.stopAtEnd })
+  })
+}
+
+export const useGetAudioNextSceneAtEndQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.nextSceneAtEnd })
+  })
+}
+
+export const useGetAudioTickQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.tick })
+  })
+}
+
+export const useGetAudioSpeedQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.speed })
+  })
+}
+
+export const useGetAudioUrlQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.url })
+  })
+}
+
+export const useGetAudioBPMQuery = (id: number) => {
+  return useGetAudioQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.bpm })
+  })
+}
+
+export const useGetCaptionScriptStopAtEndQuery = (id: number) => {
+  return useGetCaptionScriptQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.stopAtEnd })
+  })
+}
+
+export const useGetCaptionScriptNextSceneAtEndQuery = (id: number) => {
+  return useGetCaptionScriptQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.nextSceneAtEnd })
+  })
+}
+
+export const useGetCaptionScriptSyncWithAudioQuery = (id: number) => {
+  return useGetCaptionScriptQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.syncWithAudio })
+  })
+}
+
+export const useGetCaptionScriptOpacityQuery = (id: number) => {
+  return useGetCaptionScriptQuery(id, {
+    selectFromResult: ({ data }) => ({ data: data?.opacity })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsBorderQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.border })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsColorQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.color })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsBorderColorQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.borderColor })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsFontFamilyQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.fontFamily })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsFontSizeQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.fontSize })
+  })
+}
+
+export const useGetCaptionScriptFontSettingsBorderPxQuery = (id: number, type: FontSettingsType) => {
+  return useGetCaptionScriptFontSettingsQuery({id, type}, {
+    selectFromResult: ({ data }) => ({ data: data?.borderpx })
+  })
+}
 
 export const useGetDisplayViewColorQuery = (id: number) => {
   return useGetDisplayViewQuery(id, {

@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import Jiggle from '../animations/Jiggle'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { SG } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => {
@@ -49,7 +49,7 @@ function SceneCard(props: SceneCardProps) {
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
         <CardActionArea
-          component={(props) => <Link to={`${route}/${sceneID}`} {...props} />}
+          component={(props) => <RouterLink {...props} to={`${route}/${sceneID}`}/>}
         >
           <CardContent>
             <Typography component="h2" variant="h6">

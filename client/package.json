@@ -29,6 +29,7 @@
     "react-redux": "^9.1.2",
     "react-sortable-hoc": "^2.0.0",
     "react-sortablejs": "^1.5.1",
+    "react-sound": "^1.2.0",
     "react-spring": "^9.7.4",
     "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
@@ -36,6 +37,7 @@
     "tss-react": "^4.9.13",
     "use-debounce": "^10.0.4",
     "uuid": "^9.0.1",
+    "web-audio-beat-detector": "^8.1.55",
     "wretch": "^2.10.0"
   },
   "devDependencies": {
@@ -43,6 +45,7 @@
     "@types/react": "^18.3.3",
     "@types/react-color": "^2",
     "@types/react-dom": "^18.3.0",
+    "@types/react-sound": "^1.2.0",
     "@types/react-window": "^1.8.8",
     "@types/sortablejs": "^1",
     "@types/uuid": "^10.0.0",

@@ -18,6 +18,10 @@ import settings from './routes/settings'
 import contentSources from './routes/contentSources'
 import clips from './routes/clips'
 import tags from './routes/tags'
+import audios from './routes/audios'
+import captionScripts from './routes/captionScripts'
+import displayPlaylistItems from './routes/displayPlaylistItems'
+import scenePlaylistItems from './routes/scenePlaylistItems'
 import db from './db/database'
 import { getSaveDir } from './utils'
 
@@ -62,6 +66,10 @@ const init = () => {
   app.use('/api/content-sources', contentSources)
   app.use('/api/clips', clips)
   app.use('/api/tags', tags)
+  app.use('/api/audios', audios)
+  app.use('/api/caption-scripts', captionScripts)
+  app.use('api/display-playlist-items', displayPlaylistItems)
+  app.use('api/scene-playlist-items', scenePlaylistItems)
 
   // start the Express server
   app.listen(PORT, () => {

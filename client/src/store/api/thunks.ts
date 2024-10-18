@@ -2,13 +2,18 @@ import debounce from 'debounce'
 import { AppDispatch } from '../store'
 import { flipflipApi } from './slice'
 import {
+  Audio,
   CacheSettings,
+  CaptionScript,
   Clip,
   ContentSource,
   Display,
   DisplaySettings,
   DisplayView,
+  FontSettings,
+  FontSettingsType,
   GeneralSettings,
+  Playlist,
   RemoteSettings,
   Scene,
   ThemeSettings
@@ -22,6 +27,237 @@ export const refreshConnectToken = () => {
       })
     )
   }
+}
+
+const updateLocalAudio = (
+  update: Pick<Audio, 'id'> & Partial<Audio>
+) => {
+  return flipflipApi.util.updateQueryData('getAudio', update.id, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemoteAudio = debounce(
+  (update: Pick<Audio, 'id'> & Partial<Audio>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updateAudio.initiate(update))
+  },
+  250
+)
+
+const updateAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalAudio(update))
+    updateRemoteAudio(update, dispatch)
+  }
+}
+
+export const setAudioTickTF = (id: number) => {
+  return (tickMode: string) => {
+    return updateAudio({ id, tickMode })
+  }
+}
+
+export const setAudioTickDuration = (id: number) => {
+  return (tickDelay: number) => {
+    return updateAudio({ id, tickDelay })
+  }
+}
+
+export const setAudioTickDurationMin = (id: number) => {
+  return (tickMinDelay: number) => {
+    return updateAudio({ id, tickMinDelay })
+  }
+}
+
+export const setAudioTickDurationMax = (id: number) => {
+  return (tickMaxDelay: number) => {
+    return updateAudio({ id, tickMaxDelay })
+  }
+}
+
+export const setAudioTickSinRate = (id: number) => {
+  return (tickSinRate: number) => {
+    return updateAudio({ id, tickSinRate })
+  }
+}
+
+export const setAudioTickBPMMulti = (id: number) => {
+  return (tickBPMMulti: number) => {
+    return updateAudio({ id, tickBPMMulti })
+  }
+}
+
+export const setAudioStopAtEnd = (id: number) => {
+  return (stopAtEnd: boolean) => {
+    return updateAudio({ id, stopAtEnd })
+  }
+}
+
+export const setAudioNextSceneAtEnd = (id: number) => {
+  return (nextSceneAtEnd: boolean) => {
+    return updateAudio({ id, nextSceneAtEnd })
+  }
+}
+
+export const setAudioTick = (id: number) => {
+  return (tick: boolean) => {
+    return updateAudio({ id, tick })
+  }
+}
+
+export const setAudioSpeed = (id: number) => {
+  return (speed: number) => {
+    return updateAudio({ id, speed })
+  }
+}
+
+export const setAudioVolume = (id: number) => {
+  return (volume: number) => {
+    return updateAudio({ id, volume })
+  }
+}
+
+export const setAudioUrl = (id: number) => {
+  return (url: string) => {
+    return updateAudio({ id, url })
+  }
+}
+
+export const setAudioBPM = (id: number) => {
+  return (bpm: number) => {
+    return updateAudio({ id, bpm })
+  }
+}
+
+const updateLocalCaptionScript = (
+  update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
+) => {
+  return flipflipApi.util.updateQueryData('getCaptionScript', update.id, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemoteCaptionScript = debounce(
+  (update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updateCaptionScript.initiate(update))
+  },
+  250
+)
+
+const updateCaptionScript = (update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalCaptionScript(update))
+    updateRemoteCaptionScript(update, dispatch)
+  }
+}
+
+export const setCaptionScriptStopAtEnd = (id: number) => {
+  return (stopAtEnd: boolean) => {
+    return updateCaptionScript({ id, stopAtEnd })
+  }
+}
+
+export const setCaptionScriptNextSceneAtEnd = (id: number) => {
+  return (nextSceneAtEnd: boolean) => {
+    return updateCaptionScript({ id, nextSceneAtEnd })
+  }
+}
+
+export const setCaptionScriptSyncWithAudio = (id: number) => {
+  return (syncWithAudio: boolean) => {
+    return updateCaptionScript({ id, syncWithAudio })
+  }
+}
+
+export const setCaptionScriptOpacity = (id: number) => {
+  return (opacity: number) => {
+    return updateCaptionScript({ id, opacity })
+  }
+}
+
+const updateLocalCaptionScriptFontSettings = (
+  update: {id: number, type: FontSettingsType} & Partial<FontSettings>
+) => {
+  const {id, type} = update
+  return flipflipApi.util.updateQueryData('getCaptionScriptFontSettings', {id, type}, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemoteCaptionScriptFontSettings = debounce(
+  (update: {id: number, type: FontSettingsType}  & Partial<FontSettings>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updateCaptionScriptFontSettings.initiate(update))
+  },
+  250
+)
+
+const updateCaptionScriptFontSettings = (update: {id: number, type: FontSettingsType} & Partial<FontSettings>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalCaptionScriptFontSettings(update))
+    updateRemoteCaptionScriptFontSettings(update, dispatch)
+  }
+}
+
+export const setCaptionScriptFontSettingsBorder = (id: number, type: FontSettingsType) => {
+  return (border: boolean) => {
+    return updateCaptionScriptFontSettings({ id, type, border })
+  }
+}
+
+export const setCaptionScriptFontSettingsColor = (id: number, type: FontSettingsType) => {
+  return (color: string) => {
+    return updateCaptionScriptFontSettings({ id, type, color })
+  }
+}
+
+export const setCaptionScriptFontSettingsBorderColor = (id: number, type: FontSettingsType) => {
+  return (borderColor: string) => {
+    return updateCaptionScriptFontSettings({ id, type, borderColor })
+  }
+}
+
+export const setCaptionScriptFontSettingsFontFamily = (id: number, type: FontSettingsType) => {
+  return (fontFamily: string) => {
+    return updateCaptionScriptFontSettings({ id, type, fontFamily })
+  }
+}
+
+export const setCaptionScriptFontSettingsFontSize = (id: number, type: FontSettingsType) => {
+  return (fontSize: number) => {
+    return updateCaptionScriptFontSettings({ id, type, fontSize })
+  }
+}
+
+export const setCaptionScriptFontSettingsBorderPx = (id: number, type: FontSettingsType) => {
+  return (borderpx: number) => {
+    return updateCaptionScriptFontSettings({ id, type, borderpx })
+  }
+}
+
+const updateLocalPlaylist = (
+  update: Pick<Playlist, 'id'> & Partial<Playlist>
+) => {
+  return flipflipApi.util.updateQueryData('getPlaylist', update.id, (draft) => {
+    Object.assign(draft, update)
+  })
+}
+
+const updateRemotePlaylist = debounce(
+  (update: Pick<Playlist, 'id'> & Partial<Playlist>, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.updatePlaylist.initiate(update))
+  },
+  250
+)
+
+const updatePlaylist = (update: Pick<Playlist, 'id'> & Partial<Playlist>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalPlaylist(update))
+    updateRemotePlaylist(update, dispatch)
+  }
+}
+
+export const setPlaylistName = (id: number, name: string) => {
+  return updatePlaylist({ id, name })
 }
 
 const updateLocalDisplayView = (

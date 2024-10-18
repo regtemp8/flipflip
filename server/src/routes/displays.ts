@@ -1,5 +1,5 @@
 import express from 'express'
-import { SG } from 'flipflip-common'
+import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
 import {
   findDisplayById,
   findDisplaysWithSceneGroup,
@@ -41,6 +41,12 @@ router.patch('/:id', async (req, res) => {
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
   res.status(status).end()
+})
+
+router.get('/select-options', (req, res) => {
+    // TODO do db query
+  // const {includeExtra, includeRandom, onlyExtra} = req.params
+  res.status(200).send({})
 })
 
 export default router

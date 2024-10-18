@@ -1,10 +1,11 @@
 import express from 'express'
-import { SG } from 'flipflip-common'
+import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
 import {
   findDefaultScene,
   findSceneById,
   findSceneDisableWeightOptions,
   findSceneHasBpm,
+  findSceneIds,
   findScenesWithSceneGroup,
   findScenesWithoutSceneGroup,
   updateScene
@@ -30,6 +31,21 @@ router.get('/ungrouped', async (req, res) => {
 router.get('/default', async (req, res) => {
   const scene = toScene(await findDefaultScene())
   res.status(200).send(scene)
+})
+
+router.get('/', async (req, res) => {
+  const ids = await findSceneIds()
+  if (ids != null) {
+    res.status(200).send(ids)
+  } else {
+    res.status(500).end()
+  }
+})
+
+router.get('/select-options', (req, res) => {
+  // TODO do db query
+// const {includeExtra, includeRandom, onlyExtra} = req.params
+res.status(200).send({})
 })
 
 router.get('/:id', async (req, res) => {

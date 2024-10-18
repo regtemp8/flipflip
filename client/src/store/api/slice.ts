@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Credentials } from '../../types/credentials'
+import { Credentials } from '../../data/Credentials'
 import {
   AccountChange,
   Backup,
@@ -18,8 +18,16 @@ import {
   Clip,
   WeightGroup,
   Display,
-  DisplayView
+  DisplayView,
+  Playlist,
+  DisplayPlaylistItem,
+  ScenePlaylistItem,
+  FontSettings,
+  FontSettingsType,
+  CaptionScript,
+  Audio
 } from 'flipflip-common'
+import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
 // TODO check all tag types, you've added new ones
 const tagTypes = [
@@ -326,6 +334,11 @@ export const flipflipApi = createApi({
       },
       invalidatesTags: ['Config']
     }),
+    getScenes: builder.query<number[], void>({
+      query: () => `api/scenes`,
+      providesTags: (scenes) =>
+        scenes != null ? [{ type: 'Scene', id: 'List' }] : []
+    }),
     getScene: builder.query<Scene, number>({
       query: (id) => `api/scenes/${id}`,
       providesTags: (scene) =>
@@ -354,7 +367,7 @@ export const flipflipApi = createApi({
     getSceneHasBPM: builder.query<boolean, number>({
       query: (id) => `api/scenes/${id}/has-bpm`,
       providesTags: (result, error, id) =>
-        error == null ? [{ type: 'SceneDisableWeightOptions', id }] : []
+        error == null ? [{ type: 'SceneHasBPM', id }] : []
     }),
     getSceneSettings: builder.query<Scene, void>({
       query: () => `api/scenes/default`,
@@ -383,7 +396,7 @@ export const flipflipApi = createApi({
         url: `api/scene-playlists`,
         method: 'POST'
       }),
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           // TODO error handling needed?
         })
@@ -492,6 +505,11 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    getDisplays: builder.query<number[], void>({
+      query: () => `api/displays`,
+      providesTags: (displays) =>
+        displays != null ? [{ type: 'Display', id: 'List' }] : []
+    }),
     getDisplay: builder.query<Display, number>({
       query: (id) => `api/displays/${id}`,
       providesTags: (display) =>
@@ -543,7 +561,196 @@ export const flipflipApi = createApi({
           }
         })
       }
-    })
+    }),
+    getPlaylist: builder.query<Playlist, number>({
+      query: (id) => `api/playlists/${id}`,
+      providesTags: (view) =>
+        view != null ? [{ type: 'Playlist', id: view.id }] : []
+    }),
+    updatePlaylist: builder.mutation<
+      void,
+      Pick<Playlist, 'id'> & Partial<Playlist>
+    >({
+      query: ({ id, ...patch }) => ({
+        url: `api/playlists/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
+            )
+          }
+        })
+      }
+    }),
+    clonePlaylist: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `api/playlists/${id}/clone`,
+        method: 'POST'
+      }),
+      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    deletePlaylist: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `api/playlists/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
+    }),
+    getSceneSelectOptions: builder.query<
+      Record<string, string>,
+      SceneSelectOptionsRequest
+    >({
+      query: ({includeExtra, includeRandom, onlyExtra}) => ({
+        url: `api/scenes/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
+      }),
+      providesTags: (result) => {
+        // TODO incorporate request params into cache key
+        return result != null ? ['SceneSelectOptions'] : []
+      }
+    }),
+    getDisplaySelectOptions: builder.query<
+      Record<string, string>,
+      SceneSelectOptionsRequest
+    >({
+      query: ({includeExtra, includeRandom, onlyExtra}) => ({
+        url: `api/displays/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
+      }),
+      providesTags: (result) => {
+        // TODO incorporate request params into cache key
+        return result != null ? ['DisplaySelectOptions'] : []
+      }
+    }),
+    getDisplayPlaylistItem: builder.query<DisplayPlaylistItem, number>({
+      query: (id) => ({
+        url: `api/display-playlist-items/${id}`
+      }),
+      providesTags: (result) => {
+        return result != null
+          ? [{ type: 'DisplayPlaylistItems', id: result.id }]
+          : []
+      }
+    }),
+    getScenePlaylistItem: builder.query<ScenePlaylistItem, number>({
+      query: (id) => ({
+        url: `api/scene-playlist-items/${id}`
+      }),
+      providesTags: (result) => {
+        return result != null
+          ? [{ type: 'ScenePlaylistItems', id: result.id }]
+          : []
+      }
+    }),
+    getCaptionScript: builder.query<CaptionScript, number>({
+      query: (id) => ({
+        url: `api/caption-scripts/${id}`
+      }),
+      providesTags: (result) => {
+        return result != null
+          ? [{ type: 'CaptionScript', id: result.id }]
+          : []
+      }
+    }),
+    updateCaptionScript: builder.mutation<
+      void,
+      Pick<CaptionScript, 'id'> & Partial<CaptionScript>
+    >({
+      query: ({ id, ...patch }) => ({
+        url: `api/caption-scripts/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({id}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
+            )
+          }
+        })
+      }
+    }),
+    getCaptionScriptFontSettings: builder.query<FontSettings, {id: number, type: FontSettingsType}>({
+      query: ({id, type}) => ({
+        url: `api/caption-scripts/${id}/font-settings/${type}`
+      }),
+      providesTags: (result, error, {id, type}) => {
+        return result != null
+          ? [{ type: 'CaptionScriptFontSettings', id: `${id}:${type}` }]
+          : []
+      }
+    }),
+    updateCaptionScriptFontSettings: builder.mutation<
+      void,
+      {id: number, type: FontSettingsType} & Partial<FontSettings>
+    >({
+      query: ({ id, type, ...patch }) => ({
+        url: `api/caption-scripts/${id}/font-settings/${type}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id, type }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'CaptionScriptFontSettings', id: `${id}:${type}` }])
+            )
+          }
+        })
+      }
+    }),
+    getAudio: builder.query<Audio, number>({
+      query: (id) => ({
+        url: `api/audios/${id}`
+      }),
+      providesTags: (result) => {
+        return result != null
+          ? [{ type: 'Audio', id: result.id }]
+          : []
+      }
+    }),
+  updateAudio: builder.mutation<
+    void,
+    Pick<Audio, 'id'> & Partial<Audio>
+  >({
+    query: ({ id, ...patch }) => ({
+      url: `api/audios/${id}`,
+      method: 'PATCH',
+      body: patch
+    }),
+    async onQueryStarted({id}, { dispatch, queryFulfilled }) {
+      await queryFulfilled.catch((reason) => {
+        const status = reason.meta?.response?.status
+        // TODO implement etags (412)
+        // TODO implement userId checks (403)
+        if (status === 412 || status === 403) {
+          dispatch(
+            flipflipApi.util.invalidateTags([{ type: 'Audio', id }])
+          )
+        }
+      })
+    }
+  }),
   })
 })
 
@@ -584,6 +791,7 @@ export const {
   useResetTutorialsMutation,
   useGetSystemFontsQuery,
   useDefaultConfigMutation,
+  useGetScenesQuery,
   useGetSceneQuery,
   useGetSceneWeightGroupsQuery,
   useGetSceneScriptPlaylistsQuery,
@@ -601,8 +809,23 @@ export const {
   useUpdateClipMutation,
   useGetContentSourceQuery,
   useUpdateContentSourceMutation,
+  useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,
   useGetDisplayViewQuery,
-  useCreateScenePlaylistMutation
+  useCreateScenePlaylistMutation,
+  useGetPlaylistQuery,
+  useUpdatePlaylistMutation,
+  useClonePlaylistMutation,
+  useDeletePlaylistMutation,
+  useGetSceneSelectOptionsQuery,
+  useGetDisplaySelectOptionsQuery,
+  useGetDisplayPlaylistItemQuery,
+  useGetScenePlaylistItemQuery,
+  useGetCaptionScriptQuery,
+  useUpdateCaptionScriptMutation,
+  useGetCaptionScriptFontSettingsQuery,
+  useUpdateCaptionScriptFontSettingsMutation,
+  useGetAudioQuery,
+  useUpdateAudioMutation
 } = flipflipApi

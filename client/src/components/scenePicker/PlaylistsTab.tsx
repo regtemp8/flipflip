@@ -6,7 +6,6 @@ import {
 } from '../../store/api/slice'
 import GroupedSortable from './GroupedSortable'
 import UngroupedSortable from './UngroupedSortable'
-import SceneCard from './SceneCard'
 import SceneGroupCard from './SceneGroupCard'
 import PlaylistCard from './PlaylistCard'
 

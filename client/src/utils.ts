@@ -20,3 +20,16 @@ export function getTimestamp(secs: number): string {
     return minutes + ':' + (seconds >= 10 ? seconds : '0' + seconds)
   }
 }
+
+export function getMsRemainder(sec: number): string | undefined {
+  if (isNaN(sec) || sec < 0) {
+    return undefined
+  }
+
+  const ms = Math.round(sec * 1000)
+  let remainder = (Math.floor((ms % 1000) * 1000) / 1000).toString()
+  while (remainder.length < 3) {
+    remainder = '0' + remainder
+  }
+  return '.' + remainder
+}

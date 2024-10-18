@@ -6,28 +6,28 @@
 export interface Audio {
   album: string | null
   artist: string | null
-  bpm: number | null
+  bpm: number
   comment: string | null
   duration: number | null
   id: number | null
   marked: number
   name: string | null
   nextSceneAtEnd: number
-  playedCount: number | null
-  speed: number | null
+  playedCount: number
+  speed: number
   stopAtEnd: number
   thumb: string | null
   tick: number
-  tickBpmMulti: number | null
-  tickDelay: number | null
-  tickMaxDelay: number | null
-  tickMinDelay: number | null
-  tickMode: string | null
-  tickSinRate: number | null
+  tickBpmMulti: number
+  tickDelay: number
+  tickMaxDelay: number
+  tickMinDelay: number
+  tickMode: string
+  tickSinRate: number
   trackNum: number | null
   url: string
   userId: number
-  volume: number | null
+  volume: number
 }
 
 export interface AudioPlaylistItem {
@@ -59,7 +59,7 @@ export interface CaptionScript {
   id: number | null
   marked: number
   nextSceneAtEnd: number
-  opacity: number | null
+  opacity: number
   script: string | null
   stopAtEnd: number
   syncWithAudio: number
@@ -184,11 +184,11 @@ export interface DisplayView {
 
 export interface FontSettings {
   border: number
-  borderColor: string | null
-  borderpx: number | null
-  color: string | null
-  fontFamily: string | null
-  fontSize: number | null
+  borderColor: string
+  borderpx: number
+  color: string
+  fontFamily: string
+  fontSize: number
   id: number | null
   userId: number
 }
