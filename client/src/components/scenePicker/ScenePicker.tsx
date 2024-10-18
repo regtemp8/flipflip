@@ -579,7 +579,9 @@ function ScenePicker() {
         <div>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Library'}>
             <ListItemButton
-              component={(props) => <RouterLink to="sources" {...props} />}
+              component={(props) => (
+                <RouterLink to="content-library" {...props} />
+              )}
             >
               <ListItemIcon>
                 <LocalLibraryIcon />
@@ -598,7 +600,9 @@ function ScenePicker() {
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Audio Library'}>
             <ListItemButton
-              component={(props) => <RouterLink to="audios" {...props} />}
+              component={(props) => (
+                <RouterLink to="audio-library" {...props} />
+              )}
             >
               <ListItemIcon>
                 <LibraryMusicIcon />
@@ -620,7 +624,9 @@ function ScenePicker() {
             title={drawerOpen ? '' : 'Script Library'}
           >
             <ListItemButton
-              component={(props) => <RouterLink to="scripts" {...props} />}
+              component={(props) => (
+                <RouterLink to="script-library" {...props} />
+              )}
             >
               <ListItemIcon>
                 <LibraryBooksIcon />

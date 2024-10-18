@@ -18,6 +18,7 @@ import ConfigForm from './config/ConfigForm'
 import DisplaySetup from './config/DisplaySetup'
 import PlaylistSetup from './config/PlaylistSetup'
 import Library from './library/Library'
+import AudioLibrary from './library/AudioLibrary'
 
 const App = () => {
   return (
@@ -69,10 +70,18 @@ const App = () => {
                 }
               />
               <Route
-                path="/sources"
+                path="/content-library"
                 element={
                   <PrivateRoute>
                     <Library />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/audio-library/*"
+                element={
+                  <PrivateRoute>
+                    <AudioLibrary />
                   </PrivateRoute>
                 }
               />

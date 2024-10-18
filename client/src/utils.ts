@@ -33,3 +33,22 @@ export function getMsRemainder(sec: number): string | undefined {
   }
   return '.' + remainder
 }
+
+export async function extractMusicMetadata(
+  audio: Audio,
+  metadata: Audio
+): Promise<Audio> {
+  const newAudio: Audio = {
+    ...metadata,
+    ...audio
+  }
+
+  if (!newAudio.duration) {
+    const arrayBuffer = await flipflip().api.readBinaryFile(audio.url as string)
+    const context = new AudioContext()
+    const audioBuffer = await context.decodeAudioData(arrayBuffer)
+    newAudio.duration = audioBuffer.duration
+  }
+
+  return newAudio
+}
