@@ -87,8 +87,8 @@ export interface ScriptOptionsProps {
 
 function ScriptOptions(props: ScriptOptionsProps) {
   // TODO how to prevent update?
-  const {data: originalScript} = useGetCaptionScriptQuery(props.scriptID)
-  const {data: script} = useGetCaptionScriptQuery(props.scriptID)
+  const { data: originalScript } = useGetCaptionScriptQuery(props.scriptID)
+  const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
   const onCancel = () => {
     // dispatch(setCaptionScript(originalScript))
@@ -108,7 +108,9 @@ function ScriptOptions(props: ScriptOptionsProps) {
                   <BaseSwitch
                     label="Stop at End"
                     size="small"
-                    selector={() => useGetCaptionScriptStopAtEndQuery(props.scriptID)}
+                    selector={() =>
+                      useGetCaptionScriptStopAtEndQuery(props.scriptID)
+                    }
                     action={setCaptionScriptStopAtEnd(props.scriptID)}
                   />
                 </Collapse>
@@ -116,14 +118,18 @@ function ScriptOptions(props: ScriptOptionsProps) {
                   <BaseSwitch
                     label="Next Scene at End"
                     size="small"
-                    selector={() => useGetCaptionScriptNextSceneAtEndQuery(props.scriptID)}
+                    selector={() =>
+                      useGetCaptionScriptNextSceneAtEndQuery(props.scriptID)
+                    }
                     action={setCaptionScriptNextSceneAtEnd(props.scriptID)}
                   />
                 </Collapse>
                 <BaseSwitch
                   label="Sync Timestamp with Audio"
                   size="small"
-                  selector={() => useGetCaptionScriptSyncWithAudioQuery(props.scriptID)}
+                  selector={() =>
+                    useGetCaptionScriptSyncWithAudioQuery(props.scriptID)
+                  }
                   action={setCaptionScriptSyncWithAudio(props.scriptID)}
                 />
               </Grid2>

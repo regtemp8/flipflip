@@ -49,10 +49,8 @@ import {
   setAudioBPM
 } from '../../store/api/thunks'
 import BaseTextField from '../common/text/BaseTextField'
-import { 
-  useGetAudioQuery
- } from '../../store/api/slice'
- import {
+import { useGetAudioQuery } from '../../store/api/slice'
+import {
   useGetAudioHasBPMQuery,
   useGetAudioTickTFQuery,
   useGetAudioTickDurationQuery,
@@ -66,7 +64,7 @@ import {
   useGetAudioSpeedQuery,
   useGetAudioUrlQuery,
   useGetAudioBPMQuery
- } from '../../store/api/selectors'
+} from '../../store/api/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   bpmProgress: {
@@ -115,8 +113,8 @@ export interface AudioOptionsProps {
 
 function AudioOptions(props: AudioOptionsProps) {
   // TODO how to keep original audio to revert to?
-  const {data: originalAudio} = useGetAudioQuery(props.audioID)
-  const {data: audio} = useGetAudioQuery(props.audioID)
+  const { data: originalAudio } = useGetAudioQuery(props.audioID)
+  const { data: audio } = useGetAudioQuery(props.audioID)
 
   const [loadingBPM, setLoadingBPM] = useState(false)
   const [successBPM, setSuccessBPM] = useState(false)
@@ -170,7 +168,6 @@ function AudioOptions(props: AudioOptionsProps) {
     //     setErrorBPM(false)
     //   }, 3000)
     // }
-
     // const detectBPM = (data: ArrayBuffer) => {
     //   const maxByteSize = 200000000
     //   if (data.byteLength < maxByteSize) {
@@ -203,7 +200,6 @@ function AudioOptions(props: AudioOptionsProps) {
     //     bpmError()
     //   }
     // }
-
     // if (url && !loadingBPM) {
     //   setLoadingBPM(true)
     //   try {
@@ -270,7 +266,9 @@ function AudioOptions(props: AudioOptionsProps) {
                   <BaseSwitch
                     label="Next Scene at End"
                     size="small"
-                    selector={() => useGetAudioNextSceneAtEndQuery(props.audioID)}
+                    selector={() =>
+                      useGetAudioNextSceneAtEndQuery(props.audioID)
+                    }
                     action={setAudioNextSceneAtEnd(props.audioID)}
                   />
                 </Collapse>
@@ -289,7 +287,7 @@ function AudioOptions(props: AudioOptionsProps) {
                 orientation="vertical"
                 style={{ height: 48 }}
               />
-              <Grid2 size='grow'>
+              <Grid2 size="grow">
                 <Grid2 container>
                   <Grid2 size={12}>
                     <BaseTextField
@@ -392,11 +390,13 @@ function AudioOptions(props: AudioOptionsProps) {
                   action: setAudioTickDuration(props.audioID)
                 }}
                 durationMin={{
-                  selector: () => useGetAudioTickDurationMinQuery(props.audioID),
+                  selector: () =>
+                    useGetAudioTickDurationMinQuery(props.audioID),
                   action: setAudioTickDurationMin(props.audioID)
                 }}
                 durationMax={{
-                  selector: () => useGetAudioTickDurationMaxQuery(props.audioID),
+                  selector: () =>
+                    useGetAudioTickDurationMaxQuery(props.audioID),
                   action: setAudioTickDurationMax(props.audioID)
                 }}
                 wave={{

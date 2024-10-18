@@ -49,7 +49,9 @@ function SceneCard(props: SceneCardProps) {
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
         <CardActionArea
-          component={(props) => <RouterLink {...props} to={`${route}/${sceneID}`}/>}
+          component={(props) => (
+            <RouterLink {...props} to={`${route}/${sceneID}`} />
+          )}
         >
           <CardContent>
             <Typography component="h2" variant="h6">

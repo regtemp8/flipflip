@@ -44,8 +44,8 @@ router.get('/', async (req, res) => {
 
 router.get('/select-options', (req, res) => {
   // TODO do db query
-// const {includeExtra, includeRandom, onlyExtra} = req.params
-res.status(200).send({})
+  // const {includeExtra, includeRandom, onlyExtra} = req.params
+  res.status(200).send({})
 })
 
 router.get('/:id', async (req, res) => {

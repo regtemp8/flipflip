@@ -62,7 +62,7 @@ export interface AudioControlProps {
 }
 
 function AudioControl(props: AudioControlProps) {
-  const {data: audio} = useGetAudioQuery(props.audioID)
+  const { data: audio } = useGetAudioQuery(props.audioID)
 
   const [playing, setPlaying] = useState(props.startPlaying)
   const [position, setPosition] = useState(0)
@@ -86,7 +86,15 @@ function AudioControl(props: AudioControlProps) {
         setTickState(!tickState)
       }
       if (audio?.tick) {
-        const {tickMode, tickDelay, tickMaxDelay, tickMinDelay, tickBPMMulti, tickSinRate, bpm} = audio
+        const {
+          tickMode,
+          tickDelay,
+          tickMaxDelay,
+          tickMinDelay,
+          tickBPMMulti,
+          tickSinRate,
+          bpm
+        } = audio
         const timeout = _duration.current.calc(
           {
             timingFunction: tickMode,
@@ -106,11 +114,7 @@ function AudioControl(props: AudioControlProps) {
       }
       _timeout.current = undefined
     },
-    [
-      audio,
-      props.nextTrack,
-      tickState
-    ]
+    [audio, props.nextTrack, tickState]
   )
 
   useEffect(() => {
@@ -157,7 +161,13 @@ function AudioControl(props: AudioControlProps) {
 
       setTickState(!tickState)
     }
-  }, [audio?.tick, audio?.tickMode, props.scenePaths, props.nextTrack, tickState])
+  }, [
+    audio?.tick,
+    audio?.tickMode,
+    props.scenePaths,
+    props.nextTrack,
+    tickState
+  ])
 
   useEffect(() => {
     if (audio?.tick) {
@@ -294,10 +304,7 @@ function AudioControl(props: AudioControlProps) {
           onFinishedPlaying={onFinishedPlaying}
         />
       )}
-      <Grid2
-        size={12}
-        className={cx(!props.audioEnabled && classes.noPadding)}
-      >
+      <Grid2 size={12} className={cx(!props.audioEnabled && classes.noPadding)}>
         <Collapse in={props.audioEnabled} className={classes.fullWidth}>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={12}>
@@ -318,7 +325,7 @@ function AudioControl(props: AudioControlProps) {
                         {getTimestampFromMs(position)}
                       </Typography>
                     </Grid2>
-                    <Grid2 size='grow'>
+                    <Grid2 size="grow">
                       <Slider
                         valueLabelDisplay={msRemainder ? 'auto' : 'off'}
                         valueLabelFormat={msRemainder}
@@ -386,9 +393,9 @@ function AudioControl(props: AudioControlProps) {
                 <Grid2>
                   <VolumeDownIcon />
                 </Grid2>
-                <Grid2 size='grow'>
+                <Grid2 size="grow">
                   <BaseSlider
-                    selector={() => ({data: audio?.volume})}
+                    selector={() => ({ data: audio?.volume })}
                     action={props.audioVolumeAction}
                     labelledBy="audio-volume-slider"
                   />

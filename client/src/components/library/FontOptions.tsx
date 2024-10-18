@@ -53,7 +53,10 @@ export interface FontOptionsProps {
 
 function FontOptions(props: FontOptionsProps) {
   const { classes } = useStyles()
-  const {data: border} = useGetCaptionScriptFontSettingsBorderQuery(props.captionScriptID, props.type)
+  const { data: border } = useGetCaptionScriptFontSettingsBorderQuery(
+    props.captionScriptID,
+    props.type
+  )
 
   return (
     <Grid2 container spacing={2} alignItems="center">
@@ -61,10 +64,12 @@ function FontOptions(props: FontOptionsProps) {
         <FontFamilySelect
           label={`${props.name} Font`}
           controlClassName={classes.fullWidth}
-          selector={() => useGetCaptionScriptFontSettingsFontFamilyQuery(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsFontFamilyQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsFontFamily(
             props.captionScriptID,
             props.type
@@ -76,10 +81,12 @@ function FontOptions(props: FontOptionsProps) {
           variant="standard"
           label="Size"
           margin="dense"
-          selector={() => useGetCaptionScriptFontSettingsFontSizeQuery(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsFontSizeQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsFontSize(
             props.captionScriptID,
             props.type
@@ -95,10 +102,12 @@ function FontOptions(props: FontOptionsProps) {
       </Grid2>
       <Grid2 size={12}>
         <ColorPicker
-          selector={() => useGetCaptionScriptFontSettingsColorQuery(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsColorQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsColor(
             props.captionScriptID,
             props.type
@@ -109,10 +118,12 @@ function FontOptions(props: FontOptionsProps) {
         <BaseSwitch
           label="Border"
           size="small"
-          selector={() => useGetCaptionScriptFontSettingsBorderQuery(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsBorderQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsBorder(
             props.captionScriptID,
             props.type
@@ -125,10 +136,12 @@ function FontOptions(props: FontOptionsProps) {
             variant="standard"
             label="Width"
             margin="dense"
-            selector={() => useGetCaptionScriptFontSettingsBorderPxQuery(
-              props.captionScriptID,
-              props.type
-            )}
+            selector={() =>
+              useGetCaptionScriptFontSettingsBorderPxQuery(
+                props.captionScriptID,
+                props.type
+              )
+            }
             action={setCaptionScriptFontSettingsBorderPx(
               props.captionScriptID,
               props.type
@@ -146,10 +159,12 @@ function FontOptions(props: FontOptionsProps) {
       <Grid2 size={9}>
         <Collapse in={border}>
           <ColorPicker
-            selector={() => useGetCaptionScriptFontSettingsBorderColorQuery(
-              props.captionScriptID,
-              props.type
-            )}
+            selector={() =>
+              useGetCaptionScriptFontSettingsBorderColorQuery(
+                props.captionScriptID,
+                props.type
+              )
+            }
             action={setCaptionScriptFontSettingsBorderColor(
               props.captionScriptID,
               props.type

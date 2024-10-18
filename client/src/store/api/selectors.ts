@@ -117,40 +117,76 @@ export const useGetCaptionScriptOpacityQuery = (id: number) => {
   })
 }
 
-export const useGetCaptionScriptFontSettingsBorderQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.border })
-  })
+export const useGetCaptionScriptFontSettingsBorderQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.border })
+    }
+  )
 }
 
-export const useGetCaptionScriptFontSettingsColorQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.color })
-  })
+export const useGetCaptionScriptFontSettingsColorQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.color })
+    }
+  )
 }
 
-export const useGetCaptionScriptFontSettingsBorderColorQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.borderColor })
-  })
+export const useGetCaptionScriptFontSettingsBorderColorQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.borderColor })
+    }
+  )
 }
 
-export const useGetCaptionScriptFontSettingsFontFamilyQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.fontFamily })
-  })
+export const useGetCaptionScriptFontSettingsFontFamilyQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.fontFamily })
+    }
+  )
 }
 
-export const useGetCaptionScriptFontSettingsFontSizeQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.fontSize })
-  })
+export const useGetCaptionScriptFontSettingsFontSizeQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.fontSize })
+    }
+  )
 }
 
-export const useGetCaptionScriptFontSettingsBorderPxQuery = (id: number, type: FontSettingsType) => {
-  return useGetCaptionScriptFontSettingsQuery({id, type}, {
-    selectFromResult: ({ data }) => ({ data: data?.borderpx })
-  })
+export const useGetCaptionScriptFontSettingsBorderPxQuery = (
+  id: number,
+  type: FontSettingsType
+) => {
+  return useGetCaptionScriptFontSettingsQuery(
+    { id, type },
+    {
+      selectFromResult: ({ data }) => ({ data: data?.borderpx })
+    }
+  )
 }
 
 export const useGetDisplayViewColorQuery = (id: number) => {

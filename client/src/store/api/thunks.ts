@@ -29,9 +29,7 @@ export const refreshConnectToken = () => {
   }
 }
 
-const updateLocalAudio = (
-  update: Pick<Audio, 'id'> & Partial<Audio>
-) => {
+const updateLocalAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
   return flipflipApi.util.updateQueryData('getAudio', update.id, (draft) => {
     Object.assign(draft, update)
   })
@@ -132,19 +130,28 @@ export const setAudioBPM = (id: number) => {
 const updateLocalCaptionScript = (
   update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
 ) => {
-  return flipflipApi.util.updateQueryData('getCaptionScript', update.id, (draft) => {
-    Object.assign(draft, update)
-  })
+  return flipflipApi.util.updateQueryData(
+    'getCaptionScript',
+    update.id,
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
 }
 
 const updateRemoteCaptionScript = debounce(
-  (update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>, dispatch: AppDispatch) => {
+  (
+    update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>,
+    dispatch: AppDispatch
+  ) => {
     dispatch(flipflipApi.endpoints.updateCaptionScript.initiate(update))
   },
   250
 )
 
-const updateCaptionScript = (update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>) => {
+const updateCaptionScript = (
+  update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
+) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalCaptionScript(update))
     updateRemoteCaptionScript(update, dispatch)
@@ -176,59 +183,88 @@ export const setCaptionScriptOpacity = (id: number) => {
 }
 
 const updateLocalCaptionScriptFontSettings = (
-  update: {id: number, type: FontSettingsType} & Partial<FontSettings>
+  update: { id: number; type: FontSettingsType } & Partial<FontSettings>
 ) => {
-  const {id, type} = update
-  return flipflipApi.util.updateQueryData('getCaptionScriptFontSettings', {id, type}, (draft) => {
-    Object.assign(draft, update)
-  })
+  const { id, type } = update
+  return flipflipApi.util.updateQueryData(
+    'getCaptionScriptFontSettings',
+    { id, type },
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
 }
 
 const updateRemoteCaptionScriptFontSettings = debounce(
-  (update: {id: number, type: FontSettingsType}  & Partial<FontSettings>, dispatch: AppDispatch) => {
-    dispatch(flipflipApi.endpoints.updateCaptionScriptFontSettings.initiate(update))
+  (
+    update: { id: number; type: FontSettingsType } & Partial<FontSettings>,
+    dispatch: AppDispatch
+  ) => {
+    dispatch(
+      flipflipApi.endpoints.updateCaptionScriptFontSettings.initiate(update)
+    )
   },
   250
 )
 
-const updateCaptionScriptFontSettings = (update: {id: number, type: FontSettingsType} & Partial<FontSettings>) => {
+const updateCaptionScriptFontSettings = (
+  update: { id: number; type: FontSettingsType } & Partial<FontSettings>
+) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalCaptionScriptFontSettings(update))
     updateRemoteCaptionScriptFontSettings(update, dispatch)
   }
 }
 
-export const setCaptionScriptFontSettingsBorder = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsBorder = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (border: boolean) => {
     return updateCaptionScriptFontSettings({ id, type, border })
   }
 }
 
-export const setCaptionScriptFontSettingsColor = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsColor = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (color: string) => {
     return updateCaptionScriptFontSettings({ id, type, color })
   }
 }
 
-export const setCaptionScriptFontSettingsBorderColor = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsBorderColor = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (borderColor: string) => {
     return updateCaptionScriptFontSettings({ id, type, borderColor })
   }
 }
 
-export const setCaptionScriptFontSettingsFontFamily = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsFontFamily = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (fontFamily: string) => {
     return updateCaptionScriptFontSettings({ id, type, fontFamily })
   }
 }
 
-export const setCaptionScriptFontSettingsFontSize = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsFontSize = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (fontSize: number) => {
     return updateCaptionScriptFontSettings({ id, type, fontSize })
   }
 }
 
-export const setCaptionScriptFontSettingsBorderPx = (id: number, type: FontSettingsType) => {
+export const setCaptionScriptFontSettingsBorderPx = (
+  id: number,
+  type: FontSettingsType
+) => {
   return (borderpx: number) => {
     return updateCaptionScriptFontSettings({ id, type, borderpx })
   }

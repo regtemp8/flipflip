@@ -47,10 +47,12 @@ function PlaylistCard(props: PlaylistCardProps) {
       className={classes.scene}
     >
       <Card className={cx(toDelete && classes.deleteScene)}>
-      <CardActionArea
-          component={(props) => <RouterLink {...props} to={`/playlists/${playlistID}`}/>}
-        >          
-        <CardContent>
+        <CardActionArea
+          component={(props) => (
+            <RouterLink {...props} to={`/playlists/${playlistID}`} />
+          )}
+        >
+          <CardContent>
             <Stack alignItems="center" direction="row" gap={2}>
               {type === PLT.audio && <AudiotrackIcon />}
               {type === PLT.display && <TvIcon />}

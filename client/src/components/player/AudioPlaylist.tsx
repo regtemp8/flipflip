@@ -29,7 +29,11 @@ import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
 import AudioOptions from '../library/AudioOptions'
-import { useGetAudioQuery, useGetPlaylistQuery, useUpdatePlaylistMutation } from '../../store/api/slice'
+import {
+  useGetAudioQuery,
+  useGetPlaylistQuery,
+  useUpdatePlaylistMutation
+} from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   audioList: {
@@ -94,7 +98,7 @@ interface PlaylistItemProps {
 
 function PlaylistItem(props: PlaylistItemProps) {
   // const dispatch = useAppDispatch()
-  const {data: audio} = useGetAudioQuery(props.audioID)
+  const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
     // const sourceURL = url as string
@@ -112,30 +116,34 @@ function PlaylistItem(props: PlaylistItemProps) {
 
   const { classes } = useStyles()
   return (
-    <ListItem secondaryAction={
-      <>
-      <Chip
-      label={audio?.duration && getTimestamp(audio?.duration)}
-      color="default"
-      size="small"
-      variant="outlined"
-    />
-    <IconButton
-      edge="end"
-      onClick={() => props.onSourceOptions(props.audioID)}
-      size="large"
+    <ListItem
+      secondaryAction={
+        <>
+          <Chip
+            label={audio?.duration && getTimestamp(audio?.duration)}
+            color="default"
+            size="small"
+            variant="outlined"
+          />
+          <IconButton
+            edge="end"
+            onClick={() => props.onSourceOptions(props.audioID)}
+            size="large"
+          >
+            <BuildIcon />
+          </IconButton>
+          <IconButton
+            edge="end"
+            onClick={() =>
+              props.removeTrack(props.audios.indexOf(props.audioID))
+            }
+            size="large"
+          >
+            <DeleteIcon color={'error'} />
+          </IconButton>
+        </>
+      }
     >
-      <BuildIcon />
-    </IconButton>
-    <IconButton
-      edge="end"
-      onClick={() => props.removeTrack(props.audios.indexOf(props.audioID))}
-      size="large"
-    >
-      <DeleteIcon color={'error'} />
-    </IconButton>
-    </>
-    }>
       <ListItemAvatar className={classes.listAvatar}>
         <Badge
           invisible={!audio?.trackNum}
@@ -147,10 +155,12 @@ function PlaylistItem(props: PlaylistItemProps) {
           <Tooltip
             disableInteractive
             placement={audio?.comment ? 'right' : 'bottom'}
-            classes={audio?.comment ? { tooltip: classes.bigTooltip } : undefined}
-            arrow={!!audio?.comment || ((audio?.tags?.length ?? 0) > 0)}
+            classes={
+              audio?.comment ? { tooltip: classes.bigTooltip } : undefined
+            }
+            arrow={!!audio?.comment || (audio?.tags?.length ?? 0) > 0}
             title={
-              audio?.comment || ((audio?.tags?.length ?? 0) > 0) ? (
+              audio?.comment || (audio?.tags?.length ?? 0) > 0 ? (
                 <div>
                   {audio?.comment}
                   {audio?.comment && (audio?.tags?.length ?? 0) > 0 && <br />}
@@ -177,7 +187,11 @@ function PlaylistItem(props: PlaylistItemProps) {
           >
             <div onClick={onSourceIconClick} className={classes.trackThumb}>
               {audio?.thumb != null && (
-                <img className={classes.thumbImage} src={audio?.thumb} alt={audio?.name} />
+                <img
+                  className={classes.thumbImage}
+                  src={audio?.thumb}
+                  alt={audio?.name}
+                />
               )}
               {audio?.thumb == null && (
                 <Fab size="small" className={classes.avatar}>
@@ -199,7 +213,7 @@ export interface AudioPlaylistProps {
 
 function AudioPlaylist(props: AudioPlaylistProps) {
   const sceneID = 0
-  const {playlistID} = props
+  const { playlistID } = props
   // const [sceneID, setSceneID] = useState<number>(0)
   const [sourceOptions, setSourceOptions] = useState<number>()
 
@@ -275,7 +289,9 @@ function AudioPlaylist(props: AudioPlaylistProps) {
               title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
             >
               <IconButton onClick={toggleShuffle} size="large">
-                <ShuffleIcon color={playlist?.shuffle ? 'primary' : undefined} />
+                <ShuffleIcon
+                  color={playlist?.shuffle ? 'primary' : undefined}
+                />
               </IconButton>
             </Tooltip>
             <Tooltip
@@ -291,7 +307,9 @@ function AudioPlaylist(props: AudioPlaylistProps) {
             >
               <IconButton onClick={changeRepeat} size="large">
                 {playlist?.repeat === RP.none && <RepeatIcon />}
-                {playlist?.repeat === RP.all && <RepeatIcon color={'primary'} />}
+                {playlist?.repeat === RP.all && (
+                  <RepeatIcon color={'primary'} />
+                )}
                 {playlist?.repeat === RP.one && (
                   <RepeatOneIcon color={'primary'} />
                 )}

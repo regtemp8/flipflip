@@ -615,7 +615,7 @@ export const flipflipApi = createApi({
       Record<string, string>,
       SceneSelectOptionsRequest
     >({
-      query: ({includeExtra, includeRandom, onlyExtra}) => ({
+      query: ({ includeExtra, includeRandom, onlyExtra }) => ({
         url: `api/scenes/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
       }),
       providesTags: (result) => {
@@ -627,7 +627,7 @@ export const flipflipApi = createApi({
       Record<string, string>,
       SceneSelectOptionsRequest
     >({
-      query: ({includeExtra, includeRandom, onlyExtra}) => ({
+      query: ({ includeExtra, includeRandom, onlyExtra }) => ({
         url: `api/displays/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
       }),
       providesTags: (result) => {
@@ -660,9 +660,7 @@ export const flipflipApi = createApi({
         url: `api/caption-scripts/${id}`
       }),
       providesTags: (result) => {
-        return result != null
-          ? [{ type: 'CaptionScript', id: result.id }]
-          : []
+        return result != null ? [{ type: 'CaptionScript', id: result.id }] : []
       }
     }),
     updateCaptionScript: builder.mutation<
@@ -674,7 +672,7 @@ export const flipflipApi = createApi({
         method: 'PATCH',
         body: patch
       }),
-      async onQueryStarted({id}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -687,11 +685,14 @@ export const flipflipApi = createApi({
         })
       }
     }),
-    getCaptionScriptFontSettings: builder.query<FontSettings, {id: number, type: FontSettingsType}>({
-      query: ({id, type}) => ({
+    getCaptionScriptFontSettings: builder.query<
+      FontSettings,
+      { id: number; type: FontSettingsType }
+    >({
+      query: ({ id, type }) => ({
         url: `api/caption-scripts/${id}/font-settings/${type}`
       }),
-      providesTags: (result, error, {id, type}) => {
+      providesTags: (result, error, { id, type }) => {
         return result != null
           ? [{ type: 'CaptionScriptFontSettings', id: `${id}:${type}` }]
           : []
@@ -699,7 +700,7 @@ export const flipflipApi = createApi({
     }),
     updateCaptionScriptFontSettings: builder.mutation<
       void,
-      {id: number, type: FontSettingsType} & Partial<FontSettings>
+      { id: number; type: FontSettingsType } & Partial<FontSettings>
     >({
       query: ({ id, type, ...patch }) => ({
         url: `api/caption-scripts/${id}/font-settings/${type}`,
@@ -713,7 +714,9 @@ export const flipflipApi = createApi({
           // TODO implement userId checks (403)
           if (status === 412 || status === 403) {
             dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'CaptionScriptFontSettings', id: `${id}:${type}` }])
+              flipflipApi.util.invalidateTags([
+                { type: 'CaptionScriptFontSettings', id: `${id}:${type}` }
+              ])
             )
           }
         })
@@ -724,33 +727,26 @@ export const flipflipApi = createApi({
         url: `api/audios/${id}`
       }),
       providesTags: (result) => {
-        return result != null
-          ? [{ type: 'Audio', id: result.id }]
-          : []
+        return result != null ? [{ type: 'Audio', id: result.id }] : []
       }
     }),
-  updateAudio: builder.mutation<
-    void,
-    Pick<Audio, 'id'> & Partial<Audio>
-  >({
-    query: ({ id, ...patch }) => ({
-      url: `api/audios/${id}`,
-      method: 'PATCH',
-      body: patch
-    }),
-    async onQueryStarted({id}, { dispatch, queryFulfilled }) {
-      await queryFulfilled.catch((reason) => {
-        const status = reason.meta?.response?.status
-        // TODO implement etags (412)
-        // TODO implement userId checks (403)
-        if (status === 412 || status === 403) {
-          dispatch(
-            flipflipApi.util.invalidateTags([{ type: 'Audio', id }])
-          )
-        }
-      })
-    }
-  }),
+    updateAudio: builder.mutation<void, Pick<Audio, 'id'> & Partial<Audio>>({
+      query: ({ id, ...patch }) => ({
+        url: `api/audios/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(flipflipApi.util.invalidateTags([{ type: 'Audio', id }]))
+          }
+        })
+      }
+    })
   })
 })
 

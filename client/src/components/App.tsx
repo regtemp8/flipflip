@@ -17,6 +17,7 @@ import SystemSnack from './SystemSnack'
 import ConfigForm from './config/ConfigForm'
 import DisplaySetup from './config/DisplaySetup'
 import PlaylistSetup from './config/PlaylistSetup'
+import Library from './library/Library'
 
 const App = () => {
   return (
@@ -64,6 +65,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <PlaylistSetup />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/sources"
+                element={
+                  <PrivateRoute>
+                    <Library />
                   </PrivateRoute>
                 }
               />
