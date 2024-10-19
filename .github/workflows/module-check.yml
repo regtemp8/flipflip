@@ -21,15 +21,6 @@ on:
       depends-on-common:
         required: false
         type: boolean
-      depends-on-client:
-        required: false
-        type: boolean
-      depends-on-login:
-        required: false
-        type: boolean
-      depends-on-server-details:
-        required: false
-        type: boolean
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -50,21 +41,6 @@ jobs:
           working-directory: ./common
           build-task: build:main
           build-task-extra: build:module
-      - name: Build Client Dependency
-        if: ${{ inputs.depends-on-client == true }}
-        uses: ./.github/actions/build-dependency
-        with:
-          working-directory: ./client
-      - name: Build Login Dependency
-        if: ${{ inputs.depends-on-login == true }}
-        uses: ./.github/actions/build-dependency
-        with:
-          working-directory: ./login
-      - name: Build Server Details Dependency
-        if: ${{ inputs.depends-on-server-details == true }}
-        uses: ./.github/actions/build-dependency
-        with:
-          working-directory: ./server-details
       - name: Install ${{ inputs.display-name }}
         working-directory: ${{ inputs.working-directory }}
         run: yarn install
