@@ -865,7 +865,7 @@ function AudioLibrary() {
                 !open && classes.tabClose
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[0]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[0]} />
               )}
             />
             <Tab
@@ -879,7 +879,7 @@ function AudioLibrary() {
                 !open && classes.tabClose
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[1]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[1]} />
               )}
             />
             <Tab
@@ -893,7 +893,7 @@ function AudioLibrary() {
                 !open && classes.tabClose
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[2]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[2]} />
               )}
             />
             <Tab
@@ -907,7 +907,7 @@ function AudioLibrary() {
                 !open && classes.tabClose
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[3]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[3]} />
               )}
             />
           </Tabs>
@@ -918,7 +918,7 @@ function AudioLibrary() {
         <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
             <ListItemButton
-              onClick={() => {} /*dispatch(manageTags())*/}
+              onClick={() => navigate('/tags')}
               disabled={specialMode != null}
             >
               <ListItemIcon>

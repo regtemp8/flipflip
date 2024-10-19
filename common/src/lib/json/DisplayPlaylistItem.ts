@@ -1,6 +1,6 @@
 export type DisplayPlaylistItem = {
-  id: number
-  displayID: number
-  randomDisplays: number[]
-  duration: number
-}
+  id: number;
+  displayID: number;
+  randomDisplays: number[];
+  duration: number;
+};

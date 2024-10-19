@@ -452,6 +452,29 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    getTags: builder.query<number[], void>({
+      query: () => `api/tags`,
+      providesTags: (tags) =>
+        tags != null ? [{ type: 'Tag', id: 'List' }] : []
+    }),
+    deleteTags: builder.mutation<void, void>({
+      query: () => ({
+        url: `api/tags`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted(res, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(flipflipApi.util.invalidateTags(['Tag']))
+          }
+        })
+      }
+    }),
+    getTagsCount: builder.query<number, void>({
+      query: () => `api/tags/count`,
+      providesTags: (count) =>
+        count != null ? [{ type: 'Tag', id: 'Count' }] : []
+    }),
     getTag: builder.query<Tag, number>({
       query: (id) => `api/tags/${id}`,
       providesTags: (tag) => (tag != null ? [{ type: 'Tag', id: tag.id }] : [])
@@ -655,6 +678,14 @@ export const flipflipApi = createApi({
           : []
       }
     }),
+    getCaptionScripts: builder.query<number[], void>({
+      query: () => ({
+        url: `api/caption-scripts`
+      }),
+      providesTags: (result) => {
+        return result != null ? [{ type: 'CaptionScript', id: 'List' }] : []
+      }
+    }),
     getCaptionScript: builder.query<CaptionScript, number>({
       query: (id) => ({
         url: `api/caption-scripts/${id}`
@@ -746,6 +777,18 @@ export const flipflipApi = createApi({
           }
         })
       }
+    }),
+    createTag: builder.mutation<void, Tag>({
+      query: (body) => ({
+        url: `api/tags`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          // TODO error handling needed?
+        })
+      }
     })
   })
 })
@@ -823,5 +866,10 @@ export const {
   useGetCaptionScriptFontSettingsQuery,
   useUpdateCaptionScriptFontSettingsMutation,
   useGetAudioQuery,
-  useUpdateAudioMutation
+  useUpdateAudioMutation,
+  useGetTagsQuery,
+  useDeleteTagsMutation,
+  useGetTagsCountQuery,
+  useGetCaptionScriptsQuery,
+  useCreateTagMutation
 } = flipflipApi

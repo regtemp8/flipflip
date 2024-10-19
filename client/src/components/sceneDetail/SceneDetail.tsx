@@ -863,7 +863,7 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.disable
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[0]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[0]} />
               )}
             />
             <Tab
@@ -879,7 +879,7 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.highlight
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[1]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[1]} />
               )}
             />
             <Tab
@@ -896,7 +896,7 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[2]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[2]} />
               )}
             />
             <Tab
@@ -912,7 +912,7 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[3]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[3]} />
               )}
             />
             {/* {generatorWeights && (
@@ -927,7 +927,7 @@ function SceneDetail() {
                   !open && classes.tabClose
                 )}
                 component={(props) => (
-                  <RouterLink replace to={tabRoutes[4]} {...props} />
+                  <RouterLink {...props} replace to={tabRoutes[4]} />
                 )}
               />
             )} */}

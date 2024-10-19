@@ -398,6 +398,7 @@ const getOpenTab = (pathname: string) => {
 function ScenePicker() {
   const tutorial = ''
   const { classes } = useStyles()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
 
   const { data: version } = useGetVersionQuery()
@@ -414,6 +415,10 @@ function ScenePicker() {
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
   const openGitRelease = () => {}
+
+  const openLink = (url: string) => {
+    window.open(url, '_blank')?.focus()
+  }
 
   const openTab = getOpenTab(pathname)
   return (
@@ -530,7 +535,7 @@ function ScenePicker() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={0}
-              component={(props) => <RouterLink to={tabRoutes[0]} {...props} />}
+              component={(props) => <RouterLink {...props} to={tabRoutes[0]} />}
             />
             <Tab
               id="vertical-tab-1"
@@ -543,7 +548,7 @@ function ScenePicker() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={1}
-              component={(props) => <RouterLink to={tabRoutes[1]} {...props} />}
+              component={(props) => <RouterLink {...props} to={tabRoutes[1]} />}
             />
             <Tab
               id="vertical-tab-3"
@@ -556,7 +561,7 @@ function ScenePicker() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={2}
-              component={(props) => <RouterLink to={tabRoutes[2]} {...props} />}
+              component={(props) => <RouterLink {...props} to={tabRoutes[2]} />}
             />
             <Tab
               id="vertical-tab-4"
@@ -569,7 +574,7 @@ function ScenePicker() {
                 !drawerOpen && classes.tabClose
               )}
               tabIndex={3}
-              component={(props) => <RouterLink to={tabRoutes[3]} {...props} />}
+              component={(props) => <RouterLink {...props} to={tabRoutes[3]} />}
             />
           </Tabs>
         </div>
@@ -578,11 +583,7 @@ function ScenePicker() {
 
         <div>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Library'}>
-            <ListItemButton
-              component={(props) => (
-                <RouterLink to="content-library" {...props} />
-              )}
-            >
+            <ListItemButton onClick={() => navigate('/content-library')}>
               <ListItemIcon>
                 <LocalLibraryIcon />
               </ListItemIcon>
@@ -599,11 +600,7 @@ function ScenePicker() {
             </ListItemButton>
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Audio Library'}>
-            <ListItemButton
-              component={(props) => (
-                <RouterLink to="audio-library" {...props} />
-              )}
-            >
+            <ListItemButton onClick={() => navigate('/audio-library')}>
               <ListItemIcon>
                 <LibraryMusicIcon />
               </ListItemIcon>
@@ -623,11 +620,7 @@ function ScenePicker() {
             disableInteractive
             title={drawerOpen ? '' : 'Script Library'}
           >
-            <ListItemButton
-              component={(props) => (
-                <RouterLink to="script-library" {...props} />
-              )}
-            >
+            <ListItemButton onClick={() => navigate('/script-library')}>
               <ListItemIcon>
                 <LibraryBooksIcon />
               </ListItemIcon>
@@ -652,9 +645,7 @@ function ScenePicker() {
             disableInteractive
             title={drawerOpen ? '' : 'Caption Scripter'}
           >
-            <ListItemButton
-              component={(props) => <RouterLink to="scripter" {...props} />}
-            >
+            <ListItemButton onClick={() => navigate('/scripter')}>
               <ListItemIcon>
                 <CodeIcon />
               </ListItemIcon>
@@ -667,9 +658,7 @@ function ScenePicker() {
 
         <div>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Account'}>
-            <ListItemButton
-              component={(props) => <RouterLink to="account" {...props} />}
-            >
+            <ListItemButton onClick={() => navigate('/account')}>
               <ListItemIcon>
                 <PersonIcon />
               </ListItemIcon>
@@ -677,9 +666,7 @@ function ScenePicker() {
             </ListItemButton>
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Settings'}>
-            <ListItemButton
-              component={(props) => <RouterLink to="settings" {...props} />}
-            >
+            <ListItemButton onClick={() => navigate('/settings')}>
               <ListItemIcon>
                 <SettingsIcon />
               </ListItemIcon>
@@ -688,12 +675,7 @@ function ScenePicker() {
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'User Manual'}>
             <ListItemButton
-              component={(props) => (
-                <RouterLink
-                  to="https://regtemp8.github.io/flipflip/#/"
-                  {...props}
-                />
-              )}
+              onClick={() => openLink('https://regtemp8.github.io/flipflip/#/')}
             >
               <ListItemIcon>
                 <HelpIcon />

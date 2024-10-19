@@ -786,7 +786,7 @@ function Library() {
 
         <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
-            <ListItemButton onClick={() => {} /*dispatch(manageTags())*/}>
+            <ListItemButton onClick={() => navigate('/tags')}>
               <ListItemIcon>
                 <LocalOfferIcon />
               </ListItemIcon>

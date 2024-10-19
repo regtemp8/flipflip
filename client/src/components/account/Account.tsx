@@ -290,7 +290,7 @@ function Account() {
               )}
               tabIndex={0}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[0]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[0]} />
               )}
             />
             <Tab
@@ -305,7 +305,7 @@ function Account() {
               )}
               tabIndex={1}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[1]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[1]} />
               )}
             />
           </Tabs>

@@ -1,5 +1,5 @@
 export type SceneSelectOptionsRequest = {
-    includeRandom?: boolean
-    includeExtra?: boolean
-    onlyExtra?: boolean
-}
+  includeRandom?: boolean;
+  includeExtra?: boolean;
+  onlyExtra?: boolean;
+};

@@ -1,5 +1,5 @@
 export type Tag = {
   id: number;
-  name?: string;
+  name: string;
   phraseString?: string;
 };

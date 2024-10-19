@@ -311,7 +311,7 @@ function ConfigForm() {
               tabIndex={0}
               disabled={scene == null}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[0]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[0]} />
               )}
             />
             <Tab
@@ -327,7 +327,7 @@ function ConfigForm() {
               tabIndex={1}
               disabled={scene == null}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[1]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[1]} />
               )}
             />
             <Tab
@@ -342,7 +342,7 @@ function ConfigForm() {
               )}
               tabIndex={2}
               component={(props) => (
-                <RouterLink replace to={tabRoutes[2]} {...props} />
+                <RouterLink {...props} replace to={tabRoutes[2]} />
               )}
             />
           </Tabs>

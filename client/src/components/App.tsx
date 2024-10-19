@@ -19,6 +19,8 @@ import DisplaySetup from './config/DisplaySetup'
 import PlaylistSetup from './config/PlaylistSetup'
 import Library from './library/Library'
 import AudioLibrary from './library/AudioLibrary'
+import ScriptLibrary from './library/ScriptLibrary'
+import TagManager from './library/TagManager'
 
 const App = () => {
   return (
@@ -82,6 +84,22 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <AudioLibrary />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/script-library"
+                element={
+                  <PrivateRoute>
+                    <ScriptLibrary />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/tags"
+                element={
+                  <PrivateRoute>
+                    <TagManager />
                   </PrivateRoute>
                 }
               />

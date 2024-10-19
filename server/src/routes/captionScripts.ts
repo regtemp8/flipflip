@@ -6,6 +6,7 @@ import {
   toFontSettingsUpdate
 } from '../db/mappers'
 import {
+  findCaptionScriptIds,
   findCaptionScriptById,
   updateCaptionScript,
   findFontSettingsByType,
@@ -14,6 +15,14 @@ import {
 import { FontSettingsType } from 'flipflip-common'
 
 const router = express.Router()
+router.get('/', async (req, res) => {
+  const ids = await findCaptionScriptIds()
+  if (ids != null) {
+    res.status(200).send(ids)
+  } else {
+    res.status(500).end()
+  }
+})
 router.get('/:id', async (req, res) => {
   const source = await findCaptionScriptById(Number(req.params.id))
   if (source != null) {

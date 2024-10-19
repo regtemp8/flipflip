@@ -3,6 +3,15 @@ import { CaptionScript, FontSettings } from './types/generated'
 import db from './database'
 import { FontSettingsType } from 'flipflip-common'
 
+export async function findCaptionScriptIds(): Promise<number[]> {
+  return await db()
+    .query()
+    .selectFrom('captionScript')
+    .select('id')
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
+}
+
 export async function findCaptionScriptById(
   id: number
 ): Promise<CaptionScript> {
