@@ -21,6 +21,7 @@ import Library from './library/Library'
 import AudioLibrary from './library/AudioLibrary'
 import ScriptLibrary from './library/ScriptLibrary'
 import TagManager from './library/TagManager'
+import CaptionScriptor from './sceneDetail/CaptionScriptor'
 
 const App = () => {
   return (
@@ -100,6 +101,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <TagManager />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/scripter"
+                element={
+                  <PrivateRoute>
+                    <CaptionScriptor />
                   </PrivateRoute>
                 }
               />
