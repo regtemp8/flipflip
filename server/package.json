@@ -43,7 +43,8 @@
     "ts-node": "^10.9.2"
   },
   "scripts": {
-    "dev": "NODE_ENV=development && yarn tsc && node --env-file=.env ./bin/server.js",
+    "dev": "NODE_ENV=development && yarn tsc && node ./bin/server.js",
+    "test": "NODE_ENV=test && cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn tsc && node ./bin/server.js",
     "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "test:lint": "eslint --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",

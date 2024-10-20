@@ -1,6 +1,10 @@
+import path from 'path'
 export const isMacOSX = process.platform === 'darwin'
 
 export function getSaveDir(useNodeEnv = true) {
+  if(process.env.NODE_ENV === 'test') {
+    return path.join(__dirname, '../tests')
+  }
   if (useNodeEnv && process.env.NODE_ENV === 'development') {
     return '/tmp'
   }

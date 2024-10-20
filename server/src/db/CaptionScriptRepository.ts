@@ -14,13 +14,13 @@ export async function findCaptionScriptIds(): Promise<number[]> {
 
 export async function findCaptionScriptById(
   id: number
-): Promise<CaptionScript> {
+): Promise<CaptionScript | undefined> {
   return await db()
     .query()
     .selectFrom('captionScript')
     .selectAll()
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export type CaptionScriptUpdate = Updateable<CaptionScript>
@@ -39,7 +39,7 @@ export async function updateCaptionScript(
 export async function findFontSettingsByType(
   id: number,
   type: FontSettingsType
-): Promise<FontSettings> {
+): Promise<FontSettings | undefined> {
   return await db()
     .query()
     .selectFrom('fontSettings')
@@ -50,7 +50,7 @@ export async function findFontSettingsByType(
         .select(`${type}FontId`)
         .where('id', '=', id)
     )
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export type FontSettingsUpdate = Updateable<FontSettings>
