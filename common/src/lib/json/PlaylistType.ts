@@ -1,4 +1,4 @@
-import { PLT } from './const';
+import { PLT } from '../const';
 
 export type PlaylistType =
   | typeof PLT.audio

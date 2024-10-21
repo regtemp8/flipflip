@@ -68,7 +68,7 @@ function BatchClipDialog(props: BatchClipDialogProps) {
   }
 
   const batchClipFinish = () => {
-    let index = -1
+    const index = -1
     const errorCallback = (msg: string) => {
       console.error(msg)
       createBatchClips()

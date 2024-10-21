@@ -43,8 +43,9 @@
     "ts-node": "^10.9.2"
   },
   "scripts": {
-    "dev": "NODE_ENV=development && yarn tsc && node ./bin/server.js",
-    "test": "NODE_ENV=test && cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn tsc && node ./bin/server.js",
+    "build": "yarn tsc",
+    "dev": "NODE_ENV=development && yarn build && node ./bin/server.js",
+    "test": "NODE_ENV=test && cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn build && node ./bin/server.js",
     "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "test:lint": "eslint --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",
@@ -52,7 +53,7 @@
     "db:codegen-help": "kysely-codegen --help",
     "db:codegen": "kysely-codegen --camel-case --dialect sqlite --env-file .env --out-file ./src/db/types/generated.ts",
     "db:verify": "yarn db:codegen --verify",
-    "package": "cd ../client && yarn install && yarn build && cd ../server && rm -rf bin && yarn tsc && mv ../client/dist bin/public/ && pkg --debug ."
+    "package": "cd ../client && yarn install && yarn build && cd ../server && rm -rf bin && yarn build && mv ../client/dist bin/public/ && pkg --debug ."
   },
   "bin": "bin/server.js",
   "pkg": {

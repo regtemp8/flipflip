@@ -1,11 +1,5 @@
-import { SG } from '../const';
 import { SceneGroupItem } from './SceneGroupItem';
-
-export type SceneGroupType =
-  | typeof SG.display
-  | typeof SG.generator
-  | typeof SG.playlist
-  | typeof SG.scene;
+import { SceneGroupType } from './SceneGroupType';
 
 export type SceneGroup = {
   id: number;

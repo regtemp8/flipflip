@@ -1,5 +1,3 @@
-export type FontSettingsType = 'blink' | 'caption' | 'captionBig' | 'count';
-
 export type FontSettings = {
   color: string;
   fontSize: number;
