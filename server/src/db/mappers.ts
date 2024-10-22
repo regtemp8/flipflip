@@ -329,8 +329,6 @@ export function toThemeSettings(row: ThemeRow): ThemeSettings {
 export function toGeneralSettings(row: GeneralSettingsRow): GeneralSettings {
   const {
     prioritizePerformance,
-    portableMode,
-    disableLocalSave,
     confirmSceneDeletion,
     confirmBlacklist,
     confirmFileDeletion,
@@ -351,8 +349,6 @@ export function toGeneralSettings(row: GeneralSettingsRow): GeneralSettings {
   } = row
   return {
     prioritizePerformance: toBoolean(prioritizePerformance),
-    portableMode: toBoolean(portableMode),
-    disableLocalSave: toBoolean(disableLocalSave),
     confirmSceneDeletion: toBoolean(confirmSceneDeletion),
     confirmBlacklist: toBoolean(confirmBlacklist),
     confirmFileDeletion: toBoolean(confirmFileDeletion),
@@ -861,8 +857,6 @@ export function toGeneralSettingsUpdate(
 ): GeneralSettingsUpdate {
   const {
     prioritizePerformance,
-    portableMode,
-    disableLocalSave,
     confirmSceneDeletion,
     confirmBlacklist,
     confirmFileDeletion,
@@ -884,8 +878,6 @@ export function toGeneralSettingsUpdate(
 
   return {
     prioritizePerformance: toNumberOpt(prioritizePerformance),
-    portableMode: toNumberOpt(portableMode),
-    disableLocalSave: toNumberOpt(disableLocalSave),
     confirmSceneDeletion: toNumberOpt(confirmSceneDeletion),
     confirmBlacklist: toNumberOpt(confirmBlacklist),
     confirmFileDeletion: toNumberOpt(confirmFileDeletion),

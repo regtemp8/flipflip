@@ -44,8 +44,8 @@
   },
   "scripts": {
     "build": "yarn tsc",
-    "dev": "NODE_ENV=development && yarn build && node ./bin/server.js",
-    "test": "NODE_ENV=test && cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn build && node ./bin/server.js",
+    "dev": "yarn build && node --env-file=.env ./bin/server.js",
+    "test": "cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn build && node --env-file=./tests/data/.env ./bin/server.js",
     "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "test:lint": "eslint --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",

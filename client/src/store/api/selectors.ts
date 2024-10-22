@@ -1390,16 +1390,6 @@ export const useGetGeneralSettingsConfirmFileDeletionQuery = () => {
     selectFromResult: ({ data }) => ({ data: data?.confirmFileDeletion })
   })
 }
-export const useGetGeneralSettingsPortableModeQuery = () => {
-  return useGetGeneralSettingsQuery(undefined, {
-    selectFromResult: ({ data }) => ({ data: data?.portableMode })
-  })
-}
-export const useGetGeneralSettingsDisableLocalSaveQuery = () => {
-  return useGetGeneralSettingsQuery(undefined, {
-    selectFromResult: ({ data }) => ({ data: data?.disableLocalSave })
-  })
-}
 export const useGetDisplaySettingsFullScreenQuery = () => {
   return useGetDisplaySettingsQuery(undefined, {
     selectFromResult: ({ data }) => ({ data: data?.fullScreen })

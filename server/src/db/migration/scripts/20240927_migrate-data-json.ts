@@ -29,7 +29,7 @@ import {
 } from '../data/migrate-data-json/LibrarySource'
 import { Tag, newTag } from '../data/migrate-data-json/Tag'
 import { Route, newRoute } from '../data/migrate-data-json/Route'
-import { getSaveDir } from '../../../utils'
+import { getElectronSaveDir } from '../../../utils'
 import { toNumber } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
@@ -45,7 +45,8 @@ import {
 } from 'flipflip-common'
 
 const getDataJsonPath = () => {
-  return path.join(getSaveDir(false), 'data.json')
+  const saveDir = getElectronSaveDir()
+  return saveDir != null ? path.join(saveDir, 'data.json') : undefined
 }
 
 const getDataJsonPortablePath = () => {
@@ -54,30 +55,43 @@ const getDataJsonPortablePath = () => {
 
 const readDataJsonFile = (): AppStorage | undefined => {
   console.log('Read data.json file')
-  let data
-  let portableMode = false
   const savePath = getDataJsonPath()
+  if (savePath == null) {
+    console.log('! No Electron save directory found')
+  } else {
+    console.log(`Save path: ${savePath}`)
+  }
+
   const portablePath = getDataJsonPortablePath()
-  console.log(savePath)
-  console.log(portablePath)
-  if (!existsSync(savePath) && existsSync(portablePath)) {
+  console.log(`Portable path: ${portablePath}`)
+
+  let data
+  let dataPath
+  let portableMode = false
+  const savePathExists = savePath != null && existsSync(savePath)
+  const portablePathExists = existsSync(portablePath)
+  if (portablePathExists) {
+    dataPath = portablePath
     data = JSON.parse(readFileSync(portablePath, 'utf-8'))
-    if (!data.config.generalSettings.portableMode) {
-      data = JSON.parse(readFileSync(savePath, 'utf-8'))
-    } else {
-      portableMode = true
-    }
-  } else if (existsSync(savePath)) {
+    portableMode = data.config.generalSettings.portableMode
+  }
+  if ((!portablePathExists || !portableMode) && savePathExists) {
+    dataPath = savePath
     data = JSON.parse(readFileSync(savePath, 'utf-8'))
-    if (data.config.generalSettings.portableMode) {
-      portableMode = true
+    portableMode = data.config.generalSettings.portableMode
+    if (portableMode && portablePathExists) {
+      dataPath = portablePath
       data = JSON.parse(readFileSync(portablePath, 'utf-8'))
+    } else {
+      portableMode = false
     }
   }
 
   if (data == null) {
     console.log('! No data.json file found')
     return undefined
+  } else {
+    console.log(`+ Read data from: ${dataPath}`)
   }
 
   if (!data.version) {
@@ -416,8 +430,6 @@ const generalSettingsInsert = async (
   console.log('+ Insert general settings')
   const {
     prioritizePerformance,
-    portableMode,
-    disableLocalSave,
     confirmSceneDeletion,
     confirmBlacklist,
     confirmFileDeletion,
@@ -441,8 +453,6 @@ const generalSettingsInsert = async (
     .values({
       userId,
       prioritizePerformance: toNumber(prioritizePerformance),
-      portableMode: toNumber(portableMode),
-      disableLocalSave: toNumber(disableLocalSave),
       confirmSceneDeletion: toNumber(confirmSceneDeletion),
       confirmBlacklist: toNumber(confirmBlacklist),
       confirmFileDeletion: toNumber(confirmFileDeletion),

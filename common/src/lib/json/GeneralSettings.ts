@@ -1,7 +1,5 @@
 export type GeneralSettings = {
   prioritizePerformance: boolean;
-  portableMode: boolean;
-  disableLocalSave: boolean;
   confirmSceneDeletion: boolean;
   confirmBlacklist: boolean;
   confirmFileDeletion: boolean;

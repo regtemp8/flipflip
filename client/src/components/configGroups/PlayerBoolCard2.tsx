@@ -1,62 +1,24 @@
-import React, { type ChangeEvent, useState } from 'react'
+import React from 'react'
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  Grid2
-} from '@mui/material'
+import { Grid2 } from '@mui/material'
 
 import BaseSwitch from '../common/BaseSwitch'
 import {
   setConfigGeneralSettingsPrioritizePerformance,
   setConfigGeneralSettingsConfirmSceneDeletion,
   setConfigGeneralSettingsConfirmBlacklist,
-  setConfigGeneralSettingsConfirmFileDeletion,
-  setConfigGeneralSettingsDisableLocalSave
+  setConfigGeneralSettingsConfirmFileDeletion
 } from '../../store/api/thunks'
 import {
   useGetGeneralSettingsPrioritizePerformanceQuery,
   useGetGeneralSettingsConfirmSceneDeletionQuery,
   useGetGeneralSettingsConfirmBlacklistQuery,
-  useGetGeneralSettingsConfirmFileDeletionQuery,
-  useGetGeneralSettingsPortableModeQuery,
-  useGetGeneralSettingsDisableLocalSaveQuery
+  useGetGeneralSettingsConfirmFileDeletionQuery
 } from '../../store/api/selectors'
 
 export default function PlayerBoolCard2() {
-  const [portableDialog, setPortableDialog] = useState(false)
-
   const { data: prioritizePerformance } =
     useGetGeneralSettingsPrioritizePerformanceQuery()
-  const { data: portableMode } = useGetGeneralSettingsPortableModeQuery()
-
-  const onTogglePortable = (
-    e: ChangeEvent<HTMLInputElement>,
-    checked: boolean
-  ) => {
-    // TODO make portable mode work
-    // if (checked && portablePathExists) {
-    //   // Ask whether to keep local or keep portable
-    //   onToggleDialog()
-    // } else {
-    //   dispatch(setConfigGeneralSettingsPortableMode(checked))
-    // }
-  }
-
-  const onToggleDialog = () => {
-    setPortableDialog(portableDialog)
-  }
-
-  const onChoosePortable = () => {
-    // TODO make portable mode work
-    // dispatch(setConfigGeneralSettingsPortableMode(true))
-    // dispatch(restoreAppStorageFromBackup(portablePath))
-    // onToggleDialog()
-  }
-
   return (
     <Grid2 container spacing={2} alignItems="center">
       <Grid2 size={12}>
@@ -103,44 +65,6 @@ export default function PlayerBoolCard2() {
           action={setConfigGeneralSettingsConfirmFileDeletion}
         />
       </Grid2>
-      <Grid2 size={12}>
-        <BaseSwitch
-          label="Portable Mode"
-          tooltip="Portable Mode will save a copy of your data in the same directory as the FlipFlip executable, as well as the default save path. This needs to be enabled on each machine."
-          selector={useGetGeneralSettingsPortableModeQuery}
-          onChange={onTogglePortable}
-        />
-      </Grid2>
-      {portableMode && (
-        <Grid2 size={12}>
-          <BaseSwitch
-            label="Disable Local Saves"
-            tooltip="If on, data will only be saved in the same directory as the FlipFlip executable, and not at the default save path."
-            selector={useGetGeneralSettingsDisableLocalSaveQuery}
-            action={setConfigGeneralSettingsDisableLocalSave}
-          />
-        </Grid2>
-      )}
-      <Dialog
-        open={portableDialog}
-        onClose={onToggleDialog}
-        aria-describedby="portable-description"
-      >
-        <DialogContent>
-          <DialogContentText id="portable-description">
-            Do you want to use the local data on this machine or existing
-            portable data?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onToggleDialog} color="secondary">
-            Local data
-          </Button>
-          <Button onClick={onChoosePortable} color="primary">
-            Portable data
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Grid2>
   )
 }

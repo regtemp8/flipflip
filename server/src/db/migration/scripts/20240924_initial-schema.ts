@@ -135,8 +135,6 @@ const generalSettingsTable = async (trx: Kysely<DB>) => {
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('prioritizePerformance', 'boolean', (col) => col.notNull())
-    .addColumn('portableMode', 'boolean', (col) => col.notNull())
-    .addColumn('disableLocalSave', 'boolean', (col) => col.notNull())
     .addColumn('confirmSceneDeletion', 'boolean', (col) => col.notNull())
     .addColumn('confirmBlacklist', 'boolean', (col) => col.notNull())
     .addColumn('confirmFileDeletion', 'boolean', (col) => col.notNull())

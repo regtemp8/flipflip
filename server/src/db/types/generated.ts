@@ -204,9 +204,7 @@ export interface GeneralSettings {
   confirmBlacklist: number
   confirmFileDeletion: number
   confirmSceneDeletion: number
-  disableLocalSave: number
   id: number | null
-  portableMode: number
   prioritizePerformance: number
   userId: number
   watermark: number
@@ -505,12 +503,6 @@ export interface ScenePlaylistItemScene {
   scenePlaylistItemId: number
 }
 
-export interface Sessions {
-  expired: string | null
-  sess: string | null
-  sid: string | null
-}
-
 export interface Tag {
   id: number | null
   name: string
@@ -592,7 +584,6 @@ export interface DB {
   scenePlaylist: ScenePlaylist
   scenePlaylistItem: ScenePlaylistItem
   scenePlaylistItemScene: ScenePlaylistItemScene
-  sessions: Sessions
   tag: Tag
   theme: Theme
   tutorials: Tutorials

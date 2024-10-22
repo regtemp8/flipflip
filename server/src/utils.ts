@@ -1,14 +1,7 @@
 import path from 'path'
 export const isMacOSX = process.platform === 'darwin'
 
-export function getSaveDir(useNodeEnv = true) {
-  if(process.env.NODE_ENV === 'test') {
-    return path.join(__dirname, '../tests')
-  }
-  if (useNodeEnv && process.env.NODE_ENV === 'development') {
-    return '/tmp'
-  }
-
+export function getElectronSaveDir() {
   let directory: string | undefined
   switch (process.platform) {
     case 'win32':
@@ -22,5 +15,9 @@ export function getSaveDir(useNodeEnv = true) {
       break
   }
 
-  return directory + '/flipflip'
+  return directory != null ? directory + '/flipflip' : undefined
+}
+
+export function getSaveDir() {
+  return process.env.SAVE_DIR ?? process.cwd()
 }

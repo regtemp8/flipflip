@@ -1802,12 +1802,6 @@ export const setConfigGeneralSettingsConfirmFileDeletion = (
   return updateGeneralSettings({ confirmFileDeletion })
 }
 
-export const setConfigGeneralSettingsDisableLocalSave = (
-  disableLocalSave: boolean
-) => {
-  return updateGeneralSettings({ disableLocalSave })
-}
-
 const updateLocalRemoteSettings = (update: Partial<RemoteSettings>) => {
   return flipflipApi.util.updateQueryData(
     'getRemoteSettings',
