@@ -46,7 +46,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import SaveIcon from '@mui/icons-material/Save'
 
 import { CST, MO, RP } from 'flipflip-common'
-import {captionProgramDefaults} from '../../utils'
+import { captionProgramDefaults } from '../../utils'
 // import Player from '../player/Player'
 import SceneSelect from '../configGroups/SceneSelect'
 import CaptionProgram from '../player/CaptionProgram'
@@ -63,9 +63,17 @@ import CodeMirror, {
 } from './CodeMirror'
 import BaseSlider from '../common/slider/BaseSlider'
 import { useNavigate } from 'react-router-dom'
-import { useGetCaptionScriptQuery, useGetSceneQuery, useGetTutorialsQuery } from '../../store/api/slice'
+import {
+  useGetCaptionScriptQuery,
+  useGetSceneQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import { useAppSelector } from '../../store/hooks'
-import { selectCaptionScriptorSceneID, selectCaptionScriptorSceneScripts, selectCaptionScriptorCaptionScriptID} from '../../store/captionScriptor/selectors'
+import {
+  selectCaptionScriptorSceneID,
+  selectCaptionScriptorSceneScripts,
+  selectCaptionScriptorCaptionScriptID
+} from '../../store/captionScriptor/selectors'
 import { useGetCaptionScriptOpacityQuery } from '../../store/api/selectors'
 import { setCaptionScriptOpacity } from '../../store/api/thunks'
 
@@ -242,15 +250,15 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 function CaptionScriptor() {
   const navigate = useNavigate()
-  const {data: tutorial} = useGetTutorialsQuery()
+  const { data: tutorial } = useGetTutorialsQuery()
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())
   const sceneScripts = useAppSelector(selectCaptionScriptorSceneScripts())
   const captionScriptID = useAppSelector(selectCaptionScriptorCaptionScriptID())
   const loadFromSceneError = false
 
-  const {data: scene} = useGetSceneQuery(sceneID)
+  const { data: scene } = useGetSceneQuery(sceneID)
   const audioEnabled = scene?.audioEnabled === true
-  const {data: script} = useGetCaptionScriptQuery(captionScriptID)
+  const { data: script } = useGetCaptionScriptQuery(captionScriptID)
 
   const [selectScript, setSelectScript] = useState('')
   const [error, setError] = useState<string>()
@@ -287,7 +295,7 @@ function CaptionScriptor() {
   }, [fullscreen, onFullscreen])
 
   useEffect(() => {
-    if(script == null) {
+    if (script == null) {
       return
     }
 
@@ -709,7 +717,7 @@ function CaptionScriptor() {
                   <CheckCircleOutlineIcon className={classes.okIcon} />
                 </div>
               )}
-              {((script?.script?.length ?? 0) === 0) && (
+              {(script?.script?.length ?? 0) === 0 && (
                 <div className={classes.statusMessage}>
                   <Typography
                     component="div"
@@ -740,7 +748,8 @@ function CaptionScriptor() {
                       size={12}
                       className={cx(
                         classes.menuGridButtons,
-                        tutorial?.current === CST.menu && classes.backdropTopHighlight,
+                        tutorial?.current === CST.menu &&
+                          classes.backdropTopHighlight,
                         tutorial?.current === CST.menu && classes.disable
                       )}
                     >
@@ -799,14 +808,18 @@ function CaptionScriptor() {
                         <MenuItem
                           disabled={
                             !scriptChanged ||
-                            (script?.url != null && script.url.startsWith('http'))
+                            (script?.url != null &&
+                              script.url.startsWith('http'))
                           }
                           onClick={onSave}
                         >
                           Save
                         </MenuItem>
                         <MenuItem onClick={onSaveAs}>Save As</MenuItem>
-                        <MenuItem disabled={!script?.url} onClick={onSaveToLibrary}>
+                        <MenuItem
+                          disabled={!script?.url}
+                          onClick={onSaveToLibrary}
+                        >
                           Save To Library
                         </MenuItem>
                       </Menu>
@@ -849,7 +862,8 @@ function CaptionScriptor() {
                     <Grid2
                       size={12}
                       className={cx(
-                        tutorial?.current === CST.menu && classes.backdropTopHighlight,
+                        tutorial?.current === CST.menu &&
+                          classes.backdropTopHighlight,
                         tutorial?.current === CST.menu && classes.disable
                       )}
                     >
@@ -1197,7 +1211,9 @@ function CaptionScriptor() {
                   <BaseSlider
                     min={0}
                     max={100}
-                    selector={() => useGetCaptionScriptOpacityQuery(captionScriptID)}
+                    selector={() =>
+                      useGetCaptionScriptOpacityQuery(captionScriptID)
+                    }
                     action={setCaptionScriptOpacity(captionScriptID)}
                     labelledBy="opacity-slider"
                     label={{ text: 'Script Opacity:', appendValue: true }}

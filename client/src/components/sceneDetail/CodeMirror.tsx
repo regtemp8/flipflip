@@ -1,8 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { getTimingFromString } from '../../utils'
 import type ChildCallbackHack from '../player/ChildCallbackHack'
-import { type Mode, type Editor, type EditorChange, registerHelper } from 'codemirror'
-import {Controlled } from 'react-codemirror2'
+import {
+  type Mode,
+  type Editor,
+  type EditorChange,
+  registerHelper
+} from 'codemirror'
+import { Controlled } from 'react-codemirror2'
 
 const actions = [
   'blink',

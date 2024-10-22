@@ -17,7 +17,10 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { HTMLContentElement } from './HTMLContentElement'
 import DurationCalculator from '../../data/DurationCalculator'
 import { useNavigate } from 'react-router-dom'
-import { useGetCaptionScriptFontSettingsQuery, useGetCaptionScriptQuery } from '../../store/api/slice'
+import {
+  useGetCaptionScriptFontSettingsQuery,
+  useGetCaptionScriptQuery
+} from '../../store/api/slice'
 import { useGetAudioBPMQuery } from '../../store/api/selectors'
 
 const splitFirstWord = function (s: string) {
@@ -64,12 +67,24 @@ export default function CaptionProgram(props: CaptionProgramProps) {
     selectCurrentImageTags(props.currentImage)
   )*/
 
-  const {data: script} = useGetCaptionScriptQuery(props.captionScriptID)
-  const {data: fsBlink} = useGetCaptionScriptFontSettingsQuery({id: props.captionScriptID, type: 'blink'})
-  const {data: fsCaption} = useGetCaptionScriptFontSettingsQuery({id: props.captionScriptID, type: 'caption'})
-  const {data: fsCaptionBig} = useGetCaptionScriptFontSettingsQuery({id: props.captionScriptID, type: 'captionBig'})
-  const {data: fsCount} = useGetCaptionScriptFontSettingsQuery({id: props.captionScriptID, type: 'count'})
-  const {data: bpm} = useGetAudioBPMQuery(props.currentAudio ?? -1)
+  const { data: script } = useGetCaptionScriptQuery(props.captionScriptID)
+  const { data: fsBlink } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'blink'
+  })
+  const { data: fsCaption } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'caption'
+  })
+  const { data: fsCaptionBig } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'captionBig'
+  })
+  const { data: fsCount } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'count'
+  })
+  const { data: bpm } = useGetAudioBPMQuery(props.currentAudio ?? -1)
 
   const [state, setState] = useState({
     ...captionProgramDefaults,
@@ -268,8 +283,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             const fs = fsCaptionBig as FontSettings
             const element = _el.current as HTMLDivElement
             element.style.color = fs.color
-            element.style.fontSize =
-              fs.fontSize * props.scale + 'vmin'
+            element.style.fontSize = fs.fontSize * props.scale + 'vmin'
             element.style.fontFamily = fs.fontFamily
             element.style.display = 'table-cell'
             element.style.textAlign = 'center'
@@ -293,9 +307,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             element.style.transition = 'opacity 0.1s ease-out'
             if (fs.border) {
               element.style.webkitTextStroke =
-                fs.borderpx * props.scale +
-                'px ' +
-                fs.borderColor
+                fs.borderpx * props.scale + 'px ' + fs.borderColor
             } else {
               element.style.webkitTextStroke = 'unset'
             }
@@ -1115,7 +1127,14 @@ export default function CaptionProgram(props: CaptionProgramProps) {
       }
       _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
     }
-  }, [dispatch, script?.nextSceneAtEnd, props, state, script?.stopAtEnd, script?.syncWithAudio])
+  }, [
+    dispatch,
+    script?.nextSceneAtEnd,
+    props,
+    state,
+    script?.stopAtEnd,
+    script?.syncWithAudio
+  ])
 
   const captionLoop = useCallback(() => {
     if (state.program[state.programCounter]) {
@@ -1764,7 +1783,16 @@ export default function CaptionProgram(props: CaptionProgramProps) {
         }
       }
     })
-  }, [advance, captionLoop, commands, props, script, state, timestampLoop, script?.url])
+  }, [
+    advance,
+    captionLoop,
+    commands,
+    props,
+    script,
+    state,
+    timestampLoop,
+    script?.url
+  ])
 
   useEffect(() => {
     start()

@@ -37,14 +37,14 @@ export default defineConfig({
     {
       name: 'password-login-chromium',
       testMatch: /login\/password\.spec\.ts/,
-      use: { 
+      use: {
         ...devices['Desktop Chrome']
       }
     },
     {
       name: 'token-login-chromium',
       testMatch: /login\/token\.spec\.ts/,
-      use: { 
+      use: {
         ...devices['Desktop Chrome']
       }
     },
@@ -52,22 +52,22 @@ export default defineConfig({
       name: 'app-chromium',
       testMatch: /app\/.*\.spec\.ts/,
       dependencies: ['password-login-chromium'],
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        storageState: "tests/session.json"
+        storageState: 'tests/session.json'
       }
     },
     {
       name: 'password-login-firefox',
       testMatch: /login\/password\.spec\.ts/,
-      use: { 
+      use: {
         ...devices['Desktop Firefox']
       }
     },
     {
       name: 'token-login-firefox',
       testMatch: /login\/token\.spec\.ts/,
-      use: { 
+      use: {
         ...devices['Desktop Firefox']
       }
     },
@@ -75,11 +75,11 @@ export default defineConfig({
       name: 'app-firefox',
       testMatch: /app\/.*\.spec\.ts/,
       dependencies: ['password-login-firefox'],
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
-        storageState: "tests/session.json"
+        storageState: 'tests/session.json'
       }
-    },
+    }
 
     // {
     //   name: 'webkit',

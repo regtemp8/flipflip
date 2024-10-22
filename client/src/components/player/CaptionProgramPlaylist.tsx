@@ -23,14 +23,21 @@ export interface CaptionProgramPlaylistProps {
   onError?: (e: string) => void
 }
 
-const initialPlaylist = {id: -1, name: '', type: PLT.script, items: [], repeat: RP.none, shuffle: false}
+const initialPlaylist = {
+  id: -1,
+  name: '',
+  type: PLT.script,
+  items: [],
+  repeat: RP.none,
+  shuffle: false
+}
 
 export default function CaptionProgramPlaylist(
   props: CaptionProgramPlaylistProps
 ) {
   const playlistResult = useGetPlaylistQuery(props.playlistID)
   const playlist: Playlist = playlistResult.data ?? initialPlaylist
-  const {data: scene} = useGetSceneQuery(props.sceneID)
+  const { data: scene } = useGetSceneQuery(props.sceneID)
   const isScriptScene = scene?.scriptScene === true
   const scriptStartIndex = scene?.scriptStartIndex ?? 0
 

@@ -1,4 +1,4 @@
-import { Audio, ContentSource, ScraperHelpers, TF } from "flipflip-common"
+import { Audio, ContentSource, ScraperHelpers, TF } from 'flipflip-common'
 
 export const captionProgramDefaults = {
   program: Array<Function>(),
