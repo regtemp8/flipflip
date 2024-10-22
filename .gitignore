@@ -109,3 +109,4 @@ coverage
 */playwright/.cache/
 
 /server/tests/flipflip.db
+/server/tests/session.json
