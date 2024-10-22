@@ -104,5 +104,5 @@ coverage
 */blob-report/
 */playwright/.cache/
 
-tests/flipflip.db
-tests/session.json
+server/tests/flipflip.db
+server/tests/session.json

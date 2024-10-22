@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.use({ storageState: 'tests/session.json' })
+test.use({ storageState: 'server/tests/session.json' })
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings')
 })
@@ -36,33 +36,17 @@ test('Settings navigation', async ({ page }) => {
 })
 
 test('Fullscreen setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Fullscreen")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Fullscreen', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Fullscreen', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Fullscreen")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Fullscreen', { exact: true })).toBeChecked()
 
   await page.getByLabel('Fullscreen', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Fullscreen")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Fullscreen', { exact: true })).not.toBeChecked()
 })
 
 test('Start Immediately setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Start Immediately")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Start Immediately', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Start Immediately', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -71,26 +55,14 @@ test('Start Immediately setting', async ({ page }) => {
   )
 
   await page.getByLabel('Start Immediately', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Start Immediately")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Start Immediately', { exact: true })).toBeChecked()
 
   await page.getByLabel('Start Immediately', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Start Immediately")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Start Immediately', { exact: true })).not.toBeChecked()
 })
 
 test('Click to Progress setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Click to Progress")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Click to Progress', { exact: true })).toBeChecked()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeVisible()
 
   await page.getByLabel('Click to Progress', { exact: true }).hover()
@@ -100,30 +72,18 @@ test('Click to Progress setting', async ({ page }) => {
   )
 
   await page.getByLabel('Click to Progress', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Click to Progress")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Click to Progress', { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeHidden()
 
   await page.getByLabel('Click to Progress', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Click to Progress")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Click to Progress', { exact: true })).toBeChecked()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeVisible()
 })
 
 test('While Playing setting', async ({ page }) => {
   await page.getByLabel('Click to Progress', { exact: true }).check()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeVisible()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("While Playing")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('While Playing', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('While Playing', { exact: true }).hover()
   await expect(
@@ -136,26 +96,14 @@ test('While Playing setting', async ({ page }) => {
   )
 
   await page.getByLabel('While Playing', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("While Playing")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('While Playing', { exact: true })).toBeChecked()
 
   await page.getByLabel('While Playing', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("While Playing")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('While Playing', { exact: true })).not.toBeChecked()
 })
 
 test('Show Adv Easing Controls setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Adv Easing Controls")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Adv Easing Controls', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Show Adv Easing Controls', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -164,26 +112,14 @@ test('Show Adv Easing Controls setting', async ({ page }) => {
   )
 
   await page.getByLabel('Show Adv Easing Controls', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Adv Easing Controls")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Adv Easing Controls', { exact: true })).toBeChecked()
 
   await page.getByLabel('Show Adv Easing Controls', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Adv Easing Controls")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Adv Easing Controls', { exact: true })).not.toBeChecked()
 })
 
 test('Show Audio Info setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Audio Info")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Audio Info', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Show Audio Info', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -192,26 +128,14 @@ test('Show Audio Info setting', async ({ page }) => {
   )
 
   await page.getByLabel('Show Audio Info', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Audio Info")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Audio Info', { exact: true })).toBeChecked()
 
   await page.getByLabel('Show Audio Info', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Show Audio Info")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Show Audio Info', { exact: true })).not.toBeChecked()
 })
 
 test('Prioritize Performance setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Prioritize Performance")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Prioritize Performance', { exact: true })).toBeChecked()
 
   await page.getByLabel('Prioritize Performance', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -220,26 +144,14 @@ test('Prioritize Performance setting', async ({ page }) => {
   )
 
   await page.getByLabel('Prioritize Performance', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Prioritize Loading")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Prioritize Loading', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Prioritize Loading', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Prioritize Performance")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Prioritize Performance', { exact: true })).toBeChecked()
 })
 
 test('Confirm Scene Deletion setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Scene Deletion")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Scene Deletion', { exact: true })).toBeChecked()
 
   await page.getByLabel('Confirm Scene Deletion', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -248,26 +160,14 @@ test('Confirm Scene Deletion setting', async ({ page }) => {
   )
 
   await page.getByLabel('Confirm Scene Deletion', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Scene Deletion")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Scene Deletion', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Confirm Scene Deletion', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Scene Deletion")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Scene Deletion', { exact: true })).toBeChecked()
 })
 
 test('Confirm Blacklist setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Blacklist")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Blacklist', { exact: true })).toBeChecked()
 
   await page.getByLabel('Confirm Blacklist', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -276,26 +176,14 @@ test('Confirm Blacklist setting', async ({ page }) => {
   )
 
   await page.getByLabel('Confirm Blacklist', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Blacklist")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Blacklist', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Confirm Blacklist', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm Blacklist")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm Blacklist', { exact: true })).toBeChecked()
 })
 
 test('Confirm File Deletion setting', async ({ page }) => {
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm File Deletion")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm File Deletion', { exact: true })).toBeChecked()
 
   await page.getByLabel('Confirm File Deletion', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -304,16 +192,128 @@ test('Confirm File Deletion setting', async ({ page }) => {
   )
 
   await page.getByLabel('Confirm File Deletion', { exact: true }).uncheck()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm File Deletion")) .MuiSwitch-switchBase'
-    )
-  ).not.toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm File Deletion', { exact: true })).not.toBeChecked()
 
   await page.getByLabel('Confirm File Deletion', { exact: true }).check()
-  await expect(
-    page.locator(
-      'label:has( > :text-matches("Confirm File Deletion")) .MuiSwitch-switchBase'
-    )
-  ).toHaveClass(/Mui-checked/)
+  await expect(page.getByLabel('Confirm File Deletion', { exact: true })).toBeChecked()
+})
+
+test('Min Image Size setting', async ({ page }) => {
+  await expect(page.getByLabel('Min Image Size', { exact: true })).toHaveAttribute('type', 'number')
+  await page.getByLabel('Min Image Size', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toBeVisible()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'Images under this size (width or height) will be skipped'
+  )
+
+  await page.getByLabel('Min Image Size', { exact: true }).click();
+  await page.getByLabel('Min Image Size', { exact: true }).fill('-1');
+  await page.getByLabel('Min Image Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Image Size', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Min Image Size', { exact: true }).click();
+  await page.getByLabel('Min Image Size', { exact: true }).fill('0');
+  await page.getByLabel('Min Image Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Image Size', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Min Image Size', { exact: true }).click();
+  await page.getByLabel('Min Image Size', { exact: true }).fill('1234567890');
+  await page.getByLabel('Min Image Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Image Size')).toHaveValue('1234567890')
+})
+
+test('Min Video Size setting', async ({ page }) => {
+  await expect(page.getByLabel('Min Video Size', { exact: true })).toHaveAttribute('type', 'number')
+  await page.getByLabel('Min Video Size', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toBeVisible()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'Videos under this size (width or height) will be skipped'
+  )
+
+  await page.getByLabel('Min Video Size', { exact: true }).click();
+  await page.getByLabel('Min Video Size', { exact: true }).fill('-1');
+  await page.getByLabel('Min Video Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Video Size', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Min Video Size', { exact: true }).click();
+  await page.getByLabel('Min Video Size', { exact: true }).fill('0');
+  await page.getByLabel('Min Video Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Video Size', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Min Video Size', { exact: true }).click();
+  await page.getByLabel('Min Video Size', { exact: true }).fill('1234567890');
+  await page.getByLabel('Min Video Size', { exact: true }).blur()
+  await expect(page.getByLabel('Min Video Size')).toHaveValue('1234567890')
+})
+
+test('Max in History setting', async ({ page }) => {
+  await expect(page.getByLabel('Max in History', { exact: true })).toHaveAttribute('type', 'number')
+  await page.getByLabel('Max in History', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toBeVisible()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'The maximum number of images/videos to keep in player history. Reduce this number to reduce memory usage and improve performance.'
+  )
+
+  await page.getByLabel('Max in History', { exact: true }).click();
+  await page.getByLabel('Max in History', { exact: true }).fill('-1');
+  await page.getByLabel('Max in History', { exact: true }).blur()
+  await expect(page.getByLabel('Max in History', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max in History', { exact: true }).click();
+  await page.getByLabel('Max in History', { exact: true }).fill('0');
+  await page.getByLabel('Max in History', { exact: true }).blur()
+  await expect(page.getByLabel('Max in History', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max in History', { exact: true }).click();
+  await page.getByLabel('Max in History', { exact: true }).fill('1234567890');
+  await page.getByLabel('Max in History', { exact: true }).blur()
+  await expect(page.getByLabel('Max in History')).toHaveValue('1234567890')
+})
+
+test('Max in Memory setting', async ({ page }) => {
+  await expect(page.getByLabel('Max in Memory', { exact: true })).toHaveAttribute('type', 'number')
+  await page.getByLabel('Max in Memory', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toBeVisible()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'The maximum number of images/videos to queue up for rendering. Reduce this number to reduce memory usage and improve performance.'
+  )
+
+  await page.getByLabel('Max in Memory', { exact: true }).click();
+  await page.getByLabel('Max in Memory', { exact: true }).fill('-1');
+  await page.getByLabel('Max in Memory', { exact: true }).blur()
+  await expect(page.getByLabel('Max in Memory', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max in Memory', { exact: true }).click();
+  await page.getByLabel('Max in Memory', { exact: true }).fill('0');
+  await page.getByLabel('Max in Memory', { exact: true }).blur()
+  await expect(page.getByLabel('Max in Memory', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max in Memory', { exact: true }).click();
+  await page.getByLabel('Max in Memory', { exact: true }).fill('1234567890');
+  await page.getByLabel('Max in Memory', { exact: true }).blur()
+  await expect(page.getByLabel('Max in Memory')).toHaveValue('1234567890')
+})
+
+test('Max Loading at Once setting', async ({ page }) => {
+  await expect(page.getByLabel('Max Loading at Once', { exact: true })).toHaveAttribute('type', 'number')
+  await page.getByLabel('Max Loading at Once', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toBeVisible()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'The maximum number of simultaneous images/videos loading. Increase this number to load sources faster. Reduce this number to improve display performance.'
+  )
+
+  await page.getByLabel('Max Loading at Once', { exact: true }).click();
+  await page.getByLabel('Max Loading at Once', { exact: true }).fill('-1');
+  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
+  await expect(page.getByLabel('Max Loading at Once', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max Loading at Once', { exact: true }).click();
+  await page.getByLabel('Max Loading at Once', { exact: true }).fill('0');
+  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
+  await expect(page.getByLabel('Max Loading at Once', { exact: true })).toHaveValue('0')
+
+  await page.getByLabel('Max Loading at Once', { exact: true }).click();
+  await page.getByLabel('Max Loading at Once', { exact: true }).fill('1234567890');
+  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
+  await expect(page.getByLabel('Max Loading at Once')).toHaveValue('1234567890')
 })

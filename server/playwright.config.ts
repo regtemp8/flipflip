@@ -54,7 +54,7 @@ export default defineConfig({
       dependencies: ['password-login-chromium'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'tests/session.json'
+        storageState: 'server/tests/session.json'
       }
     },
     {
@@ -77,7 +77,7 @@ export default defineConfig({
       dependencies: ['password-login-firefox'],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'tests/session.json'
+        storageState: 'server/tests/session.json'
       }
     }
 
@@ -112,7 +112,7 @@ export default defineConfig({
     {
       command: 'yarn test',
       url: 'http://localhost:5050',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
       timeout: 60 * 1000
     },
     {

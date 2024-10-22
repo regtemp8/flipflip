@@ -30,5 +30,5 @@ test('Successfull password login', async ({ page }) => {
   await page.getByRole('button', { name: 'Login' }).click()
   await expect(page).toHaveURL('/')
 
-  await page.context().storageState({ path: 'tests/session.json' })
+  await page.context().storageState({ path: 'server/tests/session.json' })
 })
