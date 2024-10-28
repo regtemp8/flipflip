@@ -1,69 +1,39 @@
 import { test, expect } from '@playwright/test'
-import {VTF} from 'flipflip-common'
-import {changeSlider, testSliderValue} from '../../utils'
+import { changeSlider, testSliderValue } from '../../utils'
 
 test.use({ storageState: 'server/tests/session.json' })
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
-test('Enable zoom/move timing', async ({ page }) => {
-    const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
-    await expect(container).not.toBeVisible()
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
-    await expect(page.getByText('None').first()).toBeVisible()
-    await expect(page.getByText('None').nth(1)).toBeVisible()
+test('Fade effect', async ({ page }) => {
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
+    await expect(page.getByRole('combobox').nth(2)).not.toBeVisible();
+    await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible();
 
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(container).toBeVisible()
-
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(container).not.toBeVisible()
-
-    await page.getByText('None').first().click()
-    await page.getByRole('option', { name: 'Left', exact: true }).click();
-    await expect(container).toBeVisible()
-
-    await page.getByText('Left').first().click()
-    await page.getByRole('option', { name: 'Right', exact: true }).click();
-    await expect(container).toBeVisible()
-
-    await page.getByText('Right').first().click()
-    await page.getByRole('option', { name: 'Left/Right', exact: true }).click();
-    await expect(container).toBeVisible()
-
-    await page.getByText('Left/Right').first().click()
-    await page.getByRole('option', { name: 'None', exact: true }).click();
-    await expect(container).not.toBeVisible()
-
-    await page.getByText('None').nth(1).click()
-    await page.getByRole('option', { name: 'Up', exact: true }).click();
-    await expect(container).toBeVisible()
-
-    await page.getByText('Up').first().click()
-    await page.getByRole('option', { name: 'Down', exact: true }).click();
-    await expect(container).toBeVisible()
-
-    await page.getByText('Down').first().click()
-    await page.getByRole('option', { name: 'Up/Down', exact: true }).click();
-    await expect(container).toBeVisible()
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
+    await expect(page.getByRole('combobox').nth(2)).toBeVisible();
+    await expect(page.getByRole('combobox').nth(2)).toHaveText('Constant')
+    await expect(page.getByRole('spinbutton', { name: 'For' })).toBeVisible();
 
     const responsePromise = page.waitForResponse((res) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.vertTransType === VTF.none
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByText('Up/Down').first().click()
-    await page.getByRole('option', { name: 'None', exact: true }).click();
-    await expect(container).not.toBeVisible()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
+    await expect(page.getByRole('combobox').nth(2)).not.toBeVisible();
+    await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible();
     await responsePromise
 })
 
-test('Constant zoom/move timing', async ({ page }) => {
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
+test('Constant fade timing', async ({ page }) => {
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
     const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
 
     await page.getByRole('combobox').nth(2).click();
@@ -82,17 +52,17 @@ test('Constant zoom/move timing', async ({ page }) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.zoom === false
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
     await responsePromise
 })
 
-test('Random zoom/move timing', async ({ page }) => {
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
+test('Random fade timing', async ({ page }) => {
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
     const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
 
     await page.getByRole('combobox').nth(2).click();
@@ -114,21 +84,22 @@ test('Random zoom/move timing', async ({ page }) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.zoom === false
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
     await responsePromise
 })
 
-test('Wave zoom/move timing', async ({ page }) => {
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
+test('Wave fade timing', async ({ page }) => {
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
     const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
 
     await page.getByRole('combobox').nth(2).click();
     await page.getByRole('option', { name: 'Wave', exact: true }).click();
+    await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
     await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'Between' })).toBeVisible()
     await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'Between' })).toHaveAttribute('type', 'number')
     await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'Between' })).toHaveAttribute('min', '0')
@@ -138,8 +109,8 @@ test('Wave zoom/move timing', async ({ page }) => {
     await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'and' })).toHaveAttribute('min', '0')
     await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'and' })).toHaveAttribute('step', '100')
     await expect(container.locator('.MuiCollapse-entered .MuiTypography-caption')).toHaveText('Wave Rate');
-    
-    const input = await container.locator('.MuiCollapse-entered .MuiTextField-root input[aria-labelledby="trans-sin-rate-slider"]')
+
+    const input = await container.locator('.MuiCollapse-entered .MuiTextField-root input[aria-labelledby="fadeio-sin-rate-slider"]')
     await expect(input).toBeVisible();
     await expect(input).toHaveAttribute('type', 'number')
     await expect(input).toHaveAttribute('min', '0')
@@ -197,23 +168,21 @@ test('Wave zoom/move timing', async ({ page }) => {
     await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100')
     expect(await testSliderValue(thumb, slider, 1)).toBe(true)
 
-    await expect(container.locator('.MuiCollapse-entered').getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
-
     const responsePromise = page.waitForResponse((res) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.zoom === false
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
     await responsePromise
 })
 
-test('Audio BPM zoom/move timing', async ({page}) => {
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
+test('Audio BPM fade timing', async ({page}) => {
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
     const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
 
     await page.getByRole('combobox').nth(2).click();
@@ -253,17 +222,17 @@ test('Audio BPM zoom/move timing', async ({page}) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.zoom === false
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
     await responsePromise
 })
 
-test('With scene zoom/move timing', async ({ page }) => {
-    await page.getByLabel('Zoom', { exact: true }).check();
-    await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
+test('With scene fade timing', async ({ page }) => {
+    await page.getByLabel('Fade In/Out', { exact: true }).check();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
     const container = await page.locator('.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")')
 
     await page.getByRole('combobox').nth(2).click();
@@ -278,10 +247,10 @@ test('With scene zoom/move timing', async ({ page }) => {
         const request = res.request()
         return new URL(request.url()).pathname === '/api/scenes/1' 
             && request.method() === 'PATCH' 
-            && request.postDataJSON()?.zoom === false
+            && request.postDataJSON()?.fadeInOut === false
             && res.status() === 204
     })
-    await page.getByLabel('Zoom', { exact: true }).uncheck();
-    await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
+    await page.getByLabel('Fade In/Out', { exact: true }).uncheck();
+    await expect(page.getByLabel('Fade In/Out', { exact: true })).not.toBeChecked()
     await responsePromise
 })

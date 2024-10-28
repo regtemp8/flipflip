@@ -29,7 +29,7 @@ export async function changeSlider(page: Page, thumb: Locator, slider: Locator, 
     await page.mouse.up();
 }
 
-export async function testSliderValue(thumb: Locator, slider: Locator, expectedPercentage) {
+export async function testSliderValue(thumb: Locator, slider: Locator, expectedPercentage: number) {
     const thumbBoundingBox = await thumb.boundingBox();
     const sliderBoundingBox = await slider.boundingBox();
 
