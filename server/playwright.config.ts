@@ -35,15 +35,15 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'password-login-chromium',
-      testMatch: /login\/password\.spec\.ts/,
+      name: 'login-chromium',
+      testMatch: /login\/login\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome']
       }
     },
     {
-      name: 'token-login-chromium',
-      testMatch: /login\/token\.spec\.ts/,
+      name: 'auth-chromium',
+      testMatch: /login\/auth.spec.ts/,
       use: {
         ...devices['Desktop Chrome']
       }
@@ -51,22 +51,22 @@ export default defineConfig({
     {
       name: 'app-chromium',
       testMatch: /app\/.*\.spec\.ts/,
-      dependencies: ['password-login-chromium'],
+      dependencies: ['auth-chromium'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'server/tests/session.json'
       }
     },
     {
-      name: 'password-login-firefox',
-      testMatch: /login\/password\.spec\.ts/,
+      name: 'login-firefox',
+      testMatch: /login\/login\.spec\.ts/,
       use: {
         ...devices['Desktop Firefox']
       }
     },
     {
-      name: 'token-login-firefox',
-      testMatch: /login\/token\.spec\.ts/,
+      name: 'auth-firefox',
+      testMatch: /login\/auth.spec.ts/,
       use: {
         ...devices['Desktop Firefox']
       }
@@ -74,7 +74,7 @@ export default defineConfig({
     {
       name: 'app-firefox',
       testMatch: /app\/.*\.spec\.ts/,
-      dependencies: ['password-login-firefox'],
+      dependencies: ['auth-firefox'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'server/tests/session.json'
