@@ -7,6 +7,7 @@ import { makeStyles } from 'tss-react/mui'
 import * as color from '@mui/material/colors'
 import type ReduxProps from '../common/ReduxProps'
 import { useAppDispatch } from '../../store/hooks'
+import { ColorPartial } from '@mui/material/styles/createPalette'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   colorGrid: {
@@ -33,27 +34,39 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-const colors = [
-  color.red,
-  color.pink,
-  color.purple,
-  color.deepPurple,
-  color.indigo,
-  color.blue,
-  color.lightBlue,
-  color.cyan,
-  color.teal,
-  color.green,
-  color.lightGreen,
-  color.lime,
-  color.yellow,
-  color.amber,
-  color.orange,
-  color.deepOrange,
-  color.brown,
-  color.grey,
-  color.blueGrey
-]
+const colors = new Map([
+  ['red', color.red as ColorPartial], 
+  ['pink', color.pink as ColorPartial], 
+  ['purple', color.purple as ColorPartial], 
+  ['deepPurple', color.deepPurple as ColorPartial], 
+  ['indigo', color.indigo as ColorPartial], 
+  ['blue', color.blue as ColorPartial], 
+  ['lightBlue', color.lightBlue as ColorPartial], 
+  ['cyan', color.cyan as ColorPartial], 
+  ['teal', color.teal as ColorPartial], 
+  ['green', color.green as ColorPartial], 
+  ['lightGreen', color.lightGreen as ColorPartial], 
+  ['lime', color.lime as ColorPartial], 
+  ['yellow', color.yellow as ColorPartial], 
+  ['amber', color.amber as ColorPartial], 
+  ['orange', color.orange as ColorPartial], 
+  ['deepOrange', color.deepOrange as ColorPartial], 
+  ['brown', color.brown as ColorPartial], 
+  ['grey', color.grey as ColorPartial], 
+  ['blueGrey', color.blueGrey as ColorPartial],
+])
+
+const getColorValue = (currentColor?: string) => {
+  switch(currentColor) {
+    case 'white':
+      return color.common.white
+    case 'black':
+      return color.common.black
+    default:
+      const colorPartial = currentColor != null ? colors.get(currentColor) : undefined
+      return colorPartial != null ? colorPartial[500] : undefined
+  }
+}
 
 export interface ThemeColorPickerProps extends ReduxProps<string> {}
 
@@ -63,13 +76,14 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
 
   const onChangeColor = (color: string) => dispatch(props.action(color))
 
+  const colorValue = getColorValue(currentColor)
   const { classes } = useStyles()
   return (
     <Grid2 container alignItems="center">
       <Grid2 className={classes.colorGrid}>
         <Fab
           className={classes.colorButton}
-          style={{ backgroundColor: currentColor }}
+          style={{ backgroundColor: colorValue }}
           size="medium"
         >
           <div />
@@ -83,18 +97,18 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
               readOnly: true
             }
           }}
-          value={currentColor ?? ''}
+          value={colorValue ?? ''}
         />
       </Grid2>
       <Grid2 size={{ xs: 12, sm: 'grow' }}>
         <Grid2 container alignItems="center">
-          {colors.map((c) => (
-            <Grid2 key={c[500]}>
+          {[...colors.keys()].map((key) => (
+            <Grid2 key={key}>
               <Fab
                 className={classes.colorPickerButton}
-                style={{ backgroundColor: c[500] }}
-                value={c[500]}
-                onClick={() => onChangeColor(c[500])}
+                style={{ backgroundColor: colors.get(key)![500] }}
+                value={colors.get(key)![500]}
+                onClick={() => onChangeColor(key)}
                 size="small"
               >
                 <div />
@@ -106,7 +120,7 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
               className={classes.colorPickerButton}
               style={{ backgroundColor: color.common.white }}
               value={color.common.white}
-              onClick={() => onChangeColor(color.common.white)}
+              onClick={() => onChangeColor('white')}
               size="small"
             >
               <div />
@@ -117,7 +131,7 @@ function ThemeColorPicker(props: ThemeColorPickerProps) {
               className={classes.colorPickerButton}
               style={{ backgroundColor: color.common.black }}
               value={color.common.black}
-              onClick={() => onChangeColor(color.common.black)}
+              onClick={() => onChangeColor('black')}
               size="small"
             >
               <div />

@@ -407,10 +407,35 @@ const themeInsert = async (
   json: AppStorage,
   userId: number
 ) => {
+  const colors = new Map([
+    ['#f44336', 'red'], 
+    ['#e91e63', 'pink'], 
+    ['#9c27b0', 'purple'], 
+    ['#673ab7', 'deepPurple'], 
+    ['#3f51b5', 'indigo'], 
+    ['#2196f3', 'blue'], 
+    ['#03a9f4', 'lightBlue'], 
+    ['#00bcd4', 'cyan'], 
+    ['#009688', 'teal'], 
+    ['#4caf50', 'green'], 
+    ['#8bc34a', 'lightGreen'], 
+    ['#cddc39', 'lime'], 
+    ['#ffeb3b', 'yellow'], 
+    ['#ffc107', 'amber'], 
+    ['#ff9800', 'orange'], 
+    ['#ff5722', 'deepOrange'], 
+    ['#795548', 'brown'], 
+    ['#9e9e9e', 'grey'], 
+    ['#607d8b', 'blueGrey'],
+    ['#fff', 'white'], 
+    ['#000', 'black']
+  ])
+
   console.log('+ Insert theme')
   const { mode, primary, secondary } = json.theme.palette
-  const primaryColor = (primary as Record<string, string>).main
-  const secondaryColor = (secondary as Record<string, string>).main
+  const defaultColor = 'pink'
+  const primaryColor = colors.get((primary as Record<string, string>).main) ?? defaultColor
+  const secondaryColor = colors.get((secondary as Record<string, string>).main) ?? defaultColor
   return await trx
     .insertInto('theme')
     .values({

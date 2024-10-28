@@ -1,6 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
-import { createTheme, CssBaseline } from '@mui/material'
-import { ThemeOptions, ThemeProvider } from '@mui/material/styles'
+import { CssBaseline } from '@mui/material'
 
 import ErrorBoundary from './error/ErrorBoundary'
 import createCache from '@emotion/cache'
@@ -12,7 +11,6 @@ import Login from './login/Login'
 import Account from './account/Account'
 import SceneDetail from './sceneDetail/SceneDetail'
 import ScenePicker from './scenePicker/ScenePicker'
-import { defaultTheme } from '../theme'
 import SystemSnack from './SystemSnack'
 import ConfigForm from './config/ConfigForm'
 import DisplaySetup from './config/DisplaySetup'
@@ -22,12 +20,13 @@ import AudioLibrary from './library/AudioLibrary'
 import ScriptLibrary from './library/ScriptLibrary'
 import TagManager from './library/TagManager'
 import CaptionScriptor from './sceneDetail/CaptionScriptor'
+import AppThemeProvider from './AppThemeProvider'
 
 const App = () => {
   return (
     <Provider store={store}>
       <CacheProvider value={createCache({ key: 'css' })}>
-        <ThemeProvider theme={createTheme(defaultTheme as ThemeOptions)}>
+        <AppThemeProvider>
           <ErrorBoundary>
             <CssBaseline />
             <Routes>
@@ -123,7 +122,7 @@ const App = () => {
             </Routes>
             <SystemSnack />
           </ErrorBoundary>
-        </ThemeProvider>
+        </AppThemeProvider>
       </CacheProvider>
     </Provider>
   )

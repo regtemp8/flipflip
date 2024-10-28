@@ -68,7 +68,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      invalidatesTags: ['Authenticated']
+      invalidatesTags: ['Authenticated', 'Theme']
     }),
     tokenLogin: builder.mutation<boolean, string>({
       query(token) {
@@ -76,7 +76,7 @@ export const flipflipApi = createApi({
           url: `login/token?token=${token}`
         }
       },
-      invalidatesTags: ['Authenticated']
+      invalidatesTags: ['Authenticated', 'Theme']
     }),
     logout: builder.mutation<boolean, void>({
       query() {
@@ -84,7 +84,10 @@ export const flipflipApi = createApi({
           url: `logout`
         }
       },
-      invalidatesTags: ['Authenticated']
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(flipflipApi.util.resetApiState())
+      }
     }),
     changeUsername: builder.mutation<Message, AccountChange>({
       query(body) {
@@ -94,8 +97,10 @@ export const flipflipApi = createApi({
           body
         }
       },
-      invalidatesTags: (result, error) =>
-        error == null ? ['Authenticated'] : []
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(flipflipApi.util.resetApiState())
+      }
     }),
     changePassword: builder.mutation<Message, AccountChange>({
       query(body) {
@@ -105,8 +110,10 @@ export const flipflipApi = createApi({
           body
         }
       },
-      invalidatesTags: (result, error) =>
-        error == null ? ['Authenticated'] : []
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(flipflipApi.util.resetApiState())
+      }
     }),
     getConnectToken: builder.query<string, void>({
       query: () => `connect`,

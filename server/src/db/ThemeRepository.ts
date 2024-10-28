@@ -5,9 +5,9 @@ import { Theme, User } from './types/generated'
 export async function findTheme(user: User): Promise<Theme> {
   return await db()
     .query()
-    .selectFrom('theme as t')
+    .selectFrom('theme')
     .selectAll()
-    .where('t.userId', '=', user.id)
+    .where('userId', '=', user.id)
     .executeTakeFirstOrThrow()
 }
 
