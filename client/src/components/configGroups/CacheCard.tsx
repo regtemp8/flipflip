@@ -15,7 +15,8 @@ import {
   InputAdornment,
   Link,
   type Theme,
-  Tooltip
+  Tooltip,
+  TextField
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -38,6 +39,7 @@ import {
   useGetCachingEnabledQuery,
   useGetCachingMaxSizeQuery
 } from '../../store/api/selectors'
+import FilePicker from '../common/FilePicker'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -57,6 +59,7 @@ function CacheCard() {
 
   const [cachePath, setCachePath] = useState('')
   const [cacheSize, setCacheSize] = useState('--')
+  const [showFilePicker, setShowFilePicker] = useState(false)
   const [clearCacheAlert, setClearCacheAlert] = useState(false)
 
   // TODO calculate cache size
@@ -151,16 +154,16 @@ function CacheCard() {
         <Collapse in={data?.enabled} className={classes.fullWidth}>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size="grow">
-              <BaseTextField
+              <TextField
                 variant="standard"
                 fullWidth
                 label="Caching Directory"
-                placeholder={cachePath}
-                selector={useGetCachingDirectoryQuery}
-                action={setConfigCachingDirectory}
-                InputProps={{
-                  readOnly: true
+                slotProps={{
+                  input: {
+                    readOnly: true
+                  }
                 }}
+                onClick={() => setShowFilePicker(true)}
               />
             </Grid2>
             <Grid2>
@@ -224,6 +227,11 @@ function CacheCard() {
           </Button>
         </DialogActions>
       </Dialog>
+      <FilePicker
+        open={showFilePicker}
+        type="dir"
+        onClose={() => setShowFilePicker(false)}
+      />
     </Grid2>
   )
 }

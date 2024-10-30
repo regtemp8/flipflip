@@ -22,6 +22,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "codemirror": "5.x",
     "debounce": "^2.2.0",
+    "filesize": "^10.1.6",
     "flipflip-common": "link:./../common",
     "qrcode.react": "^4.0.1",
     "react": "^18.3.1",

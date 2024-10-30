@@ -25,7 +25,8 @@ import {
   FontSettings,
   FontSettingsType,
   CaptionScript,
-  Audio
+  Audio,
+  FilePickerData
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -796,11 +797,30 @@ export const flipflipApi = createApi({
           // TODO error handling needed?
         })
       }
+    }),
+    getFilePickerData: builder.query<
+      FilePickerData,
+      { path?: string; type?: string }
+    >({
+      query: (data) => ({
+        url: `fs/pick/${data.path ?? ''}${data.type ? '?type=' + data.type : ''}`
+      }),
+      providesTags: ['FilePicker']
+    }),
+    createDirectory: builder.mutation<void, { path: string }>({
+      query: (body) => ({
+        url: `fs/create-directory`,
+        method: 'POST',
+        body
+      }),
+      invalidatesTags: ['FilePicker']
     })
   })
 })
 
 export const {
+  useGetFilePickerDataQuery,
+  useCreateDirectoryMutation,
   useIsAuthenticatedQuery,
   usePasswordLoginMutation,
   useTokenLoginMutation,

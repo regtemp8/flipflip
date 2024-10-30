@@ -19,6 +19,8 @@ export * from './lib/json/ThemeSettings';
 export * from './lib/json/Tutorials';
 export * from './lib/json/CacheSettings';
 export * from './lib/json/DisplaySettings';
+export * from './lib/json/FilePickerData';
+export * from './lib/json/FilePickerItem';
 export * from './lib/json/GeneralSettings';
 export * from './lib/json/RemoteSettings';
 export * from './lib/json/Tag';
