@@ -755,7 +755,7 @@ function SceneDetail() {
                 id="title"
                 value={isEditingName}
                 margin="none"
-                inputProps={{ className: classes.titleInput }}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
                 onChange={onChangeName}
               />

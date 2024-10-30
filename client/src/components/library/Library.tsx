@@ -1166,16 +1166,18 @@ function Library() {
                 placeholder="Paste URL Here"
                 margin="dense"
                 value={importFile}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip disableInteractive title="Open File">
-                        <IconButton onClick={onOpenImportFile} size="large">
-                          <FolderIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  )
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip disableInteractive title="Open File">
+                          <IconButton onClick={onOpenImportFile} size="large">
+                            <FolderIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
                 }}
                 onChange={onChangeImportFile}
               />

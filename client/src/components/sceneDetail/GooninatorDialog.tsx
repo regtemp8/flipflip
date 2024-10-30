@@ -103,7 +103,7 @@ function GooninatorDialog(props: GooninatorDialogProps) {
               fullWidth
               label="Parent Directory"
               value={rootDir}
-              InputProps={{ readOnly: true }}
+              slotProps={{ input: { readOnly: true } }}
               onClick={onRootChange}
             />
           </Collapse>

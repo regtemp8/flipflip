@@ -71,7 +71,7 @@ function URLDialog(props: URLDialogProps) {
           multiline
           margin="dense"
           value={importURLs}
-          inputProps={{ className: classes.urlInput }}
+          slotProps={{ htmlInput: { className: classes.urlInput } }}
           onChange={onURLChange}
         />
       </DialogContent>

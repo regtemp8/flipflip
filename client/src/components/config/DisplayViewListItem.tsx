@@ -202,11 +202,13 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
                 value={editingName}
                 onChange={onChangeName}
                 onBlur={onEndEdit}
-                inputProps={{
-                  className: cx(
-                    classes.urlField,
-                    selected ? classes.selectedText : ''
-                  )
+                slotProps={{
+                  htmlInput: {
+                    className: cx(
+                      classes.urlField,
+                      selected ? classes.selectedText : ''
+                    )
+                  }
                 }}
               />
             </form>

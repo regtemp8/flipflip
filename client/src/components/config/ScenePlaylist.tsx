@@ -206,15 +206,17 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
                 margin="dense"
                 value={currentDuration}
                 onChange={onChangeDuration}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">ms</InputAdornment>
-                  )
-                }}
-                inputProps={{
-                  min: 0,
-                  step: 100,
-                  type: 'number'
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">ms</InputAdornment>
+                    )
+                  },
+                  htmlInput: {
+                    min: 0,
+                    step: 100,
+                    type: 'number'
+                  }
                 }}
               />
             </Collapse>

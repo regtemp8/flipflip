@@ -196,7 +196,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
           helperText="One URL to blacklist per line"
           value={blacklistToEdit}
           margin="dense"
-          inputProps={{ className: classes.blacklistInput }}
+          slotProps={{ htmlInput: { className: classes.blacklistInput } }}
           onChange={onChangeBlacklist}
         />
       </DialogContent>

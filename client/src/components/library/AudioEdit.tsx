@@ -193,9 +193,11 @@ function AudioEdit(props: AudioEditProps) {
           value={audio.trackNum == null ? '' : audio.trackNum}
           margin="normal"
           label="Track #"
-          inputProps={{
-            min: 0,
-            type: 'number'
+          slotProps={{
+            htmlInput: {
+              min: 0,
+              type: 'number'
+            }
           }}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             onEditInt('trackNum', e)
