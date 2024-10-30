@@ -35,35 +35,36 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 const colors = new Map([
-  ['red', color.red as ColorPartial], 
-  ['pink', color.pink as ColorPartial], 
-  ['purple', color.purple as ColorPartial], 
-  ['deepPurple', color.deepPurple as ColorPartial], 
-  ['indigo', color.indigo as ColorPartial], 
-  ['blue', color.blue as ColorPartial], 
-  ['lightBlue', color.lightBlue as ColorPartial], 
-  ['cyan', color.cyan as ColorPartial], 
-  ['teal', color.teal as ColorPartial], 
-  ['green', color.green as ColorPartial], 
-  ['lightGreen', color.lightGreen as ColorPartial], 
-  ['lime', color.lime as ColorPartial], 
-  ['yellow', color.yellow as ColorPartial], 
-  ['amber', color.amber as ColorPartial], 
-  ['orange', color.orange as ColorPartial], 
-  ['deepOrange', color.deepOrange as ColorPartial], 
-  ['brown', color.brown as ColorPartial], 
-  ['grey', color.grey as ColorPartial], 
-  ['blueGrey', color.blueGrey as ColorPartial],
+  ['red', color.red as ColorPartial],
+  ['pink', color.pink as ColorPartial],
+  ['purple', color.purple as ColorPartial],
+  ['deepPurple', color.deepPurple as ColorPartial],
+  ['indigo', color.indigo as ColorPartial],
+  ['blue', color.blue as ColorPartial],
+  ['lightBlue', color.lightBlue as ColorPartial],
+  ['cyan', color.cyan as ColorPartial],
+  ['teal', color.teal as ColorPartial],
+  ['green', color.green as ColorPartial],
+  ['lightGreen', color.lightGreen as ColorPartial],
+  ['lime', color.lime as ColorPartial],
+  ['yellow', color.yellow as ColorPartial],
+  ['amber', color.amber as ColorPartial],
+  ['orange', color.orange as ColorPartial],
+  ['deepOrange', color.deepOrange as ColorPartial],
+  ['brown', color.brown as ColorPartial],
+  ['grey', color.grey as ColorPartial],
+  ['blueGrey', color.blueGrey as ColorPartial]
 ])
 
 const getColorValue = (currentColor?: string) => {
-  switch(currentColor) {
+  switch (currentColor) {
     case 'white':
       return color.common.white
     case 'black':
       return color.common.black
     default:
-      const colorPartial = currentColor != null ? colors.get(currentColor) : undefined
+      const colorPartial =
+        currentColor != null ? colors.get(currentColor) : undefined
       return colorPartial != null ? colorPartial[500] : undefined
   }
 }

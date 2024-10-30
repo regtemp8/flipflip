@@ -1,4 +1,4 @@
-import { PlaylistType } from "./PlaylistType";
+import { PlaylistType } from './PlaylistType';
 
 export type Playlist = {
   id: number;
