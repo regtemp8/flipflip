@@ -25,6 +25,7 @@ import displayPlaylistItems from './routes/displayPlaylistItems'
 import scenePlaylistItems from './routes/scenePlaylistItems'
 import db from './db/database'
 import { getSaveDir } from './utils'
+import scheduler from './scheduler'
 
 const PORT = process.env.PORT || 5050
 
@@ -77,6 +78,8 @@ const init = () => {
   app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
   })
+
+  scheduler().init()
 }
 
 db()

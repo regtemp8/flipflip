@@ -975,6 +975,24 @@ const captionScriptTagTable = async (trx: Kysely<DB>) => {
     .execute()
 }
 
+const backupTable = async (trx: Kysely<DB>) => {
+  console.log('+ Create backup table')
+  return await trx.schema
+    .createTable('backup')
+    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('fileName', 'text', (col) => col.notNull())
+    .addColumn('createdAt', 'integer', (col) => col.notNull())
+    .addColumn('interval', 'text', (col) => col.notNull())
+    .addColumn('intervalValue', 'integer', (col) => col.notNull())
+    .addColumn('year', 'integer', (col) => col.notNull())
+    .addUniqueConstraint('UQ_backup_interval_intervalValue_year', [
+      'interval',
+      'intervalValue',
+      'year'
+    ])
+    .execute()
+}
+
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     await userTable(trx)
@@ -1012,11 +1030,15 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await audioTable(trx)
     await audioTagTable(trx)
     await fontSettingsTable(trx)
+    await backupTable(trx)
   })
 }
 
 export async function down(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
+    console.log('- Drop backup table')
+    await trx.schema.dropTable('backup').execute()
+
     console.log('- Drop fontSettings table')
     await trx.schema.dropTable('fontSettings').execute()
 

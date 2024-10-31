@@ -1,6 +1,43 @@
 import { Updateable } from 'kysely'
 import db from './database'
 import { GeneralSettings, User } from './types/generated'
+import { BackupSettings } from './types/BackupSettings'
+import { toBoolean } from './utils'
+
+export async function findBackupSettings(): Promise<BackupSettings> {
+  return await db()
+    .query()
+    .selectFrom('generalSettings')
+    .select([
+      'autoBackup',
+      'autoBackupDays',
+      'autoCleanBackup',
+      'autoCleanBackupDays',
+      'autoCleanBackupMonths',
+      'autoCleanBackupWeeks',
+      'cleanRetain'
+    ])
+    .executeTakeFirstOrThrow()
+    .then(
+      ({
+        autoBackup,
+        autoBackupDays,
+        autoCleanBackup,
+        autoCleanBackupDays,
+        autoCleanBackupMonths,
+        autoCleanBackupWeeks,
+        cleanRetain
+      }) => ({
+        autoBackup: toBoolean(autoBackup),
+        autoBackupDays,
+        autoCleanBackup: toBoolean(autoCleanBackup),
+        autoCleanBackupDays,
+        autoCleanBackupMonths,
+        autoCleanBackupWeeks,
+        cleanRetain
+      })
+    )
+}
 
 export async function findGeneralSettings(
   user: User

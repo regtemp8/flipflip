@@ -43,6 +43,15 @@ export interface AudioTag {
   tagId: number
 }
 
+export interface Backup {
+  createdAt: number
+  fileName: string
+  id: number | null
+  interval: string
+  intervalValue: number
+  year: number
+}
+
 export interface CacheSettings {
   directory: string
   enabled: number
@@ -503,6 +512,12 @@ export interface ScenePlaylistItemScene {
   scenePlaylistItemId: number
 }
 
+export interface Sessions {
+  expired: string | null
+  sess: string | null
+  sid: string | null
+}
+
 export interface Tag {
   id: number | null
   name: string
@@ -557,6 +572,7 @@ export interface DB {
   audio: Audio
   audioPlaylistItem: AudioPlaylistItem
   audioTag: AudioTag
+  backup: Backup
   cacheSettings: CacheSettings
   captionScript: CaptionScript
   captionScriptPlaylistItem: CaptionScriptPlaylistItem
@@ -584,6 +600,7 @@ export interface DB {
   scenePlaylist: ScenePlaylist
   scenePlaylistItem: ScenePlaylistItem
   scenePlaylistItemScene: ScenePlaylistItemScene
+  sessions: Sessions
   tag: Tag
   theme: Theme
   tutorials: Tutorials

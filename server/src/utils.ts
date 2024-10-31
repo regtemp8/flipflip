@@ -21,3 +21,7 @@ export function getElectronSaveDir() {
 export function getSaveDir() {
   return process.env.SAVE_DIR ?? process.cwd()
 }
+
+export function getBackupsDir() {
+  return getSaveDir() + path.sep + 'backups'
+}

@@ -9,7 +9,7 @@ import {
   FileMigrationProvider
 } from 'kysely'
 import { DB } from './types/generated'
-import { getSaveDir } from '../utils'
+import { getSaveDir, getBackupsDir } from '../utils'
 
 export class DatabaseService {
   private static instance: DatabaseService
@@ -58,14 +58,21 @@ export class DatabaseService {
   }
 
   public async createBackup(fileName: string) {
-    await this.sqlite.backup(fileName)
+    console.log(`Create backup`)
+    const path = this.backupFileName(fileName)
+    console.log(`+ Write backup to: ${path}`)
+    await this.sqlite.backup(path)
   }
 
   public async restoreBackup(fileName: string) {
+    console.log(`Restore backup`)
+    console.log('+ Close database connection')
     await this.kysely.destroy()
-    const src = this.databaseFileName(fileName)
+    const src = this.backupFileName(fileName)
     const dest = this.databaseFileName()
+    console.log(`+ Copy database ${src} to ${dest}`)
     await fs.copyFile(src, dest)
+    console.log('+ Open database connection')
     this.sqlite = new SQLite(dest)
     this.kysely = new Kysely<DB>({
       dialect: new SqliteDialect({ database: this.sqlite }),
@@ -73,8 +80,12 @@ export class DatabaseService {
     })
   }
 
-  private databaseFileName(fileName = 'flipflip.db') {
-    return getSaveDir() + path.sep + fileName
+  private databaseFileName() {
+    return getSaveDir() + path.sep + 'flipflip.db'
+  }
+
+  private backupFileName(fileName: string) {
+    return getBackupsDir() + path.sep + fileName
   }
 
   public static getInstance(): DatabaseService {
