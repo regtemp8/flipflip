@@ -1,8 +1,9 @@
 import { Kysely } from 'kysely'
 import { DB } from '../../types/generated'
+import logger from '../../../logger'
 
 const userTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create user table')
+  logger.info('+ Create user table')
   return await trx.schema
     .createTable('user')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -15,7 +16,7 @@ const userTable = async (trx: Kysely<DB>) => {
 }
 
 const remoteSettingsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create remoteSettings table')
+  logger.info('+ Create remoteSettings table')
   return await trx.schema
     .createTable('remoteSettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -53,7 +54,7 @@ const remoteSettingsTable = async (trx: Kysely<DB>) => {
 }
 
 const cacheSettingsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create cacheSettings table')
+  logger.info('+ Create cacheSettings table')
   return await trx.schema
     .createTable('cacheSettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -71,7 +72,7 @@ const cacheSettingsTable = async (trx: Kysely<DB>) => {
 }
 
 const displaySettingsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create displaySettings table')
+  logger.info('+ Create displaySettings table')
   return await trx.schema
     .createTable('displaySettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -97,7 +98,7 @@ const displaySettingsTable = async (trx: Kysely<DB>) => {
 }
 
 const tagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create tag table')
+  logger.info('+ Create tag table')
   return await trx.schema
     .createTable('tag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -110,7 +111,7 @@ const tagTable = async (trx: Kysely<DB>) => {
 }
 
 const ignoredTagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create ignoredTag table')
+  logger.info('+ Create ignoredTag table')
   return await trx.schema
     .createTable('ignoredTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -129,7 +130,7 @@ const ignoredTagTable = async (trx: Kysely<DB>) => {
 }
 
 const generalSettingsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create generalSettings table')
+  logger.info('+ Create generalSettings table')
   return await trx.schema
     .createTable('generalSettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -162,7 +163,7 @@ const generalSettingsTable = async (trx: Kysely<DB>) => {
 }
 
 const tutorialsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create tutorials table')
+  logger.info('+ Create tutorials table')
   return await trx.schema
     .createTable('tutorials')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -184,7 +185,7 @@ const tutorialsTable = async (trx: Kysely<DB>) => {
 }
 
 const themeTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create theme table')
+  logger.info('+ Create theme table')
   return await trx.schema
     .createTable('theme')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -197,7 +198,7 @@ const themeTable = async (trx: Kysely<DB>) => {
 }
 
 const contentSourceTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create contentSource table')
+  logger.info('+ Create contentSource table')
   return await trx.schema
     .createTable('contentSource') // library source
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -227,7 +228,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
 }
 
 const contentSourceTagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create contentSourceTag table')
+  logger.info('+ Create contentSourceTag table')
   return await trx.schema
     .createTable('contentSourceTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -249,7 +250,7 @@ const contentSourceTagTable = async (trx: Kysely<DB>) => {
 }
 
 const clipTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create clip table')
+  logger.info('+ Create clip table')
   return await trx.schema
     .createTable('clip')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -270,7 +271,7 @@ const clipTable = async (trx: Kysely<DB>) => {
 }
 
 const clipTagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create clipTag table')
+  logger.info('+ Create clipTag table')
   return await trx.schema
     .createTable('clipTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -284,7 +285,7 @@ const clipTagTable = async (trx: Kysely<DB>) => {
 }
 
 const contentSourceBlacklistItemTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create contentSourceBlacklistItem table')
+  logger.info('+ Create contentSourceBlacklistItem table')
   return await trx.schema
     .createTable('contentSourceBlacklistItem')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -300,7 +301,7 @@ const contentSourceBlacklistItemTable = async (trx: Kysely<DB>) => {
 }
 
 const sceneTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create scene table')
+  logger.info('+ Create scene table')
   return await trx.schema
     .createTable('scene')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -508,7 +509,7 @@ const sceneTable = async (trx: Kysely<DB>) => {
 }
 
 const scenePlaylistTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create scenePlaylist table')
+  logger.info('+ Create scenePlaylist table')
   return await trx.schema
     .createTable('scenePlaylist')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -530,7 +531,7 @@ const scenePlaylistTable = async (trx: Kysely<DB>) => {
 }
 
 const weightGroupTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create weightGroup table')
+  logger.info('+ Create weightGroup table')
   return await trx.schema
     .createTable('weightGroup')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -557,7 +558,7 @@ const weightGroupTable = async (trx: Kysely<DB>) => {
 }
 
 const sceneColorTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create sceneColor table')
+  logger.info('+ Create sceneColor table')
   return await trx.schema
     .createTable('sceneColor')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -574,7 +575,7 @@ const sceneColorTable = async (trx: Kysely<DB>) => {
 }
 
 const libraryContentSourceTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create libraryContentSource table')
+  logger.info('+ Create libraryContentSource table')
   return await trx.schema
     .createTable('libraryContentSource')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -596,7 +597,7 @@ const libraryContentSourceTable = async (trx: Kysely<DB>) => {
 }
 
 const sceneContentSourceTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create sceneContentSource table')
+  logger.info('+ Create sceneContentSource table')
   return await trx.schema
     .createTable('sceneContentSource')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -618,7 +619,7 @@ const sceneContentSourceTable = async (trx: Kysely<DB>) => {
 }
 
 const sceneGroupTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create sceneGroup table')
+  logger.info('+ Create sceneGroup table')
   return await trx.schema
     .createTable('sceneGroup')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -632,7 +633,7 @@ const sceneGroupTable = async (trx: Kysely<DB>) => {
 }
 
 const displayTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create display table')
+  logger.info('+ Create display table')
   return await trx.schema
     .createTable('display')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -652,7 +653,7 @@ const displayTable = async (trx: Kysely<DB>) => {
 }
 
 const displayViewTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create displayView table')
+  logger.info('+ Create displayView table')
   return await trx.schema
     .createTable('displayView')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -692,7 +693,7 @@ const displayViewTable = async (trx: Kysely<DB>) => {
 }
 
 const audioPlaylistItemTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create audioPlaylistItem table')
+  logger.info('+ Create audioPlaylistItem table')
   return await trx.schema
     .createTable('audioPlaylistItem')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -715,7 +716,7 @@ const audioPlaylistItemTable = async (trx: Kysely<DB>) => {
 }
 
 const captionScriptPlaylistItemTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create captionScriptPlaylistItem table')
+  logger.info('+ Create captionScriptPlaylistItem table')
   return await trx.schema
     .createTable('captionScriptPlaylistItem')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -738,7 +739,7 @@ const captionScriptPlaylistItemTable = async (trx: Kysely<DB>) => {
 }
 
 const displayPlaylistItemTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create displayPlaylistItem table')
+  logger.info('+ Create displayPlaylistItem table')
   return await trx.schema
     .createTable('displayPlaylistItem')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -755,7 +756,7 @@ const displayPlaylistItemTable = async (trx: Kysely<DB>) => {
 }
 
 const displayPlaylistItemDisplayTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create displayPlaylistItemDisplay table')
+  logger.info('+ Create displayPlaylistItemDisplay table')
   return await trx.schema
     .createTable('displayPlaylistItemDisplay')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -777,7 +778,7 @@ const displayPlaylistItemDisplayTable = async (trx: Kysely<DB>) => {
 }
 
 const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create scenePlaylistItem table')
+  logger.info('+ Create scenePlaylistItem table')
   return await trx.schema
     .createTable('scenePlaylistItem')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -795,7 +796,7 @@ const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
 }
 
 const scenePlaylistItemSceneTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create scenePlaylistItemScene table')
+  logger.info('+ Create scenePlaylistItemScene table')
   return await trx.schema
     .createTable('scenePlaylistItemScene')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -817,7 +818,7 @@ const scenePlaylistItemSceneTable = async (trx: Kysely<DB>) => {
 }
 
 const playlistTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create playlist table')
+  logger.info('+ Create playlist table')
   return await trx.schema
     .createTable('playlist')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -840,7 +841,7 @@ const playlistTable = async (trx: Kysely<DB>) => {
 }
 
 const audioTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create audio table')
+  logger.info('+ Create audio table')
   return await trx.schema
     .createTable('audio')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -872,7 +873,7 @@ const audioTable = async (trx: Kysely<DB>) => {
 }
 
 const audioTagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create audioTag table')
+  logger.info('+ Create audioTag table')
   return await trx.schema
     .createTable('audioTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -889,7 +890,7 @@ const audioTagTable = async (trx: Kysely<DB>) => {
 }
 
 const fontSettingsTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create fontSettings table')
+  logger.info('+ Create fontSettings table')
   return await trx.schema
     .createTable('fontSettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -904,7 +905,7 @@ const fontSettingsTable = async (trx: Kysely<DB>) => {
 }
 
 const captionScriptTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create captionScript table')
+  logger.info('+ Create captionScript table')
   return await trx.schema
     .createTable('captionScript')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -954,7 +955,7 @@ const captionScriptTable = async (trx: Kysely<DB>) => {
 }
 
 const captionScriptTagTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create captionScriptTag table')
+  logger.info('+ Create captionScriptTag table')
   return await trx.schema
     .createTable('captionScriptTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -976,7 +977,7 @@ const captionScriptTagTable = async (trx: Kysely<DB>) => {
 }
 
 const backupTable = async (trx: Kysely<DB>) => {
-  console.log('+ Create backup table')
+  logger.info('+ Create backup table')
   return await trx.schema
     .createTable('backup')
     .addColumn('id', 'integer', (col) => col.primaryKey())
@@ -1036,112 +1037,112 @@ export async function up(db: Kysely<DB>): Promise<void> {
 
 export async function down(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
-    console.log('- Drop backup table')
+    logger.info('- Drop backup table')
     await trx.schema.dropTable('backup').execute()
 
-    console.log('- Drop fontSettings table')
+    logger.info('- Drop fontSettings table')
     await trx.schema.dropTable('fontSettings').execute()
 
-    console.log('- Drop audioTag table')
+    logger.info('- Drop audioTag table')
     await trx.schema.dropTable('audioTag').execute()
 
-    console.log('- Drop audio table')
+    logger.info('- Drop audio table')
     await trx.schema.dropTable('audio').execute()
 
-    console.log('- Drop displayView table')
+    logger.info('- Drop displayView table')
     await trx.schema.dropTable('displayView').execute()
 
-    console.log('- Drop display table')
+    logger.info('- Drop display table')
     await trx.schema.dropTable('display').execute()
 
-    console.log('- Drop scenePlaylistItemScene table')
+    logger.info('- Drop scenePlaylistItemScene table')
     await trx.schema.dropTable('scenePlaylistItemScene').execute()
 
-    console.log('- Drop scenePlaylistItem table')
+    logger.info('- Drop scenePlaylistItem table')
     await trx.schema.dropTable('scenePlaylistItem').execute()
 
-    console.log('- Drop displayPlaylistItemScene table')
+    logger.info('- Drop displayPlaylistItemScene table')
     await trx.schema.dropTable('displayPlaylistItemScene').execute()
 
-    console.log('- Drop displayPlaylistItem table')
+    logger.info('- Drop displayPlaylistItem table')
     await trx.schema.dropTable('displayPlaylistItem').execute()
 
-    console.log('- Drop captionScriptPlaylistItem table')
+    logger.info('- Drop captionScriptPlaylistItem table')
     await trx.schema.dropTable('captionScriptPlaylistItem').execute()
 
-    console.log('- Drop audioPlaylistItem table')
+    logger.info('- Drop audioPlaylistItem table')
     await trx.schema.dropTable('audioPlaylistItem').execute()
 
-    console.log('- Drop playlist table')
+    logger.info('- Drop playlist table')
     await trx.schema.dropTable('playlist').execute()
 
-    console.log('- Drop captionScriptTag table')
+    logger.info('- Drop captionScriptTag table')
     await trx.schema.dropTable('captionScriptTag').execute()
 
-    console.log('- Drop captionScript table')
+    logger.info('- Drop captionScript table')
     await trx.schema.dropTable('captionScript').execute()
 
-    console.log('- Drop libraryContentSource table')
+    logger.info('- Drop libraryContentSource table')
     await trx.schema.dropTable('libraryContentSource').execute()
 
-    console.log('- Drop sceneContentSource table')
+    logger.info('- Drop sceneContentSource table')
     await trx.schema.dropTable('sceneContentSource').execute()
 
-    console.log('- Drop sceneColor table')
+    logger.info('- Drop sceneColor table')
     await trx.schema.dropTable('sceneColor').execute()
 
-    console.log('- Drop weightGroup table')
+    logger.info('- Drop weightGroup table')
     await trx.schema.dropTable('weightGroup').execute()
 
-    console.log('- Drop scenePlaylist table')
+    logger.info('- Drop scenePlaylist table')
     await trx.schema.dropTable('scenePlaylist').execute()
 
-    console.log('- Drop scene table')
+    logger.info('- Drop scene table')
     await trx.schema.dropTable('scene').execute()
 
-    console.log('- Drop sceneGroup table')
+    logger.info('- Drop sceneGroup table')
     await trx.schema.dropTable('sceneGroup').execute()
 
-    console.log('- Drop contentSourceBlacklistItem table')
+    logger.info('- Drop contentSourceBlacklistItem table')
     await trx.schema.dropTable('contentSourceBlacklistItem').execute()
 
-    console.log('- Drop clipTag table')
+    logger.info('- Drop clipTag table')
     await trx.schema.dropTable('clipTag').execute()
 
-    console.log('- Drop clip table')
+    logger.info('- Drop clip table')
     await trx.schema.dropTable('clip').execute()
 
-    console.log('- Drop contentSourceTag table')
+    logger.info('- Drop contentSourceTag table')
     await trx.schema.dropTable('contentSourceTag').execute()
 
-    console.log('- Drop contentSource table')
+    logger.info('- Drop contentSource table')
     await trx.schema.dropTable('contentSource').execute()
 
-    console.log('- Drop theme table')
+    logger.info('- Drop theme table')
     await trx.schema.dropTable('theme').execute()
 
-    console.log('- Drop tutorials table')
+    logger.info('- Drop tutorials table')
     await trx.schema.dropTable('tutorials').execute()
 
-    console.log('- Drop generalSettings table')
+    logger.info('- Drop generalSettings table')
     await trx.schema.dropTable('generalSettings').execute()
 
-    console.log('- Drop ignoredTag table')
+    logger.info('- Drop ignoredTag table')
     await trx.schema.dropTable('ignoredTag').execute()
 
-    console.log('- Drop tag table')
+    logger.info('- Drop tag table')
     await trx.schema.dropTable('tag').execute()
 
-    console.log('- Drop displaySettings table')
+    logger.info('- Drop displaySettings table')
     await trx.schema.dropTable('displaySettings').execute()
 
-    console.log('- Drop cacheSettings table')
+    logger.info('- Drop cacheSettings table')
     await trx.schema.dropTable('cacheSettings').execute()
 
-    console.log('- Drop remoteSettings table')
+    logger.info('- Drop remoteSettings table')
     await trx.schema.dropTable('remoteSettings').execute()
 
-    console.log('- Drop user table')
+    logger.info('- Drop user table')
     await trx.schema.dropTable('user').execute()
   })
 }

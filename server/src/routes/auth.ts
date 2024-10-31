@@ -11,6 +11,7 @@ import {
 } from '../db/UserRepository'
 import { User } from '../db/types/generated'
 import { AccountChange, Message } from 'flipflip-common'
+import logger from '../logger'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
@@ -38,9 +39,9 @@ passport.use(
         310000,
         32,
         'sha256',
-        (err, hashedPassword) => {
-          if (err) {
-            return cb(err)
+        (error, hashedPassword) => {
+          if (error) {
+            return cb(error)
           }
           if (!crypto.timingSafeEqual(user.hashedPassword, hashedPassword)) {
             return cb(null, false, {
@@ -107,9 +108,9 @@ router.get(
 )
 
 router.get('/logout', (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err)
+  req.logout((error) => {
+    if (error) {
+      return next(error)
     }
     res.status(200).send(false)
   })
@@ -136,9 +137,9 @@ router.post('/change-username', async (req, res, next) => {
   }
 
   await updateUser(user, { username: change.new })
-  req.logout((err) => {
-    if (err) {
-      return next(err)
+  req.logout((error) => {
+    if (error) {
+      return next(error)
     }
     const message: Message = {
       success: 'Your username has been changed successfully.'
@@ -167,10 +168,9 @@ router.post('/change-password', async (req, res, next) => {
     310000,
     32,
     'sha256',
-    async (err, currentHashedPassword) => {
-      if (err) {
-        res.status(503).send(err)
-        return
+    async (error, currentHashedPassword) => {
+      if (error) {
+        next(error)
       }
       if (!crypto.timingSafeEqual(user.hashedPassword, currentHashedPassword)) {
         const message: Message = { error: 'Current password is invalid.' }
@@ -187,9 +187,9 @@ router.post('/change-password', async (req, res, next) => {
         'sha256'
       )
       await updateUser(user, { salt, hashedPassword })
-      req.logout((err) => {
-        if (err) {
-          return next(err)
+      req.logout((error) => {
+        if (error) {
+          return next(error)
         }
         const message: Message = {
           success: 'Your password has been changed successfully.'

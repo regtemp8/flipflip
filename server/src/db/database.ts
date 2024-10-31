@@ -10,6 +10,7 @@ import {
 } from 'kysely'
 import { DB } from './types/generated'
 import { getSaveDir, getBackupsDir } from '../utils'
+import logger from '../logger'
 
 export class DatabaseService {
   private static instance: DatabaseService
@@ -43,36 +44,36 @@ export class DatabaseService {
     const { error, results } = await migrator.migrateToLatest()
     results?.forEach((it) => {
       if (it.status === 'Success') {
-        console.log(
+        logger.info(
           `Migration "${it.migrationName}" was executed successfully.`
         )
       } else if (it.status === 'Error') {
-        console.error(`Failed to execute migration "${it.migrationName}".`)
+        logger.error(`Failed to execute migration "${it.migrationName}".`)
       }
     })
 
     if (error) {
-      console.log(error)
+      logger.error('Failed to execute migrations', {error})
       throw error
     }
   }
 
   public async createBackup(fileName: string) {
-    console.log(`Create backup`)
+    logger.info(`Create backup`)
     const path = this.backupFileName(fileName)
-    console.log(`+ Write backup to: ${path}`)
+    logger.info(`+ Write backup to: {path}`, {path})
     await this.sqlite.backup(path)
   }
 
   public async restoreBackup(fileName: string) {
-    console.log(`Restore backup`)
-    console.log('+ Close database connection')
+    logger.info(`Restore backup`)
+    logger.info('+ Close database connection')
     await this.kysely.destroy()
     const src = this.backupFileName(fileName)
     const dest = this.databaseFileName()
-    console.log(`+ Copy database ${src} to ${dest}`)
+    logger.info(`+ Copy database {src} to {dest}`, {src, dest})
     await fs.copyFile(src, dest)
-    console.log('+ Open database connection')
+    logger.info('+ Open database connection')
     this.sqlite = new SQLite(dest)
     this.kysely = new Kysely<DB>({
       dialect: new SqliteDialect({ database: this.sqlite }),

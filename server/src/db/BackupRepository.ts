@@ -1,3 +1,4 @@
+import logger from '../logger'
 import db from './database'
 import { User } from './types/generated'
 import { Moment } from 'moment'
@@ -6,7 +7,7 @@ export async function createBackup(
   fileName: string,
   createdAt: Moment
 ): Promise<void> {
-  console.log(`+ Store backup data in database (file: ${fileName}, created: ${createdAt.unix()})`)
+  logger.info(`+ Store backup data in database (file: ${fileName}, created: ${createdAt.unix()})`)
   return db()
     .query()
     .transaction()

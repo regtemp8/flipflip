@@ -1,7 +1,8 @@
-import fs from 'fs'
+import fs, { Dirent } from 'fs'
 import path from 'path'
 import express from 'express'
 import { FilePickerData, FilePickerItem, Message } from 'flipflip-common'
+import logger from '../logger'
 
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
@@ -20,7 +21,14 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     return
   }
 
-  let dirents = await fs.promises.readdir(cwd, { withFileTypes: true })
+  let dirents: Dirent[]
+  try {
+    dirents = await fs.promises.readdir(cwd, { withFileTypes: true })
+  } catch(error) {
+    logger.error(`Failed to read directory {path}`, {path: cwd, error})
+    res.status(500).end()
+    return
+  }
   if (dirents.length === 0) {
     const data: FilePickerData = { path: cwd, items: [] }
     res.status(200).send(data)
@@ -50,8 +58,8 @@ router.post('/create-directory', async (req, res) => {
   try {
     await fs.promises.mkdir(req.body.path, { recursive: false })
     res.status(204).end()
-  } catch (err) {
-    console.log('Failed to create directory', err)
+  } catch (error) {
+    logger.error('Failed to create directory {path}', {path: req.body.path, error})
     res.status(500).end()
   }
 })
