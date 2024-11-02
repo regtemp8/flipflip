@@ -23,13 +23,20 @@ const splatf = winston.format((info, opts) => {
             throw new Error('Expects only 1 object entry in splat')
         }
         if(opts?.redacted === true) {
+            const path = entry?.error?.path
             entry = redact(entry)
+            if(path != null){
+                if(entry.error?.message != null) {
+                    entry.error.message = entry.error.message.replace(path, entry.error.path)
+                }
+                if(entry.error?.stack != null) {
+                    entry.error.stack = entry.error.stack.replace(path, entry.error.path)
+                }
+            }
         }
 
         info.message = format(info.message, entry)
-
         if(entry.error != null) {
-            entry.error.message = undefined
             info.message += ` - ${inspect(entry.error)}`
         }
     }
