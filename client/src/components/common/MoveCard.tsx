@@ -10,11 +10,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
     width: '100%'
   },
-  paddingLeft: {
-    [theme.breakpoints.up('sm')]: {
-      paddingLeft: theme.spacing(1)
-    }
-  },
   endInput: {
     paddingLeft: theme.spacing(1),
     paddingTop: 0
@@ -50,7 +45,7 @@ function MoveCard(props: MoveCardProps) {
 
   const { classes } = useStyles()
   return (
-    <Grid2 container spacing={2} alignItems="center">
+    <Grid2 container spacing={props.enabled && type !== props.values.none ? 2 : 0} alignItems="center">
       <Grid2
         size={{
           xs: 12,
@@ -59,7 +54,7 @@ function MoveCard(props: MoveCardProps) {
       >
         <Collapse
           in={props.enabled}
-          className={cx(classes.fullWidth, classes.paddingLeft)}
+          className={classes.fullWidth}
         >
           <BaseSelect
             label={props.label}
@@ -93,7 +88,7 @@ function MoveCard(props: MoveCardProps) {
             imageHeight === false &&
             type !== props.values.none
           }
-          className={cx(classes.fullWidth, classes.paddingLeft)}
+          className={classes.fullWidth}
         >
           <BaseSwitch
             label="Randomize"
@@ -105,7 +100,7 @@ function MoveCard(props: MoveCardProps) {
         {props.imageWidth != null ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
-            className={cx(classes.fullWidth, classes.paddingLeft)}
+            className={classes.fullWidth}
           >
             <BaseSwitch
               label="Use Img Width"
@@ -118,7 +113,7 @@ function MoveCard(props: MoveCardProps) {
         {props.imageHeight != null ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
-            className={cx(classes.fullWidth, classes.paddingLeft)}
+            className={classes.fullWidth}
           >
             <BaseSwitch
               label="Use Img Height"
