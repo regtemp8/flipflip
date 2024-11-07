@@ -106,3 +106,4 @@ coverage
 
 server/tests/flipflip.db
 server/tests/session.json
+server/tests/server.log
