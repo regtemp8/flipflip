@@ -124,6 +124,7 @@ export default function BaseSlider(props: BaseSliderProps) {
             variant="standard"
             selector={props.selector}
             action={props.action}
+            scale={props.scale}
             InputProps={
               props?.format?.type === 'percent'
                 ? {

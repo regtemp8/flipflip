@@ -17,6 +17,7 @@ export interface BaseTextFieldProps<T, S> extends ReduxProps<T, S> {
   multiline?: boolean
   id?: string
   onBlur?: () => void
+  scale?: number
   inputProps?: {
     className?: string
     min?: number
@@ -41,7 +42,16 @@ export default function BaseTextField<
   const dispatch = useAppDispatch()
 
   const getValue = (value?: S) => {
-    return props.inputProps?.type === 'number' ? (value ?? min) : (value ?? '')
+    if(props.inputProps?.type === 'number') {
+      let num: number = value as number ?? min
+      if(props.scale != null) {
+        num *= props.scale
+      }
+
+      return Number(num).toFixed()
+    } else {
+      return value ?? ''
+    }
   }
 
   const onChangeText = (
