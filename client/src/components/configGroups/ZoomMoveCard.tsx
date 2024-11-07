@@ -88,9 +88,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
       paddingLeft: theme.spacing(1)
     }
   },
-  noPadding: {
-    padding: '0 !important'
-  },
   endInput: {
     paddingLeft: theme.spacing(1),
     paddingTop: 0
@@ -368,7 +365,6 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
       {enabled && (<Grid2
         size={12}
         className={cx(
-          !enabled && classes.noPadding,
           tutorial?.current != null &&
             tutorial?.current !== SDT.zoom3 &&
             classes.disable
