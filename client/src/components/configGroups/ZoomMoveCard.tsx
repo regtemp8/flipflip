@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
@@ -298,10 +297,8 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             </Grid2>
           </Grid2>
         </Collapse>
-      </Grid2>
-      <Grid2 size={12} className={cx(!enabled && classes.noPadding)}>
-        <Collapse in={enabled} className={classes.fullWidth}>
-          <Divider />
+        <Collapse in={zoom} className={classes.fullWidth}>
+          <Divider sx={{pt: 2}}/>
         </Collapse>
       </Grid2>
       <Grid2 size={12} className={cx(tutorial?.current && classes.disable)}>
@@ -332,10 +329,8 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             action: setSceneHorizTransLevelMax(props.sceneID)
           }}
         />
-      </Grid2>
-      <Grid2 size={12} className={cx(!enabled && classes.noPadding)}>
-        <Collapse in={enabled} className={classes.fullWidth}>
-          <Divider />
+        <Collapse in={horizTransType !== HTF.none} className={classes.fullWidth}>
+          <Divider sx={{pt: 2}}/>
         </Collapse>
       </Grid2>
       <Grid2 size={12} className={cx(tutorial?.current && classes.disable)}>
@@ -366,13 +361,11 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             action: setSceneVertTransLevelMax(props.sceneID)
           }}
         />
-      </Grid2>
-      <Grid2 size={12} className={cx(!enabled && classes.noPadding)}>
-        <Collapse in={enabled} className={classes.fullWidth}>
-          <Divider />
+        <Collapse in={vertTransType !== VTF.none} className={classes.fullWidth}>
+          <Divider sx={{pt: 2}}/>
         </Collapse>
       </Grid2>
-      <Grid2
+      {enabled && (<Grid2
         size={12}
         className={cx(
           !enabled && classes.noPadding,
@@ -413,46 +406,40 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             }}
           />
         </Collapse>
-      </Grid2>
-      {easingControls && (
-        <React.Fragment>
-          <Grid2 size={12} className={cx(!enabled && classes.noPadding)}>
-            <Collapse in={enabled} className={classes.fullWidth}>
-              <Divider />
-            </Collapse>
-          </Grid2>
-          <Grid2 size={12}>
-            <Collapse in={enabled} className={classes.fullWidth}>
-              <EasingCard
-                sidebar={sidebar}
-                easing={{
-                  selector: () => useGetSceneTransEaseQuery(props.sceneID),
-                  action: setSceneTransEase(props.sceneID)
-                }}
-                exponent={{
-                  selector: () => useGetSceneTransExpQuery(props.sceneID),
-                  action: setSceneTransExp(props.sceneID),
-                  labelledBy: 'trans-exp-slider'
-                }}
-                overshoot={{
-                  selector: () => useGetSceneTransOvQuery(props.sceneID),
-                  action: setSceneTransOv(props.sceneID),
-                  labelledBy: 'trans-ov-slider'
-                }}
-                amplitude={{
-                  selector: () => useGetSceneTransAmpQuery(props.sceneID),
-                  action: setSceneTransAmp(props.sceneID),
-                  labelledBy: 'trans-amp-slider'
-                }}
-                period={{
-                  selector: () => useGetSceneTransPerQuery(props.sceneID),
-                  action: setSceneTransPer(props.sceneID),
-                  labelledBy: 'trans-per-slider'
-                }}
-              />
-            </Collapse>
-          </Grid2>
-        </React.Fragment>
+      </Grid2>)}
+      {easingControls && enabled && (
+        <Grid2 size={12}>
+          <Collapse in={enabled} className={classes.fullWidth}>
+            <Divider sx={{mb: 2}}/>
+            <EasingCard
+              sidebar={sidebar}
+              easing={{
+                selector: () => useGetSceneTransEaseQuery(props.sceneID),
+                action: setSceneTransEase(props.sceneID)
+              }}
+              exponent={{
+                selector: () => useGetSceneTransExpQuery(props.sceneID),
+                action: setSceneTransExp(props.sceneID),
+                labelledBy: 'trans-exp-slider'
+              }}
+              overshoot={{
+                selector: () => useGetSceneTransOvQuery(props.sceneID),
+                action: setSceneTransOv(props.sceneID),
+                labelledBy: 'trans-ov-slider'
+              }}
+              amplitude={{
+                selector: () => useGetSceneTransAmpQuery(props.sceneID),
+                action: setSceneTransAmp(props.sceneID),
+                labelledBy: 'trans-amp-slider'
+              }}
+              period={{
+                selector: () => useGetSceneTransPerQuery(props.sceneID),
+                action: setSceneTransPer(props.sceneID),
+                labelledBy: 'trans-per-slider'
+              }}
+            />
+          </Collapse>
+        </Grid2>
       )}
     </Grid2>
   )
