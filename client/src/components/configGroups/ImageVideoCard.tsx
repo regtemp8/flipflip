@@ -158,7 +158,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
   const { data: orderFunction } = useGetSceneOrderFunctionQuery(props.sceneID)
 
   return (
-    <Grid2 container alignItems="center">
+    <>
       {!isPlayer && (
         <Grid2
           container
@@ -739,7 +739,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           </Collapse>
         </Grid2>
       </Grid2>
-    </Grid2>
+    </>
   )
 }
 
