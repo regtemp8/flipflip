@@ -19,7 +19,7 @@ export function getElectronSaveDir() {
 }
 
 export function getSaveDir() {
-  return process.env.SAVE_DIR ?? process.cwd()
+  return process.env.FF_SAVE_DIR ?? process.cwd()
 }
 
 export function getBackupsDir() {

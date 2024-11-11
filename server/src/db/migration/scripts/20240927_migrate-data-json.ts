@@ -2045,8 +2045,8 @@ const displayInsert = async (
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     const json = readDataJsonFile() ?? initialAppStorage
-    const username = process.env.USERNAME ?? generateUsername()
-    const password = process.env.PASSWORD ?? generator.generate({
+    const username = process.env.FF_USERNAME ?? generateUsername()
+    const password = process.env.FF_PASSWORD ?? generator.generate({
       numbers: true,
       length: 12,
       excludeSimilarCharacters: true,

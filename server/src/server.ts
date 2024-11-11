@@ -28,7 +28,7 @@ import { getSaveDir } from './utils'
 import scheduler from './scheduler'
 import logger from './logger'
 
-const PORT = process.env.PORT || 5050
+const PORT = process.env.FF_PORT || 5050
 
 const init = () => {
   const SQLiteStore = connect(session)

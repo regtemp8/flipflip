@@ -55,7 +55,7 @@ const logFormat = (redacted?: boolean) => {
 }
 
 const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL ?? 'info',
+    level: process.env.FF_LOG_LEVEL ?? 'info',
     transports: [
         new winston.transports.Console({
             format: logFormat()
