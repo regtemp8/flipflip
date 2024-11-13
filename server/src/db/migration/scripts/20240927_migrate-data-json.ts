@@ -55,16 +55,21 @@ const getDataJsonPortablePath = () => {
 }
 
 const readDataJsonFile = (): AppStorage | undefined => {
+  if (process.env.NODE_ENV === 'test') {
+    logger.info(": Generating test database, don't read data.json file")
+    return undefined
+  }
+
   logger.info('Read data.json file')
   const savePath = getDataJsonPath()
   if (savePath == null) {
     logger.info('! No Electron save directory found')
   } else {
-    logger.info(`Save path: {path}`, {path: savePath})
+    logger.info(`Save path: {path}`, { path: savePath })
   }
 
   const portablePath = getDataJsonPortablePath()
-  logger.info(`Portable path: {path}`, {path: portablePath})
+  logger.info(`Portable path: {path}`, { path: portablePath })
 
   let data
   let dataPath
@@ -92,7 +97,7 @@ const readDataJsonFile = (): AppStorage | undefined => {
     logger.info('! No data.json file found')
     return undefined
   } else {
-    logger.info(`+ Read data from: {path}`, {path: dataPath})
+    logger.info(`+ Read data from: {path}`, { path: dataPath })
   }
 
   if (!data.version) {
@@ -288,7 +293,7 @@ const tagInsert = async (trx: Kysely<DB>, tag: Tag, userId: number) => {
     return undefined
   }
 
-  logger.info(`+ Insert tag '{name}' (id: ${id})`, {name})
+  logger.info(`+ Insert tag '{name}' (id: ${id})`, { name })
   return await trx
     .insertInto('tag')
     .values({
@@ -353,11 +358,13 @@ const displaySettingsInsert = async (
   for (const ignoredTag of ignoredTags) {
     const tagId = tags.find((tag) => tag.name === ignoredTag)?.id
     if (tagId == null) {
-      logger.info(`! Skipping ignored tag, '{name}' not found in tags`, {name: ignoredTag})
+      logger.info(`! Skipping ignored tag, '{name}' not found in tags`, {
+        name: ignoredTag
+      })
       continue
     }
 
-    logger.info(`+ Insert ignored tag '{name}'`, {name: ignoredTag})
+    logger.info(`+ Insert ignored tag '{name}'`, { name: ignoredTag })
     await trx
       .insertInto('ignoredTag')
       .values({
@@ -930,11 +937,11 @@ const clipInsert = async (
   for (const tag of clip.tags) {
     const tagId = tags.find((t) => t.name === tag.name)?.id
     if (tagId == null) {
-      logger.info(`! Skipping clip tag '{name}', not found`, {name: tag.name})
+      logger.info(`! Skipping clip tag '{name}', not found`, { name: tag.name })
       continue
     }
 
-    logger.info(`+ Insert clip tag '{name}' (id: ${tagId})`, {name: tag.name})
+    logger.info(`+ Insert clip tag '{name}' (id: ${tagId})`, { name: tag.name })
     await trx
       .insertInto('clipTag')
       .values({
@@ -1009,7 +1016,7 @@ const contentSourceInsert = async (
     includeReplies
   } = source
 
-  logger.info(`+ Insert content source {url} (id: ${id})`, {url})
+  logger.info(`+ Insert content source {url} (id: ${id})`, { url })
   const insertedSource = await trx
     .insertInto('contentSource')
     .values({
@@ -1040,11 +1047,15 @@ const contentSourceInsert = async (
   for (const tag of source.tags) {
     const tagId = tags.find((t) => t.name === tag.name)?.id
     if (tagId == null) {
-      logger.info(`! Skipping content source tag '{name}', not found`, {name: tag.name})
+      logger.info(`! Skipping content source tag '{name}', not found`, {
+        name: tag.name
+      })
       continue
     }
 
-    logger.info(`+ Insert content source tag '{name}' (id: ${tagId})`, {name: tag.name})
+    logger.info(`+ Insert content source tag '{name}' (id: ${tagId})`, {
+      name: tag.name
+    })
     await trx
       .insertInto('contentSourceTag')
       .values({
@@ -1066,7 +1077,7 @@ const contentSourceInsert = async (
     logger.info('+ Insert content source blacklist')
   }
   for (const url of blacklist) {
-    logger.info(`+ Insert content source blacklist item {url}`, {url})
+    logger.info(`+ Insert content source blacklist item {url}`, { url })
     await trx
       .insertInto('contentSourceBlacklistItem')
       .values({
@@ -1090,11 +1101,13 @@ const sceneGroupInsert = async (
   for (const group of json.sceneGroups) {
     const { id, name, type } = group
     if (type == null) {
-      logger.info(`! Skipping scene group, '{name}' has no type (id: ${id})`, {name})
+      logger.info(`! Skipping scene group, '{name}' has no type (id: ${id})`, {
+        name
+      })
       continue
     }
 
-    logger.info(`+ Insert scene group '{name}' (id: ${id})`, {name})
+    logger.info(`+ Insert scene group '{name}' (id: ${id})`, { name })
     await trx
       .insertInto('sceneGroup')
       .values({ id, userId, name, type })
@@ -1146,7 +1159,7 @@ const audioInsert = async (
       continue
     }
 
-    logger.info(`+ Insert audio {url} (id: ${id})`, {url})
+    logger.info(`+ Insert audio {url} (id: ${id})`, { url })
     await trx
       .insertInto('audio')
       .values({
@@ -1183,11 +1196,15 @@ const audioInsert = async (
     for (const tag of audio.tags) {
       const tagId = tags.find((t) => t.name === tag.name)?.id
       if (tagId == null) {
-        logger.info(`! Skipping audio tag '{name}', not found`, {name: tag.name})
+        logger.info(`! Skipping audio tag '{name}', not found`, {
+          name: tag.name
+        })
         continue
       }
 
-      logger.info(`+ Insert audio tag '{name}' (id: ${tagId})`, {name: tag.name})
+      logger.info(`+ Insert audio tag '{name}' (id: ${tagId})`, {
+        name: tag.name
+      })
       return await trx
         .insertInto('audioTag')
         .values({
@@ -1345,7 +1362,9 @@ const captionScriptInsert = async (
     for (const tag of captionScript.tags) {
       const tagId = tags.find((t) => t.name === tag.name)?.id
       if (tagId == null) {
-        logger.info(`Skipping caption script tag '{name}', not found`, {name: tag.name})
+        logger.info(`Skipping caption script tag '{name}', not found`, {
+          name: tag.name
+        })
         continue
       }
 
@@ -1382,7 +1401,7 @@ const playlistInsert = async (
 ) => {
   const { name, shuffle, repeat } = playlist
 
-  logger.info(`+ Insert ${type} playlist '{name}'`, {name})
+  logger.info(`+ Insert ${type} playlist '{name}'`, { name })
   return await trx
     .insertInto('playlist')
     .values({
@@ -1668,7 +1687,7 @@ const sceneInsert = async (
     const sceneGroupId = json.sceneGroups.find(
       (group) => group.type === SG.scene && group.scenes.includes(id)
     )?.id
-    logger.info(`+ Insert scene '{name}' (id: ${id})`, {name})
+    logger.info(`+ Insert scene '{name}' (id: ${id})`, { name })
     await trx
       .insertInto('scene')
       .values({
@@ -1977,7 +1996,7 @@ const displayInsert = async (
       group.scenes.includes(convertGridIDToSceneID(id))
     )?.id
 
-    logger.info(`+ Insert display '{name}' (id: ${id})`, {name})
+    logger.info(`+ Insert display '{name}' (id: ${id})`, { name })
     await trx
       .insertInto('display')
       .values({ id, name: name ?? '', userId, sceneGroupId })
@@ -1995,7 +2014,7 @@ const displayInsert = async (
         const sync = cell.sceneCopy.length === 2
         const cellName =
           json.scenes.find((s) => s.id === cell.sceneID)?.name ?? 'View'
-        logger.info(`+ Insert display view '{name}' [${r}, ${c}]`, {name})
+        logger.info(`+ Insert display view '{name}' [${r}, ${c}]`, { name })
         const view = await trx
           .insertInto('displayView')
           .values({
@@ -2027,7 +2046,9 @@ const displayInsert = async (
 
         const cell = grid.grid[r][c]
         const copyView = insertedViews[cell.sceneCopy[0]][cell.sceneCopy[1]]
-        logger.info(`+ Update synced display view '{name}'`, {name: view.name})
+        logger.info(`+ Update synced display view '{name}'`, {
+          name: view.name
+        })
         await trx
           .updateTable('displayView')
           .set({
@@ -2046,12 +2067,14 @@ export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     const json = readDataJsonFile() ?? initialAppStorage
     const username = process.env.FF_USERNAME ?? generateUsername()
-    const password = process.env.FF_PASSWORD ?? generator.generate({
-      numbers: true,
-      length: 12,
-      excludeSimilarCharacters: true,
-      strict: true
-    })
+    const password =
+      process.env.FF_PASSWORD ??
+      generator.generate({
+        numbers: true,
+        length: 12,
+        excludeSimilarCharacters: true,
+        strict: true
+      })
 
     const userId = await userInsert(trx, username, password)
     await generalSettingsInsert(trx, json, userId)
@@ -2070,14 +2093,17 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await sceneSettingsInsert(trx, json, userId)
     await displayInsert(trx, json, userId)
 
-    logger.info(`
+    logger.info(
+      `
       +-----------------------------------------------------------------------------------------+
        username: {username}                   
        password: {password}                 
       +-----------------------------------------------------------------------------------------+
       IMPORTANT: The username and password are only shown once. Please store them somewhere safe. 
       You can change the username and password in the account settings after logging in. 
-    `, {username, password})
+    `,
+      { username, password }
+    )
   })
 }
 

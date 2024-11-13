@@ -53,8 +53,8 @@
   "scripts": {
     "build": "yarn tsc",
     "dev": "yarn build && node --env-file=.env ./bin/server.js",
-    "test": "cp ./tests/data/flipflip.db ./tests/flipflip.db && yarn build && node --env-file=./tests/data/.env ./bin/server.js",
-    "test:dbgen": "npx ts-node ./tests/data/create-db.ts",
+    "test": "yarn test:dbgen && yarn build && node --env-file=./tests/config/.env ./bin/server.js",
+    "test:dbgen": "npx ts-node ./tests/config/create-db.ts",
     "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "test:lint": "eslint --ignore-path .eslintignore --ext .js,.ts,.tsx .",
     "format": "prettier --ignore-path .eslintignore --write \"**/*.+(js|ts|tsx|json)\"",

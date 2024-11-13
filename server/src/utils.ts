@@ -25,3 +25,11 @@ export function getSaveDir() {
 export function getBackupsDir() {
   return getSaveDir() + path.sep + 'backups'
 }
+
+export function getCacheDir() {
+  return getSaveDir() + path.sep + 'cache'
+}
+
+export function getLogsDir() {
+  return getSaveDir() + path.sep + 'logs'
+}

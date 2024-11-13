@@ -10,5 +10,5 @@ test('Authentication', async ({ page }) => {
   await page.getByRole('button', { name: 'Login' }).click()
   await expect(page).toHaveURL('/')
 
-  await page.context().storageState({ path: 'server/tests/session.json' })
+  await page.context().storageState({ path: 'server/tests/data/session.json' })
 })

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { VTF } from 'flipflip-common'
 import { changeSlider, testSliderValue } from '../../utils'
 
-test.use({ storageState: 'server/tests/session.json' })
+test.use({ storageState: 'server/tests/data/session.json' })
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })

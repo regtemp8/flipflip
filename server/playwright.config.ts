@@ -54,7 +54,7 @@ export default defineConfig({
       dependencies: ['auth-chromium'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'server/tests/session.json'
+        storageState: 'server/tests/data/session.json'
       }
     },
     {
@@ -77,7 +77,7 @@ export default defineConfig({
       dependencies: ['auth-firefox'],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'server/tests/session.json'
+        storageState: 'server/tests/data/session.json'
       }
     }
 

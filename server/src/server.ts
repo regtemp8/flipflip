@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import express from 'express'
 import session from 'express-session'
@@ -24,15 +25,24 @@ import captionScripts from './routes/captionScripts'
 import displayPlaylistItems from './routes/displayPlaylistItems'
 import scenePlaylistItems from './routes/scenePlaylistItems'
 import db from './db/database'
-import { getSaveDir } from './utils'
+import { getBackupsDir, getCacheDir, getSaveDir } from './utils'
 import scheduler from './scheduler'
 import logger from './logger'
 
-const PORT = process.env.FF_PORT || 5050
+const port = process.env.FF_PORT || 5050
 
-const init = () => {
+void (async function () {
+  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir()]
+  for (const path of dirs) {
+    if (!fs.existsSync(path)) {
+      logger.info('+ Creating directory {path}', { path })
+      await fs.promises.mkdir(path)
+    }
+  }
+
+  await db().migrateToLatest()
+
   const SQLiteStore = connect(session)
-
   const app = express()
   app.use(
     cors({
@@ -49,7 +59,7 @@ const init = () => {
       resave: false,
       saveUninitialized: false,
       store: new SQLiteStore({
-        db: 'flipflip.db',
+        db: 'sessions.db',
         dir: getSaveDir()
       }) as session.Store
     })
@@ -76,15 +86,9 @@ const init = () => {
   app.use('/fs', files)
 
   // start the Express server
-  app.listen(PORT, () => {
-    logger.info(`Server listening on port ${PORT}`)
+  app.listen(port, () => {
+    logger.info(`Server listening on port ${port}`)
   })
 
   scheduler().init()
-}
-
-db()
-  .migrateToLatest()
-  .then(init, () => {
-    process.exit(1)
-  })
+})()
