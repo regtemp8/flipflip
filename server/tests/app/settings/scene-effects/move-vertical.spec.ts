@@ -139,7 +139,7 @@ test('Move vertically slider', async ({ page }) => {
   const slider = await container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 
@@ -228,7 +228,7 @@ test('Move vertically min slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('5%')
 
@@ -280,7 +280,7 @@ test('Move vertically max slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 

@@ -484,46 +484,47 @@ test('Slide distance', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
 
-  const container = await page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Direction") .MuiGrid2-container .MuiGrid2-root'
-  ).nth(1)
+  const container = await page
+    .locator(
+      '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Direction") .MuiGrid2-container .MuiGrid2-root'
+    )
+    .nth(1)
 
   const slider = container.locator('.MuiSlider-root')
   const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100%')
-  await expect(
-    container.locator('.MuiTypography-caption')
-  ).toHaveText('Distance: 100%')
-
+  await expect(container.locator('.MuiTypography-caption')).toHaveText(
+    'Distance: 100%'
+  )
 
   await changeSlider(page, thumb, slider, 0)
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1%')
-  await expect(
-    container.locator('.MuiTypography-caption')
-  ).toHaveText('Distance: 1%')
+  await expect(container.locator('.MuiTypography-caption')).toHaveText(
+    'Distance: 1%'
+  )
 
   await changeSlider(page, thumb, slider, 0.01)
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('2%')
-  await expect(
-    container.locator('.MuiTypography-caption')
-  ).toHaveText('Distance: 2%')
+  await expect(container.locator('.MuiTypography-caption')).toHaveText(
+    'Distance: 2%'
+  )
 
   await changeSlider(page, thumb, slider, 0.99)
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
-  await expect(
-    container.locator('.MuiTypography-caption')
-  ).toHaveText('Distance: 99%')
+  await expect(container.locator('.MuiTypography-caption')).toHaveText(
+    'Distance: 99%'
+  )
 
   await changeSlider(page, thumb, slider, 1)
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100%')
-  await expect(
-    container.locator('.MuiTypography-caption')
-  ).toHaveText('Distance: 100%')
+  await expect(container.locator('.MuiTypography-caption')).toHaveText(
+    'Distance: 100%'
+  )
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()

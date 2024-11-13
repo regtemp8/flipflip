@@ -267,7 +267,7 @@ test('Wave zoom/move timing', async ({ page }) => {
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100')
 
@@ -362,7 +362,7 @@ test('Audio BPM zoom/move timing', async ({ page }) => {
       .getByRole('spinbutton', { name: 'and' })
   ).not.toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1x')
   await expect(

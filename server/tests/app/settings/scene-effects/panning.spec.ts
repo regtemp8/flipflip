@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { HTF } from 'flipflip-common'
 import { changeSlider, testSliderValue } from '../../utils'
 
 test.use({ storageState: 'server/tests/data/session.json' })
@@ -12,7 +11,9 @@ test('Panning effect', async ({ page }) => {
   await expect(page.getByText('None').nth(2)).not.toBeVisible()
   await expect(page.getByText('None').nth(3)).not.toBeVisible()
   await expect(page.getByRole('combobox').nth(4)).not.toBeVisible()
-  await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
+  await expect(
+    page.getByRole('spinbutton', { name: 'For', exact: true })
+  ).not.toBeVisible()
 
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
@@ -249,7 +250,7 @@ test('Wave panning timing', async ({ page }) => {
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100')
 
@@ -338,7 +339,7 @@ test('Audio BPM panning timing', async ({ page }) => {
       .getByRole('spinbutton', { name: 'and' })
   ).not.toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1x')
   await expect(
@@ -687,7 +688,7 @@ test('Panning move horizontally slider', async ({ page }) => {
   const slider = await container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 
@@ -784,7 +785,7 @@ test('Panning move horizontally min slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('5%')
 
@@ -844,7 +845,7 @@ test('Panning move horizontally max slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 
@@ -1117,7 +1118,7 @@ test('Panning move vertically slider', async ({ page }) => {
   const slider = await container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 
@@ -1210,7 +1211,7 @@ test('Panning move vertically min slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('5%')
 
@@ -1266,7 +1267,7 @@ test('Panning move vertically max slider', async ({ page }) => {
   )
   await expect(slider).toBeVisible()
 
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('10%')
 

@@ -46,7 +46,7 @@ test('Zoom start slider', async ({ page }) => {
   await expect(page.getByText('Zoom Start: 1x', { exact: true })).toBeVisible()
 
   const slider = await page.locator('.MuiSlider-root').first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1x')
@@ -100,7 +100,7 @@ test('Zoom end slider', async ({ page }) => {
   const slider = await page
     .locator('div:nth-child(2) > .MuiSlider-root')
     .first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('2x')
@@ -196,7 +196,7 @@ test('Zoom start min slider', async ({ page }) => {
   ).toBeVisible()
 
   const slider = await container.locator('.MuiSlider-root').first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('0.5x')
@@ -261,7 +261,7 @@ test('Zoom start max slider', async ({ page }) => {
   ).toBeVisible()
 
   const slider = await container.locator('.MuiSlider-root').first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1x')
@@ -326,7 +326,7 @@ test('Zoom end min slider', async ({ page }) => {
   ).toBeVisible()
 
   const slider = await container.locator('.MuiSlider-root').first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('1.5x')
@@ -391,7 +391,7 @@ test('Zoom end max slider', async ({ page }) => {
   ).toBeVisible()
 
   const slider = await container.locator('.MuiSlider-root').first()
-  const thumb = await slider.locator('.MuiSlider-thumb')
+  const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('2x')
