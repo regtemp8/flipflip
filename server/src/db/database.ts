@@ -8,9 +8,15 @@ import {
   Migrator,
   FileMigrationProvider
 } from 'kysely'
-import { DB } from './types/generated'
+import { Backup, DB } from './types/generated'
 import { getSaveDir, getBackupsDir } from '../utils'
 import logger from '../logger'
+import { BackupSettings } from './types/BackupSettings'
+import {
+  deleteByIdsToKeep,
+  findByIntervalToKeep,
+  findMostRecentToKeep
+} from './BackupRepository'
 
 export class DatabaseService {
   private static instance: DatabaseService
@@ -53,7 +59,7 @@ export class DatabaseService {
     })
 
     if (error) {
-      logger.error('Failed to execute migrations', {error})
+      logger.error('Failed to execute migrations', { error })
       throw error
     }
   }
@@ -61,17 +67,16 @@ export class DatabaseService {
   public async createBackup(fileName: string) {
     logger.info(`Create backup`)
     const path = this.backupFileName(fileName)
-    logger.info(`+ Write backup to: {path}`, {path})
+    logger.info(`+ Write backup to: {path}`, { path })
     await this.sqlite.backup(path)
   }
 
   public async restoreBackup(fileName: string) {
     logger.info(`Restore backup`)
-    logger.info('+ Close database connection')
-    await this.kysely.destroy()
+    await this.destroy()
     const src = this.backupFileName(fileName)
     const dest = this.databaseFileName()
-    logger.info(`+ Copy database {src} to {dest}`, {src, dest})
+    logger.info(`+ Copy database {src} to {dest}`, { src, dest })
     await fs.copyFile(src, dest)
     logger.info('+ Open database connection')
     this.sqlite = new SQLite(dest)
@@ -79,6 +84,73 @@ export class DatabaseService {
       dialect: new SqliteDialect({ database: this.sqlite }),
       plugins: [new CamelCasePlugin()]
     })
+  }
+
+  public async cleanBackups(settings: BackupSettings) {
+    let toKeep: Array<Partial<Backup>>
+    if (settings.autoCleanBackup) {
+      toKeep = []
+      const months = settings.autoCleanBackupMonths
+      const keepMonths = await findByIntervalToKeep('month', months)
+      toKeep.push(...keepMonths)
+      if (keepMonths.length > 0) {
+        keepMonths.forEach((keep) =>
+          logger.info(`+ Keep monthly backup: ${keep.fileName}`)
+        )
+      } else {
+        logger.info(': No monthly backups to keep')
+      }
+
+      const weeks = settings.autoCleanBackupWeeks
+      const keepWeeks = await findByIntervalToKeep('week', weeks)
+      toKeep.push(...keepWeeks)
+      if (keepWeeks.length > 0) {
+        keepWeeks.forEach((keep) =>
+          logger.info(`+ Keep weekly backup: ${keep.fileName}`)
+        )
+      } else {
+        logger.info(': No weekly backups to keep')
+      }
+
+      const days = settings.autoCleanBackupDays
+      const keepDays = await findByIntervalToKeep('day', days)
+      toKeep.push(...keepDays)
+      if (keepDays.length > 0) {
+        keepDays.forEach((keep) =>
+          logger.info(`+ Keep daily backup: ${keep.fileName}`)
+        )
+      } else {
+        logger.info(': No daily backups to keep')
+      }
+    } else {
+      toKeep = await findMostRecentToKeep(settings.cleanRetain)
+      if (toKeep.length > 0) {
+        toKeep.forEach((keep) =>
+          logger.info(`+ Keep recent backup: ${keep.fileName}`)
+        )
+      } else {
+        logger.info(': No recent backups to keep')
+      }
+    }
+
+    const filesToKeep = new Set<string>()
+    toKeep.forEach((keep) => filesToKeep.add(keep.fileName as string))
+    const backupsDir = getBackupsDir()
+    const backupFiles = await fs.readdir(backupsDir)
+    const toRemove = backupFiles.filter((file) => !filesToKeep.has(file))
+    await Promise.all(
+      toRemove.map((file) => {
+        logger.info(`- Remove backup: ${file}`)
+        const backupPath = path.join(backupsDir, file)
+        return fs.unlink(backupPath)
+      })
+    )
+    await deleteByIdsToKeep(toKeep.map((backup) => backup.id as number))
+  }
+
+  public async destroy() {
+    logger.info('+ Close database connection')
+    await this.kysely.destroy()
   }
 
   private databaseFileName() {

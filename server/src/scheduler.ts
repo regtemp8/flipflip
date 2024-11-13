@@ -61,57 +61,7 @@ export class SchedulerService {
     logger.info(`+ Schedule clean backups job (cron: ${cron})`)
     schedule.scheduleJob('Clean Backups', cron, async () => {
       logger.info(`+ Run auto backup job: ${moment().toISOString()}`)
-      let toKeep: Array<Partial<Backup>>
-      if (settings.autoCleanBackup) {
-        toKeep = []
-        const months = settings.autoCleanBackupMonths
-        const keepMonths = await findByIntervalToKeep('month', months)
-        toKeep.push(...keepMonths)
-        if(keepMonths.length > 0) {
-          keepMonths.forEach((keep) => logger.info(`+ Keep monthly backup: ${keep.fileName}`))
-        } else {
-          logger.info(': No monthly backups to keep')
-        }
-
-        const weeks = settings.autoCleanBackupWeeks
-        const keepWeeks = await findByIntervalToKeep('week', weeks)
-        toKeep.push(...keepWeeks)
-        if(keepWeeks.length > 0) {
-          keepWeeks.forEach((keep) => logger.info(`+ Keep weekly backup: ${keep.fileName}`))
-        } else {
-          logger.info(': No weekly backups to keep')
-        }
-
-        const days = settings.autoCleanBackupDays
-        const keepDays = await findByIntervalToKeep('day', days)
-        toKeep.push(...keepDays)
-        if(keepDays.length > 0) {
-          keepDays.forEach((keep) => logger.info(`+ Keep daily backup: ${keep.fileName}`))
-        } else {
-          logger.info(': No daily backups to keep')
-        }
-      } else {
-        toKeep = await findMostRecentToKeep(settings.cleanRetain)
-        if(toKeep.length > 0) {
-          toKeep.forEach((keep) => logger.info(`+ Keep recent backup: ${keep.fileName}`))
-        } else {
-          logger.info(': No recent backups to keep')
-        }
-      }
-
-      const filesToKeep = new Set<string>()
-      toKeep.forEach((keep) => filesToKeep.add(keep.fileName as string))
-      const backupsDir = getBackupsDir()
-      const backupFiles = await fs.promises.readdir(backupsDir)
-      const toRemove = backupFiles.filter((file) => !filesToKeep.has(file))
-      await Promise.all(
-        toRemove.map((file) => {
-          logger.info(`- Remove backup: ${file}`)
-          const backupPath = path.join(backupsDir, file)
-          return fs.promises.unlink(backupPath)
-        })
-      )
-      await deleteByIdsToKeep(toKeep.map((backup) => backup.id as number))
+      await db().cleanBackups(settings)
     })
   }
 }

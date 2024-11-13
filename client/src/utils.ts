@@ -1,4 +1,11 @@
-import { Audio, ContentSource, ScraperHelpers, TF } from 'flipflip-common'
+import { filesize } from 'filesize'
+import {
+  Audio,
+  Backup,
+  ContentSource,
+  ScraperHelpers,
+  TF
+} from 'flipflip-common'
 
 export const captionProgramDefaults = {
   program: Array<Function>(),
@@ -95,10 +102,12 @@ export function getTimingFromString(tf: string): string | undefined {
   }
 }
 
-export function convertFromEpoch(backupFile: string) {
-  const epochString = backupFile.substring(backupFile.lastIndexOf('.') + 1)
-  const date = new Date(Number.parseInt(epochString))
-  return date.toLocaleString()
+export function formatBackup(backup: Backup) {
+  return `${convertFromEpoch(backup.createdAt)} (${filesize(backup.size, { standard: 'jedec', round: 0 })})`
+}
+
+export function convertFromEpoch(timestamp: number) {
+  return new Date(timestamp * 1000).toLocaleString()
 }
 
 export function getTimestamp(secs: number): string {

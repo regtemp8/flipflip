@@ -26,28 +26,10 @@ import {
   FontSettingsType,
   CaptionScript,
   Audio,
-  FilePickerData
+  FilePickerData,
+  CleanBackupsRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
-
-// TODO check all tag types, you've added new ones
-const tagTypes = [
-  'Authenticated',
-  'ConnectToken',
-  'Backup',
-  'Version',
-  'GroupedScenes',
-  'UngroupedScenes',
-  'GroupedGenerators',
-  'UngroupedGenerators',
-  'GroupedDisplays',
-  'UngroupedDisplays',
-  'GroupedPlaylists',
-  'UngroupedPlaylists',
-  'Tutorials',
-  'Config',
-  'Scene'
-]
 
 export const flipflipApi = createApi({
   reducerPath: 'flipflipApi',
@@ -55,7 +37,49 @@ export const flipflipApi = createApi({
     baseUrl: 'http://localhost:5050/',
     credentials: 'include'
   }),
-  tagTypes,
+  tagTypes: [
+    'Authenticated',
+    'Theme',
+    'ConnectToken',
+    'Backup',
+    'Version',
+    'GroupedScenes',
+    'UngroupedScenes',
+    'GroupedGenerators',
+    'UngroupedGenerators',
+    'GroupedDisplays',
+    'UngroupedDisplays',
+    'GroupedPlaylists',
+    'UngroupedPlaylists',
+    'PlaylistOptions',
+    'Tutorials',
+    'GeneralSettings',
+    'RemoteSettings',
+    'DisplaySettings',
+    'CacheSettings',
+    'SystemFonts',
+    'Config',
+    'Scene',
+    'SceneWeightGroups',
+    'SceneAudioPlaylists',
+    'SceneScriptPlaylists',
+    'SceneDisableWeightOptions',
+    'SceneHasBPM',
+    'Tag',
+    'Clip',
+    'ContentSource',
+    'Display',
+    'DisplayView',
+    'Playlist',
+    'SceneSelectOptions',
+    'DisplaySelectOptions',
+    'DisplayPlaylistItems',
+    'ScenePlaylistItems',
+    'CaptionScript',
+    'CaptionScriptFontSettings',
+    'Audio',
+    'FilePicker'
+  ],
   endpoints: (builder) => ({
     isAuthenticated: builder.query<boolean, void>({
       query: () => `authenticated`,
@@ -124,32 +148,36 @@ export const flipflipApi = createApi({
       query: () => `api/backups`,
       providesTags: [{ type: 'Backup', id: 'List' }]
     }),
-    createBackup: builder.mutation<boolean, void>({
+    createBackup: builder.mutation<Message, void>({
       query() {
         return {
-          url: `api/backups/new`,
+          url: `api/backups`,
           method: 'POST'
         }
       },
       invalidatesTags: [{ type: 'Backup', id: 'List' }]
     }),
-    cleanBackups: builder.mutation<boolean, void>({
-      query() {
+    cleanBackups: builder.mutation<Message, CleanBackupsRequest>({
+      query(body) {
         return {
           url: `api/backups/clean`,
-          method: 'POST'
+          method: 'POST',
+          body
         }
       },
       invalidatesTags: [{ type: 'Backup', id: 'List' }]
     }),
-    restoreBackup: builder.mutation<boolean, number>({
+    restoreBackup: builder.mutation<Message, number>({
       query(id) {
         return {
-          url: `api/backup/${id}/restore`,
+          url: `api/backups/${id}/restore`,
           method: 'POST'
         }
       },
-      invalidatesTags: tagTypes
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(flipflipApi.util.resetApiState())
+      }
     }),
     resetData: builder.mutation<boolean, void>({
       query() {
@@ -158,7 +186,10 @@ export const flipflipApi = createApi({
           method: 'POST'
         }
       },
-      invalidatesTags: tagTypes
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(flipflipApi.util.resetApiState())
+      }
     }),
     getVersion: builder.query<Message, void>({
       query: () => `api/version`,

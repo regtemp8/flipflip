@@ -21,7 +21,7 @@ import {
   type SelectChangeEvent
 } from '@mui/material'
 
-import { convertFromEpoch } from '../../utils'
+import { formatBackup } from '../../utils'
 import { Backup } from 'flipflip-common'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -118,7 +118,7 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const onChangeBackup = (e: SelectChangeEvent<string>) => {
-    setBackup(backups.find((b) => b.url === e.target.value))
+    setBackup(backups.find((b) => b.id === Number(e.target.value)))
   }
 
   const onFinishRestore = async () => {
@@ -260,8 +260,7 @@ export default function ErrorCard(props: ErrorCardProps) {
                     >
                       {backups.map((b) => (
                         <MenuItem value={b.id} key={b.id}>
-                          {convertFromEpoch(b.url)} ({Math.round(b.size / 1000)}{' '}
-                          KB)
+                          {formatBackup(b)}
                         </MenuItem>
                       ))}
                     </Select>

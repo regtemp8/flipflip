@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import {
   CacheSettings,
   DisplaySettings,
@@ -15,7 +17,11 @@ import {
   SceneGroupItem,
   Audio,
   CaptionScript,
-  FontSettings
+  FontSettings,
+  Backup,
+  CleanBackupsRequest,
+  DefaultCleanBackupsRequest,
+  AutoCleanBackupsRequest
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -32,7 +38,8 @@ import {
   Playlist as PlaylistRow,
   Audio as AudioRow,
   CaptionScript as CaptionScriptRow,
-  FontSettings as FontSettingsRow
+  FontSettings as FontSettingsRow,
+  Backup as BackupRow
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
@@ -55,6 +62,8 @@ import {
   CaptionScriptUpdate,
   FontSettingsUpdate
 } from './CaptionScriptRepository'
+import { getBackupsDir } from '../utils'
+import { BackupSettings } from './types/BackupSettings'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,
@@ -1351,5 +1360,41 @@ export function toFontSettingsUpdate(
     color,
     fontFamily,
     fontSize
+  }
+}
+
+export function toBackup(row: BackupRow): Backup {
+  const { id, createdAt, fileName } = row
+  const filePath = path.join(getBackupsDir(), fileName)
+  const size = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
+  return { id: id as number, createdAt, size }
+}
+
+export function toBackupSettings(request: CleanBackupsRequest): BackupSettings {
+  let autoCleanBackup = false
+  let autoCleanBackupDays = 0
+  let autoCleanBackupMonths = 0
+  let autoCleanBackupWeeks = 0
+  let cleanRetain = 0
+
+  if (request.hasOwnProperty('cleanRetain')) {
+    const defaultRequest = request as DefaultCleanBackupsRequest
+    cleanRetain = defaultRequest.cleanRetain
+  } else {
+    const autoRequest = request as AutoCleanBackupsRequest
+    autoCleanBackup = true
+    autoCleanBackupDays = autoRequest.autoCleanBackupDays
+    autoCleanBackupMonths = autoRequest.autoCleanBackupMonths
+    autoCleanBackupWeeks = autoRequest.autoCleanBackupWeeks
+  }
+
+  return {
+    autoBackup: false,
+    autoBackupDays: 0,
+    autoCleanBackup,
+    autoCleanBackupDays,
+    autoCleanBackupMonths,
+    autoCleanBackupWeeks,
+    cleanRetain
   }
 }

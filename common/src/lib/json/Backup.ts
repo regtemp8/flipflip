@@ -1,5 +1,5 @@
 export type Backup = {
   id: number;
-  url: string;
+  createdAt: number;
   size: number;
 };

@@ -26,8 +26,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import RestoreIcon from '@mui/icons-material/Restore'
 import SaveIcon from '@mui/icons-material/Save'
 
-import { convertFromEpoch } from '../../utils'
-import { Backup, MO } from 'flipflip-common'
+import { convertFromEpoch, formatBackup } from '../../utils'
+import { Backup, GeneralSettings, MO } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
 import {
   setConfigGeneralSettingsAutoBackup,
@@ -102,34 +102,35 @@ function BackupCard() {
   const [openMenu, setOpenMenu] = useState<string>()
 
   const onChangeBackup = (e: SelectChangeEvent) => {
-    setBackup(backups?.find((b) => b.url === e.target.value))
+    setBackup(backups?.find((b) => b.id === Number(e.target.value)))
   }
 
   const onBackup = async () => {
-    try {
-      await createBackup()
-      dispatch(showSystemSnack({ success: 'Backup success!' }))
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      dispatch(showSystemSnack({ error: 'Error: ' + e }))
+    const { data } = await createBackup()
+    if (data != null) {
+      dispatch(showSystemSnack(data))
     }
   }
 
   const onClean = () => {
-    setBackup((backups as Backup[])[0])
     setOpenMenu(MO.deleteAlert)
   }
 
   const onFinishClean = async () => {
     onCloseDialog()
-    try {
-      await cleanBackups()
-      dispatch(showSystemSnack({ success: 'Backup success!' }))
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      dispatch(showSystemSnack({ error: 'Error: ' + e }))
+    const {
+      cleanRetain,
+      autoCleanBackup,
+      autoCleanBackupDays,
+      autoCleanBackupWeeks,
+      autoCleanBackupMonths
+    } = generalSettings as GeneralSettings
+    const request = autoCleanBackup
+      ? { autoCleanBackupDays, autoCleanBackupWeeks, autoCleanBackupMonths }
+      : { cleanRetain }
+    const { data } = await cleanBackups(request)
+    if (data != null) {
+      dispatch(showSystemSnack(data))
     }
   }
 
@@ -140,13 +141,9 @@ function BackupCard() {
 
   const onFinishRestore = async () => {
     onCloseDialog()
-    try {
-      await restoreBackup((backup as Backup).id)
-      dispatch(showSystemSnack({ success: 'Restore success!' }))
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      dispatch(showSystemSnack({ error: 'Error: ' + e }))
+    const { data } = await restoreBackup((backup as Backup).id)
+    if (data != null) {
+      dispatch(showSystemSnack(data))
     }
   }
 
@@ -200,8 +197,7 @@ function BackupCard() {
       >
         <Tooltip
           disableInteractive
-          title="If enabled, backups will be automatically cleaned up. This algorithm will keep 1 backup for
-          each of the configured periods."
+          title="If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period."
         >
           <Grid2 size={'auto'} className={classes.buttonGrid}>
             <BaseSwitch
@@ -323,14 +319,7 @@ function BackupCard() {
         </Grid2>
         <Grid2 size={'auto'} className={cx(classes.buttonGrid, classes.hideXS)}>
           <Chip
-            label={`Latest: ${
-              hasBackup
-                ? convertFromEpoch(backups[0].url) +
-                  ' (' +
-                  Math.round(backups[0].size / 1000) +
-                  ' KB)'
-                : '--'
-            }`}
+            label={`Latest: ${hasBackup ? formatBackup(backups[0]) : '--'}`}
             color="secondary"
             variant="outlined"
           />
@@ -338,7 +327,7 @@ function BackupCard() {
         <Grid2 size={'auto'} className={cx(classes.buttonGrid, classes.showXS)}>
           <Chip
             label={`Latest: ${
-              hasBackup ? convertFromEpoch(backups[0].url) : '--'
+              hasBackup ? convertFromEpoch(backups[0].createdAt) : '--'
             }`}
             color="secondary"
             variant="outlined"
@@ -356,10 +345,11 @@ function BackupCard() {
           {generalSettings?.autoCleanBackup && (
             <DialogContentText id="remove-all-description">
               You are about to clean your backups. Backups will be retained
-              according to your Auto Clean configuration. A record will be kept
-              for each of the last: {generalSettings?.autoCleanBackupDays} Days,{' '}
-              {generalSettings?.autoCleanBackupWeeks} Weeks,{' '}
-              {generalSettings?.autoCleanBackupMonths} Months.
+              according to your Auto Clean configuration. The last{' '}
+              {generalSettings?.autoCleanBackupDays} daily, last{' '}
+              {generalSettings?.autoCleanBackupWeeks} weekly and last{' '}
+              {generalSettings?.autoCleanBackupMonths} monthly backups will be
+              kept.
             </DialogContentText>
           )}
           {!generalSettings?.autoCleanBackup && (
@@ -409,7 +399,7 @@ function BackupCard() {
               <InputLabel>Backups</InputLabel>
               <Select
                 variant="standard"
-                value={backup.url}
+                value={backup.id.toString()}
                 MenuProps={{
                   PaperProps: {
                     style: {
@@ -421,7 +411,7 @@ function BackupCard() {
               >
                 {backups?.map((b) => (
                   <MenuItem value={b.id} key={b.id}>
-                    {convertFromEpoch(b.url)} ({Math.round(b.size / 1000)} KB)
+                    {formatBackup(b)}
                   </MenuItem>
                 ))}
               </Select>
