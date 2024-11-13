@@ -24,8 +24,8 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
   let dirents: Dirent[]
   try {
     dirents = await fs.promises.readdir(cwd, { withFileTypes: true })
-  } catch(error) {
-    logger.error(`Failed to read directory {path}`, {path: cwd, error})
+  } catch (error) {
+    logger.error(`Failed to read directory {path}`, { path: cwd, error })
     res.status(500).end()
     return
   }
@@ -59,7 +59,10 @@ router.post('/create-directory', async (req, res) => {
     await fs.promises.mkdir(req.body.path, { recursive: false })
     res.status(204).end()
   } catch (error) {
-    logger.error('Failed to create directory {path}', {path: req.body.path, error})
+    logger.error('Failed to create directory {path}', {
+      path: req.body.path,
+      error
+    })
     res.status(500).end()
   }
 })

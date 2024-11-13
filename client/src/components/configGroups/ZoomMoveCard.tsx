@@ -295,7 +295,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           </Grid2>
         </Collapse>
         <Collapse in={zoom} className={classes.fullWidth}>
-          <Divider sx={{pt: 2}}/>
+          <Divider sx={{ pt: 2 }} />
         </Collapse>
       </Grid2>
       <Grid2 size={12} className={cx(tutorial?.current && classes.disable)}>
@@ -326,8 +326,11 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
             action: setSceneHorizTransLevelMax(props.sceneID)
           }}
         />
-        <Collapse in={horizTransType !== HTF.none} className={classes.fullWidth}>
-          <Divider sx={{pt: 2}}/>
+        <Collapse
+          in={horizTransType !== HTF.none}
+          className={classes.fullWidth}
+        >
+          <Divider sx={{ pt: 2 }} />
         </Collapse>
       </Grid2>
       <Grid2 size={12} className={cx(tutorial?.current && classes.disable)}>
@@ -359,54 +362,56 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           }}
         />
         <Collapse in={vertTransType !== VTF.none} className={classes.fullWidth}>
-          <Divider sx={{pt: 2}}/>
+          <Divider sx={{ pt: 2 }} />
         </Collapse>
       </Grid2>
-      {enabled && (<Grid2
-        size={12}
-        className={cx(
-          tutorial?.current != null &&
-            tutorial?.current !== SDT.zoom3 &&
-            classes.disable
-        )}
-      >
-        <Collapse in={enabled} className={classes.fullWidth}>
-          <TimingCard
-            sidebar={sidebar}
-            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
-            timing={{
-              selector: () => useGetSceneZoomTFQuery(props.sceneID),
-              action: setSceneZoomTF(props.sceneID)
-            }}
-            duration={{
-              selector: () => useGetSceneZoomDurationQuery(props.sceneID),
-              action: setSceneZoomDuration(props.sceneID)
-            }}
-            durationMin={{
-              selector: () => useGetSceneZoomDurationMinQuery(props.sceneID),
-              action: setSceneZoomDurationMin(props.sceneID)
-            }}
-            durationMax={{
-              selector: () => useGetSceneZoomDurationMaxQuery(props.sceneID),
-              action: setSceneZoomDurationMax(props.sceneID)
-            }}
-            wave={{
-              selector: () => useGetSceneZoomSinRateQuery(props.sceneID),
-              action: setSceneZoomSinRate(props.sceneID),
-              labelledBy: 'trans-sin-rate-slider'
-            }}
-            bpm={{
-              selector: () => useGetSceneZoomBPMMultiQuery(props.sceneID),
-              action: setSceneZoomBPMMulti(props.sceneID),
-              labelledBy: 'trans-bpm-multi-slider'
-            }}
-          />
-        </Collapse>
-      </Grid2>)}
+      {enabled && (
+        <Grid2
+          size={12}
+          className={cx(
+            tutorial?.current != null &&
+              tutorial?.current !== SDT.zoom3 &&
+              classes.disable
+          )}
+        >
+          <Collapse in={enabled} className={classes.fullWidth}>
+            <TimingCard
+              sidebar={sidebar}
+              hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
+              timing={{
+                selector: () => useGetSceneZoomTFQuery(props.sceneID),
+                action: setSceneZoomTF(props.sceneID)
+              }}
+              duration={{
+                selector: () => useGetSceneZoomDurationQuery(props.sceneID),
+                action: setSceneZoomDuration(props.sceneID)
+              }}
+              durationMin={{
+                selector: () => useGetSceneZoomDurationMinQuery(props.sceneID),
+                action: setSceneZoomDurationMin(props.sceneID)
+              }}
+              durationMax={{
+                selector: () => useGetSceneZoomDurationMaxQuery(props.sceneID),
+                action: setSceneZoomDurationMax(props.sceneID)
+              }}
+              wave={{
+                selector: () => useGetSceneZoomSinRateQuery(props.sceneID),
+                action: setSceneZoomSinRate(props.sceneID),
+                labelledBy: 'trans-sin-rate-slider'
+              }}
+              bpm={{
+                selector: () => useGetSceneZoomBPMMultiQuery(props.sceneID),
+                action: setSceneZoomBPMMulti(props.sceneID),
+                labelledBy: 'trans-bpm-multi-slider'
+              }}
+            />
+          </Collapse>
+        </Grid2>
+      )}
       {easingControls && enabled && (
         <Grid2 size={12}>
           <Collapse in={enabled} className={classes.fullWidth}>
-            <Divider sx={{mb: 2}}/>
+            <Divider sx={{ mb: 2 }} />
             <EasingCard
               sidebar={sidebar}
               easing={{

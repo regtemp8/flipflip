@@ -45,17 +45,18 @@ function MoveCard(props: MoveCardProps) {
 
   const { classes } = useStyles()
   return (
-    <Grid2 container spacing={props.enabled && type !== props.values.none ? 2 : 0} alignItems="center">
+    <Grid2
+      container
+      spacing={props.enabled && type !== props.values.none ? 2 : 0}
+      alignItems="center"
+    >
       <Grid2
         size={{
           xs: 12,
           sm: !props.sidebar && type !== props.values.none ? 5 : 12
         }}
       >
-        <Collapse
-          in={props.enabled}
-          className={classes.fullWidth}
-        >
+        <Collapse in={props.enabled} className={classes.fullWidth}>
           <BaseSelect
             label={props.label}
             selector={props.type.selector}

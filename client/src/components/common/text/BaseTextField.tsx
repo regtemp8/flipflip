@@ -42,9 +42,9 @@ export default function BaseTextField<
   const dispatch = useAppDispatch()
 
   const getValue = (value?: S) => {
-    if(props.inputProps?.type === 'number') {
-      let num: number = value as number ?? min
-      if(props.scale != null) {
+    if (props.inputProps?.type === 'number') {
+      let num: number = (value as number) ?? min
+      if (props.scale != null) {
         num *= props.scale
       }
 
