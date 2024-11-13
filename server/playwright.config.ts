@@ -112,7 +112,7 @@ export default defineConfig({
     {
       command: 'yarn test',
       url: 'http://localhost:5050',
-      reuseExistingServer: false,
+      reuseExistingServer: !process.env.CI,
       timeout: 60 * 1000
     },
     {
