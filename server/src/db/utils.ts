@@ -11,3 +11,11 @@ export const toNumberOpt = (value?: boolean | string) => {
   }
 }
 export const toBoolean = (value?: number) => value === 1
+
+export const toStringArray = (value?: string) =>
+  value != null ? (JSON.parse(value) as string[]) : []
+
+export const toText = (value: any) => JSON.stringify(value)
+
+export const toTextOpt = (value?: any) =>
+  value != null ? JSON.stringify(value) : undefined

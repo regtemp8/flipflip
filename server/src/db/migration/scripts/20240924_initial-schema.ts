@@ -324,6 +324,8 @@ const sceneTable = async (trx: Kysely<DB>) => {
     .addColumn('backForthBpmMulti', 'integer', (col) => col.notNull())
     .addColumn('imageType', 'text', (col) => col.notNull())
     .addColumn('backgroundType', 'text', (col) => col.notNull())
+    .addColumn('backgroundColor', 'text', (col) => col.notNull())
+    .addColumn('backgroundColorSet', 'text', (col) => col.notNull())
     .addColumn('backgroundBlur', 'integer', (col) => col.notNull())
     .addColumn('imageTypeFilter', 'text', (col) => col.notNull())
     .addColumn('fullSource', 'boolean', (col) => col.notNull())
@@ -426,6 +428,8 @@ const sceneTable = async (trx: Kysely<DB>) => {
     .addColumn('strobeDelaySinRate', 'integer', (col) => col.notNull())
     .addColumn('strobeDelayBpmMulti', 'integer', (col) => col.notNull())
     .addColumn('strobeColorType', 'text', (col) => col.notNull())
+    .addColumn('strobeColor', 'text', (col) => col.notNull())
+    .addColumn('strobeColorSet', 'text', (col) => col.notNull())
     .addColumn('strobeEase', 'text', (col) => col.notNull())
     .addColumn('strobeExp', 'integer', (col) => col.notNull())
     .addColumn('strobeAmp', 'integer', (col) => col.notNull())
@@ -552,23 +556,6 @@ const weightGroupTable = async (trx: Kysely<DB>) => {
       'FK_weightGroup_weightGroup_ruleId',
       ['ruleId'],
       'weightGroup',
-      ['id']
-    )
-    .execute()
-}
-
-const sceneColorTable = async (trx: Kysely<DB>) => {
-  logger.info('+ Create sceneColor table')
-  return await trx.schema
-    .createTable('sceneColor')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
-    .addColumn('sceneId', 'integer', (col) => col.notNull())
-    .addColumn('color', 'text', (col) => col.notNull())
-    .addColumn('type', 'text', (col) => col.notNull()) // background, strobe
-    .addForeignKeyConstraint(
-      'FK_sceneBackgroundColor_scene_sceneId',
-      ['sceneId'],
-      'scene',
       ['id']
     )
     .execute()
@@ -1014,7 +1001,6 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await sceneTable(trx)
     await scenePlaylistTable(trx)
     await weightGroupTable(trx)
-    await sceneColorTable(trx)
     await sceneContentSourceTable(trx)
     await libraryContentSourceTable(trx)
     await captionScriptTable(trx)
@@ -1087,9 +1073,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Drop sceneContentSource table')
     await trx.schema.dropTable('sceneContentSource').execute()
-
-    logger.info('- Drop sceneColor table')
-    await trx.schema.dropTable('sceneColor').execute()
 
     logger.info('- Drop weightGroup table')
     await trx.schema.dropTable('weightGroup').execute()

@@ -71,6 +71,9 @@ export default function BaseTextField<
     if (props?.inputProps?.max != null) {
       value = Math.min(value, props.inputProps.max)
     }
+    if (props.scale != null) {
+      value = value / props.scale
+    }
 
     const action = props.action as (
       value: number

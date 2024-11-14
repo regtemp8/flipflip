@@ -30,7 +30,7 @@ import {
 import { Tag, newTag } from '../data/migrate-data-json/Tag'
 import { Route, newRoute } from '../data/migrate-data-json/Route'
 import { getElectronSaveDir } from '../../../utils'
-import { toNumber } from '../../utils'
+import { toNumber, toText } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
 import { WeightGroup } from '../data/migrate-data-json/WeightGroup'
@@ -653,6 +653,8 @@ const sceneSettingsInsert = async (
     videoOrientation,
     backgroundType,
     backgroundBlur,
+    backgroundColor,
+    backgroundColorSet,
     gifOption,
     gifTimingConstant,
     gifTimingMin,
@@ -692,6 +694,8 @@ const sceneSettingsInsert = async (
     strobeDelaySinRate,
     strobeDelayBPMMulti,
     strobeColorType,
+    strobeColor,
+    strobeColorSet,
     strobeEase,
     strobeExp,
     strobeAmp,
@@ -732,6 +736,8 @@ const sceneSettingsInsert = async (
       imageType,
       backgroundType,
       backgroundBlur,
+      backgroundColor,
+      backgroundColorSet: toText(backgroundColorSet),
       imageTypeFilter,
       fullSource: toNumber(fullSource),
       imageOrientation,
@@ -833,6 +839,8 @@ const sceneSettingsInsert = async (
       strobeDelaySinRate,
       strobeDelayBpmMulti: strobeDelayBPMMulti,
       strobeColorType,
+      strobeColor,
+      strobeColorSet: toText(strobeColorSet),
       strobeEase,
       strobeExp,
       strobeAmp,
@@ -950,19 +958,6 @@ const clipInsert = async (
       })
       .execute()
   }
-}
-
-const sceneColorInsert = async (
-  trx: Kysely<DB>,
-  sceneId: number,
-  color: string,
-  type: string
-) => {
-  logger.info(`+ Insert scene ${type} color ${color}`)
-  return await trx
-    .insertInto('sceneColor')
-    .values({ sceneId, color, type })
-    .execute()
 }
 
 const libraryContentSourceInsert = async (
@@ -1510,6 +1505,8 @@ const sceneInsert = async (
       imageType,
       backgroundType,
       backgroundBlur,
+      backgroundColor,
+      backgroundColorSet,
       imageTypeFilter,
       fullSource,
       imageOrientation,
@@ -1611,6 +1608,8 @@ const sceneInsert = async (
       strobeDelaySinRate,
       strobeDelayBPMMulti,
       strobeColorType,
+      strobeColor,
+      strobeColorSet,
       strobeEase,
       strobeExp,
       strobeAmp,
@@ -1712,6 +1711,8 @@ const sceneInsert = async (
         imageType,
         backgroundType,
         backgroundBlur,
+        backgroundColor,
+        backgroundColorSet: toText(backgroundColorSet),
         imageTypeFilter,
         fullSource: toNumber(fullSource),
         imageOrientation,
@@ -1813,6 +1814,8 @@ const sceneInsert = async (
         strobeDelaySinRate,
         strobeDelayBpmMulti: strobeDelayBPMMulti,
         strobeColorType,
+        strobeColor,
+        strobeColorSet: toText(strobeColorSet),
         strobeEase,
         strobeExp,
         strobeAmp,
@@ -1900,16 +1903,6 @@ const sceneInsert = async (
           contentSourceId: source.id
         })
         .execute()
-    }
-
-    await sceneColorInsert(trx, id, scene.backgroundColor, 'background')
-    for (const color of scene.backgroundColorSet) {
-      await sceneColorInsert(trx, id, color, 'background')
-    }
-
-    await sceneColorInsert(trx, id, scene.strobeColor, 'strobe')
-    for (const color of scene.strobeColorSet) {
-      await sceneColorInsert(trx, id, color, 'strobe')
     }
 
     for (let i = 0; i < scene.audioPlaylists.length; i++) {
@@ -2144,9 +2137,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Delete sceneContentSource rows')
     await trx.deleteFrom('sceneContentSource').execute()
-
-    logger.info('- Delete sceneColor rows')
-    await trx.deleteFrom('sceneColor').execute()
 
     logger.info('- Delete weightGroup rows')
     await trx.deleteFrom('weightGroup').execute()

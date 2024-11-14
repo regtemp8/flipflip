@@ -287,6 +287,8 @@ export interface Scene {
   backForthSinRate: number
   backForthTf: string
   backgroundBlur: number
+  backgroundColor: string
+  backgroundColorSet: string
   backgroundType: string
   continueVideo: number
   crossFade: number
@@ -406,6 +408,8 @@ export interface Scene {
   strobe: number
   strobeAmp: number
   strobeBpmMulti: number
+  strobeColor: string
+  strobeColorSet: string
   strobeColorType: string
   strobeDelay: number
   strobeDelayBpmMulti: number
@@ -472,13 +476,6 @@ export interface Scene {
   zoomStartMin: number
 }
 
-export interface SceneColor {
-  color: string
-  id: number | null
-  sceneId: number
-  type: string
-}
-
 export interface SceneContentSource {
   contentSourceId: number
   id: number | null
@@ -510,12 +507,6 @@ export interface ScenePlaylistItemScene {
   id: number | null
   sceneId: number
   scenePlaylistItemId: number
-}
-
-export interface Sessions {
-  expired: string | null
-  sess: string | null
-  sid: string | null
 }
 
 export interface Tag {
@@ -594,13 +585,11 @@ export interface DB {
   playlist: Playlist
   remoteSettings: RemoteSettings
   scene: Scene
-  sceneColor: SceneColor
   sceneContentSource: SceneContentSource
   sceneGroup: SceneGroup
   scenePlaylist: ScenePlaylist
   scenePlaylistItem: ScenePlaylistItem
   scenePlaylistItemScene: ScenePlaylistItemScene
-  sessions: Sessions
   tag: Tag
   theme: Theme
   tutorials: Tutorials

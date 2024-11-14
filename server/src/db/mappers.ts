@@ -43,7 +43,7 @@ import {
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
-import { toBoolean, toNumberOpt } from './utils'
+import { toBoolean, toNumberOpt, toStringArray, toTextOpt } from './utils'
 import { SceneUpdate } from './SceneRepository'
 import { ThemeUpdate } from './ThemeRepository'
 import { GeneralSettingsUpdate } from './GeneralSettingsRepository'
@@ -124,8 +124,8 @@ export function toScene(row: SceneRow): Scene {
     backForthBPMMulti: row.backForthBpmMulti,
     imageType: row.imageType,
     backgroundType: row.backgroundType,
-    backgroundColor: '',
-    backgroundColorSet: [],
+    backgroundColor: row.backgroundColor,
+    backgroundColorSet: toStringArray(row.backgroundColorSet),
     backgroundBlur: row.backgroundBlur,
 
     imageTypeFilter: row.imageTypeFilter,
@@ -233,8 +233,8 @@ export function toScene(row: SceneRow): Scene {
     strobeDelaySinRate: row.strobeDelaySinRate,
     strobeDelayBPMMulti: row.strobeDelayBpmMulti,
     strobeColorType: row.strobeColorType,
-    strobeColor: '',
-    strobeColorSet: [],
+    strobeColor: row.strobeColor,
+    strobeColorSet: toStringArray(row.strobeColorSet),
     strobeEase: row.strobeEase,
     strobeExp: row.strobeExp,
     strobeAmp: row.strobeAmp,
@@ -490,6 +490,8 @@ export function toSceneUpdate(scene: Partial<Scene>): SceneUpdate {
     imageType,
     backgroundType,
     backgroundBlur,
+    backgroundColor,
+    backgroundColorSet,
     imageTypeFilter,
     fullSource,
     imageOrientation,
@@ -591,6 +593,8 @@ export function toSceneUpdate(scene: Partial<Scene>): SceneUpdate {
     strobeDelaySinRate,
     strobeDelayBPMMulti,
     strobeColorType,
+    strobeColor,
+    strobeColorSet,
     strobeEase,
     strobeExp,
     strobeAmp,
@@ -682,6 +686,8 @@ export function toSceneUpdate(scene: Partial<Scene>): SceneUpdate {
     imageType,
     backgroundType,
     backgroundBlur,
+    backgroundColor,
+    backgroundColorSet: toTextOpt(backgroundColorSet),
     imageTypeFilter,
     fullSource: toNumberOpt(fullSource),
     imageOrientation,
@@ -783,6 +789,8 @@ export function toSceneUpdate(scene: Partial<Scene>): SceneUpdate {
     strobeDelaySinRate,
     strobeDelayBpmMulti: strobeDelayBPMMulti,
     strobeColorType,
+    strobeColor,
+    strobeColorSet: toTextOpt(strobeColorSet),
     strobeEase,
     strobeExp,
     strobeAmp,
