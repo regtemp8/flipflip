@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('Enable zoom/move timing', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
   await expect(container).not.toBeVisible()
@@ -68,7 +68,7 @@ test('Enable zoom/move timing', async ({ page }) => {
 test('Constant zoom/move timing', async ({ page }) => {
   await page.getByLabel('Zoom', { exact: true }).check()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -129,7 +129,7 @@ test('Constant zoom/move timing', async ({ page }) => {
 test('Random zoom/move timing', async ({ page }) => {
   await page.getByLabel('Zoom', { exact: true }).check()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -205,7 +205,7 @@ test('Random zoom/move timing', async ({ page }) => {
 test('Wave zoom/move timing', async ({ page }) => {
   await page.getByLabel('Zoom', { exact: true }).check()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -338,7 +338,7 @@ test('Wave zoom/move timing', async ({ page }) => {
 test('Audio BPM zoom/move timing', async ({ page }) => {
   await page.getByLabel('Zoom', { exact: true }).check()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -414,7 +414,7 @@ test('Audio BPM zoom/move timing', async ({ page }) => {
 test('With scene zoom/move timing', async ({ page }) => {
   await page.getByLabel('Zoom', { exact: true }).check()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 

@@ -45,7 +45,7 @@ test('Zoom start slider', async ({ page }) => {
 
   await expect(page.getByText('Zoom Start: 1x', { exact: true })).toBeVisible()
 
-  const slider = await page.locator('.MuiSlider-root').first()
+  const slider = page.locator('.MuiSlider-root').first()
   const thumb = slider.locator('.MuiSlider-thumb')
 
   await thumb.hover()
@@ -188,9 +188,7 @@ test('Zoom start min slider', async ({ page }) => {
   await page.getByText('Randomize Zoom', { exact: true }).check()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
-  const container = await page.locator(
-    'main .MuiCollapse-entered div:nth-child(1)'
-  )
+  const container = page.locator('main .MuiCollapse-entered div:nth-child(1)')
   await expect(
     container.getByText('Zoom Start Min: 0.5x', { exact: true })
   ).toBeVisible()
@@ -253,9 +251,7 @@ test('Zoom start max slider', async ({ page }) => {
   await page.getByText('Randomize Zoom', { exact: true }).check()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
-  const container = await page.locator(
-    'main .MuiCollapse-entered div:nth-child(2)'
-  )
+  const container = page.locator('main .MuiCollapse-entered div:nth-child(2)')
   await expect(
     container.getByText('Zoom Start Max: 1x', { exact: true })
   ).toBeVisible()
@@ -318,9 +314,7 @@ test('Zoom end min slider', async ({ page }) => {
   await page.getByText('Randomize Zoom', { exact: true }).check()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
-  const container = await page.locator(
-    'main .MuiCollapse-entered div:nth-child(3)'
-  )
+  const container = page.locator('main .MuiCollapse-entered div:nth-child(3)')
   await expect(
     container.getByText('Zoom End Min: 1.5x', { exact: true })
   ).toBeVisible()
@@ -383,9 +377,7 @@ test('Zoom end max slider', async ({ page }) => {
   await page.getByText('Randomize Zoom', { exact: true }).check()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
-  const container = await page.locator(
-    'main .MuiCollapse-entered div:nth-child(4)'
-  )
+  const container = page.locator('main .MuiCollapse-entered div:nth-child(4)')
   await expect(
     container.getByText('Zoom End Max: 2x', { exact: true })
   ).toBeVisible()

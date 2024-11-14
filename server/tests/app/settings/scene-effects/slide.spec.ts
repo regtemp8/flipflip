@@ -47,7 +47,7 @@ test('Slide effect', async ({ page }) => {
 test('Constant slide timing', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -108,7 +108,7 @@ test('Constant slide timing', async ({ page }) => {
 test('Random slide timing', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -184,7 +184,7 @@ test('Random slide timing', async ({ page }) => {
 test('Wave slide timing', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -316,7 +316,7 @@ test('Wave slide timing', async ({ page }) => {
 test('Audio BPM slide timing', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -392,7 +392,7 @@ test('Audio BPM slide timing', async ({ page }) => {
 test('With scene slide timing', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).check()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 

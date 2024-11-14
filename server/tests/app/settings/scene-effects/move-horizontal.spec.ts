@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('Move horizontally setting', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
   await expect(
@@ -87,7 +87,7 @@ test('Move horizontally setting', async ({ page }) => {
 })
 
 test('Randomize move horizontally setting', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
   await container.getByRole('combobox').first().click()
@@ -133,7 +133,7 @@ test('Randomize move horizontally setting', async ({ page }) => {
 })
 
 test('Move horizontally slider', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
   await container.getByRole('combobox').first().click()
@@ -214,7 +214,7 @@ test('Move horizontally slider', async ({ page }) => {
 })
 
 test('Move horizontally min slider', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
   await container.getByRole('combobox').first().click()
@@ -266,7 +266,7 @@ test('Move horizontally min slider', async ({ page }) => {
 })
 
 test('Move horizontally max slider', async ({ page }) => {
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
   await container.getByRole('combobox').first().click()

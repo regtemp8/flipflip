@@ -46,7 +46,7 @@ test('Panning effect', async ({ page }) => {
 test('Constant panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -107,7 +107,7 @@ test('Constant panning timing', async ({ page }) => {
 test('Random panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -183,7 +183,7 @@ test('Random panning timing', async ({ page }) => {
 test('Wave panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -315,7 +315,7 @@ test('Wave panning timing', async ({ page }) => {
 test('Audio BPM panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -391,7 +391,7 @@ test('Audio BPM panning timing', async ({ page }) => {
 test('With scene panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 

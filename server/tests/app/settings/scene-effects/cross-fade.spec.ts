@@ -54,7 +54,7 @@ test('Cross-fade effect', async ({ page }) => {
 test('Constant cross-fade timing', async ({ page }) => {
   await page.getByLabel('Cross-Fade', { exact: true }).check()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -115,7 +115,7 @@ test('Constant cross-fade timing', async ({ page }) => {
 test('Random cross-fade timing', async ({ page }) => {
   await page.getByLabel('Cross-Fade', { exact: true }).check()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -191,7 +191,7 @@ test('Random cross-fade timing', async ({ page }) => {
 test('Wave cross-fade timing', async ({ page }) => {
   await page.getByLabel('Cross-Fade', { exact: true }).check()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -323,7 +323,7 @@ test('Wave cross-fade timing', async ({ page }) => {
 test('Audio BPM cross-fade timing', async ({ page }) => {
   await page.getByLabel('Cross-Fade', { exact: true }).check()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -399,7 +399,7 @@ test('Audio BPM cross-fade timing', async ({ page }) => {
 test('With scene cross-fade timing', async ({ page }) => {
   await page.getByLabel('Cross-Fade', { exact: true }).check()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 

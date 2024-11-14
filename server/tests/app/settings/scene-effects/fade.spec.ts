@@ -40,7 +40,7 @@ test('Fade effect', async ({ page }) => {
 test('Constant fade timing', async ({ page }) => {
   await page.getByLabel('Fade In/Out', { exact: true }).check()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -103,7 +103,7 @@ test('Constant fade timing', async ({ page }) => {
 test('Random fade timing', async ({ page }) => {
   await page.getByLabel('Fade In/Out', { exact: true }).check()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -181,7 +181,7 @@ test('Random fade timing', async ({ page }) => {
 test('Wave fade timing', async ({ page }) => {
   await page.getByLabel('Fade In/Out', { exact: true }).check()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -315,7 +315,7 @@ test('Wave fade timing', async ({ page }) => {
 test('Audio BPM fade timing', async ({ page }) => {
   await page.getByLabel('Fade In/Out', { exact: true }).check()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
@@ -393,7 +393,7 @@ test('Audio BPM fade timing', async ({ page }) => {
 test('With scene fade timing', async ({ page }) => {
   await page.getByLabel('Fade In/Out', { exact: true }).check()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  const container = await page.locator(
+  const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
