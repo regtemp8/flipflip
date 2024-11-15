@@ -243,34 +243,6 @@ test('Auto Backup Months Keep Last input', async ({ page }) => {
   await responsePromise
 })
 
-test('Backup Data', async ({ page }) => {
-  await expect(
-    page.getByRole('button', { name: 'Backup Data', exact: true })
-  ).toBeEnabled()
-  await expect(
-    page.locator('div').filter({ hasText: 'Backups: 29' }).nth(1)
-  ).toBeVisible()
-  await expect(
-    page
-      .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (204 KB)' })
-      .nth(1)
-  ).toBeVisible()
-
-  await page.getByRole('button', { name: 'Backup Data', exact: true }).click()
-  await expect(page.getByRole('presentation')).toHaveText('Backup success!')
-  await expect(
-    page.locator('div').filter({ hasText: 'Backups: 30' }).nth(1)
-  ).toBeVisible()
-  const now = new Date().toLocaleString().split(',')[0]
-  const latestText = new RegExp(
-    `^Latest: ${now}, ([0-9]|1[0-2]):[0-5][0-9]:[0-5][0-9] (A|P)M \\(\\d+ KB\\)$`
-  )
-  await expect(
-    page.locator('div').filter({ hasText: latestText }).nth(1)
-  ).toBeVisible()
-})
-
 test('Restore Backup', async ({ page }) => {
   // test restore dialog elements
   await expect(page.getByRole('dialog')).not.toBeVisible()
@@ -289,11 +261,11 @@ test('Restore Backup', async ({ page }) => {
     'Choose a backup to restore from:'
   )
   await page
-    .getByText('10/18/2024, 12:00:00 AM (204 KB)', { exact: true })
+    .getByText('10/18/2024, 12:00:00 AM (200 KB)', { exact: true })
     .click()
   await page
     .getByRole('option', {
-      name: '4/18/2024, 12:00:00 AM (204 KB)',
+      name: '4/18/2024, 12:00:00 AM (200 KB)',
       exact: true
     })
     .click()
@@ -361,7 +333,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (204 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -374,7 +346,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (204 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
       .nth(1)
   ).toBeVisible()
 
@@ -405,7 +377,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (204 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -420,7 +392,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (204 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
       .nth(1)
   ).toBeVisible()
 
@@ -447,5 +419,33 @@ test('Clean Backups', async ({ page }) => {
   ).toBeVisible()
   await expect(
     page.locator('div').filter({ hasText: 'Latest: --' }).nth(1)
+  ).toBeVisible()
+})
+
+test('Backup Data', async ({ page }) => {
+  await expect(
+    page.getByRole('button', { name: 'Backup Data', exact: true })
+  ).toBeEnabled()
+  await expect(
+    page.locator('div').filter({ hasText: 'Backups: --' }).nth(1)
+  ).toBeVisible()
+  await expect(
+    page
+      .locator('div')
+      .filter({ hasText: 'Latest: --' })
+      .nth(1)
+  ).toBeVisible()
+
+  await page.getByRole('button', { name: 'Backup Data', exact: true }).click()
+  await expect(page.getByRole('presentation')).toHaveText('Backup success!')
+  await expect(
+    page.locator('div').filter({ hasText: 'Backups: 1' }).nth(1)
+  ).toBeVisible()
+  const now = new Date().toLocaleString().split(',')[0]
+  const latestText = new RegExp(
+    `^Latest: ${now}, ([0-9]|1[0-2]):[0-5][0-9]:[0-5][0-9] (A|P)M \\(\\d+ KB\\)$`
+  )
+  await expect(
+    page.locator('div').filter({ hasText: latestText }).nth(1)
   ).toBeVisible()
 })
