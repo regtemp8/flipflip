@@ -368,6 +368,12 @@ test('Audio BPM strobe timing', async ({ page }) => {
 
   await page.getByRole('combobox').nth(4).click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
+
+  await page.getByTestId('ErrorOutlineIcon').first().hover()
+  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
+    'Missing audio with BPM'
+  )
+
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
   await expect(
@@ -772,6 +778,12 @@ test('Audio BPM strobe delay timing', async ({ page }) => {
 
   await page.getByRole('combobox').nth(5).click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
+
+  await page.getByTestId('ErrorOutlineIcon').first().hover()
+  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
+    'Missing audio with BPM'
+  )
+
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
   await expect(
