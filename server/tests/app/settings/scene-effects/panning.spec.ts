@@ -43,67 +43,6 @@ test('Panning effect', async ({ page }) => {
   await responsePromise
 })
 
-test('Constant panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
-  await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
-  )
-
-  await page.getByRole('combobox').nth(4).click()
-  await page.getByRole('option', { name: 'Constant', exact: true }).click()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('type', 'number')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('min', '0')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('step', '100')
-
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'Between' })
-  ).not.toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'and' })
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiTypography-caption')
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiSlider-root')
-  ).not.toBeVisible()
-
-  const responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
-      request.method() === 'PATCH' &&
-      request.postDataJSON()?.panning === false &&
-      res.status() === 204
-    )
-  })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
-  await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
-  await responsePromise
-})
-
 test('Random panning timing', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).check()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
@@ -420,6 +359,67 @@ test('With scene panning timing', async ({ page }) => {
   ).not.toBeVisible()
   await expect(
     container.locator('.MuiCollapse-entered .MuiTypography-root')
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiSlider-root')
+  ).not.toBeVisible()
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.panning === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
+  await responsePromise
+})
+
+test('Constant panning timing', async ({ page }) => {
+  await page.getByLabel('Panning', { exact: true }).check()
+  await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
+  const container = page.locator(
+    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
+  )
+
+  await page.getByRole('combobox').nth(4).click()
+  await page.getByRole('option', { name: 'Constant', exact: true }).click()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('type', 'number')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('min', '0')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('step', '100')
+
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'Between' })
+  ).not.toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'and' })
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiTypography-caption')
   ).not.toBeVisible()
   await expect(
     container.locator('.MuiCollapse-entered .MuiSlider-root')

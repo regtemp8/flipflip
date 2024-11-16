@@ -12,53 +12,6 @@ test('Default timing setting', async ({ page }) => {
   ).toBeVisible()
 })
 
-test('Constant timing', async ({ page }) => {
-  const container = page.locator(
-    '.MuiCard-root .MuiGrid2-container .MuiGrid2-root:has-text("Timing")'
-  )
-
-  await page.getByRole('combobox').first().click()
-  await page.getByRole('option', { name: 'Constant', exact: true }).click()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('type', 'number')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('min', '0')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('step', '100')
-
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'Between' })
-  ).not.toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'and' })
-  ).not.toBeVisible()
-
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiTypography-caption')
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiSlider-root')
-  ).not.toBeVisible()
-})
-
 test('Random timing', async ({ page }) => {
   const container = page.locator(
     '.MuiCard-root .MuiGrid2-container .MuiGrid2-root:has-text("Timing")'
@@ -302,4 +255,51 @@ test('Audio BPM timing', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTypography-caption')
   ).toHaveText('BPM Multiplier 10x')
+})
+
+test('Constant timing', async ({ page }) => {
+  const container = page.locator(
+    '.MuiCard-root .MuiGrid2-container .MuiGrid2-root:has-text("Timing")'
+  )
+
+  await page.getByRole('combobox').first().click()
+  await page.getByRole('option', { name: 'Constant', exact: true }).click()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('type', 'number')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('min', '0')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('step', '100')
+
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'Between' })
+  ).not.toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'and' })
+  ).not.toBeVisible()
+
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiTypography-caption')
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiSlider-root')
+  ).not.toBeVisible()
 })

@@ -47,67 +47,6 @@ test('Back/Forth effect', async ({ page }) => {
   await responsePromise
 })
 
-test('Constant back/forth timing', async ({ page }) => {
-  await page.getByLabel('Back/Forth', { exact: true }).check()
-  await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
-  const container = page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
-  )
-
-  await page.getByRole('combobox').nth(1).click()
-  await page.getByRole('option', { name: 'Constant', exact: true }).click()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('type', 'number')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('min', '0')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('step', '100')
-
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'Between' })
-  ).not.toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'and' })
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiTypography-caption')
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiSlider-root')
-  ).not.toBeVisible()
-
-  const responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
-      request.method() === 'PATCH' &&
-      request.postDataJSON()?.backForth === false &&
-      res.status() === 204
-    )
-  })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
-  await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
-  await responsePromise
-})
-
 test('Random back/forth timing', async ({ page }) => {
   await page.getByLabel('Back/Forth', { exact: true }).check()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
@@ -383,6 +322,67 @@ test('Audio BPM back/forth timing', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTypography-caption')
   ).toHaveText('BPM Multiplier 10x')
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.backForth === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
+  await responsePromise
+})
+
+test('Constant back/forth timing', async ({ page }) => {
+  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
+  const container = page.locator(
+    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
+  )
+
+  await page.getByRole('combobox').nth(1).click()
+  await page.getByRole('option', { name: 'Constant', exact: true }).click()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('type', 'number')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('min', '0')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('step', '100')
+
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'Between' })
+  ).not.toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'and' })
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiTypography-caption')
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiSlider-root')
+  ).not.toBeVisible()
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()

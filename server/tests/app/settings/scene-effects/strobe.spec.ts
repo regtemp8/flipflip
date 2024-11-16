@@ -72,72 +72,21 @@ test('Add strobe delay', async ({ page }) => {
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   await expect(page.getByText('Delay TimingConstant')).toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
-  await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
-
-  const responsePromise = page.waitForResponse((res) => {
+  let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
       request.method() === 'PATCH' &&
-      request.postDataJSON()?.strobe === false &&
+      request.postDataJSON()?.strobePulse === false &&
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
-  await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
+  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
+  await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
   await responsePromise
-})
 
-test('Constant strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
-  await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  const container = page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
-  )
-
-  await page.getByRole('combobox').nth(4).click()
-  await page.getByRole('option', { name: 'Constant', exact: true }).click()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('type', 'number')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('min', '0')
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'For' })
-  ).toHaveAttribute('step', '100')
-
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'Between' })
-  ).not.toBeVisible()
-  await expect(
-    container
-      .locator('.MuiCollapse-entered')
-      .getByRole('spinbutton', { name: 'and' })
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiTypography-caption')
-  ).not.toBeVisible()
-  await expect(
-    container.locator('.MuiCollapse-entered .MuiSlider-root')
-  ).not.toBeVisible()
-
-  const responsePromise = page.waitForResponse((res) => {
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -486,16 +435,14 @@ test('With scene strobe timing', async ({ page }) => {
   await responsePromise
 })
 
-test('Constant strobe delay timing', async ({ page }) => {
+test('Constant strobe timing', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).check()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
-  await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
+    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByRole('combobox').nth(4).click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container
@@ -535,8 +482,6 @@ test('Constant strobe delay timing', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiSlider-root')
   ).not.toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
-  await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
@@ -902,6 +847,71 @@ test('With scene strobe delay timing', async ({ page }) => {
   await responsePromise
 })
 
+test('Constant strobe delay timing', async ({ page }) => {
+  await page.getByLabel('Strobe', { exact: true }).check()
+  await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
+  await page.getByLabel('Add Delay', { exact: true }).check()
+  await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
+  const container = page.locator(
+    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
+  )
+
+  await page.getByRole('combobox').nth(5).click()
+  await page.getByRole('option', { name: 'Constant', exact: true }).click()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('type', 'number')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('min', '0')
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'For' })
+  ).toHaveAttribute('step', '100')
+
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'Between' })
+  ).not.toBeVisible()
+  await expect(
+    container
+      .locator('.MuiCollapse-entered')
+      .getByRole('spinbutton', { name: 'and' })
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiTypography-caption')
+  ).not.toBeVisible()
+  await expect(
+    container.locator('.MuiCollapse-entered .MuiSlider-root')
+  ).not.toBeVisible()
+
+  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobe === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
+  await responsePromise
+})
+
 test('Strobe layer', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).check()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
@@ -1009,7 +1019,7 @@ test('Strobe solid color', async ({ page }) => {
   await page.getByRole('combobox').nth(2).click()
   await page.getByRole('option', { name: 'Solid Color', exact: true }).click()
 
-  await expect(page.getByLabel('Pick Color')).toHaveCSS(
+  await expect(page.getByLabel('Pick Color', { exact: true })).toHaveCSS(
     'background-color',
     'rgb(255, 255, 255)'
   )
