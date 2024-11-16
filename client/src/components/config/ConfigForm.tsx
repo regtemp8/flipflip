@@ -53,8 +53,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   useGetTutorialsQuery,
   useResetTutorialsMutation,
-  useDefaultConfigMutation,
-  useGetSceneSettingsQuery
+  useGetSceneSettingsQuery,
+  useResetSettingsMutation
 } from '../../store/api/slice'
 
 const drawerWidth = 240
@@ -213,7 +213,7 @@ function ConfigForm() {
   const { pathname } = useLocation()
   const { data: scene } = useGetSceneSettingsQuery()
   const { data: tutorials } = useGetTutorialsQuery()
-  const [defaultConfig] = useDefaultConfigMutation()
+  const [resetSettings] = useResetSettingsMutation()
   const [resetTutorials] = useResetTutorialsMutation()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -225,7 +225,10 @@ function ConfigForm() {
   const onRestoreDefaults = () => {
     setOpenMenu(MO.deleteAlert)
   }
-  const onFinishRestoreDefaults = async () => await defaultConfig()
+  const onFinishRestoreDefaults = async () => {
+    await resetSettings()
+    onCloseDialog()
+  }
 
   const onCloseDialog = () => {
     setOpenMenu(undefined)

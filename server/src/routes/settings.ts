@@ -5,6 +5,7 @@ import {
   updateCacheSettings
 } from '../db/CacheSettingsRepository'
 import {
+  deleteIgnoredTags,
   findDisplaySettings,
   updateDisplaySettings
 } from '../db/DisplaySettingsRepository'
@@ -29,6 +30,8 @@ import {
   toDisplaySettingsUpdate,
   toCacheSettingsUpdate
 } from '../db/mappers'
+import { toNumber } from '../db/utils'
+import { WC } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/theme', async (req, res) => {
@@ -96,5 +99,79 @@ router.patch('/cache', async (req, res) => {
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
   res.status(status).end()
+})
+router.post('/reset', async (req, res) => {
+  const user = req.user as User
+  await updateTheme(user, {
+    mode: 'light',
+    primaryColor: 'indigo',
+    secondaryColor: 'pink'
+  })
+  await updateCacheSettings(user, {
+    directory: '',
+    enabled: toNumber(true),
+    maxSize: 500
+  })
+  await updateDisplaySettings(user, {
+    fullScreen: toNumber(false),
+    clickToProgress: toNumber(true),
+    clickToProgressWhilePlaying: toNumber(false),
+    startImmediately: toNumber(false),
+    easingControls: toNumber(false),
+    audioAlert: toNumber(true),
+    minVideoSize: 200,
+    minImageSize: 200,
+    maxInMemory: 40,
+    maxInHistory: 120,
+    maxLoadingAtOnce: 5
+  })
+  await deleteIgnoredTags(user)
+  await updateGeneralSettings(user, {
+    prioritizePerformance: toNumber(true),
+    confirmSceneDeletion: toNumber(true),
+    confirmBlacklist: toNumber(true),
+    confirmFileDeletion: toNumber(true),
+    autoBackup: toNumber(false),
+    autoBackupDays: 1,
+    autoCleanBackup: toNumber(false),
+    autoCleanBackupDays: 14,
+    autoCleanBackupWeeks: 8,
+    autoCleanBackupMonths: 6,
+    cleanRetain: 1,
+    watermark: toNumber(false),
+    watermarkDisplay: toNumber(false),
+    watermarkCorner: WC.bottomRight,
+    watermarkText: '',
+    watermarkFontFamily: 'Arial Black,Arial Bold,Gadget,sans-serif',
+    watermarkFontSize: 14,
+    watermarkColor: '#FFFFFF'
+  })
+  await updateRemoteSettings(user, {
+    tumblrKey: '',
+    tumblrSecret: '',
+    tumblrOauthToken: '',
+    tumblrOauthTokenSecret: '',
+    silenceTumblrAlert: toNumber(false),
+    redditUserAgent: '',
+    redditClientId: '',
+    redditDeviceId: '',
+    redditRefreshToken: '',
+    twitterConsumerKey: '',
+    twitterConsumerSecret: '',
+    twitterAccessTokenKey: '',
+    twitterAccessTokenSecret: '',
+    instagramUsername: '',
+    instagramPassword: '',
+    hydrusProtocol: 'http',
+    hydrusDomain: 'localhost',
+    hydrusPort: 45869,
+    hydrusApiKey: '',
+    piwigoProtocol: 'http',
+    piwigoHost: '',
+    piwigoUsername: '',
+    piwigoPassword: ''
+  })
+
+  res.status(204).end()
 })
 export default router

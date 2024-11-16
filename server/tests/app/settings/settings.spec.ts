@@ -402,7 +402,35 @@ test('Max Loading at Once setting', async ({ page }) => {
   await expect(page.getByLabel('Max Loading at Once')).toHaveValue('1234567890')
 })
 
-// TODO caching settings
+test('Restore Defaults', async ({ page }) => {
+  await page.getByLabel('Restore Defaults', { exact: true }).hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Restore Defaults', exact: true })
+  ).toBeVisible()
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+
+  await page.getByLabel('Restore Defaults', { exact: true }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(page.getByRole('dialog').getByRole('heading')).toHaveText(
+    'Restore Defaults'
+  )
+  await expect(page.getByRole('dialog').getByRole('paragraph')).toHaveText(
+    'Are you sure you want to restore all settings to their defaults? This will also reset any configured APIs.'
+  )
+
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+
+  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Restore Defaults').click()
+  await page.getByRole('button', { name: 'OK' }).click()
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+  await expect(
+    page.getByLabel('Enable Watermark', { exact: true })
+  ).not.toBeChecked()
+})
+
+// TODO watermark settings
 
 // TODO ignored tags setting
 

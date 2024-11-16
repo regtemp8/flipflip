@@ -57,6 +57,7 @@ export const flipflipApi = createApi({
     'RemoteSettings',
     'DisplaySettings',
     'CacheSettings',
+    'IgnoredTags',
     'SystemFonts',
     'Config',
     'Scene',
@@ -364,14 +365,21 @@ export const flipflipApi = createApi({
       query: () => `api/system-fonts`,
       providesTags: ['SystemFonts']
     }),
-    defaultConfig: builder.mutation<boolean, void>({
+    resetSettings: builder.mutation<boolean, void>({
       query() {
         return {
-          url: `api/config/default`,
+          url: `api/settings/reset`,
           method: 'POST'
         }
       },
-      invalidatesTags: ['Config']
+      invalidatesTags: [
+        'Theme',
+        'CacheSettings',
+        'DisplaySettings',
+        'IgnoredTags',
+        'GeneralSettings',
+        'RemoteSettings'
+      ]
     }),
     getScenes: builder.query<number[], void>({
       query: () => `api/scenes`,
@@ -887,7 +895,7 @@ export const {
   useUpdateCacheSettingsMutation,
   useResetTutorialsMutation,
   useGetSystemFontsQuery,
-  useDefaultConfigMutation,
+  useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,
   useGetSceneWeightGroupsQuery,

@@ -25,3 +25,16 @@ export async function updateDisplaySettings(
     .where('userId', '=', user.id)
     .execute()
 }
+
+export async function deleteIgnoredTags(user: User) {
+  return await db()
+    .query()
+    .deleteFrom('ignoredTag')
+    .where('displaySettingsId', '=', (eb) =>
+      eb
+        .selectFrom('displaySettings')
+        .select('id')
+        .where('userId', '=', user.id)
+    )
+    .execute()
+}
