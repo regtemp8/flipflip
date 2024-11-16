@@ -3,11 +3,11 @@ import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
 import {
   findDefaultScene,
   findSceneById,
-  findSceneDisableWeightOptions,
   findSceneHasBpm,
   findSceneIds,
   findScenesWithSceneGroup,
   findScenesWithoutSceneGroup,
+  isDefaultScene,
   updateScene
 } from '../db/SceneRepository'
 import {
@@ -16,6 +16,7 @@ import {
   toScene,
   toSceneUpdate
 } from '../db/mappers'
+import { findSceneContentSources } from '../db/ContentSourceRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -58,9 +59,16 @@ router.get('/:id', async (req, res) => {
 })
 
 router.get('/:id/disable-weight-options', async (req, res) => {
-  const disableWeightOptions = await findSceneDisableWeightOptions(
-    Number(req.params.id)
-  )
+  const id = Number(req.params.id)
+  let disableWeightOptions = false
+  const defaultScene = await isDefaultScene(id)
+  if (!defaultScene) {
+    const sources = await findSceneContentSources(id)
+    disableWeightOptions =
+      sources.length === 0 ||
+      (sources.length === 1 && !sources[0].localDirOfSources)
+  }
+
   res.status(200).send(disableWeightOptions)
 })
 

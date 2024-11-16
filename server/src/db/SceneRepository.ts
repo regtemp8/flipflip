@@ -2,7 +2,7 @@ import db from './database'
 import { SceneGroupRow } from './types/SceneGroupRow'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { Scene } from './types/generated'
-import { toNumber } from './utils'
+import { toBoolean, toNumber } from './utils'
 import { PLT } from 'flipflip-common'
 import { Updateable, sql } from 'kysely'
 
@@ -86,21 +86,14 @@ export async function findSceneById(id: number): Promise<Scene | undefined> {
     .executeTakeFirst()
 }
 
-export async function findSceneDisableWeightOptions(
-  id: number
-): Promise<boolean> {
-  const result = await db()
+export async function isDefaultScene(id: number): Promise<boolean> {
+  return await db()
     .query()
-    .selectFrom('sceneContentSource as scs')
-    .innerJoin('contentSource as cs', 'cs.id', 'scs.contentSourceId')
-    .select(sql.lit(1).as('hasDir'))
-    .where('scs.sceneId', '=', id)
-    .where('cs.localDirOfSources', '=', toNumber(true))
-    .orderBy('cs.id')
-    .limit(1)
+    .selectFrom('scene')
+    .select('defaultScene')
+    .where('id', '=', id)
     .executeTakeFirst()
-
-  return result == null
+    .then((row) => toBoolean(row?.defaultScene))
 }
 
 export async function findSceneHasBpm(id: number): Promise<boolean> {
