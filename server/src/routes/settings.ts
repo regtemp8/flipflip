@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import express from 'express'
 import { findTheme, updateTheme } from '../db/ThemeRepository'
 import {
@@ -28,10 +30,12 @@ import {
   toGeneralSettingsUpdate,
   toRemoteSettingsUpdate,
   toDisplaySettingsUpdate,
-  toCacheSettingsUpdate
+  toCacheSettingsUpdate,
+  toCacheSize
 } from '../db/mappers'
 import { toNumber } from '../db/utils'
 import { WC } from 'flipflip-common'
+import logger from '../logger'
 
 const router = express.Router()
 router.get('/theme', async (req, res) => {
@@ -91,6 +95,28 @@ router.get('/cache', async (req, res) => {
   const settings = toCacheSettings(await findCacheSettings(req.user as User))
   res.status(200).send(settings)
 })
+router.get('/cache/size', async (req, res) => {
+  const settings = await findCacheSettings(req.user as User)
+  if (
+    !fs.existsSync(settings.directory) ||
+    !fs.statSync(settings.directory).isDirectory()
+  ) {
+    res.status(200).send(toCacheSize(0))
+    return
+  }
+
+  const { default: getFolderSize } = await import('get-folder-size')
+  const result = await getFolderSize(settings.directory)
+  if (result.errors != null) {
+    for (const error of result.errors) {
+      logger.error('Failed to get folder size', { error })
+    }
+
+    res.status(500).end()
+  } else {
+    res.status(200).send(toCacheSize(result.size / (1024 * 1024)))
+  }
+})
 router.patch('/cache', async (req, res) => {
   const result = await updateCacheSettings(
     req.user as User,
@@ -99,6 +125,22 @@ router.patch('/cache', async (req, res) => {
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
   res.status(status).end()
+})
+router.post('/cache/clear', async (req, res) => {
+  const settings = await findCacheSettings(req.user as User)
+  if (
+    fs.existsSync(settings.directory) &&
+    fs.statSync(settings.directory).isDirectory()
+  ) {
+    const entries = await fs.promises.readdir(settings.directory)
+    for (const entry of entries) {
+      const dirPath = path.join(settings.directory, entry)
+      const recursive = (await fs.promises.stat(dirPath)).isDirectory()
+      await fs.promises.rm(dirPath, { recursive, force: true })
+    }
+  }
+
+  res.status(204).end()
 })
 router.post('/reset', async (req, res) => {
   const user = req.user as User

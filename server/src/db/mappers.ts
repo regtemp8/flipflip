@@ -21,7 +21,8 @@ import {
   Backup,
   CleanBackupsRequest,
   DefaultCleanBackupsRequest,
-  AutoCleanBackupsRequest
+  AutoCleanBackupsRequest,
+  CacheSize
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -62,7 +63,7 @@ import {
   CaptionScriptUpdate,
   FontSettingsUpdate
 } from './CaptionScriptRepository'
-import { getBackupsDir } from '../utils'
+import { getBackupsDir, getCacheDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 
 export function toSceneGroups(
@@ -466,8 +467,13 @@ export function toCacheSettings(row: CacheSettingsRow): CacheSettings {
   return {
     enabled: toBoolean(enabled),
     directory,
+    defaultDirectory: getCacheDir(),
     maxSize
   }
+}
+
+export function toCacheSize(size: number): CacheSize {
+  return { size }
 }
 
 export function toSceneUpdate(scene: Partial<Scene>): SceneUpdate {

@@ -23,13 +23,13 @@ export function getSaveDir() {
 }
 
 export function getBackupsDir() {
-  return getSaveDir() + path.sep + 'backups'
+  return path.resolve(getSaveDir(), 'backups')
 }
 
 export function getCacheDir() {
-  return getSaveDir() + path.sep + 'cache'
+  return path.resolve(getSaveDir(), 'cache')
 }
 
 export function getLogsDir() {
-  return getSaveDir() + path.sep + 'logs'
+  return path.resolve(getSaveDir(), 'logs')
 }

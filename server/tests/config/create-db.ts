@@ -90,4 +90,12 @@ void (async function () {
     const dest = path.join(backupsDir, backupFile)
     await fs.promises.copyFile(src, dest)
   }
+
+  const oldCacheDir = path.join(process.env.FF_SAVE_DIR as string, 'old-cache')
+  await fs.promises.mkdir(oldCacheDir)
+  const oldCacheFiles = Array.from(backupFiles).slice(0, 10)
+  for (const oldCacheFile of oldCacheFiles) {
+    const dest = path.join(oldCacheDir, oldCacheFile)
+    await fs.promises.copyFile(src, dest)
+  }
 })()

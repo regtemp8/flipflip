@@ -1,4 +1,4 @@
-import { type MouseEvent, useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -13,7 +13,6 @@ import {
   Grid2,
   IconButton,
   InputAdornment,
-  Link,
   type Theme,
   Tooltip,
   TextField
@@ -24,7 +23,6 @@ import { makeStyles } from 'tss-react/mui'
 import ClearIcon from '@mui/icons-material/Clear'
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
 
-import { urlToPath } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseTextField from '../common/text/BaseTextField'
 import { useAppDispatch } from '../../store/hooks'
@@ -33,9 +31,12 @@ import {
   setConfigCachingDirectory,
   setConfigCachingMaxSize
 } from '../../store/api/thunks'
-import { useGetCacheSettingsQuery } from '../../store/api/slice'
 import {
-  useGetCachingDirectoryQuery,
+  useClearCacheMutation,
+  useGetCacheSettingsQuery,
+  useGetCacheSizeQuery
+} from '../../store/api/slice'
+import {
   useGetCachingEnabledQuery,
   useGetCachingMaxSizeQuery
 } from '../../store/api/selectors'
@@ -54,31 +55,12 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 function CacheCard() {
   const dispatch = useAppDispatch()
-  // const { isWin32 } = useAppSelector(selectConstants())
   const { data } = useGetCacheSettingsQuery()
+  const { data: cacheSize } = useGetCacheSizeQuery()
+  const [clearCache] = useClearCacheMutation()
 
-  const [cachePath, setCachePath] = useState('')
-  const [cacheSize, setCacheSize] = useState('--')
   const [showFilePicker, setShowFilePicker] = useState(false)
   const [clearCacheAlert, setClearCacheAlert] = useState(false)
-
-  // TODO calculate cache size
-  // const calculateCacheSize = useCallback(async () => {
-  //   const cachePath = (await getCachePath(directory)) as string
-  //   if (maxSize !== 0) {
-  //     if (await flipflip().api.pathExists(cachePath)) {
-  //       const size = await flipflip().api.getFolderSize(cachePath)
-  //       const mbSize = size / 1024 / 1024
-  //       setCacheSize(mbSize.toFixed(2))
-  //     }
-  //   }
-
-  //   setCachePath(cachePath)
-  // }, [maxSize, directory])
-
-  // useEffect(() => {
-  //   calculateCacheSize()
-  // }, [calculateCacheSize])
 
   const onCloseClear = () => {
     setClearCacheAlert(false)
@@ -89,28 +71,12 @@ function CacheCard() {
   }
 
   const onFinishClearCache = async () => {
-    // TODO clear cache
-    // await flipflip().api.rimrafSync(cachePath)
-    // setCacheSize('--')
-    // await calculateCacheSize()
+    onCloseClear()
+    await clearCache()
   }
 
-  const onResetCacheDir = (e: MouseEvent) => {
-    e.preventDefault()
+  const onResetCacheDir = () => {
     dispatch(setConfigCachingDirectory(''))
-  }
-
-  const openDirectory = () => {
-    // TODO create directory picker
-    // if (isWin32) {
-    //   openExternalURL(cachePath)
-    // } else {
-    //   openExternalURL(urlToPath(cachePath, isWin32))
-    // }
-  }
-
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
   }
 
   const { classes } = useStyles()
@@ -121,7 +87,7 @@ function CacheCard() {
           <Grid2 size={'grow'}>
             <BaseSwitch
               label="Caching"
-              tooltip="When enabled, FlipFlip will store downloaded images in a local directory to improve future performance and reduce the need re-download files."
+              tooltip="When enabled, FlipFlip will store downloaded images in a local directory to improve future performance and reduce the need to re-download files."
               selector={useGetCachingEnabledQuery}
               action={setConfigCachingEnabled}
             />
@@ -158,6 +124,8 @@ function CacheCard() {
                 variant="standard"
                 fullWidth
                 label="Caching Directory"
+                value={data?.directory ?? ''}
+                placeholder={data?.directory || data?.defaultDirectory || ''}
                 slotProps={{
                   input: {
                     readOnly: true
@@ -196,7 +164,7 @@ function CacheCard() {
             </Grid2>
             <Grid2>
               <Chip
-                label={`Current: ${cacheSize} MB`}
+                label={`Current: ${(cacheSize?.size ?? 0) > 0 ? cacheSize?.size.toFixed(2) : '--'} MB`}
                 color="primary"
                 variant="outlined"
               />
@@ -211,11 +179,7 @@ function CacheCard() {
       >
         <DialogContent>
           <DialogContentText id="clean-cache-description">
-            Are you SURE you want to delete the contents of{' '}
-            <Link href="#" onClick={openDirectory} underline="hover">
-              {cachePath}
-            </Link>{' '}
-            ?
+            Are you SURE you want to delete the contents of {data?.directory}?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -230,7 +194,13 @@ function CacheCard() {
       <FilePicker
         open={showFilePicker}
         type="dir"
-        onClose={() => setShowFilePicker(false)}
+        path={data?.directory || data?.defaultDirectory || ''}
+        onClose={async (chosenFile?: string) => {
+          setShowFilePicker(false)
+          if (chosenFile != null) {
+            dispatch(setConfigCachingDirectory(chosenFile))
+          }
+        }}
       />
     </Grid2>
   )

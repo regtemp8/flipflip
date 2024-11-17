@@ -32,7 +32,7 @@ import logger from './logger'
 const port = process.env.FF_PORT || 5050
 
 void (async function () {
-  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir()]
+  const dirs = [getSaveDir(), getBackupsDir()]
   for (const path of dirs) {
     if (!fs.existsSync(path)) {
       logger.info('+ Creating directory {path}', { path })

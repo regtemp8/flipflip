@@ -27,7 +27,8 @@ import {
   CaptionScript,
   Audio,
   FilePickerData,
-  CleanBackupsRequest
+  CleanBackupsRequest,
+  CacheSize
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -57,6 +58,7 @@ export const flipflipApi = createApi({
     'RemoteSettings',
     'DisplaySettings',
     'CacheSettings',
+    'CacheSize',
     'IgnoredTags',
     'SystemFonts',
     'Config',
@@ -333,6 +335,14 @@ export const flipflipApi = createApi({
       query: () => `api/settings/cache`,
       providesTags: ['CacheSettings']
     }),
+    getCacheSize: builder.query<CacheSize, void>({
+      query: () => `api/settings/cache/size`,
+      providesTags: ['CacheSize']
+    }),
+    clearCache: builder.mutation<void, void>({
+      query: () => ({ url: `api/settings/cache/clear`, method: 'POST' }),
+      invalidatesTags: ['CacheSize']
+    }),
     updateCacheSettings: builder.mutation<void, Partial<CacheSettings>>({
       query(body) {
         return {
@@ -342,14 +352,25 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted({}, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(flipflipApi.util.invalidateTags(['CacheSettings']))
-          }
-        })
+        await queryFulfilled
+          .then(async (reason) => {
+            if (!reason.meta?.response?.ok) {
+              return
+            }
+
+            const json = await reason.meta.request.json()
+            if (json.directory != null) {
+              dispatch(flipflipApi.util.invalidateTags(['CacheSize']))
+            }
+          })
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(flipflipApi.util.invalidateTags(['CacheSettings']))
+            }
+          })
       }
     }),
     resetTutorials: builder.mutation<boolean, void>({
@@ -374,6 +395,7 @@ export const flipflipApi = createApi({
       },
       invalidatesTags: [
         'Theme',
+        'CacheSize',
         'CacheSettings',
         'DisplaySettings',
         'IgnoredTags',
@@ -891,6 +913,8 @@ export const {
   useUpdateRemoteSettingsMutation,
   useGetDisplaySettingsQuery,
   useUpdateDisplaySettingsMutation,
+  useGetCacheSizeQuery,
+  useClearCacheMutation,
   useGetCacheSettingsQuery,
   useUpdateCacheSettingsMutation,
   useResetTutorialsMutation,

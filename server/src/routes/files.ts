@@ -3,34 +3,32 @@ import path from 'path'
 import express from 'express'
 import { FilePickerData, FilePickerItem, Message } from 'flipflip-common'
 import logger from '../logger'
+import { getSaveDir } from '../utils'
 
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
-  let cwd: string
+  let dir = getSaveDir()
   if (req.params.cwd) {
-    cwd = req.params.cwd
+    let cwd = req.params.cwd
     if (!cwd.startsWith('/')) {
       cwd = '/' + cwd
     }
-  } else {
-    cwd = process.cwd()
+    if (fs.existsSync(cwd) && fs.statSync(cwd).isDirectory()) {
+      dir = cwd
+    }
   }
 
-  if (!fs.existsSync(cwd) || !fs.statSync(cwd).isDirectory()) {
-    res.status(404).end()
-    return
-  }
-
+  dir = path.resolve(dir)
   let dirents: Dirent[]
   try {
-    dirents = await fs.promises.readdir(cwd, { withFileTypes: true })
+    dirents = await fs.promises.readdir(dir, { withFileTypes: true })
   } catch (error) {
-    logger.error(`Failed to read directory {path}`, { path: cwd, error })
+    logger.error(`Failed to read directory {path}`, { path: dir, error })
     res.status(500).end()
     return
   }
   if (dirents.length === 0) {
-    const data: FilePickerData = { path: cwd, items: [] }
+    const data: FilePickerData = { path: dir, items: [] }
     res.status(200).send(data)
     return
   }
@@ -40,17 +38,27 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     dirents = dirents.filter((dirent) => dirent.isDirectory())
   }
 
-  const items = dirents.map((dirent): FilePickerItem => {
+  const { default: getFolderSize } = await import('get-folder-size')
+  const items: FilePickerItem[] = []
+  for (const dirent of dirents) {
     const stat = fs.statSync(path.join(dirent.parentPath, dirent.name))
-    return {
+    let size = stat.size
+    if (dirent.isDirectory()) {
+      const result = await getFolderSize(path.join(dir, dirent.name))
+      if (result.errors == null) {
+        size = result.size
+      }
+    }
+
+    items.push({
       name: dirent.name,
       lastModified: stat.mtimeMs,
-      size: stat.size,
+      size,
       directory: dirent.isDirectory()
-    }
-  })
+    })
+  }
 
-  const data: FilePickerData = { path: cwd, items }
+  const data: FilePickerData = { path: dir, items }
   res.status(200).send(data)
 })
 

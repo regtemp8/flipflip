@@ -17,6 +17,7 @@ export * from './lib/json/SceneGroupType';
 export * from './lib/json/SceneGroupItem';
 export * from './lib/json/ThemeSettings';
 export * from './lib/json/Tutorials';
+export * from './lib/json/CacheSize';
 export * from './lib/json/CacheSettings';
 export * from './lib/json/DisplaySettings';
 export * from './lib/json/FilePickerData';

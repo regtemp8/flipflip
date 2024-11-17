@@ -17,6 +17,7 @@
     "flipflip-common": "link:./../common",
     "font-list": "^1.5.1",
     "generate-password": "^1.7.1",
+    "get-folder-size": "^5.0.0",
     "kysely": "^0.27.4",
     "moment": "^2.30.1",
     "node-schedule": "^2.1.1",

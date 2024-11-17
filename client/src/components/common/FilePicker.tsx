@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState, useRef } from 'react'
+import React, { CSSProperties, useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,6 @@ import {
   Typography,
   DialogActions,
   Divider,
-  ListItem,
   ListItemButton,
   Paper,
   Stack,
@@ -251,7 +250,8 @@ enum FilePickerMode {
 export interface FilePickerProps {
   open: boolean
   type: string
-  onClose: () => void
+  path: string
+  onClose: (chosenFile?: string) => void
 }
 
 export default function FilePicker(props: FilePickerProps) {
@@ -262,6 +262,17 @@ export default function FilePicker(props: FilePickerProps) {
   const [mode, setMode] = useState(FilePickerMode.PathNavigation)
   const { data } = useGetFilePickerDataQuery({ path, type: props.type })
 
+  const _path = useRef('')
+
+  useEffect(() => {
+    onChangePath(props.path)
+  }, [props.path])
+
+  const onChangePath = (path: string) => {
+    _path.current = path
+    setPath(path)
+  }
+
   const renderFilePickerTopBar = () => {
     switch (mode) {
       case FilePickerMode.PathInput:
@@ -269,7 +280,7 @@ export default function FilePicker(props: FilePickerProps) {
           <PathTextField
             path={data?.path ?? ''}
             onApply={(path: string) => {
-              setPath(path)
+              onChangePath(path)
               setMode(FilePickerMode.PathNavigation)
               setSelected(undefined)
             }}
@@ -293,7 +304,7 @@ export default function FilePicker(props: FilePickerProps) {
                 underline="hover"
                 color="inherit"
                 onClick={() => {
-                  setPath(array.slice(0, index + 1).join('/'))
+                  onChangePath(array.slice(0, index + 1).join('/'))
                   setSelected(undefined)
                 }}
               >
@@ -330,11 +341,16 @@ export default function FilePicker(props: FilePickerProps) {
   }
 
   const onNavigate = (name: string) => {
-    setPath(`${data?.path}/${name}`)
+    onChangePath(`${data?.path}/${name}`)
     setSelected(undefined)
   }
 
-  const onSelect = (name?: string) => setSelected(name)
+  const onSelect = (name?: string) => {
+    setSelected(name)
+    if (name != null) {
+      _path.current = `${data?.path}/${name}`
+    }
+  }
 
   const onSortClick = (column: string) => {
     if (sort.column === column) {
@@ -344,12 +360,13 @@ export default function FilePicker(props: FilePickerProps) {
     }
   }
 
-  const onClose = () => {
-    props.onClose()
+  const onClose = (path?: string) => {
+    props.onClose(path)
     setMode(FilePickerMode.PathNavigation)
     setSelected(undefined)
     setSort({ column: 'name', asc: true })
     setSearch(undefined)
+    onChangePath('')
   }
 
   let items: FilePickerItem[] = []
@@ -440,10 +457,14 @@ export default function FilePicker(props: FilePickerProps) {
         </Grid2>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={() => onClose()} color="secondary">
           Cancel
         </Button>
-        <Button onClick={onClose} color="primary" sx={{ mr: 2 }}>
+        <Button
+          onClick={() => onClose(_path.current)}
+          color="primary"
+          sx={{ mr: 2 }}
+        >
           Choose
         </Button>
       </DialogActions>
