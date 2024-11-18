@@ -382,10 +382,6 @@ export const flipflipApi = createApi({
       },
       invalidatesTags: ['Tutorials']
     }),
-    getSystemFonts: builder.query<string[], void>({
-      query: () => `api/system-fonts`,
-      providesTags: ['SystemFonts']
-    }),
     resetSettings: builder.mutation<boolean, void>({
       query() {
         return {
@@ -918,7 +914,6 @@ export const {
   useGetCacheSettingsQuery,
   useUpdateCacheSettingsMutation,
   useResetTutorialsMutation,
-  useGetSystemFontsQuery,
   useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,

@@ -31,7 +31,7 @@ import {
 } from '../../store/api/selectors'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseTextField from '../common/text/BaseTextField'
-import FontFamilySelect from '../common/FontFamilySelect'
+import FontFamilySelect from '../common/fontPicker/FontFamilySelect'
 
 const useStyles = makeStyles()(() => ({
   fullWidth: {
@@ -137,7 +137,6 @@ function WatermarkCard() {
             <Grid2 size={9}>
               <FontFamilySelect
                 label="Font"
-                controlClassName={classes.fullWidth}
                 selector={useGetGeneralSettingsWatermarkFontFamilyQuery}
                 action={setConfigGeneralSettingsWatermarkFontFamily}
               />

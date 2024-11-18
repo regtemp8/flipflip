@@ -7,7 +7,7 @@ import ColorPicker from '../config/ColorPicker'
 
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSwitch from '../common/BaseSwitch'
-import FontFamilySelect from '../common/FontFamilySelect'
+import FontFamilySelect from '../common/fontPicker/FontFamilySelect'
 import {
   setCaptionScriptFontSettingsBorder,
   setCaptionScriptFontSettingsColor,
@@ -52,7 +52,6 @@ export interface FontOptionsProps {
 }
 
 function FontOptions(props: FontOptionsProps) {
-  const { classes } = useStyles()
   const { data: border } = useGetCaptionScriptFontSettingsBorderQuery(
     props.captionScriptID,
     props.type
@@ -63,7 +62,6 @@ function FontOptions(props: FontOptionsProps) {
       <Grid2 size={9}>
         <FontFamilySelect
           label={`${props.name} Font`}
-          controlClassName={classes.fullWidth}
           selector={() =>
             useGetCaptionScriptFontSettingsFontFamilyQuery(
               props.captionScriptID,

@@ -8,7 +8,6 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import auth from './routes/auth'
 import backups from './routes/backups'
-import systemFonts from './routes/systemFonts'
 import scenes from './routes/scenes'
 import generators from './routes/generators'
 import displays from './routes/displays'
@@ -75,7 +74,6 @@ void (async function () {
   app.use('/api/playlists', playlists)
   app.use('/api/settings', settings)
   app.use('/api/backups', backups)
-  app.use('/api/system-fonts', systemFonts)
   app.use('/api/content-sources', contentSources)
   app.use('/api/clips', clips)
   app.use('/api/tags', tags)
