@@ -430,10 +430,7 @@ test('Backup Data', async ({ page }) => {
     page.locator('div').filter({ hasText: 'Backups: --' }).nth(1)
   ).toBeVisible()
   await expect(
-    page
-      .locator('div')
-      .filter({ hasText: 'Latest: --' })
-      .nth(1)
+    page.locator('div').filter({ hasText: 'Latest: --' }).nth(1)
   ).toBeVisible()
 
   await page.getByRole('button', { name: 'Backup Data', exact: true }).click()

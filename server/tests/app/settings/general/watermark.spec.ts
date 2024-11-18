@@ -173,7 +173,7 @@ test('Watermark Text', async ({ page }) => {
   await responsePromise
 })
 
-test('Watermark Font', async ({page}) => {
+test('Watermark Font', async ({ page }) => {
   await page.getByLabel('Enable Watermark', { exact: true }).check()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
@@ -181,31 +181,40 @@ test('Watermark Font', async ({page}) => {
   await expect(page.getByLabel('Font', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Font').click();
-  for(let i = 0; i < 13; i++) {
-    await page.keyboard.press('ArrowDown');
+  await page.getByLabel('Font').click()
+  for (let i = 0; i < 13; i++) {
+    await page.keyboard.press('ArrowDown')
   }
-  await page.locator('[id="\\:r33\\:-option-13"]').click();
+  await page.locator('[id="\\:r33\\:-option-13"]').click()
   expect(await page.getByLabel('Font')).toHaveValue('Agbalumo')
 
-  await page.getByLabel('Font').click();
-  await expect(page.locator('[id="\\:r33\\:-option-13"]')).toHaveAttribute('aria-selected', 'true')
-  await page.keyboard.press('ArrowUp');
-  await page.locator('[id="\\:r33\\:-option-12"]').click();
+  await page.getByLabel('Font').click()
+  await expect(page.locator('[id="\\:r33\\:-option-13"]')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await page.keyboard.press('ArrowUp')
+  await page.locator('[id="\\:r33\\:-option-12"]').click()
   expect(await page.getByLabel('Font')).toHaveValue('Afacad')
 
-  await page.getByLabel('Clear', { exact: true }).click();
+  await page.getByLabel('Clear', { exact: true }).click()
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Font').fill('cree');
-  await expect(page.getByRole('option').nth(0)).toHaveClass(/ font-preview-creepster /);
-  await expect(page.getByRole('option').nth(1)).toHaveClass(/ font-preview-sancreek /);
-  await expect(page.getByRole('option').nth(2)).toHaveClass(/ font-preview-silkscreen /);
+  await page.getByLabel('Font').fill('cree')
+  await expect(page.getByRole('option').nth(0)).toHaveClass(
+    / font-preview-creepster /
+  )
+  await expect(page.getByRole('option').nth(1)).toHaveClass(
+    / font-preview-sancreek /
+  )
+  await expect(page.getByRole('option').nth(2)).toHaveClass(
+    / font-preview-silkscreen /
+  )
   await expect(page.getByRole('option').nth(3)).not.toBeVisible()
   await page.getByRole('option').nth(1).click()
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('Sancreek')
 
-  await page.getByLabel('Font').fill('');
+  await page.getByLabel('Font').fill('')
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('')
 
   const responsePromise = page.waitForResponse((res) => {
