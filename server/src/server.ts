@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import connect from 'connect-sqlite3'
@@ -82,6 +82,20 @@ void (async function () {
   app.use('api/display-playlist-items', displayPlaylistItems)
   app.use('api/scene-playlist-items', scenePlaylistItems)
   app.use('/fs', files)
+  app.use(
+    (
+      error: NodeJS.ErrnoException,
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      logger.error(`Failed to process request ${req.url}`, { error })
+      const codes = ['SQLITE_CONSTRAINT_UNIQUE']
+      const status =
+        error.code != null && codes.includes(error.code) ? 400 : 500
+      res.status(status).end()
+    }
+  )
 
   // start the Express server
   app.listen(port, () => {
