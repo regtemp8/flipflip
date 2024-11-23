@@ -430,8 +430,8 @@ test('Restore Defaults', async ({ page }) => {
   ).not.toBeChecked()
 })
 
-// TODO watermark settings
-
 // TODO ignored tags setting
 
 // TODO API sign in tests
+
+// TODO reset tutorials test
