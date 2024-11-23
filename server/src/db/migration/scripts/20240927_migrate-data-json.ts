@@ -276,8 +276,9 @@ const tagsInsert = async (
     logger.info(': No tags')
   }
   const insertedTags: DBTag[] = []
-  for (const tag of json.tags) {
-    const insertedTag = await tagInsert(trx, tag, userId)
+  for (let i = 0; i < json.tags.length; i++) {
+    const tag = json.tags[i]
+    const insertedTag = await tagInsert(trx, tag, i, userId)
     if (insertedTag != null) {
       insertedTags.push(insertedTag)
     }
@@ -286,7 +287,12 @@ const tagsInsert = async (
   return insertedTags
 }
 
-const tagInsert = async (trx: Kysely<DB>, tag: Tag, userId: number) => {
+const tagInsert = async (
+  trx: Kysely<DB>,
+  tag: Tag,
+  index: number,
+  userId: number
+) => {
   const { id, name, phraseString } = tag
   if (name == null) {
     logger.info(`! Skipping tag, no name defined (id: ${id})`)
@@ -300,7 +306,8 @@ const tagInsert = async (trx: Kysely<DB>, tag: Tag, userId: number) => {
       id,
       userId,
       name,
-      phraseString
+      phraseString,
+      index
     })
     .returningAll()
     .executeTakeFirstOrThrow()

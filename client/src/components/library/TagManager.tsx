@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { ChangeEvent, MouseEvent, useState } from 'react'
+import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
 
@@ -41,11 +41,16 @@ import { en, MO, SF } from 'flipflip-common'
 import Jiggle from '../animations/Jiggle'
 import {
   useCreateTagMutation,
+  useDeleteTagMutation,
   useDeleteTagsMutation,
   useGetTagQuery,
-  useGetTagsQuery
+  useGetTagsQuery,
+  useSortTagsMutation
 } from '../../store/api/slice'
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch } from '../../store/hooks'
+import { moveTag, updateTag } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -120,10 +125,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
     backgroundColor: theme.palette.error.main,
     margin: 0,
     top: 'auto',
-    right: 130,
+    right: 80,
     bottom: 20,
     left: 'auto',
     position: 'fixed'
+  },
+  removeAllWithSortButton: {
+    right: 130
   },
   icon: {
     color: theme.palette.primary.contrastText
@@ -140,16 +148,31 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-const ADD_TAG_ID = 0
+const ADD_TAG_ID = -2
 interface TagEditDialogProps {
   tagID: number
   onClose: () => void
 }
 
 function TagEditDialog(props: TagEditDialogProps) {
+  const dispatch = useAppDispatch()
+  const { data: tag } = useGetTagQuery(props.tagID)
   const [createTag] = useCreateTagMutation()
+  const [deleteTag] = useDeleteTagMutation()
   const [tagName, setTagName] = useState('')
   const [tagPhrase, setTagPhrase] = useState('')
+
+  useEffect(() => {
+    if (props.tagID >= 0) {
+      setTagName(tag?.name ?? '')
+      setTagPhrase(tag?.phraseString ?? '')
+    }
+  }, [props.tagID])
+
+  useEffect(() => {
+    setTagName(tag?.name ?? '')
+    setTagPhrase(tag?.phraseString ?? '')
+  }, [tag])
 
   const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setTagName(e.currentTarget.value)
@@ -159,20 +182,25 @@ function TagEditDialog(props: TagEditDialogProps) {
     setTagPhrase(e.currentTarget.value)
   }
 
-  const onRemoveTag = () => {
-    setTagName('')
-    setTagPhrase('')
-    props.onClose()
+  const onRemoveTag = async () => {
+    await deleteTag({ id: props.tagID })
+    onCloseEditDialog()
   }
 
   const onFinishEdit = async () => {
-    await createTag({ id: props.tagID, name: tagName, phraseString: tagPhrase })
-    setTagName('')
-    setTagPhrase('')
-    props.onClose()
+    if (props.tagID === ADD_TAG_ID) {
+      await createTag({ name: tagName, phraseString: tagPhrase })
+    } else {
+      dispatch(
+        updateTag({ id: props.tagID, name: tagName, phraseString: tagPhrase })
+      )
+    }
+    onCloseEditDialog()
   }
 
   const onCloseEditDialog = () => {
+    setTagName('')
+    setTagPhrase('')
     props.onClose()
   }
 
@@ -258,8 +286,10 @@ function TagCard(props: TagCardProps) {
 }
 
 function TagManager() {
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [deleteTags] = useDeleteTagsMutation()
+  const [sortTags] = useSortTagsMutation()
   const { data: tags } = useGetTagsQuery()
   const [openMenu, setOpenMenu] = useState<string>()
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
@@ -342,8 +372,13 @@ function TagManager() {
                 animation: 150,
                 easing: 'cubic-bezier(1, 0, 0, 1)'
               }}
-              onChange={(order: any, sortable: any, evt: any) => {
-                // arrayMove(tags, evt.oldIndex, evt.newIndex)
+              onChange={async (order: any, sortable: any, evt: any) => {
+                const newTags = arrayMove(
+                  tags as number[],
+                  evt.oldIndex,
+                  evt.newIndex
+                )
+                dispatch(moveTag(newTags))
               }}
             >
               {tags?.map((tagID) => (
@@ -359,7 +394,10 @@ function TagManager() {
         <React.Fragment>
           <Tooltip disableInteractive title="Remove All Tags">
             <Fab
-              className={classes.removeAllButton}
+              className={cx(
+                classes.removeAllButton,
+                (tags?.length ?? 0) >= 2 && classes.removeAllWithSortButton
+              )}
               onClick={onRemoveAll}
               size="small"
             >
@@ -375,8 +413,8 @@ function TagManager() {
             <DialogTitle id="remove-all-title">Delete Tags</DialogTitle>
             <DialogContent>
               <DialogContentText id="remove-all-description">
-                Are you sure you want to remove all Tags? This will untag all
-                sources as well.
+                Are you sure you want to remove all tags? This will untag all
+                sources, clips, audios and caption scripts as well.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -420,15 +458,15 @@ function TagManager() {
             open={openMenu === MO.sort}
             onClose={onCloseDialog}
           >
-            {[SF.alpha, SF.date].map((sf) => (
+            {[SF.name].map((sf) => (
               <ListItem
                 key={sf}
                 secondaryAction={
                   <>
                     <IconButton
                       edge="end"
-                      onClick={() => {
-                        // dispatch(sortTags(sf, true))
+                      onClick={async () => {
+                        await sortTags({ sortBy: 'name', sortOrder: 'asc' })
                       }}
                       size="large"
                     >
@@ -436,8 +474,8 @@ function TagManager() {
                     </IconButton>
                     <IconButton
                       edge="end"
-                      onClick={() => {
-                        // dispatch(sortTags(sf, false))
+                      onClick={async () => {
+                        await sortTags({ sortBy: 'name', sortOrder: 'desc' })
                       }}
                       size="large"
                     >

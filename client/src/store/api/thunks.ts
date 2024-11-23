@@ -16,6 +16,7 @@ import {
   Playlist,
   RemoteSettings,
   Scene,
+  Tag,
   ThemeSettings
 } from 'flipflip-common'
 
@@ -2004,4 +2005,44 @@ export const setConfigDisplaySettingsEasingControls = (
 
 export const setConfigDisplaySettingsAudioAlert = (audioAlert: boolean) => {
   return updateDisplaySettings({ audioAlert })
+}
+
+const updateLocalTag = (update: Partial<Tag>) => {
+  return flipflipApi.util.updateQueryData(
+    'getTag',
+    update.id as number,
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
+}
+
+const updateRemoteTag = debounce(
+  (update: Partial<Tag>, dispatch: AppDispatch) => {
+    const id = update.id as number
+    dispatch(flipflipApi.endpoints.updateTag.initiate({ ...update, id }))
+  },
+  250
+)
+
+export const updateTag = (update: Partial<Tag>) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalTag(update))
+    updateRemoteTag(update, dispatch)
+  }
+}
+
+const moveLocalTag = (ids: number[]) => {
+  return flipflipApi.util.updateQueryData('getTags', undefined, () => ids)
+}
+
+const moveRemoteTag = debounce((ids: number[], dispatch: AppDispatch) => {
+  dispatch(flipflipApi.endpoints.moveTag.initiate({ ids }))
+}, 250)
+
+export const moveTag = (ids: number[]) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(moveLocalTag(ids))
+    moveRemoteTag(ids, dispatch)
+  }
 }

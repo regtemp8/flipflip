@@ -145,6 +145,7 @@ const SF = {
   duration: 'sf.duration',
   resolution: 'sf.resolution',
   random: 'sf.random',
+  name: 'sf.name',
 };
 
 const ASF = {

@@ -105,8 +105,10 @@ const tagTable = async (trx: Kysely<DB>) => {
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('phraseString', 'text')
+    .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint('FK_tag_user_userId', ['userId'], 'user', ['id'])
     .addUniqueConstraint('UQ_tag_userId_name', ['userId', 'name'])
+    .addUniqueConstraint('UQ_tag_index', ['index'])
     .execute()
 }
 

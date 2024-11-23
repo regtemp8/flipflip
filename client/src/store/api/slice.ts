@@ -28,7 +28,9 @@ import {
   Audio,
   FilePickerData,
   CleanBackupsRequest,
-  CacheSize
+  CacheSize,
+  SortRequest,
+  MoveRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -843,15 +845,97 @@ export const flipflipApi = createApi({
         })
       }
     }),
-    createTag: builder.mutation<void, Tag>({
+    sortTags: builder.mutation<void, SortRequest>({
+      query: (body) => ({
+        url: `api/tags/sort`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    createTag: builder.mutation<void, Omit<Tag, 'id'>>({
       query: (body) => ({
         url: `api/tags`,
         method: 'POST',
         body
       }),
       async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    moveTag: builder.mutation<void, MoveRequest>({
+      query: (body) => ({
+        url: `api/tags/move`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
+            )
+          }
+        })
+      }
+    }),
+    updateTag: builder.mutation<void, Pick<Tag, 'id'> & Partial<Tag>>({
+      query: ({ id, ...patch }) => ({
+        url: `api/tags/${id}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(flipflipApi.util.invalidateTags([{ type: 'Tag', id }]))
+          }
+        })
+      }
+    }),
+    deleteTag: builder.mutation<void, Pick<Tag, 'id'>>({
+      query: ({ id }) => ({
+        url: `api/tags/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'Tag', id },
+                { type: 'Tag', id: 'List' }
+              ])
+            )
+          }
         })
       }
     }),
@@ -956,5 +1040,9 @@ export const {
   useDeleteTagsMutation,
   useGetTagsCountQuery,
   useGetCaptionScriptsQuery,
-  useCreateTagMutation
+  useCreateTagMutation,
+  useUpdateTagMutation,
+  useDeleteTagMutation,
+  useSortTagsMutation,
+  useMoveTagMutation
 } = flipflipApi

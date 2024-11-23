@@ -511,6 +511,7 @@ export interface ScenePlaylistItemScene {
 
 export interface Tag {
   id: number | null
+  index: number
   name: string
   phraseString: string | null
   userId: number
