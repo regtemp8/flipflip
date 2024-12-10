@@ -1,5 +1,4 @@
-- <details open>
-    <summary>v3.x.x</summary>
+- v3.x.x
 
   - Scenes
 
@@ -36,10 +35,8 @@
   - [Import/Export](v3/import_export.md)
   - [Caption Scriptor Tool](v3/scriptor.md)
   - [Caption Script Format](v3/caption_script.md)
-</details>
 
-- <details>
-    <summary>v4.0.0-beta</summary>
+- v4.0.0-beta
 
   - Scenes
 
@@ -77,7 +74,6 @@
   - [Import/Export](v4/import_export.md)
   - [Caption Scriptor Tool](v4/scriptor.md)
   - [Caption Script Format](v4/caption_script.md)
-</details>
 
 - [Screen Capture](screen_capture.md)
 - [Developers](developers.md)
