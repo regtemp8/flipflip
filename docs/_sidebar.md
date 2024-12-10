@@ -1,40 +1,40 @@
-- v3.x.x
+- # v3.x.x
 
-  - Scenes
+  - ## Scenes
 
-    - [Overview](v3/scenes.md)
-    - [Options](v3/options.md)
-    - [Effects](v3/effects.md)
-    - [Audio/Text](v3/audio_text.md)
-    - [Sources](v3/sources.md)
-    - [Playing Scene](v3/playing_scene.md)
-    - [Scene Generators](v3/scene_generators.md)
-    - [Scene Grid](v3/grid.md)
-    - [Scene Groups](v3/groups.md)
+    - ### [Overview](v3/scenes.md)
+    - ### [Options](v3/options.md)
+    - ### [Effects](v3/effects.md)
+    - ### [Audio/Text](v3/audio_text.md)
+    - ### [Sources](v3/sources.md)
+    - ### [Playing Scene](v3/playing_scene.md)
+    - ### [Scene Generators](v3/scene_generators.md)
+    - ### [Scene Grid](v3/grid.md)
+    - ### [Scene Groups](v3/groups.md)
     
-  - Library
+  - ## Library
 
-    - [Overview](v3/library.md)
-    - [Tagging](v3/tagging.md)
-    - [Import from Library](v3/import_from_library.md)  
+    - ### [Overview](v3/library.md)
+    - ### [Tagging](v3/tagging.md)
+    - ### [Import from Library](v3/import_from_library.md)  
     
-  - Audio Library
+  - ## Audio Library
 
-    - [Overview](v3/audio_library.md)
-    - [Tagging](v3/audio_tagging.md)
-    - [Import from Library](v3/audio_import_from_library.md)
+    - ### [Overview](v3/audio_library.md)
+    - ### [Tagging](v3/audio_tagging.md)
+    - ### [Import from Library](v3/audio_import_from_library.md)
 
-  - Script Library
+  - ## Script Library
 
-    - [Overview](v3/script_library.md)
-    - [Tagging](v3/script_tagging.md)
-    - [Import from Library](v3/script_import_from_library.md)
+    - ### [Overview](v3/script_library.md)
+    - ### [Tagging](v3/script_tagging.md)
+    - ### [Import from Library](v3/script_import_from_library.md)
     
-  - [Settings](v3/config.md)
-  - [Video Clipper](v3/clips.md)
-  - [Import/Export](v3/import_export.md)
-  - [Caption Scriptor Tool](v3/scriptor.md)
-  - [Caption Script Format](v3/caption_script.md)
+  - ## [Settings](v3/config.md)
+  - ## [Video Clipper](v3/clips.md)
+  - ## [Import/Export](v3/import_export.md)
+  - ## [Caption Scriptor Tool](v3/scriptor.md)
+  - ## [Caption Script Format](v3/caption_script.md)
 
 - v4.0.0-beta
 
