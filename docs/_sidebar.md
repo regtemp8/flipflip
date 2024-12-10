@@ -1,44 +1,5 @@
-- Scenes
-
-  - [Overview](v4/scenes.md)
-  - [Options](v4/options.md)
-  - [Effects](v4/effects.md)
-  - [Audio/Text](v4/audio_text.md)
-  - [Sources](v4/sources.md)
-  - [Playing Scene](v4/playing_scene.md)
-  - [Scene Generators](v4/scene_generators.md)
-  - [Scene Groups](v4/groups.md)
-  - [Scene Playlists](v4/scene_playlists.md)
-  
-- Library
-
-  - [Overview](v4/library.md)
-  - [Tagging](v4/tagging.md)
-  - [Import from Library](v4/import_from_library.md)  
-  
-- Audio Library
-
-  - [Overview](v4/audio_library.md)
-  - [Tagging](v4/audio_tagging.md)
-  - [Import from Library](v4/audio_import_from_library.md)
-
-- Script Library
-
-  - [Overview](v4/script_library.md)
-  - [Tagging](v4/script_tagging.md)
-  - [Import from Library](v4/script_import_from_library.md)
-
-- [Displays](v4/displays.md)
-- [Settings](v4/config.md)
-- [Video Clipper](v4/clips.md)
-- [Import/Export](v4/import_export.md)
-- [Caption Scriptor Tool](v4/scriptor.md)
-- [Caption Script Format](v4/caption_script.md)
-- [Screen Capture](screen_capture.md)
-- [Developers](developers.md)
-- [Changelog](changelog.md)
-
-- v3.x.x
+- <details open>
+    <summary>v3.x.x</summary>
 
   - Scenes
 
@@ -75,3 +36,49 @@
   - [Import/Export](v3/import_export.md)
   - [Caption Scriptor Tool](v3/scriptor.md)
   - [Caption Script Format](v3/caption_script.md)
+</details>
+
+- <details>
+    <summary>v4.0.0-beta</summary>
+
+  - Scenes
+
+    - [Overview](v4/scenes.md)
+    - [Options](v4/options.md)
+    - [Effects](v4/effects.md)
+    - [Audio/Text](v4/audio_text.md)
+    - [Sources](v4/sources.md)
+    - [Playing Scene](v4/playing_scene.md)
+    - [Scene Generators](v4/scene_generators.md)
+    - [Scene Groups](v4/groups.md)
+    - [Scene Playlists](v4/scene_playlists.md)
+    
+  - Library
+
+    - [Overview](v4/library.md)
+    - [Tagging](v4/tagging.md)
+    - [Import from Library](v4/import_from_library.md)  
+    
+  - Audio Library
+
+    - [Overview](v4/audio_library.md)
+    - [Tagging](v4/audio_tagging.md)
+    - [Import from Library](v4/audio_import_from_library.md)
+
+  - Script Library
+
+    - [Overview](v4/script_library.md)
+    - [Tagging](v4/script_tagging.md)
+    - [Import from Library](v4/script_import_from_library.md)
+
+  - [Displays](v4/displays.md)
+  - [Settings](v4/config.md)
+  - [Video Clipper](v4/clips.md)
+  - [Import/Export](v4/import_export.md)
+  - [Caption Scriptor Tool](v4/scriptor.md)
+  - [Caption Script Format](v4/caption_script.md)
+</details>
+
+- [Screen Capture](screen_capture.md)
+- [Developers](developers.md)
+- [Changelog](changelog.md)
