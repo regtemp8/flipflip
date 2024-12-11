@@ -1,6 +1,6 @@
-![logo](doc_images/flipflip_logo.png)
+![logo](/doc_images/flipflip_logo.png)
 
-# FlipFlip <small>4.0</small>
+# FlipFlip
 
 > A glorified slideshow, with _lots_ of bells and whistles
 

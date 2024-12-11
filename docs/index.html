@@ -26,29 +26,31 @@
   <div id="app"></div>
   <script>
     window.$docsify = {
-      name: '<h1 class="app-name"><a class="app-name-link" data-nosearch="" href="/flipflip/">FlipFlip</a></h1>' +
-        '<select id="version-selector" name="version" class="sidebar-version-select">' +
+      name: '<a id="name-link" class="app-name-link" href="/"><h1>FlipFlip</h1></a>' +
+        '<div class="container"><select id="version-selector" name="version" class="custom-select">' +
           '<option value="v3">v3.0.0</value>' +
-          '<option value="v4">v4.0.0-beta</value>' +
-        '</select>',
+          '<option value="v4">v4.0.0</value>' +
+        '</select></div>',
       loadSidebar: true,
       maxLevel: 4,
       subMaxLevel: 2,
       auto2top: true,
       coverpage: true,
       routerMode: 'hash',
+      relativePath: true,
       alias: {
         '/v3/.*_sidebar.md': 'https://raw.githubusercontent.com/regtemp8/flipflip/master/docs/_sidebar.md',
         '/v4/.*_sidebar.md': 'https://raw.githubusercontent.com/regtemp8/flipflip/v4.0.0/docs/_sidebar.md',
         '/v3/': 'https://raw.githubusercontent.com/regtemp8/flipflip/master/docs/README.md',
-        '/v3/(.*)': 'https://raw.githubusercontent.com/regtemp8/flipflip/master/docs/$1',
         '/v4/': 'https://raw.githubusercontent.com/regtemp8/flipflip/v4.0.0/docs/README.md',
+        '/v3/(.*)': 'https://raw.githubusercontent.com/regtemp8/flipflip/master/docs/$1',
         '/v4/(.*)': 'https://raw.githubusercontent.com/regtemp8/flipflip/v4.0.0/docs/$1',
       },
       namespaces: [
         {
           id: "version",
           values: ["v3", "v4"],
+          default: "v3",
           optional: true,
           selector: "#version-selector"
         }
