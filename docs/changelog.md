@@ -1,4 +1,10 @@
 # Changelog
+## v4.0.0-beta4 <small>(09/24/2024)</small>
+- Display playback
+- Playlist playback. This is still a work in progress
+- Replace `react-select` with MUI `AutoComplete` component
+- Check that `route` isn't pointing to data that hasn't been stored (e.g. a temporary scene or display)
+
 ## v4.0.0-beta3 <small>(05/23/2024)</small>
 - Display editor as replacement for grids
 - Scene and Display playlists
