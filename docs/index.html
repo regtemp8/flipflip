@@ -26,7 +26,7 @@
   <div id="app"></div>
   <script>
     window.$docsify = {
-      name: '<a id="name-link" class="app-name-link" href="/"><h1>FlipFlip</h1></a>' +
+      name: '<a id="name-link" class="app-name-link" href="/flipflip"><h1>FlipFlip</h1></a>' +
         '<div class="container"><select id="version-selector" name="version" class="custom-select">' +
           '<option value="v3">v3.0.0</value>' +
           '<option value="v4">v4.0.0</value>' +
@@ -54,7 +54,30 @@
           optional: true,
           selector: "#version-selector"
         }
-      ]
+      ],
+      plugins: [
+        function rewriteImageURLs(hook, vm) {
+          hook.afterEach(html => {
+            const file = vm.route.file;
+            const url = file.substring(0, file.lastIndexOf('/'));
+
+            const el = document.createElement( 'html' );
+            el.innerHTML = `<html><head></head><body>${html}</body></html>`;
+            const imgs = el.getElementsByTagName('img');
+            const replace = ['/doc_images/', '/doc_icons/'];
+            for(const img of imgs) {
+              for(const r of replace) {
+                let index = img.src.indexOf(r);
+                if(index != -1) {
+                  img.src = url + img.src.substring(index);
+                }
+              }
+            }
+
+            return el.getElementsByTagName('body')[0].innerHTML;
+          });
+        },
+      ],
     }
   </script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
