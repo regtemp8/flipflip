@@ -75,21 +75,24 @@ export function getRandomColor() {
   return color;
 }
 
-export function getFileName(url: string, pathSep: string, extension = true) {
-  let sep;
-  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
-    sep = '/';
-  } else {
-    sep = pathSep;
+export function randomizeList(list: any[]) {
+  let currentIndex = list.length,
+    temporaryValue,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = list[currentIndex];
+    list[currentIndex] = list[randomIndex];
+    list[randomIndex] = temporaryValue;
   }
-  url = url.substring(url.lastIndexOf(sep) + 1);
-  if (url.includes('?')) {
-    url = url.substring(0, url.indexOf('?'));
-  }
-  if (!extension) {
-    url = url.substring(0, url.lastIndexOf('.'));
-  }
-  return url;
+
+  return list;
 }
 
 export function urlToPath(url: string, isWin32: boolean): string {
@@ -181,78 +184,8 @@ export const isImageOrVideo = (path: string, strict: boolean): boolean => {
   return isImage(path, strict) || isVideo(path, strict);
 };
 
-export function getSourceType(url: string): string {
-  if (isAudio(url, false)) {
-    return ST.audio;
-  } else if (isVideo(url, false)) {
-    return ST.video;
-  } else if (isVideoPlaylist(url, true)) {
-    return ST.playlist;
-  } else if (/^https?:\/\/([^.]*|(66\.media))\.tumblr\.com/.exec(url) != null) {
-    return ST.tumblr;
-  } else if (/^https?:\/\/(www\.)?reddit\.com\//.exec(url) != null) {
-    return ST.reddit;
-  } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
-    return ST.redgifs;
-  } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
-    return ST.imagefap;
-  } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
-    return ST.imgur;
-  } else if (/^https?:\/\/(www\.)?(cdn\.)?sex\.com\//.exec(url) != null) {
-    return ST.sexcom;
-  } else if (/^https?:\/\/(www\.)?twitter\.com\//.exec(url) != null) {
-    return ST.twitter;
-  } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
-    return ST.deviantart;
-  } else if (/^https?:\/\/(www\.)?instagram\.com\//.exec(url) != null) {
-    return ST.instagram;
-  } else if (
-    /^https?:\/\/(www\.)?(lolibooru\.moe|hypnohub\.net|danbooru\.donmai\.us)\//.exec(
-      url
-    ) != null
-  ) {
-    return ST.danbooru;
-  } else if (
-    /^https?:\/\/(www\.)?(gelbooru\.com|furry\.booru\.org|rule34\.xxx|realbooru\.com|safebooru\.org)\//.exec(
-      url
-    ) != null
-  ) {
-    return ST.gelbooru2;
-  } else if (/^https?:\/\/(www\.)?(e621\.net)\//.exec(url) != null) {
-    return ST.e621;
-  } else if (
-    /^https?:\/\/(www\.|members\.)?luscious\.net\//.exec(url) != null
-  ) {
-    return ST.luscious;
-  } else if (
-    /^https?:\/\/(www\.)?(.*\.booru\.org|idol\.sankakucomplex\.com)\//.exec(
-      url
-    ) != null
-  ) {
-    return ST.gelbooru1;
-  } else if (/^https?:\/\/(www\.)?e-hentai\.org\/g\//.exec(url) != null) {
-    return ST.ehentai;
-  } else if (/^https?:\/\/[^.]*\.bdsmlr\.com/.exec(url) != null) {
-    return ST.bdsmlr;
-  } else if (
-    /^https?:\/\/[\w\\.]+:\d+\/get_files\/search_files/.exec(url) != null
-  ) {
-    return ST.hydrus;
-  } else if (/^https?:\/\/[^.]*\.[a-z0-9.:]+\/ws.php/.exec(url) != null) {
-    return ST.piwigo;
-  } else if (/^https?:\/\/hypno\.nimja\.com\/visual\/\d+/.exec(url) != null) {
-    return ST.nimja;
-  } else if (/(^https?:\/\/)|(\.txt$)/.exec(url) != null) {
-    // Arbitrary URL, assume image list
-    return ST.list;
-  } else {
-    // Directory
-    return ST.local;
-  }
-}
-
-export function getFileGroup(url: string, pathSep: string) {
-  switch (getSourceType(url)) {
+export function getFileGroup(type: string, url: string, pathSep: string) {
+  switch (type) {
     case ST.tumblr:
       return url.replace(/https?:\/\//, '').replace(/\.tumblr\.com\/?/, '');
     case ST.reddit:
@@ -466,4 +399,74 @@ export function removeDuplicatesBy<T>(
     if (isNew) mySet.add(key);
     return isNew;
   });
+}
+
+export function getSourceType(url: string): string {
+  if (isAudio(url, false)) {
+    return ST.audio
+  } else if (isVideo(url, false)) {
+    return ST.video
+  } else if (isVideoPlaylist(url, true)) {
+    return ST.playlist
+  } else if (/^https?:\/\/([^.]*|(66\.media))\.tumblr\.com/.exec(url) != null) {
+    return ST.tumblr
+  } else if (/^https?:\/\/(www\.)?reddit\.com\//.exec(url) != null) {
+    return ST.reddit
+  } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
+    return ST.redgifs
+  } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
+    return ST.imagefap
+  } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
+    return ST.imgur
+  } else if (/^https?:\/\/(www\.)?(cdn\.)?sex\.com\//.exec(url) != null) {
+    return ST.sexcom
+  } else if (/^https?:\/\/(www\.)?twitter\.com\//.exec(url) != null) {
+    return ST.twitter
+  } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
+    return ST.deviantart
+  } else if (/^https?:\/\/(www\.)?instagram\.com\//.exec(url) != null) {
+    return ST.instagram
+  } else if (
+    /^https?:\/\/(www\.)?(lolibooru\.moe|hypnohub\.net|danbooru\.donmai\.us)\//.exec(
+      url
+    ) != null
+  ) {
+    return ST.danbooru
+  } else if (
+    /^https?:\/\/(www\.)?(gelbooru\.com|furry\.booru\.org|rule34\.xxx|realbooru\.com|safebooru\.org)\//.exec(
+      url
+    ) != null
+  ) {
+    return ST.gelbooru2
+  } else if (/^https?:\/\/(www\.)?(e621\.net)\//.exec(url) != null) {
+    return ST.e621
+  } else if (
+    /^https?:\/\/(www\.|members\.)?luscious\.net\//.exec(url) != null
+  ) {
+    return ST.luscious
+  } else if (
+    /^https?:\/\/(www\.)?(.*\.booru\.org|idol\.sankakucomplex\.com)\//.exec(
+      url
+    ) != null
+  ) {
+    return ST.gelbooru1
+  } else if (/^https?:\/\/(www\.)?e-hentai\.org\/g\//.exec(url) != null) {
+    return ST.ehentai
+  } else if (/^https?:\/\/[^.]*\.bdsmlr\.com/.exec(url) != null) {
+    return ST.bdsmlr
+  } else if (
+    /^https?:\/\/[\w\\.]+:\d+\/get_files\/search_files/.exec(url) != null
+  ) {
+    return ST.hydrus
+  } else if (/^https?:\/\/[^.]*\.[a-z0-9.:]+\/ws.php/.exec(url) != null) {
+    return ST.piwigo
+  } else if (/^https?:\/\/hypno\.nimja\.com\/visual\/\d+/.exec(url) != null) {
+    return ST.nimja
+  } else if (/(^https?:\/\/)|(\.txt$)/.exec(url) != null) {
+    // Arbitrary URL, assume image list
+    return ST.list
+  } else {
+    // Directory
+    return ST.local
+  }
 }

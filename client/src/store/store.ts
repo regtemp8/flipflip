@@ -6,10 +6,12 @@ import sceneDetailSlice from './sceneDetail/slice'
 import scenePickerSlice from './scenePicker/slice'
 import displaySlice from './display/slice'
 import captionScriptorSlice from './captionScriptor/slice'
+import appSlice from './app/slice'
 
 const store = configureStore({
   reducer: {
     [flipflipApi.reducerPath]: flipflipApi.reducer,
+    app: appSlice,
     // components
     display: displaySlice,
     captionScriptor: captionScriptorSlice,

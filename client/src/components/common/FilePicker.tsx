@@ -17,7 +17,8 @@ import {
   Stack,
   Box,
   Popover,
-  TextField
+  TextField,
+  Theme
 } from '@mui/material'
 import CancelIcon from '@mui/icons-material/Cancel'
 import EditIcon from '@mui/icons-material/Edit'
@@ -34,24 +35,39 @@ import {
 } from '../../store/api/slice'
 import { FilePickerItem } from 'flipflip-common'
 import { filesize } from 'filesize'
+import { makeStyles } from 'tss-react/mui'
+
+const useStyles = makeStyles()((theme: Theme) => ({
+  itemSelected: {
+    backgroundColor: `${theme.palette.primary.main} !important`,
+    color: theme.palette.primary.contrastText,
+    '&:hover': {
+      backgroundColor: `${theme.palette.primary.main} !important`,
+      color: theme.palette.primary.contrastText
+    }
+  }
+}))
 
 interface FilePickerListItemProps {
   selected: boolean
   item: FilePickerItem
-  onNavigate: (name: string) => void
-  onSelect: (name?: string) => void
+  onDoubleClick: (item: FilePickerItem) => void
+  onSelect: (item: FilePickerItem, ctrlKey: boolean, shiftKey: boolean) => void
   style?: CSSProperties
 }
 
 const FilePickerListItem = (props: FilePickerListItemProps) => {
-  const { item, selected, style, onNavigate, onSelect } = props
-  const onDoubleClick = item.directory ? () => onNavigate(item.name) : undefined
+  const { item, selected, style, onDoubleClick, onSelect } = props
+  const { classes } = useStyles()
   return (
     <ListItemButton
       style={style}
       selected={selected}
-      onDoubleClick={onDoubleClick}
-      onClick={() => onSelect(selected ? undefined : item.name)}
+      onDoubleClick={() => onDoubleClick(item)}
+      onClick={(event) => onSelect(item, event.ctrlKey, event.shiftKey)}
+      classes={{
+        selected: classes.itemSelected
+      }}
     >
       <Stack direction="row" spacing={1} sx={{ flex: 1 }}>
         {item.directory ? <FolderIcon /> : <InsertDriveFileIcon />}
@@ -74,7 +90,7 @@ const Row = (props: any) => {
       key={index}
       selected={data[index].selected}
       item={data[index].item}
-      onNavigate={data[index].onNavigate}
+      onDoubleClick={data[index].onDoubleClick}
       onSelect={data[index].onSelect}
       style={style}
     />
@@ -108,7 +124,7 @@ const PathTextField = (props: PathTextFieldProps) => {
 
 interface CreateDirectoryPopoverProps {
   parentPath?: string
-  setSelected: (name: string) => void
+  setSelected: (selected: string[]) => void
 }
 
 const CreateDirectoryPopover = (props: CreateDirectoryPopoverProps) => {
@@ -125,10 +141,10 @@ const CreateDirectoryPopover = (props: CreateDirectoryPopoverProps) => {
     setFolderName('')
   }
 
-  const onCreate = () => {
+  const onCreate = async () => {
     if (folderName) {
-      createDirectory({ path: props.parentPath + '/' + folderName })
-      props.setSelected(folderName)
+      await createDirectory({ path: props.parentPath + '/' + folderName })
+      props.setSelected([folderName])
       handleClose()
     }
   }
@@ -249,29 +265,25 @@ enum FilePickerMode {
 
 export interface FilePickerProps {
   open: boolean
+  multiple?: boolean
   type: string
   path: string
-  onClose: (chosenFile?: string) => void
+  onClose: (chosenFiles?: string[]) => void
 }
 
 export default function FilePicker(props: FilePickerProps) {
-  const [selected, setSelected] = useState<string>()
+  const [selected, setSelected] = useState<string[]>([])
   const [sort, setSort] = useState<SortBy>({ column: 'name', asc: true })
   const [path, setPath] = useState('')
   const [search, setSearch] = useState<string>()
   const [mode, setMode] = useState(FilePickerMode.PathNavigation)
   const { data } = useGetFilePickerDataQuery({ path, type: props.type })
 
-  const _path = useRef('')
+  const _lastSelected = useRef<string>()
 
   useEffect(() => {
-    onChangePath(props.path)
+    setPath(props.path)
   }, [props.path])
-
-  const onChangePath = (path: string) => {
-    _path.current = path
-    setPath(path)
-  }
 
   const renderFilePickerTopBar = () => {
     switch (mode) {
@@ -280,9 +292,9 @@ export default function FilePicker(props: FilePickerProps) {
           <PathTextField
             path={data?.path ?? ''}
             onApply={(path: string) => {
-              onChangePath(path)
+              setPath(path)
               setMode(FilePickerMode.PathNavigation)
-              setSelected(undefined)
+              setSelected([])
             }}
           />
         )
@@ -304,8 +316,8 @@ export default function FilePicker(props: FilePickerProps) {
                 underline="hover"
                 color="inherit"
                 onClick={() => {
-                  onChangePath(array.slice(0, index + 1).join('/'))
-                  setSelected(undefined)
+                  setPath(array.slice(0, index + 1).join('/'))
+                  setSelected([])
                 }}
               >
                 {crumb}
@@ -340,15 +352,46 @@ export default function FilePicker(props: FilePickerProps) {
     )
   }
 
-  const onNavigate = (name: string) => {
-    onChangePath(`${data?.path}/${name}`)
-    setSelected(undefined)
+  const onDoubleClick = (item: FilePickerItem) => {
+    setSearch('')
+    setMode(FilePickerMode.PathNavigation)
+    if (item.directory) {
+      setPath(`${data?.path}/${item.name}`)
+      setSelected([])
+      _lastSelected.current = undefined
+    } else {
+      onClose([`${data?.path}/${item.name}`])
+    }
   }
 
-  const onSelect = (name?: string) => {
-    setSelected(name)
-    if (name != null) {
-      _path.current = `${data?.path}/${name}`
+  const onSelect = (
+    item: FilePickerItem,
+    ctrlKey: boolean,
+    shiftKey: boolean
+  ) => {
+    if (props.multiple && ctrlKey) {
+      _lastSelected.current = item.name
+      setSelected((value) => {
+        const oldLength = value.length
+        value = value.filter((v) => v !== item.name)
+        if (value.length === oldLength) {
+          value.push(item.name)
+        }
+
+        return value
+      })
+    } else if (props.multiple && shiftKey && _lastSelected.current != null) {
+      console.log('SHIFT', _lastSelected.current)
+      const lastSelectedIndex = items.findIndex(
+        (i) => i.name === _lastSelected.current
+      )
+      const currentSelectedIndex = items.findIndex((i) => i.name === item.name)
+      const start = Math.min(lastSelectedIndex, currentSelectedIndex)
+      const end = Math.max(lastSelectedIndex, currentSelectedIndex) + 1
+      setSelected(items.slice(start, end).map((i) => i.name))
+    } else {
+      _lastSelected.current = item.name
+      setSelected([item.name])
     }
   }
 
@@ -360,13 +403,22 @@ export default function FilePicker(props: FilePickerProps) {
     }
   }
 
-  const onClose = (path?: string) => {
-    props.onClose(path)
+  const onClose = (chosenFiles?: string[]) => {
+    props.onClose(chosenFiles)
     setMode(FilePickerMode.PathNavigation)
-    setSelected(undefined)
+    setSelected([])
     setSort({ column: 'name', asc: true })
     setSearch(undefined)
-    onChangePath('')
+    setPath('')
+    _lastSelected.current = undefined
+  }
+
+  const onChoose = () => {
+    const chosenFiles =
+      props.type === 'dir' && selected.length === 0
+        ? [path]
+        : selected.map((name) => `${path}/${name}`)
+    onClose(chosenFiles)
   }
 
   let items: FilePickerItem[] = []
@@ -377,6 +429,12 @@ export default function FilePicker(props: FilePickerProps) {
     items = items.filter((item) => item.name.includes(search))
   }
   sortItems(items, sort)
+  const canChoose =
+    (props.type === 'dir' && (selected.length === 1 || path !== '')) ||
+    (selected.length > 0 &&
+      selected
+        .map((n) => items.find((i) => i.name === n))
+        .find((i) => i?.directory) == null)
   return (
     <Dialog open={props.open} fullWidth maxWidth="lg">
       <DialogContent sx={{ overflow: 'hidden' }}>
@@ -398,11 +456,15 @@ export default function FilePicker(props: FilePickerProps) {
               >
                 <SearchIcon />
               </IconButton>
-              <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-              <CreateDirectoryPopover
-                parentPath={data?.path}
-                setSelected={setSelected}
-              />
+              {props.type === 'dir' && (
+                <>
+                  <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                  <CreateDirectoryPopover
+                    parentPath={data?.path}
+                    setSelected={setSelected}
+                  />
+                </>
+              )}
             </Card>
           </Grid2>
           <Grid2 size={12}>
@@ -440,9 +502,9 @@ export default function FilePicker(props: FilePickerProps) {
                 itemCount={items.length}
                 itemData={items.map((item, index) => ({
                   index,
-                  selected: item.name === selected,
+                  selected: selected.includes(item.name),
                   item,
-                  onNavigate,
+                  onDoubleClick,
                   onSelect
                 }))}
                 itemKey={(index: number, data: FilePickerListItemProps[]) =>
@@ -461,7 +523,8 @@ export default function FilePicker(props: FilePickerProps) {
           Cancel
         </Button>
         <Button
-          onClick={() => onClose(_path.current)}
+          disabled={!canChoose}
+          onClick={() => onChoose()}
           color="primary"
           sx={{ mr: 2 }}
         >

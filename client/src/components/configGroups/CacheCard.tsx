@@ -195,10 +195,10 @@ function CacheCard() {
         open={showFilePicker}
         type="dir"
         path={data?.directory || data?.defaultDirectory || ''}
-        onClose={async (chosenFile?: string) => {
+        onClose={async (chosenFiles?: string[]) => {
           setShowFilePicker(false)
-          if (chosenFile != null) {
-            dispatch(setConfigCachingDirectory(chosenFile))
+          if (chosenFiles?.length === 1) {
+            dispatch(setConfigCachingDirectory(chosenFiles[0]))
           }
         }}
       />

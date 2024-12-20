@@ -26,6 +26,7 @@ import { grey } from '@mui/material/colors'
 import SourceIcon from './SourceIcon'
 import TagChip from './TagChip'
 import { useGetAudioQuery } from '../../store/api/slice'
+import { ST } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -331,7 +332,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                       )}
                     >
                       <SourceIcon
-                        url={audio?.url}
+                        type={audio?.type}
                         className={cx(
                           classes.sourceIcon,
                           audio?.marked && classes.sourceMarkedIcon

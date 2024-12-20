@@ -177,7 +177,7 @@ test('Delete Tag', async ({ page }) => {
   await expect(page.getByTestId('SortIcon')).not.toBeVisible()
 })
 
-test('Sort Tags', async ({ page }) => {
+test('Sort By Title', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(
     page.getByRole('heading', { name: 'Add Tag', exact: true })
@@ -219,8 +219,8 @@ test('Sort Tags', async ({ page }) => {
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
   await page.getByTestId('SortIcon').click()
-  await expect(page.locator('li')).toHaveCount(1)
-  await expect(page.locator('li').first()).toHaveText('By Name')
+  await expect(page.locator('li')).toHaveCount(2)
+  await expect(page.locator('li').first()).toHaveText('By Title')
   await expect(
     page.locator('li').first().getByTestId('ArrowUpwardIcon')
   ).toBeVisible()
@@ -255,7 +255,7 @@ test('Sort Tags', async ({ page }) => {
   )
 })
 
-test('Move Tag', async ({ page }) => {
+test('Sort By Date', async ({ page }) => {
   await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
     'car'
   )
@@ -266,7 +266,59 @@ test('Move Tag', async ({ page }) => {
     'pets'
   )
 
-  let box2 = await page.locator('main').getByRole('button', {name: 'pets', exact: true}).boundingBox()
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('li')).toHaveCount(2)
+  await expect(page.locator('li').nth(1)).toHaveText('By Date')
+  await expect(
+    page.locator('li').nth(1).getByTestId('ArrowUpwardIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('li').nth(1).getByTestId('ArrowDownwardIcon')
+  ).toBeVisible()
+
+  await page.locator('li').nth(1).getByTestId('ArrowDownwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('li').nth(1)).not.toBeVisible()
+  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+    'dogs'
+  )
+  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+    'pets'
+  )
+  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+    'car'
+  )
+
+  await page.getByTestId('SortIcon').click()
+  await page.locator('li').nth(1).getByTestId('ArrowUpwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+    'car'
+  )
+  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+    'pets'
+  )
+  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+    'dogs'
+  )
+})
+
+test('Move Tag', async ({ page }) => {
+  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+    'car'
+  )
+  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+    'pets'
+  )
+  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+    'dogs'
+  )
+
+  let box2 = await page
+    .locator('main')
+    .getByRole('button', { name: 'dogs', exact: true })
+    .boundingBox()
   if (box2 == null) {
     throw new Error('Failed to get button bounding box')
   }
@@ -275,14 +327,17 @@ test('Move Tag', async ({ page }) => {
     .locator('main')
     .getByRole('button')
     .nth(0)
-    .dragTo(page.locator('main').getByRole('button', {name: 'pets', exact: true}), {
-      targetPosition: { x: box2.width, y: 0 }
-    })
+    .dragTo(
+      page.locator('main').getByRole('button', { name: 'dogs', exact: true }),
+      {
+        targetPosition: { x: box2.width, y: 0 }
+      }
+    )
   await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
-    'dogs'
+    'pets'
   )
   await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
-    'pets'
+    'dogs'
   )
   await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
     'car'
@@ -294,16 +349,19 @@ test('Move Tag', async ({ page }) => {
     .nth(1)
     .dragTo(page.locator('main').getByRole('button').nth(0))
   await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
-    'pets'
+    'dogs'
   )
   await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
-    'dogs'
+    'pets'
   )
   await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
     'car'
   )
 
-  box2 = await page.locator('main').getByRole('button', {name: 'car', exact: true}).boundingBox()
+  box2 = await page
+    .locator('main')
+    .getByRole('button', { name: 'car', exact: true })
+    .boundingBox()
   if (box2 == null) {
     throw new Error('Failed to get button bounding box')
   }
@@ -312,17 +370,20 @@ test('Move Tag', async ({ page }) => {
     .locator('main')
     .getByRole('button')
     .nth(1)
-    .dragTo(page.locator('main').getByRole('button', {name: 'car', exact: true}), {
-      targetPosition: { x: box2.width, y: 0 }
-    })
+    .dragTo(
+      page.locator('main').getByRole('button', { name: 'car', exact: true }),
+      {
+        targetPosition: { x: box2.width, y: 0 }
+      }
+    )
   await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
-    'pets'
+    'dogs'
   )
   await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
     'car'
   )
   await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
-    'dogs'
+    'pets'
   )
 })
 

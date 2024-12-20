@@ -62,7 +62,7 @@ import CodeMirror, {
   tupleSetters
 } from './CodeMirror'
 import BaseSlider from '../common/slider/BaseSlider'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   useGetCaptionScriptQuery,
   useGetSceneQuery,
@@ -249,6 +249,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function CaptionScriptor() {
+  const { id } = useParams() // TODO use this as captionscript id, if not null
   const navigate = useNavigate()
   const { data: tutorial } = useGetTutorialsQuery()
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())

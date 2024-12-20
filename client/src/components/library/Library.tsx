@@ -73,7 +73,11 @@ import SourceList from './SourceList'
 import GooninatorDialog from '../sceneDetail/GooninatorDialog'
 import PiwigoDialog from '../sceneDetail/PiwigoDialog'
 import URLDialog from '../sceneDetail/URLDialog'
-import { useGetTutorialsQuery } from '../../store/api/slice'
+import {
+  useGetContentSourceBatchTagOptionsQuery,
+  useGetContentSourceSearchOptionsQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import {
   useGetRemoteSettingsRedditAuthorizedQuery,
   useGetRemoteSettingsTwitterAuthorizedQuery,
@@ -82,8 +86,9 @@ import {
   useGetRemoteSettingsPiwigoConfiguredQuery
 } from '../../store/api/selectors'
 import { useNavigate } from 'react-router-dom'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { showSystemSnack } from '../../store/systemSnack/store'
+import { selectSpecialMode } from '../../store/app/selectors'
 
 const drawerWidth = 240
 
@@ -354,7 +359,7 @@ function Library() {
   const { data: tutorial } = useGetTutorialsQuery()
   const library: number[] = []
   const tags: number[] = []
-  const specialMode = ''
+  const specialMode = useAppSelector(selectSpecialMode())
 
   const { data: tumblrAuthorized } = useGetRemoteSettingsTumblrAuthorizedQuery()
   const { data: redditAuthorized } = useGetRemoteSettingsRedditAuthorizedQuery()
@@ -363,6 +368,8 @@ function Library() {
   const { data: instagramConfigured } =
     useGetRemoteSettingsInstagramConfiguredQuery()
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
+  const { data: tagOptions } = useGetContentSourceBatchTagOptionsQuery()
+  const { data: searchOptions } = useGetContentSourceSearchOptionsQuery()
 
   const progressCurrent = 0
   const progressMode = ''
@@ -734,12 +741,10 @@ function Library() {
                 />
               )}
               <LibrarySearch
-                displaySources={displaySources}
+                options={searchOptions}
                 filters={filters}
                 placeholder={'Search ...'}
-                isLibrary
                 isCreatable
-                onlyUsed
                 onUpdateFilters={onUpdateFilters}
               />
             </div>
@@ -1502,16 +1507,12 @@ function Library() {
           </DialogContentText>
           {openMenu === MO.batchTag && (
             <LibrarySearch
-              displaySources={library}
               filters={selectedTags}
+              options={tagOptions}
               placeholder={'Tag These Sources'}
-              isLibrary
-              isClearable
-              onlyTags
               showCheckboxes
               fullWidth
               inputVariant="standard"
-              hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
             />
           )}

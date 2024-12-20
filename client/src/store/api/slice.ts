@@ -1,4 +1,8 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import {
+  createApi,
+  fetchBaseQuery,
+  TagDescription
+} from '@reduxjs/toolkit/query/react'
 import { Credentials } from '../../data/Credentials'
 import {
   AccountChange,
@@ -30,7 +34,9 @@ import {
   CleanBackupsRequest,
   CacheSize,
   SortRequest,
-  MoveRequest
+  MoveRequest,
+  SelectOption,
+  BatchTagRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -73,6 +79,7 @@ export const flipflipApi = createApi({
     'Tag',
     'Clip',
     'ContentSource',
+    'ContentSourceBatchTagOptions',
     'Display',
     'DisplayView',
     'Playlist',
@@ -82,8 +89,15 @@ export const flipflipApi = createApi({
     'ScenePlaylistItems',
     'CaptionScript',
     'CaptionScriptFontSettings',
+    'CaptionScriptBatchTagOptions',
     'Audio',
-    'FilePicker'
+    'AudioBatchTagOptions',
+    'FilePicker',
+    'CaptionScriptSearchOptions',
+    'AudioSearchOptions',
+    'ContentSourceSearchOptions',
+    'TagSearchOptions',
+    'IgnoredTagOptions'
   ],
   endpoints: (builder) => ({
     isAuthenticated: builder.query<boolean, void>({
@@ -745,13 +759,46 @@ export const flipflipApi = createApi({
           : []
       }
     }),
+    createCaptionScripts: builder.mutation<void, string[]>({
+      query: (body) => ({
+        url: `api/caption-scripts`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'CaptionScript', id: 'List' },
+                  { type: 'CaptionScript', id: 'FilteredList' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
     getCaptionScripts: builder.query<number[], void>({
       query: () => ({
         url: `api/caption-scripts`
       }),
-      providesTags: (result) => {
-        return result != null ? [{ type: 'CaptionScript', id: 'List' }] : []
-      }
+      providesTags: [{ type: 'CaptionScript', id: 'List' }]
+    }),
+    getFilteredCaptionScripts: builder.query<number[], string[]>({
+      query: (filters) => {
+        let filtersQuery = encodeURIComponent(filters.join(','))
+        if (filtersQuery !== '') {
+          filtersQuery = '?filters=' + filtersQuery
+        }
+
+        // TODO would it be better to do filtering on the client?
+        return { url: `api/caption-scripts/filtered${filtersQuery}` }
+      },
+      providesTags: [{ type: 'CaptionScript', id: 'FilteredList' }]
     }),
     getCaptionScript: builder.query<CaptionScript, number>({
       query: (id) => ({
@@ -759,6 +806,36 @@ export const flipflipApi = createApi({
       }),
       providesTags: (result) => {
         return result != null ? [{ type: 'CaptionScript', id: result.id }] : []
+      }
+    }),
+    deleteCaptionScript: builder.mutation<void, Pick<CaptionScript, 'id'>>({
+      query: ({ id }) => ({
+        url: `api/caption-scripts/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
+            )
+          }
+        })
+      }
+    }),
+    deleteCaptionScripts: builder.mutation<void, void>({
+      query: () => ({
+        url: `api/caption-scripts`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'CaptionScript' }])
+            )
+          }
+        })
       }
     }),
     updateCaptionScript: builder.mutation<
@@ -771,16 +848,30 @@ export const flipflipApi = createApi({
         body: patch
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
-            )
-          }
-        })
+        await queryFulfilled
+          .then(({ meta }) => {
+            const status = meta?.response?.status
+            console.log('STATUS', status)
+            if (status === 205) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'CaptionScript', id },
+                  { type: 'CaptionScript', id: 'FilteredList' },
+                  { type: 'CaptionScript', id: 'List' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
+              )
+            }
+          })
       }
     }),
     getCaptionScriptFontSettings: builder.query<
@@ -814,6 +905,267 @@ export const flipflipApi = createApi({
             dispatch(
               flipflipApi.util.invalidateTags([
                 { type: 'CaptionScriptFontSettings', id: `${id}:${type}` }
+              ])
+            )
+          }
+        })
+      }
+    }),
+    getCaptionScriptBatchTagOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/caption-scripts/batch-tag-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['CaptionScriptBatchTagOptions'] : []
+      }
+    }),
+    getAudioBatchTagOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/audios/batch-tag-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['AudioBatchTagOptions'] : []
+      }
+    }),
+    getContentSourceBatchTagOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/content-sources/batch-tag-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['ContentSourceBatchTagOptions'] : []
+      }
+    }),
+    getCaptionScriptSearchOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/caption-scripts/search-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['CaptionScriptSearchOptions'] : []
+      }
+    }),
+    getAudioSearchOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/audios/search-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['AudioSearchOptions'] : []
+      }
+    }),
+    getContentSourceSearchOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/content-sources/search-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['ContentSourceSearchOptions'] : []
+      }
+    }),
+    getTagSearchOptions: builder.query<SelectOption[], void>({
+      query: () => ({
+        url: `api/tags/search-options`
+      }),
+      providesTags: (result) => {
+        return result != null ? ['TagSearchOptions'] : []
+      }
+    }),
+    batchTagAudios: builder.mutation<void, BatchTagRequest>({
+      query(body) {
+        return {
+          url: `api/audios/tags`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(request, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...request.ids.map((id) => ({ type: 'Audio' as const, id })),
+                  'AudioBatchTagOptions',
+                  'AudioSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    batchTagContentSources: builder.mutation<void, BatchTagRequest>({
+      query(body) {
+        return {
+          url: `api/content-sources/tags`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(request, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...request.ids.map((id) => ({
+                    type: 'ContentSource' as const,
+                    id
+                  })),
+                  'ContentSourceBatchTagOptions',
+                  'IgnoredTagOptions',
+                  'ContentSourceSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    batchTagCaptionScripts: builder.mutation<void, BatchTagRequest>({
+      query(body) {
+        return {
+          url: `api/caption-scripts/tags`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(request, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...request.ids.map((id) => ({
+                    type: 'CaptionScript' as const,
+                    id
+                  })),
+                  'CaptionScriptBatchTagOptions',
+                  'CaptionScriptSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    markAudios: builder.mutation<void, number[]>({
+      query(body) {
+        return {
+          url: `api/audios/mark`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(ids, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...ids.map((id) => ({ type: 'Audio' as const, id })),
+                  'AudioSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    markContentSources: builder.mutation<void, number[]>({
+      query(body) {
+        return {
+          url: `api/content-sources/mark`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(ids, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...ids.map((id) => ({ type: 'ContentSource' as const, id })),
+                  'ContentSourceSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    markCaptionScripts: builder.mutation<void, number[]>({
+      query(body) {
+        return {
+          url: `api/caption-scripts/mark`,
+          method: 'POST',
+          body
+        }
+      },
+      async onQueryStarted(ids, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  ...ids.map((id) => ({ type: 'CaptionScript' as const, id })),
+                  'CaptionScriptSearchOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    sortCaptionScripts: builder.mutation<void, SortRequest>({
+      query: (body) => ({
+        url: `api/caption-scripts/sort`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'CaptionScript', id: 'List' },
+                  { type: 'CaptionScript', id: 'FilteredList' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    moveCaptionScript: builder.mutation<void, MoveRequest>({
+      query: (body) => ({
+        url: `api/caption-scripts/move`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'CaptionScript', id: 'List' },
+                { type: 'CaptionScript', id: 'FilteredList' }
               ])
             )
           }
@@ -876,7 +1228,12 @@ export const flipflipApi = createApi({
           .then(({ meta }) => {
             if (meta?.response?.ok) {
               dispatch(
-                flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
+                flipflipApi.util.invalidateTags([
+                  { type: 'Tag', id: 'List' },
+                  { type: 'CaptionScriptBatchTagOptions' },
+                  { type: 'ContentSourceBatchTagOptions' },
+                  { type: 'AudioBatchTagOptions' }
+                ])
               )
             }
           })
@@ -1031,6 +1388,7 @@ export const {
   useGetDisplayPlaylistItemQuery,
   useGetScenePlaylistItemQuery,
   useGetCaptionScriptQuery,
+  useDeleteCaptionScriptsMutation,
   useUpdateCaptionScriptMutation,
   useGetCaptionScriptFontSettingsQuery,
   useUpdateCaptionScriptFontSettingsMutation,
@@ -1039,10 +1397,28 @@ export const {
   useGetTagsQuery,
   useDeleteTagsMutation,
   useGetTagsCountQuery,
+  useCreateCaptionScriptsMutation,
   useGetCaptionScriptsQuery,
+  useDeleteCaptionScriptMutation,
+  useGetFilteredCaptionScriptsQuery,
+  useSortCaptionScriptsMutation,
+  useMoveCaptionScriptMutation,
   useCreateTagMutation,
   useUpdateTagMutation,
   useDeleteTagMutation,
   useSortTagsMutation,
-  useMoveTagMutation
+  useMoveTagMutation,
+  useGetCaptionScriptBatchTagOptionsQuery,
+  useGetAudioBatchTagOptionsQuery,
+  useGetContentSourceBatchTagOptionsQuery,
+  useGetCaptionScriptSearchOptionsQuery,
+  useGetAudioSearchOptionsQuery,
+  useGetContentSourceSearchOptionsQuery,
+  useGetTagSearchOptionsQuery,
+  useBatchTagAudiosMutation,
+  useBatchTagContentSourcesMutation,
+  useBatchTagCaptionScriptsMutation,
+  useMarkAudiosMutation,
+  useMarkCaptionScriptsMutation,
+  useMarkContentSourcesMutation
 } = flipflipApi

@@ -693,7 +693,7 @@ function APICard() {
         <DialogTitle id="sign-out-title">
           {menuTypeText} Sign Out
           <Avatar className={classes.iconAvatar}>
-            <SourceIcon className={classes.icon} type={menuType} />
+            <SourceIcon className={classes.icon} type={menuType as string} />
           </Avatar>
         </DialogTitle>
         <DialogContent>

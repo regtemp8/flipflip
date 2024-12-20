@@ -33,3 +33,20 @@ export function getCacheDir() {
 export function getLogsDir() {
   return path.resolve(getSaveDir(), 'logs')
 }
+
+export function getFileName(url: string, extension = true) {
+  let sep
+  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
+    sep = '/'
+  } else {
+    sep = path.sep
+  }
+  url = url.substring(url.lastIndexOf(sep) + 1)
+  if (url.includes('?')) {
+    url = url.substring(0, url.indexOf('?'))
+  }
+  if (!extension) {
+    url = url.substring(0, url.lastIndexOf('.'))
+  }
+  return url
+}

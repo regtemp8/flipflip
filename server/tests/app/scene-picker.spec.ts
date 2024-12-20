@@ -35,8 +35,8 @@ test('Scene picker navigation', async ({ page }) => {
   await expect(page).toHaveURL('/script-library')
   await page.getByLabel('Back').click()
 
-  await page.getByLabel('Caption Scripter').click()
-  await expect(page).toHaveURL('/scripter')
+  await page.getByLabel('Caption Scriptor').click()
+  await expect(page).toHaveURL('/scriptor')
   await page.getByLabel('Back').click()
 
   await page.getByLabel('Account').click()

@@ -4,6 +4,9 @@ import express from 'express'
 import { FilePickerData, FilePickerItem, Message } from 'flipflip-common'
 import logger from '../logger'
 import { getSaveDir } from '../utils'
+import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
+import { findAudioUrlById } from '../db/AudioRepository'
+import { findContentSourceUrlById } from '../db/ContentSourceRepository'
 
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
@@ -36,24 +39,21 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
   const type = req.query.type
   if (type === 'dir') {
     dirents = dirents.filter((dirent) => dirent.isDirectory())
+  } else if (type === 'txt') {
+    dirents = dirents.filter(
+      (dirent) => dirent.isDirectory() || dirent.name.endsWith('.txt')
+    )
   }
 
-  const { default: getFolderSize } = await import('get-folder-size')
   const items: FilePickerItem[] = []
   for (const dirent of dirents) {
-    const stat = fs.statSync(path.join(dirent.parentPath, dirent.name))
-    let size = stat.size
-    if (dirent.isDirectory()) {
-      const result = await getFolderSize(path.join(dir, dirent.name))
-      if (result.errors == null) {
-        size = result.size
-      }
-    }
-
+    const stat = await fs.promises.stat(
+      path.join(dirent.parentPath, dirent.name)
+    )
     items.push({
       name: dirent.name,
       lastModified: stat.mtimeMs,
-      size,
+      size: stat.size,
       directory: dirent.isDirectory()
     })
   }
@@ -72,6 +72,29 @@ router.post('/create-directory', async (req, res) => {
       error
     })
     res.status(500).end()
+  }
+})
+
+router.get('/open/:type/:id', async (req, res) => {
+  const { id, type } = req.params
+  const queries = new Map([
+    ['caption-script', findCaptionScriptUrlById],
+    ['audio', findAudioUrlById],
+    ['content-source', findContentSourceUrlById]
+  ])
+
+  const query = queries.get(type)
+  if (query == null) {
+    res.status(400).send({ error: `Unsupported type: '${type}'` })
+    return
+  }
+
+  const url = await query(Number(id))
+  if (url.startsWith('http')) {
+    res.status(302).location(url).end()
+  } else {
+    res.status(200).type(url.substring(url.lastIndexOf('.')))
+    fs.createReadStream(url).pipe(res)
   }
 })
 

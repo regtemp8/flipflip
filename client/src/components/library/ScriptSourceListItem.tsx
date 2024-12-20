@@ -25,6 +25,10 @@ import { grey } from '@mui/material/colors'
 import { SP } from 'flipflip-common'
 import EditIcon from '@mui/icons-material/Edit'
 import TagChip from './TagChip'
+import { useGetCaptionScriptQuery } from '../../store/api/slice'
+import { useNavigate } from 'react-router-dom'
+import { selectSpecialMode } from '../../store/app/selectors'
+import { useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -111,36 +115,31 @@ export interface ScriptSourceListItemProps {
   lastSelected: boolean
   scriptID: number
   style: any
-  onDelete: (scriptID: number) => void
   onEndEdit: (newURL: string) => void
   onPlay: (scriptID: number) => void
   onRemove: (scriptID: number) => void
-  onSourceOptions: (scriptID: number) => void
   onStartEdit: (scriptID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>) => void
   savePosition: () => void
 }
 
 function ScriptSourceListItem(props: ScriptSourceListItemProps) {
-  const specialMode = '' //useAppSelector(selectAppSpecialMode())
-  const url = '' //useAppSelector(selectCaptionScriptUrl(props.scriptID))
-  const marked = false //useAppSelector(selectCaptionScriptMarked(props.scriptID))
-  const tags: number[] = [] //useAppSelector(selectCaptionScriptTags(props.scriptID))
+  const navigate = useNavigate()
+  const specialMode = useAppSelector(selectSpecialMode())
+  const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
-  const [urlInput, setUrlInput] = useState<string>()
+  const [urlInput, setUrlInput] = useState<string>('')
 
   useEffect(() => {
-    setUrlInput(url)
-  }, [url])
+    if (props.isEditing === props.scriptID) {
+      setUrlInput(script?.url ?? '')
+    }
+  }, [props.isEditing, props.scriptID, script?.url])
 
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
-    const sourceURL = url as string
-    if (e.shiftKey && e.ctrlKey && e.altKey) {
-      props.onDelete(props.scriptID)
-    } else if (e.shiftKey && !e.ctrlKey) {
-      openExternalURL(sourceURL)
-    } else if (!e.shiftKey && e.ctrlKey) {
-      // flipflip().api.showItemInFolder(sourceURL)
+    if (e.shiftKey && !e.ctrlKey) {
+      const id = script?.id as number
+      window.location.href = `http://localhost:5050/fs/open/caption-script/${id}`
     } else if (!e.shiftKey && !e.ctrlKey) {
       props.savePosition()
       props.onPlay(props.scriptID)
@@ -152,7 +151,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   }
 
   const onEndEdit = () => {
-    props.onEndEdit(urlInput as string)
+    props.onEndEdit(urlInput)
   }
 
   const openExternalURL = (url: string) => {
@@ -175,7 +174,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
               {!specialMode && (
                 <IconButton
                   onClick={() => {
-                    // dispatch(openScriptInScriptor(props.scriptID))
+                    navigate(`/scriptor/${props.scriptID}`)
                   }}
                   className={classes.actionButton}
                   edge="end"
@@ -186,7 +185,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 </IconButton>
               )}
               <IconButton
-                onClick={() => props.onSourceOptions(props.scriptID)}
+                onClick={() => navigate(`/scripts/${props.scriptID}/options`)}
                 className={classes.actionButton}
                 edge="end"
                 size="small"
@@ -230,21 +229,22 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 Library Tagging
                 <br />
                 Shift+Click: Open Source
-                <br />
-                &nbsp;&nbsp;Ctrl+Click: Reveal File
               </div>
             }
           >
             <Fab
               size="small"
               onClick={onSourceIconClick}
-              className={cx(classes.avatar, marked && classes.markedSource)}
+              className={cx(
+                classes.avatar,
+                script?.marked && classes.markedSource
+              )}
             >
               <SourceIcon
-                url={url}
+                type={script?.type ?? ''}
                 className={cx(
                   classes.sourceIcon,
-                  marked && classes.sourceMarkedIcon
+                  script?.marked && classes.sourceMarkedIcon
                 )}
               />
             </Fab>
@@ -273,32 +273,31 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 className={classes.noUserSelect}
                 onClick={() => props.onStartEdit(props.scriptID)}
               >
-                {url}
+                {script?.url ?? ''}
               </Typography>
-              {tags &&
-                tags.map((tagID) => (
-                  <React.Fragment key={tagID}>
-                    <TagChip
-                      tagID={tagID}
-                      className={cx(
-                        classes.noUserSelect,
-                        classes.actionButton,
-                        classes.fullTag
-                      )}
-                      outlined
-                    />
-                    <TagChip
-                      tagID={tagID}
-                      className={cx(
-                        classes.noUserSelect,
-                        classes.actionButton,
-                        classes.simpleTag
-                      )}
-                      outlined
-                      simpleTag
-                    />
-                  </React.Fragment>
-                ))}
+              {script?.tags?.map((tagID) => (
+                <React.Fragment key={tagID}>
+                  <TagChip
+                    tagID={tagID}
+                    className={cx(
+                      classes.noUserSelect,
+                      classes.actionButton,
+                      classes.fullTag
+                    )}
+                    outlined
+                  />
+                  <TagChip
+                    tagID={tagID}
+                    className={cx(
+                      classes.noUserSelect,
+                      classes.actionButton,
+                      classes.simpleTag
+                    )}
+                    outlined
+                    simpleTag
+                  />
+                </React.Fragment>
+              ))}
             </React.Fragment>
           )}
         </ListItemText>

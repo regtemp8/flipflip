@@ -1,7 +1,7 @@
-import { DeleteResult, Insertable, Updateable } from 'kysely'
-import { Tag } from './types/generated'
+import { DeleteResult, Insertable, Kysely, Updateable } from 'kysely'
+import { DB, Tag } from './types/generated'
 import db from './database'
-import { MoveRequest, SortRequest } from 'flipflip-common'
+import { MoveRequest, SF, SortRequest } from 'flipflip-common'
 
 export async function findTagIds(): Promise<number[]> {
   return await db()
@@ -100,6 +100,10 @@ export async function deleteTag(id: number) {
     })
 }
 
+const sortColumns = new Map<string, string>([
+  [SF.alpha, 'name'], 
+  [SF.date, 'id']
+])
 export async function sortTags({ sortBy, sortOrder }: SortRequest) {
   return await db()
     .query()
@@ -108,16 +112,14 @@ export async function sortTags({ sortBy, sortOrder }: SortRequest) {
       const rows = await trx
         .selectFrom('tag')
         .select('id')
-        .orderBy(`${sortBy as keyof Tag} ${sortOrder}`)
+        .orderBy(`${sortColumns.get(sortBy) as keyof Tag} ${sortOrder}`)
         .execute()
 
-      for (let i = 0; i < rows.length; i++) {
-        await trx
-          .updateTable('tag')
-          .set({ index: rows.length + i })
-          .where('id', '=', rows[i].id)
-          .execute()
-      }
+      await trx
+        .updateTable('tag')
+        .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
+        .execute()
+
       for (let i = 0; i < rows.length; i++) {
         await trx
           .updateTable('tag')
@@ -158,4 +160,13 @@ export async function findTagsCount() {
     .selectFrom('tag')
     .select((eb) => eb.fn.countAll<number>().as('tagsCount'))
     .executeTakeFirstOrThrow()
+}
+
+export async function findTagIdsByName(tags: string[], trx: Kysely<DB>) {
+  return await trx
+    .selectFrom('tag')
+    .select('id')
+    .where('name', 'in', tags)
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
 }

@@ -1,6 +1,7 @@
 export type CaptionScript = {
   id: number;
-  url?: string;
+  url: string;
+  type: string;
   script?: string;
   marked: boolean;
   tags: number[]; // Array of Tag IDs

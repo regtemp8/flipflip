@@ -70,6 +70,7 @@ test('Caching Directory', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^backups/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^logs/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^old-cache/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
   await page.getByTestId('SearchIcon').click()
   await page.getByPlaceholder('Search current directory').fill('lo')
   await expect(page.getByRole('button', { name: /^backups/ })).not.toBeVisible()
@@ -77,10 +78,12 @@ test('Caching Directory', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: /^old-cache/ })
   ).not.toBeVisible()
+  await expect(page.getByRole('button', { name: /^scripts/ })).not.toBeVisible()
   await page.getByTestId('CancelIcon').click()
   await expect(page.getByRole('button', { name: /^backups/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^logs/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^old-cache/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
   await page.getByRole('button', { name: /^logs/ }).click()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(
@@ -101,7 +104,7 @@ test('Caching Directory', async ({ page }) => {
     page.getByLabel('Caching Directory', { exact: true })
   ).toHaveValue(path.resolve(__dirname, '..', '..', '..', 'data', 'backups'))
   await expect(
-    page.getByText('Current: 5.67 MB', { exact: true })
+    page.getByText('Current: 5.78 MB', { exact: true })
   ).toBeVisible()
 
   await page.getByLabel('Caching Directory', { exact: true }).click()
@@ -150,7 +153,7 @@ test('Clear Cache', async ({ page }) => {
     page.getByLabel('Caching Directory', { exact: true })
   ).toHaveValue(directory)
   await expect(
-    page.getByText('Current: 1.96 MB', { exact: true })
+    page.getByText('Current: 2.00 MB', { exact: true })
   ).toBeVisible()
 
   await page.getByTestId('DeleteSweepIcon').click()
@@ -171,7 +174,7 @@ test('Clear Cache', async ({ page }) => {
     page.getByLabel('Caching Directory', { exact: true })
   ).toHaveValue(directory)
   await expect(
-    page.getByText('Current: 1.96 MB', { exact: true })
+    page.getByText('Current: 2.00 MB', { exact: true })
   ).toBeVisible()
 
   await page.getByTestId('DeleteSweepIcon').click()

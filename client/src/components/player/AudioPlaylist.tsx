@@ -195,7 +195,10 @@ function PlaylistItem(props: PlaylistItemProps) {
               )}
               {audio?.thumb == null && (
                 <Fab size="small" className={classes.avatar}>
-                  <SourceIcon url={audio?.url} className={classes.sourceIcon} />
+                  <SourceIcon
+                    type={audio?.type}
+                    className={classes.sourceIcon}
+                  />
                 </Fab>
               )}
             </div>

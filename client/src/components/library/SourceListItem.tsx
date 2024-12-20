@@ -24,7 +24,7 @@ import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt'
 
-import { getSourceType, SDT, ST } from 'flipflip-common'
+import { SDT, ST } from 'flipflip-common'
 import SourceIcon from './SourceIcon'
 import { grey } from '@mui/material/colors'
 import TagChip from './TagChip'
@@ -266,7 +266,7 @@ function SourceListItem(props: SourceListItemProps) {
   }
 
   const { classes } = useStyles()
-  const sourceType = source?.url && getSourceType(source?.url)
+  const sourceType = source?.type
   return (
     <div
       style={props.style}
@@ -502,7 +502,7 @@ function SourceListItem(props: SourceListItemProps) {
                 )}
               >
                 <SourceIcon
-                  url={source?.url}
+                  type={source?.type}
                   className={cx(
                     classes.sourceIcon,
                     source?.marked && classes.sourceMarkedIcon

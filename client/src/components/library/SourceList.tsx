@@ -36,7 +36,7 @@ import { makeStyles } from 'tss-react/mui'
 import FolderIcon from '@mui/icons-material/Folder'
 
 import { getTimestamp } from '../../utils'
-import { getSourceType, en, RF, RT, SDT, ST } from 'flipflip-common'
+import { en, RF, RT, SDT, ST } from 'flipflip-common'
 import SourceListItem from './SourceListItem'
 import BaseSwitch from '../common/BaseSwitch'
 // import {
@@ -331,7 +331,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
   const { data: source } = useGetContentSourceQuery(props.sourceID)
   const redditFunc = source?.redditFunc
   const url = source?.url
-  const type = source?.url && getSourceType(source?.url)
+  const type = source?.type
 
   const onOpenSubtitleFile = async () => {
     // const subtitleFile = await flipflip().api.openSubtitleFile()

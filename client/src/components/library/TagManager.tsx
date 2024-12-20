@@ -458,7 +458,7 @@ function TagManager() {
             open={openMenu === MO.sort}
             onClose={onCloseDialog}
           >
-            {[SF.name].map((sf) => (
+            {[SF.alpha, SF.date].map((sf) => (
               <ListItem
                 key={sf}
                 secondaryAction={
@@ -466,7 +466,7 @@ function TagManager() {
                     <IconButton
                       edge="end"
                       onClick={async () => {
-                        await sortTags({ sortBy: 'name', sortOrder: 'asc' })
+                        await sortTags({ sortBy: sf, sortOrder: 'asc' })
                       }}
                       size="large"
                     >
@@ -475,7 +475,7 @@ function TagManager() {
                     <IconButton
                       edge="end"
                       onClick={async () => {
-                        await sortTags({ sortBy: 'name', sortOrder: 'desc' })
+                        await sortTags({ sortBy: sf, sortOrder: 'desc' })
                       }}
                       size="large"
                     >

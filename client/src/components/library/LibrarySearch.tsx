@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
-import { useAppSelector } from '../../store/hooks'
+import { SelectOption } from 'flipflip-common'
 //import { selectAppLibrarySearchOptions } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -30,49 +30,20 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface LibrarySearchProps {
-  displaySources: number[]
   filters: string[]
+  options: SelectOption[]
   placeholder: string
-  isLibrary?: boolean
-  isAudio?: boolean
-  isScript?: boolean
   autoFocus?: boolean
-  controlShouldRenderValue?: boolean
-  hideSelectedOptions?: boolean
-  isClearable?: boolean
   isCreatable?: boolean
   menuIsOpen?: boolean
-  noTypes?: boolean
-  onlyTags?: boolean
-  onlyTagsAndTypes?: boolean
-  onlyUsed?: boolean
   showCheckboxes?: boolean
   fullWidth?: boolean
-  withBrackets?: boolean
   inputVariant?: TextFieldVariants
   onUpdateFilters: (filter: string[]) => void
 }
 
 function LibrarySearch(props: LibrarySearchProps) {
   const [searchInput, setSearchInput] = useState('')
-  // TODO make library search work again
-  const options: { value: string; label: string }[] = []
-  // const options = useAppSelector(
-  //   selectAppLibrarySearchOptions(
-  //     props.displaySources,
-  //     props.filters,
-  //     searchInput,
-  //     props.isLibrary,
-  //     props.isAudio,
-  //     props.isScript,
-  //     props.onlyUsed,
-  //     props.onlyTags,
-  //     props.onlyTagsAndTypes,
-  //     props.isCreatable,
-  //     props.withBrackets,
-  //     props.noTypes
-  //   )
-  // )
 
   const defaultValues = props.filters.map((filter) => {
     return { label: filter, value: filter }
@@ -161,6 +132,7 @@ function LibrarySearch(props: LibrarySearchProps) {
     return filtered
   }
 
+  console.log('OPTIONS', props.options)
   const { classes } = useStyles()
   return (
     <Autocomplete
@@ -174,7 +146,7 @@ function LibrarySearch(props: LibrarySearchProps) {
         !props.fullWidth && classes.limitWidth
       )}
       value={defaultValues}
-      options={options}
+      options={props.options}
       isOptionEqualToValue={(option, value) => {
         const optionValue = typeof option === 'string' ? option : option.value
         const valueValue = typeof value === 'string' ? value : value.value

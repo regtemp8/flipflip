@@ -1,6 +1,7 @@
 export type ContentSource = {
   id: number;
   url: string;
+  type: string;
   offline: boolean;
   marked: boolean;
   lastCheck?: number;

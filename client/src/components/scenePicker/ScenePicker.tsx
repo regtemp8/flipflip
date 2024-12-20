@@ -643,13 +643,13 @@ function ScenePicker() {
         <div>
           <Tooltip
             disableInteractive
-            title={drawerOpen ? '' : 'Caption Scripter'}
+            title={drawerOpen ? '' : 'Caption Scriptor'}
           >
-            <ListItemButton onClick={() => navigate('/scripter')}>
+            <ListItemButton onClick={() => navigate('/scriptor')}>
               <ListItemIcon>
                 <CodeIcon />
               </ListItemIcon>
-              <ListItemText primary="Caption Scripter" />
+              <ListItemText primary="Caption Scriptor" />
             </ListItemButton>
           </Tooltip>
         </div>

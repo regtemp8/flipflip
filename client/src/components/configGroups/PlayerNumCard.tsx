@@ -139,17 +139,12 @@ function PlayerNumCard() {
               Ignored Tags/Types
             </Typography>
             <LibrarySearch
-              displaySources={library}
               filters={ignoredTags}
-              isLibrary
-              isClearable
-              onlyTagsAndTypes
               showCheckboxes
-              withBrackets
               placeholder={'Search ...'}
-              hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
               inputVariant="standard"
+              optionsQuery={useGetIgnoredTagOptionsQuery()}
             />
           </div>
         </Tooltip>

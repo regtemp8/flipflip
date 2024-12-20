@@ -41,7 +41,8 @@ import {
   SG,
   convertGridIDToSceneID,
   convertPlaylistIDToSceneID,
-  getRandomColor
+  getRandomColor,
+  getSourceType
 } from 'flipflip-common'
 import logger from '../../../logger'
 
@@ -376,7 +377,8 @@ const displaySettingsInsert = async (
       .insertInto('ignoredTag')
       .values({
         displaySettingsId,
-        tagId
+        tagId,
+        userId
       })
       .execute()
   }
@@ -961,7 +963,8 @@ const clipInsert = async (
       .insertInto('clipTag')
       .values({
         clipId: insertedClip.id as number,
-        tagId
+        tagId,
+        userId
       })
       .execute()
   }
@@ -1025,6 +1028,7 @@ const contentSourceInsert = async (
       id,
       userId,
       url,
+      type: getSourceType(url),
       offline: toNumber(offline),
       marked: toNumber(marked),
       lastCheck: new Date(lastCheck).getTime(),
@@ -1062,7 +1066,8 @@ const contentSourceInsert = async (
       .insertInto('contentSourceTag')
       .values({
         contentSourceId: insertedSource.id as number,
-        tagId
+        tagId,
+        userId
       })
       .execute()
   }
@@ -1168,6 +1173,7 @@ const audioInsert = async (
         id,
         userId,
         url,
+        type: getSourceType(url),
         marked: toNumber(marked),
         volume,
         speed,
@@ -1211,7 +1217,8 @@ const audioInsert = async (
         .insertInto('audioTag')
         .values({
           audioId: id,
-          tagId
+          tagId,
+          userId
         })
         .execute()
     }
@@ -1270,6 +1277,8 @@ const audioPlaylistInsert = async (
 const fontSettingsInsert = async (
   trx: Kysely<DB>,
   fontSettings: FontSettings,
+  captionScriptId: number,
+  type: string,
   userId: number
 ) => {
   logger.info('+ Insert font settings')
@@ -1280,6 +1289,8 @@ const fontSettingsInsert = async (
     .insertInto('fontSettings')
     .values({
       userId,
+      captionScriptId,
+      type,
       color,
       fontSize,
       fontFamily,
@@ -1287,8 +1298,7 @@ const fontSettingsInsert = async (
       borderpx,
       borderColor
     })
-    .returningAll()
-    .executeTakeFirstOrThrow()
+    .execute()
 }
 
 const captionScriptInsert = async (
@@ -1302,7 +1312,8 @@ const captionScriptInsert = async (
   } else {
     logger.info(': No caption scripts')
   }
-  for (const captionScript of json.scripts) {
+  for (let i = 0; i < json.scripts.length; i++) {
+    const captionScript = json.scripts[i]
     const {
       id,
       url,
@@ -1318,32 +1329,19 @@ const captionScriptInsert = async (
       count
     } = captionScript
 
-    if (url == null && script == null) {
-      logger.info(
-        `! Skipping caption script, no url or script defined (id: ${id})`
-      )
+    if (url == null) {
+      logger.info(`! Skipping caption script, no url defined (id: ${id})`)
       continue
     }
 
-    logger.info('+ Insert blink font settings')
-    const blinkFontId = (await fontSettingsInsert(trx, blink, userId)).id
-
-    logger.info('+ Insert caption font settings')
-    const captionFontId = (await fontSettingsInsert(trx, caption, userId)).id
-
-    logger.info('+ Insert big caption font settings')
-    const captionBigFontId = (await fontSettingsInsert(trx, captionBig, userId))
-      .id
-
-    logger.info('+ Insert count font settings')
-    const countFontId = (await fontSettingsInsert(trx, count, userId)).id
-
+    // TODO how is script column used?
     logger.info(`+ Insert caption script (id: ${id})`)
     await trx
       .insertInto('captionScript')
       .values({
         id,
         url,
+        type: getSourceType(url),
         userId,
         script,
         marked: toNumber(marked),
@@ -1351,12 +1349,21 @@ const captionScriptInsert = async (
         stopAtEnd: toNumber(stopAtEnd),
         nextSceneAtEnd: toNumber(nextSceneAtEnd),
         syncWithAudio: toNumber(syncWithAudio),
-        blinkFontId,
-        captionFontId,
-        captionBigFontId,
-        countFontId
+        index: i
       })
       .execute()
+
+    logger.info('+ Insert blink font settings')
+    await fontSettingsInsert(trx, blink, id, 'blink', userId)
+
+    logger.info('+ Insert caption font settings')
+    await fontSettingsInsert(trx, caption, id, 'caption', userId)
+
+    logger.info('+ Insert big caption font settings')
+    await fontSettingsInsert(trx, captionBig, id, 'captionBig', userId)
+
+    logger.info('+ Insert count font settings')
+    await fontSettingsInsert(trx, count, id, 'count', userId)
 
     if (captionScript.tags.length > 0) {
       logger.info('+ Insert caption script tags')
@@ -1375,7 +1382,8 @@ const captionScriptInsert = async (
         .insertInto('captionScriptTag')
         .values({
           captionScriptId: id,
-          tagId
+          tagId,
+          userId
         })
         .execute()
     }

@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent, useState } from 'react'
+import React, { MouseEvent } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -8,7 +8,6 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
   ListItemText,
   type Theme,
   Tooltip
@@ -25,7 +24,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
-import ScriptOptions from '../library/ScriptOptions'
+import { useNavigate } from 'react-router-dom'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
@@ -73,13 +72,14 @@ export interface ScriptPlaylistItemProps {
   index: number
   sceneID: number
   scripts: number[]
-  onSourceOptions: (id: number) => void
 }
 
 export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
   const { playlistID, index } = props
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
+  const type = useAppSelector(selectCaptionScriptType(props.scriptID))
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
     const sourceURL = url as string
@@ -111,7 +111,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
         <>
           <IconButton
             edge="end"
-            onClick={() => props.onSourceOptions(props.scriptID)}
+            onClick={() => navigate(`/scripts/${props.scriptID}/options`)}
             size="large"
           >
             <BuildIcon />
@@ -139,7 +139,7 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
         >
           <div onClick={onSourceIconClick} className={classes.scriptThumb}>
             <Fab size="small" className={classes.avatar}>
-              <SourceIcon url={url} className={classes.sourceIcon} />
+              <SourceIcon type={type} className={classes.sourceIcon} />
             </Fab>
           </div>
         </Tooltip>
@@ -158,16 +158,8 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
   const dispatch = useAppDispatch()
   const playlist = useAppSelector(selectPlaylist(playlistID))
 
-  const [sourceOptions, setSourceOptions] = useState<number>()
   const sceneID = 0
   // const [sceneID, setSceneID] = useState<number>(0)
-
-  const onCloseSourceOptions = () => {
-    setSourceOptions(undefined)
-  }
-  const onSourceOptions = (scriptID: number) => {
-    setSourceOptions(scriptID)
-  }
 
   const toggleShuffle = () => {
     dispatch(setPlaylistToggleShuffle(playlistID))
@@ -205,7 +197,6 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
               index={index}
               sceneID={sceneID}
               scripts={playlist.items}
-              onSourceOptions={onSourceOptions}
             />
           ))}
         </Sortable>
@@ -249,9 +240,6 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
           </Tooltip>
         </div>
       </List>
-      {sourceOptions != null && (
-        <ScriptOptions scriptID={sourceOptions} onDone={onCloseSourceOptions} />
-      )}
     </>
   )
 }

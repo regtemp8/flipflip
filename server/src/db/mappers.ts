@@ -22,7 +22,8 @@ import {
   CleanBackupsRequest,
   DefaultCleanBackupsRequest,
   AutoCleanBackupsRequest,
-  CacheSize
+  CacheSize,
+  SelectOption
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -65,6 +66,7 @@ import {
 } from './CaptionScriptRepository'
 import { getBackupsDir, getCacheDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
+import { SearchOption } from './types/SearchOption'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,
@@ -1021,7 +1023,10 @@ export function toCacheSettingsUpdate(
   }
 }
 
-export function toContentSource(row: ContentSourceRow): ContentSource {
+export function toContentSource(
+  row: ContentSourceRow,
+  tags: number[]
+): ContentSource {
   const {
     count,
     countComplete,
@@ -1034,6 +1039,7 @@ export function toContentSource(row: ContentSourceRow): ContentSource {
     redditTime,
     twitterIncludeReplies,
     twitterIncludeRetweets,
+    type,
     url,
     videoDuration,
     videoResolution,
@@ -1044,10 +1050,11 @@ export function toContentSource(row: ContentSourceRow): ContentSource {
   return {
     id: id as number,
     url,
+    type,
     offline: toBoolean(offline),
     marked: toBoolean(marked),
     lastCheck: opt<number>(lastCheck),
-    tags: [],
+    tags,
     clips: [],
     disabledClips: [],
     blacklist: [],
@@ -1192,7 +1199,7 @@ export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
   }
 }
 
-export function toAudio(row: AudioRow): Audio {
+export function toAudio(row: AudioRow, tags: number[]): Audio {
   const {
     album,
     artist,
@@ -1215,6 +1222,7 @@ export function toAudio(row: AudioRow): Audio {
     tickMode,
     tickSinRate,
     trackNum,
+    type,
     url,
     volume
   } = row
@@ -1222,8 +1230,9 @@ export function toAudio(row: AudioRow): Audio {
   return {
     id: id as number,
     url,
+    type,
     marked: toBoolean(marked),
-    tags: [],
+    tags,
     volume,
     speed,
     stopAtEnd: toBoolean(stopAtEnd),
@@ -1299,7 +1308,10 @@ export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
   }
 }
 
-export function toCaptionScript(row: CaptionScriptRow): CaptionScript {
+export function toCaptionScript(
+  row: CaptionScriptRow,
+  tags: number[]
+): CaptionScript {
   const {
     id,
     marked,
@@ -1308,15 +1320,17 @@ export function toCaptionScript(row: CaptionScriptRow): CaptionScript {
     script,
     stopAtEnd,
     syncWithAudio,
+    type,
     url
   } = row
 
   return {
     id: id as number,
-    url: opt<string>(url),
+    url,
+    type,
     script: opt<string>(script),
     marked: toBoolean(marked),
-    tags: [],
+    tags,
     opacity,
     stopAtEnd: toBoolean(stopAtEnd),
     nextSceneAtEnd: toBoolean(nextSceneAtEnd),
@@ -1411,4 +1425,76 @@ export function toBackupSettings(request: CleanBackupsRequest): BackupSettings {
     autoCleanBackupWeeks,
     cleanRetain
   }
+}
+
+export function toSearchSelectOptions(
+  tagOptions: SearchOption[],
+  untaggedCount: number,
+  markedCount: number,
+  offlineCount?: number,
+  typeOptions?: SearchOption[]
+): SelectOption[] {
+  const options: SelectOption[] = []
+  if (untaggedCount > 0) {
+    options.push({
+      label: '<Untagged> (' + untaggedCount + ')',
+      value: '<Untagged>'
+    })
+  }
+  if (offlineCount != null && offlineCount > 0) {
+    options.push({
+      label: '<Offline> (' + offlineCount + ')',
+      value: '<Offline>'
+    })
+  }
+  if (markedCount > 0) {
+    options.push({ label: '<Marked> (' + markedCount + ')', value: '<Marked>' })
+  }
+
+  tagOptions.forEach(({ name, count }) =>
+    options.push({ label: `${name} (${count})`, value: `[${name}]` })
+  )
+  if (typeOptions != null) {
+    typeOptions.forEach(({ name, count }) =>
+      options.push({ label: `${name} (${count})`, value: `{${name}}` })
+    )
+  }
+
+  tagOptions.forEach(({ name, count }) =>
+    options.push({ label: `-${name} (${count})`, value: `-[${name}]` })
+  )
+  if (typeOptions != null) {
+    typeOptions.forEach(({ name, count }) =>
+      options.push({ label: `-${name} (${count})`, value: `-{${name}}` })
+    )
+  }
+
+  return options
+}
+
+export function toTagSelectOptions(options: SearchOption[]): SelectOption[] {
+  return options.map(({ name, count }) => ({
+    label: `${name} (${count})`,
+    value: name
+  }))
+}
+
+export function toIgnoredTagSelectOptions(
+  tagOptions: SearchOption[],
+  typeOptions: SearchOption[]
+): SelectOption[] {
+  const options: SelectOption[] = []
+  tagOptions.forEach(({ name, count }) =>
+    options.push({ label: `${name} (${count})`, value: `[${name}]` })
+  )
+  typeOptions.forEach(({ name, count }) =>
+    options.push({ label: `${name} (${count})`, value: `{${name}}` })
+  )
+  tagOptions.forEach(({ name, count }) =>
+    options.push({ label: `-${name} (${count})`, value: `-[${name}]` })
+  )
+  typeOptions.forEach(({ name, count }) =>
+    options.push({ label: `-${name} (${count})`, value: `-{${name}}` })
+  )
+  return options
 }

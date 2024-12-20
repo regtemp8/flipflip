@@ -79,6 +79,12 @@ import PlaylistSelect from '../common/PlaylistSelect'
 import PlaylistList from './PlaylistList'
 import AudioEdit from './AudioEdit'
 import { useLocation } from 'react-router-dom'
+import { useAppSelector } from '../../store/hooks'
+import { selectSpecialMode } from '../../store/app/selectors'
+import {
+  useGetAudioBatchTagOptionsQuery,
+  useGetAudioSearchOptionsQuery
+} from '../../store/api/slice'
 
 const drawerWidth = 240
 
@@ -427,9 +433,12 @@ const getOpenTab = (pathname: string) => {
 function AudioLibrary() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { data: tagOptions } = useGetAudioBatchTagOptionsQuery()
+  const { data: searchOptions } = useGetAudioSearchOptionsQuery()
+
   const tutorial = ''
   const tagsCount = 0
-  const specialMode = ''
+  const specialMode = useAppSelector(selectSpecialMode())
   const progressMode = ''
   const progressCurrent = 0
   const progressTotal = 100
@@ -799,13 +808,10 @@ function AudioLibrary() {
                 />
               )}
               <LibrarySearch
-                displaySources={displaySources}
                 filters={filters}
+                options={searchOptions}
                 placeholder={'Search ...'}
-                isAudio
                 isCreatable
-                onlyUsed
-                noTypes
                 onUpdateFilters={onUpdateFilters}
               />
             </div>
@@ -1592,15 +1598,11 @@ function AudioLibrary() {
             </DialogContentText>
             {openMenu === MO.batchTag && (
               <LibrarySearch
-                displaySources={audios}
+                options={tagOptions}
                 filters={selectedTags}
                 placeholder={'Tag These Sources'}
-                isAudio
-                isClearable
-                onlyTags
                 fullWidth
                 showCheckboxes
-                hideSelectedOptions={false}
                 onUpdateFilters={onSelectTags}
                 inputVariant="standard"
               />

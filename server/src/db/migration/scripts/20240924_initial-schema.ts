@@ -117,8 +117,12 @@ const ignoredTagTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('ignoredTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('displaySettingsId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint('FK_ignoredTag_user_userId', ['userId'], 'user', [
+      'id'
+    ])
     .addForeignKeyConstraint(
       'FK_ignoredTag_displaySettings_displaySettingsId',
       ['displaySettingsId'],
@@ -127,6 +131,11 @@ const ignoredTagTable = async (trx: Kysely<DB>) => {
     )
     .addForeignKeyConstraint('FK_ignoredTag_tag_tagId', ['tagId'], 'tag', [
       'id'
+    ])
+    .addUniqueConstraint('UQ_ignoredTag_userId_displaySettingsId_tagId', [
+      'userId',
+      'displaySettingsId',
+      'tagId'
     ])
     .execute()
 }
@@ -206,6 +215,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
+    .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('offline', 'boolean', (col) => col.notNull())
     .addColumn('marked', 'boolean', (col) => col.notNull())
     .addColumn('lastCheck', 'integer')
@@ -234,8 +244,15 @@ const contentSourceTagTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('contentSourceTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('contentSourceId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint(
+      'FK_contentSourceTag_user_userId',
+      ['userId'],
+      'user',
+      ['id']
+    )
     .addForeignKeyConstraint(
       'FK_contentSourceTag_contentSource_contentSourceId',
       ['contentSourceId'],
@@ -248,6 +265,11 @@ const contentSourceTagTable = async (trx: Kysely<DB>) => {
       'tag',
       ['id']
     )
+    .addUniqueConstraint('UQ_contentSourceTag_userId_contentSourceId_tagId', [
+      'userId',
+      'contentSourceId',
+      'tagId'
+    ])
     .execute()
 }
 
@@ -277,12 +299,21 @@ const clipTagTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('clipTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('clipId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint('FK_clipTag_user_userId', ['userId'], 'user', [
+      'id'
+    ])
     .addForeignKeyConstraint('FK_clipTag_clip_clipId', ['clipId'], 'clip', [
       'id'
     ])
     .addForeignKeyConstraint('FK_clipTag_tag_tagId', ['tagId'], 'tag', ['id'])
+    .addUniqueConstraint('UQ_clipTag_userId_clipId_tagId', [
+      'userId',
+      'clipId',
+      'tagId'
+    ])
     .execute()
 }
 
@@ -836,6 +867,7 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
+    .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('marked', 'boolean', (col) => col.notNull())
     .addColumn('volume', 'integer', (col) => col.notNull())
     .addColumn('speed', 'integer', (col) => col.notNull())
@@ -866,8 +898,12 @@ const audioTagTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('audioTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('audioId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint('FK_audioTag_user_userId', ['userId'], 'user', [
+      'id'
+    ])
     .addForeignKeyConstraint(
       'FK_audioTag_audio_audioId',
       ['audioId'],
@@ -875,6 +911,11 @@ const audioTagTable = async (trx: Kysely<DB>) => {
       ['id']
     )
     .addForeignKeyConstraint('FK_audioTag_tag_tagId', ['tagId'], 'tag', ['id'])
+    .addUniqueConstraint('UQ_audioTag_userId_audioId_tagId', [
+      'userId',
+      'audioId',
+      'tagId'
+    ])
     .execute()
 }
 
@@ -884,12 +925,24 @@ const fontSettingsTable = async (trx: Kysely<DB>) => {
     .createTable('fontSettings')
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
+    .addColumn('captionScriptId', 'integer', (col) => col.notNull())
+    .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('color', 'text', (col) => col.notNull())
     .addColumn('fontSize', 'integer', (col) => col.notNull())
     .addColumn('fontFamily', 'text', (col) => col.notNull())
     .addColumn('border', 'boolean', (col) => col.notNull())
     .addColumn('borderpx', 'integer', (col) => col.notNull())
     .addColumn('borderColor', 'text', (col) => col.notNull())
+    .addForeignKeyConstraint(
+      'FK_fontSettings_captionScript_captionScriptId',
+      ['captionScriptId'],
+      'captionScript',
+      ['id']
+    )
+    .addUniqueConstraint('UQ_fontSettings_captionScriptId_type', [
+      'captionScriptId',
+      'type'
+    ])
     .execute()
 }
 
@@ -899,47 +952,22 @@ const captionScriptTable = async (trx: Kysely<DB>) => {
     .createTable('captionScript')
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('userId', 'integer', (col) => col.notNull())
-    .addColumn('url', 'text')
+    .addColumn('url', 'text', (col) => col.notNull())
+    .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('script', 'text')
     .addColumn('marked', 'boolean', (col) => col.notNull())
     .addColumn('opacity', 'integer', (col) => col.notNull())
     .addColumn('stopAtEnd', 'boolean', (col) => col.notNull())
     .addColumn('nextSceneAtEnd', 'boolean', (col) => col.notNull())
     .addColumn('syncWithAudio', 'boolean', (col) => col.notNull())
-    .addColumn('blinkFontId', 'integer')
-    .addColumn('captionFontId', 'integer')
-    .addColumn('captionBigFontId', 'integer')
-    .addColumn('countFontId', 'integer')
+    .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint(
       'FK_captionScript_user_userId',
       ['userId'],
       'user',
       ['id']
     )
-    .addForeignKeyConstraint(
-      'FK_captionScript_fontSettings_blinkFontId',
-      ['blinkFontId'],
-      'fontSettings',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_captionScript_fontSettings_captionFontId',
-      ['captionFontId'],
-      'fontSettings',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_captionScript_fontSettings_captionBigFontId',
-      ['captionBigFontId'],
-      'fontSettings',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_captionScript_fontSettings_countFontId',
-      ['countFontId'],
-      'fontSettings',
-      ['id']
-    )
+    .addUniqueConstraint('UQ_captionScript_url', ['url'])
     .execute()
 }
 
@@ -948,8 +976,15 @@ const captionScriptTagTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('captionScriptTag')
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('captionScriptId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint(
+      'FK_captionScriptTag_user_userId',
+      ['userId'],
+      'user',
+      ['id']
+    )
     .addForeignKeyConstraint(
       'FK_captionScriptTag_captionScript_captionScriptId',
       ['captionScriptId'],
@@ -962,6 +997,11 @@ const captionScriptTagTable = async (trx: Kysely<DB>) => {
       'tag',
       ['id']
     )
+    .addUniqueConstraint('UQ_captionScriptTag_userId_captionScriptId_tagId', [
+      'userId',
+      'captionScriptId',
+      'tagId'
+    ])
     .execute()
 }
 

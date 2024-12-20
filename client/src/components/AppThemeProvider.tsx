@@ -95,7 +95,6 @@ function getPalette(colorName: string): PaletteColorOptions | undefined {
       main: white
     }
   } else {
-    console.log('COLOR', colorName)
     const color = colors.get(colorName)
     return color != null
       ? {
@@ -121,7 +120,6 @@ function getPalette(colorName: string): PaletteColorOptions | undefined {
 
 const AppThemeProvider = ({ children }: PropsWithChildren) => {
   const { data } = useGetThemeQuery()
-  console.log('QUERY', data)
   const theme = copy<ThemeOptions>(defaultTheme as ThemeOptions)
   if (data?.primaryColor != null) {
     theme.palette!.primary = getPalette(data?.primaryColor)

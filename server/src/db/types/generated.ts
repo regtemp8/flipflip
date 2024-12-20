@@ -25,6 +25,7 @@ export interface Audio {
   tickMode: string
   tickSinRate: number
   trackNum: number | null
+  type: string
   url: string
   userId: number
   volume: number
@@ -41,6 +42,7 @@ export interface AudioTag {
   audioId: number
   id: number | null
   tagId: number
+  userId: number
 }
 
 export interface Backup {
@@ -61,18 +63,16 @@ export interface CacheSettings {
 }
 
 export interface CaptionScript {
-  blinkFontId: number | null
-  captionBigFontId: number | null
-  captionFontId: number | null
-  countFontId: number | null
   id: number | null
+  index: number
   marked: number
   nextSceneAtEnd: number
   opacity: number
   script: string | null
   stopAtEnd: number
   syncWithAudio: number
-  url: string | null
+  type: string
+  url: string
   userId: number
 }
 
@@ -87,6 +87,7 @@ export interface CaptionScriptTag {
   captionScriptId: number
   id: number | null
   tagId: number
+  userId: number
 }
 
 export interface Clip {
@@ -103,6 +104,7 @@ export interface ClipTag {
   clipId: number
   id: number | null
   tagId: number
+  userId: number
 }
 
 export interface ContentSource {
@@ -117,6 +119,7 @@ export interface ContentSource {
   redditTime: string | null
   twitterIncludeReplies: number
   twitterIncludeRetweets: number
+  type: string
   url: string
   userId: number
   videoDuration: number | null
@@ -135,6 +138,7 @@ export interface ContentSourceTag {
   contentSourceId: number
   id: number | null
   tagId: number
+  userId: number
 }
 
 export interface Display {
@@ -195,10 +199,12 @@ export interface FontSettings {
   border: number
   borderColor: string
   borderpx: number
+  captionScriptId: number
   color: string
   fontFamily: string
   fontSize: number
   id: number | null
+  type: string
   userId: number
 }
 
@@ -229,6 +235,7 @@ export interface IgnoredTag {
   displaySettingsId: number
   id: number | null
   tagId: number
+  userId: number
 }
 
 export interface LibraryContentSource {

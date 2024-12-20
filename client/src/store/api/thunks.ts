@@ -1,5 +1,5 @@
 import debounce from 'debounce'
-import { AppDispatch } from '../store'
+import { AppDispatch, RootState } from '../store'
 import { flipflipApi } from './slice'
 import {
   Audio,
@@ -13,6 +13,7 @@ import {
   FontSettings,
   FontSettingsType,
   GeneralSettings,
+  getSourceType,
   Playlist,
   RemoteSettings,
   Scene,
@@ -131,6 +132,10 @@ export const setAudioBPM = (id: number) => {
 const updateLocalCaptionScript = (
   update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
 ) => {
+  if(update.url != null) {
+    update.type = getSourceType(update.url)
+  }
+
   return flipflipApi.util.updateQueryData(
     'getCaptionScript',
     update.id,
@@ -150,12 +155,58 @@ const updateRemoteCaptionScript = debounce(
   250
 )
 
-const updateCaptionScript = (
+export const updateCaptionScript = (
   update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
 ) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalCaptionScript(update))
     updateRemoteCaptionScript(update, dispatch)
+  }
+}
+
+const deleteLocalCaptionScript = (id: number) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    for (const {
+      endpointName,
+      originalArgs
+    } of flipflipApi.util.selectInvalidatedBy(getState(), [
+      { type: 'CaptionScript', id: 'FilteredList' }
+    ])) {
+      if (endpointName !== 'getFilteredCaptionScripts') continue
+      dispatch(
+        flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+          draft.filter((v) => v !== id)
+        )
+      )
+    }
+    for (const {
+      endpointName,
+      originalArgs
+    } of flipflipApi.util.selectInvalidatedBy(getState(), [
+      { type: 'CaptionScript', id: 'List' }
+    ])) {
+      // we only want to update `getPosts` here
+      if (endpointName !== 'getCaptionScripts') continue
+      dispatch(
+        flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+          draft.filter((v) => v !== id)
+        )
+      )
+    }
+  }
+}
+
+const deleteRemoteCaptionScript = debounce(
+  (id: number, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.deleteCaptionScript.initiate({ id }))
+  },
+  250
+)
+
+export const deleteCaptionScript = (id: number) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(deleteLocalCaptionScript(id))
+    deleteRemoteCaptionScript(id, dispatch)
   }
 }
 
@@ -208,7 +259,7 @@ const updateRemoteCaptionScriptFontSettings = debounce(
   250
 )
 
-const updateCaptionScriptFontSettings = (
+export const updateCaptionScriptFontSettings = (
   update: { id: number; type: FontSettingsType } & Partial<FontSettings>
 ) => {
   return (dispatch: AppDispatch) => {
@@ -2044,5 +2095,36 @@ export const moveTag = (ids: number[]) => {
   return (dispatch: AppDispatch) => {
     dispatch(moveLocalTag(ids))
     moveRemoteTag(ids, dispatch)
+  }
+}
+
+const moveLocalCaptionScript = (
+  ids: number[],
+  filters: string[],
+  filtered: number[]
+) => {
+  flipflipApi.util.updateQueryData('getCaptionScripts', undefined, () => ids)
+  return flipflipApi.util.updateQueryData(
+    'getFilteredCaptionScripts',
+    filters,
+    () => filtered
+  )
+}
+
+const moveRemoteCaptionScript = debounce(
+  (ids: number[], dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.moveCaptionScript.initiate({ ids }))
+  },
+  250
+)
+
+export const moveCaptionScript = (
+  ids: number[],
+  filters: string[],
+  filtered: number[]
+) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(moveLocalCaptionScript(ids, filters, filtered))
+    moveRemoteCaptionScript(ids, dispatch)
   }
 }

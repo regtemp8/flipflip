@@ -21,6 +21,7 @@ import ScriptLibrary from './library/ScriptLibrary'
 import TagManager from './library/TagManager'
 import CaptionScriptor from './sceneDetail/CaptionScriptor'
 import AppThemeProvider from './AppThemeProvider'
+import ScriptOptions from './library/ScriptOptions'
 
 const App = () => {
   return (
@@ -96,6 +97,14 @@ const App = () => {
                 }
               />
               <Route
+                path="/scripts/:id/options"
+                element={
+                  <PrivateRoute>
+                    <ScriptOptions />
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/tags"
                 element={
                   <PrivateRoute>
@@ -104,7 +113,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/scripter"
+                path="/scriptor/:id?"
                 element={
                   <PrivateRoute>
                     <CaptionScriptor />

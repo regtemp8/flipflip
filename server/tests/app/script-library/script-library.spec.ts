@@ -1,0 +1,788 @@
+import path from 'path'
+import { test, expect } from '@playwright/test'
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('/script-library')
+})
+
+test('Script library navigation', async ({ page }) => {
+  await page.getByLabel('Manage Tags').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Manage Tags', exact: true })
+  ).toBeVisible()
+  await page.getByLabel('Manage Tags').click()
+  await expect(page).toHaveURL('/tags')
+
+  await page.getByLabel('Back').click()
+  await expect(page).toHaveURL('/script-library')
+
+  await page.getByLabel('Batch Tag').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Batch Tag', exact: true })
+  ).toBeVisible()
+  await page.getByLabel('Batch Tag').click()
+
+  await page.getByLabel('Back').click()
+  await page.getByRole('listitem').getByRole('button').click()
+  await expect(page.locator('#root > div > div > div')).toHaveCSS(
+    'width',
+    '240px'
+  )
+  await page.getByRole('listitem').getByRole('button').click()
+})
+
+test('Title', async ({ page }) => {
+  await expect(
+    page.getByRole('heading', { name: 'Caption Script Library', exact: true })
+  ).toBeVisible()
+})
+
+test('No Caption Scripts', async ({ page }) => {
+  await expect(
+    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Nothing here', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).toBeVisible()
+  await expect(page.getByTestId('AddIcon')).toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeDisabled()
+})
+
+test('Add Single Local Caption Script', async ({ page }) => {
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
+  await page.getByTestId('DescriptionIcon').hover()
+  await expect(page.getByRole('tooltip')).toHaveText('Local Script')
+  await page.getByTestId('DescriptionIcon').click()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
+  await page.getByRole('button', { name: /^scripts/ }).dblclick()
+
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^phrases.txt/ }).click()
+  await page.keyboard.up('Shift')
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^bpm-timing.txt/ }).click()
+  await page.keyboard.up('Shift')
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^wave-timing.txt/ }).click()
+  await page.keyboard.up('Shift')
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+
+  await page.keyboard.down('Control')
+  await page.getByRole('button', { name: /^random-timing.txt/ }).click()
+  await page.keyboard.up('Control')
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^bpm-timing.txt/ }).click()
+  await page.keyboard.up('Shift')
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+
+  await page.getByRole('button', { name: /^phrases.txt/ }).click()
+  await expect(
+    page.getByRole('button', { name: /^bpm-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^phrase-groups.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(page.getByRole('button', { name: /^phrases.txt/ })).toHaveClass(
+    / Mui-selected /
+  )
+  await expect(
+    page.getByRole('button', { name: /^random-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+  await expect(
+    page.getByRole('button', { name: /^wave-timing.txt/ })
+  ).not.toHaveClass(/ Mui-selected /)
+
+  await page.getByRole('button', { name: 'Choose', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+  await expect(page.locator('#sortable-list li p')).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(
+    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+  ).not.toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Nothing here', exact: true })
+  ).not.toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).not.toBeVisible()
+})
+
+test('Click Script Source Icon', async ({ page }) => {
+  await page.getByTestId('ListIcon').nth(0).click()
+  await expect(
+    page.getByText('Choose a scene to test with:', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Play', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Play', exact: true })
+  ).toBeDisabled()
+
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Choose a scene to test with:', { exact: true })
+  ).not.toBeVisible()
+
+  // TODO choose scene
+  // TODO play is NOT disabled
+  // TODO click play -> navigates to player
+})
+
+test('Shift + Click Local Script', async ({ page }) => {
+  await page.keyboard.down('Shift')
+  await page.getByTestId('ListIcon').nth(0).click()
+  await page.keyboard.up('Shift')
+  await expect(page).toHaveURL('http://localhost:5050/fs/open/caption-script/1')
+  await page.goBack()
+  await expect(page).toHaveURL('/script-library')
+})
+
+test('Edit Caption Script Options', async ({ page }) => {
+  await page.getByTestId('BuildIcon').nth(0).click()
+  await expect(page).toHaveURL('/scripts/1/options')
+  await page.getByTestId('ArrowBackIcon').click()
+  await expect(page).toHaveURL('/script-library')
+
+  // TODO make separate spec where you test each feature of the options page
+})
+
+test('Edit Caption Script in Scriptor', async ({ page }) => {
+  await page.getByTestId('EditIcon').nth(0).click()
+  await expect(page).toHaveURL('/scriptor/1')
+  await page.getByTestId('ArrowBackIcon').click()
+  await expect(page).toHaveURL('/script-library')
+})
+
+test('Delete Single Caption Script', async ({ page }) => {
+  await page.getByTestId('DeleteIcon').nth(0).click()
+  await expect(
+    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Nothing here', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).toBeVisible()
+})
+
+test('Add Multiple Local Caption Scripts', async ({ page }) => {
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
+  await page.getByTestId('DescriptionIcon').click()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
+  await page.getByRole('button', { name: /^scripts/ }).dblclick()
+
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^bpm-timing.txt/ }).click()
+  await page.keyboard.up('Shift')
+  await page.keyboard.down('Shift')
+  await page.getByRole('button', { name: /^phrases.txt/ }).click()
+  await page.keyboard.up('Shift')
+
+  await page.getByRole('button', { name: 'Choose', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+})
+
+test('Add Same Local Caption Script', async ({ page }) => {
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
+  await page.getByTestId('DescriptionIcon').click()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
+  await page.getByRole('button', { name: /^scripts/ }).dblclick()
+  await page.getByRole('button', { name: /^phrases.txt/ }).click()
+  await page.getByRole('button', { name: 'Choose', exact: true }).click()
+
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+})
+
+test('Add Remote Caption Script', async ({ page }) => {
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+  await page.getByTestId('HttpIcon').hover()
+  await expect(page.getByRole('tooltip')).toHaveText('URL')
+  await page.getByTestId('HttpIcon').click()
+
+  await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  await page
+    .locator('#sortable-list li input')
+    .fill('https://pastebin.com/raw/ZNJ5A40S')
+  await expect(page.locator('#sortable-list li input')).toHaveValue(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+  await page.getByTestId('HttpIcon').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await page
+    .locator('#sortable-list li input')
+    .fill('https://pastebin.com/raw/LDvJvg0C')
+  await expect(page.locator('#sortable-list li input')).toHaveValue(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+  await page.getByTestId('HttpIcon').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await page
+    .locator('#sortable-list li input')
+    .fill('https://pastebin.com/raw/48LPhQD3')
+  await expect(page.locator('#sortable-list li input')).toHaveValue(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+})
+
+test('Add Same Remote Caption Script', async ({ page }) => {
+  // TODO add tags to test if they are kept
+
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+  await page.getByTestId('HttpIcon').click()
+
+  await expect(page.locator('#sortable-list li input')).toHaveValue('')
+  await expect(page.locator('#sortable-list li')).toHaveCount(7)
+  await page
+    .locator('#sortable-list li input')
+    .fill('https://pastebin.com/raw/ZNJ5A40S')
+  await expect(page.locator('#sortable-list li input')).toHaveValue(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+})
+
+test('Shift + Click Remote Script', async ({ page }) => {
+  await page.keyboard.down('Shift')
+  await page.getByTestId('ListIcon').nth(0).click()
+  await page.keyboard.up('Shift')
+  await expect(page).toHaveURL('https://pastebin.com/raw/ZNJ5A40S')
+  await page.goBack()
+  await expect(page).toHaveURL('/script-library')
+})
+
+test('Sort By Title', async ({ page }) => {
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('#sort-menu li').nth(0)).toHaveText('By Title')
+  await expect(
+    page.locator('#sort-menu li').nth(0).getByTestId('ArrowUpwardIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('#sort-menu li').nth(0).getByTestId('ArrowDownwardIcon')
+  ).toBeVisible()
+
+  await page.locator('#sort-menu li').nth(0).getByTestId('ArrowDownwardIcon').click()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('#sort-menu li').nth(0)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+
+  await page.locator('#sort-menu li').nth(0).getByTestId('ArrowUpwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('#sort-menu li').nth(0)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+})
+
+test('Sort By Full Title', async ({ page }) => {
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('li').nth(1)).toHaveText('By Full Title')
+  await expect(
+    page.locator('li').nth(1).getByTestId('ArrowUpwardIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('li').nth(1).getByTestId('ArrowDownwardIcon')
+  ).toBeVisible()
+
+  await page.locator('li').nth(1).getByTestId('ArrowDownwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('li').nth(1)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+
+  await page.locator('li').nth(1).getByTestId('ArrowUpwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('li').nth(1)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+})
+
+test('Sort By Date', async ({ page }) => {
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('li').nth(2)).toHaveText('By Date')
+  await expect(
+    page.locator('li').nth(2).getByTestId('ArrowUpwardIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('li').nth(2).getByTestId('ArrowDownwardIcon')
+  ).toBeVisible()
+
+  await page.locator('li').nth(2).getByTestId('ArrowDownwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('li').nth(2)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+
+  await page.locator('li').nth(2).getByTestId('ArrowUpwardIcon').click()
+  await page.locator('.MuiBackdrop-root').click()
+  await expect(page.locator('li').nth(2)).not.toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+})
+
+test('Randomize Order', async ({ page }) => {
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('li').nth(3)).toHaveText('Randomize Order')
+  await expect(
+    page.locator('li').nth(3).getByTestId('ShuffleIcon')
+  ).toBeVisible()
+  await page.locator('li').nth(3).getByTestId('ShuffleIcon').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/48LPhQD3'})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+})
+
+// test('Move Caption Script', async ({ page }) => {})
+
+// test('Empty URL Deletes Caption Script', async ({ page }) => {
+//   await expect(page.locator('#sortable-list li')).toHaveCount(1)
+//   await page
+//     .locator('#sortable-list li p', {
+//       hasText: 'https://pastebin.com/raw/48LPhQD3'
+//     })
+//     .click()
+//   await page.locator('#sortable-list li input').fill('')
+//   await page.locator('.MuiDrawer-root').click()
+//   await expect(page.locator('#sortable-list li')).toHaveCount(6)
+// })
+
+test('Delete All Caption Scripts', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(page.getByRole('tooltip')).toHaveText('Delete All Sources')
+  await page.getByTestId('DeleteSweepIcon').click()
+
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to delete your entire caption script library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(0)
+})
+
+// test('Batch Tag No Caption Scripts', async ({ page }) => {
+//   await page.getByLabel('Batch Tag').click()
+//   await expect(
+//     page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+//   ).toBeVisible()
+//   await expect(
+//     page.getByRole('heading', { name: 'Nothing here', exact: true })
+//   ).toBeVisible()
+//   await expect(
+//     page.getByRole('heading', { name: 'Add new scripts', exact: true })
+//   ).not.toBeVisible()
+
+//   await expect(
+//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+//   ).toBeVisible()
+//   await expect(
+//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+//   ).toBeDisabled()
+
+//   await expect(page.getByTestId('SortIcon')).toBeVisible()
+//   await expect(page.getByTestId('SortIcon')).toBeDisabled()
+
+//   await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
+//   await page.getByTestId('SelectAllIcon').hover()
+//   await expect(
+//     page.getByRole('tooltip', { name: 'Select All', exact: true })
+//   ).toBeVisible()
+
+//   await expect(page.getByTestId('ClearIcon')).toBeVisible()
+//   await page.getByTestId('ClearIcon').hover()
+//   await expect(
+//     page.getByRole('tooltip', { name: 'Clear', exact: true })
+//   ).toBeVisible()
+
+//   await page.getByTestId('ArrowBackIcon').hover()
+//   await expect(
+//     page.getByRole('tooltip', { name: 'Back', exact: true })
+//   ).toBeVisible()
+//   await page.getByTestId('ArrowBackIcon').click()
+//   await expect(
+//     page.getByRole('heading', { name: 'Add new scripts', exact: true })
+//   ).toBeVisible()
+
+//   await expect(
+//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+//   ).not.toBeVisible()
+//   await expect(page.getByTestId('SortIcon')).toBeVisible()
+//   await expect(page.getByTestId('SelectAllIcon')).not.toBeVisible()
+//   await expect(page.getByTestId('ClearIcon')).not.toBeVisible()
+// })
+
+// test('Batch Tag Single Caption Script', async ({ page }) => {
+//   // Add tags
+//   // Remove tags
+//   // Overwrite tags
+// })
+
+// test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
+//   // Add tags
+//   // Remove tags
+//   // Overwrite tags
+// })
+
+// test('Search Caption Scripts', async ({ page }) => {})
+
+// test('Import Single Caption Script From Library', async ({ page }) => {})
+
+// test('Import Multiple Caption Scripts From Library', async ({ page }) => {})
+
+// test('Mark Caption Scripts', async ({ page }) => {})
+
+// test('Select Single Caption Scripts', async ({ page }) => {})
+
+// test('Select All Caption Scripts', async ({ page }) => {})
+
+// test('Select None Caption Scripts', async ({ page }) => {})
+
+// TODO Test play navigates to play page
+// TODO Test change play with scene

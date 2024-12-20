@@ -1,6 +1,7 @@
 export type Audio = {
   id: number;
-  url?: string;
+  url: string;
+  type: string;
   marked: boolean;
   tags: number[]; // Array of Tag IDs
   volume: number;

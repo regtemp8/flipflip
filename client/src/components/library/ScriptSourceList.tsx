@@ -24,10 +24,16 @@ import { makeStyles } from 'tss-react/mui'
 
 import ScriptSourceListItem from './ScriptSourceListItem'
 import SceneSelect from '../configGroups/SceneSelect'
-import ScriptOptions from './ScriptOptions'
 import { SP } from 'flipflip-common'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { showSystemSnack } from '../../store/systemSnack/store'
+import { useCreateCaptionScriptsMutation } from '../../store/api/slice'
+import { selectSpecialMode } from '../../store/app/selectors'
+import {
+  deleteCaptionScript,
+  updateCaptionScript
+} from '../../store/api/thunks'
+import useTrackVariableChanges from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -70,16 +76,16 @@ interface SortableVirtualListProps {
 export interface ScriptSourceListProps {
   showHelp: boolean
   sources: number[]
+  addHttpURL: boolean
   selected: number[]
   onUpdateSelected: (selected: number[]) => void
+  onEndAddHttpURL: () => void
 }
 
 function ScriptSourceList(props: ScriptSourceListProps) {
   const dispatch = useAppDispatch()
-  const [sourceOptions, setSourceOptions] = useState<number>()
   const [lastSelected, setLastSelected] = useState<number>()
   const [isEditing, setIsEditing] = useState(-1)
-  const [deleteDialog, setDeleteDialog] = useState<number>()
   const [beginPlay, setBeginPlay] = useState<number>()
   const [playWithScene, setPlayWithScene] = useState<number>()
 
@@ -91,10 +97,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   // const beginPlaySelector =
   //   beginPlay != null ? selectCaptionScriptUrl(beginPlay) : selectUndefined
   const beginPlayURL = '' //useAppSelector(beginPlaySelector)
-  const firstSourceURL = '' /*useAppSelector(
-    selectCaptionScriptUrl(props.sources.length > 0 ? props.sources[0] : -1)
-  )*/
-  const specialMode = '' //useAppSelector(selectAppSpecialMode())
+  const specialMode = useAppSelector(selectSpecialMode())
   const yOffset = 0 //useAppSelector(selectAppScriptYOffset())
 
   const _shiftDown = useRef<boolean>()
@@ -135,10 +138,10 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }, [savePosition])
 
   useEffect(() => {
-    if (firstSourceURL === '') {
-      setIsEditing(props.sources[0])
+    if (props.addHttpURL) {
+      onStartEdit(props.sources[0])
     }
-  }, [props.sources, firstSourceURL])
+  }, [props.addHttpURL, props.sources])
 
   const onSortEnd = ({
     oldIndex,
@@ -149,41 +152,17 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }) => {
     const oldSourceID = props.sources[oldIndex]
     const newSourceID = props.sources[newIndex]
+
     // dispatch(swapScripts(oldSourceID, newSourceID))
   }
 
   const clearLastSelected = () => {
-    if (!sourceOptions) {
-      setLastSelected(undefined)
-    }
-  }
-
-  const onSourceOptions = (scriptID: number) => {
-    setSourceOptions(scriptID)
-    setLastSelected(scriptID)
-  }
-
-  const onCloseSourceOptions = () => {
-    setSourceOptions(undefined)
-  }
-
-  const onDelete = (scriptID: number) => {
-    setDeleteDialog(scriptID)
-  }
-
-  const onCloseDeleteDialog = () => {
-    setDeleteDialog(undefined)
-  }
-
-  const onFinishDelete = async () => {
-    // await flipflip().api.unlink(deleteDialogURL as string)
-    onRemove(deleteDialog as number)
-    onCloseDeleteDialog()
+    setLastSelected(undefined)
   }
 
   const onRemove = (scriptID: number) => {
     props.onUpdateSelected(props.selected.filter((id) => id !== scriptID))
-    // dispatch(setScriptsRemoveOne(scriptID))
+    dispatch(deleteCaptionScript(scriptID))
   }
 
   const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -226,8 +205,19 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     setIsEditing(id)
   }
 
-  const onEndEdit = (newURL: string) => {
-    // dispatch(setScriptsEditUrl(isEditing, newURL))
+  const onEndEdit = async (url: string) => {
+    console.log('END EDIT', isEditing, url)
+    if (url === '') {
+      console.log('DELETE SCRIPT')
+      dispatch(deleteCaptionScript(isEditing))
+    } else {
+      console.log('UPDATE SCRIPT')
+      dispatch(updateCaptionScript({ id: isEditing, url }))
+    }
+    if (props.addHttpURL) {
+      props.onEndAddHttpURL()
+    }
+
     setIsEditing(-1)
   }
 
@@ -246,7 +236,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     try {
       const scriptID = beginPlay as number
       const sceneID = playWithScene as number
-      // dispatch(playScript(scriptID, sceneID, props.sources))
+      // dispatch(playScript(scriptID, sceneID, sources))
     } catch (e) {
       dispatch(
         showSystemSnack({
@@ -306,11 +296,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             lastSelected={scriptID === lastSelected}
             scriptID={scriptID}
             style={value.style}
-            onDelete={onDelete}
             onEndEdit={onEndEdit}
             onPlay={onPlay}
             onRemove={onRemove}
-            onSourceOptions={onSourceOptions}
             onStartEdit={onStartEdit}
             onToggleSelect={onToggleSelect}
             savePosition={savePosition}
@@ -385,30 +373,6 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           </List>
         )}
       </AutoSizer>
-      {deleteDialog != null && (
-        <Dialog
-          open={true}
-          onClose={onCloseDeleteDialog}
-          aria-describedby="delete-description"
-        >
-          <DialogContent>
-            <DialogContentText id="delete-description">
-              Are you sure you want to delete {deleteDialogURL}?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onCloseDeleteDialog} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={onFinishDelete} color="primary">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-      {sourceOptions != null && (
-        <ScriptOptions scriptID={sourceOptions} onDone={onCloseSourceOptions} />
-      )}
       {beginPlay != null && (
         <Dialog
           open={true}
