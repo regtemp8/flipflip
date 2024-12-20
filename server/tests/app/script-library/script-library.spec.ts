@@ -173,6 +173,14 @@ test('Add Single Local Caption Script', async ({ page }) => {
     page.getByRole('button', { name: /^wave-timing.txt/ })
   ).not.toHaveClass(/ Mui-selected /)
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page.getByRole('button', { name: 'Choose', exact: true }).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
   await expect(page.locator('#sortable-list li p')).toHaveText(
@@ -187,6 +195,7 @@ test('Add Single Local Caption Script', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Add new scripts', exact: true })
   ).not.toBeVisible()
+  await responsePromise
 })
 
 test('Click Script Source Icon', async ({ page }) => {
@@ -243,6 +252,14 @@ test('Edit Caption Script in Scriptor', async ({ page }) => {
 })
 
 test('Delete Single Caption Script', async ({ page }) => {
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
   await page.getByTestId('DeleteIcon').nth(0).click()
   await expect(
     page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
@@ -253,6 +270,7 @@ test('Delete Single Caption Script', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Add new scripts', exact: true })
   ).toBeVisible()
+  await responsePromise
 })
 
 test('Add Multiple Local Caption Scripts', async ({ page }) => {
@@ -269,6 +287,14 @@ test('Add Multiple Local Caption Scripts', async ({ page }) => {
   await page.getByRole('button', { name: /^phrases.txt/ }).click()
   await page.keyboard.up('Shift')
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page.getByRole('button', { name: 'Choose', exact: true }).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -280,6 +306,7 @@ test('Add Multiple Local Caption Scripts', async ({ page }) => {
   await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
   )
+  await responsePromise
 })
 
 test('Add Same Local Caption Script', async ({ page }) => {
@@ -289,8 +316,16 @@ test('Add Same Local Caption Script', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
   await page.getByRole('button', { name: /^scripts/ }).dblclick()
   await page.getByRole('button', { name: /^phrases.txt/ }).click()
-  await page.getByRole('button', { name: 'Choose', exact: true }).click()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
+  await page.getByRole('button', { name: 'Choose', exact: true }).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
@@ -301,6 +336,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
   )
+  await responsePromise
 })
 
 test('Add Remote Caption Script', async ({ page }) => {
@@ -311,6 +347,14 @@ test('Add Remote Caption Script', async ({ page }) => {
   await page.getByTestId('HttpIcon').click()
 
   await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page
     .locator('#sortable-list li input')
     .fill('https://pastebin.com/raw/ZNJ5A40S')
@@ -322,6 +366,16 @@ test('Add Remote Caption Script', async ({ page }) => {
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
   await page.getByTestId('HttpIcon').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
+
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page
     .locator('#sortable-list li input')
     .fill('https://pastebin.com/raw/LDvJvg0C')
@@ -333,6 +387,16 @@ test('Add Remote Caption Script', async ({ page }) => {
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
   await page.getByTestId('HttpIcon').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
+
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page
     .locator('#sortable-list li input')
     .fill('https://pastebin.com/raw/48LPhQD3')
@@ -343,6 +407,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     'https://pastebin.com/raw/48LPhQD3'
   )
+  await responsePromise
 })
 
 test('Add Same Remote Caption Script', async ({ page }) => {
@@ -354,6 +419,14 @@ test('Add Same Remote Caption Script', async ({ page }) => {
 
   await expect(page.locator('#sortable-list li input')).toHaveValue('')
   await expect(page.locator('#sortable-list li')).toHaveCount(7)
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
   await page
     .locator('#sortable-list li input')
     .fill('https://pastebin.com/raw/ZNJ5A40S')
@@ -380,6 +453,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
   )
+  await responsePromise
 })
 
 test('Shift + Click Remote Script', async ({ page }) => {
@@ -699,12 +773,21 @@ test('Delete All Caption Scripts', async ({ page }) => {
   ).not.toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
   await page.getByTestId('DeleteSweepIcon').click()
   await expect(
     page.getByText('Delete Caption Script Library', { exact: true })
   ).toBeVisible()
   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(0)
+  await responsePromise
 })
 
 // test('Batch Tag No Caption Scripts', async ({ page }) => {
