@@ -221,7 +221,7 @@ test('Click Script Source Icon', async ({ page }) => {
     page.getByText('Choose a scene to test with:', { exact: true })
   ).not.toBeVisible()
 
-  // TODO choose scene
+  // TODO Test change play with scene
   // TODO play is NOT disabled
   // TODO click play -> navigates to player
 })
@@ -309,35 +309,35 @@ test('Add Multiple Local Caption Scripts', async ({ page }) => {
   await responsePromise
 })
 
-// test('Add Same Local Caption Script', async ({ page }) => {
-//   await page.getByTestId('AddIcon').click()
-//   await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
-//   await page.getByTestId('DescriptionIcon').click()
-//   await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
-//   await page.getByRole('button', { name: /^scripts/ }).dblclick()
-//   await page.getByRole('button', { name: /^phrases.txt/ }).click()
+test.fixme('Add Same Local Caption Script', async ({ page }) => {
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
+  await page.getByTestId('DescriptionIcon').click()
+  await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
+  await page.getByRole('button', { name: /^scripts/ }).dblclick()
+  await page.getByRole('button', { name: /^phrases.txt/ }).click()
 
-//   const responsePromise = page.waitForResponse((res) => {
-//     const request = res.request()
-//     return (
-//       new URL(request.url()).pathname === '/api/caption-scripts' &&
-//       request.method() === 'POST' &&
-//       res.status() === 204
-//     )
-//   })
-//   await page.getByRole('button', { name: 'Choose', exact: true }).click()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-//   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
-//     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
-//   )
-//   await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
-//     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
-//   )
-//   await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
-//     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
-//   )
-//   await responsePromise
-// })
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
+  await page.getByRole('button', { name: 'Choose', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await responsePromise
+})
 
 test('Add Remote Caption Script', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
@@ -732,146 +732,207 @@ test('Randomize Order', async ({ page }) => {
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
 })
 
-// test('Move Caption Script', async ({ page }) => {})
+test.fixme('Move Caption Script', async ({ page }) => {
+  // move script
+  // verify order of scripts
+})
 
-// test('Empty URL Deletes Caption Script', async ({ page }) => {
-//   await expect(page.locator('#sortable-list li')).toHaveCount(1)
-//   await page
-//     .locator('#sortable-list li p', {
-//       hasText: 'https://pastebin.com/raw/48LPhQD3'
-//     })
-//     .click()
-//   await page.locator('#sortable-list li input').fill('')
-//   await page.locator('.MuiDrawer-root').click()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(6)
-// })
+test.fixme('Empty URL Deletes Caption Script', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+  await page
+    .locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/48LPhQD3'
+    })
+    .click()
+  await page.locator('#sortable-list li input').fill('')
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+})
 
-// test('Delete All Caption Scripts', async ({ page }) => {
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-//   await page.getByTestId('DeleteSweepIcon').hover()
-//   await expect(page.getByRole('tooltip')).toHaveText('Delete All Sources')
-//   await page.getByTestId('DeleteSweepIcon').click()
+test.fixme('Batch Tag No Caption Scripts', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await expect(
+    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Nothing here', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).not.toBeVisible()
 
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByText(
-//       'Are you sure you want to delete your entire caption script library?',
-//       { exact: true }
-//     )
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).not.toBeDisabled()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).not.toBeDisabled()
-//   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeDisabled()
 
-  // const responsePromise = page.waitForResponse((res) => {
-  //   const request = res.request()
-  //   return (
-  //     new URL(request.url()).pathname === '/api/caption-scripts' &&
-  //     request.method() === 'DELETE' &&
-  //     res.status() === 204
-  //   )
-  // })
-//   await page.getByTestId('DeleteSweepIcon').click()
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).toBeVisible()
-//   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(0)
-  // await responsePromise
-// })
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeDisabled()
 
-// test('Batch Tag No Caption Scripts', async ({ page }) => {
-//   await page.getByLabel('Batch Tag').click()
-//   await expect(
-//     page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('heading', { name: 'Nothing here', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('heading', { name: 'Add new scripts', exact: true })
-//   ).not.toBeVisible()
+  await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
+  await page.getByTestId('SelectAllIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Select All', exact: true })
+  ).toBeVisible()
 
-//   await expect(
-//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-//   ).toBeVisible()
-//   await expect(
-//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-//   ).toBeDisabled()
+  await expect(page.getByTestId('ClearIcon')).toBeVisible()
+  await page.getByTestId('ClearIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Clear', exact: true })
+  ).toBeVisible()
 
-//   await expect(page.getByTestId('SortIcon')).toBeVisible()
-//   await expect(page.getByTestId('SortIcon')).toBeDisabled()
+  await page.getByTestId('ArrowBackIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Back', exact: true })
+  ).toBeVisible()
+  await page.getByTestId('ArrowBackIcon').click()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).toBeVisible()
 
-//   await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
-//   await page.getByTestId('SelectAllIcon').hover()
-//   await expect(
-//     page.getByRole('tooltip', { name: 'Select All', exact: true })
-//   ).toBeVisible()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).not.toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await expect(page.getByTestId('SelectAllIcon')).not.toBeVisible()
+  await expect(page.getByTestId('ClearIcon')).not.toBeVisible()
+})
 
-//   await expect(page.getByTestId('ClearIcon')).toBeVisible()
-//   await page.getByTestId('ClearIcon').hover()
-//   await expect(
-//     page.getByRole('tooltip', { name: 'Clear', exact: true })
-//   ).toBeVisible()
+test.fixme('Batch Tag Select With Shift', async ({ page }) => {
+  // hold down shift
+  // select
+  // release shift
+  // multiple scripts are selected
+})
 
-//   await page.getByTestId('ArrowBackIcon').hover()
-//   await expect(
-//     page.getByRole('tooltip', { name: 'Back', exact: true })
-//   ).toBeVisible()
-//   await page.getByTestId('ArrowBackIcon').click()
-//   await expect(
-//     page.getByRole('heading', { name: 'Add new scripts', exact: true })
-//   ).toBeVisible()
+test.fixme('Batch Tag Select All', async ({ page }) => {
+    // Select all scripts
+})
+test.fixme('Batch Tag Select None', async ({ page }) => {
+  // Verify that all scripts are selected
+  // Select none scripts
+})
 
-//   await expect(
-//     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-//   ).not.toBeVisible()
-//   await expect(page.getByTestId('SortIcon')).toBeVisible()
-//   await expect(page.getByTestId('SelectAllIcon')).not.toBeVisible()
-//   await expect(page.getByTestId('ClearIcon')).not.toBeVisible()
-// })
+test.fixme('Batch Tag Select All With Filter', async ({ page }) => {
+  // Apply filter
+  // Select all scripts
+  // Remove filter
+  // Previously selected scripts are still selected and no other scripts are selected
+  // Select none to clear state
+})
 
-// test('Batch Tag Single Caption Script', async ({ page }) => {
-//   // Add tags
-//   // Remove tags
-//   // Overwrite tags
-// })
+test.fixme('Batch Tag Single Caption Script', async ({ page }) => {
+  // Select single script
+  // Add tags
+  // Remove tags
+  // Overwrite tags
+  // Check tag counts after each step
+})
 
-// test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
-//   // Add tags
-//   // Remove tags
-//   // Overwrite tags
-// })
+test.fixme('Batch Tag Multiple Caption Scripts', async ({ page }) => {
+  // Select multiple scripts
+  // Add tags
+  // Remove tags
+  // Overwrite tags
+  // Check tag counts after each step
+})
 
-// test('Search Caption Scripts', async ({ page }) => {})
+test.fixme('Batch Tag Escape Key Navigates Back', async ({ page }) => {
+  // click batch tag
+  // select sources
+  // open dialog
+  // press Esc => dialog closes
+  // press Esc => back to library (exit batch tag mode)
+  // press Esc => does nothing
+})
 
-// test('Import Single Caption Script From Library', async ({ page }) => {})
+test.fixme('Mark Caption Scripts', async ({page}) => {
+  // mark all caption scripts (ALT + m)
+  // unmark all caption scripts
+  // apply filter
+  // mark all visible caption scripts
+  // remove filter
+  // only previously filtered caption scripts are marked
+  // unmark all caption scripts
+})
 
-// test('Import Multiple Caption Scripts From Library', async ({ page }) => {})
+test.fixme('Search Caption Scripts', async ({ page }) => {
+  // marked filter
+  // untagged filter
+  // tag filter (starts with [)
+  // negative tag filter (starts with -[)
+  // url filter (starts with ')
+  // negative url filter (starts with -')
+  // url filter (starts with ")
+  // negative url filter (starts with -")
+  // url filter (no prefix)
+  // negative url filter (starts with -)
+  // combine multiple filters
+})
 
-// test('Mark Caption Scripts', async ({ page }) => {})
+test.fixme('Save Position Caption Script List', async ({ page }) => {
+  // add caption scripts so that the list becomes scrollable
+  // scroll the list
+  // navigate to different page
+  // go back
+  // script library list is in same position
+})
 
-// test('Select Single Caption Scripts', async ({ page }) => {})
+test.fixme('Delete All Visible Caption Scripts', async ({ page }) => {
+  // TODO apply filter
+  // assert that dialog message is: 'Are you sure you want to remove these sources from your caption script library??'
+  // assert that only visible scripts were deleted
+  
+})
 
-// test('Select All Caption Scripts', async ({ page }) => {})
+test.fixme('Delete All Caption Scripts', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(page.getByRole('tooltip')).toHaveText('Delete All Sources')
+  await page.getByTestId('DeleteSweepIcon').click()
 
-// test('Select None Caption Scripts', async ({ page }) => {})
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to delete your entire caption script library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
 
-// TODO Test play navigates to play page
-// TODO Test change play with scene
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(0)
+  await responsePromise
+})
