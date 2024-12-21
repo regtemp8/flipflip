@@ -753,6 +753,7 @@ test('Randomize Order', async ({ page }) => {
     page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon')
   ).toBeVisible()
   await page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon').click()
+  await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
   await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/48LPhQD3'})).toBeVisible()
@@ -767,8 +768,8 @@ test.fixme('Move Caption Script', async ({ page }) => {
   // verify order of scripts
 })
 
-test.fixme('Empty URL Deletes Caption Script', async ({ page }) => {
-  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+test('Empty URL Deletes Caption Script', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await page
     .locator('#sortable-list li p', {
       hasText: 'https://pastebin.com/raw/48LPhQD3'
@@ -776,7 +777,12 @@ test.fixme('Empty URL Deletes Caption Script', async ({ page }) => {
     .click()
   await page.locator('#sortable-list li input').fill('')
   await page.locator('.MuiDrawer-root').click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
 })
 
 test.fixme('Batch Tag No Caption Scripts', async ({ page }) => {
