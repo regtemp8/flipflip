@@ -52,6 +52,57 @@ test('No Caption Scripts', async ({ page }) => {
   await expect(page.getByTestId('SortIcon')).toBeDisabled()
 })
 
+test('Batch Tag No Caption Scripts', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await expect(
+    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Nothing here', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).not.toBeVisible()
+
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeDisabled()
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeDisabled()
+
+  await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
+  await page.getByTestId('SelectAllIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Select All', exact: true })
+  ).toBeVisible()
+
+  await expect(page.getByTestId('ClearIcon')).toBeVisible()
+  await page.getByTestId('ClearIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Clear', exact: true })
+  ).toBeVisible()
+
+  await page.getByTestId('ArrowBackIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Back', exact: true })
+  ).toBeVisible()
+  await page.getByTestId('ArrowBackIcon').click()
+  await expect(
+    page.getByRole('heading', { name: 'Add new scripts', exact: true })
+  ).toBeVisible()
+
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).not.toBeVisible()
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await expect(page.getByTestId('SelectAllIcon')).not.toBeVisible()
+  await expect(page.getByTestId('ClearIcon')).not.toBeVisible()
+})
+
 test('Add Single Local Caption Script', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
@@ -783,57 +834,6 @@ test('Empty URL Deletes Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
-})
-
-test.fixme('Batch Tag No Caption Scripts', async ({ page }) => {
-  await page.getByLabel('Batch Tag').click()
-  await expect(
-    page.getByRole('heading', { name: '乁( ◔ ౪◔)「', exact: true })
-  ).toBeVisible()
-  await expect(
-    page.getByRole('heading', { name: 'Nothing here', exact: true })
-  ).toBeVisible()
-  await expect(
-    page.getByRole('heading', { name: 'Add new scripts', exact: true })
-  ).not.toBeVisible()
-
-  await expect(
-    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-  ).toBeVisible()
-  await expect(
-    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-  ).toBeDisabled()
-
-  await expect(page.getByTestId('SortIcon')).toBeVisible()
-  await expect(page.getByTestId('SortIcon')).toBeDisabled()
-
-  await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
-  await page.getByTestId('SelectAllIcon').hover()
-  await expect(
-    page.getByRole('tooltip', { name: 'Select All', exact: true })
-  ).toBeVisible()
-
-  await expect(page.getByTestId('ClearIcon')).toBeVisible()
-  await page.getByTestId('ClearIcon').hover()
-  await expect(
-    page.getByRole('tooltip', { name: 'Clear', exact: true })
-  ).toBeVisible()
-
-  await page.getByTestId('ArrowBackIcon').hover()
-  await expect(
-    page.getByRole('tooltip', { name: 'Back', exact: true })
-  ).toBeVisible()
-  await page.getByTestId('ArrowBackIcon').click()
-  await expect(
-    page.getByRole('heading', { name: 'Add new scripts', exact: true })
-  ).toBeVisible()
-
-  await expect(
-    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
-  ).not.toBeVisible()
-  await expect(page.getByTestId('SortIcon')).toBeVisible()
-  await expect(page.getByTestId('SelectAllIcon')).not.toBeVisible()
-  await expect(page.getByTestId('ClearIcon')).not.toBeVisible()
 })
 
 test.fixme('Batch Tag Select With Shift', async ({ page }) => {
