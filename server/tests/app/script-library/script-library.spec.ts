@@ -836,19 +836,49 @@ test('Empty URL Deletes Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
 })
 
-test.fixme('Batch Tag Select With Shift', async ({ page }) => {
-  // hold down shift
-  // select
-  // release shift
-  // multiple scripts are selected
+test('Batch Tag Select With Shift', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await expect(page.getByRole('checkbox')).toHaveCount(5)
+  await page.getByRole('checkbox').nth(1).click()
+  await expect(page.getByRole('checkbox').nth(1)).toBeChecked()
+  await page.keyboard.down('Shift')
+  await page.getByRole('checkbox').nth(3).click()
+  await page.keyboard.up('Shift')
+  await expect(page.getByRole('checkbox').nth(0)).not.toBeChecked()
+  await expect(page.getByRole('checkbox').nth(1)).toBeChecked()
+  await expect(page.getByRole('checkbox').nth(2)).toBeChecked()
+  await expect(page.getByRole('checkbox').nth(3)).toBeChecked()
+  await expect(page.getByRole('checkbox').nth(4)).not.toBeChecked()
 })
 
-test.fixme('Batch Tag Select All', async ({ page }) => {
-    // Select all scripts
+test('Batch Tag Select All', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await expect(page.getByRole('checkbox')).toHaveCount(5)
+  for(let i = 0; i < 5; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
+  }
+
+  await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
+  await page.getByTestId('SelectAllIcon').click()
+  for(let i = 0; i < 5; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
+  }
 })
-test.fixme('Batch Tag Select None', async ({ page }) => {
-  // Verify that all scripts are selected
-  // Select none scripts
+
+test('Batch Tag Select None', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await page.getByTestId('SelectAllIcon').click()
+  await expect(page.getByRole('checkbox')).toHaveCount(5)
+  for(let i = 0; i < 5; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
+  }
+
+  await expect(page.getByTestId('ClearIcon')).toBeVisible()
+  await page.getByTestId('ClearIcon').click()
+
+  for(let i = 0; i < 5; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
+  }
 })
 
 test.fixme('Batch Tag Select All With Filter', async ({ page }) => {
