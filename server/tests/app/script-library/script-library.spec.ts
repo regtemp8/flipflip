@@ -344,14 +344,24 @@ test('Add Remote Caption Script', async ({ page }) => {
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
   await page.getByTestId('HttpIcon').hover()
   await expect(page.getByRole('tooltip')).toHaveText('URL')
-  await page.getByTestId('HttpIcon').click()
 
-  await expect(page.locator('#sortable-list li')).toHaveCount(4)
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts' &&
-      request.method() === 'POST' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
+  await page.getByTestId('HttpIcon').click()
+
+  await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
@@ -364,6 +374,16 @@ test('Add Remote Caption Script', async ({ page }) => {
 
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
+
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
   await page.getByTestId('HttpIcon').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
 
@@ -371,8 +391,8 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts' &&
-      request.method() === 'POST' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
@@ -385,6 +405,16 @@ test('Add Remote Caption Script', async ({ page }) => {
 
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
+
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
   await page.getByTestId('HttpIcon').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
 
@@ -392,8 +422,8 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts' &&
-      request.method() === 'POST' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
@@ -421,9 +451,9 @@ test('Add Same Remote Caption Script', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts' &&
-      request.method() === 'POST' &&
-      res.status() === 204
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
+      request.method() === 'PATCH' &&
+      res.status() === 205
     )
   })
   await page
