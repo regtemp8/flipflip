@@ -37,8 +37,8 @@ import {
   SortRequest,
   BatchTagRequest
 } from 'flipflip-common'
-import { CaptionScript, User } from '../db/types/generated'
-import { toBoolean, toNumber } from '../db/utils'
+import { User } from '../db/types/generated'
+import { toBoolean } from '../db/utils'
 
 const router = express.Router()
 router.get('/', async (req, res) => {

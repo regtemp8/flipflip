@@ -99,8 +99,10 @@ export async function createCaptionScripts(urls: string[], userId: number) {
         })
       }
 
-      await trx.insertInto('fontSettings').values(fontSettings).execute()
-
+      if(fontSettings.length > 0) {
+        await trx.insertInto('fontSettings').values(fontSettings).execute()
+      }
+      
       return rows
     })
 }

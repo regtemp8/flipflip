@@ -309,7 +309,7 @@ test('Add Multiple Local Caption Scripts', async ({ page }) => {
   await responsePromise
 })
 
-test.fixme('Add Same Local Caption Script', async ({ page }) => {
+test('Add Same Local Caption Script', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
   await page.getByTestId('DescriptionIcon').click()
