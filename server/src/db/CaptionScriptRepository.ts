@@ -144,10 +144,13 @@ export async function findCaptionScriptTagIds(
 ): Promise<number[]> {
   return await db()
     .query()
-    .selectFrom('captionScriptTag')
-    .select('tagId')
-    .where('userId', '=', userId)
-    .where('captionScriptId', '=', id)
+    .selectFrom('captionScriptTag as cst')
+    .innerJoin('tag as t', 't.id', 'cst.tagId')
+    .select('cst.tagId')
+    .where('cst.userId', '=', userId)
+    .where('t.userId', '=', userId)
+    .where('cst.captionScriptId', '=', id)
+    .orderBy('t.name asc')
     .execute()
     .then((value) => value.map(({ tagId }) => tagId))
 }
