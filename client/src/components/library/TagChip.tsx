@@ -2,6 +2,10 @@ import * as React from 'react'
 import { Chip } from '@mui/material'
 import { useGetTagQuery } from '../../store/api/slice'
 
+const getSimpleTag = (tagName?: string) => {
+  return tagName?.replace(/[a-z]/g, '').replace(/\s/g, '')
+}
+
 export interface TagChipProps {
   tagID: number
   className?: string
@@ -11,10 +15,6 @@ export interface TagChipProps {
 
 export default function TagChip(props: TagChipProps) {
   const { data: tag } = useGetTagQuery(props.tagID)
-
-  const getSimpleTag = (tagName?: string) => {
-    return tagName?.replace(/[a-z]/g, '').replace(/\s/g, '')
-  }
 
   return (
     <Chip

@@ -12,7 +12,9 @@ import {
   TextField,
   type Theme,
   Tooltip,
-  Typography
+  Typography,
+  useTheme,
+  useMediaQuery
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -86,19 +88,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
   actionButton: {
     marginLeft: theme.spacing(1)
   },
-  fullTag: {
-    [theme.breakpoints.down('md')]: {
-      display: 'none'
-    }
-  },
-  simpleTag: {
-    [theme.breakpoints.up('md')]: {
-      display: 'none'
-    },
-    [theme.breakpoints.down('sm')]: {
-      display: 'none'
-    }
-  },
   urlField: {
     width: '100%',
     margin: 0
@@ -107,6 +96,32 @@ const useStyles = makeStyles()((theme: Theme) => ({
     userSelect: 'none'
   }
 }))
+
+interface ListItemTagChip {
+  tagID: number
+}
+
+function ListItemTagChip(props: ListItemTagChip) {
+  const {tagID} = props
+  const theme = useTheme()
+  const isFullTag = useMediaQuery(theme.breakpoints.up('md'))
+  const isSimpleTag = useMediaQuery(theme.breakpoints.up('sm'))
+  const {classes} = useStyles()
+
+  if(isFullTag || isSimpleTag) {
+    return (<TagChip
+      tagID={tagID}
+      className={cx(
+        classes.noUserSelect,
+        classes.actionButton
+      )}
+      outlined
+      simpleTag={!isFullTag}
+    />)
+  } else {
+    return null
+  }
+}
 
 export interface ScriptSourceListItemProps {
   checked: boolean
@@ -152,10 +167,6 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
 
   const onEndEdit = () => {
     props.onEndEdit(urlInput)
-  }
-
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
   }
 
   const { classes } = useStyles()
@@ -276,27 +287,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 {script?.url ?? ''}
               </Typography>
               {script?.tags?.map((tagID) => (
-                <React.Fragment key={tagID}>
-                  <TagChip
-                    tagID={tagID}
-                    className={cx(
-                      classes.noUserSelect,
-                      classes.actionButton,
-                      classes.fullTag
-                    )}
-                    outlined
-                  />
-                  <TagChip
-                    tagID={tagID}
-                    className={cx(
-                      classes.noUserSelect,
-                      classes.actionButton,
-                      classes.simpleTag
-                    )}
-                    outlined
-                    simpleTag
-                  />
-                </React.Fragment>
+                <ListItemTagChip key={tagID} tagID={tagID}/>
               ))}
             </React.Fragment>
           )}
