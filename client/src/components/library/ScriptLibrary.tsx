@@ -69,6 +69,7 @@ import FilePicker from '../common/FilePicker'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import { setSpecialMode } from '../../store/app/slice'
+import { selectScriptLibrarySelectedTagIDs, selectScriptLibrarySelectedTagNames } from '../../store/api/selectors'
 
 const drawerWidth = 240
 
@@ -342,8 +343,6 @@ function ScriptLibrary() {
   const { data: tagsCount } = useGetTagsCountQuery()
   const { data: tagOptions } = useGetCaptionScriptBatchTagOptionsQuery()
   const { data: searchOptions } = useGetCaptionScriptSearchOptionsQuery()
-  const selectedTagNames: string[] = [] //useAppSelector(selectAppScriptSelectedTagNames())
-  const specialMode = useAppSelector(selectSpecialMode())
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -351,6 +350,9 @@ function ScriptLibrary() {
   const [openMenu, setOpenMenu] = useState<string>()
   const [selected, setSelected] = useState<number[]>([])
   const [addHttpURL, setAddHttpURL] = useState(false)
+  const selectedTagIDs = useAppSelector(selectScriptLibrarySelectedTagIDs(selected))
+  const selectedTagNames = useAppSelector(selectScriptLibrarySelectedTagNames(selectedTagIDs))
+  const specialMode = useAppSelector(selectSpecialMode())
 
   const goBack = useCallback(() => {
     if (specialMode === SP.batchTag) {

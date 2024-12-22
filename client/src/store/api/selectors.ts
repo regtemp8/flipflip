@@ -12,8 +12,10 @@ import {
   useGetDisplayViewQuery,
   useGetCaptionScriptFontSettingsQuery,
   useGetCaptionScriptQuery,
-  useGetAudioQuery
+  useGetAudioQuery,
+  flipflipApi
 } from './slice'
+import { createSelector } from '@reduxjs/toolkit'
 
 export const useGetAudioHasBPMQuery = (id: number) => {
   return useGetAudioQuery(id, {
@@ -1421,4 +1423,41 @@ export const useGetDisplaySettingsAudioAlertQuery = () => {
   return useGetDisplaySettingsQuery(undefined, {
     selectFromResult: ({ data }) => ({ data: data?.audioAlert })
   })
+}
+
+const createGetCaptionScriptSelector = createSelector(
+  (id: number) => id,
+  (id) => flipflipApi.endpoints.getCaptionScript.select(id),
+)
+
+export const selectScriptLibrarySelectedTagIDs = (ids: number[]) => {
+  const inputs = ids.map((id) => createGetCaptionScriptSelector(id))
+  return createSelector(
+    inputs,
+    (...outputs) => {
+      const counts = new Map<number, number>()
+      outputs.flatMap((output) => output?.data?.tags ?? []).forEach((tag: number) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
+      const tagIDs: number[] = []
+      counts.forEach((value, key) => {
+        if(value === outputs.length) {
+          tagIDs.push(key)
+        }
+      })
+
+      return tagIDs
+    }
+  )
+}
+
+const createGetTagSelector = createSelector(
+  (id: number) => id,
+  (id) => flipflipApi.endpoints.getTag.select(id),
+)
+
+export const selectScriptLibrarySelectedTagNames = (ids: number[]) => {
+  const inputs = ids.map((id) => createGetTagSelector(id))
+  return createSelector(
+    inputs,
+    (...outputs) => outputs.map((output) => output?.data?.name ?? '').sort()
+  )
 }
