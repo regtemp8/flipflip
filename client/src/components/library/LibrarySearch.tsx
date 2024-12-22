@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useEffect, useState } from 'react'
+import React, { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Autocomplete,
@@ -50,9 +50,15 @@ function LibrarySearch(props: LibrarySearchProps) {
     setOpen(props.menuIsOpen ?? false)
   }, [props.menuIsOpen])
 
-  const defaultValues = props.filters.map((filter) => {
-    return { label: filter, value: filter }
-  })
+  const defaultValues = useMemo(() => {
+    return props.filters.map((filter) => ({label: filter, value: filter}))
+  }, [props.filters])
+  const options = useMemo(() => {
+    return [
+      ...props.filters.map((filter) => props.options.find((o) => o.value === filter) as SelectOption),
+      ...props.options.filter((o) => !props.filters.includes(o.value))
+    ]
+  }, [props.filters, props.options])
 
   const handleChange = (
     event: SyntheticEvent<Element, Event>,
@@ -137,7 +143,6 @@ function LibrarySearch(props: LibrarySearchProps) {
     return filtered
   }
 
-  console.log('OPTIONS', props.options)
   const { classes } = useStyles()
   return (
     <Autocomplete
@@ -151,7 +156,7 @@ function LibrarySearch(props: LibrarySearchProps) {
         !props.fullWidth && classes.limitWidth
       )}
       value={defaultValues}
-      options={props.options}
+      options={options}
       isOptionEqualToValue={(option, value) => {
         const optionValue = typeof option === 'string' ? option : option.value
         const valueValue = typeof value === 'string' ? value : value.value
