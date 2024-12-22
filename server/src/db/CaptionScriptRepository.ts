@@ -511,7 +511,7 @@ async function insertCaptionScriptTags(
     }
   }
 
-  return await trx.insertInto('captionScriptTag').values(values).execute()
+  return await trx.insertInto('captionScriptTag').values(values).onConflict((oc) => oc.doNothing()).execute()
 }
 
 export async function setCaptionScriptTags(
