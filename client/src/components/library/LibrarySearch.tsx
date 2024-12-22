@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useState } from 'react'
+import React, { SyntheticEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Autocomplete,
@@ -43,7 +43,12 @@ export interface LibrarySearchProps {
 }
 
 function LibrarySearch(props: LibrarySearchProps) {
+  const [open, setOpen] = useState(props.menuIsOpen ?? false)
   const [searchInput, setSearchInput] = useState('')
+
+  useEffect(() => {
+    setOpen(props.menuIsOpen ?? false)
+  }, [props.menuIsOpen])
 
   const defaultValues = props.filters.map((filter) => {
     return { label: filter, value: filter }
@@ -169,7 +174,9 @@ function LibrarySearch(props: LibrarySearchProps) {
       )}
       onChange={handleChange}
       onInputChange={props.isCreatable ? handleInputChange : undefined}
-      open={props.menuIsOpen}
+      open={open}
+      onClose={() => setOpen(false)}
+      onOpen={() => setOpen(true)}
       autoFocus={props.autoFocus}
       disableCloseOnSelect={props.showCheckboxes}
     />
