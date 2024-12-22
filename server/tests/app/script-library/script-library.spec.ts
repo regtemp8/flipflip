@@ -496,10 +496,20 @@ test('Add Same Remote Caption Script', async ({ page }) => {
 
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
+
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
   await page.getByTestId('HttpIcon').click()
 
   await expect(page.locator('#sortable-list li')).toHaveCount(7)
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/caption-scripts/7' &&
@@ -889,7 +899,77 @@ test.fixme('Batch Tag Select All With Filter', async ({ page }) => {
   // Select none to clear state
 })
 
-test.fixme('Batch Tag Single Caption Script', async ({ page }) => {
+test('Batch Tag Single Caption Script', async ({ page }) => {
+  await page.getByLabel('Manage Tags').click()
+  await expect(page).toHaveURL('/tags')
+  await page.getByTestId('AddIcon').click()
+  await page.getByLabel('Name *', { exact: true }).fill('pets')
+  await page.getByRole('button', { name: 'OK', exact: true }).click()
+  await page.getByTestId('AddIcon').click()
+  await page.getByLabel('Name *', { exact: true }).fill('animals')
+  await page.getByRole('button', { name: 'OK', exact: true }).click()
+  await page.getByTestId('AddIcon').click()
+  await page.getByLabel('Name *', { exact: true }).fill('car')
+  await page.getByRole('button', { name: 'OK', exact: true }).click()
+  await page.getByLabel('Back').click()
+  await expect(page).toHaveURL('/script-library')
+  
+  await page.getByLabel('Batch Tag').click()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeDisabled()
+  await page.getByRole('checkbox').nth(0).click()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).toBeVisible()
+  await expect(
+    page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
+  ).not.toBeDisabled()
+  await expect(page.locator('.MuiBadge-root .MuiBadge-badge')).toHaveText('1')
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+
+  await expect(page.getByRole('heading')).toHaveText('Batch Tag')
+  await expect(page.getByText('Choose tags to add, remove, or overwrite on the selected source(s)')).toBeVisible()
+  await expect(page.getByRole('button', {name: '- Remove', exact: true})).toBeVisible()
+  await expect(page.getByRole('button', {name: '+ Add', exact: true})).toBeVisible()
+  await expect(page.getByRole('button', {name: 'Overwrite', exact: true})).toBeVisible()
+  await expect(page.getByRole('button', {name: '- Remove', exact: true})).toBeDisabled()
+  await expect(page.getByRole('button', {name: '+ Add', exact: true})).toBeDisabled()
+  await expect(page.getByRole('button', {name: 'Overwrite', exact: true})).not.toBeDisabled()
+  await expect(page.getByRole('combobox')).toHaveAttribute('placeholder', 'Tag These Sources')
+
+  await page.getByRole('combobox').click()
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(3)
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (0)')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (0)')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
+
+  await page.getByRole('combobox').fill('s')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(2)
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (0)')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('pets (0)')
+
+  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0).click()
+  await expect(page.locator('.MuiChip-root > .MuiChip-label', {hasText: 'animals'})).toBeVisible()
+  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
+  await expect(page.locator('.MuiChip-root > .MuiChip-label', {hasText: 'animals'})).toBeVisible()
+  await expect(page.locator('.MuiChip-root > .MuiChip-label', {hasText: 'pets'})).toBeVisible()
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(3)
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'false')
+  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'true')
+  await page.getByRole('combobox').click()
+  await page.getByRole('button', {name: '+ Add', exact: true}).click()
+  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label', {hasText: 'animals'})).toBeVisible()
+  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label', {hasText: 'pets'})).toBeVisible()
+
+  // should show tags in dialog
+  // overwrite when no tags selected -> should remove all tags?
+  // should tags be selected when opening dialog and item has tags, and how to do that when multiple scripts with different tag sets
+
   // Select single script
   // Add tags
   // Remove tags
