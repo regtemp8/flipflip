@@ -529,8 +529,10 @@ export async function setCaptionScriptTags(
         .where('captionScriptId', 'in', ids)
         .execute()
 
-      const tagIds = await findTagIdsByName(tags, trx)
-      await insertCaptionScriptTags(userId, ids, tagIds, trx)
+      if(tags.length > 0) {
+        const tagIds = await findTagIdsByName(tags, trx)
+        await insertCaptionScriptTags(userId, ids, tagIds, trx)
+      }
     })
 }
 
