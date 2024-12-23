@@ -292,8 +292,6 @@ test('Edit Caption Script Options', async ({ page }) => {
   await expect(page).toHaveURL('/scripts/1/options')
   await page.getByTestId('ArrowBackIcon').click()
   await expect(page).toHaveURL('/script-library')
-
-  // TODO make separate spec where you test each feature of the options page
 })
 
 test('Edit Caption Script in Scriptor', async ({ page }) => {
