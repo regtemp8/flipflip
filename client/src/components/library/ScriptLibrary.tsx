@@ -62,7 +62,6 @@ import {
   useGetTagsCountQuery,
   useGetTutorialsQuery,
   useMarkCaptionScriptsMutation,
-  useMoveCaptionScriptMutation,
   useSortCaptionScriptsMutation
 } from '../../store/api/slice'
 import FilePicker from '../common/FilePicker'
@@ -675,6 +674,8 @@ function ScriptLibrary() {
             <ScriptSourceList
               selected={selected}
               showHelp={!specialMode && filters.length === 0}
+              scripts={scripts ?? []}
+              filters={filters}
               sources={displaySources ?? []}
               addHttpURL={addHttpURL}
               onUpdateSelected={onUpdateSelected}

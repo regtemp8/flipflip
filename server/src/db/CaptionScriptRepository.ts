@@ -121,6 +121,7 @@ export async function findCaptionScriptIds(): Promise<number[]> {
     .query()
     .selectFrom('captionScript')
     .select('id')
+    .orderBy('index asc')
     .execute()
     .then((value) => value.map((v) => v.id as number))
 }

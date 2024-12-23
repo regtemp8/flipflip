@@ -27,13 +27,13 @@ import SceneSelect from '../configGroups/SceneSelect'
 import { SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { showSystemSnack } from '../../store/systemSnack/store'
-import { useCreateCaptionScriptsMutation } from '../../store/api/slice'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
   deleteCaptionScript,
+  moveCaptionScript,
   updateCaptionScript
 } from '../../store/api/thunks'
-import useTrackVariableChanges from '../../utils'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -75,6 +75,8 @@ interface SortableVirtualListProps {
 
 export interface ScriptSourceListProps {
   showHelp: boolean
+  scripts: number[]
+  filters: string[]
   sources: number[]
   addHttpURL: boolean
   selected: number[]
@@ -150,10 +152,19 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     oldIndex: number
     newIndex: number
   }) => {
-    const oldSourceID = props.sources[oldIndex]
-    const newSourceID = props.sources[newIndex]
-
-    // dispatch(swapScripts(oldSourceID, newSourceID))
+    const oldID = props.sources[oldIndex]
+    const newID = props.sources[newIndex]
+    const newSources = arrayMove(
+      props.sources,
+      oldIndex,
+      newIndex
+    )
+    const newScripts = arrayMove(
+      props.scripts,
+      props.scripts.indexOf(oldID),
+      props.scripts.indexOf(newID)
+    )
+    dispatch(moveCaptionScript(newScripts, props.filters, newSources))
   }
 
   const clearLastSelected = () => {

@@ -1,5 +1,6 @@
 import path from 'path'
 import { test, expect } from '@playwright/test'
+import { dragListItem } from '../utils'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/script-library')
@@ -787,24 +788,143 @@ test('Sort By Date', async ({ page }) => {
   )
 })
 
-test('Randomize Order', async ({ page }) => {
-  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+test('Move Caption Script Down', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
   )
-  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
   )
-  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
   )
-  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'https://pastebin.com/raw/ZNJ5A40S'
   )
-  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
     'https://pastebin.com/raw/LDvJvg0C'
   )
-  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'https://pastebin.com/raw/48LPhQD3'
+  )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/move' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
+
+  const start = await page.locator('#sortable-list li').nth(0).boundingBox()
+  if (start == null) {
+    throw new Error('Failed to get list item bounding box')
+  }
+  const end = await page.locator('#sortable-list li').nth(5).boundingBox()
+  if (end == null) {
+    throw new Error('Failed to get list item bounding box')
+  }
+  await dragListItem(page, start, end)
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await responsePromise
+})
+
+test('Move Caption Script Up', async ({page}) => {
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/move' &&
+      request.method() === 'POST' &&
+      res.status() === 204
+    )
+  })
+
+  const start = await page.locator('#sortable-list li').nth(4).boundingBox()
+  if (start == null) {
+    throw new Error('Failed to get list item bounding box')
+  }
+  const end = await page.locator('#sortable-list li').nth(0).boundingBox()
+  if (end == null) {
+    throw new Error('Failed to get list item bounding box')
+  }
+  await dragListItem(page, start, end)
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+  await responsePromise
+})
+
+test('Randomize Order', async ({ page }) => {
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
+    'https://pastebin.com/raw/48LPhQD3'
+  )
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -822,11 +942,6 @@ test('Randomize Order', async ({ page }) => {
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
-})
-
-test.fixme('Move Caption Script', async ({ page }) => {
-  // move script
-  // verify order of scripts
 })
 
 test('Empty URL Deletes Caption Script', async ({ page }) => {

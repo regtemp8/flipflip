@@ -87,3 +87,21 @@ export async function testSliderValue(
   )
   return currentX === expectedX
 }
+
+export interface BoundingBox {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export async function dragListItem(
+  page: Page,
+  start: BoundingBox,
+  end: BoundingBox
+) {
+  await page.mouse.move(start.x + (start.width / 2), start.y + (start.height / 2))
+  await page.mouse.down({button: 'left'})
+  await page.mouse.move(end.x + (end.width / 2), end.y + (end.height / 2), {steps: 20})
+  await page.mouse.up({button: 'left'})
+}
