@@ -606,7 +606,7 @@ function ScriptLibrary() {
         )}
         variant="permanent"
         classes={{
-          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
+          paper: cx(classes.drawerPaper, !specialMode && !open && classes.drawerPaperClose, specialMode && classes.drawerPaperHidden)
         }}
         open={drawerOpen}
       >
@@ -662,7 +662,9 @@ function ScriptLibrary() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <div className={cx(classes.root, classes.fill)}>
-          <div className={classes.drawerSpacer} />
+          {!specialMode &&  (
+            <div className={classes.drawerSpacer}/>
+          )}
           <Container
             maxWidth={false}
             className={cx(
