@@ -1266,13 +1266,27 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   await page.getByTestId('ArrowBackIcon').click()
 })
 
-test.fixme('Batch Tag Escape Key Navigates Back', async ({ page }) => {
-  // click batch tag
-  // select sources
-  // open dialog
-  // press Esc => dialog closes
-  // press Esc => back to library (exit batch tag mode)
-  // press Esc => does nothing
+test('Batch Tag Escape Key Navigates Back', async ({ page }) => {
+  await expect(page.getByRole('checkbox')).toHaveCount(0)
+  await page.getByLabel('Batch Tag').click()
+  await expect(page.getByRole('checkbox')).toHaveCount(5)
+  await page.getByTestId('SelectAllIcon').click()
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+  await expect(page.getByRole('heading')).toHaveText('Batch Tag')
+
+  // close batch tag dialog
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('heading', {name: 'Batch Tag', exact: true})).not.toBeVisible()
+  await expect(page.getByRole('checkbox')).toHaveCount(5)
+
+  // go back to script library
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('checkbox')).toHaveCount(0)
+  await expect(page).toHaveURL('/script-library')
+
+  // extra Esc press does nothing
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL('/script-library')
 })
 
 test.fixme('Mark Caption Scripts', async ({page}) => {

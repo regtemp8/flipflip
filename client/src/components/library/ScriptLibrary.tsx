@@ -376,7 +376,7 @@ function ScriptLibrary() {
       ) {
         console.log('MARK')
         await markCaptionScripts(displaySources)
-      } else if (e.key === 'Escape' && specialMode != null) {
+      } else if (e.key === 'Escape' && specialMode) {
         goBack()
       }
     }
