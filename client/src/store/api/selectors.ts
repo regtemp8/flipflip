@@ -1427,37 +1427,35 @@ export const useGetDisplaySettingsAudioAlertQuery = () => {
 
 const createGetCaptionScriptSelector = createSelector(
   (id: number) => id,
-  (id) => flipflipApi.endpoints.getCaptionScript.select(id),
+  (id) => flipflipApi.endpoints.getCaptionScript.select(id)
 )
 
 export const selectScriptLibrarySelectedTagIDs = (ids: number[]) => {
   const inputs = ids.map((id) => createGetCaptionScriptSelector(id))
-  return createSelector(
-    inputs,
-    (...outputs) => {
-      const counts = new Map<number, number>()
-      outputs.flatMap((output) => output?.data?.tags ?? []).forEach((tag: number) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
-      const tagIDs: number[] = []
-      counts.forEach((value, key) => {
-        if(value === outputs.length) {
-          tagIDs.push(key)
-        }
-      })
+  return createSelector(inputs, (...outputs) => {
+    const counts = new Map<number, number>()
+    outputs
+      .flatMap((output) => output?.data?.tags ?? [])
+      .forEach((tag: number) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
+    const tagIDs: number[] = []
+    counts.forEach((value, key) => {
+      if (value === outputs.length) {
+        tagIDs.push(key)
+      }
+    })
 
-      return tagIDs
-    }
-  )
+    return tagIDs
+  })
 }
 
 const createGetTagSelector = createSelector(
   (id: number) => id,
-  (id) => flipflipApi.endpoints.getTag.select(id),
+  (id) => flipflipApi.endpoints.getTag.select(id)
 )
 
 export const selectScriptLibrarySelectedTagNames = (ids: number[]) => {
   const inputs = ids.map((id) => createGetTagSelector(id))
-  return createSelector(
-    inputs,
-    (...outputs) => outputs.map((output) => output?.data?.name ?? '').sort()
+  return createSelector(inputs, (...outputs) =>
+    outputs.map((output) => output?.data?.name ?? '').sort()
   )
 }

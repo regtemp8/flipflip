@@ -99,10 +99,10 @@ export async function createCaptionScripts(urls: string[], userId: number) {
         })
       }
 
-      if(fontSettings.length > 0) {
+      if (fontSettings.length > 0) {
         await trx.insertInto('fontSettings').values(fontSettings).execute()
       }
-      
+
       return rows
     })
 }
@@ -512,7 +512,11 @@ async function insertCaptionScriptTags(
     }
   }
 
-  return await trx.insertInto('captionScriptTag').values(values).onConflict((oc) => oc.doNothing()).execute()
+  return await trx
+    .insertInto('captionScriptTag')
+    .values(values)
+    .onConflict((oc) => oc.doNothing())
+    .execute()
 }
 
 export async function setCaptionScriptTags(
@@ -530,7 +534,7 @@ export async function setCaptionScriptTags(
         .where('captionScriptId', 'in', ids)
         .execute()
 
-      if(tags.length > 0) {
+      if (tags.length > 0) {
         const tagIds = await findTagIdsByName(tags, trx)
         await insertCaptionScriptTags(userId, ids, tagIds, trx)
       }

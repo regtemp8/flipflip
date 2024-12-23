@@ -586,7 +586,11 @@ test('Sort By Title', async ({ page }) => {
     page.locator('#sort-menu li').nth(0).getByTestId('ArrowDownwardIcon')
   ).toBeVisible()
 
-  await page.locator('#sort-menu li').nth(0).getByTestId('ArrowDownwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(0)
+    .getByTestId('ArrowDownwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(0)).not.toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -610,7 +614,11 @@ test('Sort By Title', async ({ page }) => {
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
   await page.getByTestId('SortIcon').click()
-  await page.locator('#sort-menu li').nth(0).getByTestId('ArrowUpwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(0)
+    .getByTestId('ArrowUpwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(0)).not.toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -663,7 +671,11 @@ test('Sort By Full Title', async ({ page }) => {
     page.locator('#sort-menu li').nth(1).getByTestId('ArrowDownwardIcon')
   ).toBeVisible()
 
-  await page.locator('#sort-menu li').nth(1).getByTestId('ArrowDownwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(1)
+    .getByTestId('ArrowDownwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(1)).not.toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -687,7 +699,11 @@ test('Sort By Full Title', async ({ page }) => {
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
   await page.getByTestId('SortIcon').click()
-  await page.locator('#sort-menu li').nth(1).getByTestId('ArrowUpwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(1)
+    .getByTestId('ArrowUpwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(1)).not.toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -740,7 +756,11 @@ test('Sort By Date', async ({ page }) => {
     page.locator('#sort-menu li').nth(2).getByTestId('ArrowDownwardIcon')
   ).toBeVisible()
 
-  await page.locator('#sort-menu li').nth(2).getByTestId('ArrowDownwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(2)
+    .getByTestId('ArrowDownwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(2)).not.toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
@@ -764,7 +784,11 @@ test('Sort By Date', async ({ page }) => {
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
   await page.getByTestId('SortIcon').click()
-  await page.locator('#sort-menu li').nth(2).getByTestId('ArrowUpwardIcon').click()
+  await page
+    .locator('#sort-menu li')
+    .nth(2)
+    .getByTestId('ArrowUpwardIcon')
+    .click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(2)).not.toBeVisible()
 
@@ -848,7 +872,7 @@ test('Move Caption Script Down', async ({ page }) => {
   await responsePromise
 })
 
-test('Move Caption Script Up', async ({page}) => {
+test('Move Caption Script Up', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
   )
@@ -929,19 +953,66 @@ test('Randomize Order', async ({ page }) => {
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
   await page.getByTestId('SortIcon').click()
-  await expect(page.locator('#sort-menu li').nth(3)).toHaveText('Randomize Order')
+  await expect(page.locator('#sort-menu li').nth(3)).toHaveText(
+    'Randomize Order'
+  )
   await expect(
     page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon')
   ).toBeVisible()
   await page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon').click()
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
-  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/48LPhQD3'})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/ZNJ5A40S'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/48LPhQD3'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/LDvJvg0C'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'bpm-timing.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrase-groups.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrases.txt'
+      )
+    })
+  ).toBeVisible()
 })
 
 test('Empty URL Deletes Caption Script', async ({ page }) => {
@@ -954,11 +1025,52 @@ test('Empty URL Deletes Caption Script', async ({ page }) => {
   await page.locator('#sortable-list li input').fill('')
   await page.locator('.MuiDrawer-root').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
-  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
-  await expect(page.locator('#sortable-list li p', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/ZNJ5A40S'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/LDvJvg0C'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'bpm-timing.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrase-groups.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrases.txt'
+      )
+    })
+  ).toBeVisible()
 })
 
 test('Batch Tag Select With Shift', async ({ page }) => {
@@ -979,13 +1091,13 @@ test('Batch Tag Select With Shift', async ({ page }) => {
 test('Batch Tag Select All', async ({ page }) => {
   await page.getByLabel('Batch Tag').click()
   await expect(page.getByRole('checkbox')).toHaveCount(5)
-  for(let i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
   }
 
   await expect(page.getByTestId('SelectAllIcon')).toBeVisible()
   await page.getByTestId('SelectAllIcon').click()
-  for(let i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
   }
 })
@@ -994,14 +1106,14 @@ test('Batch Tag Select None', async ({ page }) => {
   await page.getByLabel('Batch Tag').click()
   await page.getByTestId('SelectAllIcon').click()
   await expect(page.getByRole('checkbox')).toHaveCount(5)
-  for(let i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
   }
 
   await expect(page.getByTestId('ClearIcon')).toBeVisible()
   await page.getByTestId('ClearIcon').click()
 
-  for(let i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
   }
 })
@@ -1028,7 +1140,7 @@ test('Batch Tag Single Caption Script', async ({ page }) => {
   await page.getByRole('button', { name: 'OK', exact: true }).click()
   await page.getByLabel('Back').click()
   await expect(page).toHaveURL('/script-library')
-  
+
   await page.getByLabel('Batch Tag').click()
   await expect(
     page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon')
@@ -1048,160 +1160,679 @@ test('Batch Tag Single Caption Script', async ({ page }) => {
   // Add tags
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(page.getByRole('heading')).toHaveText('Batch Tag')
-  await expect(page.getByText('Choose tags to add, remove, or overwrite on the selected source(s)')).toBeVisible()
-  await expect(page.getByRole('button', {name: '- Remove', exact: true})).toBeVisible()
-  await expect(page.getByRole('button', {name: '+ Add', exact: true})).toBeVisible()
-  await expect(page.getByRole('button', {name: 'Overwrite', exact: true})).toBeVisible()
-  await expect(page.getByRole('button', {name: '- Remove', exact: true})).toBeDisabled()
-  await expect(page.getByRole('button', {name: '+ Add', exact: true})).toBeDisabled()
-  await expect(page.getByRole('button', {name: 'Overwrite', exact: true})).not.toBeDisabled()
-  await expect(page.getByRole('combobox')).toHaveAttribute('placeholder', 'Tag These Sources')
+  await expect(
+    page.getByText(
+      'Choose tags to add, remove, or overwrite on the selected source(s)'
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: '- Remove', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: '+ Add', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Overwrite', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: '- Remove', exact: true })
+  ).toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: '+ Add', exact: true })
+  ).toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Overwrite', exact: true })
+  ).not.toBeDisabled()
+  await expect(page.getByRole('combobox')).toHaveAttribute(
+    'placeholder',
+    'Tag These Sources'
+  )
 
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(3)
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
+  await expect(
+    page.getByRole('presentation').getByRole('listbox').getByRole('option')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('animals (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (0)')
 
   await page.getByRole('combobox').fill('s')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(2)
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('pets (0)')
+  await expect(
+    page.getByRole('presentation').getByRole('listbox').getByRole('option')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('animals (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('pets (0)')
 
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(3)
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'false')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'false')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('animals')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'false')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page.getByRole('presentation').getByRole('listbox').getByRole('option')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveAttribute('aria-selected', 'false')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveAttribute('aria-selected', 'false')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveAttribute('aria-selected', 'false')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '+ Add', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
 
   // Add duplicate tag
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option')).toHaveCount(3)
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('pets (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'false')
+  await expect(
+    page.getByRole('presentation').getByRole('listbox').getByRole('option')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('animals (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('pets (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveAttribute('aria-selected', 'false')
 
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(0).getByTestId('CancelIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(0)
+    .getByTestId('CancelIcon')
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'false')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'false')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('animals (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveAttribute('aria-selected', 'false')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveAttribute('aria-selected', 'false')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveAttribute('aria-selected', 'false')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('animals (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveAttribute('aria-selected', 'true')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveAttribute('aria-selected', 'false')
 
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '+ Add', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
 
   // Remove tags
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(1).getByTestId('CancelIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(1)
+    .getByTestId('CancelIcon')
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '- Remove', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await page.getByRole('button', { name: '- Remove', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
 
   // Overwrite same tag
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (1)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
 
   // Overwrite different tags
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(0).getByTestId('CancelIcon').click()
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(0)
+    .getByTestId('CancelIcon')
+    .click()
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('animals')
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('animals')
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
 
   // Overwrite tag overlap
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(1).getByTestId('CancelIcon').click()
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(1)
+    .getByTestId('CancelIcon')
+    .click()
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
 
   // Overwrite no tags selected
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
   await page.getByRole('presentation').locator('.MuiAutocomplete-root').hover()
   await page.getByRole('presentation').getByTestId('CloseIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByRole('checkbox').nth(0).uncheck()
 })
 
@@ -1212,171 +1843,831 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   await page.getByRole('checkbox').nth(1).check()
   await page.getByRole('checkbox').nth(2).check()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByRole('combobox').click()
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('animals')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (0)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (0)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '+ Add', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
 
   await page.getByRole('checkbox').nth(0).uncheck()
   await page.getByRole('checkbox').nth(1).uncheck()
   await page.getByRole('checkbox').nth(3).check()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (3)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (3)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (3)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('car (3)')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (3)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('animals (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('animals (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (0)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('car (3)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('animals (3)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '+ Add', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
 
   // Overwrite tags
   await page.getByRole('checkbox').nth(1).check()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (4)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (3)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (2)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (4)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (3)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (2)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
 
   // Add with overlapping tags
   await page.getByRole('checkbox').nth(0).check()
   await page.getByRole('checkbox').nth(1).uncheck()
   await page.getByRole('checkbox').nth(3).uncheck()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(0).getByTestId('CancelIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (4)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (0)')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (4)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('animals (1)')
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('pets')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('animals')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('pets (0)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (1)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('car (4)')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(0)
+    .getByTestId('CancelIcon')
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (4)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (0)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (4)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('animals (1)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(2)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('pets (0)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (1)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('car (4)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '+ Add', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
 
   // Remove tag
   await page.getByRole('checkbox').nth(1).check()
   await page.getByRole('checkbox').nth(2).uncheck()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('combobox').click()
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('car (4)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('animals (2)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (2)')
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await page.getByRole('presentation').locator('.MuiChip-root').nth(0).getByTestId('CancelIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('car (4)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('animals (2)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (2)')
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await page
+    .getByRole('presentation')
+    .locator('.MuiChip-root')
+    .nth(0)
+    .getByTestId('CancelIcon')
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByRole('combobox').click()
-  await page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1).click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(0)).toHaveText('animals (2)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(1)).toHaveText('car (4)')
-  await expect(page.getByRole('presentation').getByRole('listbox').getByRole('option').nth(2)).toHaveText('pets (2)')
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .getByRole('presentation')
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(0)
+  ).toHaveText('animals (2)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(1)
+  ).toHaveText('car (4)')
+  await expect(
+    page
+      .getByRole('presentation')
+      .getByRole('listbox')
+      .getByRole('option')
+      .nth(2)
+  ).toHaveText('pets (2)')
   await page.getByRole('combobox').click()
-  await page.getByRole('button', {name: '- Remove', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(2)
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('pets')
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('animals')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(1)).toHaveText('car')
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label').nth(2)).toHaveText('pets')
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(1)
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label').nth(0)).toHaveText('car')
+  await page.getByRole('button', { name: '- Remove', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(3)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(2)
+  ).toHaveText('pets')
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(1)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('car')
 
   // Remove all tags using overwrite action
   await page.getByTestId('SelectAllIcon').click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
-  await expect(page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await page.getByRole('button', {name: 'Overwrite', exact: true}).click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await expect(page.locator('#sortable-list li').nth(1).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await expect(page.locator('#sortable-list li').nth(2).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await expect(page.locator('#sortable-list li').nth(3).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
-  await expect(page.locator('#sortable-list li').nth(4).locator('.MuiChip-root > .MuiChip-label')).toHaveCount(0)
+  await expect(
+    page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await page.getByRole('button', { name: 'Overwrite', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(1)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(2)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(3)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .locator('#sortable-list li')
+      .nth(4)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(0)
   await page.getByTestId('ClearIcon').click()
   await page.getByTestId('ArrowBackIcon').click()
 })
@@ -1391,7 +2682,9 @@ test('Batch Tag Escape Key Navigates Back', async ({ page }) => {
 
   // close batch tag dialog
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('heading', {name: 'Batch Tag', exact: true})).not.toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Batch Tag', exact: true })
+  ).not.toBeVisible()
   await expect(page.getByRole('checkbox')).toHaveCount(5)
 
   // go back to script library
@@ -1404,7 +2697,7 @@ test('Batch Tag Escape Key Navigates Back', async ({ page }) => {
   await expect(page).toHaveURL('/script-library')
 })
 
-test.fixme('Mark Caption Scripts', async ({page}) => {
+test.fixme('Mark Caption Scripts', async ({ page }) => {
   // mark all caption scripts (ALT + m)
   // unmark all caption scripts
   // apply filter
@@ -1440,7 +2733,6 @@ test.fixme('Delete All Visible Caption Scripts', async ({ page }) => {
   // TODO apply filter
   // assert that dialog message is: 'Are you sure you want to remove these sources from your caption script library??'
   // assert that only visible scripts were deleted
-  
 })
 
 test.fixme('Delete All Caption Scripts', async ({ page }) => {

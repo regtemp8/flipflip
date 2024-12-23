@@ -102,22 +102,21 @@ interface ListItemTagChip {
 }
 
 function ListItemTagChip(props: ListItemTagChip) {
-  const {tagID} = props
+  const { tagID } = props
   const theme = useTheme()
   const isFullTag = useMediaQuery(theme.breakpoints.up('md'))
   const isSimpleTag = useMediaQuery(theme.breakpoints.up('sm'))
-  const {classes} = useStyles()
+  const { classes } = useStyles()
 
-  if(isFullTag || isSimpleTag) {
-    return (<TagChip
-      tagID={tagID}
-      className={cx(
-        classes.noUserSelect,
-        classes.actionButton
-      )}
-      outlined
-      simpleTag={!isFullTag}
-    />)
+  if (isFullTag || isSimpleTag) {
+    return (
+      <TagChip
+        tagID={tagID}
+        className={cx(classes.noUserSelect, classes.actionButton)}
+        outlined
+        simpleTag={!isFullTag}
+      />
+    )
   } else {
     return null
   }
@@ -287,7 +286,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 {script?.url ?? ''}
               </Typography>
               {script?.tags?.map((tagID) => (
-                <ListItemTagChip key={tagID} tagID={tagID}/>
+                <ListItemTagChip key={tagID} tagID={tagID} />
               ))}
             </React.Fragment>
           )}

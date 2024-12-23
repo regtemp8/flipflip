@@ -851,7 +851,6 @@ export const flipflipApi = createApi({
         await queryFulfilled
           .then(({ meta }) => {
             const status = meta?.response?.status
-            console.log('STATUS', status)
             if (status === 205) {
               dispatch(
                 flipflipApi.util.invalidateTags([

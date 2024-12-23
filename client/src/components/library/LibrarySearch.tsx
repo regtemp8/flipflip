@@ -51,11 +51,14 @@ function LibrarySearch(props: LibrarySearchProps) {
   }, [props.menuIsOpen])
 
   const defaultValues = useMemo(() => {
-    return props.filters.map((filter) => ({label: filter, value: filter}))
+    return props.filters.map((filter) => ({ label: filter, value: filter }))
   }, [props.filters])
   const options = useMemo(() => {
     return [
-      ...props.filters.map((filter) => props.options.find((o) => o.value === filter) as SelectOption),
+      ...props.filters.map(
+        (filter) =>
+          props.options.find((o) => o.value === filter) as SelectOption
+      ),
       ...props.options.filter((o) => !props.filters.includes(o.value))
     ]
   }, [props.filters, props.options])

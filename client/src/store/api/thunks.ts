@@ -132,7 +132,7 @@ export const setAudioBPM = (id: number) => {
 const updateLocalCaptionScript = (
   update: Pick<CaptionScript, 'id'> & Partial<CaptionScript>
 ) => {
-  if(update.url != null) {
+  if (update.url != null) {
     update.type = getSourceType(update.url)
   }
 

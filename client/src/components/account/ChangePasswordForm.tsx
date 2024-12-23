@@ -35,6 +35,7 @@ function ChangePasswordForm() {
         setMessage({ severity: 'error', message })
       }
     } catch (error) {
+      // TODO is this necessary?
       console.error('A problem occurred with your fetch operation: ', error)
     } finally {
       setForm({ current: '', new: '', confirm: '' })

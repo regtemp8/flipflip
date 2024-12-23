@@ -68,7 +68,10 @@ import FilePicker from '../common/FilePicker'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import { setSpecialMode } from '../../store/app/slice'
-import { selectScriptLibrarySelectedTagIDs, selectScriptLibrarySelectedTagNames } from '../../store/api/selectors'
+import {
+  selectScriptLibrarySelectedTagIDs,
+  selectScriptLibrarySelectedTagNames
+} from '../../store/api/selectors'
 
 const drawerWidth = 240
 
@@ -349,8 +352,12 @@ function ScriptLibrary() {
   const [openMenu, setOpenMenu] = useState<string>()
   const [selected, setSelected] = useState<number[]>([])
   const [addHttpURL, setAddHttpURL] = useState(false)
-  const selectedTagIDs = useAppSelector(selectScriptLibrarySelectedTagIDs(selected))
-  const selectedTagNames = useAppSelector(selectScriptLibrarySelectedTagNames(selectedTagIDs))
+  const selectedTagIDs = useAppSelector(
+    selectScriptLibrarySelectedTagIDs(selected)
+  )
+  const selectedTagNames = useAppSelector(
+    selectScriptLibrarySelectedTagNames(selectedTagIDs)
+  )
   const specialMode = useAppSelector(selectSpecialMode())
 
   const goBack = useCallback(() => {
@@ -365,7 +372,6 @@ function ScriptLibrary() {
 
   useEffect(() => {
     const onKeyDown = async (e: KeyboardEvent) => {
-      console.log('KEY DOWN')
       if (
         !e.shiftKey &&
         !e.ctrlKey &&
@@ -373,7 +379,6 @@ function ScriptLibrary() {
         (e.key === 'm' || e.key === 'µ') &&
         displaySources != null
       ) {
-        console.log('MARK')
         await markCaptionScripts(displaySources)
       } else if (e.key === 'Escape' && specialMode) {
         goBack()
@@ -605,7 +610,11 @@ function ScriptLibrary() {
         )}
         variant="permanent"
         classes={{
-          paper: cx(classes.drawerPaper, !specialMode && !open && classes.drawerPaperClose, specialMode && classes.drawerPaperHidden)
+          paper: cx(
+            classes.drawerPaper,
+            !specialMode && !open && classes.drawerPaperClose,
+            specialMode && classes.drawerPaperHidden
+          )
         }}
         open={drawerOpen}
       >
@@ -661,9 +670,7 @@ function ScriptLibrary() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <div className={cx(classes.root, classes.fill)}>
-          {!specialMode &&  (
-            <div className={classes.drawerSpacer}/>
-          )}
+          {!specialMode && <div className={classes.drawerSpacer} />}
           <Container
             maxWidth={false}
             className={cx(

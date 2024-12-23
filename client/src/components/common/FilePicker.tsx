@@ -381,7 +381,6 @@ export default function FilePicker(props: FilePickerProps) {
         return value
       })
     } else if (props.multiple && shiftKey && _lastSelected.current != null) {
-      console.log('SHIFT', _lastSelected.current)
       const lastSelectedIndex = items.findIndex(
         (i) => i.name === _lastSelected.current
       )

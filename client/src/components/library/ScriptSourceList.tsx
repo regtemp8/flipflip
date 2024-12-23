@@ -154,11 +154,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }) => {
     const oldID = props.sources[oldIndex]
     const newID = props.sources[newIndex]
-    const newSources = arrayMove(
-      props.sources,
-      oldIndex,
-      newIndex
-    )
+    const newSources = arrayMove(props.sources, oldIndex, newIndex)
     const newScripts = arrayMove(
       props.scripts,
       props.scripts.indexOf(oldID),
@@ -217,12 +213,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }
 
   const onEndEdit = async (url: string) => {
-    console.log('END EDIT', isEditing, url)
     if (url === '') {
-      console.log('DELETE SCRIPT')
       dispatch(deleteCaptionScript(isEditing))
     } else {
-      console.log('UPDATE SCRIPT')
       dispatch(updateCaptionScript({ id: isEditing, url }))
     }
     if (props.addHttpURL) {

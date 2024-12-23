@@ -101,7 +101,7 @@ export async function deleteTag(id: number) {
 }
 
 const sortColumns = new Map<string, string>([
-  [SF.alpha, 'name'], 
+  [SF.alpha, 'name'],
   [SF.date, 'id']
 ])
 export async function sortTags({ sortBy, sortOrder }: SortRequest) {
