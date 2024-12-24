@@ -27,7 +27,6 @@ import {
   useGetDisplaySettingsMaxLoadingAtOnceQuery
   // selectAppLibrary
 } from '../../store/api/selectors'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   grey: {
@@ -144,7 +143,7 @@ function PlayerNumCard() {
               placeholder={'Search ...'}
               onUpdateFilters={onSelectTags}
               inputVariant="standard"
-              optionsQuery={useGetIgnoredTagOptionsQuery()}
+              options={[]}
             />
           </div>
         </Tooltip>
