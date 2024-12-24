@@ -136,6 +136,7 @@ function WatermarkCard() {
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={9}>
               <FontFamilySelect
+                id="watermark-font"
                 label="Font"
                 selector={useGetGeneralSettingsWatermarkFontFamilyQuery}
                 action={setConfigGeneralSettingsWatermarkFontFamily}
@@ -161,6 +162,7 @@ function WatermarkCard() {
             </Grid2>
             <Grid2 size={12}>
               <ColorPicker
+                type="watermark"
                 selector={useGetGeneralSettingsWatermarkColorQuery}
                 action={setConfigGeneralSettingsWatermarkColor}
               />

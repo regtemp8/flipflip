@@ -177,6 +177,7 @@ function StrobeCard(props: StrobeCardProps) {
                 strobeLayer !== SL.image &&
                 strobeColorType === SC.color && (
                   <ColorPicker
+                    type="strobe"
                     selector={() => useGetSceneStrobeColorQuery(props.sceneID)}
                     action={setSceneStrobeColor(props.sceneID)}
                   />

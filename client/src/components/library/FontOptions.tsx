@@ -61,6 +61,7 @@ function FontOptions(props: FontOptionsProps) {
     <Grid2 container spacing={2} alignItems="center">
       <Grid2 size={9}>
         <FontFamilySelect
+          id={`${props.type.toLowerCase()}-font`}
           label={`${props.name} Font`}
           selector={() =>
             useGetCaptionScriptFontSettingsFontFamilyQuery(
@@ -100,6 +101,7 @@ function FontOptions(props: FontOptionsProps) {
       </Grid2>
       <Grid2 size={12}>
         <ColorPicker
+          type={props.type.toLowerCase()}
           selector={() =>
             useGetCaptionScriptFontSettingsColorQuery(
               props.captionScriptID,
@@ -157,6 +159,7 @@ function FontOptions(props: FontOptionsProps) {
       <Grid2 size={9}>
         <Collapse in={border}>
           <ColorPicker
+            type={`${props.type.toLowerCase()}-border`}
             selector={() =>
               useGetCaptionScriptFontSettingsBorderColorQuery(
                 props.captionScriptID,

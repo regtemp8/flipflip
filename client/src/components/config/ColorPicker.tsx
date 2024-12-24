@@ -56,7 +56,9 @@ const COLORS = [
   '#000'
 ]
 
-export interface ColorPickerProps extends ReduxProps<string> {}
+export interface ColorPickerProps extends ReduxProps<string> {
+  type: string
+}
 
 function ColorPicker(props: ColorPickerProps) {
   const dispatch = useAppDispatch()
@@ -122,7 +124,7 @@ function ColorPicker(props: ColorPickerProps) {
           }
         />
         <Menu
-          id="color-picker"
+          id={`${props.type}-color-picker`}
           elevation={1}
           anchorOrigin={{
             vertical: 'bottom',

@@ -281,6 +281,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
             >
               {backgroundType === BT.color && (
                 <ColorPicker
+                  type="background"
                   selector={() =>
                     useGetSceneBackgroundColorQuery(props.sceneID)
                   }

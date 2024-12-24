@@ -128,6 +128,7 @@ const StyledPopper = styled(Popper)({
 })
 
 export interface FontFamilySelectProps extends ReduxProps<string> {
+  id: string
   label: string
 }
 
@@ -142,6 +143,7 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
 
   return (
     <Autocomplete
+      id={props.id}
       disableListWrap
       options={fontInfo}
       value={value}
