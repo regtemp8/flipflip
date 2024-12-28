@@ -340,13 +340,12 @@ function ScriptLibrary() {
   const [markCaptionScripts] = useMarkCaptionScriptsMutation()
   const { data: tutorial } = useGetTutorialsQuery()
   const { data: scripts } = useGetCaptionScriptsQuery()
-  const filters: string[] = [] //useAppSelector(selectAppScriptFilters())
-  const { data: displaySources } = useGetFilteredCaptionScriptsQuery(filters)
   const { data: tagsCount } = useGetTagsCountQuery()
   const { data: tagOptions } = useGetCaptionScriptBatchTagOptionsQuery()
   const { data: searchOptions } = useGetCaptionScriptSearchOptionsQuery()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [filters, setFilters] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
@@ -359,6 +358,7 @@ function ScriptLibrary() {
     selectScriptLibrarySelectedTagNames(selectedTagIDs)
   )
   const specialMode = useAppSelector(selectSpecialMode())
+  const { data: displaySources } = useGetFilteredCaptionScriptsQuery(filters)
 
   const goBack = useCallback(() => {
     if (specialMode === SP.batchTag) {
@@ -400,10 +400,6 @@ function ScriptLibrary() {
   const onBatchTag = () => {
     dispatch(setSpecialMode(SP.batchTag))
     onCloseDialog()
-  }
-
-  const onUpdateFilters = (filters: string[]) => {
-    // dispatch(setScriptFilters(filters))
   }
 
   const onAddSource = async (type: string, e: MouseEvent) => {
@@ -460,14 +456,14 @@ function ScriptLibrary() {
   }
 
   const onFinishRemoveAll = async () => {
-    await deleteCaptionScripts()
+    await deleteCaptionScripts(undefined)
     onCloseDialog()
   }
 
-  const onFinishRemoveVisible = () => {
-    // dispatch(setScriptsRemove(displaySources))
+  const onFinishRemoveVisible = async () => {
+    await deleteCaptionScripts(displaySources)
     onCloseDialog()
-    // dispatch(setScriptFilters([]))
+    setFilters([])
   }
 
   const onImportFromLibrary = () => {
@@ -592,7 +588,7 @@ function ScriptLibrary() {
                 options={searchOptions ?? []}
                 placeholder={'Search ...'}
                 isCreatable
-                onUpdateFilters={onUpdateFilters}
+                onUpdateFilters={setFilters}
               />
             </div>
           </div>

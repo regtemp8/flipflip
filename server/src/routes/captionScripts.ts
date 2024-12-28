@@ -61,7 +61,7 @@ router.post('/', async (req, res, next) => {
 })
 router.delete('/', async (req, res, next) => {
   try {
-    await deleteAllCaptionScripts()
+    await deleteAllCaptionScripts(req.body)
     res.status(204).end()
   } catch (error) {
     next(error)

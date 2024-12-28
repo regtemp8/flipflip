@@ -241,18 +241,36 @@ export async function updateCaptionScript(
     })
 }
 
-export async function deleteAllCaptionScripts() {
+export async function deleteAllCaptionScripts(ids?: number[]) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const result = await Promise.all([
-        trx.deleteFrom('captionScriptPlaylistItem').execute(),
-        trx.deleteFrom('captionScriptTag').execute(),
-        trx.deleteFrom('fontSettings').execute(),
-        trx.deleteFrom('captionScript').execute()
-      ])
+      let playlistItemQuery = trx.deleteFrom('captionScriptPlaylistItem')
+      let tagQuery = trx.deleteFrom('captionScriptTag')
+      let fontSettingsQuery = trx.deleteFrom('fontSettings')
+      let scriptQuery = trx.deleteFrom('captionScript')
 
+      if (ids != null) {
+        playlistItemQuery = playlistItemQuery.where(
+          'captionScriptId',
+          'in',
+          ids
+        )
+        tagQuery = tagQuery.where('captionScriptId', 'in', ids)
+        fontSettingsQuery = fontSettingsQuery.where(
+          'captionScriptId',
+          'in',
+          ids
+        )
+        scriptQuery = scriptQuery.where('id', 'in', ids)
+      }
+
+      const result = await Promise.all(
+        [playlistItemQuery, tagQuery, fontSettingsQuery, scriptQuery].map(
+          (query) => query.execute()
+        )
+      )
       const numDeletedRows = result
         .flatMap((r) => r)
         .map((r) => r.numDeletedRows)

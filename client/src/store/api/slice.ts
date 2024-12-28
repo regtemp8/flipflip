@@ -823,10 +823,11 @@ export const flipflipApi = createApi({
         })
       }
     }),
-    deleteCaptionScripts: builder.mutation<void, void>({
-      query: () => ({
+    deleteCaptionScripts: builder.mutation<void, number[] | undefined>({
+      query: (ids) => ({
         url: `api/caption-scripts`,
-        method: 'DELETE'
+        method: 'DELETE',
+        body: ids
       }),
       async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(({ meta }) => {
