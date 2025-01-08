@@ -741,6 +741,7 @@ function Library() {
                 />
               )}
               <LibrarySearch
+                appBar
                 options={searchOptions}
                 filters={filters}
                 placeholder={'Search ...'}
@@ -1511,7 +1512,6 @@ function Library() {
               options={tagOptions}
               placeholder={'Tag These Sources'}
               showCheckboxes
-              fullWidth
               inputVariant="standard"
               onUpdateFilters={onSelectTags}
             />

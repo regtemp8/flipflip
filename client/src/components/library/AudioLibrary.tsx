@@ -808,6 +808,7 @@ function AudioLibrary() {
                 />
               )}
               <LibrarySearch
+                appBar
                 filters={filters}
                 options={searchOptions}
                 placeholder={'Search ...'}
@@ -1601,7 +1602,6 @@ function AudioLibrary() {
                 options={tagOptions}
                 filters={selectedTags}
                 placeholder={'Tag These Sources'}
-                fullWidth
                 showCheckboxes
                 onUpdateFilters={onSelectTags}
                 inputVariant="standard"

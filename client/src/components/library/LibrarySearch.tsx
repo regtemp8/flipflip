@@ -4,28 +4,24 @@ import {
   Autocomplete,
   AutocompleteChangeDetails,
   AutocompleteChangeReason,
-  AutocompleteInputChangeReason,
+  Chip,
   FilterOptionsState,
+  Stack,
   TextField,
   TextFieldVariants,
-  type Theme
+  type Theme,
+  alpha
 } from '@mui/material'
-import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
 import { SelectOption } from 'flipflip-common'
-//import { selectAppLibrarySearchOptions } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
     minWidth: 200,
-    maxHeight: theme.mixins.toolbar.minHeight,
-    color: grey[900]
+    maxHeight: theme.mixins.toolbar.minHeight
   },
   limitWidth: {
     maxWidth: `calc(100% - ${theme.spacing(7)})`
-  },
-  select: {
-    color: grey[900]
   }
 }))
 
@@ -37,14 +33,13 @@ export interface LibrarySearchProps {
   isCreatable?: boolean
   menuIsOpen?: boolean
   showCheckboxes?: boolean
-  fullWidth?: boolean
+  appBar?: boolean
   inputVariant?: TextFieldVariants
   onUpdateFilters: (filter: string[]) => void
 }
 
 function LibrarySearch(props: LibrarySearchProps) {
   const [open, setOpen] = useState(props.menuIsOpen ?? false)
-  const [searchInput, setSearchInput] = useState('')
 
   useEffect(() => {
     setOpen(props.menuIsOpen ?? false)
@@ -100,43 +95,26 @@ function LibrarySearch(props: LibrarySearchProps) {
     }
   }
 
-  const handleInputChange = (
-    event: SyntheticEvent<Element, Event>,
-    searchInput: string,
-    reason: AutocompleteInputChangeReason
-  ) => {
-    setSearchInput(searchInput)
-  }
-
   const handleFilterOptions = (
-    options: { value: string; label: string }[],
-    params: FilterOptionsState<{ value: string; label: string }>
+    options: Array<SelectOption>,
+    params: FilterOptionsState<SelectOption>
   ) => {
     const { inputValue } = params
+    // options can have undefined option when a filter is removed
+    options = options.filter((option) => option != null)
     const filtered = options
       .filter((option) => {
-        const value =
-          typeof option === 'string'
-            ? option
-            : (option as { label: string; value: string }).value
-        return defaultValues.find((v) => v.value === value) == null
+        return defaultValues.find((v) => v.value === option.value) == null
       })
       .filter((option) => {
-        const label =
-          typeof option === 'string'
-            ? option
-            : (option as { label: string; value: string }).label
-        return label.includes(inputValue)
+        return option.label.toLowerCase().includes(inputValue.toLowerCase())
       })
 
-    const missing =
-      props.isCreatable &&
-      options.find(
-        (option) =>
-          (typeof option === 'string' && inputValue === option) ||
-          inputValue === (option as { label: string; value: string }).label
-      ) == null
-    if (inputValue !== '' && missing) {
+    const create =
+      props.isCreatable && 
+      inputValue !== '' &&
+      options.find((option) => inputValue.toLowerCase() === option.label.toLowerCase()) == null
+    if (create) {
       filtered.push({
         value: inputValue,
         label: `Search for "${inputValue}"`
@@ -155,33 +133,62 @@ function LibrarySearch(props: LibrarySearchProps) {
       handleHomeEndKeys
       className={cx(
         classes.searchSelect,
-        'CreatableSelect',
-        !props.fullWidth && classes.limitWidth
+        'CreatableSelect'
       )}
       value={defaultValues}
       options={options}
-      isOptionEqualToValue={(option, value) => {
-        const optionValue = typeof option === 'string' ? option : option.value
-        const valueValue = typeof value === 'string' ? value : value.value
-        return optionValue === valueValue
-      }}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
       filterOptions={props.isCreatable ? handleFilterOptions : undefined}
       renderInput={(params) => (
         <TextField
           {...params}
           variant={props.inputVariant}
-          placeholder={props.placeholder}
-          sx={{
+          placeholder={defaultValues.length === 0 ? props.placeholder : undefined}
+          sx={props.appBar ? (theme) => ({
             '& .MuiOutlinedInput-root': {
+              flexWrap: 'nowrap',
+              'input': {
+                color: theme.palette.primary.contrastText
+              },
+              'fieldset': {
+                borderColor: alpha(theme.palette.primary.contrastText, 0.23)
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.primary.contrastText
+              },
               '&.Mui-focused fieldset': {
-                borderColor: 'white'
+                borderColor: theme.palette.primary.main
+              },
+              '.MuiAutocomplete-endAdornment > button': {
+                color: theme.palette.primary.contrastText,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.contrastText, 0.08),
+                }
               }
             }
-          }}
+          }) : undefined}
         />
       )}
+      renderTags={props.appBar ? (values, getTagProps, owner) => (
+        <Stack direction='row' sx={(theme) => ({overflowX: 'scroll', maxWidth: `calc(100% - ${theme.spacing(7)})`})}>
+          {values.map((value, index) => (
+            <Chip
+              label={owner.getOptionLabel(value)}
+              size={owner.size}
+              {...getTagProps({ index })}
+              {...owner.ChipProps}
+              sx={(theme) => ({
+                color: theme.palette.primary.contrastText,
+                backgroundColor: alpha(theme.palette.primary.contrastText, 0.16),
+                '& .MuiChip-deleteIcon': {
+                  color: alpha(theme.palette.primary.contrastText, 0.26),
+                },
+              })}
+            />
+          ))}
+        </Stack>
+      ) : undefined}
       onChange={handleChange}
-      onInputChange={props.isCreatable ? handleInputChange : undefined}
       open={open}
       onClose={() => setOpen(false)}
       onOpen={() => setOpen(true)}

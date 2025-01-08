@@ -107,17 +107,14 @@ const useStyles = makeStyles()((theme: Theme) => ({
     textAlign: 'center',
     flexGrow: 1
   },
-  headerBar: {
-    display: 'flex',
-    alignItems: 'center',
-    whiteSpace: 'nowrap',
-    flexWrap: 'nowrap'
-  },
   headerLeft: {
-    flexBasis: '20%'
+    flexBasis: '20%',
+    flexGrow: 1
   },
   headerRight: {
+    maxWidth: '33%',
     flexBasis: '20%',
+    flexGrow: 1,
     justifyContent: 'flex-end',
     display: 'flex'
   },
@@ -527,7 +524,7 @@ function ScriptLibrary() {
             cx(classes.backdropTop, classes.disable)
         )}
       >
-        <Toolbar className={classes.headerBar}>
+        <Toolbar>
           <div className={classes.headerLeft}>
             <Tooltip
               disableInteractive
@@ -584,6 +581,7 @@ function ScriptLibrary() {
                 />
               )}
               <LibrarySearch
+                appBar
                 filters={filters}
                 options={searchOptions ?? []}
                 placeholder={'Search ...'}
@@ -967,7 +965,6 @@ function ScriptLibrary() {
               placeholder={'Tag These Sources'}
               showCheckboxes
               onUpdateFilters={onSelectTags}
-              fullWidth
               inputVariant="standard"
               options={tagOptions ?? []}
             />

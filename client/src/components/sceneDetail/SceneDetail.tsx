@@ -785,6 +785,7 @@ function SceneDetail() {
           {openTab === 3 && (
             <div className={classes.librarySearch}>
               <LibrarySearch
+                appBar
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
@@ -1720,7 +1721,6 @@ function SceneDetail() {
                 autoFocus
                 isLibrary
                 isCreatable
-                fullWidth
                 onlyUsed
                 menuIsOpen
                 controlShouldRenderValue={false}

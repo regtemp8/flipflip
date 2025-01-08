@@ -737,7 +737,6 @@ function SceneGenerator(props: SceneGeneratorProps) {
                     autoFocus
                     isLibrary
                     isCreatable
-                    fullWidth
                     onlyUsed
                     menuIsOpen
                     controlShouldRenderValue={false}
