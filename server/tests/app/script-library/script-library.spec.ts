@@ -2695,14 +2695,49 @@ test('Batch Tag Escape Key Navigates Back', async ({ page }) => {
   await expect(page).toHaveURL('/script-library')
 })
 
-test.fixme('Mark Caption Scripts', async ({ page }) => {
-  // mark all caption scripts (ALT + m)
-  // unmark all caption scripts
-  // apply filter
-  // mark all visible caption scripts
-  // remove filter
-  // only previously filtered caption scripts are marked
-  // unmark all caption scripts
+test('Mark Caption Scripts', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+
+  await page.keyboard.press('Alt+m')
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+
+  await page.keyboard.press('Alt+m')
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+
+  await page.getByPlaceholder('Search').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+
+  await page.keyboard.press('Alt+m')
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+
+  await page.getByLabel('Clear').click()
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  
+  await page.keyboard.press('Alt+m')
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
 })
 
 test.fixme('Search Caption Scripts', async ({ page }) => {
@@ -2717,6 +2752,9 @@ test.fixme('Search Caption Scripts', async ({ page }) => {
   // url filter (no prefix)
   // negative url filter (starts with -)
   // combine multiple filters
+  // remove a filter by clicking X of chip
+  // clear all filters
+  // search input is matched case-insensitive
 })
 
 test.fixme('Save Position Caption Script List', async ({ page }) => {
