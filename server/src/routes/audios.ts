@@ -9,6 +9,7 @@ import {
   findAudioById,
   updateAudio,
   findBatchTagOptions,
+  findTotalCount,
   findUntaggedCount,
   findMarkedCount,
   findSearchOptions,
@@ -39,12 +40,13 @@ router.get('/search-options', async (req, res) => {
   }
 
   const userId = (req.user as User).id as number
+  const totalCount = await findTotalCount(userId)
   const untaggedCount = await findUntaggedCount(userId)
   const markedCount = await findMarkedCount(userId)
   const options = await findSearchOptions(userId)
   res
     .status(200)
-    .send(toSearchSelectOptions(options, untaggedCount, markedCount))
+    .send(toSearchSelectOptions(options, totalCount, untaggedCount, markedCount))
 })
 router.post('/tags', async (req, res, next) => {
   if (req.user == null) {

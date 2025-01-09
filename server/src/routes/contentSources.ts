@@ -18,7 +18,8 @@ import {
   setContentSourceTags,
   removeContentSourceTags,
   markContentSources,
-  findContentSourceTagIds
+  findContentSourceTagIds,
+  findTotalCount
 } from '../db/ContentSourceRepository'
 import { toIgnoredTagSelectOptions } from '../db/mappers'
 import { User } from '../db/types/generated'
@@ -33,6 +34,7 @@ router.get('/batch-tag-options', async (req, res) => {
 router.get('/search-options', async (req, res) => {
   // TODO only use content sources in library
   const userId = (req.user as User).id as number
+  const totalCount = await findTotalCount(userId)
   const untaggedCount = await findUntaggedCount(userId)
   const markedCount = await findMarkedCount(userId)
   const offlineCount = await findOfflineCount(userId)
@@ -43,6 +45,7 @@ router.get('/search-options', async (req, res) => {
     .send(
       toSearchSelectOptions(
         tagOptions,
+        totalCount,
         untaggedCount,
         markedCount,
         offlineCount,

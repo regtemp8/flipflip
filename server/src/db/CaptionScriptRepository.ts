@@ -436,9 +436,7 @@ export async function hasTag(id: number, tagName: string) {
     .query()
     .selectFrom('tag as t')
     .select((eb) => eb.lit(1).as('exists'))
-    .innerJoin('captionScriptTag as cst', (jb) =>
-      jb.on('cst.captionScriptId', '=', id)
-    )
+    .innerJoin('captionScriptTag as cst', 'cst.tagId', 't.id')
     .where('cst.captionScriptId', '=', id)
     .where('t.name', '=', tagName)
     .execute()
@@ -483,6 +481,16 @@ export async function findMarkedCount(userId: number): Promise<number> {
     .select(({ fn }) => [fn.count<number>('id').as('count')])
     .where('userId', '=', userId)
     .where('marked', '=', toNumber(true))
+    .executeTakeFirstOrThrow()
+    .then((value) => value.count)
+}
+
+export async function findTotalCount(userId: number): Promise<number> {
+  return await db()
+    .query()
+    .selectFrom('captionScript')
+    .select(({ fn }) => [fn.count<number>('id').as('count')])
+    .where('userId', '=', userId)
     .executeTakeFirstOrThrow()
     .then((value) => value.count)
 }

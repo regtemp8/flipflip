@@ -98,6 +98,16 @@ export async function findMarkedCount(userId: number): Promise<number> {
     .then((value) => value.count)
 }
 
+export async function findTotalCount(userId: number): Promise<number> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .select(({ fn }) => [fn.count<number>('id').as('count')])
+    .where('userId', '=', userId)
+    .executeTakeFirstOrThrow()
+    .then((value) => value.count)
+}
+
 export async function findSearchOptions(
   userId: number
 ): Promise<SearchOption[]> {

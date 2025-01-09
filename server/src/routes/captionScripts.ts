@@ -25,6 +25,7 @@ import {
   findSearchOptions,
   findUntaggedCount,
   findMarkedCount,
+  findTotalCount,
   addCaptionScriptTags,
   setCaptionScriptTags,
   removeCaptionScriptTags,
@@ -80,7 +81,7 @@ router.get('/filtered', async (req, res) => {
   const filters = filtersQuery.split(',')
   for (const source of scripts) {
     let matchesFilter = true
-    for (let filter of filters) {
+    for (const filter of filters) {
       if (filter == '<Marked>') {
         // This is a marked filter
         matchesFilter = toBoolean(source.marked)
@@ -93,10 +94,10 @@ router.get('/filtered', async (req, res) => {
       ) {
         // This is a tag filter
         if (filter.startsWith('-')) {
-          let tag = filter.substring(2, filter.length - 1)
-          matchesFilter = await !hasTag(source.id as number, tag)
+          const tag = filter.substring(2, filter.length - 1)
+          matchesFilter = !(await hasTag(source.id as number, tag))
         } else {
-          let tag = filter.substring(1, filter.length - 1)
+          const tag = filter.substring(1, filter.length - 1)
           matchesFilter = await hasTag(source.id as number, tag)
         }
       } else if (
@@ -106,23 +107,23 @@ router.get('/filtered', async (req, res) => {
           filter.endsWith("'"))
       ) {
         if (filter.startsWith('-')) {
-          filter = filter.substring(2, filter.length - 1)
-          const regex = new RegExp(filter.replace('\\', '\\\\'), 'i')
+          const pattern = filter.substring(2, filter.length - 1)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
           matchesFilter = source.url != null && !regex.test(source.url)
         } else {
-          filter = filter.substring(1, filter.length - 1)
-          const regex = new RegExp(filter.replace('\\', '\\\\'), 'i')
+          const pattern = filter.substring(1, filter.length - 1)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
           matchesFilter = source.url != null && regex.test(source.url)
         }
       } else {
         // This is a search filter
-        filter = filter.replace('\\', '\\\\')
-        if (filter.startsWith('-')) {
-          filter = filter.substring(1, filter.length)
-          const regex = new RegExp(filter.replace('\\', '\\\\'), 'i')
+        let pattern = filter.replace('\\', '\\\\')
+        if (pattern.startsWith('-')) {
+          pattern = pattern.substring(1, pattern.length)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
           matchesFilter = source.url != null && !regex.test(source.url)
         } else {
-          const regex = new RegExp(filter.replace('\\', '\\\\'), 'i')
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
           matchesFilter = source.url != null && regex.test(source.url)
         }
       }
@@ -151,12 +152,13 @@ router.get('/batch-tag-options', async (req, res) => {
 })
 router.get('/search-options', async (req, res) => {
   const userId = (req.user as User).id as number
+  const totalCount = await findTotalCount(userId)
   const untaggedCount = await findUntaggedCount(userId)
   const markedCount = await findMarkedCount(userId)
   const options = await findSearchOptions(userId)
   res
     .status(200)
-    .send(toSearchSelectOptions(options, untaggedCount, markedCount))
+    .send(toSearchSelectOptions(options, totalCount, untaggedCount, markedCount))
 })
 router.post('/tags', async (req, res, next) => {
   const userId = (req.user as User).id as number
