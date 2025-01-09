@@ -758,8 +758,8 @@ function ScriptLibrary() {
               disableInteractive
               title={
                 filters.length === 0
-                  ? 'Delete All Sources'
-                  : 'Delete These Sources'
+                  ? 'Delete All Scripts'
+                  : 'Delete These Scripts'
               }
               placement="left"
             >
@@ -801,11 +801,10 @@ function ScriptLibrary() {
             )}
             {filters.length > 0 && (
               <React.Fragment>
-                <DialogTitle id="remove-all-title">Delete Sources</DialogTitle>
+                <DialogTitle id="remove-all-title">Delete Caption Scripts</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you want to remove these sources from your
-                    caption script library?
+                    Are you sure you want to remove these caption scripts from your library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>

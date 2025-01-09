@@ -2898,16 +2898,70 @@ test.fixme('Save Position Caption Script List', async ({ page }) => {
   // script library list is in same position
 })
 
-test.fixme('Delete All Visible Caption Scripts', async ({ page }) => {
-  // TODO apply filter
-  // assert that dialog message is: 'Are you sure you want to remove these sources from your caption script library??'
-  // assert that only visible scripts were deleted
+test('Delete Visible Caption Scripts', async ({ page }) => {
+  await page.getByRole('combobox').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'pastebin' })).toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(page.getByRole('tooltip')).toHaveText('Delete These Scripts')
+  await page.getByTestId('DeleteSweepIcon').click()
+
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to remove these caption scripts from your library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'pastebin' })).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  await responsePromise
 })
 
 test.fixme('Delete All Caption Scripts', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await page.getByTestId('DeleteSweepIcon').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Delete All Sources')
+  await expect(page.getByRole('tooltip')).toHaveText('Delete All Scripts')
   await page.getByTestId('DeleteSweepIcon').click()
 
   await expect(
