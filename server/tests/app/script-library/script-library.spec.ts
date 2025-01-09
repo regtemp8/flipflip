@@ -2726,11 +2726,12 @@ test('Mark Caption Scripts', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
 
   await page.getByLabel('Clear').click()
-  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
-  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
-  await expect(page.locator('#sortable-list li').nth(2).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
-  await expect(page.locator('#sortable-list li').nth(3).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
-  await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'}).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'}).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')}).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')}).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')}).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   
   await page.keyboard.press('Alt+m')
   await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
@@ -2740,21 +2741,153 @@ test('Mark Caption Scripts', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(4).locator('button').first()).toHaveCSS('background-color', 'rgb(63, 81, 181)')
 })
 
-test.fixme('Search Caption Scripts', async ({ page }) => {
-  // marked filter
-  // untagged filter
-  // tag filter (starts with [)
-  // negative tag filter (starts with -[)
-  // url filter (starts with ')
-  // negative url filter (starts with -')
-  // url filter (starts with ")
-  // negative url filter (starts with -")
-  // url filter (no prefix)
+test('Search Caption Scripts', async ({ page }) => {
   // negative url filter (starts with -)
+  await page.getByRole('combobox').fill('-pasteBin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  
+  // url filter (no prefix)
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+
+  // negative url filter (starts with -')
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill("-'pasteBIN'")
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
+  // url filter (starts with ')
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill("'PASTEbin'")
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+
+  // negative url filter (starts with -")
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('-"PASTEBIN"')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
+  // url filter (starts with ")
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('"PasteBin"')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+
+  // marked filter
+  await page.keyboard.press('Alt+m')
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('marked')
+  await page.getByRole('option', { name: '<Marked> (2)' }).click();
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li').nth(0).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await expect(page.locator('#sortable-list li').nth(1).locator('button').first()).toHaveCSS('background-color', 'rgb(233, 30, 99)')
+  await page.keyboard.press('Alt+m')
+  await page.getByLabel('Clear').click()
+
+  // setup: add tags
+  await page.getByLabel('Batch Tag').click();
+  await page.locator('#sortable-list li').filter({ hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')}).getByRole('checkbox').check();
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+  await page.getByPlaceholder('Tag These Sources').click();
+  await page.getByRole('option', { name: 'car (0)' }).click();
+  await page.getByRole('combobox').click()
+  await page.getByRole('button', { name: '+ Add' }).click();
+  await page.locator('#sortable-list li').filter({ hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')}).getByRole('checkbox').uncheck();
+  await page.locator('#sortable-list li').filter({ hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')}).getByRole('checkbox').check();
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+  await page.getByPlaceholder('Tag These Sources').click();
+  await page.getByRole('option', { name: 'pets (0)' }).click();
+  await page.getByRole('combobox').click()
+  await page.getByRole('button', { name: '+ Add' }).click();
+  await page.getByLabel('Back').click();
+
+  // untagged filter
+  await page.getByRole('combobox').fill('untag')
+  await page.getByRole('option', { name: '<Untagged> (3)' }).click();
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
+  // type tag filter (starts with [)
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('[car]')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+
+  // type negative tag filter (starts with -[)
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('-[pets]')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
+  // choose tag filter option
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: 'pets (1)' }).click();
+  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+
+  // choose negative tag filter option
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: '-car (4)' }).click();
+  await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
   // combine multiple filters
+  await page.getByRole('combobox').fill('-pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
   // remove a filter by clicking X of chip
+  await page.getByRole('button', { name: '-[car]' }).getByTestId('CancelIcon').click();
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
   // clear all filters
-  // search input is matched case-insensitive
+  await page.getByRole('combobox').click()
+  await page.getByLabel('Clear').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
 })
 
 test.fixme('Save Position Caption Script List', async ({ page }) => {
