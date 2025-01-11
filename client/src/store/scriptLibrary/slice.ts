@@ -17,6 +17,7 @@ interface ScriptLibraryState {
             state.yOffset = action.payload
         },
         setScriptLibraryFilters: (state, action: PayloadAction<string[]>) => {
+            state.yOffset = 0
             state.filters = action.payload
         }
     }
