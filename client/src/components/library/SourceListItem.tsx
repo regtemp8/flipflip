@@ -130,6 +130,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
   },
   noUserSelect: {
     userSelect: 'none'
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
 
@@ -471,25 +474,30 @@ function SourceListItem(props: SourceListItemProps) {
             <Tooltip
               disableInteractive
               title={
-                <div>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                  Library Tagging
-                  <br />
-                  Shift+Click: Open Source
-                  <br />
-                  &nbsp;&nbsp;Ctrl+Click:{' '}
-                  {sourceType === ST.video ? 'Reveal File' : 'Open Cache'}
+                <table>
+                  <td>
+                    <tr className={classes.textRight}>Click:</tr>
+                    <tr>Library Tagging</tr>
+                  </td>
+                  <td>
+                    <tr className={classes.textRight}>Shift+Click</tr>
+                    <tr>Open Source</tr>
+                  </td>
+                  <td>
+                    <tr className={classes.textRight}>Ctrl+Click</tr>
+                    <tr>{sourceType === ST.video ? 'Reveal File' : 'Open Cache'}</tr>
+                  </td>
                   {sourceType !== ST.local &&
                     sourceType !== ST.video &&
                     sourceType !== ST.piwigo &&
                     sourceType !== ST.hydrus &&
                     sourceType !== ST.nimja && (
-                      <React.Fragment>
-                        <br />
-                        &nbsp;&nbsp;&nbsp;Alt+Click: Download Source
-                      </React.Fragment>
+                      <td>
+                        <tr className={classes.textRight}>Alt+Click:</tr>
+                        <tr>Download Source</tr>
+                      </td>
                     )}
-                </div>
+                </table>
               }
             >
               <Fab

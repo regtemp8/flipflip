@@ -94,6 +94,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
   },
   noUserSelect: {
     userSelect: 'none'
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
 
@@ -234,12 +237,16 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
           <Tooltip
             disableInteractive
             title={
-              <div>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                Library Tagging
-                <br />
-                Shift+Click: Open Source
-              </div>
+              <table>
+                <tr>
+                  <td className={classes.textRight}>Click:</td>
+                  <td>Play Script</td>
+                </tr>
+                <tr>
+                  <td className={classes.textRight}>Shift+Click:</td>
+                  <td>Open Script</td>
+                </tr>
+              </table>
             }
           >
             <Fab

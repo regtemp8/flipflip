@@ -63,6 +63,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
   },
   sourceIcon: {
     color: theme.palette.primary.contrastText
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
 
@@ -127,14 +130,20 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
           disableInteractive
           placement={'bottom'}
           title={
-            <div>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-              Play Script
-              <br />
-              Shift+Click: Open Source
-              <br />
-              &nbsp;&nbsp;Ctrl+Click: Reveal File
-            </div>
+            <table>
+              <tr>
+                <td className={classes.textRight}>Click:</td>
+                <td>Play Script</td>
+              </tr>
+              <tr>
+                <td className={classes.textRight}>Shift+Click:</td>
+                <td>Open Source</td>
+              </tr>
+              <tr>
+                <td className={classes.textRight}>Ctrl+Click:</td>
+                <td>Reveal File</td>
+              </tr>
+            </table>
           }
         >
           <div onClick={onSourceIconClick} className={classes.scriptThumb}>

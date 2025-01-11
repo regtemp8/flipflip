@@ -165,6 +165,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
   },
   preLine: {
     whiteSpace: 'pre-line'
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
 
@@ -304,14 +307,20 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                       </div>
                     </div>
                   ) : (
-                    <div>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                      Play Audio
-                      <br />
-                      Shift+Click: Open Source
-                      <br />
-                      &nbsp;&nbsp;Ctrl+Click: Reveal File
-                    </div>
+                    <table>
+                      <tr>
+                        <td className={classes.textRight}>Click:</td>
+                        <td>Play Audio</td>
+                      </tr>
+                      <tr>
+                        <td className={classes.textRight}>Shift+Click:</td>
+                        <td>Open Source</td>
+                      </tr>
+                      <tr>
+                        <td className={classes.textRight}>Ctrl+Click:</td>
+                        <td>Reveal File</td>
+                      </tr>
+                    </table>
                   )
                 }
               >
