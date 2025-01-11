@@ -491,80 +491,25 @@ test('Add Remote Caption Script', async ({ page }) => {
   await responsePromise
 })
 
-test('Add Same Remote Caption Script', async ({ page }) => {
-  // TODO add tags to test if they are kept
-
-  await page.getByTestId('AddIcon').click()
-  await expect(page.getByTestId('HttpIcon')).toBeVisible()
-
-  let responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
-      request.method() === 'GET' &&
-      res.status() === 200
-    )
-  })
-  await page.getByTestId('HttpIcon').click()
-
-  await expect(page.locator('#sortable-list li')).toHaveCount(7)
-  await responsePromise
-  responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
-      request.method() === 'PATCH' &&
-      res.status() === 205
-    )
-  })
-  await page
-    .locator('#sortable-list li input')
-    .fill('https://pastebin.com/raw/ZNJ5A40S')
-  await expect(page.locator('#sortable-list li input')).toHaveValue(
-    'https://pastebin.com/raw/ZNJ5A40S'
-  )
-  await page.locator('.MuiDrawer-root').click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(6)
-  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
-    'https://pastebin.com/raw/ZNJ5A40S'
-  )
-  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
-    'https://pastebin.com/raw/48LPhQD3'
-  )
-  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
-    'https://pastebin.com/raw/LDvJvg0C'
-  )
-  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
-  )
-  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
-  )
-  await expect(page.locator('#sortable-list li p').nth(5)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
-  )
-  await responsePromise
-})
-
 test('Shift + Click Remote Script', async ({ page, context }) => {
   const pagePromise = context.waitForEvent('page');
   await page.keyboard.down('Shift')
   await page.getByTestId('ListIcon').nth(0).click()
   await page.keyboard.up('Shift')
   const newPage = await pagePromise
-  await expect(newPage).toHaveURL('https://pastebin.com/raw/ZNJ5A40S')
+  await expect(newPage).toHaveURL('https://pastebin.com/raw/48LPhQD3')
   await newPage.close()
 })
 
 test('Sort By Title', async ({ page }) => {
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
-    'https://pastebin.com/raw/ZNJ5A40S'
-  )
-  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
     'https://pastebin.com/raw/48LPhQD3'
   )
-  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
     'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
   )
   await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
@@ -931,90 +876,6 @@ test('Move Caption Script Up', async ({ page }) => {
   await responsePromise
 })
 
-test('Randomize Order', async ({ page }) => {
-  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'https://pastebin.com/raw/48LPhQD3'
-  )
-  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
-  )
-  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
-  )
-  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'https://pastebin.com/raw/ZNJ5A40S'
-  )
-  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'https://pastebin.com/raw/LDvJvg0C'
-  )
-  await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
-  )
-
-  await expect(page.getByTestId('SortIcon')).toBeVisible()
-  await page.getByTestId('SortIcon').click()
-  await expect(page.locator('#sort-menu li').nth(3)).toHaveText(
-    'Randomize Order'
-  )
-  await expect(
-    page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon')
-  ).toBeVisible()
-  await page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon').click()
-  await page.locator('#sort-menu .MuiBackdrop-root').click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(6)
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: 'https://pastebin.com/raw/ZNJ5A40S'
-    })
-  ).toBeVisible()
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: 'https://pastebin.com/raw/48LPhQD3'
-    })
-  ).toBeVisible()
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: 'https://pastebin.com/raw/LDvJvg0C'
-    })
-  ).toBeVisible()
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: path.join(
-        __dirname,
-        '..',
-        '..',
-        'data',
-        'scripts',
-        'bpm-timing.txt'
-      )
-    })
-  ).toBeVisible()
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: path.join(
-        __dirname,
-        '..',
-        '..',
-        'data',
-        'scripts',
-        'phrase-groups.txt'
-      )
-    })
-  ).toBeVisible()
-  await expect(
-    page.locator('#sortable-list li p', {
-      hasText: path.join(
-        __dirname,
-        '..',
-        '..',
-        'data',
-        'scripts',
-        'phrases.txt'
-      )
-    })
-  ).toBeVisible()
-})
-
 test('Empty URL Deletes Caption Script', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await page
@@ -1144,6 +1005,7 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
 })
 
 test('Batch Tag Single Caption Script', async ({ page }) => {
+  test.slow()
   await page.getByLabel('Manage Tags').click()
   await expect(page).toHaveURL('/tags')
   await page.getByTestId('AddIcon').click()
@@ -1853,7 +1715,194 @@ test('Batch Tag Single Caption Script', async ({ page }) => {
   await page.getByRole('checkbox').nth(0).uncheck()
 })
 
+test('Add Same Remote Caption Script', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'}).getByRole('checkbox').check()
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+  await page.getByRole('combobox').click()
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(0)
+    .click()
+  await page
+    .getByRole('presentation')
+    .getByRole('listbox')
+    .getByRole('option')
+    .nth(1)
+    .click()
+  await page.getByRole('combobox').click()
+  await page.getByRole('button', { name: '+ Add', exact: true }).click()
+  await expect(
+    page
+      .locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+      .locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+      .locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})
+      .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await page.getByLabel('Back').click();
+
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
+  await page.getByTestId('HttpIcon').click()
+
+  await expect(page.locator('#sortable-list li')).toHaveCount(6)
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      request.method() === 'PATCH' &&
+      res.status() === 205
+    )
+  })
+  await page
+    .locator('#sortable-list li input')
+    .fill('https://pastebin.com/raw/ZNJ5A40S')
+  await expect(page.locator('#sortable-list li input')).toHaveValue(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li p').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li p').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+
+  await expect(
+    page
+      .locator('#sortable-list li').nth(0)
+      .locator('.MuiChip-root > .MuiChip-label')
+  ).toHaveCount(2)
+  await expect(
+    page
+    .locator('#sortable-list li').nth(0)
+    .locator('.MuiChip-root > .MuiChip-label')
+      .nth(0)
+  ).toHaveText('animals')
+  await expect(
+    page
+    .locator('#sortable-list li').nth(0)
+    .locator('.MuiChip-root > .MuiChip-label')
+      .nth(1)
+  ).toHaveText('car')
+  await responsePromise
+
+  await page.getByLabel('Batch Tag').click()
+  await page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'}).getByRole('checkbox').check()
+  await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
+  await page.getByRole('button', { name: '- Remove', exact: true }).click()
+})
+
+test('Randomize Order', async ({ page }) => {
+  await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
+    'https://pastebin.com/raw/ZNJ5A40S'
+  )
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    'https://pastebin.com/raw/LDvJvg0C'
+  )
+  await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  )
+
+  await expect(page.getByTestId('SortIcon')).toBeVisible()
+  await page.getByTestId('SortIcon').click()
+  await expect(page.locator('#sort-menu li').nth(3)).toHaveText(
+    'Randomize Order'
+  )
+  await expect(
+    page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon')
+  ).toBeVisible()
+  await page.locator('#sort-menu li').nth(3).getByTestId('ShuffleIcon').click()
+  await page.locator('#sort-menu .MuiBackdrop-root').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/ZNJ5A40S'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: 'https://pastebin.com/raw/LDvJvg0C'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'bpm-timing.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrase-groups.txt'
+      )
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li p', {
+      hasText: path.join(
+        __dirname,
+        '..',
+        '..',
+        'data',
+        'scripts',
+        'phrases.txt'
+      )
+    })
+  ).toBeVisible()
+})
+
 test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
+  test.slow()
   // Add tags
   await page.getByLabel('Batch Tag').click()
   await page.getByRole('checkbox').nth(0).check()
@@ -2999,112 +3048,122 @@ test('Save Position Caption Script List', async ({ page }) => {
   // TODO script library yOffset is saved when playing scene
 })
 
-// test('Delete Visible Caption Scripts', async ({ page }) => {
-//   await page.getByRole('combobox').fill('pastebin')
-//   await page.keyboard.press('Enter')
-//   await expect(page.getByRole('button', { name: 'pastebin' })).toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(2)
-//   await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+test('Delete Visible Caption Scripts', async ({ page }) => {
+  await page.getByRole('combobox').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'pastebin' })).toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
 
-//   await page.getByTestId('DeleteSweepIcon').hover()
-//   await expect(page.getByRole('tooltip')).toHaveText('Delete These Scripts')
-//   await page.getByTestId('DeleteSweepIcon').click()
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(page.getByRole('tooltip', {name: 'Delete These Scripts', exact: true})).toBeVisible()
+  await page.getByTestId('DeleteSweepIcon').click()
 
-//   await expect(
-//     page.getByText('Delete Caption Scripts', { exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByText(
-//       'Are you sure you want to remove these caption scripts from your library?',
-//       { exact: true }
-//     )
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).not.toBeDisabled()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).not.toBeDisabled()
-//   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-//   await expect(
-//     page.getByText('Delete Caption Scripts', { exact: true })
-//   ).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to remove these caption scripts from your library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
 
-//   const responsePromise = page.waitForResponse((res) => {
-//     const request = res.request()
-//     return (
-//       new URL(request.url()).pathname === '/api/caption-scripts' &&
-//       request.method() === 'DELETE' &&
-//       res.status() === 204
-//     )
-//   })
-//   await page.getByTestId('DeleteSweepIcon').click()
-//   await expect(
-//     page.getByText('Delete Caption Scripts', { exact: true })
-//   ).toBeVisible()
-//   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-//   await expect(page.getByRole('button', { name: 'pastebin' })).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-//   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
-//   await responsePromise
-// })
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Caption Scripts', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'pastebin' })).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S0'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S1'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S2'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S3'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S4'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S5'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S6'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S7'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S8'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://hastebin.com/raw/ZNJ5A40S9'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+  await responsePromise
+})
 
-// test.fixme('Delete All Caption Scripts', async ({ page }) => {
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-//   await page.getByTestId('DeleteSweepIcon').hover()
-//   await expect(page.getByRole('tooltip')).toHaveText('Delete All Scripts')
-//   await page.getByTestId('DeleteSweepIcon').click()
+test('Delete All Caption Scripts', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(page.getByRole('tooltip', {name: 'Delete All Scripts', exact: true})).toBeVisible()
+  await page.getByTestId('DeleteSweepIcon').click()
 
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByText(
-//       'Are you sure you want to delete your entire caption script library?',
-//       { exact: true }
-//     )
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).not.toBeDisabled()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).not.toBeDisabled()
-//   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to delete your entire caption script library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
 
-//   const responsePromise = page.waitForResponse((res) => {
-//     const request = res.request()
-//     return (
-//       new URL(request.url()).pathname === '/api/caption-scripts' &&
-//       request.method() === 'DELETE' &&
-//       res.status() === 204
-//     )
-//   })
-//   await page.getByTestId('DeleteSweepIcon').click()
-//   await expect(
-//     page.getByText('Delete Caption Script Library', { exact: true })
-//   ).toBeVisible()
-//   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(0)
-//   await responsePromise
-// })
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Caption Script Library', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(0)
+  await responsePromise
+})

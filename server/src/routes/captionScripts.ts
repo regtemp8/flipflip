@@ -61,8 +61,9 @@ router.post('/', async (req, res, next) => {
   }
 })
 router.delete('/', async (req, res, next) => {
+  const ids = req.body?.ids as number[] | undefined
   try {
-    await deleteAllCaptionScripts(req.body)
+    await deleteAllCaptionScripts(ids)
     res.status(204).end()
   } catch (error) {
     next(error)
