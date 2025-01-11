@@ -1116,12 +1116,29 @@ test('Batch Tag Select None', async ({ page }) => {
   }
 })
 
-test.fixme('Batch Tag Select All With Filter', async ({ page }) => {
-  // Apply filter
-  // Select all scripts
-  // Remove filter
-  // Previously selected scripts are still selected and no other scripts are selected
-  // Select none to clear state
+test('Batch Tag Select All With Filter', async ({ page }) => {
+  await page.getByLabel('Batch Tag').click()
+  await page.getByRole('combobox').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'})).toBeVisible()
+
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
+  await expect(page.getByRole('checkbox').nth(0)).toBeChecked()
+  await expect(page.getByRole('checkbox').nth(1)).toBeChecked()
+
+  await page.getByRole('combobox').click()
+  await page.locator('.MuiAutocomplete-root').getByLabel('Clear').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/LDvJvg0C'}).getByRole('checkbox')).toBeChecked()
+  await expect(page.locator('#sortable-list li', {hasText: 'https://pastebin.com/raw/ZNJ5A40S'}).getByRole('checkbox')).toBeChecked()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')}).getByRole('checkbox')).not.toBeChecked()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')}).getByRole('checkbox')).not.toBeChecked()
+  await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')}).getByRole('checkbox')).not.toBeChecked()
+
+  await page.getByTestId('ClearIcon').click()
 })
 
 test('Batch Tag Single Caption Script', async ({ page }) => {
