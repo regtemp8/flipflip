@@ -2761,6 +2761,10 @@ test('Mark Caption Scripts', async ({ page }) => {
 })
 
 test('Search Caption Scripts', async ({ page }) => {
+  await page.goto('/')
+  await page.getByLabel('Script Library').click()
+  await expect(page).toHaveURL('/script-library')
+
   // negative url filter (starts with -)
   await page.getByRole('combobox').fill('-pasteBin')
   await page.keyboard.press('Enter')
@@ -2897,6 +2901,13 @@ test('Search Caption Scripts', async ({ page }) => {
   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')})).toBeVisible()
   await expect(page.locator('#sortable-list li', {hasText: path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')})).toBeVisible()
+
+  // filter stays applied when navigating to another page
+  await page.getByLabel('Back').click()
+  await expect(page).toHaveURL('/')
+  await page.getByLabel('Script Library').click()
+  await expect(page).toHaveURL('/script-library')
+  await expect(page.getByRole('button', { name: '-pastebin' })).toBeVisible()
 
   // clear all filters
   await page.getByRole('combobox').click()
