@@ -159,7 +159,6 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
       const id = script?.id as number
       window.open(`http://localhost:5050/fs/open/caption-script/${id}`, '_blank')?.focus();
     } else if (!e.shiftKey && !e.ctrlKey) {
-      dispatch(saveScriptLibraryYOffset())
       props.onPlay(props.scriptID)
     }
   }
