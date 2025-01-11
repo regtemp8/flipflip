@@ -111,9 +111,11 @@ function LibrarySearch(props: LibrarySearchProps) {
       })
 
     const create =
-      props.isCreatable && 
+      props.isCreatable &&
       inputValue !== '' &&
-      options.find((option) => inputValue.toLowerCase() === option.label.toLowerCase()) == null
+      options.find(
+        (option) => inputValue.toLowerCase() === option.label.toLowerCase()
+      ) == null
     if (create) {
       filtered.push({
         value: inputValue,
@@ -131,10 +133,7 @@ function LibrarySearch(props: LibrarySearchProps) {
       autoHighlight
       freeSolo={props.isCreatable}
       handleHomeEndKeys
-      className={cx(
-        classes.searchSelect,
-        'CreatableSelect'
-      )}
+      className={cx(classes.searchSelect, 'CreatableSelect')}
       value={defaultValues}
       options={options}
       isOptionEqualToValue={(option, value) => option.value === value.value}
@@ -143,51 +142,76 @@ function LibrarySearch(props: LibrarySearchProps) {
         <TextField
           {...params}
           variant={props.inputVariant}
-          placeholder={defaultValues.length === 0 ? props.placeholder : undefined}
-          sx={props.appBar ? (theme) => ({
-            '& .MuiOutlinedInput-root': {
-              flexWrap: 'nowrap',
-              'input': {
-                color: theme.palette.primary.contrastText
-              },
-              'fieldset': {
-                borderColor: alpha(theme.palette.primary.contrastText, 0.23)
-              },
-              '&:hover fieldset': {
-                borderColor: theme.palette.primary.contrastText
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: theme.palette.primary.main
-              },
-              '.MuiAutocomplete-endAdornment > button': {
-                color: theme.palette.primary.contrastText,
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.contrastText, 0.08),
-                }
-              }
-            }
-          }) : undefined}
+          placeholder={
+            defaultValues.length === 0 ? props.placeholder : undefined
+          }
+          sx={
+            props.appBar
+              ? (theme) => ({
+                  '& .MuiOutlinedInput-root': {
+                    flexWrap: 'nowrap',
+                    input: {
+                      color: theme.palette.primary.contrastText
+                    },
+                    fieldset: {
+                      borderColor: alpha(
+                        theme.palette.primary.contrastText,
+                        0.23
+                      )
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.contrastText
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main
+                    },
+                    '.MuiAutocomplete-endAdornment > button': {
+                      color: theme.palette.primary.contrastText,
+                      '&:hover': {
+                        backgroundColor: alpha(
+                          theme.palette.primary.contrastText,
+                          0.08
+                        )
+                      }
+                    }
+                  }
+                })
+              : undefined
+          }
         />
       )}
-      renderTags={props.appBar ? (values, getTagProps, owner) => (
-        <Stack direction='row' sx={(theme) => ({overflowX: 'scroll', maxWidth: `calc(100% - ${theme.spacing(7)})`})}>
-          {values.map((value, index) => (
-            <Chip
-              label={owner.getOptionLabel(value)}
-              size={owner.size}
-              {...getTagProps({ index })}
-              {...owner.ChipProps}
-              sx={(theme) => ({
-                color: theme.palette.primary.contrastText,
-                backgroundColor: alpha(theme.palette.primary.contrastText, 0.16),
-                '& .MuiChip-deleteIcon': {
-                  color: alpha(theme.palette.primary.contrastText, 0.26),
-                },
-              })}
-            />
-          ))}
-        </Stack>
-      ) : undefined}
+      renderTags={
+        props.appBar
+          ? (values, getTagProps, owner) => (
+              <Stack
+                direction="row"
+                sx={(theme) => ({
+                  overflowX: 'scroll',
+                  maxWidth: `calc(100% - ${theme.spacing(7)})`
+                })}
+              >
+                {values.map((value, index) => (
+                  <Chip
+                    label={owner.getOptionLabel(value)}
+                    size={owner.size}
+                    {...getTagProps({ index })}
+                    {...owner.ChipProps}
+                    sx={(theme) => ({
+                      color: theme.palette.primary.contrastText,
+                      backgroundColor: alpha(
+                        theme.palette.primary.contrastText,
+                        0.16
+                      ),
+                      '& .MuiChip-deleteIcon': {
+                        color: alpha(theme.palette.primary.contrastText, 0.26)
+                      }
+                    })}
+                  />
+                ))}
+              </Stack>
+            )
+          : undefined
+      }
       onChange={handleChange}
       open={open}
       onClose={() => setOpen(false)}

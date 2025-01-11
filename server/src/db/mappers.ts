@@ -1462,11 +1462,17 @@ export function toSearchSelectOptions(
   }
 
   tagOptions.forEach(({ name, count }) =>
-    options.push({ label: `-${name} (${totalCount - count})`, value: `-[${name}]` })
+    options.push({
+      label: `-${name} (${totalCount - count})`,
+      value: `-[${name}]`
+    })
   )
   if (typeOptions != null) {
     typeOptions.forEach(({ name, count }) =>
-      options.push({ label: `-${name} (${totalCount - count})`, value: `-{${name}}` })
+      options.push({
+        label: `-${name} (${totalCount - count})`,
+        value: `-{${name}}`
+      })
     )
   }
 

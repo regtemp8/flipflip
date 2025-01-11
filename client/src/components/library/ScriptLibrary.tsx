@@ -590,7 +590,9 @@ function ScriptLibrary() {
                 options={searchOptions ?? []}
                 placeholder={'Search ...'}
                 isCreatable
-                onUpdateFilters={(filters) => dispatch(setScriptLibraryFilters(filters))}
+                onUpdateFilters={(filters) =>
+                  dispatch(setScriptLibraryFilters(filters))
+                }
               />
             </div>
           </div>
@@ -638,10 +640,12 @@ function ScriptLibrary() {
 
         <div className={cx(tutorial?.current != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
-            <ListItemButton onClick={() => {
-              dispatch(saveScriptLibraryYOffset())
-              navigate('/tags')
-            }}>
+            <ListItemButton
+              onClick={() => {
+                dispatch(saveScriptLibraryYOffset())
+                navigate('/tags')
+              }}
+            >
               <ListItemIcon>
                 <LocalOfferIcon />
               </ListItemIcon>
@@ -808,10 +812,13 @@ function ScriptLibrary() {
             )}
             {filters.length > 0 && (
               <React.Fragment>
-                <DialogTitle id="remove-all-title">Delete Caption Scripts</DialogTitle>
+                <DialogTitle id="remove-all-title">
+                  Delete Caption Scripts
+                </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you want to remove these caption scripts from your library?
+                    Are you sure you want to remove these caption scripts from
+                    your library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>

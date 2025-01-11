@@ -827,7 +827,7 @@ export const flipflipApi = createApi({
       query: (ids) => ({
         url: `api/caption-scripts`,
         method: 'DELETE',
-        body: {ids}
+        body: { ids }
       }),
       async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(({ meta }) => {

@@ -157,7 +157,9 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey && !e.ctrlKey) {
       const id = script?.id as number
-      window.open(`http://localhost:5050/fs/open/caption-script/${id}`, '_blank')?.focus();
+      window
+        .open(`http://localhost:5050/fs/open/caption-script/${id}`, '_blank')
+        ?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
       props.onPlay(props.scriptID)
     }

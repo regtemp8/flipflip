@@ -485,7 +485,9 @@ function SourceListItem(props: SourceListItemProps) {
                   </td>
                   <td>
                     <tr className={classes.textRight}>Ctrl+Click</tr>
-                    <tr>{sourceType === ST.video ? 'Reveal File' : 'Open Cache'}</tr>
+                    <tr>
+                      {sourceType === ST.video ? 'Reveal File' : 'Open Cache'}
+                    </tr>
                   </td>
                   {sourceType !== ST.local &&
                     sourceType !== ST.video &&

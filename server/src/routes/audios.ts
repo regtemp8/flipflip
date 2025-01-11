@@ -46,7 +46,9 @@ router.get('/search-options', async (req, res) => {
   const options = await findSearchOptions(userId)
   res
     .status(200)
-    .send(toSearchSelectOptions(options, totalCount, untaggedCount, markedCount))
+    .send(
+      toSearchSelectOptions(options, totalCount, untaggedCount, markedCount)
+    )
 })
 router.post('/tags', async (req, res, next) => {
   if (req.user == null) {
