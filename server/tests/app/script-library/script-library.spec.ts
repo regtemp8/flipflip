@@ -278,13 +278,14 @@ test('Click Script Source Icon', async ({ page }) => {
   // TODO click play -> navigates to player
 })
 
-test('Shift + Click Local Script', async ({ page }) => {
+test('Shift + Click Local Script', async ({ page, context }) => {
+  const pagePromise = context.waitForEvent('page');
   await page.keyboard.down('Shift')
   await page.getByTestId('ListIcon').nth(0).click()
   await page.keyboard.up('Shift')
-  await expect(page).toHaveURL('http://localhost:5050/fs/open/caption-script/1')
-  await page.goBack()
-  await expect(page).toHaveURL('/script-library')
+  const newPage = await pagePromise;
+  await expect(newPage).toHaveURL('http://localhost:5050/fs/open/caption-script/1')
+  await newPage.close()
 })
 
 test('Edit Caption Script Options', async ({ page }) => {
@@ -545,13 +546,14 @@ test('Add Same Remote Caption Script', async ({ page }) => {
   await responsePromise
 })
 
-test('Shift + Click Remote Script', async ({ page }) => {
+test('Shift + Click Remote Script', async ({ page, context }) => {
+  const pagePromise = context.waitForEvent('page');
   await page.keyboard.down('Shift')
   await page.getByTestId('ListIcon').nth(0).click()
   await page.keyboard.up('Shift')
-  await expect(page).toHaveURL('https://pastebin.com/raw/ZNJ5A40S')
-  await page.goBack()
-  await expect(page).toHaveURL('/script-library')
+  const newPage = await pagePromise
+  await expect(newPage).toHaveURL('https://pastebin.com/raw/ZNJ5A40S')
+  await newPage.close()
 })
 
 test('Sort By Title', async ({ page }) => {
