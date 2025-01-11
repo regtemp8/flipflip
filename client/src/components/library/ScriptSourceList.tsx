@@ -34,6 +34,8 @@ import {
   updateCaptionScript
 } from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
+import { selectScriptLibraryYOffset } from '../../store/scriptLibrary/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -91,33 +93,12 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   const [beginPlay, setBeginPlay] = useState<number>()
   const [playWithScene, setPlayWithScene] = useState<number>()
 
-  // const deleteDialogSelector =
-  //   deleteDialog != null
-  //     ? selectCaptionScriptUrl(deleteDialog)
-  //     : selectUndefined
-  const deleteDialogURL = '' //useAppSelector(deleteDialogSelector)
-  // const beginPlaySelector =
-  //   beginPlay != null ? selectCaptionScriptUrl(beginPlay) : selectUndefined
   const beginPlayURL = '' //useAppSelector(beginPlaySelector)
   const specialMode = useAppSelector(selectSpecialMode())
-  const yOffset = 0 //useAppSelector(selectAppScriptYOffset())
+  const yOffset = useAppSelector(selectScriptLibraryYOffset())
 
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
-
-  const savePosition = useCallback(
-    () => {
-      const sortableList = document.getElementById('sortable-list')
-      if (sortableList) {
-        // const scrollElement = sortableList.firstElementChild
-        // const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-        // dispatch(setScriptYOffset(scrollTop))
-      }
-    },
-    [
-      /*dispatch*/
-    ]
-  )
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -135,9 +116,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       window.removeEventListener('keyup', onKeyUp)
       _shiftDown.current = undefined
       _lastChecked.current = undefined
-      savePosition()
+      dispatch(saveScriptLibraryYOffset())
     }
-  }, [savePosition])
+  }, [dispatch])
 
   useEffect(() => {
     if (props.addHttpURL) {
@@ -236,7 +217,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }
 
   const onFinishPlay = () => {
-    savePosition()
+    dispatch(saveScriptLibraryYOffset())
     try {
       const scriptID = beginPlay as number
       const sceneID = playWithScene as number
@@ -305,7 +286,6 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             onRemove={onRemove}
             onStartEdit={onStartEdit}
             onToggleSelect={onToggleSelect}
-            savePosition={savePosition}
           />
         )
       }

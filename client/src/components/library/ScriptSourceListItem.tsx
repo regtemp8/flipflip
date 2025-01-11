@@ -30,7 +30,8 @@ import TagChip from './TagChip'
 import { useGetCaptionScriptQuery } from '../../store/api/slice'
 import { useNavigate } from 'react-router-dom'
 import { selectSpecialMode } from '../../store/app/selectors'
-import { useAppSelector } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -137,10 +138,10 @@ export interface ScriptSourceListItemProps {
   onRemove: (scriptID: number) => void
   onStartEdit: (scriptID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>) => void
-  savePosition: () => void
 }
 
 function ScriptSourceListItem(props: ScriptSourceListItemProps) {
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const specialMode = useAppSelector(selectSpecialMode())
   const { data: script } = useGetCaptionScriptQuery(props.scriptID)
@@ -156,9 +157,9 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey && !e.ctrlKey) {
       const id = script?.id as number
-      window.location.href = `http://localhost:5050/fs/open/caption-script/${id}`
+      window.open(`http://localhost:5050/fs/open/caption-script/${id}`, '_blank')?.focus();
     } else if (!e.shiftKey && !e.ctrlKey) {
-      props.savePosition()
+      dispatch(saveScriptLibraryYOffset())
       props.onPlay(props.scriptID)
     }
   }
@@ -187,6 +188,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
               {!specialMode && (
                 <IconButton
                   onClick={() => {
+                    dispatch(saveScriptLibraryYOffset())
                     navigate(`/scriptor/${props.scriptID}`)
                   }}
                   className={classes.actionButton}
@@ -198,7 +200,10 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 </IconButton>
               )}
               <IconButton
-                onClick={() => navigate(`/scripts/${props.scriptID}/options`)}
+                onClick={() => {
+                  dispatch(saveScriptLibraryYOffset())
+                  navigate(`/scripts/${props.scriptID}/options`)
+                }}
                 className={classes.actionButton}
                 edge="end"
                 size="small"

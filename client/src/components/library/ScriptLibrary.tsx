@@ -72,6 +72,9 @@ import {
   selectScriptLibrarySelectedTagIDs,
   selectScriptLibrarySelectedTagNames
 } from '../../store/api/selectors'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
+import { selectScriptLibraryFilters } from '../../store/scriptLibrary/selectors'
+import { setScriptLibraryFilters } from '../../store/scriptLibrary/slice'
 
 const drawerWidth = 240
 
@@ -342,7 +345,6 @@ function ScriptLibrary() {
   const { data: searchOptions } = useGetCaptionScriptSearchOptionsQuery()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [filters, setFilters] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
@@ -355,6 +357,7 @@ function ScriptLibrary() {
     selectScriptLibrarySelectedTagNames(selectedTagIDs)
   )
   const specialMode = useAppSelector(selectSpecialMode())
+  const filters = useAppSelector(selectScriptLibraryFilters())
   const { data: displaySources } = useGetFilteredCaptionScriptsQuery(filters)
 
   const goBack = useCallback(() => {
@@ -363,6 +366,7 @@ function ScriptLibrary() {
       setSelectedTags([])
       dispatch(setSpecialMode(''))
     } else {
+      dispatch(saveScriptLibraryYOffset())
       navigate(-1)
     }
   }, [dispatch, specialMode])
@@ -460,7 +464,7 @@ function ScriptLibrary() {
   const onFinishRemoveVisible = async () => {
     await deleteCaptionScripts(displaySources)
     onCloseDialog()
-    setFilters([])
+    dispatch(setScriptLibraryFilters([]))
   }
 
   const onImportFromLibrary = () => {
@@ -586,7 +590,7 @@ function ScriptLibrary() {
                 options={searchOptions ?? []}
                 placeholder={'Search ...'}
                 isCreatable
-                onUpdateFilters={setFilters}
+                onUpdateFilters={(filters) => dispatch(setScriptLibraryFilters(filters))}
               />
             </div>
           </div>
@@ -634,7 +638,10 @@ function ScriptLibrary() {
 
         <div className={cx(tutorial?.current != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
-            <ListItemButton onClick={() => navigate('/tags')}>
+            <ListItemButton onClick={() => {
+              dispatch(saveScriptLibraryYOffset())
+              navigate('/tags')
+            }}>
               <ListItemIcon>
                 <LocalOfferIcon />
               </ListItemIcon>
