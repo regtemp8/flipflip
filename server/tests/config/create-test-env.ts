@@ -153,4 +153,13 @@ void (async function () {
       throw new Error(`${response.status} - ${response.statusText}: ${url}`)
     }
   }
+
+  // AUDIO FILES
+  const audioSrcDir = path.join(process.cwd(), 'tests', 'config', 'audio')
+  const audioDestDir = path.join(process.env.FF_SAVE_DIR as string, 'audio')
+  await fs.promises.mkdir(audioDestDir)
+  const audioFiles = await fs.promises.readdir(audioSrcDir)
+  for(const audioFile of audioFiles) {
+    await fs.promises.copyFile(path.join(audioSrcDir, audioFile), path.join(audioDestDir, audioFile))
+  }
 })()
