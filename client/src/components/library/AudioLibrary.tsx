@@ -83,7 +83,8 @@ import { useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
   useGetAudioBatchTagOptionsQuery,
-  useGetAudioSearchOptionsQuery
+  useGetAudioSearchOptionsQuery,
+  useSortAudiosMutation
 } from '../../store/api/slice'
 
 const drawerWidth = 240
@@ -433,6 +434,7 @@ const getOpenTab = (pathname: string) => {
 function AudioLibrary() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [sortAudios] = useSortAudiosMutation()
   const { data: tagOptions } = useGetAudioBatchTagOptionsQuery()
   const { data: searchOptions } = useGetAudioSearchOptionsQuery()
 
@@ -1411,10 +1413,8 @@ function AudioLibrary() {
                     <>
                       <IconButton
                         edge="end"
-                        onClick={() => {
-                          // playlist
-                          //   ? dispatch(sortPlaylist(playlist, sf, true))
-                          //   : dispatch(sortAudioSources(sf, true))
+                        onClick={async() => {
+                          await sortAudios({ sortBy: sf, sortOrder: 'asc', playlistId })
                         }}
                         size="large"
                       >
@@ -1422,10 +1422,8 @@ function AudioLibrary() {
                       </IconButton>
                       <IconButton
                         edge="end"
-                        onClick={() => {
-                          // playlist
-                          //   ? dispatch(sortPlaylist(playlist, sf, false))
-                          //   : dispatch(sortAudioSources(sf, false))
+                        onClick={async() => {
+                          await sortAudios({ sortBy: sf, sortOrder: 'desc', playlistId })
                         }}
                         size="large"
                       >
@@ -1442,10 +1440,8 @@ function AudioLibrary() {
               secondaryAction={
                 <IconButton
                   edge="end"
-                  onClick={() => {
-                    // playlist
-                    //   ? dispatch(sortPlaylist(playlist, ASF.random, true))
-                    //   : dispatch(sortAudioSources(ASF.random, true))
+                  onClick={async() => {
+                    await sortAudios({ sortBy: ASF.random, sortOrder: 'asc', playlistId })
                   }}
                   size="large"
                 >

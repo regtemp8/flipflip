@@ -1,9 +1,9 @@
-import { Insertable, Kysely, Updateable } from 'kysely'
-import { Audio, AudioTag, DB } from './types/generated'
+import { Insertable, Kysely, SelectExpression, Updateable } from 'kysely'
+import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { getSourceType } from 'flipflip-common'
+import { ASF, AudioSortRequest, getSourceType, randomizeList } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 
 export async function findAudioById(
@@ -220,4 +220,124 @@ export async function markAudios(userId: number, ids: number[]) {
           .execute()
       }
     })
+}
+
+const selectColumns = new Map<string, Array<keyof Audio>>([
+  [ASF.url, ['id', 'url']],
+  [ASF.name, ['id', 'name']],
+  [ASF.artist, ['id', 'artist', 'album', 'trackNum', 'name']],
+  [ASF.album, ['id', 'album', 'trackNum', 'name']],
+  [ASF.date, ['id', 'createdAt']],
+  [ASF.duration, ['id', 'duration']],
+  [ASF.playedCount, ['id', 'playedCount', 'artist', 'album', 'trackNum', 'name']],
+  [ASF.random, ['id']],
+])
+export async function sortAudios({ sortBy, sortOrder, playlistId }: AudioSortRequest) {
+  const selections = selectColumns.get(sortBy)
+  if(selections == null) {
+    return
+  }
+
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      let rows: Array<Partial<Audio>> = []
+      if(playlistId == null) {
+        rows = await trx
+          .selectFrom('audio')
+          .select(selections)
+          .execute()
+      } else {
+        rows = await trx
+          .selectFrom('audio as a')
+          .innerJoin('audioPlaylistItem as i', 'i.audioId', 'a.id')
+          .where('i.playlistId', '=', playlistId)
+          .select(selections.map((s) => `a.${s}`) as Array<SelectExpression<DB & {a: Audio, i: AudioPlaylistItem}, 'a' | 'i'>>)
+          .execute()
+      }
+       
+      if (sortBy === ASF.random) {
+        rows = randomizeList(rows)
+      } else {
+        rows.sort(audioSortFunction(sortBy, sortOrder === 'asc'))
+      }
+
+      const updateTable = playlistId == null ? 'audio' : 'audioPlaylistItem'
+      await trx
+        .updateTable(updateTable)
+        .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
+        .execute()
+
+      const updateColumn = playlistId == null ? 'id' : 'audioId'
+      for (let i = 0; i < rows.length; i++) {
+        await trx
+          .updateTable(updateTable)
+          .set({ index: i })
+          .where(updateColumn, '=', rows[i].id as number)
+          .execute()
+      }
+    })
+}
+
+function audioSortFunction(algorithm: string, ascending: boolean): (a: Partial<Audio>, b: Partial<Audio>) => number {
+  return (a, b) => {
+    let secondary = null;
+    let aValue: any, bValue: any;
+    switch (algorithm) {
+      case ASF.url:
+        aValue = a.url;
+        bValue = b.url;
+        break;
+      case ASF.name:
+        const reA = /^(A\s|a\s|The\s|the\s)/g
+        aValue = a.name?.replace(reA, "");
+        bValue = b.name?.replace(reA, "");
+
+        const compare = aValue.localeCompare(bValue, 'en', { numeric: true });
+        return ascending ? compare : compare * -1;
+      case ASF.artist:
+        aValue = a.artist;
+        bValue = b.artist;
+        secondary = ASF.album;
+        break;
+      case ASF.album:
+        aValue = a.album;
+        bValue = b.album;
+        secondary = ASF.trackNum;
+        break;
+      case ASF.date:
+        aValue = a.id;
+        bValue = b.id;
+        break;
+      case ASF.trackNum:
+        aValue = parseInt(a.trackNum as any);
+        bValue = parseInt(b.trackNum as any);
+        secondary = ASF.name;
+        break;
+      case ASF.duration:
+        aValue = a.duration;
+        bValue = b.duration;
+        break;
+      case ASF.playedCount:
+        aValue = a.playedCount;
+        bValue = b.playedCount;
+        secondary = ASF.artist;
+        break;
+      default:
+        aValue = "";
+        bValue = "";
+    }
+    if (aValue < bValue) {
+      return ascending ? -1 : 1;
+    } else if (aValue > bValue) {
+      return ascending ? 1 : -1;
+    } else {
+      if (!!secondary) {
+        return audioSortFunction(secondary, true)(a, b);
+      } else {
+        return 0;
+      }
+    }
+  };
 }

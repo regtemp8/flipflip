@@ -36,7 +36,8 @@ import {
   SortRequest,
   MoveRequest,
   SelectOption,
-  BatchTagRequest
+  BatchTagRequest,
+  AudioSortRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -1197,6 +1198,29 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    sortAudios: builder.mutation<void, AudioSortRequest>({
+      query: (body) => ({
+        url: `api/audios/sort`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'Audio', id: 'List' },
+                  { type: 'Audio', id: 'FilteredList' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
     sortTags: builder.mutation<void, SortRequest>({
       query: (body) => ({
         url: `api/tags/sort`,
@@ -1394,6 +1418,7 @@ export const {
   useUpdateCaptionScriptFontSettingsMutation,
   useGetAudioQuery,
   useUpdateAudioMutation,
+  useSortAudiosMutation,
   useGetTagsQuery,
   useDeleteTagsMutation,
   useGetTagsCountQuery,

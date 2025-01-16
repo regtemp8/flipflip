@@ -17,10 +17,11 @@ import {
   setAudioTags,
   removeAudioTags,
   markAudios,
-  findAudioTagIds
+  findAudioTagIds,
+  sortAudios
 } from '../db/AudioRepository'
 import { User } from '../db/types/generated'
-import { BatchTagRequest } from 'flipflip-common'
+import { AudioSortRequest, BatchTagRequest, SortRequest } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/batch-tag-options', async (req, res) => {
@@ -90,6 +91,15 @@ router.post('/mark', async (req, res, next) => {
     next(error)
   }
 })
+
+// TODO make separate endpoint for audio playlist sorting
+// TODO rename AudioSortRequest to PlaylistSortRequest
+router.post('/sort', async (req, res) => {
+  const sort = req.body as AudioSortRequest
+  await sortAudios(sort)
+  res.status(204).end()
+})
+
 router.get('/:id', async (req, res) => {
   if (req.user == null) {
     res.status(401).end()
