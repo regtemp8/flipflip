@@ -889,6 +889,8 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('duration', 'integer')
     .addColumn('comment', 'text')
     .addColumn('playedCount', 'integer', (col) => col.notNull())
+    .addColumn('createdAt', 'integer', (col) => col.notNull())
+    .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint('FK_audio_user_userId', ['userId'], 'user', ['id'])
     .execute()
 }
@@ -960,6 +962,7 @@ const captionScriptTable = async (trx: Kysely<DB>) => {
     .addColumn('stopAtEnd', 'boolean', (col) => col.notNull())
     .addColumn('nextSceneAtEnd', 'boolean', (col) => col.notNull())
     .addColumn('syncWithAudio', 'boolean', (col) => col.notNull())
+    .addColumn('createdAt', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint(
       'FK_captionScript_user_userId',

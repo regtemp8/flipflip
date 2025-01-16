@@ -1134,7 +1134,8 @@ const audioInsert = async (
   } else {
     logger.info(': No audios')
   }
-  for (const audio of json.audios) {
+  for (let i = 0; i < json.audios.length; i++) {
+    const audio = json.audios[i]
     const {
       id,
       url,
@@ -1194,7 +1195,9 @@ const audioInsert = async (
         trackNum,
         duration,
         comment,
-        playedCount
+        playedCount,
+        index: i,
+        createdAt: Date.now()
       })
       .execute()
 
@@ -1349,7 +1352,8 @@ const captionScriptInsert = async (
         stopAtEnd: toNumber(stopAtEnd),
         nextSceneAtEnd: toNumber(nextSceneAtEnd),
         syncWithAudio: toNumber(syncWithAudio),
-        index: i
+        index: i,
+        createdAt: Date.now()
       })
       .execute()
 

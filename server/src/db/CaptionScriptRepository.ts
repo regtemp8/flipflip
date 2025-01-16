@@ -36,12 +36,13 @@ export async function createCaptionScripts(urls: string[], userId: number) {
         url,
         type: getSourceType(url),
         userId,
-        index,
         marked: toNumber(false),
         nextSceneAtEnd: toNumber(false),
         opacity: 100,
         stopAtEnd: toNumber(false),
-        syncWithAudio: toNumber(true)
+        syncWithAudio: toNumber(true),
+        index,
+        createdAt: Date.now()
       }))
 
       const rows = await trx
@@ -318,10 +319,10 @@ export async function deleteCaptionScript(id: number) {
     })
 }
 
-const sortColumns = new Map<string, string>([
+const sortColumns = new Map<string, keyof CaptionScript>([
   [SF.alpha, 'url'],
   [SF.alphaFull, 'url'],
-  [SF.date, 'id'],
+  [SF.date, 'createdAt'],
   [SF.random, 'id']
 ])
 export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
