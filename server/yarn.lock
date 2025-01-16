@@ -3232,9 +3232,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kysely-codegen@npm:^0.16.8":
-  version: 0.16.8
-  resolution: "kysely-codegen@npm:0.16.8"
+"kysely-codegen@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "kysely-codegen@npm:0.17.0"
   dependencies:
     chalk: "npm:4.1.2"
     dotenv: "npm:^16.4.5"
@@ -3277,7 +3277,7 @@ __metadata:
       optional: true
   bin:
     kysely-codegen: dist/cli/bin.js
-  checksum: 10c0/617ad8db6ecb62f447201790f409d6d4f4f65a54fad90d6afb8bd763adea7e1a011b0ba0cfeb4dc7fd774823a6016af25a9bc8b9a61f30a93bf469991f372b33
+  checksum: 10c0/9e780972aa5301f9df43e1e9018ef5aa5a26e6eed14af28fa1a5cdde5e8d0a2c7a6a46633eaa5dabfad4cda68d53b9612626692b4e45997ae33af288f87c6944
   languageName: node
   linkType: hard
 
@@ -4596,7 +4596,7 @@ __metadata:
     generate-password: "npm:^1.7.1"
     get-folder-size: "npm:^5.0.0"
     kysely: "npm:^0.27.4"
-    kysely-codegen: "npm:^0.16.8"
+    kysely-codegen: "npm:^0.17.0"
     moment: "npm:^2.30.1"
     node-schedule: "npm:^2.1.1"
     passport: "npm:^0.7.0"

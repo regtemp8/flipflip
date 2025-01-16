@@ -45,7 +45,7 @@
     "@yao-pkg/pkg": "^5.15.0",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.0",
-    "kysely-codegen": "^0.16.8",
+    "kysely-codegen": "^0.17.0",
     "prettier": "^3.2.4",
     "ts-node": "^10.9.2"
   },
