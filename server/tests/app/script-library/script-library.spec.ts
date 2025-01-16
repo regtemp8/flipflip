@@ -6,6 +6,8 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/script-library')
 })
 
+// TODO add tutorial tests
+
 test('Script library navigation', async ({ page }) => {
   await page.getByLabel('Manage Tags').hover()
   await expect(

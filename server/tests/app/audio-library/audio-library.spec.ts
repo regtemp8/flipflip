@@ -4,6 +4,8 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/audio-library')
 })
 
+// TODO add tutorial tests
+
 test('Audio library navigation', async ({ page }) => {
   await expect(page.locator('.MuiTabs-indicator')).toHaveCSS('top', '288px')
 
