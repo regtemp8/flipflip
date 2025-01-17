@@ -45,6 +45,7 @@ import {
   getSourceType
 } from 'flipflip-common'
 import logger from '../../../logger'
+import { IS_LIBRARY } from '../../ContentSourceRepository'
 
 const getDataJsonPath = () => {
   const saveDir = getElectronSaveDir()
@@ -970,34 +971,13 @@ const clipInsert = async (
   }
 }
 
-const libraryContentSourceInsert = async (
-  trx: Kysely<DB>,
-  json: AppStorage,
-  userId: number,
-  tags: DBTag[]
-) => {
-  if (json.library.length > 0) {
-    logger.info('+ Insert library content sources')
-  } else {
-    logger.info(': No library content sources')
-  }
-  for (const source of json.library) {
-    await contentSourceInsert(trx, source, userId, tags)
-    await trx
-      .insertInto('libraryContentSource')
-      .values({
-        userId,
-        contentSourceId: source.id
-      })
-      .execute()
-  }
-}
-
 const contentSourceInsert = async (
   trx: Kysely<DB>,
   source: LibrarySource,
   userId: number,
-  tags: DBTag[]
+  tags: DBTag[],
+  index: number,
+  sceneId: number
 ) => {
   const {
     id,
@@ -1026,6 +1006,7 @@ const contentSourceInsert = async (
     .insertInto('contentSource')
     .values({
       id,
+      sceneId,
       userId,
       url,
       type: getSourceType(url),
@@ -1042,7 +1023,9 @@ const contentSourceInsert = async (
       redditFunc,
       redditTime,
       twitterIncludeRetweets: toNumber(includeRetweets),
-      twitterIncludeReplies: toNumber(includeReplies)
+      twitterIncludeReplies: toNumber(includeReplies),
+      index,
+      createdAt: Date.now()
     })
     .returningAll()
     .executeTakeFirstOrThrow()
@@ -1913,15 +1896,9 @@ const sceneInsert = async (
     if (scene.sources.length > 0) {
       logger.info('+ Insert scene content sources')
     }
-    for (const source of scene.sources) {
-      await contentSourceInsert(trx, source, userId, tags)
-      await trx
-        .insertInto('sceneContentSource')
-        .values({
-          sceneId: id,
-          contentSourceId: source.id
-        })
-        .execute()
+    for (let i = 0; i < scene.sources.length; i++) {
+      const source = scene.sources[i]
+      await contentSourceInsert(trx, source, userId, tags, i, scene.id)
     }
 
     for (let i = 0; i < scene.audioPlaylists.length; i++) {
@@ -2099,7 +2076,11 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await audioInsert(trx, json, userId, tags)
     await audioPlaylistInsert(trx, json, userId)
     await captionScriptInsert(trx, json, userId, tags)
-    await libraryContentSourceInsert(trx, json, userId, tags)
+    for(let i = 0; i < json.library.length; i++) {
+      const source = json.library[i]
+      await contentSourceInsert(trx, source, userId, tags, i, IS_LIBRARY)
+    }
+
     await sceneGroupInsert(trx, json, userId)
     await sceneInsert(trx, json, userId, tags)
     await sceneSettingsInsert(trx, json, userId)
@@ -2150,12 +2131,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Delete captionScript rows')
     await trx.deleteFrom('captionScript').execute()
-
-    logger.info('- Delete libraryContentSource rows')
-    await trx.deleteFrom('libraryContentSource').execute()
-
-    logger.info('- Delete sceneContentSource rows')
-    await trx.deleteFrom('sceneContentSource').execute()
 
     logger.info('- Delete weightGroup rows')
     await trx.deleteFrom('weightGroup').execute()

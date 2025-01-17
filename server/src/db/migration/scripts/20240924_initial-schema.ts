@@ -213,6 +213,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
   return await trx.schema
     .createTable('contentSource') // library source
     .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('sceneId', 'integer', (col) => col.notNull())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
@@ -230,12 +231,25 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
     .addColumn('redditTime', 'text')
     .addColumn('twitterIncludeRetweets', 'boolean', (col) => col.notNull())
     .addColumn('twitterIncludeReplies', 'boolean', (col) => col.notNull())
+    .addColumn('createdAt', 'integer', (col) => col.notNull())
+    .addColumn('index', 'integer', (col) => col.notNull())
+    .addForeignKeyConstraint(
+      'FK_contentSource_scene_sceneId',
+      ['sceneId'],
+      'scene',
+      ['id']
+    )
     .addForeignKeyConstraint(
       'FK_contentSource_user_userId',
       ['userId'],
       'user',
       ['id']
     )
+    .addUniqueConstraint('UQ_contentSource_userId_sceneId_url', [
+      'userId',
+      'sceneId',
+      'url'
+    ])
     .execute()
 }
 
@@ -589,50 +603,6 @@ const weightGroupTable = async (trx: Kysely<DB>) => {
       'FK_weightGroup_weightGroup_ruleId',
       ['ruleId'],
       'weightGroup',
-      ['id']
-    )
-    .execute()
-}
-
-const libraryContentSourceTable = async (trx: Kysely<DB>) => {
-  logger.info('+ Create libraryContentSource table')
-  return await trx.schema
-    .createTable('libraryContentSource')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
-    .addColumn('userId', 'integer', (col) => col.notNull())
-    .addColumn('contentSourceId', 'integer', (col) => col.notNull())
-    .addForeignKeyConstraint(
-      'FK_libraryContentSource_user_userId',
-      ['userId'],
-      'user',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_libraryContentSource_contentSource_contentSourceId',
-      ['contentSourceId'],
-      'contentSource',
-      ['id']
-    )
-    .execute()
-}
-
-const sceneContentSourceTable = async (trx: Kysely<DB>) => {
-  logger.info('+ Create sceneContentSource table')
-  return await trx.schema
-    .createTable('sceneContentSource')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
-    .addColumn('sceneId', 'integer', (col) => col.notNull())
-    .addColumn('contentSourceId', 'integer', (col) => col.notNull())
-    .addForeignKeyConstraint(
-      'FK_sceneContentSource_scene_sceneId',
-      ['sceneId'],
-      'scene',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_sceneContentSource_contentSource_contentSourceId',
-      ['contentSourceId'],
-      'contentSource',
       ['id']
     )
     .execute()
@@ -1046,8 +1016,6 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await sceneTable(trx)
     await scenePlaylistTable(trx)
     await weightGroupTable(trx)
-    await sceneContentSourceTable(trx)
-    await libraryContentSourceTable(trx)
     await captionScriptTable(trx)
     await captionScriptTagTable(trx)
     await playlistTable(trx)
@@ -1112,12 +1080,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Drop captionScript table')
     await trx.schema.dropTable('captionScript').execute()
-
-    logger.info('- Drop libraryContentSource table')
-    await trx.schema.dropTable('libraryContentSource').execute()
-
-    logger.info('- Drop sceneContentSource table')
-    await trx.schema.dropTable('sceneContentSource').execute()
 
     logger.info('- Drop weightGroup table')
     await trx.schema.dropTable('weightGroup').execute()

@@ -113,13 +113,16 @@ export interface ClipTag {
 export interface ContentSource {
   count: number;
   countComplete: number;
+  createdAt: number;
   id: number | null;
+  index: number;
   lastCheck: number | null;
   localDirOfSources: number;
   marked: number;
   offline: number;
   redditFunc: string | null;
   redditTime: string | null;
+  sceneId: number;
   twitterIncludeReplies: number;
   twitterIncludeRetweets: number;
   type: string;
@@ -238,12 +241,6 @@ export interface IgnoredTag {
   displaySettingsId: number;
   id: number | null;
   tagId: number;
-  userId: number;
-}
-
-export interface LibraryContentSource {
-  contentSourceId: number;
-  id: number | null;
   userId: number;
 }
 
@@ -486,12 +483,6 @@ export interface Scene {
   zoomStartMin: number;
 }
 
-export interface SceneContentSource {
-  contentSourceId: number;
-  id: number | null;
-  sceneId: number;
-}
-
 export interface SceneGroup {
   id: number | null;
   name: string;
@@ -592,11 +583,9 @@ export interface DB {
   fontSettings: FontSettings;
   generalSettings: GeneralSettings;
   ignoredTag: IgnoredTag;
-  libraryContentSource: LibraryContentSource;
   playlist: Playlist;
   remoteSettings: RemoteSettings;
   scene: Scene;
-  sceneContentSource: SceneContentSource;
   sceneGroup: SceneGroup;
   scenePlaylist: ScenePlaylist;
   scenePlaylistItem: ScenePlaylistItem;

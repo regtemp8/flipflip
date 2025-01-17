@@ -1,10 +1,13 @@
-import { Insertable, Kysely, Updateable } from 'kysely'
+import { Insertable, Kysely, sql, Updateable } from 'kysely'
 import { ContentSource, ContentSourceTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { getSourceType } from 'flipflip-common'
+import { getSourceType, randomizeList, SF, SortRequest, ST } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
+import { getFileName, getFileGroup } from '../utils'
+
+export const IS_LIBRARY = 0
 
 export async function findContentSourceById(
   userId: number,
@@ -43,34 +46,14 @@ export async function findContentSourceUrlById(id: number): Promise<string> {
     .then((row) => row.url)
 }
 
-export async function findSceneContentSources(
+export async function findContentSources(
   sceneId: number
 ): Promise<ContentSource[]> {
   return await db()
     .query()
-    .selectFrom('contentSource as cs')
-    .innerJoin('sceneContentSource as scs', 'scs.contentSourceId', 'cs.id')
-    .select([
-      'cs.id',
-      'cs.userId',
-      'cs.url',
-      'cs.type',
-      'cs.offline',
-      'cs.marked',
-      'cs.lastCheck',
-      'cs.count',
-      'cs.countComplete',
-      'cs.weight',
-      'cs.localDirOfSources',
-      'cs.videoSubtitleFile',
-      'cs.videoDuration',
-      'cs.videoResolution',
-      'cs.redditFunc',
-      'cs.redditTime',
-      'cs.twitterIncludeRetweets',
-      'cs.twitterIncludeReplies'
-    ])
-    .where('scs.sceneId', '=', sceneId)
+    .selectFrom('contentSource')
+    .selectAll()
+    .where('sceneId', '=', sceneId)
     .execute()
 }
 

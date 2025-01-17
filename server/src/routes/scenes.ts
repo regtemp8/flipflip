@@ -16,7 +16,7 @@ import {
   toScene,
   toSceneUpdate
 } from '../db/mappers'
-import { findSceneContentSources } from '../db/ContentSourceRepository'
+import { findContentSources } from '../db/ContentSourceRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -63,7 +63,7 @@ router.get('/:id/disable-weight-options', async (req, res) => {
   let disableWeightOptions = false
   const defaultScene = await isDefaultScene(id)
   if (!defaultScene) {
-    const sources = await findSceneContentSources(id)
+    const sources = await findContentSources(id)
     disableWeightOptions =
       sources.length === 0 ||
       (sources.length === 1 && !sources[0].localDirOfSources)
