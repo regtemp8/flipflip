@@ -332,7 +332,7 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
     .execute(async (trx) => {
       let rows = await trx
         .selectFrom('captionScript')
-        .select(['id', trx.fn<string | null>('lower', ['url']).as('url')])
+        .select(['id', trx.fn<string>('lower', ['url']).as('url')])
         .orderBy(
           `${sortColumns.get(sortBy) as keyof CaptionScript} ${sortOrder}`
         )
@@ -341,12 +341,15 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
       if (sortBy === SF.random) {
         rows = randomizeList(rows)
       } else if (sortBy === SF.alpha) {
-        rows = rows.sort((a, b) =>
-          getFileName(a.url ?? '') < getFileName(b.url ?? '') ? -1 : 1
-        )
-        if (sortOrder === 'desc') {
-          rows.reverse()
+        let lessThan = -1
+        let greaterThan = 1
+        if(sortOrder === 'desc') {
+          lessThan = 1
+          greaterThan = -1
         }
+        rows = rows.sort((a, b) =>
+          getFileName(a.url) < getFileName(b.url) ? lessThan : greaterThan
+        )
       }
 
       await trx
