@@ -41,6 +41,7 @@ export * from './lib/json/CleanBackupsRequest';
 export * from './lib/json/MoveRequest';
 export * from './lib/json/SortRequest';
 export * from './lib/json/AudioSortRequest';
+export * from './lib/json/ContentSortRequest';
 export * from './lib/json/SelectOption';
 export * from './lib/json/BatchTagRequest';
 export * from './lib/scrape/ScrapeResult';

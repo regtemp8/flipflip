@@ -76,7 +76,8 @@ import URLDialog from '../sceneDetail/URLDialog'
 import {
   useGetContentSourceBatchTagOptionsQuery,
   useGetContentSourceSearchOptionsQuery,
-  useGetTutorialsQuery
+  useGetTutorialsQuery,
+  useSortContentSourcesMutation
 } from '../../store/api/slice'
 import {
   useGetRemoteSettingsRedditAuthorizedQuery,
@@ -361,6 +362,7 @@ function Library() {
   const tags: number[] = []
   const specialMode = useAppSelector(selectSpecialMode())
 
+  const [sortContentSources] = useSortContentSourcesMutation()
   const { data: tumblrAuthorized } = useGetRemoteSettingsTumblrAuthorizedQuery()
   const { data: redditAuthorized } = useGetRemoteSettingsRedditAuthorizedQuery()
   const { data: twitterAuthorized } =
@@ -1444,8 +1446,8 @@ function Library() {
                 <>
                   <IconButton
                     edge="end"
-                    onClick={() => {
-                      // dispatch(sortSources(sf, true))
+                    onClick={async() => {
+                      await sortContentSources({sortBy: sf, sortOrder: 'asc'})
                     }}
                     size="large"
                   >
@@ -1453,8 +1455,8 @@ function Library() {
                   </IconButton>
                   <IconButton
                     edge="end"
-                    onClick={() => {
-                      // dispatch(sortSources(sf, false))
+                    onClick={async() => {
+                      await sortContentSources({sortBy: sf, sortOrder: 'desc'})
                     }}
                     size="large"
                   >
@@ -1471,8 +1473,8 @@ function Library() {
           secondaryAction={
             <IconButton
               edge="end"
-              onClick={() => {
-                // dispatch(sortSources(SF.random, true))
+              onClick={async() => {
+                await sortContentSources({sortBy: SF.random, sortOrder: 'asc'})
               }}
               size="large"
             >

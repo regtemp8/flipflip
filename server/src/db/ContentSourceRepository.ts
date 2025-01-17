@@ -3,7 +3,7 @@ import { ContentSource, ContentSourceTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { getSourceType, randomizeList, SF, SortRequest, ST } from 'flipflip-common'
+import { getSourceType, randomizeList, SF, ContentSortRequest, ST } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 
@@ -304,4 +304,120 @@ export async function markContentSources(userId: number, ids: number[]) {
           .execute()
       }
     })
+}
+
+type SortRow = {
+  id: number | null
+  type: string
+  duration: number
+  resolution: number
+  url: string
+  count: number
+  clips: number
+}
+export async function sortContentSources({sortBy, sortOrder, sceneId}: ContentSortRequest) {
+  sceneId = sceneId ?? IS_LIBRARY
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      let rows = await trx
+        .selectFrom('contentSource as c')
+        .leftJoin('clip as cl', 'cl.contentSourceId', 'c.id')
+        .select(({fn, val}) => [
+          'c.id', 
+          'c.type',
+          'c.count',
+          fn<number>('coalesce', ['c.videoDuration', val(0)]).as('duration'),
+          fn<number>('coalesce', ['c.videoResolution', val(0)]).as('resolution'),
+          fn<string>('lower', ['c.url']).as('url'), 
+          fn<number>('count', ['cl.id']).as('clips')
+        ])
+        .where('c.sceneId', '=', sceneId)
+        .execute()
+
+      if (sortBy === SF.random) {
+        rows = randomizeList(rows)
+      } else {
+        let secondary: string | undefined = undefined
+        if (sortBy === SF.alpha) {
+          secondary = SF.type;
+        } else if (sortBy === SF.type) {
+          secondary = SF.alpha;
+        }
+
+        rows.sort(sortFunction(sortBy, sortOrder === 'asc', secondary))
+      }
+
+      await trx
+        .updateTable('contentSource')
+        .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
+        .where('sceneId', '=', sceneId)
+        .execute()
+
+      for (let i = 0; i < rows.length; i++) {
+        await trx
+          .updateTable('contentSource')
+          .set({ index: i })
+          .where('id', '=', rows[i].id)
+          .execute()
+      }
+    })
+}
+
+function getName({type, url}: SortRow) {
+  return type === ST.video || type === ST.playlist ? getFileName(url) : getFileGroup(url)
+}
+
+function getCount({type, count, clips}: SortRow) {
+  return type === ST.video ? clips : count
+};
+
+function sortFunction(algorithm: string, ascending: boolean, secondary?: string): (a: SortRow, b: SortRow) => number {
+  return (a, b) => {
+    let aValue: any, bValue: any;
+    switch (algorithm) {
+      case SF.alpha:
+        aValue = getName(a);
+        bValue = getName(b);
+        break;
+      case SF.alphaFull:
+        aValue = a.url;
+        bValue = b.url;
+        break;
+      case SF.date:
+        aValue = a.id;
+        bValue = b.id;
+        break;
+      case SF.count:
+        aValue = getCount(a);
+        bValue = getCount(b);
+        break;
+      case SF.type:
+        aValue = a.type
+        bValue = b.type
+        break;
+      case SF.duration:
+        aValue = a.duration;
+        bValue = b.duration;
+        break;
+      case SF.resolution:
+        aValue = a.resolution;
+        bValue = b.resolution;
+        break;
+      default:
+        aValue = "";
+        bValue = "";
+    }
+
+    if (aValue < bValue) {
+      return ascending ? -1 : 1;
+    } else if (aValue > bValue) {
+      return ascending ? 1 : -1;
+    } else if (secondary != null) {
+      return sortFunction(secondary, true)(a, b);
+    } else {
+      return 0;
+    }
+  }
 }

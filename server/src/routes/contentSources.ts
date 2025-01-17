@@ -19,11 +19,12 @@ import {
   removeContentSourceTags,
   markContentSources,
   findContentSourceTagIds,
-  findTotalCount
+  findTotalCount,
+  sortContentSources
 } from '../db/ContentSourceRepository'
 import { toIgnoredTagSelectOptions } from '../db/mappers'
 import { User } from '../db/types/generated'
-import { BatchTagRequest } from 'flipflip-common'
+import { BatchTagRequest, ContentSortRequest } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/batch-tag-options', async (req, res) => {
@@ -88,6 +89,11 @@ router.post('/mark', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+})
+router.post('/sort', async (req, res) => {
+  const sort = req.body as ContentSortRequest
+  await sortContentSources(sort)
+  res.status(204).end()
 })
 router.get('/:id', async (req, res) => {
   const userId = (req.user as User).id as number

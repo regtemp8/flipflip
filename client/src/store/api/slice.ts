@@ -37,7 +37,8 @@ import {
   MoveRequest,
   SelectOption,
   BatchTagRequest,
-  AudioSortRequest
+  AudioSortRequest,
+  ContentSortRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 
@@ -608,6 +609,29 @@ export const flipflipApi = createApi({
             )
           }
         })
+      }
+    }),
+    sortContentSources: builder.mutation<void, ContentSortRequest>({
+      query: (body) => ({
+        url: `api/content-sources/sort`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'ContentSource', id: 'List' },
+                  { type: 'ContentSource', id: 'FilteredList' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
       }
     }),
     getDisplays: builder.query<number[], void>({
@@ -1398,6 +1422,7 @@ export const {
   useUpdateClipMutation,
   useGetContentSourceQuery,
   useUpdateContentSourceMutation,
+  useSortContentSourcesMutation,
   useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,
