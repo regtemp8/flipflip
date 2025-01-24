@@ -851,7 +851,7 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('tickSinRate', 'integer', (col) => col.notNull())
     .addColumn('tickBpmMulti', 'integer', (col) => col.notNull())
     .addColumn('bpm', 'integer', (col) => col.notNull())
-    .addColumn('thumb', 'text')
+    .addColumn('thumb', 'integer')
     .addColumn('name', 'text')
     .addColumn('artist', 'text')
     .addColumn('album', 'text')
@@ -862,6 +862,7 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('createdAt', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint('FK_audio_user_userId', ['userId'], 'user', ['id'])
+    .addForeignKeyConstraint('FK_audio_file_thumb', ['thumb'], 'file', ['id'])
     .execute()
 }
 
@@ -996,6 +997,25 @@ const backupTable = async (trx: Kysely<DB>) => {
     .execute()
 }
 
+const fileTable = async (trx: Kysely<DB>) => {
+  logger.info('+ Create file table')
+  return await trx.schema
+    .createTable('file')
+    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('userId', 'integer', (col) => col.notNull())
+    .addColumn('publicId', 'text', (col) => col.notNull())
+    .addColumn('path', 'text', (col) => col.notNull())
+    .addForeignKeyConstraint(
+      'FK_captionScript_user_userId',
+      ['userId'],
+      'user',
+      ['id']
+    )
+    .addUniqueConstraint('UQ_file_publicId', ['publicId'])
+    .addUniqueConstraint('UQ_file_path', ['path'])
+    .execute()
+}
+
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     await userTable(trx)
@@ -1027,6 +1047,7 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await scenePlaylistItemSceneTable(trx)
     await displayTable(trx)
     await displayViewTable(trx)
+    await fileTable(trx)
     await audioTable(trx)
     await audioTagTable(trx)
     await fontSettingsTable(trx)
@@ -1047,6 +1068,9 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Drop audio table')
     await trx.schema.dropTable('audio').execute()
+
+    logger.info('- Drop file table')
+    await trx.schema.dropTable('file').execute()
 
     logger.info('- Drop displayView table')
     await trx.schema.dropTable('displayView').execute()

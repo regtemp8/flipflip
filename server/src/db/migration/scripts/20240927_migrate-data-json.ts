@@ -1,3 +1,4 @@
+import fs from 'fs'
 import crypto from 'crypto'
 import { existsSync, readFileSync } from 'fs'
 import path from 'path'
@@ -46,6 +47,7 @@ import {
 } from 'flipflip-common'
 import logger from '../../../logger'
 import { IS_LIBRARY } from '../../ContentSourceRepository'
+import { createThumb } from '../../FileRepository'
 
 const getDataJsonPath = () => {
   const saveDir = getElectronSaveDir()
@@ -1135,7 +1137,6 @@ const audioInsert = async (
       tickSinRate,
       tickBPMMulti,
       bpm,
-      thumb,
       name,
       artist,
       album,
@@ -1148,6 +1149,11 @@ const audioInsert = async (
     if (url == null) {
       logger.info(`! Skipping audio, no url defined (id: ${id})`)
       continue
+    }
+
+    let thumb: number | undefined = undefined
+    if(audio.thumb != null && fs.existsSync(audio.thumb)) {
+      thumb = await createThumb(userId, audio.thumb, trx)
     }
 
     logger.info(`+ Insert audio {url} (id: ${id})`, { url })

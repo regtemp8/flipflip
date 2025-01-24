@@ -38,7 +38,6 @@ import {
   Tag as TagRow,
   Display as DisplayRow,
   Playlist as PlaylistRow,
-  Audio as AudioRow,
   CaptionScript as CaptionScriptRow,
   FontSettings as FontSettingsRow,
   Backup as BackupRow
@@ -59,7 +58,7 @@ import { DisplayUpdate } from './DisplayRepository'
 import { PlaylistUpdate } from './PlaylistRepository'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { AudioUpdate } from './AudioRepository'
+import { AudioRow, AudioUpdate } from './AudioRepository'
 import {
   CaptionScriptUpdate,
   FontSettingsUpdate
@@ -1224,7 +1223,8 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     trackNum,
     type,
     url,
-    volume
+    volume,
+    thumbPublicId
   } = row
 
   return {
@@ -1245,7 +1245,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     tickSinRate,
     tickBPMMulti: tickBpmMulti,
     bpm,
-    thumb: opt<string>(thumb),
+    thumb: toFileUrl(thumbPublicId),
     name: opt<string>(name),
     artist: opt<string>(artist),
     album: opt<string>(album),
@@ -1256,7 +1256,11 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
   }
 }
 
-export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
+function toFileUrl(publicId: string | null) {
+  return publicId != null ? `http://localhost:5050/fs/file/${publicId}` : undefined
+}
+
+export function toAudioUpdate(audio: Partial<Audio>, thumb?: number): AudioUpdate {
   const {
     url,
     marked,
@@ -1272,7 +1276,6 @@ export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
     tickSinRate,
     tickBPMMulti,
     bpm,
-    thumb,
     name,
     artist,
     album,

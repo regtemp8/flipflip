@@ -1,5 +1,8 @@
-import { getSourceType, ST } from 'flipflip-common'
+import { Audio, getSourceType, ST } from 'flipflip-common'
+import fs from 'fs'
 import path from 'path'
+import crypto from 'crypto'
+import logger from './logger'
 export const isMacOSX = process.platform === 'darwin'
 
 export function getElectronSaveDir() {
@@ -25,6 +28,10 @@ export function getSaveDir() {
 
 export function getBackupsDir() {
   return path.resolve(getSaveDir(), 'backups')
+}
+
+export function getThumbsDir() {
+  return path.resolve(getSaveDir(), 'thumbs')
 }
 
 export function getCacheDir() {
@@ -224,5 +231,51 @@ export function getFileGroup(url: string): string {
       return "piwigo";
     default:
       return ''
+  }
+}
+
+export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
+  const metadata = await parseAudioMetadata(url)
+
+  const {duration} = metadata.format
+  const {title: name, album, artist, picture, track, bpm} = metadata.common
+  const audio: Partial<Audio> = {url,name,album,artist, bpm, duration, trackNum: track.no ?? undefined}
+
+  const {selectCover} = await import('music-metadata')
+  const cover = selectCover(picture)
+  if(cover != null) {
+    const hash = crypto.createHash('sha256').update(cover.data).digest('hex')
+    const mime = await import('mime')
+    const extension = mime.default.getExtension(cover.format)
+    const thumb = path.join(getThumbsDir(), `${hash}.${extension}`)
+    if(!fs.existsSync(thumb)) {
+      await fs.promises.writeFile(thumb, cover.data)
+    }
+
+    audio.thumb = thumb
+  }
+
+  return audio
+}
+
+async function parseAudioMetadata(url: string) {
+  const {parseFile, parseWebStream} = await import('music-metadata')
+  if(url.startsWith('http')) {
+    const {ok, body, headers} = await fetch(url)
+    if(!ok || body == null) {
+      logger.error('Failed to fetch audio {url}', {url})
+      throw new Error(`Failed to fetch audio ${url}`)
+    }
+
+    let type = headers.get('Content-Type')
+    if(type == null || !type.startsWith('audio/')) {
+      const mime = await import('mime')
+      const path =  url.split('/').pop() ?? url
+      type = mime.default.getType(path)
+    }
+
+    return await parseWebStream(body, type ?? undefined, {duration: true})
+  } else {
+    return await parseFile(url, {duration: true})
   }
 }

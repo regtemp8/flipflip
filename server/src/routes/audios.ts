@@ -18,28 +18,37 @@ import {
   removeAudioTags,
   markAudios,
   findAudioTagIds,
-  sortAudios
+  sortAudios,
+  createAudios,
+  findAudioUrlById
 } from '../db/AudioRepository'
 import { User } from '../db/types/generated'
-import { AudioSortRequest, BatchTagRequest, SortRequest } from 'flipflip-common'
+import { Audio, AudioSortRequest, BatchTagRequest, SortRequest } from 'flipflip-common'
+import { readAudioMetadata } from '../utils'
+import { createThumb, createThumbFromMetadata } from '../db/FileRepository'
 
 const router = express.Router()
-router.get('/batch-tag-options', async (req, res) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
+router.post('/', async (req, res, next) => {
+  const userId = (req.user as User).id as number
+  const urls = req.body as string[]
+  try {
+    const audios: Array<Partial<Audio>> = []
+    for(const url of urls) {
+      audios.push(await readAudioMetadata(url))
+    }
 
+    await createAudios(audios, userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+router.get('/batch-tag-options', async (req, res) => {
   const userId = (req.user as User).id as number
   const options = await findBatchTagOptions(userId)
   res.status(200).send(toTagSelectOptions(options))
 })
 router.get('/search-options', async (req, res) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
-
   const userId = (req.user as User).id as number
   const totalCount = await findTotalCount(userId)
   const untaggedCount = await findUntaggedCount(userId)
@@ -52,11 +61,6 @@ router.get('/search-options', async (req, res) => {
     )
 })
 router.post('/tags', async (req, res, next) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
-
   const userId = (req.user as User).id as number
   const body = req.body as BatchTagRequest
   try {
@@ -77,11 +81,6 @@ router.post('/tags', async (req, res, next) => {
   }
 })
 router.post('/mark', async (req, res, next) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
-
   const userId = (req.user as User).id as number
   const ids = req.body as number[]
   try {
@@ -101,11 +100,6 @@ router.post('/sort', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
-
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
   const source = await findAudioById(userId, id)
@@ -117,17 +111,46 @@ router.get('/:id', async (req, res) => {
   }
 })
 router.patch('/:id', async (req, res) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
+  const userId = (req.user as User).id as number
+  const body = req.body as Partial<Audio>
+  let thumb: number | undefined = undefined
+  if(body.thumb != null) {
+    thumb = await createThumb(userId, body.thumb)
   }
-
   const result = await updateAudio(
     Number(req.params.id),
-    toAudioUpdate(req.body)
+    toAudioUpdate(body, thumb)
   )
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
   res.status(status).end()
+})
+router.post('/:id/use-metadata', async (req, res) => {
+  const userId = (req.user as User).id as number
+  const id = Number(req.params.id)
+  const url = await findAudioUrlById(id)
+  const metadata = await readAudioMetadata(url)
+  let thumb: number | undefined = undefined
+  if(metadata.thumb != null) {
+    thumb = await createThumb(userId, metadata.thumb)
+  }
+  const result = await updateAudio(
+    Number(req.params.id),
+    toAudioUpdate(metadata, thumb)
+  )
+  const status =
+    result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
+  res.status(status).end()
+})
+router.get('/:id/bpm', async (req, res) => {
+  // const userId = (req.user as User).id as number
+  // const id = Number(req.params.id)
+  // const source = await findAudioUrlById(userId, id)
+  // if (source != null) {
+  //   const tags = await findAudioTagIds(userId, id)
+  //   res.status(200).send(toAudio(source, tags))
+  // } else {
+  //   res.status(404).end()
+  // }
 })
 export default router

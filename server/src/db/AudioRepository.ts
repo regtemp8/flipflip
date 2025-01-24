@@ -3,17 +3,21 @@ import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { ASF, AudioSortRequest, getSourceType, randomizeList } from 'flipflip-common'
+import { ASF, AudioSortRequest, getSourceType, randomizeList, Audio as AudioJson, TF } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
+import { createThumbFromMetadata } from './FileRepository'
 
+export type AudioRow = Audio & {thumbPublicId: string | null}
 export async function findAudioById(
   userId: number,
   id: number
-): Promise<Audio> {
+): Promise<AudioRow> {
   return await db()
     .query()
-    .selectFrom('audio')
-    .selectAll()
+    .selectFrom('audio as a')
+    .leftJoin('file as f', 'f.id', 'a.thumb')
+    .selectAll('a')
+    .select('f.publicId as thumbPublicId')
     .where('userId', '=', userId)
     .where('id', '=', id)
     .executeTakeFirstOrThrow()
@@ -41,6 +45,56 @@ export async function findAudioUrlById(id: number): Promise<string> {
     .where('id', '=', id)
     .executeTakeFirstOrThrow()
     .then((row) => row.url)
+}
+
+export async function createAudios(audios: Array<Partial<AudioJson>>, userId: number) {
+  return await db().query().transaction().execute(async (trx) => {
+    await trx
+    .updateTable('audio')
+    .set((eb) => ({ index: eb('index', '+', audios.length) }))
+    .execute()
+
+    const values: Array<Insertable<Audio>> = []
+    for(let index = 0; index < audios.length; index++) {
+      let thumb: number | null = null
+      const audio = audios[index]
+      if(audio.thumb != null) {
+        thumb = await createThumbFromMetadata(userId, audio.thumb, trx)
+      }
+
+      const url = audio.url as string
+      const {name,album,artist, bpm, duration, trackNum} = audio
+      values.push({
+        marked: toNumber(false),
+        volume: 100,
+        speed: 10,
+        stopAtEnd: toNumber(false),
+        nextSceneAtEnd: toNumber(false),
+        tick: toNumber(false),
+        tickMode: TF.constant,
+        tickDelay: 1000,
+        tickMinDelay: 500,
+        tickMaxDelay: 5000,
+        tickSinRate: 100,
+        tickBpmMulti: 10,
+        playedCount: 0,
+        url,
+        type: getSourceType(url),
+        name,
+        album,
+        artist, 
+        bpm: bpm ?? 0, 
+        duration, 
+        trackNum,
+        thumb,
+        index,
+        createdAt: Date.now(),
+        userId
+      })
+    }
+    
+    trx.insertInto('audio').values(values).execute()
+  })
 }
 
 export type AudioUpdate = Updateable<Audio>

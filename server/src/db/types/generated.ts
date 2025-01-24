@@ -18,7 +18,7 @@ export interface Audio {
   playedCount: number;
   speed: number;
   stopAtEnd: number;
-  thumb: string | null;
+  thumb: number | null;
   tick: number;
   tickBpmMulti: number;
   tickDelay: number;
@@ -199,6 +199,13 @@ export interface DisplayView {
   x: number;
   y: number;
   z: number;
+}
+
+export interface File {
+  id: number | null;
+  path: string;
+  publicId: string;
+  userId: number;
 }
 
 export interface FontSettings {
@@ -580,6 +587,7 @@ export interface DB {
   displayPlaylistItemDisplay: DisplayPlaylistItemDisplay;
   displaySettings: DisplaySettings;
   displayView: DisplayView;
+  file: File;
   fontSettings: FontSettings;
   generalSettings: GeneralSettings;
   ignoredTag: IgnoredTag;

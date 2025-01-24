@@ -24,14 +24,14 @@ import captionScripts from './routes/captionScripts'
 import displayPlaylistItems from './routes/displayPlaylistItems'
 import scenePlaylistItems from './routes/scenePlaylistItems'
 import db from './db/database'
-import { getBackupsDir, getCacheDir, getSaveDir } from './utils'
+import { getBackupsDir, getCacheDir, getSaveDir, getThumbsDir } from './utils'
 import scheduler from './scheduler'
 import logger from './logger'
 
 const port = process.env.FF_PORT || 5050
 
 void (async function () {
-  const dirs = [getSaveDir(), getBackupsDir()]
+  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir(), getThumbsDir()]
   for (const path of dirs) {
     if (!fs.existsSync(path)) {
       logger.info('+ Creating directory {path}', { path })
