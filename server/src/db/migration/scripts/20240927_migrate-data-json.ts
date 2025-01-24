@@ -1152,7 +1152,7 @@ const audioInsert = async (
     }
 
     let thumb: number | undefined = undefined
-    if(audio.thumb != null && fs.existsSync(audio.thumb)) {
+    if (audio.thumb != null && fs.existsSync(audio.thumb)) {
       thumb = await createThumb(userId, audio.thumb, trx)
     }
 
@@ -2082,7 +2082,7 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await audioInsert(trx, json, userId, tags)
     await audioPlaylistInsert(trx, json, userId)
     await captionScriptInsert(trx, json, userId, tags)
-    for(let i = 0; i < json.library.length; i++) {
+    for (let i = 0; i < json.library.length; i++) {
       const source = json.library[i]
       await contentSourceInsert(trx, source, userId, tags, i, IS_LIBRARY)
     }

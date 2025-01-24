@@ -3,7 +3,13 @@ import { ContentSource, ContentSourceTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { getSourceType, randomizeList, SF, ContentSortRequest, ST } from 'flipflip-common'
+import {
+  getSourceType,
+  randomizeList,
+  SF,
+  ContentSortRequest,
+  ST
+} from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 
@@ -315,7 +321,11 @@ type SortRow = {
   count: number
   clips: number
 }
-export async function sortContentSources({sortBy, sortOrder, sceneId}: ContentSortRequest) {
+export async function sortContentSources({
+  sortBy,
+  sortOrder,
+  sceneId
+}: ContentSortRequest) {
   sceneId = sceneId ?? IS_LIBRARY
   return await db()
     .query()
@@ -324,13 +334,15 @@ export async function sortContentSources({sortBy, sortOrder, sceneId}: ContentSo
       let rows = await trx
         .selectFrom('contentSource as c')
         .leftJoin('clip as cl', 'cl.contentSourceId', 'c.id')
-        .select(({fn, val}) => [
-          'c.id', 
+        .select(({ fn, val }) => [
+          'c.id',
           'c.type',
           'c.count',
           fn<number>('coalesce', ['c.videoDuration', val(0)]).as('duration'),
-          fn<number>('coalesce', ['c.videoResolution', val(0)]).as('resolution'),
-          fn<string>('lower', ['c.url']).as('url'), 
+          fn<number>('coalesce', ['c.videoResolution', val(0)]).as(
+            'resolution'
+          ),
+          fn<string>('lower', ['c.url']).as('url'),
           fn<number>('count', ['cl.id']).as('clips')
         ])
         .where('c.sceneId', '=', sceneId)
@@ -341,9 +353,9 @@ export async function sortContentSources({sortBy, sortOrder, sceneId}: ContentSo
       } else {
         let secondary: string | undefined = undefined
         if (sortBy === SF.alpha) {
-          secondary = SF.type;
+          secondary = SF.type
         } else if (sortBy === SF.type) {
-          secondary = SF.alpha;
+          secondary = SF.alpha
         }
 
         rows.sort(sortFunction(sortBy, sortOrder === 'asc', secondary))
@@ -365,59 +377,65 @@ export async function sortContentSources({sortBy, sortOrder, sceneId}: ContentSo
     })
 }
 
-function getName({type, url}: SortRow) {
-  return type === ST.video || type === ST.playlist ? getFileName(url) : getFileGroup(url)
+function getName({ type, url }: SortRow) {
+  return type === ST.video || type === ST.playlist
+    ? getFileName(url)
+    : getFileGroup(url)
 }
 
-function getCount({type, count, clips}: SortRow) {
+function getCount({ type, count, clips }: SortRow) {
   return type === ST.video ? clips : count
-};
+}
 
-function sortFunction(algorithm: string, ascending: boolean, secondary?: string): (a: SortRow, b: SortRow) => number {
+function sortFunction(
+  algorithm: string,
+  ascending: boolean,
+  secondary?: string
+): (a: SortRow, b: SortRow) => number {
   return (a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: any, bValue: any
     switch (algorithm) {
       case SF.alpha:
-        aValue = getName(a);
-        bValue = getName(b);
-        break;
+        aValue = getName(a)
+        bValue = getName(b)
+        break
       case SF.alphaFull:
-        aValue = a.url;
-        bValue = b.url;
-        break;
+        aValue = a.url
+        bValue = b.url
+        break
       case SF.date:
-        aValue = a.id;
-        bValue = b.id;
-        break;
+        aValue = a.id
+        bValue = b.id
+        break
       case SF.count:
-        aValue = getCount(a);
-        bValue = getCount(b);
-        break;
+        aValue = getCount(a)
+        bValue = getCount(b)
+        break
       case SF.type:
         aValue = a.type
         bValue = b.type
-        break;
+        break
       case SF.duration:
-        aValue = a.duration;
-        bValue = b.duration;
-        break;
+        aValue = a.duration
+        bValue = b.duration
+        break
       case SF.resolution:
-        aValue = a.resolution;
-        bValue = b.resolution;
-        break;
+        aValue = a.resolution
+        bValue = b.resolution
+        break
       default:
-        aValue = "";
-        bValue = "";
+        aValue = ''
+        bValue = ''
     }
 
     if (aValue < bValue) {
-      return ascending ? -1 : 1;
+      return ascending ? -1 : 1
     } else if (aValue > bValue) {
-      return ascending ? 1 : -1;
+      return ascending ? 1 : -1
     } else if (secondary != null) {
-      return sortFunction(secondary, true)(a, b);
+      return sortFunction(secondary, true)(a, b)
     } else {
-      return 0;
+      return 0
     }
   }
 }

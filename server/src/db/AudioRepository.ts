@@ -3,11 +3,18 @@ import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
-import { ASF, AudioSortRequest, getSourceType, randomizeList, Audio as AudioJson, TF } from 'flipflip-common'
+import {
+  ASF,
+  AudioSortRequest,
+  getSourceType,
+  randomizeList,
+  Audio as AudioJson,
+  TF
+} from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 import { createThumbFromMetadata } from './FileRepository'
 
-export type AudioRow = Audio & {thumbPublicId: string | null}
+export type AudioRow = Audio & { thumbPublicId: string | null }
 export async function findAudioById(
   userId: number,
   id: number
@@ -47,54 +54,60 @@ export async function findAudioUrlById(id: number): Promise<string> {
     .then((row) => row.url)
 }
 
-export async function createAudios(audios: Array<Partial<AudioJson>>, userId: number) {
-  return await db().query().transaction().execute(async (trx) => {
-    await trx
-    .updateTable('audio')
-    .set((eb) => ({ index: eb('index', '+', audios.length) }))
-    .execute()
+export async function createAudios(
+  audios: Array<Partial<AudioJson>>,
+  userId: number
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      await trx
+        .updateTable('audio')
+        .set((eb) => ({ index: eb('index', '+', audios.length) }))
+        .execute()
 
-    const values: Array<Insertable<Audio>> = []
-    for(let index = 0; index < audios.length; index++) {
-      let thumb: number | null = null
-      const audio = audios[index]
-      if(audio.thumb != null) {
-        thumb = await createThumbFromMetadata(userId, audio.thumb, trx)
+      const values: Array<Insertable<Audio>> = []
+      for (let index = 0; index < audios.length; index++) {
+        let thumb: number | null = null
+        const audio = audios[index]
+        if (audio.thumb != null) {
+          thumb = await createThumbFromMetadata(userId, audio.thumb, trx)
+        }
+
+        const url = audio.url as string
+        const { name, album, artist, bpm, duration, trackNum } = audio
+        values.push({
+          marked: toNumber(false),
+          volume: 100,
+          speed: 10,
+          stopAtEnd: toNumber(false),
+          nextSceneAtEnd: toNumber(false),
+          tick: toNumber(false),
+          tickMode: TF.constant,
+          tickDelay: 1000,
+          tickMinDelay: 500,
+          tickMaxDelay: 5000,
+          tickSinRate: 100,
+          tickBpmMulti: 10,
+          playedCount: 0,
+          url,
+          type: getSourceType(url),
+          name,
+          album,
+          artist,
+          bpm: bpm ?? 0,
+          duration,
+          trackNum,
+          thumb,
+          index,
+          createdAt: Date.now(),
+          userId
+        })
       }
 
-      const url = audio.url as string
-      const {name,album,artist, bpm, duration, trackNum} = audio
-      values.push({
-        marked: toNumber(false),
-        volume: 100,
-        speed: 10,
-        stopAtEnd: toNumber(false),
-        nextSceneAtEnd: toNumber(false),
-        tick: toNumber(false),
-        tickMode: TF.constant,
-        tickDelay: 1000,
-        tickMinDelay: 500,
-        tickMaxDelay: 5000,
-        tickSinRate: 100,
-        tickBpmMulti: 10,
-        playedCount: 0,
-        url,
-        type: getSourceType(url),
-        name,
-        album,
-        artist, 
-        bpm: bpm ?? 0, 
-        duration, 
-        trackNum,
-        thumb,
-        index,
-        createdAt: Date.now(),
-        userId
-      })
-    }
-    
-    trx.insertInto('audio').values(values).execute()
-  })
+      trx.insertInto('audio').values(values).execute()
+    })
 }
 
 export type AudioUpdate = Updateable<Audio>
@@ -283,12 +296,19 @@ const selectColumns = new Map<string, Array<keyof Audio>>([
   [ASF.album, ['id', 'album', 'trackNum', 'name']],
   [ASF.date, ['id', 'createdAt']],
   [ASF.duration, ['id', 'duration']],
-  [ASF.playedCount, ['id', 'playedCount', 'artist', 'album', 'trackNum', 'name']],
-  [ASF.random, ['id']],
+  [
+    ASF.playedCount,
+    ['id', 'playedCount', 'artist', 'album', 'trackNum', 'name']
+  ],
+  [ASF.random, ['id']]
 ])
-export async function sortAudios({ sortBy, sortOrder, playlistId }: AudioSortRequest) {
+export async function sortAudios({
+  sortBy,
+  sortOrder,
+  playlistId
+}: AudioSortRequest) {
   const selections = selectColumns.get(sortBy)
-  if(selections == null) {
+  if (selections == null) {
     return
   }
 
@@ -297,20 +317,24 @@ export async function sortAudios({ sortBy, sortOrder, playlistId }: AudioSortReq
     .transaction()
     .execute(async (trx) => {
       let rows: Array<Partial<Audio>> = []
-      if(playlistId == null) {
-        rows = await trx
-          .selectFrom('audio')
-          .select(selections)
-          .execute()
+      if (playlistId == null) {
+        rows = await trx.selectFrom('audio').select(selections).execute()
       } else {
         rows = await trx
           .selectFrom('audio as a')
           .innerJoin('audioPlaylistItem as i', 'i.audioId', 'a.id')
           .where('i.playlistId', '=', playlistId)
-          .select(selections.map((s) => `a.${s}`) as Array<SelectExpression<DB & {a: Audio, i: AudioPlaylistItem}, 'a' | 'i'>>)
+          .select(
+            selections.map((s) => `a.${s}`) as Array<
+              SelectExpression<
+                DB & { a: Audio; i: AudioPlaylistItem },
+                'a' | 'i'
+              >
+            >
+          )
           .execute()
       }
-       
+
       if (sortBy === ASF.random) {
         rows = randomizeList(rows)
       } else {
@@ -334,64 +358,67 @@ export async function sortAudios({ sortBy, sortOrder, playlistId }: AudioSortReq
     })
 }
 
-function audioSortFunction(algorithm: string, ascending: boolean): (a: Partial<Audio>, b: Partial<Audio>) => number {
+function audioSortFunction(
+  algorithm: string,
+  ascending: boolean
+): (a: Partial<Audio>, b: Partial<Audio>) => number {
   return (a, b) => {
-    let secondary = null;
-    let aValue: any, bValue: any;
+    let secondary = null
+    let aValue: any, bValue: any
     switch (algorithm) {
       case ASF.url:
-        aValue = a.url;
-        bValue = b.url;
-        break;
+        aValue = a.url
+        bValue = b.url
+        break
       case ASF.name:
         const reA = /^(A\s|a\s|The\s|the\s)/g
-        aValue = a.name?.replace(reA, "");
-        bValue = b.name?.replace(reA, "");
+        aValue = a.name?.replace(reA, '')
+        bValue = b.name?.replace(reA, '')
 
-        const compare = aValue.localeCompare(bValue, 'en', { numeric: true });
-        return ascending ? compare : compare * -1;
+        const compare = aValue.localeCompare(bValue, 'en', { numeric: true })
+        return ascending ? compare : compare * -1
       case ASF.artist:
-        aValue = a.artist;
-        bValue = b.artist;
-        secondary = ASF.album;
-        break;
+        aValue = a.artist
+        bValue = b.artist
+        secondary = ASF.album
+        break
       case ASF.album:
-        aValue = a.album;
-        bValue = b.album;
-        secondary = ASF.trackNum;
-        break;
+        aValue = a.album
+        bValue = b.album
+        secondary = ASF.trackNum
+        break
       case ASF.date:
-        aValue = a.id;
-        bValue = b.id;
-        break;
+        aValue = a.id
+        bValue = b.id
+        break
       case ASF.trackNum:
-        aValue = parseInt(a.trackNum as any);
-        bValue = parseInt(b.trackNum as any);
-        secondary = ASF.name;
-        break;
+        aValue = parseInt(a.trackNum as any)
+        bValue = parseInt(b.trackNum as any)
+        secondary = ASF.name
+        break
       case ASF.duration:
-        aValue = a.duration;
-        bValue = b.duration;
-        break;
+        aValue = a.duration
+        bValue = b.duration
+        break
       case ASF.playedCount:
-        aValue = a.playedCount;
-        bValue = b.playedCount;
-        secondary = ASF.artist;
-        break;
+        aValue = a.playedCount
+        bValue = b.playedCount
+        secondary = ASF.artist
+        break
       default:
-        aValue = "";
-        bValue = "";
+        aValue = ''
+        bValue = ''
     }
     if (aValue < bValue) {
-      return ascending ? -1 : 1;
+      return ascending ? -1 : 1
     } else if (aValue > bValue) {
-      return ascending ? 1 : -1;
+      return ascending ? 1 : -1
     } else {
       if (!!secondary) {
-        return audioSortFunction(secondary, true)(a, b);
+        return audioSortFunction(secondary, true)(a, b)
       } else {
-        return 0;
+        return 0
       }
     }
-  };
+  }
 }

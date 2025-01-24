@@ -23,7 +23,12 @@ import {
   findAudioUrlById
 } from '../db/AudioRepository'
 import { User } from '../db/types/generated'
-import { Audio, AudioSortRequest, BatchTagRequest, SortRequest } from 'flipflip-common'
+import {
+  Audio,
+  AudioSortRequest,
+  BatchTagRequest,
+  SortRequest
+} from 'flipflip-common'
 import { readAudioMetadata } from '../utils'
 import { createThumb, createThumbFromMetadata } from '../db/FileRepository'
 
@@ -33,7 +38,7 @@ router.post('/', async (req, res, next) => {
   const urls = req.body as string[]
   try {
     const audios: Array<Partial<Audio>> = []
-    for(const url of urls) {
+    for (const url of urls) {
       audios.push(await readAudioMetadata(url))
     }
 
@@ -114,7 +119,7 @@ router.patch('/:id', async (req, res) => {
   const userId = (req.user as User).id as number
   const body = req.body as Partial<Audio>
   let thumb: number | undefined = undefined
-  if(body.thumb != null) {
+  if (body.thumb != null) {
     thumb = await createThumb(userId, body.thumb)
   }
   const result = await updateAudio(
@@ -131,7 +136,7 @@ router.post('/:id/use-metadata', async (req, res) => {
   const url = await findAudioUrlById(id)
   const metadata = await readAudioMetadata(url)
   let thumb: number | undefined = undefined
-  if(metadata.thumb != null) {
+  if (metadata.thumb != null) {
     thumb = await createThumb(userId, metadata.thumb)
   }
   const result = await updateAudio(

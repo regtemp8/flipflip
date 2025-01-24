@@ -24,11 +24,6 @@ router.get('/', async (req, res) => {
   }
 })
 router.post('/', async (req, res, next) => {
-  if (req.user == null) {
-    res.status(401).end()
-    return
-  }
-
   const userId = (req.user as User).id as number
   const { name, phraseString } = req.body as Tag
   try {

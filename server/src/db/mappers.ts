@@ -1257,10 +1257,15 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
 }
 
 function toFileUrl(publicId: string | null) {
-  return publicId != null ? `http://localhost:5050/fs/file/${publicId}` : undefined
+  return publicId != null
+    ? `http://localhost:5050/fs/file/${publicId}`
+    : undefined
 }
 
-export function toAudioUpdate(audio: Partial<Audio>, thumb?: number): AudioUpdate {
+export function toAudioUpdate(
+  audio: Partial<Audio>,
+  thumb?: number
+): AudioUpdate {
   const {
     url,
     marked,

@@ -49,7 +49,7 @@ export async function createCaptionScripts(urls: string[], userId: number) {
         .insertInto('captionScript')
         .values(captionScripts)
         .onConflict((oc) => oc.doNothing())
-        .returningAll()
+        .returning('id')
         .execute()
 
       const fontSettings: FontSettingsInsert[] = []
@@ -343,7 +343,7 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
       } else if (sortBy === SF.alpha) {
         let lessThan = -1
         let greaterThan = 1
-        if(sortOrder === 'desc') {
+        if (sortOrder === 'desc') {
           lessThan = 1
           greaterThan = -1
         }
