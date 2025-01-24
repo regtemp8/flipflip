@@ -26,6 +26,16 @@ async function findFileIdByPath(path: string, trx: Kysely<DB>) {
   return file?.id
 }
 
+export async function findFilePathByPublicId(publicId: string, userId: number) {
+  const file = await db().query()
+    .selectFrom('file')
+    .select('path')
+    .where('publicId', '=', publicId)
+    .where('userId', '=', userId)
+    .executeTakeFirst()
+  return file?.path
+}
+
 export async function insertThumb(
   userId: number,
   path: string,

@@ -1197,6 +1197,47 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    createAudios: builder.mutation<void, string[]>({
+      query: (body) => ({
+        url: `api/audios`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'Audio', id: 'List' },
+                  { type: 'Audio', id: 'FilteredList' }
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            // TODO error handling needed?
+          })
+      }
+    }),
+    getAudios: builder.query<number[], void>({
+      query: () => ({
+        url: `api/audios`
+      }),
+      providesTags: [{ type: 'Audio', id: 'List' }]
+    }),
+    getFilteredAudios: builder.query<number[], string[]>({
+      query: (filters) => {
+        let filtersQuery = encodeURIComponent(filters.join(','))
+        if (filtersQuery !== '') {
+          filtersQuery = '?filters=' + filtersQuery
+        }
+
+        // TODO would it be better to do filtering on the client?
+        return { url: `api/audios/filtered${filtersQuery}` }
+      },
+      providesTags: [{ type: 'Audio', id: 'FilteredList' }]
+    }),
     getAudio: builder.query<Audio, number>({
       query: (id) => ({
         url: `api/audios/${id}`
@@ -1441,6 +1482,9 @@ export const {
   useUpdateCaptionScriptMutation,
   useGetCaptionScriptFontSettingsQuery,
   useUpdateCaptionScriptFontSettingsMutation,
+  useCreateAudiosMutation,
+  useGetAudiosQuery,
+  useGetFilteredAudiosQuery,
   useGetAudioQuery,
   useUpdateAudioMutation,
   useSortAudiosMutation,

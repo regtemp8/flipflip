@@ -6,6 +6,7 @@ import {
   toTagSelectOptions
 } from '../db/mappers'
 import {
+  findAudioIds,
   findAudioById,
   updateAudio,
   findBatchTagOptions,
@@ -20,7 +21,8 @@ import {
   findAudioTagIds,
   sortAudios,
   createAudios,
-  findAudioUrlById
+  findAudioUrlById,
+  findAudios
 } from '../db/AudioRepository'
 import { User } from '../db/types/generated'
 import {
@@ -30,9 +32,19 @@ import {
   SortRequest
 } from 'flipflip-common'
 import { readAudioMetadata } from '../utils'
-import { createThumb, createThumbFromMetadata } from '../db/FileRepository'
+import { createThumb } from '../db/FileRepository'
+import { toBoolean } from '../db/utils'
+import { hasTag, isUntagged } from '../db/CaptionScriptRepository'
 
 const router = express.Router()
+router.get('/', async (req, res) => {
+  const ids = await findAudioIds()
+  if (ids != null) {
+    res.status(200).send(ids)
+  } else {
+    res.status(500).end()
+  }
+})
 router.post('/', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const urls = req.body as string[]
@@ -47,6 +59,75 @@ router.post('/', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+})
+router.get('/filtered', async (req, res) => {
+  // TODO fix filtering
+  let filtersQuery = req.query.filters
+  const audios = await findAudios()
+  if (filtersQuery == null) {
+    res.status(200).send(audios.map((s) => s.id as number))
+    return
+  }
+
+  let filteredScripts: number[] = []
+  filtersQuery = decodeURIComponent(filtersQuery as string)
+  const filters = filtersQuery.split(',')
+  for (const source of audios) {
+    let matchesFilter = true
+    for (const filter of filters) {
+      if (filter == '<Marked>') {
+        // This is a marked filter
+        matchesFilter = toBoolean(source.marked)
+      } else if (filter == '<Untagged>') {
+        // This is untagged filter
+        matchesFilter = await isUntagged(source.id as number)
+      } else if (
+        (filter.startsWith('[') || filter.startsWith('-[')) &&
+        filter.endsWith(']')
+      ) {
+        // This is a tag filter
+        if (filter.startsWith('-')) {
+          const tag = filter.substring(2, filter.length - 1)
+          matchesFilter = !(await hasTag(source.id as number, tag))
+        } else {
+          const tag = filter.substring(1, filter.length - 1)
+          matchesFilter = await hasTag(source.id as number, tag)
+        }
+      } else if (
+        ((filter.startsWith('"') || filter.startsWith('-"')) &&
+          filter.endsWith('"')) ||
+        ((filter.startsWith("'") || filter.startsWith("-'")) &&
+          filter.endsWith("'"))
+      ) {
+        if (filter.startsWith('-')) {
+          const pattern = filter.substring(2, filter.length - 1)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          matchesFilter = source.url != null && !regex.test(source.url)
+        } else {
+          const pattern = filter.substring(1, filter.length - 1)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          matchesFilter = source.url != null && regex.test(source.url)
+        }
+      } else {
+        // This is a search filter
+        let pattern = filter.replace('\\', '\\\\')
+        if (pattern.startsWith('-')) {
+          pattern = pattern.substring(1, pattern.length)
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          matchesFilter = source.url != null && !regex.test(source.url)
+        } else {
+          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          matchesFilter = source.url != null && regex.test(source.url)
+        }
+      }
+      if (!matchesFilter) break
+    }
+    if (matchesFilter) {
+      filteredScripts.push(source.id as number)
+    }
+  }
+
+  res.status(200).send(filteredScripts)
 })
 router.get('/batch-tag-options', async (req, res) => {
   const userId = (req.user as User).id as number

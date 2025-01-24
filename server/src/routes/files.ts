@@ -1,12 +1,14 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
 import express from 'express'
-import { FilePickerData, FilePickerItem, Message } from 'flipflip-common'
+import { FilePickerData, FilePickerItem, isAudio } from 'flipflip-common'
 import logger from '../logger'
 import { getSaveDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
+import { findFilePathByPublicId } from '../db/FileRepository'
+import { User } from '../db/types/generated'
 
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
@@ -42,6 +44,10 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
   } else if (type === 'txt') {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || dirent.name.endsWith('.txt')
+    )
+  } else if (type === 'audio') {
+    dirents = dirents.filter(
+      (dirent) => dirent.isDirectory() || isAudio(dirent.name, true)
     )
   }
 
@@ -95,6 +101,18 @@ router.get('/open/:type/:id', async (req, res) => {
   } else {
     res.status(200).type(url.substring(url.lastIndexOf('.')))
     fs.createReadStream(url).pipe(res)
+  }
+})
+
+router.get('/file/:uuid', async (req, res) => {
+  const { uuid } = req.params
+  const userId = (req.user as User).id as number
+  const path = await findFilePathByPublicId(uuid, userId)
+  if(path != null) {
+    res.status(200).type(path.substring(path.lastIndexOf('.')))
+    fs.createReadStream(path).pipe(res)
+  } else {
+    res.status(404).end()
   }
 })
 

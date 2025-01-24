@@ -14,6 +14,25 @@ import {
 import { findTagIdsByName } from './TagRepository'
 import { createThumbFromMetadata } from './FileRepository'
 
+export async function findAudios(): Promise<Audio[]> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .selectAll()
+    .orderBy('index asc')
+    .execute()
+}
+
+export async function findAudioIds(): Promise<number[]> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .select('id')
+    .orderBy('index asc')
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
+}
+
 export type AudioRow = Audio & { thumbPublicId: string | null }
 export async function findAudioById(
   userId: number,
@@ -25,8 +44,8 @@ export async function findAudioById(
     .leftJoin('file as f', 'f.id', 'a.thumb')
     .selectAll('a')
     .select('f.publicId as thumbPublicId')
-    .where('userId', '=', userId)
-    .where('id', '=', id)
+    .where('a.userId', '=', userId)
+    .where('a.id', '=', id)
     .executeTakeFirstOrThrow()
 }
 

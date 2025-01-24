@@ -341,7 +341,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                       )}
                     >
                       <SourceIcon
-                        type={audio?.type}
+                        type={audio?.type ?? ''}
                         className={cx(
                           classes.sourceIcon,
                           audio?.marked && classes.sourceMarkedIcon

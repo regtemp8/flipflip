@@ -82,10 +82,16 @@ import { useLocation } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
+  useCreateAudiosMutation,
   useGetAudioBatchTagOptionsQuery,
   useGetAudioSearchOptionsQuery,
+  useGetAudiosQuery,
+  useGetFilteredAudiosQuery,
+  useGetTutorialsQuery,
   useSortAudiosMutation
 } from '../../store/api/slice'
+import FilePicker from '../common/FilePicker'
+import { selectAudioLibraryFilters } from '../../store/audioLibrary/selectors'
 
 const drawerWidth = 240
 
@@ -434,7 +440,10 @@ const getOpenTab = (pathname: string) => {
 function AudioLibrary() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [createAudios] = useCreateAudiosMutation()
   const [sortAudios] = useSortAudiosMutation()
+  const { data: tutorials } = useGetTutorialsQuery()
+  const { data: audios } = useGetAudiosQuery()
   const { data: tagOptions } = useGetAudioBatchTagOptionsQuery()
   const { data: searchOptions } = useGetAudioSearchOptionsQuery()
 
@@ -444,16 +453,12 @@ function AudioLibrary() {
   const progressMode = ''
   const progressCurrent = 0
   const progressTotal = 100
-  const filters: string[] = []
-  const audios: number[] = []
-  const displaySources: number[] = []
   const selected: number[] = []
-  const openMenu = ''
   const loadingSources = false
   const loadingMetadata = false
   const selectedTags: string[] = []
   const error = false
-  const commonAudio: Audio = {
+  const commonAudio: Partial<Audio> = {
     id: 0,
     marked: false,
     tags: [],
@@ -472,11 +477,15 @@ function AudioLibrary() {
     playedCount: 0
   }
 
+  const [openMenu, setOpenMenu] = useState<string>()
   const [cachePath, setCachePath] = useState<string>('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [importURL, setImportURL] = useState<string>()
 
   const _menuAnchorEl = useRef<any>()
+
+  const filters = useAppSelector(selectAudioLibraryFilters())
+  const { data: displaySources } = useGetFilteredAudiosQuery(filters)
 
   const toggleMarked = useCallback(
     () => {
@@ -589,15 +598,11 @@ function AudioLibrary() {
     onCloseDialog()
     switch (type) {
       case AF.url:
-        // dispatch(setOpenMenu(MO.urlImport))
+        setOpenMenu(MO.urlImport)
         setImportURL('')
         break
       case AF.audios:
-        // const audioSources = await flipflip().api.loadAudioSources(e.shiftKey)
-        // if (audioSources) {
-        //   dispatch(setLoadingSources(true))
-        //   addAudioSources(audioSources)
-        // }
+        setOpenMenu(MO.openLocal)
         break
     }
   }
@@ -613,25 +618,25 @@ function AudioLibrary() {
 
   const onToggleBatchTagModal = () => {
     // if (openMenu === MO.batchTag) {
-    //   dispatch(setOpenMenu(undefined))
+    //   setOpenMenu(undefined)
     //   dispatch(setSelectedTags([]))
     // } else {
-    //   dispatch(setOpenMenu(MO.batchTag))
+    //   setOpenMenu(MO.batchTag)
     //   dispatch(setSelectedTags(selectedTagNames))
     // }
   }
 
   const onShowBatchEditModal = () => {
-    // dispatch(setOpenMenu(MO.batchEdit))
+    setOpenMenu(MO.batchEdit)
   }
 
   const onTogglePlaylistDialog = (e: MouseEvent) => {
     // if (openMenu === MO.playlist) {
     //   _menuAnchorEl.current = null
-    //   dispatch(setOpenMenu(undefined))
+    //   setOpenMenu(undefined)
     // } else {
     //   _menuAnchorEl.current = e.currentTarget
-    //   dispatch(setOpenMenu(MO.playlist))
+    //   setOpenMenu(MO.playlist)
     // }
   }
 
@@ -667,21 +672,22 @@ function AudioLibrary() {
   }
 
   const onToggleNewMenu = () => {
-    // dispatch(setOpenMenu(openMenu === MO.new ? undefined : MO.new))
+    setOpenMenu(openMenu === MO.new ? undefined : MO.new)
   }
 
   const onOpenSortMenu = (e: MouseEvent) => {
     _menuAnchorEl.current = e.currentTarget
-    // dispatch(setOpenMenu(MO.sort))
+    setOpenMenu(MO.sort)
   }
 
   const onCloseDialog = () => {
     _menuAnchorEl.current = null
-    // dispatch(closeDialog())
+    setOpenMenu(undefined)
+    setDrawerOpen(false)
   }
 
   const onRemoveAll = () => {
-    // dispatch(setOpenMenu(MO.removeAllAlert))
+    setOpenMenu(MO.removeAllAlert)
   }
 
   const onFinishRemoveAll = () => {
@@ -736,6 +742,13 @@ function AudioLibrary() {
 
   const batchTagRemove = () => {
     // dispatch(setAudiosRemoveTags(selected, selectedTags))
+    onCloseDialog()
+  }
+
+  const onOpenLocalFiles = async (chosenFiles?: string[]) => {
+    if (chosenFiles != null) {
+      await createAudios(chosenFiles)
+    }
     onCloseDialog()
   }
 
@@ -794,10 +807,10 @@ function AudioLibrary() {
                 tutorial === ALT.toolbar && classes.highlight
               )}
             >
-              {audios.length > 0 && (
+              {(audios?.length ?? 0) > 0 && (
                 <Chip
                   className={classes.searchCount}
-                  label={audios.length}
+                  label={audios?.length}
                   size="medium"
                   variant="outlined"
                 />
@@ -812,7 +825,7 @@ function AudioLibrary() {
               <LibrarySearch
                 appBar
                 filters={filters}
-                options={searchOptions}
+                options={searchOptions ?? []}
                 placeholder={'Search ...'}
                 isCreatable
                 onUpdateFilters={onUpdateFilters}
@@ -1087,7 +1100,7 @@ function AudioLibrary() {
                     isSelect={!!specialMode}
                     selected={selected}
                     showHelp={!specialMode && filters.length === 0}
-                    audios={displaySources}
+                    audios={displaySources ?? []}
                     playlist={playlist}
                     onClickAlbum={onClickAlbum}
                     onClickArtist={onClickArtist}
@@ -1227,7 +1240,7 @@ function AudioLibrary() {
 
       {!specialMode && openTab === 3 && (
         <React.Fragment>
-          {audios.length > 0 && (
+          {(audios?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
               title={
@@ -1377,7 +1390,7 @@ function AudioLibrary() {
       {openTab === 3 && (
         <React.Fragment>
           <Fab
-            disabled={audios.length < 2}
+            disabled={(audios?.length ?? 0) < 2}
             className={classes.sortMenuButton}
             aria-haspopup="true"
             aria-controls="sort-menu"
@@ -1625,6 +1638,13 @@ function AudioLibrary() {
           </DialogActions>
         </Dialog>
       )}
+      <FilePicker
+        open={openMenu === MO.openLocal}
+        type="audio"
+        multiple
+        path=""
+        onClose={onOpenLocalFiles}
+      />
     </div>
   )
 }

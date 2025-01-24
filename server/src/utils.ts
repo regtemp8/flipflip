@@ -267,6 +267,10 @@ export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
 
     audio.thumb = thumb
   }
+  if (audio.name == null) {
+    const sep = url.startsWith('http') ? '/' : path.sep
+    audio.name = url.substring(url.lastIndexOf(sep) + 1, url.lastIndexOf("."));
+  }
 
   return audio
 }

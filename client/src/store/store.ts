@@ -8,6 +8,7 @@ import displaySlice from './display/slice'
 import captionScriptorSlice from './captionScriptor/slice'
 import appSlice from './app/slice'
 import scriptLibrarySlice from './scriptLibrary/slice'
+import audioLibrarySlice from './audioLibrary/slice'
 
 const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ const store = configureStore({
     sceneDetail: sceneDetailSlice,
     scenePicker: scenePickerSlice,
     scriptLibrary: scriptLibrarySlice,
+    audioLibrary: audioLibrarySlice,
     systemSnack: systemSnackSlice
   },
   middleware: (getDefaultMiddleware) =>
