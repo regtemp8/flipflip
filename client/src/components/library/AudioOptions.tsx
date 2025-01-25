@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import { analyze } from 'web-audio-beat-detector'
-import wretch from 'wretch'
 
 import {
   Button,
@@ -28,7 +27,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 import { green, red } from '@mui/material/colors'
 
-import { RP } from 'flipflip-common'
+import { Audio, RP } from 'flipflip-common'
 import AudioControl from '../player/AudioControl'
 import TimingCard from '../common/TimingCard'
 import BaseSwitch from '../common/BaseSwitch'
@@ -111,17 +110,21 @@ export interface AudioOptionsProps {
   onDone: () => void
 }
 
-function AudioOptions(props: AudioOptionsProps) {
+function AudioOptions(props: AudioOptionsProps) {  
   // TODO how to keep original audio to revert to?
-  const { data: originalAudio } = useGetAudioQuery(props.audioID)
-  const { data: audio } = useGetAudioQuery(props.audioID)
+  const { data: oldAudio } = useGetAudioQuery(props.audioID)
 
+  const [newAudio, setNewAudio] = useState<Audio>()
   const [loadingBPM, setLoadingBPM] = useState(false)
   const [successBPM, setSuccessBPM] = useState(false)
   const [errorBPM, setErrorBPM] = useState(false)
   const [loadingTag, setLoadingTag] = useState(false)
   const [successTag, setSuccessTag] = useState(false)
   const [errorTag, setErrorTag] = useState(false)
+
+  useEffect(() => {
+    setNewAudio(oldAudio)
+  }, [oldAudio])
 
   const onCancel = () => {
     // dispatch(setAudio(originalAudio))
@@ -161,65 +164,41 @@ function AudioOptions(props: AudioOptionsProps) {
   }
 
   const onDetectBPM = async () => {
-    // const bpmError = () => {
-    //   setLoadingBPM(false)
-    //   setErrorBPM(true)
-    //   setTimeout(() => {
-    //     setErrorBPM(false)
-    //   }, 3000)
-    // }
-    // const detectBPM = (data: ArrayBuffer) => {
-    //   const maxByteSize = 200000000
-    //   if (data.byteLength < maxByteSize) {
-    //     const context = new AudioContext()
-    //     context.decodeAudioData(
-    //       data,
-    //       (audioBuffer) => {
-    //         analyze(audioBuffer)
-    //           .then((tempo: number) => {
-    //             dispatch(setAudioBPM(props.audioID)(Number(tempo.toFixed(2))))
-    //             setLoadingBPM(false)
-    //             setSuccessBPM(true)
-    //             setTimeout(() => {
-    //               setSuccessBPM(false)
-    //             }, 3000)
-    //           })
-    //           .catch((err: any) => {
-    //             console.error('Error analyzing')
-    //             console.error(err)
-    //             bpmError()
-    //           })
-    //       },
-    //       (err) => {
-    //         console.error(err)
-    //         bpmError()
-    //       }
-    //     )
-    //   } else {
-    //     console.error("'" + url + "' is too large to decode")
-    //     bpmError()
-    //   }
-    // }
-    // if (url && !loadingBPM) {
-    //   setLoadingBPM(true)
-    //   try {
-    //     if (await flipflip().api.pathExists(url)) {
-    //       const arrayBuffer = await flipflip().api.readBinaryFile(url)
-    //       detectBPM(arrayBuffer)
-    //     } else {
-    //       wretch(url)
-    //         .get()
-    //         .arrayBuffer(detectBPM)
-    //         .catch((err) => {
-    //           console.error(err)
-    //           bpmError()
-    //         })
-    //     }
-    //   } catch (e) {
-    //     console.error(e)
-    //     bpmError()
-    //   }
-    // }
+    if (newAudio?.url != null && !loadingBPM) {
+      setLoadingBPM(true)
+      const context = new AudioContext()
+      try {
+        const data = await fetch(newAudio.url).then((res) => res.arrayBuffer())
+        const maxByteSize = 200000000
+        if (data.byteLength < maxByteSize) {
+          const audioBuffer = await context.decodeAudioData(data)
+          const tempo = await analyze(audioBuffer)
+          setNewAudio((value) => {
+            if(value == null) {
+              return
+            }
+
+            return {...value, bpm: Number(tempo.toFixed(2))}
+          })
+          setLoadingBPM(false)
+          setSuccessBPM(true)
+          setTimeout(() => {
+            setSuccessBPM(false)
+          }, 3000)
+        } else {
+          throw new Error(`'${newAudio.url}' is too large to decode`)
+        }
+      } catch (e) {
+        console.error(e)
+        setLoadingBPM(false)
+        setErrorBPM(true)
+        setTimeout(() => {
+          setErrorBPM(false)
+        }, 3000)
+      } finally {
+        await context.close()
+      }
+    }
   }
 
   const { classes } = useStyles()
@@ -254,7 +233,7 @@ function AudioOptions(props: AudioOptionsProps) {
           <Grid2 size={12}>
             <Grid2 container spacing={2} alignItems="center">
               <Grid2>
-                <Collapse in={!audio?.tick && !audio?.nextSceneAtEnd}>
+                <Collapse in={!newAudio?.tick && !newAudio?.nextSceneAtEnd}>
                   <BaseSwitch
                     label="Stop at End"
                     size="small"
@@ -262,7 +241,7 @@ function AudioOptions(props: AudioOptionsProps) {
                     action={setAudioStopAtEnd(props.audioID)}
                   />
                 </Collapse>
-                <Collapse in={!audio?.tick && !audio?.stopAtEnd}>
+                <Collapse in={!newAudio?.tick && !newAudio?.stopAtEnd}>
                   <BaseSwitch
                     label="Next Scene at End"
                     size="small"
@@ -272,7 +251,7 @@ function AudioOptions(props: AudioOptionsProps) {
                     action={setAudioNextSceneAtEnd(props.audioID)}
                   />
                 </Collapse>
-                <Collapse in={!audio?.stopAtEnd && !audio?.nextSceneAtEnd}>
+                <Collapse in={!newAudio?.stopAtEnd && !newAudio?.nextSceneAtEnd}>
                   <BaseSwitch
                     label="Tick"
                     tooltip="Repeat track at particular interval"
@@ -376,8 +355,8 @@ function AudioOptions(props: AudioOptionsProps) {
               </Grid2>
             </Grid2>
           </Grid2>
-          <Grid2 size={12} className={cx(!audio?.tick && classes.noPadding)}>
-            <Collapse in={audio?.tick} className={classes.fullWidth}>
+          <Grid2 size={12} className={cx(!newAudio?.tick && classes.noPadding)}>
+            <Collapse in={newAudio?.tick} className={classes.fullWidth}>
               <TimingCard
                 sidebar={false}
                 hasBPMSelector={() => useGetAudioHasBPMQuery(props.audioID)}

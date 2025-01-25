@@ -42,7 +42,7 @@
     "tss-react": "^4.9.13",
     "use-debounce": "^10.0.4",
     "uuid": "^9.0.1",
-    "web-audio-beat-detector": "^8.1.55",
+    "web-audio-beat-detector": "^8.2.20",
     "wretch": "^2.10.0"
   },
   "devDependencies": {
