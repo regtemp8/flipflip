@@ -18,8 +18,6 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Audio } from 'flipflip-common'
 
-import { extractMusicMetadata } from '../../utils'
-
 const useStyles = makeStyles()((theme: Theme) => ({
   input: {
     width: '100%',
