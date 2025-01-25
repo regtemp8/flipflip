@@ -194,15 +194,10 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
   const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
-    const sourceURL = audio?.url as string
-    if (e.shiftKey && e.ctrlKey && e.altKey) {
-      props.onDelete(props.audioID)
-    } else if (e.shiftKey && !e.ctrlKey) {
-      // flipflip()
-      //   .api.getFileUrl(sourceURL)
-      //   .then((fileURL) => window.open(fileURL, '_blank')?.focus())
-    } else if (!e.shiftKey && e.ctrlKey) {
-      // flipflip().api.showItemInFolder(sourceURL)
+    if (e.shiftKey && !e.ctrlKey) {
+      window
+        .open(audio?.fileUrl, '_blank')
+        ?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
       // TODO get playAudio to work
       // props.savePosition()
@@ -315,10 +310,6 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                       <tr>
                         <td className={classes.textRight}>Shift+Click:</td>
                         <td>Open Source</td>
-                      </tr>
-                      <tr>
-                        <td className={classes.textRight}>Ctrl+Click:</td>
-                        <td>Reveal File</td>
                       </tr>
                     </table>
                   )
