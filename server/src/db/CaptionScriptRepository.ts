@@ -157,12 +157,13 @@ export async function findCaptionScriptTagIds(
     .then((value) => value.map(({ tagId }) => tagId))
 }
 
-export async function findCaptionScriptUrlById(id: number): Promise<string> {
+export async function findCaptionScriptUrlById(id: number, userId: number): Promise<string> {
   return await db()
     .query()
     .selectFrom('captionScript')
     .select('url')
     .where('id', '=', id)
+    .where('userId', '=', userId)
     .executeTakeFirstOrThrow()
     .then((row) => row.url)
 }

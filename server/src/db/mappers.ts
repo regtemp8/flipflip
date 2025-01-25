@@ -34,6 +34,7 @@ import {
   RemoteSettings as RemoteSettingsRow,
   CacheSettings as CacheSettingsRow,
   ContentSource as ContentSourceRow,
+  Audio as AudioRow,
   Clip as ClipRow,
   Tag as TagRow,
   Display as DisplayRow,
@@ -58,7 +59,7 @@ import { DisplayUpdate } from './DisplayRepository'
 import { PlaylistUpdate } from './PlaylistRepository'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { AudioRow, AudioUpdate } from './AudioRepository'
+import { AudioUpdate } from './AudioRepository'
 import {
   CaptionScriptUpdate,
   FontSettingsUpdate
@@ -1067,7 +1068,8 @@ export function toContentSource(
     redditFunc: opt<string>(redditFunc),
     redditTime: opt<string>(redditTime),
     includeRetweets: toBoolean(twitterIncludeRetweets),
-    includeReplies: toBoolean(twitterIncludeReplies)
+    includeReplies: toBoolean(twitterIncludeReplies),
+    fileUrl: `http://localhost:5050/fs/file/content-source/${id}`
   }
 }
 
@@ -1212,7 +1214,6 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     playedCount,
     speed,
     stopAtEnd,
-    thumb,
     tick,
     tickBpmMulti,
     tickDelay,
@@ -1223,9 +1224,13 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     trackNum,
     type,
     url,
-    volume,
-    thumbPublicId
+    volume
   } = row
+
+  let thumb: string | undefined = undefined
+  if(row.thumb != null) {
+    thumb = `http://localhost:5050/fs/file/audio-thumb/${id}`
+  }
 
   return {
     id: id as number,
@@ -1245,26 +1250,20 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     tickSinRate,
     tickBPMMulti: tickBpmMulti,
     bpm,
-    thumb: toFileUrl(thumbPublicId),
+    thumb,
     name: opt<string>(name),
     artist: opt<string>(artist),
     album: opt<string>(album),
     trackNum: opt<number>(trackNum),
     duration: opt<number>(duration),
     comment: opt<string>(comment),
-    playedCount
+    playedCount,
+    fileUrl: `http://localhost:5050/fs/file/audio/${id}`
   }
 }
 
-function toFileUrl(publicId: string | null) {
-  return publicId != null
-    ? `http://localhost:5050/fs/file/${publicId}`
-    : undefined
-}
-
 export function toAudioUpdate(
-  audio: Partial<Audio>,
-  thumb?: number
+  audio: Partial<Audio>
 ): AudioUpdate {
   const {
     url,
@@ -1286,6 +1285,7 @@ export function toAudioUpdate(
     album,
     trackNum,
     duration,
+    thumb,
     comment,
     playedCount
   } = audio
@@ -1342,7 +1342,8 @@ export function toCaptionScript(
     opacity,
     stopAtEnd: toBoolean(stopAtEnd),
     nextSceneAtEnd: toBoolean(nextSceneAtEnd),
-    syncWithAudio: toBoolean(syncWithAudio)
+    syncWithAudio: toBoolean(syncWithAudio),
+    fileUrl: `http://localhost:5050/fs/file/caption-script/${id}`
   }
 }
 

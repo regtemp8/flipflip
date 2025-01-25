@@ -12,7 +12,6 @@ import {
   TF
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
-import { createThumbFromMetadata } from './FileRepository'
 
 export async function findAudios(): Promise<Audio[]> {
   return await db()
@@ -33,19 +32,16 @@ export async function findAudioIds(): Promise<number[]> {
     .then((value) => value.map((v) => v.id as number))
 }
 
-export type AudioRow = Audio & { thumbPublicId: string | null }
 export async function findAudioById(
   userId: number,
   id: number
-): Promise<AudioRow> {
+): Promise<Audio> {
   return await db()
     .query()
-    .selectFrom('audio as a')
-    .leftJoin('file as f', 'f.id', 'a.thumb')
-    .selectAll('a')
-    .select('f.publicId as thumbPublicId')
-    .where('a.userId', '=', userId)
-    .where('a.id', '=', id)
+    .selectFrom('audio')
+    .selectAll()
+    .where('userId', '=', userId)
+    .where('id', '=', id)
     .executeTakeFirstOrThrow()
 }
 
@@ -63,14 +59,26 @@ export async function findAudioTagIds(
     .then((value) => value.map(({ tagId }) => tagId))
 }
 
-export async function findAudioUrlById(id: number): Promise<string> {
+export async function findAudioUrlById(id: number, userId: number): Promise<string> {
   return await db()
     .query()
     .selectFrom('audio')
     .select('url')
     .where('id', '=', id)
+    .where('userId', '=', userId)
     .executeTakeFirstOrThrow()
     .then((row) => row.url)
+}
+
+export async function findAudioThumbById(id: number, userId: number): Promise<string|undefined> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .select('thumb')
+    .where('id', '=', id)
+    .where('userId', '=', userId)
+    .executeTakeFirst()
+    .then((row) => row?.thumb ?? undefined)
 }
 
 export async function createAudios(
@@ -88,14 +96,9 @@ export async function createAudios(
 
       const values: Array<Insertable<Audio>> = []
       for (let index = 0; index < audios.length; index++) {
-        let thumb: number | null = null
         const audio = audios[index]
-        if (audio.thumb != null) {
-          thumb = await createThumbFromMetadata(userId, audio.thumb, trx)
-        }
-
         const url = audio.url as string
-        const { name, album, artist, bpm, duration, trackNum } = audio
+        const { name, album, artist, bpm, duration, thumb, trackNum } = audio
         values.push({
           marked: toNumber(false),
           volume: 100,

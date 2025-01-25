@@ -31,8 +31,7 @@ import {
   BatchTagRequest,
   SortRequest
 } from 'flipflip-common'
-import { readAudioMetadata } from '../utils'
-import { createThumb } from '../db/FileRepository'
+import { copyThumbFile, readAudioMetadata } from '../utils'
 import { toBoolean } from '../db/utils'
 import { hasTag, isUntagged } from '../db/CaptionScriptRepository'
 
@@ -197,15 +196,13 @@ router.get('/:id', async (req, res) => {
   }
 })
 router.patch('/:id', async (req, res) => {
-  const userId = (req.user as User).id as number
   const body = req.body as Partial<Audio>
-  let thumb: number | undefined = undefined
   if (body.thumb != null) {
-    thumb = await createThumb(userId, body.thumb)
+    body.thumb = await copyThumbFile(body.thumb)
   }
   const result = await updateAudio(
     Number(req.params.id),
-    toAudioUpdate(body, thumb)
+    toAudioUpdate(body)
   )
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
@@ -214,15 +211,11 @@ router.patch('/:id', async (req, res) => {
 router.post('/:id/use-metadata', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
-  const url = await findAudioUrlById(id)
+  const url = await findAudioUrlById(id, userId)
   const metadata = await readAudioMetadata(url)
-  let thumb: number | undefined = undefined
-  if (metadata.thumb != null) {
-    thumb = await createThumb(userId, metadata.thumb)
-  }
   const result = await updateAudio(
     Number(req.params.id),
-    toAudioUpdate(metadata, thumb)
+    toAudioUpdate(metadata)
   )
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500

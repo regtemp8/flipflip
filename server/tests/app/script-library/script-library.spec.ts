@@ -287,7 +287,7 @@ test('Shift + Click Local Script', async ({ page, context }) => {
   await page.keyboard.up('Shift')
   const newPage = await pagePromise
   await expect(newPage).toHaveURL(
-    'http://localhost:5050/fs/open/caption-script/1'
+    'http://localhost:5050/fs/file/caption-script/1'
   )
   await newPage.close()
 })

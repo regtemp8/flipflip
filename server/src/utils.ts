@@ -296,3 +296,24 @@ async function parseAudioMetadata(url: string) {
     return await parseFile(url, { duration: true })
   }
 }
+
+async function getFileHash(path: string) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256')
+    const rs = fs.createReadStream(path)
+    rs.on('error', reject)
+    rs.on('data', (chunk) => hash.update(chunk))
+    rs.on('end', () => resolve(hash.digest('hex')))
+  })
+}
+
+export async function copyThumbFile(thumb: string) {
+  const hash = await getFileHash(thumb)
+  const extension = thumb.split('.').pop ?? ''
+  const thumbPath = path.join(getThumbsDir(), `${hash}.${extension}`)
+  if(!fs.existsSync(thumbPath)) {
+    await fs.promises.copyFile(thumb, thumbPath)
+  }
+
+  return thumbPath
+}

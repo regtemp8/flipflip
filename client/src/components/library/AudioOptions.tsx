@@ -168,7 +168,7 @@ function AudioOptions(props: AudioOptionsProps) {
       setLoadingBPM(true)
       const context = new AudioContext()
       try {
-        const data = await fetch(newAudio.url).then((res) => res.arrayBuffer())
+        const data = await fetch(newAudio.fileUrl, {credentials: 'include'}).then((res) => res.arrayBuffer())
         const maxByteSize = 200000000
         if (data.byteLength < maxByteSize) {
           const audioBuffer = await context.decodeAudioData(data)

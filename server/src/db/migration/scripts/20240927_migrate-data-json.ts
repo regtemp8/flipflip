@@ -30,7 +30,7 @@ import {
 } from '../data/migrate-data-json/LibrarySource'
 import { Tag, newTag } from '../data/migrate-data-json/Tag'
 import { Route, newRoute } from '../data/migrate-data-json/Route'
-import { getElectronSaveDir } from '../../../utils'
+import { copyThumbFile, getElectronSaveDir } from '../../../utils'
 import { toNumber, toText } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
@@ -47,7 +47,6 @@ import {
 } from 'flipflip-common'
 import logger from '../../../logger'
 import { IS_LIBRARY } from '../../ContentSourceRepository'
-import { createThumb } from '../../FileRepository'
 
 const getDataJsonPath = () => {
   const saveDir = getElectronSaveDir()
@@ -1151,9 +1150,10 @@ const audioInsert = async (
       continue
     }
 
-    let thumb: number | undefined = undefined
+    let thumb: string | undefined = undefined
     if (audio.thumb != null && fs.existsSync(audio.thumb)) {
-      thumb = await createThumb(userId, audio.thumb, trx)
+      logger.info(`+ Create audio thumb {path} (id: ${id})`, { path: audio.thumb })
+      thumb = await copyThumbFile(audio.thumb)
     }
 
     logger.info(`+ Insert audio {url} (id: ${id})`, { url })

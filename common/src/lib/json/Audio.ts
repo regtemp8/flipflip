@@ -24,4 +24,5 @@ export type Audio = {
   duration?: number;
   comment?: string;
   playedCount: number;
+  fileUrl: string;
 };

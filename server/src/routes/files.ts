@@ -5,9 +5,8 @@ import { FilePickerData, FilePickerItem, isAudio } from 'flipflip-common'
 import logger from '../logger'
 import { getSaveDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
-import { findAudioUrlById } from '../db/AudioRepository'
+import { findAudioUrlById, findAudioThumbById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
-import { findFilePathByPublicId } from '../db/FileRepository'
 import { User } from '../db/types/generated'
 
 const router = express.Router()
@@ -81,11 +80,12 @@ router.post('/create-directory', async (req, res) => {
   }
 })
 
-router.get('/open/:type/:id', async (req, res) => {
+router.get('/file/:type/:id', async (req, res, next) => {
   const { id, type } = req.params
   const queries = new Map([
     ['caption-script', findCaptionScriptUrlById],
     ['audio', findAudioUrlById],
+    ['audio-thumb', findAudioThumbById],
     ['content-source', findContentSourceUrlById]
   ])
 
@@ -95,24 +95,19 @@ router.get('/open/:type/:id', async (req, res) => {
     return
   }
 
-  const url = await query(Number(id))
-  if (url.startsWith('http')) {
-    res.status(302).location(url).end()
-  } else {
-    res.status(200).type(url.substring(url.lastIndexOf('.')))
-    fs.createReadStream(url).pipe(res)
-  }
-})
-
-router.get('/file/:uuid', async (req, res) => {
-  const { uuid } = req.params
-  const userId = (req.user as User).id as number
-  const path = await findFilePathByPublicId(uuid, userId)
-  if(path != null) {
-    res.status(200).type(path.substring(path.lastIndexOf('.')))
-    fs.createReadStream(path).pipe(res)
-  } else {
-    res.status(404).end()
+  try {
+    const userId = (req.user as User).id as number
+    const url = await query(Number(id), userId)
+    if(url == null) {
+      res.status(404).end()
+    } else if (url.startsWith('http')) {
+      res.status(302).location(url).end()
+    } else {
+      res.status(200).type(url.substring(url.lastIndexOf('.')))
+      fs.createReadStream(url).pipe(res)
+    }
+  } catch(error) {
+    next(error)
   }
 })
 

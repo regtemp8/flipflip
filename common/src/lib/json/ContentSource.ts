@@ -12,6 +12,7 @@ export type ContentSource = {
   count: number;
   countComplete: boolean;
   weight: number;
+  fileUrl: string;
 
   // Type specific properties
   // Local

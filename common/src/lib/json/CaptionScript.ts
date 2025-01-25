@@ -9,4 +9,5 @@ export type CaptionScript = {
   stopAtEnd: boolean;
   nextSceneAtEnd: boolean;
   syncWithAudio: boolean;
+  fileUrl: string;
 };

@@ -282,7 +282,7 @@ function AudioControl(props: AudioControlProps) {
     <React.Fragment key={props.audioID}>
       {props.audioEnabled && audio?.tick && playing && (
         <SoundTick
-          url={audio?.url as string}
+          url={audio?.fileUrl as string}
           playing={playStatus}
           speed={(audio?.speed ?? 1) / 10}
           volume={audio?.volume}
@@ -294,7 +294,7 @@ function AudioControl(props: AudioControlProps) {
       )}
       {props.audioEnabled && !audio?.tick && (
         <Sound
-          url={audio?.url as string}
+          url={audio?.fileUrl as string}
           playStatus={playStatus}
           playbackRate={(audio?.speed ?? 1) / 10}
           volume={audio?.volume}
