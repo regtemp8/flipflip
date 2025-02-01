@@ -26,7 +26,9 @@ import { grey } from '@mui/material/colors'
 import SourceIcon from './SourceIcon'
 import TagChip from './TagChip'
 import { useGetAudioQuery } from '../../store/api/slice'
-import { ST } from 'flipflip-common'
+import { useAppDispatch } from '../../store/hooks'
+import { editAudioOptions } from '../../store/audioOptions/thunks'
+import { editAudioEdit } from '../../store/audioEdit/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -175,22 +177,19 @@ export interface AudioSourceListItemProps {
   checked: boolean
   index: number
   isSelect: boolean
-  lastSelected: boolean
   audioID: number
   audios: number[]
   style: any
   onClickAlbum: (album: string) => void
   onClickArtist: (artist: string) => void
   onDelete: (audioID: number) => void
-  onEditSource: (audioID: number) => void
   onRemove: (audioID: number) => void
-  onSourceOptions: (audioID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
   savePosition: () => void
 }
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
-  // const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch()
   const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -211,13 +210,20 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
     }
   }
 
+  const onSourceOptions = (audioID: number) => {
+    dispatch(editAudioOptions(audioID))
+  }
+
+  const onEditSource = (audioID: number) => {
+    dispatch(editAudioEdit([audioID]))
+  }
+
   const { classes } = useStyles()
   return (
     <div
       style={props.style}
       className={cx(
-        props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
-        props.lastSelected && classes.lastSelected
+        props.index % 2 === 0 ? classes.evenChild : classes.oddChild
       )}
     >
       <ListItem
@@ -229,7 +235,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                 <Chip label={audio?.playedCount} color="primary" size="small" />
               )}
               <IconButton
-                onClick={() => props.onEditSource(props.audioID)}
+                onClick={() => onEditSource(props.audioID)}
                 className={classes.actionButton}
                 edge="end"
                 size="small"
@@ -238,7 +244,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                 <EditIcon />
               </IconButton>
               <IconButton
-                onClick={() => props.onSourceOptions(props.audioID)}
+                onClick={() => onSourceOptions(props.audioID)}
                 className={classes.actionButton}
                 edge="end"
                 size="small"

@@ -9,7 +9,7 @@ export const initialState: ScriptLibraryState = {
   yOffset: 0,
   filters: []
 }
-export const captionScriptorSlice = createSlice({
+export const scriptLibrarySlice = createSlice({
   name: 'scriptLibrary',
   initialState,
   reducers: {
@@ -23,6 +23,6 @@ export const captionScriptorSlice = createSlice({
 })
 
 export const { setScriptLibraryYOffset, setScriptLibraryFilters } =
-  captionScriptorSlice.actions
+scriptLibrarySlice.actions
 
-export default captionScriptorSlice.reducer
+export default scriptLibrarySlice.reducer

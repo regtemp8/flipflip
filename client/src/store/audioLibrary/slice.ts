@@ -9,7 +9,7 @@ export const initialState: AudioLibraryState = {
   yOffset: 0,
   filters: []
 }
-export const captionScriptorSlice = createSlice({
+export const audioLibrarySlice = createSlice({
   name: 'audioLibrary',
   initialState,
   reducers: {
@@ -23,6 +23,6 @@ export const captionScriptorSlice = createSlice({
 })
 
 export const { setAudioLibraryYOffset, setAudioLibraryFilters } =
-  captionScriptorSlice.actions
+audioLibrarySlice.actions
 
-export default captionScriptorSlice.reducer
+export default audioLibrarySlice.reducer

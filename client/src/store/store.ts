@@ -9,12 +9,16 @@ import captionScriptorSlice from './captionScriptor/slice'
 import appSlice from './app/slice'
 import scriptLibrarySlice from './scriptLibrary/slice'
 import audioLibrarySlice from './audioLibrary/slice'
+import audioOptionsSlice from './audioOptions/slice'
+import audioEditSlice from './audioEdit/slice'
 
 const store = configureStore({
   reducer: {
     [flipflipApi.reducerPath]: flipflipApi.reducer,
     app: appSlice,
     // components
+    audioEdit: audioEditSlice,
+    audioOptions: audioOptionsSlice,
     display: displaySlice,
     captionScriptor: captionScriptorSlice,
     sceneDetail: sceneDetailSlice,

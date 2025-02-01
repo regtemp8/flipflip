@@ -22,10 +22,7 @@ import {
 
 import { makeStyles } from 'tss-react/mui'
 
-import { Audio } from 'flipflip-common'
 import AudioSourceListItem from './AudioSourceListItem'
-import AudioEdit from './AudioEdit'
-import AudioOptions from './AudioOptions'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -75,17 +72,13 @@ export interface AudioSourceListProps {
 }
 
 function AudioSourceList(props: AudioSourceListProps) {
-  const [sourceOptions, setSourceOptions] = useState<number>()
   const [deleteDialog, setDeleteDialog] = useState<number>()
-  const [sourceEditID, setSourceEditID] = useState<number>()
-  const [lastSelected, setLastSelected] = useState<number>()
 
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
 
   const yOffset = 0
   const deleteDialogURL = ''
-  const sourceEdit: Audio | undefined = undefined
 
   const onSortEnd = (/*{
     oldIndex,
@@ -200,35 +193,6 @@ function AudioSourceList(props: AudioSourceListProps) {
     props.onUpdateSelected(newSelected)
   }
 
-  const clearLastSelected = () => {
-    if (!sourceEditID && !sourceOptions) {
-      setLastSelected(undefined)
-    }
-  }
-
-  const onEditSource = (audioID: number) => {
-    setSourceEditID(audioID)
-    setLastSelected(audioID)
-  }
-
-  const onCloseSourceEditDialog = () => {
-    setSourceEditID(undefined)
-  }
-
-  const onSourceOptions = (audioID: number) => {
-    setSourceOptions(audioID)
-    setLastSelected(audioID)
-  }
-
-  const onSourceOptionsDone = () => {
-    setSourceOptions(undefined)
-  }
-
-  const onFinishSourceEdit = (newAudio: Audio) => {
-    // dispatch(updateAudio(newAudio))
-    onCloseSourceEditDialog()
-  }
-
   const SortableVirtualList =
     SortableContainer<SortableVirtualListProps>(VirtualList)
 
@@ -261,16 +225,13 @@ function AudioSourceList(props: AudioSourceListProps) {
           checked={props.isSelect ? props.selected.includes(audioID) : false}
           index={index}
           isSelect={props.isSelect}
-          lastSelected={audioID === lastSelected}
           audioID={audioID}
           audios={value.data}
           style={value.style}
           onClickAlbum={props.onClickAlbum}
           onClickArtist={props.onClickArtist}
           onDelete={onDelete}
-          onEditSource={onEditSource}
           onRemove={onRemove}
-          onSourceOptions={onSourceOptions}
           onToggleSelect={onToggleSelect}
           savePosition={savePosition}
         />
@@ -329,7 +290,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     <React.Fragment>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
-          <List id="sortable-list" disablePadding onClick={clearLastSelected}>
+          <List id="sortable-list" disablePadding>
             <SortableVirtualList
               helperContainer={() =>
                 document.getElementById('sortable-list') as HTMLElement
@@ -364,19 +325,6 @@ function AudioSourceList(props: AudioSourceListProps) {
             </Button>
           </DialogActions>
         </Dialog>
-      )}
-      {sourceOptions != null && (
-        <AudioOptions audioID={sourceOptions} onDone={onSourceOptionsDone} />
-      )}
-      {sourceEdit != null && (
-        <AudioEdit
-          audio={sourceEdit}
-          cachePath={props.cachePath}
-          title={'Edit song info'}
-          allowSuggestion
-          onCancel={onCloseSourceEditDialog}
-          onFinishEdit={onFinishSourceEdit}
-        />
       )}
     </React.Fragment>
   )

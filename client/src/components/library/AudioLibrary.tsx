@@ -79,7 +79,7 @@ import PlaylistSelect from '../common/PlaylistSelect'
 import PlaylistList from './PlaylistList'
 import AudioEdit from './AudioEdit'
 import { useLocation } from 'react-router-dom'
-import { useAppSelector } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
   useCreateAudiosMutation,
@@ -92,6 +92,7 @@ import {
 } from '../../store/api/slice'
 import FilePicker from '../common/FilePicker'
 import { selectAudioLibraryFilters } from '../../store/audioLibrary/selectors'
+import { editAudioEdit } from '../../store/audioEdit/thunks'
 
 const drawerWidth = 240
 
@@ -440,6 +441,7 @@ const getOpenTab = (pathname: string) => {
 function AudioLibrary() {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [createAudios] = useCreateAudiosMutation()
   const [sortAudios] = useSortAudiosMutation()
   const { data: tutorials } = useGetTutorialsQuery()
@@ -448,6 +450,7 @@ function AudioLibrary() {
   const { data: searchOptions } = useGetAudioSearchOptionsQuery()
 
   const tutorial = ''
+  const playlistId = 0
   const tagsCount = 0
   const specialMode = useAppSelector(selectSpecialMode())
   const progressMode = ''
@@ -627,7 +630,7 @@ function AudioLibrary() {
   }
 
   const onShowBatchEditModal = () => {
-    setOpenMenu(MO.batchEdit)
+    dispatch(editAudioEdit(selected))
   }
 
   const onTogglePlaylistDialog = (e: MouseEvent) => {
@@ -724,11 +727,6 @@ function AudioLibrary() {
     //   setAudioSelected(selected.filter((id) => !displaySources.includes(id)))
     // )
   }
-  const onFinishBatchEdit = (common: Audio) => {
-    const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
-    // dispatch(setAudiosChangeKeys(selected, keys, common))
-    onCloseDialog()
-  }
 
   const batchTagOverwrite = () => {
     // dispatch(setAudiosTags(selected, selectedTags))
@@ -746,10 +744,10 @@ function AudioLibrary() {
   }
 
   const onOpenLocalFiles = async (chosenFiles?: string[]) => {
+    onCloseDialog()
     if (chosenFiles != null) {
       await createAudios(chosenFiles)
     }
-    onCloseDialog()
   }
 
   const { classes } = useStyles()
@@ -818,7 +816,7 @@ function AudioLibrary() {
               {filters.length > 0 && (
                 <Chip
                   className={classes.displayCount}
-                  label={displaySources.length}
+                  label={displaySources?.length}
                   size="medium"
                 />
               )}
@@ -1065,7 +1063,7 @@ function AudioLibrary() {
                 <div className={classes.drawerSpacer} />
                 <Box p={2} className={classes.fill}>
                   <AudioArtistList
-                    sources={displaySources}
+                    sources={displaySources ?? []}
                     showHelp={!specialMode && filters.length === 0}
                     onClickArtist={onClickArtist}
                   />
@@ -1080,7 +1078,7 @@ function AudioLibrary() {
                 <div className={classes.drawerSpacer} />
                 <Box p={2} className={classes.fill}>
                   <AudioAlbumList
-                    sources={displaySources}
+                    sources={displaySources ?? []}
                     showHelp={!specialMode && filters.length === 0}
                     onClickAlbum={onClickAlbum}
                     onClickArtist={onClickArtist}
@@ -1583,15 +1581,7 @@ function AudioLibrary() {
         </Dialog>
       )}
 
-      {openMenu === MO.batchEdit && (
-        <AudioEdit
-          audio={commonAudio}
-          cachePath={cachePath}
-          title={'Batch Edit song info'}
-          onCancel={onCloseDialog}
-          onFinishEdit={onFinishBatchEdit}
-        />
-      )}
+      <AudioEdit />
 
       {openMenu === MO.batchTag && (
         <Dialog
@@ -1608,7 +1598,7 @@ function AudioLibrary() {
             </DialogContentText>
             {openMenu === MO.batchTag && (
               <LibrarySearch
-                options={tagOptions}
+                options={tagOptions ?? []}
                 filters={selectedTags}
                 placeholder={'Tag These Sources'}
                 showCheckboxes
