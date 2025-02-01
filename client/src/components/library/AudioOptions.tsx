@@ -27,43 +27,46 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 import { green, red } from '@mui/material/colors'
 
-import { Audio, RP } from 'flipflip-common'
+import { RP } from 'flipflip-common'
 import AudioControl from '../player/AudioControl'
 import TimingCard from '../common/TimingCard'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
-import {
-  setAudioTickTF,
-  setAudioTickDuration,
-  setAudioTickDurationMin,
-  setAudioTickDurationMax,
-  setAudioTickSinRate,
-  setAudioTickBPMMulti,
-  setAudioStopAtEnd,
-  setAudioNextSceneAtEnd,
-  setAudioTick,
-  setAudioSpeed,
-  setAudioVolume,
-  setAudioUrl,
-  setAudioBPM
-} from '../../store/api/thunks'
 import BaseTextField from '../common/text/BaseTextField'
-import { useGetAudioQuery } from '../../store/api/slice'
-import {
-  useGetAudioHasBPMQuery,
-  useGetAudioTickTFQuery,
-  useGetAudioTickDurationQuery,
-  useGetAudioTickDurationMinQuery,
-  useGetAudioTickDurationMaxQuery,
-  useGetAudioTickSinRateQuery,
-  useGetAudioTickBPMMultiQuery,
-  useGetAudioStopAtEndQuery,
-  useGetAudioNextSceneAtEndQuery,
-  useGetAudioTickQuery,
-  useGetAudioSpeedQuery,
-  useGetAudioUrlQuery,
-  useGetAudioBPMQuery
-} from '../../store/api/selectors'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { 
+  selectAudioOptions,
+  selectAudioOptionsUrl, 
+  selectAudioOptionsStopAtEnd,
+  selectAudioOptionsNextSceneAtEnd,
+  selectAudioOptionsTick,
+  selectAudioOptionsBPM,
+  selectAudioOptionsSpeed,
+  selectAudioOptionsHasBPM,
+  selectAudioOptionsTickTF,
+  selectAudioOptionsTickDuration,
+  selectAudioOptionsTickDurationMin,
+  selectAudioOptionsTickDurationMax,
+  selectAudioOptionsTickSinRate,
+  selectAudioOptionsTickBPMMulti
+} from '../../store/audioOptions/selectors'
+import { 
+  setAudioOptionsBPM, 
+  setAudioOptionsEditing, 
+  setAudioOptionsNextSceneAtEnd, 
+  setAudioOptionsSpeed, 
+  setAudioOptionsStopAtEnd, 
+  setAudioOptionsTick, 
+  setAudioOptionsTickBPMMulti, 
+  setAudioOptionsTickDuration, 
+  setAudioOptionsTickDurationMax, 
+  setAudioOptionsTickDurationMin, 
+  setAudioOptionsTickSinRate, 
+  setAudioOptionsTickTF, 
+  setAudioOptionsUrl
+} from '../../store/audioOptions/slice'
+import { AppDispatch } from '../../store/store'
+import { saveAudioOptions } from '../../store/audioOptions/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   bpmProgress: {
@@ -104,17 +107,10 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-export interface AudioOptionsProps {
-  sceneID?: number
-  audioID: number
-  onDone: () => void
-}
+function AudioOptions() {  
+  const dispatch = useAppDispatch()
+  const audio = useAppSelector(selectAudioOptions())
 
-function AudioOptions(props: AudioOptionsProps) {  
-  // TODO how to keep original audio to revert to?
-  const { data: oldAudio } = useGetAudioQuery(props.audioID)
-
-  const [newAudio, setNewAudio] = useState<Audio>()
   const [loadingBPM, setLoadingBPM] = useState(false)
   const [successBPM, setSuccessBPM] = useState(false)
   const [errorBPM, setErrorBPM] = useState(false)
@@ -122,71 +118,58 @@ function AudioOptions(props: AudioOptionsProps) {
   const [successTag, setSuccessTag] = useState(false)
   const [errorTag, setErrorTag] = useState(false)
 
-  useEffect(() => {
-    setNewAudio(oldAudio)
-  }, [oldAudio])
-
   const onCancel = () => {
-    // dispatch(setAudio(originalAudio))
-    props.onDone()
+    dispatch(setAudioOptionsEditing(undefined))
   }
 
-  const onReadBPMTag = () => {
-    // if (url && !loadingTag) {
-    //   setLoadingTag(true)
-    //   flipflip()
-    //     .api.parseMusicMetadataBpm(url)
-    //     .then((bpm: number | undefined) => {
-    //       if (bpm) {
-    //         dispatch(setAudioBPM(props.audioID)(bpm))
-    //         setLoadingTag(false)
-    //         setSuccessTag(true)
-    //         setTimeout(() => {
-    //           setSuccessTag(false)
-    //         }, 3000)
-    //       } else {
-    //         setLoadingTag(false)
-    //         setErrorTag(true)
-    //         setTimeout(() => {
-    //           setErrorTag(false)
-    //         }, 3000)
-    //       }
-    //     })
-    //     .catch((err: any) => {
-    //       console.error('Error reading metadata:', err.message)
-    //       setLoadingTag(false)
-    //       setErrorTag(true)
-    //       setTimeout(() => {
-    //         setErrorTag(false)
-    //       }, 3000)
-    //     })
-    // }
+  const onDone = () => {
+    dispatch(saveAudioOptions())
+  }
+
+  const onReadBPMTag = async () => {
+    if (audio?.url != null && !loadingTag) {
+      setLoadingTag(true)
+      try {
+        const {bpm} = await fetch(`http://localhost:5050/api/audios/${audio.id}/bpm`, {credentials: 'include'}).then((res) => res.json())
+        if (bpm) {
+          dispatch(setAudioOptionsBPM(bpm))
+          setLoadingTag(false)
+          setSuccessTag(true)
+          setTimeout(() => {
+            setSuccessTag(false)
+          }, 3000)
+        } else {
+          throw new Error('Failed to read BPM')
+        }
+      } catch(error) {
+        console.error('Error reading metadata', error)
+        setLoadingTag(false)
+        setErrorTag(true)
+        setTimeout(() => {
+          setErrorTag(false)
+        }, 3000)
+      }
+    }
   }
 
   const onDetectBPM = async () => {
-    if (newAudio?.url != null && !loadingBPM) {
+    if (audio?.url != null && !loadingBPM) {
       setLoadingBPM(true)
       const context = new AudioContext()
       try {
-        const data = await fetch(newAudio.fileUrl, {credentials: 'include'}).then((res) => res.arrayBuffer())
+        const data = await fetch(audio.fileUrl, {credentials: 'include'}).then((res) => res.arrayBuffer())
         const maxByteSize = 200000000
         if (data.byteLength < maxByteSize) {
           const audioBuffer = await context.decodeAudioData(data)
           const tempo = await analyze(audioBuffer)
-          setNewAudio((value) => {
-            if(value == null) {
-              return
-            }
-
-            return {...value, bpm: Number(tempo.toFixed(2))}
-          })
+          dispatch(setAudioOptionsBPM(tempo))
           setLoadingBPM(false)
           setSuccessBPM(true)
           setTimeout(() => {
             setSuccessBPM(false)
           }, 3000)
         } else {
-          throw new Error(`'${newAudio.url}' is too large to decode`)
+          throw new Error(`'${audio.url}' is too large to decode`)
         }
       } catch (e) {
         console.error(e)
@@ -202,7 +185,7 @@ function AudioOptions(props: AudioOptionsProps) {
   }
 
   const { classes } = useStyles()
-  return (
+  return audio != null && (
     <Dialog open={true} onClose={onCancel} aria-describedby="edit-description">
       <DialogContent>
         <Typography variant="h6">Edit song options</Typography>
@@ -213,51 +196,48 @@ function AudioOptions(props: AudioOptionsProps) {
               fullWidth
               margin="normal"
               label="URL"
-              selector={() => useGetAudioUrlQuery(props.audioID)}
-              action={setAudioUrl(props.audioID)}
+              selector={() => useAppSelector(selectAudioOptionsUrl())}
+              action={(url: string) => (dispatch: AppDispatch) => dispatch(setAudioOptionsUrl(url))}
             />
           </Grid2>
           <Grid2 size={12}>
             <AudioControl
-              sceneID={props.sceneID ?? 0}
-              audioID={props.audioID}
+              sceneID={0} // TODO make sceneID work for player
+              audioID={audio.id}
               audioEnabled={true}
               singleTrack={true}
               lastTrack={true}
               repeat={RP.one}
               scenePaths={[]}
               startPlaying={false}
-              audioVolumeAction={setAudioVolume(props.audioID)}
             />
           </Grid2>
           <Grid2 size={12}>
             <Grid2 container spacing={2} alignItems="center">
               <Grid2>
-                <Collapse in={!newAudio?.tick && !newAudio?.nextSceneAtEnd}>
+                <Collapse in={!audio.tick && !audio.nextSceneAtEnd}>
                   <BaseSwitch
                     label="Stop at End"
                     size="small"
-                    selector={() => useGetAudioStopAtEndQuery(props.audioID)}
-                    action={setAudioStopAtEnd(props.audioID)}
-                  />
+                    selector={() => useAppSelector(selectAudioOptionsStopAtEnd())}
+                    action={(stopAtEnd: boolean) => (dispatch: AppDispatch) => dispatch(setAudioOptionsStopAtEnd(stopAtEnd))}
+                    />
                 </Collapse>
-                <Collapse in={!newAudio?.tick && !newAudio?.stopAtEnd}>
+                <Collapse in={!audio.tick && !audio.stopAtEnd}>
                   <BaseSwitch
                     label="Next Scene at End"
                     size="small"
-                    selector={() =>
-                      useGetAudioNextSceneAtEndQuery(props.audioID)
-                    }
-                    action={setAudioNextSceneAtEnd(props.audioID)}
+                    selector={() => useAppSelector(selectAudioOptionsNextSceneAtEnd())}
+                    action={(nextSceneAtEnd: boolean) => (dispatch: AppDispatch) => dispatch(setAudioOptionsNextSceneAtEnd(nextSceneAtEnd))}
                   />
                 </Collapse>
-                <Collapse in={!newAudio?.stopAtEnd && !newAudio?.nextSceneAtEnd}>
+                <Collapse in={!audio.stopAtEnd && !audio.nextSceneAtEnd}>
                   <BaseSwitch
                     label="Tick"
                     tooltip="Repeat track at particular interval"
                     size="small"
-                    selector={() => useGetAudioTickQuery(props.audioID)}
-                    action={setAudioTick(props.audioID)}
+                    selector={() => useAppSelector(selectAudioOptionsTick())}
+                    action={(tick: boolean) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTick(tick))}
                   />
                 </Collapse>
               </Grid2>
@@ -273,8 +253,8 @@ function AudioOptions(props: AudioOptionsProps) {
                       variant="outlined"
                       label="BPM"
                       margin="dense"
-                      selector={() => useGetAudioBPMQuery(props.audioID)}
-                      action={setAudioBPM(props.audioID)}
+                      selector={() => useAppSelector(selectAudioOptionsBPM())}
+                      action={(bpm: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsBPM(bpm))}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -344,8 +324,8 @@ function AudioOptions(props: AudioOptionsProps) {
                     <BaseSlider
                       min={5}
                       max={40}
-                      selector={() => useGetAudioSpeedQuery(props.audioID)}
-                      action={setAudioSpeed(props.audioID)}
+                      selector={() => useAppSelector(selectAudioOptionsSpeed())}
+                      action={(speed: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsSpeed(speed))}
                       labelledBy="audio-speed-slider"
                       label={{ text: 'Speed', appendValue: true }}
                       format={{ type: 'times', divideBy: 10 }}
@@ -355,37 +335,35 @@ function AudioOptions(props: AudioOptionsProps) {
               </Grid2>
             </Grid2>
           </Grid2>
-          <Grid2 size={12} className={cx(!newAudio?.tick && classes.noPadding)}>
-            <Collapse in={newAudio?.tick} className={classes.fullWidth}>
+          <Grid2 size={12} className={cx(!audio.tick && classes.noPadding)}>
+            <Collapse in={audio.tick} className={classes.fullWidth}>
               <TimingCard
                 sidebar={false}
-                hasBPMSelector={() => useGetAudioHasBPMQuery(props.audioID)}
+                hasBPMSelector={() => useAppSelector(selectAudioOptionsHasBPM())}
                 timing={{
-                  selector: () => useGetAudioTickTFQuery(props.audioID),
-                  action: setAudioTickTF(props.audioID)
+                  selector: () => useAppSelector(selectAudioOptionsTickTF()),
+                  action: (tickTF: string) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickTF(tickTF))
                 }}
                 duration={{
-                  selector: () => useGetAudioTickDurationQuery(props.audioID),
-                  action: setAudioTickDuration(props.audioID)
+                  selector: () => useAppSelector(selectAudioOptionsTickDuration()),
+                  action: (duration: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickDuration(duration))
                 }}
                 durationMin={{
-                  selector: () =>
-                    useGetAudioTickDurationMinQuery(props.audioID),
-                  action: setAudioTickDurationMin(props.audioID)
+                  selector: () => useAppSelector(selectAudioOptionsTickDurationMin()),
+                  action: (durationMin: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickDurationMin(durationMin))
                 }}
                 durationMax={{
-                  selector: () =>
-                    useGetAudioTickDurationMaxQuery(props.audioID),
-                  action: setAudioTickDurationMax(props.audioID)
+                  selector: () => useAppSelector(selectAudioOptionsTickDurationMax()),
+                  action: (durationMax: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickDurationMax(durationMax))
                 }}
                 wave={{
-                  selector: () => useGetAudioTickSinRateQuery(props.audioID),
-                  action: setAudioTickSinRate(props.audioID),
+                  selector: () => useAppSelector(selectAudioOptionsTickSinRate()),
+                  action: (sinRate: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickSinRate(sinRate)),
                   labelledBy: 'tick-sin-rate-slider'
                 }}
                 bpm={{
-                  selector: () => useGetAudioTickBPMMultiQuery(props.audioID),
-                  action: setAudioTickBPMMulti(props.audioID),
+                  selector: () => useAppSelector(selectAudioOptionsTickBPMMulti()),
+                  action: (bpmMulti: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsTickBPMMulti(bpmMulti)),
                   labelledBy: 'tick-bpm-multi-slider',
                   min: -8,
                   max: 10,
@@ -400,7 +378,7 @@ function AudioOptions(props: AudioOptionsProps) {
         <Button onClick={onCancel} color="secondary">
           Cancel
         </Button>
-        <Button onClick={props.onDone} color="primary">
+        <Button onClick={onDone} color="primary">
           Save
         </Button>
       </DialogActions>

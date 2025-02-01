@@ -28,12 +28,13 @@ import { getTimestamp } from '../../utils'
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
-import AudioOptions from '../library/AudioOptions'
 import {
   useGetAudioQuery,
   useGetPlaylistQuery,
   useUpdatePlaylistMutation
 } from '../../store/api/slice'
+import { useAppDispatch } from '../../store/hooks'
+import { editAudioOptions } from '../../store/audioOptions/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   audioList: {
@@ -205,7 +206,7 @@ function PlaylistItem(props: PlaylistItemProps) {
               {audio?.thumb == null && (
                 <Fab size="small" className={classes.avatar}>
                   <SourceIcon
-                    type={audio?.type}
+                    type={audio?.type ?? ''}
                     className={classes.sourceIcon}
                   />
                 </Fab>
@@ -224,16 +225,12 @@ export interface AudioPlaylistProps {
 }
 
 function AudioPlaylist(props: AudioPlaylistProps) {
-  const sceneID = 0
+  const dispatch = useAppDispatch()
   const { playlistID } = props
   // const [sceneID, setSceneID] = useState<number>(0)
-  const [sourceOptions, setSourceOptions] = useState<number>()
 
-  const onSourceOptionsDone = () => {
-    setSourceOptions(undefined)
-  }
   const onSourceOptions = (audioID: number) => {
-    setSourceOptions(audioID)
+    dispatch(editAudioOptions(audioID))
   }
 
   const { data: playlist } = useGetPlaylistQuery(playlistID)
@@ -338,13 +335,6 @@ function AudioPlaylist(props: AudioPlaylistProps) {
           </Tooltip>
         </div>
       </List>
-      {sourceOptions != null && (
-        <AudioOptions
-          sceneID={sceneID}
-          audioID={sourceOptions}
-          onDone={onSourceOptionsDone}
-        />
-      )}
     </>
   )
 }

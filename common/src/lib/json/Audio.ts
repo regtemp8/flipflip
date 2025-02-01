@@ -1,4 +1,6 @@
 export type Audio = {
+  [key: string]: number | string | boolean | number[] | undefined;
+
   id: number;
   url: string;
   type: string;

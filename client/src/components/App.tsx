@@ -22,6 +22,7 @@ import TagManager from './library/TagManager'
 import CaptionScriptor from './sceneDetail/CaptionScriptor'
 import AppThemeProvider from './AppThemeProvider'
 import ScriptOptions from './library/ScriptOptions'
+import AudioOptions from './library/AudioOptions'
 
 const App = () => {
   return (
@@ -129,6 +130,7 @@ const App = () => {
                 }
               />
             </Routes>
+            <AudioOptions/>
             <SystemSnack />
           </ErrorBoundary>
         </AppThemeProvider>
