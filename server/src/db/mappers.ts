@@ -64,7 +64,7 @@ import {
   CaptionScriptUpdate,
   FontSettingsUpdate
 } from './CaptionScriptRepository'
-import { getBackupsDir, getCacheDir } from '../utils'
+import { getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
 
@@ -1200,6 +1200,14 @@ export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
   }
 }
 
+export function toAudioThumb(thumb: string) {
+  return `http://localhost:5050/fs/file/audio-thumb/${thumb.split(path.sep).pop()}`
+}
+
+export function fromAudioThumb(thumb: string) {
+  return path.join(getThumbsDir(), thumb.split('/').pop() as string)
+}
+
 export function toAudio(row: AudioRow, tags: number[]): Audio {
   const {
     album,
@@ -1229,7 +1237,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
 
   let thumb: string | undefined = undefined
   if(row.thumb != null) {
-    thumb = `http://localhost:5050/fs/file/audio-thumb/${id}`
+    thumb = toAudioThumb(row.thumb)
   }
 
   return {

@@ -44,88 +44,10 @@ const updateRemoteAudio = debounce(
   250
 )
 
-const updateAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
+export const updateAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalAudio(update))
     updateRemoteAudio(update, dispatch)
-  }
-}
-
-export const setAudioTickTF = (id: number) => {
-  return (tickMode: string) => {
-    return updateAudio({ id, tickMode })
-  }
-}
-
-export const setAudioTickDuration = (id: number) => {
-  return (tickDelay: number) => {
-    return updateAudio({ id, tickDelay })
-  }
-}
-
-export const setAudioTickDurationMin = (id: number) => {
-  return (tickMinDelay: number) => {
-    return updateAudio({ id, tickMinDelay })
-  }
-}
-
-export const setAudioTickDurationMax = (id: number) => {
-  return (tickMaxDelay: number) => {
-    return updateAudio({ id, tickMaxDelay })
-  }
-}
-
-export const setAudioTickSinRate = (id: number) => {
-  return (tickSinRate: number) => {
-    return updateAudio({ id, tickSinRate })
-  }
-}
-
-export const setAudioTickBPMMulti = (id: number) => {
-  return (tickBPMMulti: number) => {
-    return updateAudio({ id, tickBPMMulti })
-  }
-}
-
-export const setAudioStopAtEnd = (id: number) => {
-  return (stopAtEnd: boolean) => {
-    return updateAudio({ id, stopAtEnd })
-  }
-}
-
-export const setAudioNextSceneAtEnd = (id: number) => {
-  return (nextSceneAtEnd: boolean) => {
-    return updateAudio({ id, nextSceneAtEnd })
-  }
-}
-
-export const setAudioTick = (id: number) => {
-  return (tick: boolean) => {
-    return updateAudio({ id, tick })
-  }
-}
-
-export const setAudioSpeed = (id: number) => {
-  return (speed: number) => {
-    return updateAudio({ id, speed })
-  }
-}
-
-export const setAudioVolume = (id: number) => {
-  return (volume: number) => {
-    return updateAudio({ id, volume })
-  }
-}
-
-export const setAudioUrl = (id: number) => {
-  return (url: string) => {
-    return updateAudio({ id, url })
-  }
-}
-
-export const setAudioBPM = (id: number) => {
-  return (bpm: number) => {
-    return updateAudio({ id, bpm })
   }
 }
 

@@ -1,6 +1,8 @@
 import express from 'express'
 import {
+  fromAudioThumb,
   toAudio,
+  toAudioThumb,
   toAudioUpdate,
   toSearchSelectOptions,
   toTagSelectOptions
@@ -184,6 +186,12 @@ router.post('/sort', async (req, res) => {
   res.status(204).end()
 })
 
+router.post('/upload-thumb', async (req, res) => {
+  const path = req.body.thumb as string
+  const thumb = await copyThumbFile(path)
+  res.status(200).send({thumb: toAudioThumb(thumb)})
+})
+
 router.get('/:id', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
@@ -198,7 +206,7 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   const body = req.body as Partial<Audio>
   if (body.thumb != null) {
-    body.thumb = await copyThumbFile(body.thumb)
+    body.thumb = fromAudioThumb(body.thumb)
   }
   const result = await updateAudio(
     Number(req.params.id),
@@ -222,14 +230,10 @@ router.post('/:id/use-metadata', async (req, res) => {
   res.status(status).end()
 })
 router.get('/:id/bpm', async (req, res) => {
-  // const userId = (req.user as User).id as number
-  // const id = Number(req.params.id)
-  // const source = await findAudioUrlById(userId, id)
-  // if (source != null) {
-  //   const tags = await findAudioTagIds(userId, id)
-  //   res.status(200).send(toAudio(source, tags))
-  // } else {
-  //   res.status(404).end()
-  // }
+  const userId = (req.user as User).id as number
+  const id = Number(req.params.id)
+  const url = await findAudioUrlById(id, userId)
+  const metadata = await readAudioMetadata(url)
+  res.status(200).send({bpm: metadata.bpm})
 })
 export default router

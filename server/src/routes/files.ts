@@ -1,9 +1,9 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
 import express from 'express'
-import { FilePickerData, FilePickerItem, isAudio } from 'flipflip-common'
+import { FilePickerData, FilePickerItem, isAudio, isImage } from 'flipflip-common'
 import logger from '../logger'
-import { getSaveDir } from '../utils'
+import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById, findAudioThumbById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
@@ -48,6 +48,10 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || isAudio(dirent.name, true)
     )
+  } else if (type === 'img') {
+    dirents = dirents.filter(
+      (dirent) => dirent.isDirectory() || isImage(dirent.name, true)
+    )
   }
 
   const items: FilePickerItem[] = []
@@ -80,12 +84,27 @@ router.post('/create-directory', async (req, res) => {
   }
 })
 
+router.get('/file/audio-thumb/:name', async (req, res, next) => {
+  const { name } = req.params
+  console.log('NAME', name)
+  try {
+    const thumb = path.join(getThumbsDir(), name)
+    if(fs.existsSync(thumb)) {
+      res.status(200).type(name.substring(name.lastIndexOf('.')))
+      fs.createReadStream(thumb).pipe(res)
+    } else {
+      res.status(404).end()
+    }
+  } catch(error) {
+    next(error)
+  }
+})
+
 router.get('/file/:type/:id', async (req, res, next) => {
   const { id, type } = req.params
   const queries = new Map([
     ['caption-script', findCaptionScriptUrlById],
     ['audio', findAudioUrlById],
-    ['audio-thumb', findAudioThumbById],
     ['content-source', findContentSourceUrlById]
   ])
 
@@ -102,6 +121,8 @@ router.get('/file/:type/:id', async (req, res, next) => {
       res.status(404).end()
     } else if (url.startsWith('http')) {
       res.status(302).location(url).end()
+    } else if(!fs.existsSync(url)) {
+      res.status(404).end()
     } else {
       res.status(200).type(url.substring(url.lastIndexOf('.')))
       fs.createReadStream(url).pipe(res)

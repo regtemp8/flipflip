@@ -1263,6 +1263,13 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    uploadAudioThumb: builder.mutation<Pick<Audio, 'thumb'>, Pick<Audio, 'thumb'>>({
+      query: ({ thumb }) => ({
+        url: `api/audios/upload-thumb`,
+        method: 'POST',
+        body: {thumb}
+      })
+    }),
     sortAudios: builder.mutation<void, AudioSortRequest>({
       query: (body) => ({
         url: `api/audios/sort`,
@@ -1487,6 +1494,7 @@ export const {
   useGetFilteredAudiosQuery,
   useGetAudioQuery,
   useUpdateAudioMutation,
+  useUploadAudioThumbMutation,
   useSortAudiosMutation,
   useGetTagsQuery,
   useDeleteTagsMutation,

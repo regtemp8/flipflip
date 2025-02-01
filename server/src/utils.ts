@@ -309,7 +309,7 @@ async function getFileHash(path: string) {
 
 export async function copyThumbFile(thumb: string) {
   const hash = await getFileHash(thumb)
-  const extension = thumb.split('.').pop ?? ''
+  const extension = thumb.split('.').pop() ?? ''
   const thumbPath = path.join(getThumbsDir(), `${hash}.${extension}`)
   if(!fs.existsSync(thumbPath)) {
     await fs.promises.copyFile(thumb, thumbPath)
