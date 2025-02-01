@@ -3,6 +3,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 interface ScriptLibraryState {
   yOffset: number
   filters: string[]
+  lastSelected?: number
 }
 
 export const initialState: ScriptLibraryState = {
@@ -18,11 +19,14 @@ export const scriptLibrarySlice = createSlice({
     },
     setScriptLibraryFilters: (state, action: PayloadAction<string[]>) => {
       state.filters = action.payload
+    },
+    setScriptLibraryLastSelected: (state, action: PayloadAction<number|undefined>) => {
+      state.lastSelected = action.payload
     }
   }
 })
 
-export const { setScriptLibraryYOffset, setScriptLibraryFilters } =
+export const { setScriptLibraryYOffset, setScriptLibraryFilters, setScriptLibraryLastSelected } =
 scriptLibrarySlice.actions
 
 export default scriptLibrarySlice.reducer

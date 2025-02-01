@@ -36,6 +36,7 @@ import {
 import { arrayMove } from 'react-sortable-hoc'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryYOffset } from '../../store/scriptLibrary/selectors'
+import { setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -88,7 +89,6 @@ export interface ScriptSourceListProps {
 
 function ScriptSourceList(props: ScriptSourceListProps) {
   const dispatch = useAppDispatch()
-  const [lastSelected, setLastSelected] = useState<number>()
   const [isEditing, setIsEditing] = useState(-1)
   const [beginPlay, setBeginPlay] = useState<number>()
   const [playWithScene, setPlayWithScene] = useState<number>()
@@ -143,9 +143,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     )
     dispatch(moveCaptionScript(newScripts, props.filters, newSources))
   }
-
+  
   const clearLastSelected = () => {
-    setLastSelected(undefined)
+    dispatch(setScriptLibraryLastSelected(undefined))
   }
 
   const onRemove = (scriptID: number) => {
@@ -278,7 +278,6 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             checked={isChecked(scriptID)}
             index={index}
             isEditing={isEditing}
-            lastSelected={scriptID === lastSelected}
             scriptID={scriptID}
             style={value.style}
             onEndEdit={onEndEdit}

@@ -20,6 +20,7 @@ import {
   Tag,
   ThemeSettings
 } from 'flipflip-common'
+import { setScriptLibraryLastSelected } from '../scriptLibrary/slice'
 
 export const refreshConnectToken = () => {
   return (dispatch: AppDispatch): void => {
@@ -126,7 +127,12 @@ const deleteRemoteCaptionScript = debounce(
 )
 
 export const deleteCaptionScript = (id: number) => {
-  return (dispatch: AppDispatch) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    if(state.scriptLibrary.lastSelected === id) {
+      dispatch(setScriptLibraryLastSelected(undefined))
+    }
+
     dispatch(deleteLocalCaptionScript(id))
     deleteRemoteCaptionScript(id, dispatch)
   }

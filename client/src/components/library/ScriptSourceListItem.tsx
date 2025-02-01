@@ -32,6 +32,8 @@ import { useNavigate } from 'react-router-dom'
 import { selectSpecialMode } from '../../store/app/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
+import { selectScriptLibraryIsLastSelected } from '../../store/scriptLibrary/selectors'
+import { setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -130,7 +132,6 @@ export interface ScriptSourceListItemProps {
   checked: boolean
   index: number
   isEditing: number
-  lastSelected: boolean
   scriptID: number
   style: any
   onEndEdit: (newURL: string) => void
@@ -144,6 +145,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const specialMode = useAppSelector(selectSpecialMode())
+  const lastSelected = useAppSelector(selectScriptLibraryIsLastSelected(props.scriptID))
   const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
   const [urlInput, setUrlInput] = useState<string>('')
@@ -178,7 +180,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
       style={props.style}
       className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
-        props.lastSelected && classes.lastSelected
+        lastSelected && classes.lastSelected
       )}
     >
       <ListItem
@@ -187,8 +189,10 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
             <>
               {!specialMode && (
                 <IconButton
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     dispatch(saveScriptLibraryYOffset())
+                    dispatch(setScriptLibraryLastSelected(props.scriptID))
                     navigate(`/scriptor/${props.scriptID}`)
                   }}
                   className={classes.actionButton}
@@ -200,8 +204,10 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 </IconButton>
               )}
               <IconButton
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   dispatch(saveScriptLibraryYOffset())
+                  dispatch(setScriptLibraryLastSelected(props.scriptID))
                   navigate(`/scripts/${props.scriptID}/options`)
                 }}
                 className={classes.actionButton}
@@ -212,7 +218,10 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
                 <BuildIcon />
               </IconButton>
               <IconButton
-                onClick={() => props.onRemove(props.scriptID)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  props.onRemove(props.scriptID)}
+                }
                 className={cx(classes.deleteButton, classes.actionButton)}
                 edge="end"
                 size="small"
