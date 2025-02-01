@@ -297,6 +297,9 @@ test('Edit Caption Script Options', async ({ page }) => {
   await expect(page).toHaveURL('/scripts/1/options')
   await page.getByTestId('ArrowBackIcon').click()
   await expect(page).toHaveURL('/script-library')
+  await expect(page.locator('#sortable-list > div > div > div').nth(0)).toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await page.locator('#sortable-list > div').click()
+  await expect(page.locator('#sortable-list > div > div > div').nth(0)).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
 })
 
 test('Edit Caption Script in Scriptor', async ({ page }) => {
@@ -304,6 +307,9 @@ test('Edit Caption Script in Scriptor', async ({ page }) => {
   await expect(page).toHaveURL('/scriptor/1')
   await page.getByTestId('ArrowBackIcon').click()
   await expect(page).toHaveURL('/script-library')
+  await expect(page.locator('#sortable-list > div > div > div').nth(0)).toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await page.locator('#sortable-list > div').click()
+  await expect(page.locator('#sortable-list > div > div > div').nth(0)).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
 })
 
 test('Delete Single Caption Script', async ({ page }) => {
