@@ -7,3 +7,7 @@ export const selectAudioLibraryYOffset = () => {
 export const selectAudioLibraryFilters = () => {
   return (state: RootState) => state.audioLibrary.filters
 }
+
+export const selectAudioLibraryIsLastSelected = (audioID: number) => {
+  return (state: RootState) => state.audioLibrary.lastSelected === audioID
+}

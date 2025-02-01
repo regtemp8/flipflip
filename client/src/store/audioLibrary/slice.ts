@@ -3,6 +3,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 interface AudioLibraryState {
   yOffset: number
   filters: string[]
+  lastSelected?: number
 }
 
 export const initialState: AudioLibraryState = {
@@ -18,11 +19,14 @@ export const audioLibrarySlice = createSlice({
     },
     setAudioLibraryFilters: (state, action: PayloadAction<string[]>) => {
       state.filters = action.payload
+    },
+    setAudioLibraryLastSelected: (state, action: PayloadAction<number|undefined>) => {
+      state.lastSelected = action.payload
     }
   }
 })
 
-export const { setAudioLibraryYOffset, setAudioLibraryFilters } =
+export const { setAudioLibraryYOffset, setAudioLibraryFilters, setAudioLibraryLastSelected } =
 audioLibrarySlice.actions
 
 export default audioLibrarySlice.reducer

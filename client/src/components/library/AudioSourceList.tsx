@@ -23,6 +23,8 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import AudioSourceListItem from './AudioSourceListItem'
+import { useAppDispatch } from '../../store/hooks'
+import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -72,6 +74,7 @@ export interface AudioSourceListProps {
 }
 
 function AudioSourceList(props: AudioSourceListProps) {
+  const dispatch = useAppDispatch()
   const [deleteDialog, setDeleteDialog] = useState<number>()
 
   const _shiftDown = useRef<boolean>()
@@ -156,7 +159,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     //   dispatch(setPlaylistRemoveAudio(props.playlist, audioID))
     // } else {
     //   props.onUpdateSelected(props.selected.filter((id) => id !== audioID))
-    //   dispatch(removeAudios([audioID]))
+    //   dispatch(removeAudios([audioID])) // TODO removeAudios thunk should also clear lastSelected when audioID === lastSelected
     //   dispatch(setPlaylistsRemoveAudio(audioID))
     // }
   }
@@ -191,6 +194,10 @@ function AudioSourceList(props: AudioSourceListProps) {
     }
     _lastChecked.current = audioID
     props.onUpdateSelected(newSelected)
+  }
+
+  const clearLastSelected = () => {
+    dispatch(setAudioLibraryLastSelected(undefined))
   }
 
   const SortableVirtualList =
@@ -290,7 +297,7 @@ function AudioSourceList(props: AudioSourceListProps) {
     <React.Fragment>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
-          <List id="sortable-list" disablePadding>
+          <List id="sortable-list" disablePadding onClick={clearLastSelected}>
             <SortableVirtualList
               helperContainer={() =>
                 document.getElementById('sortable-list') as HTMLElement
