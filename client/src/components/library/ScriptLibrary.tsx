@@ -509,10 +509,10 @@ function ScriptLibrary() {
     })
 
   const onOpenLocalFiles = async (chosenFiles?: string[]) => {
+    onCloseDialog()
     if (chosenFiles != null) {
       await createScripts(chosenFiles)
     }
-    onCloseDialog()
   }
 
   const { classes } = useStyles()
