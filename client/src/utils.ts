@@ -132,12 +132,8 @@ export function getMsRemainder(sec: number): string | undefined {
     return undefined
   }
 
-  const ms = Math.round(sec * 1000)
-  let remainder = (Math.floor((ms % 1000) * 1000) / 1000).toString()
-  while (remainder.length < 3) {
-    remainder = '0' + remainder
-  }
-  return '.' + remainder
+  const text = sec.toFixed(3)
+  return text.substring(text.length - 4)
 }
 
 export function getMsTimestampValue(value: string): number | undefined {

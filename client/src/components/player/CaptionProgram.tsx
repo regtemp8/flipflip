@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import wretch from 'wretch'
-import Sound from 'react-sound'
 
 import {
   captionProgramDefaults,
@@ -1907,16 +1906,13 @@ export default function CaptionProgram(props: CaptionProgramProps) {
       </div>
       {state.audios.map((a) => {
         return (
-          <Sound
+          // TODO set volume
+          // TODO test if this works, replacement for react-sound
+          <audio
             key={a.alias}
-            url={a.file}
-            playStatus={
-              a.playing
-                ? (Sound as any).status.PLAYING
-                : (Sound as any).status.PAUSED
-            }
-            volume={a.volume}
-            onFinishedPlaying={() => {
+            src={a.file}
+            autoPlay={a.playing}
+            onEnded={() => {
               const newAudios = Array.from(state.audios)
               const audio = newAudios.find((au) => a.alias === au.alias)
               if (audio) {

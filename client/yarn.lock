@@ -1694,15 +1694,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-sound@npm:^1.2.0":
-  version: 1.2.6
-  resolution: "@types/react-sound@npm:1.2.6"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 10c0/61c1d50646079e353dae0f605e801a162dfa1683442ab9e3bfda7b62ce7e1e1501ff54539bde42aa627014ff6d1e9c58117d3ea6df8825c7b42483195170c528
-  languageName: node
-  linkType: hard
-
 "@types/react-transition-group@npm:^4.4.11":
   version: 4.4.11
   resolution: "@types/react-transition-group@npm:4.4.11"
@@ -2158,7 +2149,6 @@ __metadata:
     "@types/react": "npm:^18.3.3"
     "@types/react-color": "npm:^2"
     "@types/react-dom": "npm:^18.3.0"
-    "@types/react-sound": "npm:^1.2.0"
     "@types/react-window": "npm:^1.8.8"
     "@types/sortablejs": "npm:^1"
     "@types/uuid": "npm:^10.0.0"
@@ -2182,7 +2172,6 @@ __metadata:
     react-router-dom: "npm:^6.26.2"
     react-sortable-hoc: "npm:^2.0.0"
     react-sortablejs: "npm:^1.5.1"
-    react-sound: "npm:^1.2.0"
     react-spring: "npm:^9.7.4"
     react-virtualized-auto-sizer: "npm:^1.0.20"
     react-window: "npm:^1.8.9"
@@ -3927,18 +3916,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-sound@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "react-sound@npm:1.2.0"
-  dependencies:
-    prop-types: "npm:^15.5.7"
-    soundmanager2: "npm:^2.97.20170602"
-  peerDependencies:
-    react: ^15.3.0 || ^16.0.0-0
-  checksum: 10c0/1d528264cb24e93f709f8d633fd2d38682db5cc58d1b6db653bb7272022b7dd8dffbfc35cc357621c63150ee5d2441affc1a7cf40eb58cf3a8cdf88179a7ed20
-  languageName: node
-  linkType: hard
-
 "react-spring@npm:^9.7.4":
   version: 9.7.4
   resolution: "react-spring@npm:9.7.4"
@@ -4257,13 +4234,6 @@ __metadata:
   version: 1.6.1
   resolution: "sortablejs@npm:1.6.1"
   checksum: 10c0/460b2c8dddf5240c407d1fdf568bbf6600d5505f6d4ce223a8603da9c0c563877e8a20659c42a59874989daf8e8a2839b0b03c831ca56bf3cd5c30e6246fa8c7
-  languageName: node
-  linkType: hard
-
-"soundmanager2@npm:^2.97.20170602":
-  version: 2.97.20170602
-  resolution: "soundmanager2@npm:2.97.20170602"
-  checksum: 10c0/e1f8ece57acb881d3e581a38c6deb47d680ff22d11db29e21622bcda6b0e3f010a9d4bd111888fa9157ab6715070685dc650681146f7b50df187da8d77a4e475
   languageName: node
   linkType: hard
 
