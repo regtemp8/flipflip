@@ -1,7 +1,7 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
 import express from 'express'
-import { FilePickerData, FilePickerItem, isAudio, isImage } from 'flipflip-common'
+import { FilePickerData, FilePickerItem, isAudio, isImage, isVideo } from 'flipflip-common'
 import logger from '../logger'
 import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
@@ -124,8 +124,45 @@ router.get('/file/:type/:id', async (req, res, next) => {
     } else if(!fs.existsSync(url)) {
       res.status(404).end()
     } else {
-      res.status(200).type(url.substring(url.lastIndexOf('.')))
-      fs.createReadStream(url).pipe(res)
+      let ranges = undefined
+      const {size} = await fs.promises.stat(url)
+      if(isVideo(url, true) || isAudio(url, true)) {
+        res.setHeader('Accept-Ranges', 'bytes')
+        ranges = req.range(size)
+      }
+
+      if (ranges == -1) {
+        // Unsatisfiable range parser result, return HTTP status 416: range not satisfiable
+        res.setHeader('Content-Range', `bytes */${size}`).status(416).end()
+      } else if (ranges == -2) {
+        // Syntactically invalid parser result, return HTTP status 400: bad request
+        res.status(400).end()
+      } else {
+        let status = 200
+        let start = undefined
+        let end = undefined
+        if(ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
+          status = 206
+
+          // TODO handle multi part ranges
+          start = ranges[0].start
+          end = ranges[0].end
+          res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
+        }
+
+        res.status(status).type(url.substring(url.lastIndexOf('.')))
+        res.on('close', () => console.log('Closed response')) // TODO remove after done debugging
+        res.on('error', (error) => {
+          logger.error(`Failed to process request ${req.url}`, { error })
+        })
+        res.on('finish', () => console.log('Finished response'))  // TODO remove after done debugging
+        const stream = fs.createReadStream(url, {start, end})
+        stream.on('close', () => console.log('Closed stream')) // TODO remove after done debugging
+        stream.on('error', (error) => {
+          logger.error(`Failed to read file ${req.url}`, { error })
+        })
+        stream.pipe(res)
+      }
     }
   } catch(error) {
     next(error)
