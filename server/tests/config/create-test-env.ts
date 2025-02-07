@@ -165,4 +165,15 @@ void (async function () {
       path.join(audioDestDir, audioFile)
     )
   }
+
+  const imgSrcDir = path.join(process.cwd(), 'tests', 'config', 'img')
+  const imgDestDir = path.join(process.env.FF_SAVE_DIR as string, 'img')
+  await fs.promises.mkdir(imgDestDir)
+  const imgFiles = await fs.promises.readdir(imgSrcDir)
+  for (const imgFile of imgFiles) {
+    await fs.promises.copyFile(
+      path.join(imgSrcDir, imgFile),
+      path.join(imgDestDir, imgFile)
+    )
+  }
 })()

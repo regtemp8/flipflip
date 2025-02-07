@@ -86,7 +86,6 @@ router.post('/create-directory', async (req, res) => {
 
 router.get('/file/audio-thumb/:name', async (req, res, next) => {
   const { name } = req.params
-  console.log('NAME', name)
   try {
     const thumb = path.join(getThumbsDir(), name)
     if(fs.existsSync(thumb)) {
