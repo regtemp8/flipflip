@@ -18,13 +18,13 @@ import { makeStyles } from 'tss-react/mui'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { setAudioEditAlbum, setAudioEditArtist, setAudioEditComment, setAudioEditEditing, setAudioEditName, setAudioEditThumb, setAudioEditTrackNum } from '../../store/audioEdit/slice'
+import { setAudioEditAlbum, setAudioEditArtist, setAudioEditComment, setAudioEditEditing, setAudioEditName, setAudioEditThumb, setAudioEditTrackNum, updateAudioEditEditing } from '../../store/audioEdit/slice'
 import { selectAudioEditAlbum, selectAudioEditArtist, selectAudioEditComment, selectAudioEditIDs, selectAudioEditName, selectAudioEditThumb, selectAudioEditTrackNum } from '../../store/audioEdit/selectors'
 import BaseTextField from '../common/text/BaseTextField'
 import { AppDispatch } from '../../store/store'
 import { saveAudioEdit } from '../../store/audioEdit/thunks'
 import FilePicker from '../common/FilePicker'
-import { useUploadAudioThumbMutation } from '../../store/api/slice'
+import { useLazyGetAudioMetadataQuery, useUploadAudioThumbMutation } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   input: {
@@ -73,6 +73,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 function AudioEdit() {
   const dispatch = useAppDispatch()
+  const [getAudioMetadata] = useLazyGetAudioMetadataQuery()
   const [uploadAudioThumb] = useUploadAudioThumbMutation()
   const ids = useAppSelector(selectAudioEditIDs())
   const { data: name } = useAppSelector(selectAudioEditName())
@@ -100,19 +101,18 @@ function AudioEdit() {
     setShowThumbPicker(thumb == null)
   }
 
-  const loadSuggestions = () => {
-    // const url = audio.url as string
-    // flipflip()
-    //   .api.parseMusicMetadataFile(url, props.cachePath)
-    //   .then(async (metadata: any) => {
-    //     return await extractMusicMetadata(newAudio(audio), newAudio(metadata))
-    //   })
-    //   .then((newAudio: Audio) => {
-    //     setAudio(newAudio)
-    //   })
-    //   .catch((err: any) => {
-    //     console.error('Error reading metadata:', err.message)
-    //   })
+  const loadSuggestions = async () => {
+    if(ids?.length !== 1) {
+      return
+    }
+
+    const id = ids[0]
+    try {
+      const metadata = await getAudioMetadata(id).unwrap()
+      dispatch(updateAudioEditEditing(metadata))
+    } catch(error) {
+      console.error('Error getting metadata', error)
+    }
   }
 
   const onCancel = () => {

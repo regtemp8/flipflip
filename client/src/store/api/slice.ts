@@ -93,6 +93,8 @@ export const flipflipApi = createApi({
     'CaptionScriptFontSettings',
     'CaptionScriptBatchTagOptions',
     'Audio',
+    'AudioBPM',
+    'AudioMetadata',
     'AudioBatchTagOptions',
     'FilePicker',
     'CaptionScriptSearchOptions',
@@ -1246,6 +1248,22 @@ export const flipflipApi = createApi({
         return result != null ? [{ type: 'Audio', id: result.id }] : []
       }
     }),
+    getAudioBPM: builder.query<Partial<Audio>, number>({
+      query: (id) => ({
+        url: `api/audios/${id}/bpm`
+      }),
+      providesTags: (result) => {
+        return result != null ? [{ type: 'AudioBPM', id: result.id }] : []
+      }
+    }),
+    getAudioMetadata: builder.query<Partial<Audio>, number>({
+      query: (id) => ({
+        url: `api/audios/${id}/metadata`
+      }),
+      providesTags: (result) => {
+        return result != null ? [{ type: 'AudioMetadata', id: result.id }] : []
+      }
+    }),
     updateAudio: builder.mutation<void, Pick<Audio, 'id'> & Partial<Audio>>({
       query: ({ id, ...patch }) => ({
         url: `api/audios/${id}`,
@@ -1493,6 +1511,8 @@ export const {
   useGetAudiosQuery,
   useGetFilteredAudiosQuery,
   useGetAudioQuery,
+  useLazyGetAudioBPMQuery,
+  useLazyGetAudioMetadataQuery,
   useUpdateAudioMutation,
   useUploadAudioThumbMutation,
   useSortAudiosMutation,

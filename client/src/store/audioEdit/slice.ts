@@ -11,6 +11,19 @@ export const audioEditSlice = createSlice({
   name: 'audioEdit',
   initialState,
   reducers: {
+    updateAudioEditEditing: (state, action: PayloadAction<Partial<Audio>>) => {
+      if(state.editing == null) {
+        return
+      }
+
+      const keys = ["thumb", "name", "artist", "album", "comment", "trackNum"];
+      for(const key of keys) {
+        const value = action.payload[key]
+        if(value) {
+          state.editing[key] = value 
+        }
+      }
+    },
     setAudioEditEditing: (state, action: PayloadAction<Audio[]|undefined>) => {
       if(action.payload != null) {
         state.ids = action.payload.map((a) => a.id)
@@ -65,7 +78,8 @@ export const audioEditSlice = createSlice({
 })
 
 export const {
-  setAudioEditEditing, 
+  updateAudioEditEditing,
+  setAudioEditEditing,
   setAudioEditThumb,
   setAudioEditName,
   setAudioEditArtist,

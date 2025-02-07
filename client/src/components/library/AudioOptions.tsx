@@ -67,6 +67,7 @@ import {
 } from '../../store/audioOptions/slice'
 import { AppDispatch } from '../../store/store'
 import { saveAudioOptions } from '../../store/audioOptions/thunks'
+import { useLazyGetAudioBPMQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   bpmProgress: {
@@ -109,6 +110,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 function AudioOptions() {  
   const dispatch = useAppDispatch()
+  const [getAudioBPM] = useLazyGetAudioBPMQuery()
   const audio = useAppSelector(selectAudioOptions())
 
   const [loadingBPM, setLoadingBPM] = useState(false)
@@ -130,7 +132,7 @@ function AudioOptions() {
     if (audio?.url != null && !loadingTag) {
       setLoadingTag(true)
       try {
-        const {bpm} = await fetch(`http://localhost:5050/api/audios/${audio.id}/bpm`, {credentials: 'include'}).then((res) => res.json())
+        const {bpm} = await getAudioBPM(audio.id).unwrap()
         if (bpm) {
           dispatch(setAudioOptionsBPM(bpm))
           setLoadingTag(false)
@@ -142,7 +144,7 @@ function AudioOptions() {
           throw new Error('Failed to read BPM')
         }
       } catch(error) {
-        console.error('Error reading metadata', error)
+        console.error('Error reading BPM', error)
         setLoadingTag(false)
         setErrorTag(true)
         setTimeout(() => {

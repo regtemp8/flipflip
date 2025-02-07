@@ -216,24 +216,22 @@ router.patch('/:id', async (req, res) => {
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
   res.status(status).end()
 })
-router.post('/:id/use-metadata', async (req, res) => {
+router.get('/:id/metadata', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
   const url = await findAudioUrlById(id, userId)
   const metadata = await readAudioMetadata(url)
-  const result = await updateAudio(
-    Number(req.params.id),
-    toAudioUpdate(metadata)
-  )
-  const status =
-    result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
-  res.status(status).end()
+  if(metadata?.thumb != null) {
+    metadata.thumb = toAudioThumb(metadata.thumb)
+  }
+  
+  res.status(200).send({...metadata, id})
 })
 router.get('/:id/bpm', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
   const url = await findAudioUrlById(id, userId)
   const metadata = await readAudioMetadata(url)
-  res.status(200).send({bpm: metadata.bpm})
+  res.status(200).send({id, bpm: metadata.bpm})
 })
 export default router
