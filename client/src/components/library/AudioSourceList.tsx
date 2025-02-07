@@ -25,6 +25,7 @@ import { makeStyles } from 'tss-react/mui'
 import AudioSourceListItem from './AudioSourceListItem'
 import { useAppDispatch } from '../../store/hooks'
 import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
+import { deleteAudio } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -155,13 +156,12 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const onRemove = (audioID: number) => {
-    // if (props.playlist) {
-    //   dispatch(setPlaylistRemoveAudio(props.playlist, audioID))
-    // } else {
-    //   props.onUpdateSelected(props.selected.filter((id) => id !== audioID))
-    //   dispatch(removeAudios([audioID])) // TODO removeAudios thunk should also clear lastSelected when audioID === lastSelected
-    //   dispatch(setPlaylistsRemoveAudio(audioID))
-    // }
+    if(props.playlist) {
+      return // TODO add playlist delete
+    }
+
+    props.onUpdateSelected(props.selected.filter((id) => id !== audioID))
+    dispatch(deleteAudio(audioID))
   }
 
   const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {

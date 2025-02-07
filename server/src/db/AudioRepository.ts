@@ -311,6 +311,39 @@ export async function markAudios(userId: number, ids: number[]) {
     })
 }
 
+export async function deleteAudio(id: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { index } = await trx
+        .selectFrom('audio')
+        .select('index')
+        .where('id', '=', id)
+        .executeTakeFirstOrThrow()
+
+      await trx
+        .deleteFrom('audioPlaylistItem')
+        .where('audioId', '=', id)
+        .execute()
+      await trx
+        .deleteFrom('audioTag')
+        .where('audioId', '=', id)
+        .execute()
+      const result = await trx
+        .deleteFrom('audio')
+        .where('id', '=', id)
+        .execute()
+      await trx
+        .updateTable('audio')
+        .set((eb) => ({ index: eb('index', '-', 1) }))
+        .where('index', '>', index)
+        .execute()
+
+      return result
+    })
+}
+
 const selectColumns = new Map<string, Array<keyof Audio>>([
   [ASF.url, ['id', 'url']],
   [ASF.name, ['id', 'name']],

@@ -21,6 +21,7 @@ import {
   ThemeSettings
 } from 'flipflip-common'
 import { setScriptLibraryLastSelected } from '../scriptLibrary/slice'
+import { setAudioLibraryLastSelected } from '../audioLibrary/slice'
 
 export const refreshConnectToken = () => {
   return (dispatch: AppDispatch): void => {
@@ -49,6 +50,57 @@ export const updateAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
   return (dispatch: AppDispatch) => {
     dispatch(updateLocalAudio(update))
     updateRemoteAudio(update, dispatch)
+  }
+}
+
+const deleteLocalAudio = (id: number) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    for (const {
+      endpointName,
+      originalArgs
+    } of flipflipApi.util.selectInvalidatedBy(getState(), [
+      { type: 'Audio', id: 'FilteredList' }
+    ])) {
+      if (endpointName !== 'getFilteredAudios') continue
+      dispatch(
+        flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+          draft.filter((v) => v !== id)
+        )
+      )
+    }
+    for (const {
+      endpointName,
+      originalArgs
+    } of flipflipApi.util.selectInvalidatedBy(getState(), [
+      { type: 'Audio', id: 'List' }
+    ])) {
+      // we only want to update `getPosts` here
+      if (endpointName !== 'getAudios') continue
+      dispatch(
+        flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+          draft.filter((v) => v !== id)
+        )
+      )
+    }
+  }
+}
+
+const deleteRemoteAudio = debounce(
+  (id: number, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.deleteAudio.initiate({ id }))
+  },
+  250
+)
+
+export const deleteAudio = (id: number) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    if(state.audioLibrary.lastSelected === id) {
+      dispatch(setAudioLibraryLastSelected(undefined))
+    }
+
+    dispatch(deleteLocalAudio(id))
+    deleteRemoteAudio(id, dispatch)
   }
 }
 

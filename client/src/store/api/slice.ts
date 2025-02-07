@@ -1,7 +1,6 @@
 import {
   createApi,
-  fetchBaseQuery,
-  TagDescription
+  fetchBaseQuery
 } from '@reduxjs/toolkit/query/react'
 import { Credentials } from '../../data/Credentials'
 import {
@@ -822,7 +821,6 @@ export const flipflipApi = createApi({
           filtersQuery = '?filters=' + filtersQuery
         }
 
-        // TODO would it be better to do filtering on the client?
         return { url: `api/caption-scripts/filtered${filtersQuery}` }
       },
       providesTags: [{ type: 'CaptionScript', id: 'FilteredList' }]
@@ -1264,6 +1262,21 @@ export const flipflipApi = createApi({
         return result != null ? [{ type: 'AudioMetadata', id: result.id }] : []
       }
     }),
+    deleteAudio: builder.mutation<void, Pick<Audio, 'id'>>({
+      query: ({ id }) => ({
+        url: `api/audios/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Audio', id }, { type: 'AudioBPM', id }, { type: 'AudioMetadata', id }])
+            )
+          }
+        })
+      }
+    }),
     updateAudio: builder.mutation<void, Pick<Audio, 'id'> & Partial<Audio>>({
       query: ({ id, ...patch }) => ({
         url: `api/audios/${id}`,
@@ -1513,6 +1526,7 @@ export const {
   useGetAudioQuery,
   useLazyGetAudioBPMQuery,
   useLazyGetAudioMetadataQuery,
+  useDeleteAudioMutation,
   useUpdateAudioMutation,
   useUploadAudioThumbMutation,
   useSortAudiosMutation,
