@@ -151,13 +151,10 @@ router.get('/file/:type/:id', async (req, res, next) => {
         }
 
         res.status(status).type(url.substring(url.lastIndexOf('.')))
-        res.on('close', () => console.log('Closed response')) // TODO remove after done debugging
         res.on('error', (error) => {
-          logger.error(`Failed to process request ${req.url}`, { error })
+          logger.error(`Failed to process file request ${req.url}`, { error })
         })
-        res.on('finish', () => console.log('Finished response'))  // TODO remove after done debugging
         const stream = fs.createReadStream(url, {start, end})
-        stream.on('close', () => console.log('Closed stream')) // TODO remove after done debugging
         stream.on('error', (error) => {
           logger.error(`Failed to read file ${req.url}`, { error })
         })
