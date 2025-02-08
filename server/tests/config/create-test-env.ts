@@ -142,12 +142,12 @@ void (async function () {
     bpmTimingScript
   )
 
-  const urls = [
+  const scriptUrls = [
     'https://pastebin.com/raw/ZNJ5A40S',
     'https://pastebin.com/raw/48LPhQD3',
     'https://pastebin.com/raw/LDvJvg0C'
   ]
-  for (const url of urls) {
+  for (const url of scriptUrls) {
     const response = await fetch(url)
     if (!response.ok) {
       throw new Error(`${response.status} - ${response.statusText}: ${url}`)
@@ -166,6 +166,19 @@ void (async function () {
     )
   }
 
+  const audioUrls = [
+    'https://feeds.soundcloud.com/stream/336839158-royaltyfreemusic-nocopyrightmusic-sugar-vibe-tracks.mp3',
+    'https://feeds.soundcloud.com/stream/337111059-royaltyfreemusic-nocopyrightmusic-vibe-tracks-take-you-home-tonight.mp3',
+    'https://feeds.soundcloud.com/stream/338313073-royaltyfreemusic-nocopyrightmusic-foundation-vibe-tracks-free-download.mp3'
+  ]
+  for (const url of audioUrls) {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`${response.status} - ${response.statusText}: ${url}`)
+    }
+  }
+
+  // IMAGE FILES
   const imgSrcDir = path.join(process.cwd(), 'tests', 'config', 'img')
   const imgDestDir = path.join(process.env.FF_SAVE_DIR as string, 'img')
   await fs.promises.mkdir(imgDestDir)
