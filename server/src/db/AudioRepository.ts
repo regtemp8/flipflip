@@ -94,12 +94,10 @@ export async function createAudios(
         .set((eb) => ({ index: eb('index', '+', audios.length) }))
         .execute()
 
-      const values: Array<Insertable<Audio>> = []
-      for (let index = 0; index < audios.length; index++) {
-        const audio = audios[index]
+      const values = audios.map((audio, index) => {
         const url = audio.url as string
         const { name, album, artist, bpm, duration, thumb, trackNum } = audio
-        values.push({
+        return {
           marked: toNumber(false),
           volume: 100,
           speed: 10,
@@ -125,10 +123,14 @@ export async function createAudios(
           index,
           createdAt: Date.now(),
           userId
-        })
-      }
+        }
+      })
 
-      trx.insertInto('audio').values(values).execute()
+      await trx
+        .insertInto('audio')
+        .values(values)
+        .onConflict((oc) => oc.doNothing())
+        .execute()
     })
 }
 

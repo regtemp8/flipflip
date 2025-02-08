@@ -862,6 +862,7 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('createdAt', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint('FK_audio_user_userId', ['userId'], 'user', ['id'])
+    .addUniqueConstraint('UQ_audio_url', ['url'])
     .execute()
 }
 
