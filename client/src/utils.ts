@@ -3,9 +3,11 @@ import { filesize } from 'filesize'
 import {
   Backup,
   ContentSource,
+  Message,
   ScraperHelpers,
   TF
 } from 'flipflip-common'
+import { enqueueSnackbar } from 'notistack'
 
 export const captionProgramDefaults = {
   program: Array<Function>(),
@@ -212,6 +214,24 @@ export function randomizeList(list: any[]) {
   }
 
   return list
+}
+
+export function showMessages(messages: Message[]) {
+  for(const message of messages) {
+    showMessage(message)
+  }
+}
+
+export function showMessage(message: Message) {
+  if(message.error) {
+    enqueueSnackbar(message.error, {variant: 'error'})
+  } else if(message.warning) {
+    enqueueSnackbar(message.warning, {variant: 'warning'})
+  } else if(message.success) {
+    enqueueSnackbar(message.success, {variant: 'success'})
+  } else if(message.info) {
+    enqueueSnackbar(message.info, {variant: 'info'})
+  }
 }
 
 export function htmlEntities(str: string): string {

@@ -26,7 +26,6 @@ import ScriptSourceListItem from './ScriptSourceListItem'
 import SceneSelect from '../configGroups/SceneSelect'
 import { SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { showSystemSnack } from '../../store/systemSnack/store'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
   deleteCaptionScript,
@@ -37,6 +36,7 @@ import { arrayMove } from 'react-sortable-hoc'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryYOffset } from '../../store/scriptLibrary/selectors'
 import { setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
+import { showMessage } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -223,11 +223,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       const sceneID = playWithScene as number
       // dispatch(playScript(scriptID, sceneID, sources))
     } catch (e) {
-      dispatch(
-        showSystemSnack({
-          error: 'The source ' + beginPlayURL + " isn't in your Library"
-        })
-      )
+      showMessage({
+        error: 'The source ' + beginPlayURL + " isn't in your Library"
+      })
     }
   }
 

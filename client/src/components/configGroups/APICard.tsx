@@ -64,8 +64,8 @@ import {
   useGetRemoteSettingsPiwigoConfiguredQuery
 } from '../../store/api/selectors'
 import { useAppDispatch } from '../../store/hooks'
-import { showSystemSnack } from '../../store/systemSnack/store'
 import { useGetRemoteSettingsQuery } from '../../store/api/slice'
+import { showMessage } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -123,11 +123,11 @@ function APICard() {
   const _tfa = useRef<any>()
 
   const showError = (error: string) => {
-    dispatch(showSystemSnack({ error }))
+    showMessage({ error })
   }
 
   const showSuccess = (success: string) => {
-    dispatch(showSystemSnack({ success }))
+    showMessage({ success })
   }
 
   const onClearTumblr = () => {

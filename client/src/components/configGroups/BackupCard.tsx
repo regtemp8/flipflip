@@ -26,7 +26,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import RestoreIcon from '@mui/icons-material/Restore'
 import SaveIcon from '@mui/icons-material/Save'
 
-import { convertFromEpoch, formatBackup } from '../../utils'
+import { convertFromEpoch, formatBackup, showMessage } from '../../utils'
 import { Backup, GeneralSettings, MO } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
 import {
@@ -56,7 +56,6 @@ import {
   useGetGeneralSettingsQuery,
   useRestoreBackupMutation
 } from '../../store/api/slice'
-import { showSystemSnack } from '../../store/systemSnack/store'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   buttonGrid: {
@@ -108,7 +107,7 @@ function BackupCard() {
   const onBackup = async () => {
     const { data } = await createBackup()
     if (data != null) {
-      dispatch(showSystemSnack(data))
+      showMessage(data)
     }
   }
 
@@ -130,7 +129,7 @@ function BackupCard() {
       : { cleanRetain }
     const { data } = await cleanBackups(request)
     if (data != null) {
-      dispatch(showSystemSnack(data))
+      showMessage(data)
     }
   }
 
@@ -143,7 +142,7 @@ function BackupCard() {
     onCloseDialog()
     const { data } = await restoreBackup((backup as Backup).id)
     if (data != null) {
-      dispatch(showSystemSnack(data))
+      showMessage(data)
     }
   }
 

@@ -2,11 +2,9 @@ import { useState, FormEvent } from 'react'
 import { Alert, AlertColor, Button, Grid2, TextField } from '@mui/material'
 import { AccountChange, Message } from 'flipflip-common'
 import { useChangeUsernameMutation } from '../../store/api/slice'
-import { useAppDispatch } from '../../store/hooks'
-import { showSystemSnack } from '../../store/systemSnack/store'
+import { showMessage } from '../../utils'
 
 function ChangeUsernameForm() {
-  const dispatch = useAppDispatch()
   const [changeUsername] = useChangeUsernameMutation()
   const [message, setMessage] = useState({
     severity: 'info',
@@ -29,7 +27,7 @@ function ChangeUsernameForm() {
     try {
       const { data, error } = await changeUsername(form)
       if (data != null) {
-        dispatch(showSystemSnack(data))
+        showMessage(data)
       } else if (error != null && 'data' in error) {
         const message = (error.data as Message).error as string
         setMessage({ severity: 'error', message })

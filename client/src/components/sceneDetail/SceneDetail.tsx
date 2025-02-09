@@ -96,7 +96,6 @@ import {
   Route,
   Routes
 } from 'react-router-dom'
-import { showSystemSnack } from '../../store/systemSnack/store'
 import {
   useGetDisplaySettingsFullScreenQuery,
   useGetGeneralSettingsConfirmSceneDeletionQuery,
@@ -106,6 +105,7 @@ import {
 } from '../../store/api/selectors'
 import { useGetSceneQuery, useGetTutorialsQuery } from '../../store/api/slice'
 import { setSceneGeneratorMax } from '../../store/api/thunks'
+import { showMessage } from '../../utils'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -532,20 +532,17 @@ function SceneDetail() {
 
   const generateCallback = () => {
     if (scene?.sources.length === 0) {
-      dispatch(
-        showSystemSnack({
-          warning: 'Sorry, no sources were found for these rules'
-        })
-      )
+      showMessage({
+        warning: 'Sorry, no sources were found for these rules'
+      })
+
       // if (tutorial === SDGT.generate) {
       //   dispatch(doneTutorial(SDGT.generateError))
       // }
     } else {
-      dispatch(
-        showSystemSnack({
-          success: 'Generated scene with ' + scene?.sources.length + ' sources'
-        })
-      )
+      showMessage({
+        success: 'Generated scene with ' + scene?.sources.length + ' sources'
+      })
       // if (tutorial === SDGT.generate) {
       //   dispatch(doneTutorial(SDGT.generate))
       // }
