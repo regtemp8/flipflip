@@ -1,3 +1,4 @@
+import fs from 'fs'
 import express from 'express'
 import {
   toCaptionScript,
@@ -36,7 +37,9 @@ import {
   FontSettingsType,
   MoveRequest,
   SortRequest,
-  BatchTagRequest
+  BatchTagRequest,
+  isText,
+  Message
 } from 'flipflip-common'
 import { User } from '../db/types/generated'
 import { toBoolean } from '../db/utils'
@@ -52,12 +55,31 @@ router.get('/', async (req, res) => {
 })
 router.post('/', async (req, res, next) => {
   const userId = (req.user as User).id as number
-  const urls = req.body as string[]
-  try {
-    await createCaptionScripts(urls, userId)
+  const messages: Message[] = []
+  const urls: string[] = []
+  for(const url of req.body) {
+    if(url === '' || url.startsWith('http') || (isText(url, false) && fs.existsSync(url))) {
+      urls.push(url)
+    } else {
+      messages.push({error: `Invalid caption script file: ${url}`})
+    }
+  }
+
+  if(urls.length > 0) {
+    try {
+      const ids = await createCaptionScripts(urls, userId)
+      if(ids.length === 0) {
+        messages.push({info: 'No new caption scripts added'})
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  if(messages.length > 0) {
+    res.status(200).send(messages)
+  } else {
     res.status(204).end()
-  } catch (error) {
-    next(error)
   }
 })
 router.delete('/', async (req, res, next) => {
@@ -206,13 +228,22 @@ router.get('/:id', async (req, res) => {
 })
 router.patch('/:id', async (req, res, next) => {
   try {
-    const didDeleteRow = await updateCaptionScript(
-      Number(req.params.id),
-      toCaptionScriptUpdate(req.body)
-    )
+    let isUrl = false
+    const update = toCaptionScriptUpdate(req.body)
+    if(update.url) {
+      isUrl = update.url.startsWith('http')
+      if(!isUrl && (!isText(update.url, false) || !fs.existsSync(update.url))) {
+        res.status(400).send({error: `Invalid caption script path: ${update.url}`})
+        return
+      }
+    }
 
-    const status = didDeleteRow ? 205 : 204
-    res.status(status).end()
+    const didDeleteRow = await updateCaptionScript(Number(req.params.id), update)
+    if(didDeleteRow) {
+      res.status(404).send({error: `Duplicate caption script ${isUrl ? 'URL' : 'path'}: ${update.url}`})
+    } else {
+      res.status(204).end()
+    }
   } catch (error) {
     next(error)
   }

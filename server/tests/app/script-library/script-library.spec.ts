@@ -236,6 +236,7 @@ test('Add Single Local Caption Script', async ({ page }) => {
     )
   })
   await page.getByRole('button', { name: 'Choose', exact: true }).click()
+  await responsePromise
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
   await expect(page.locator('#sortable-list li p')).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
@@ -249,7 +250,6 @@ test('Add Single Local Caption Script', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Add new scripts', exact: true })
   ).not.toBeVisible()
-  await responsePromise
 })
 
 test('Click Script Source Icon', async ({ page }) => {
@@ -378,15 +378,16 @@ test('Add Same Local Caption Script', async ({ page }) => {
   await page.getByRole('button', { name: /^scripts/ }).dblclick()
   await page.getByRole('button', { name: /^phrases.txt/ }).click()
 
-  const responsePromise = page.waitForResponse((res) => {
+  let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/caption-scripts' &&
       request.method() === 'POST' &&
-      res.status() === 204
+      res.status() === 200
     )
   })
   await page.getByRole('button', { name: 'Choose', exact: true }).click()
+  await expect(page.getByText('No new caption scripts added', {exact: true})).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
@@ -398,6 +399,64 @@ test('Add Same Local Caption Script', async ({ page }) => {
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrases.txt')
   )
   await responsePromise
+
+  await page.getByTestId('AddIcon').click()
+  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      request.method() === 'GET' &&
+      res.status() === 200
+    )
+  })
+  await page.getByTestId('HttpIcon').click()
+
+  await expect(page.locator('#sortable-list li')).toHaveCount(4)
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      request.method() === 'PATCH' &&
+      res.status() === 404
+    )
+  })
+
+  const filePath = path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
+  await page
+    .locator('#sortable-list li input')
+    .fill(filePath)
+  await expect(page.locator('#sortable-list li input')).toHaveValue(filePath)
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.getByText(`Duplicate caption script path: ${filePath}`, {exact: true})).toBeVisible()
+})
+
+test('Invalid Local Caption Script Path', async ({page}) => {
+  const filePath = path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.mp3')
+  await page.locator('#sortable-list li p').nth(1).click()
+  await page
+    .locator('#sortable-list li input')
+    .fill(filePath)
+  await expect(page.locator('#sortable-list li input')).toHaveValue(filePath)
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.getByText(`Invalid caption script path: ${filePath}`, {exact: true})).toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
+
+  const dirPath = path.join(__dirname, '..', '..', 'data', 'scripts', 'invalid', 'phrase-groups.txt')
+  await page.locator('#sortable-list li p').nth(1).click()
+  await page
+    .locator('#sortable-list li input')
+    .fill(dirPath)
+  await expect(page.locator('#sortable-list li input')).toHaveValue(dirPath)
+  await page.locator('.MuiDrawer-root').click()
+  await expect(page.getByText(`Invalid caption script path: ${dirPath}`, {exact: true})).toBeVisible()
+  await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
+    path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
+  )
 })
 
 test('Add Remote Caption Script', async ({ page }) => {
@@ -499,6 +558,10 @@ test('Add Remote Caption Script', async ({ page }) => {
     'https://pastebin.com/raw/48LPhQD3'
   )
   await responsePromise
+})
+
+test.fixme('Click Remote Script', async ({page}) => {
+  // TODO play remote script
 })
 
 test('Shift + Click Remote Script', async ({ page, context }) => {
@@ -1853,7 +1916,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
     return (
       new URL(request.url()).pathname === '/api/caption-scripts/6' &&
       request.method() === 'PATCH' &&
-      res.status() === 205
+      res.status() === 404
     )
   })
   await page
@@ -1863,6 +1926,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
     'https://pastebin.com/raw/ZNJ5A40S'
   )
   await page.locator('.MuiDrawer-root').click()
+  await expect(page.getByText('Duplicate caption script URL: https://pastebin.com/raw/ZNJ5A40S', {exact: true})).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     'https://pastebin.com/raw/ZNJ5A40S'

@@ -320,25 +320,23 @@ export async function deleteCaptionScript(id: number) {
     })
 }
 
-const sortColumns = new Map<string, keyof CaptionScript>([
-  [SF.alpha, 'url'],
-  [SF.alphaFull, 'url'],
-  [SF.date, 'createdAt'],
-  [SF.random, 'id']
+const sortColumns = new Map<string, Array<keyof CaptionScript>>([
+  [SF.alpha, ['url']],
+  [SF.alphaFull, ['url']],
+  [SF.date, ['createdAt', 'url']],
+  [SF.random, ['id']]
 ])
 export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      let rows = await trx
+      let query = trx
         .selectFrom('captionScript')
         .select(['id', trx.fn<string>('lower', ['url']).as('url')])
-        .orderBy(
-          `${sortColumns.get(sortBy) as keyof CaptionScript} ${sortOrder}`
-        )
-        .execute()
-
+      
+      sortColumns.get(sortBy)?.forEach((sort) => query = query.orderBy(`${sort as keyof CaptionScript} ${sortOrder}`))
+      let rows = await query.execute()
       if (sortBy === SF.random) {
         rows = randomizeList(rows)
       } else if (sortBy === SF.alpha) {

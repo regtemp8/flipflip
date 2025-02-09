@@ -40,6 +40,7 @@ import {
   ContentSortRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
+import snackbar from '../../data/Snackbar'
 
 export const flipflipApi = createApi({
   reducerPath: 'flipflipApi',
@@ -785,7 +786,7 @@ export const flipflipApi = createApi({
           : []
       }
     }),
-    createCaptionScripts: builder.mutation<void, string[]>({
+    createCaptionScripts: builder.mutation<Message[] | undefined, string[]>({
       query: (body) => ({
         url: `api/caption-scripts`,
         method: 'POST',
@@ -793,8 +794,12 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled
-          .then(({ meta }) => {
+          .then(({ data, meta }) => {
             if (meta?.response?.ok) {
+              if(data != null) {
+                snackbar().showMessages(data)
+              }
+
               dispatch(
                 flipflipApi.util.invalidateTags([
                   { type: 'CaptionScript', id: 'List' },
@@ -865,7 +870,7 @@ export const flipflipApi = createApi({
       }
     }),
     updateCaptionScript: builder.mutation<
-      void,
+      Message | undefined,
       Pick<CaptionScript, 'id'> & Partial<CaptionScript>
     >({
       query: ({ id, ...patch }) => ({
@@ -875,25 +880,31 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         await queryFulfilled
-          .then(({ meta }) => {
-            const status = meta?.response?.status
-            if (status === 205) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'CaptionScript', id },
-                  { type: 'CaptionScript', id: 'FilteredList' },
-                  { type: 'CaptionScript', id: 'List' }
-                ])
-              )
-            }
-          })
           .catch((reason) => {
+            if(typeof reason.error === 'object' && reason.error != null && 'data' in reason.error) {
+              snackbar().showMessage(reason.error.data as Message)
+            }
+
             const status = reason.meta?.response?.status
             // TODO implement etags (412)
             // TODO implement userId checks (403)
             if (status === 412 || status === 403) {
               dispatch(
                 flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
+              )
+            } else if (status === 400) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'CaptionScript', id }
+                ])
+              )
+            } else if (status === 404) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'CaptionScript', id },
+                  { type: 'CaptionScript', id: 'FilteredList' },
+                  { type: 'CaptionScript', id: 'List' }
+                ])
               )
             }
           })
@@ -1233,7 +1244,6 @@ export const flipflipApi = createApi({
           filtersQuery = '?filters=' + filtersQuery
         }
 
-        // TODO would it be better to do filtering on the client?
         return { url: `api/audios/filtered${filtersQuery}` }
       },
       providesTags: [{ type: 'Audio', id: 'FilteredList' }]
