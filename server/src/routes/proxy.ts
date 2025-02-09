@@ -18,6 +18,21 @@ class ProxyService {
   private constructor() {
     this.server = createProxyServer({})
     this.server.on('proxyRes', (proxyRes, req, res) => {
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*')
+      if(proxyRes.statusCode != null && proxyRes.statusCode !== 200) {
+        res.statusCode = proxyRes.statusCode
+        res.statusMessage = proxyRes.statusMessage ?? ''
+        if(proxyRes.statusCode === 416) {
+          const value = proxyRes.headers['content-range']
+          if(value != null) {
+            res.setHeader('content-range', value)
+          }
+        }
+        
+        res.end()
+        return
+      }
+      
       const headers = ['accept-ranges', 'content-type', 'date']
       if(req.headers.range) {
         headers.push('content-range')
@@ -30,7 +45,6 @@ class ProxyService {
         }
       })
 
-      res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*')
       proxyRes.pipe(res)
     })
     this.registry = new Map<string, ProxyRequest>()
