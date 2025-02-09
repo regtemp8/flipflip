@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { flipflipApi } from './api/slice'
-import systemSnackSlice from './systemSnack/store'
 import sceneDetailSlice from './sceneDetail/slice'
 import scenePickerSlice from './scenePicker/slice'
 import displaySlice from './display/slice'
@@ -24,8 +23,7 @@ const store = configureStore({
     sceneDetail: sceneDetailSlice,
     scenePicker: scenePickerSlice,
     scriptLibrary: scriptLibrarySlice,
-    audioLibrary: audioLibrarySlice,
-    systemSnack: systemSnackSlice
+    audioLibrary: audioLibrarySlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(flipflipApi.middleware)

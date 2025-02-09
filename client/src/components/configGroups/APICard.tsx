@@ -65,7 +65,7 @@ import {
 } from '../../store/api/selectors'
 import { useAppDispatch } from '../../store/hooks'
 import { useGetRemoteSettingsQuery } from '../../store/api/slice'
-import { showMessage } from '../../utils'
+import snackbar from '../../data/Snackbar'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -123,11 +123,11 @@ function APICard() {
   const _tfa = useRef<any>()
 
   const showError = (error: string) => {
-    showMessage({ error })
+    snackbar().showMessage({ error })
   }
 
   const showSuccess = (success: string) => {
-    showMessage({ success })
+    snackbar().showMessage({ success })
   }
 
   const onClearTumblr = () => {

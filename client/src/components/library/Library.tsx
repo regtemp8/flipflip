@@ -89,7 +89,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
-import { showMessage } from '../../utils'
+import snackbar from '../../data/Snackbar'
 
 const drawerWidth = 240
 
@@ -597,11 +597,11 @@ function Library() {
             // dispatch(importLibrary(json))
             onCloseDialog()
           } catch (e) {
-            showMessage({ error: 'This is not a valid JSON file' })
+            snackbar().showMessage({ error: 'This is not a valid JSON file' })
           }
         })
         .catch((e) => {
-          showMessage({ error: 'Error accessing URL' })
+          snackbar().showMessage({ error: 'Error accessing URL' })
         })
     } else {
       // const text = await flipflip().api.readTextFile(importFile)

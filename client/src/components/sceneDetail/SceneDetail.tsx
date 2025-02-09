@@ -105,7 +105,7 @@ import {
 } from '../../store/api/selectors'
 import { useGetSceneQuery, useGetTutorialsQuery } from '../../store/api/slice'
 import { setSceneGeneratorMax } from '../../store/api/thunks'
-import { showMessage } from '../../utils'
+import snackbar from '../../data/Snackbar'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -532,7 +532,7 @@ function SceneDetail() {
 
   const generateCallback = () => {
     if (scene?.sources.length === 0) {
-      showMessage({
+      snackbar().showMessage({
         warning: 'Sorry, no sources were found for these rules'
       })
 
@@ -540,7 +540,7 @@ function SceneDetail() {
       //   dispatch(doneTutorial(SDGT.generateError))
       // }
     } else {
-      showMessage({
+      snackbar().showMessage({
         success: 'Generated scene with ' + scene?.sources.length + ' sources'
       })
       // if (tutorial === SDGT.generate) {

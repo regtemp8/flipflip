@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react'
 import { Alert, AlertColor, Button, Grid2, TextField } from '@mui/material'
 import { AccountChange, Message } from 'flipflip-common'
 import { useChangePasswordMutation } from '../../store/api/slice'
-import { showMessage } from '../../utils'
+import snackbar from '../../data/Snackbar'
 
 function ChangePasswordForm() {
   const [changePassword] = useChangePasswordMutation()
@@ -27,7 +27,7 @@ function ChangePasswordForm() {
     try {
       const { data, error } = await changePassword(form)
       if (data != null) {
-        showMessage(data)
+        snackbar().showMessage(data)
       } else if (error != null && 'data' in error) {
         const message = (error.data as Message).error as string
         setMessage({ severity: 'error', message })

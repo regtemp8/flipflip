@@ -24,6 +24,7 @@ import ScriptOptions from './library/ScriptOptions'
 import AudioOptions from './library/AudioOptions'
 import {SnackbarKey, SnackbarProvider, closeSnackbar} from 'notistack'
 import CloseIcon from '@mui/icons-material/Close'
+import { AUTO_HIDE_DURATION, MAX_SNACKS } from '../data/Snackbar'
 
 const CloseSnackBarAction = (key: SnackbarKey) => {
   return(<IconButton onClick={() => closeSnackbar(key)} size="small">
@@ -37,7 +38,7 @@ const App = () => {
       <CacheProvider value={createCache({ key: 'css' })}>
         <AppThemeProvider>
           <ErrorBoundary>
-            <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} autoHideDuration={3000} action={CloseSnackBarAction}>
+            <SnackbarProvider maxSnack={MAX_SNACKS} autoHideDuration={AUTO_HIDE_DURATION} action={CloseSnackBarAction}>
               <CssBaseline />
               <AudioOptions/>
               <Routes>
