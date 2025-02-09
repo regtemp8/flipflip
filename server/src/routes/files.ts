@@ -120,8 +120,12 @@ router.get('/file/:type/:id', async (req, res, next) => {
     if(url == null) {
       res.status(404).end()
     } else if (url.startsWith('http')) {
-      const uuid = proxy().set({url})
-      proxy().get(uuid, req, res)
+      if(isVideo(url, true) || isAudio(url, true)) {
+        const uuid = proxy().set({url})
+        proxy().get(uuid, req, res)
+      } else {
+        res.status(302).location(url).end()
+      }
     } else if(!fs.existsSync(url)) {
       res.status(404).end()
     } else {
