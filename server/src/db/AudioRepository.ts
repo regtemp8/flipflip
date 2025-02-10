@@ -348,14 +348,14 @@ export async function deleteAudio(id: number) {
 
 const selectColumns = new Map<string, Array<keyof Audio>>([
   [ASF.url, ['id', 'url']],
-  [ASF.name, ['id', 'name']],
-  [ASF.artist, ['id', 'artist', 'album', 'trackNum', 'name']],
-  [ASF.album, ['id', 'album', 'trackNum', 'name']],
-  [ASF.date, ['id', 'createdAt']],
-  [ASF.duration, ['id', 'duration']],
+  [ASF.name, ['id', 'name', 'url']],
+  [ASF.artist, ['id', 'artist', 'album', 'trackNum', 'name', 'url']],
+  [ASF.album, ['id', 'album', 'trackNum', 'name', 'url']],
+  [ASF.date, ['id', 'createdAt', 'url']],
+  [ASF.duration, ['id', 'duration', 'url']],
   [
     ASF.playedCount,
-    ['id', 'playedCount', 'artist', 'album', 'trackNum', 'name']
+    ['id', 'playedCount', 'artist', 'album', 'trackNum', 'name', 'url']
   ],
   [ASF.random, ['id']]
 ])
@@ -429,11 +429,18 @@ function audioSortFunction(
         break
       case ASF.name:
         const reA = /^(A\s|a\s|The\s|the\s)/g
-        aValue = a.name?.replace(reA, '')
-        bValue = b.name?.replace(reA, '')
+        aValue = (a.name ?? '').replace(reA, '')
+        bValue = (b.name ?? '').replace(reA, '')
 
         const compare = aValue.localeCompare(bValue, 'en', { numeric: true })
-        return ascending ? compare : compare * -1
+        if(compare != 0) {
+          return ascending ? compare : compare * -1
+        }
+
+        aValue = ''
+        bValue = ''
+        secondary = ASF.url
+        break
       case ASF.artist:
         aValue = a.artist
         bValue = b.artist
@@ -445,8 +452,9 @@ function audioSortFunction(
         secondary = ASF.trackNum
         break
       case ASF.date:
-        aValue = a.id
-        bValue = b.id
+        aValue = a.createdAt
+        bValue = b.createdAt
+        secondary = ASF.url
         break
       case ASF.trackNum:
         aValue = parseInt(a.trackNum as any)
@@ -456,6 +464,7 @@ function audioSortFunction(
       case ASF.duration:
         aValue = a.duration
         bValue = b.duration
+        secondary = ASF.url
         break
       case ASF.playedCount:
         aValue = a.playedCount
