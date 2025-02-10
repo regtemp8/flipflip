@@ -1334,6 +1334,28 @@ export const flipflipApi = createApi({
           })
       }
     }),
+    moveAudio: builder.mutation<void, MoveRequest>({
+      query: (body) => ({
+        url: `api/audios/move`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'Audio', id: 'List' },
+                { type: 'Audio', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+      }
+    }),
     sortTags: builder.mutation<void, SortRequest>({
       query: (body) => ({
         url: `api/tags/sort`,
@@ -1540,6 +1562,7 @@ export const {
   useUpdateAudioMutation,
   useUploadAudioThumbMutation,
   useSortAudiosMutation,
+  useMoveAudioMutation,
   useGetTagsQuery,
   useDeleteTagsMutation,
   useGetTagsCountQuery,

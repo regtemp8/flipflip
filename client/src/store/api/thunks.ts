@@ -2063,8 +2063,8 @@ export const updateTag = (update: Partial<Tag>) => {
   }
 }
 
-const moveLocalTag = (ids: number[]) => {
-  return flipflipApi.util.updateQueryData('getTags', undefined, () => ids)
+const moveLocalTag = (ids: number[], dispatch: AppDispatch) => {
+  dispatch(flipflipApi.util.updateQueryData('getTags', undefined, () => ids))
 }
 
 const moveRemoteTag = debounce((ids: number[], dispatch: AppDispatch) => {
@@ -2073,7 +2073,7 @@ const moveRemoteTag = debounce((ids: number[], dispatch: AppDispatch) => {
 
 export const moveTag = (ids: number[]) => {
   return (dispatch: AppDispatch) => {
-    dispatch(moveLocalTag(ids))
+    moveLocalTag(ids, dispatch)
     moveRemoteTag(ids, dispatch)
   }
 }
@@ -2081,14 +2081,15 @@ export const moveTag = (ids: number[]) => {
 const moveLocalCaptionScript = (
   ids: number[],
   filters: string[],
-  filtered: number[]
+  filtered: number[],
+  dispatch: AppDispatch
 ) => {
-  flipflipApi.util.updateQueryData('getCaptionScripts', undefined, () => ids)
-  return flipflipApi.util.updateQueryData(
+  dispatch(flipflipApi.util.updateQueryData('getCaptionScripts', undefined, () => ids))
+  dispatch(flipflipApi.util.updateQueryData(
     'getFilteredCaptionScripts',
     filters,
     () => filtered
-  )
+  ))
 }
 
 const moveRemoteCaptionScript = debounce(
@@ -2104,7 +2105,39 @@ export const moveCaptionScript = (
   filtered: number[]
 ) => {
   return (dispatch: AppDispatch) => {
-    dispatch(moveLocalCaptionScript(ids, filters, filtered))
+    moveLocalCaptionScript(ids, filters, filtered, dispatch)
     moveRemoteCaptionScript(ids, dispatch)
+  }
+}
+
+const moveLocalAudio = (
+  ids: number[],
+  filters: string[],
+  filtered: number[],
+  dispatch: AppDispatch
+) => {
+  dispatch(flipflipApi.util.updateQueryData('getAudios', undefined, () => ids))
+  dispatch(flipflipApi.util.updateQueryData(
+    'getFilteredAudios',
+    filters,
+    () => filtered
+  ))
+}
+
+const moveRemoteAudio = debounce(
+  (ids: number[], dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.moveAudio.initiate({ ids }))
+  },
+  250
+)
+
+export const moveAudio = (
+  ids: number[],
+  filters: string[],
+  filtered: number[]
+) => {
+  return (dispatch: AppDispatch) => {
+    moveLocalAudio(ids, filters, filtered, dispatch)
+    moveRemoteAudio(ids, dispatch)
   }
 }

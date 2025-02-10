@@ -22,6 +22,7 @@ import {
   markAudios,
   findAudioTagIds,
   sortAudios,
+  moveAudio,
   createAudios,
   findAudioUrlById,
   findAudios,
@@ -32,6 +33,8 @@ import {
   Audio,
   AudioSortRequest,
   BatchTagRequest,
+  isAudio,
+  MoveRequest,
   SortRequest
 } from 'flipflip-common'
 import { copyThumbFile, readAudioMetadata } from '../utils'
@@ -186,7 +189,10 @@ router.post('/sort', async (req, res) => {
   await sortAudios(sort)
   res.status(204).end()
 })
-
+router.post('/move', async (req, res) => {
+  await moveAudio(req.body as MoveRequest)
+  res.status(204).end()
+})
 router.post('/upload-thumb', async (req, res) => {
   const path = req.body.thumb as string
   const thumb = await copyThumbFile(path)

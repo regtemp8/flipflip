@@ -5,7 +5,7 @@ import React, {
   ChangeEvent,
   useCallback
 } from 'react'
-import { SortableContainer, SortableElement } from 'react-sortable-hoc'
+import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
 
@@ -25,7 +25,7 @@ import { makeStyles } from 'tss-react/mui'
 import AudioSourceListItem from './AudioSourceListItem'
 import { useAppDispatch } from '../../store/hooks'
 import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
-import { deleteAudio } from '../../store/api/thunks'
+import { deleteAudio, moveAudio } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -68,6 +68,8 @@ export interface AudioSourceListProps {
   selected: number[]
   showHelp: boolean
   audios: number[]
+  filters: string[]
+  sources: number[]
   playlist?: string
   onClickAlbum: (album: string) => void
   onClickArtist: (artist: string) => void
@@ -84,24 +86,22 @@ function AudioSourceList(props: AudioSourceListProps) {
   const yOffset = 0
   const deleteDialogURL = ''
 
-  const onSortEnd = (/*{
+  const onSortEnd = ({
     oldIndex,
     newIndex
   }: {
     oldIndex: number
     newIndex: number
-  }*/) => {
-    // if (props.playlist) {
-    //   const oldSourceId = props.audios[oldIndex]
-    //   const newSourceId = props.audios[newIndex]
-    //   dispatch(
-    //     setPlaylistsSwapPlaylist(props.playlist, oldSourceId, newSourceId)
-    //   )
-    // } else {
-    //   const oldSourceURL = props.audios[oldIndex]
-    //   const newSourceURL = props.audios[newIndex]
-    //   dispatch(swapAudios(oldSourceURL, newSourceURL))
-    // }
+  }) => {
+    const oldID = props.sources[oldIndex]
+    const newID = props.sources[newIndex]
+    const newSources = arrayMove(props.sources, oldIndex, newIndex)
+    const newAudios = arrayMove(
+      props.audios,
+      props.audios.indexOf(oldID),
+      props.audios.indexOf(newID)
+    )
+    dispatch(moveAudio(newAudios, props.filters, newSources))
   }
 
   const savePosition = useCallback(
