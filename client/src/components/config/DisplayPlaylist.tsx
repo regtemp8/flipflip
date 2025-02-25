@@ -31,7 +31,7 @@ import Sortable from 'react-sortablejs'
 import { RP } from 'flipflip-common'
 import DisplaySelect from '../configGroups/DisplaySelect'
 import MultiDisplaySelect from '../configGroups/MultiDisplaySelect'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import {
   useGetDisplayPlaylistItemQuery,
   useGetDisplaysQuery,

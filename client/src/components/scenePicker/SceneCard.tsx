@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import Jiggle from '../animations/Jiggle'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 import { SG } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => {

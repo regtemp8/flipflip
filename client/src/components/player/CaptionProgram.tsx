@@ -15,7 +15,7 @@ import { Box, CircularProgress } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { HTMLContentElement } from './HTMLContentElement'
 import DurationCalculator from '../../data/DurationCalculator'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import {
   useGetCaptionScriptFontSettingsQuery,
   useGetCaptionScriptQuery

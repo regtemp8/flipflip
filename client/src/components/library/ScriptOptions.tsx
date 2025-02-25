@@ -30,7 +30,7 @@ import {
 } from '../../store/api/selectors'
 import BaseSlider from '../common/slider/BaseSlider'
 import { useGetCaptionScriptQuery } from '../../store/api/slice'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { cx } from '@emotion/css'
 
 const useStyles = makeStyles()((theme: Theme) => ({

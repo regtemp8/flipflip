@@ -4,8 +4,9 @@ import {
   Link as RouterLink,
   Route,
   Routes,
-  useLocation
-} from 'react-router-dom'
+  useLocation,
+  useNavigate
+} from 'react-router'
 import {
   AppBar,
   Box,
@@ -49,7 +50,6 @@ import SceneEffects from '../sceneDetail/SceneEffects'
 
 import { MO } from 'flipflip-common'
 
-import { useNavigate } from 'react-router-dom'
 import {
   useGetTutorialsQuery,
   useResetTutorialsMutation,

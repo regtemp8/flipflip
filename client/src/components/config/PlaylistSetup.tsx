@@ -56,7 +56,7 @@ import {
   useGetDisplaySettingsQuery,
   useGetPlaylistQuery
 } from '../../store/api/slice'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 
 const drawerWidth = 240
 

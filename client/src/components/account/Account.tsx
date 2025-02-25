@@ -6,7 +6,7 @@ import {
   Routes,
   useLocation,
   useNavigate
-} from 'react-router-dom'
+} from 'react-router'
 import { cx } from '@emotion/css'
 
 import {

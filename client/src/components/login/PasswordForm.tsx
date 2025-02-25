@@ -1,6 +1,6 @@
 import { Button, Grid2, TextField } from '@mui/material'
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Credentials } from '../../data/Credentials'
 import { usePasswordLoginMutation } from '../../store/api/slice'
 

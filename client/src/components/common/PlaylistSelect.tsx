@@ -11,7 +11,7 @@ import TvIcon from '@mui/icons-material/Tv'
 import MovieIcon from '@mui/icons-material/Movie'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { makeStyles } from 'tss-react/mui'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useGetPlaylistOptionsQuery } from '../../store/api/slice'
 
 const playlistTypeDisplayNames: Record<string, string> = {}

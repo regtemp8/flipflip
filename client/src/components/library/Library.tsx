@@ -86,7 +86,7 @@ import {
   useGetRemoteSettingsInstagramConfiguredQuery,
   useGetRemoteSettingsPiwigoConfiguredQuery
 } from '../../store/api/selectors'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import snackbar from '../../data/Snackbar'

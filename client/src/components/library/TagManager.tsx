@@ -47,7 +47,7 @@ import {
   useGetTagsQuery,
   useSortTagsMutation
 } from '../../store/api/slice'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useAppDispatch } from '../../store/hooks'
 import { moveTag, updateTag } from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'

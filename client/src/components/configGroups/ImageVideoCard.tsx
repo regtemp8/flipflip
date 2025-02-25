@@ -89,7 +89,7 @@ import {
   useGetSceneDisableWeightOptionsQuery,
   useGetTutorialsQuery
 } from '../../store/api/slice'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({

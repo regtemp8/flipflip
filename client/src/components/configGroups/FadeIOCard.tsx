@@ -51,7 +51,7 @@ import {
 } from '../../store/api/slice'
 import EasingCard from '../common/EasingCard'
 import BaseSwitch from '../common/BaseSwitch'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({

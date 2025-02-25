@@ -95,7 +95,7 @@ import {
   Link as RouterLink,
   Route,
   Routes
-} from 'react-router-dom'
+} from 'react-router'
 import {
   useGetDisplaySettingsFullScreenQuery,
   useGetGeneralSettingsConfirmSceneDeletionQuery,

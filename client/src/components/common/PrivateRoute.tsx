@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router'
 import { LinearProgress } from '@mui/material'
 import { useIsAuthenticatedQuery } from '../../store/api/slice'
 

@@ -59,7 +59,7 @@ import {
   Publish
 } from '@mui/icons-material'
 import { MO } from 'flipflip-common'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import {
   useGetDisplayQuery,
   useGetDisplaySettingsQuery

@@ -14,7 +14,7 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { PLT } from 'flipflip-common'
 import Jiggle from '../animations/Jiggle'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {

@@ -32,7 +32,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 import Sortable from 'react-sortablejs'
 import { RP } from 'flipflip-common'
 import SceneSelect from '../configGroups/SceneSelect'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import {
   useGetPlaylistQuery,
   useGetScenePlaylistItemQuery,

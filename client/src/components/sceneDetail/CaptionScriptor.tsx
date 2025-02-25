@@ -62,7 +62,7 @@ import CodeMirror, {
   tupleSetters
 } from './CodeMirror'
 import BaseSlider from '../common/slider/BaseSlider'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import {
   useGetCaptionScriptQuery,
   useGetSceneQuery,

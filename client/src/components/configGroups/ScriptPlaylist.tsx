@@ -24,7 +24,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
