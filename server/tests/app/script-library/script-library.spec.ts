@@ -1134,6 +1134,88 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   ).not.toBeChecked()
 
   await page.getByTestId('ClearIcon').click()
+  for(let i = 0; i < 5; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
+  }
+
+  await page.getByRole('combobox').fill('pastebin')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(2)
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: 'https://pastebin.com/raw/LDvJvg0C'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: 'https://pastebin.com/raw/ZNJ5A40S'
+    })
+  ).toBeVisible()
+  
+  await page.getByTestId('SelectAllIcon').click()
+  for (let i = 0; i < 2; i++) {
+    await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
+  }
+
+  await page.getByRole('combobox').click()
+  await page.locator('.MuiAutocomplete-root').getByLabel('Clear').click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(5)
+  await expect(
+    page
+      .locator('#sortable-list li', {
+        hasText: 'https://pastebin.com/raw/LDvJvg0C'
+      })
+      .getByRole('checkbox')
+  ).toBeChecked()
+  await expect(
+    page
+      .locator('#sortable-list li', {
+        hasText: 'https://pastebin.com/raw/ZNJ5A40S'
+      })
+      .getByRole('checkbox')
+  ).toBeChecked()
+  await expect(
+    page
+      .locator('#sortable-list li', {
+        hasText: path.join(
+          __dirname,
+          '..',
+          '..',
+          'data',
+          'scripts',
+          'bpm-timing.txt'
+        )
+      })
+      .getByRole('checkbox')
+  ).not.toBeChecked()
+  await expect(
+    page
+      .locator('#sortable-list li', {
+        hasText: path.join(
+          __dirname,
+          '..',
+          '..',
+          'data',
+          'scripts',
+          'phrases.txt'
+        )
+      })
+      .getByRole('checkbox')
+  ).not.toBeChecked()
+  await expect(
+    page
+      .locator('#sortable-list li', {
+        hasText: path.join(
+          __dirname,
+          '..',
+          '..',
+          'data',
+          'scripts',
+          'phrase-groups.txt'
+        )
+      })
+      .getByRole('checkbox')
+  ).not.toBeChecked()
 })
 
 test('Batch Tag Single Caption Script', async ({ page }) => {

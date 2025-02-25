@@ -50,7 +50,7 @@ import SortIcon from '@mui/icons-material/Sort'
 import LibrarySearch from './LibrarySearch'
 import ScriptSourceList from './ScriptSourceList'
 import { en, AF, MO, SF, SP, SLT, BatchTagOperation } from 'flipflip-common'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import {
   useBatchTagCaptionScriptsMutation,
   useCreateCaptionScriptsMutation,
@@ -70,7 +70,7 @@ import { selectSpecialMode } from '../../store/app/selectors'
 import { setSpecialMode } from '../../store/app/slice'
 import {
   selectScriptLibrarySelectedTagIDs,
-  selectScriptLibrarySelectedTagNames
+  selectLibrarySelectedTagNames
 } from '../../store/api/selectors'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryFilters } from '../../store/scriptLibrary/selectors'
@@ -354,7 +354,7 @@ function ScriptLibrary() {
     selectScriptLibrarySelectedTagIDs(selected)
   )
   const selectedTagNames = useAppSelector(
-    selectScriptLibrarySelectedTagNames(selectedTagIDs)
+    selectLibrarySelectedTagNames(selectedTagIDs)
   )
   const specialMode = useAppSelector(selectSpecialMode())
   const filters = useAppSelector(selectScriptLibraryFilters())
@@ -364,11 +364,12 @@ function ScriptLibrary() {
     if (specialMode === SP.batchTag) {
       setSelected([])
       setSelectedTags([])
-      dispatch(setSpecialMode(''))
     } else {
       dispatch(saveScriptLibraryYOffset())
       navigate(-1)
     }
+
+    dispatch(setSpecialMode(undefined))
   }, [dispatch, specialMode])
 
   useEffect(() => {
@@ -479,7 +480,7 @@ function ScriptLibrary() {
   }
 
   const onSelectAll = () => {
-    setSelected(scripts ?? [])
+    setSelected(displaySources ?? [])
   }
 
   const onSelectNone = () => {

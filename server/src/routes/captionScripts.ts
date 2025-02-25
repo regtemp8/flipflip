@@ -58,7 +58,7 @@ router.post('/', async (req, res, next) => {
   const messages: Message[] = []
   const urls: string[] = []
   for(const url of req.body) {
-    if(url === '' || url.startsWith('http') || (isText(url, false) && fs.existsSync(url))) {
+    if(url === '' || url.startsWith('http') || (isText(url, true) && fs.existsSync(url))) {
       urls.push(url)
     } else {
       messages.push({error: `Invalid caption script file: ${url}`})
@@ -99,7 +99,7 @@ router.get('/filtered', async (req, res) => {
     return
   }
 
-  let filteredScripts: number[] = []
+  const filteredScripts: number[] = []
   filtersQuery = decodeURIComponent(filtersQuery as string)
   const filters = filtersQuery.split(',')
   for (const source of scripts) {
@@ -209,7 +209,7 @@ router.post('/mark', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const ids = req.body as number[]
   try {
-    markCaptionScripts(userId, ids)
+    await markCaptionScripts(userId, ids)
     res.status(204).end()
   } catch (error) {
     next(error)
@@ -232,7 +232,7 @@ router.patch('/:id', async (req, res, next) => {
     const update = toCaptionScriptUpdate(req.body)
     if(update.url) {
       isUrl = update.url.startsWith('http')
-      if(!isUrl && (!isText(update.url, false) || !fs.existsSync(update.url))) {
+      if(!isUrl && (!isText(update.url, true) || !fs.existsSync(update.url))) {
         res.status(400).send({error: `Invalid caption script path: ${update.url}`})
         return
       }

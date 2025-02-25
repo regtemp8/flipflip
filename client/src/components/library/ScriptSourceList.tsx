@@ -116,9 +116,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       window.removeEventListener('keyup', onKeyUp)
       _shiftDown.current = undefined
       _lastChecked.current = undefined
-      dispatch(saveScriptLibraryYOffset())
     }
-  }, [dispatch])
+  }, [])
 
   useEffect(() => {
     if (props.addHttpURL) {
