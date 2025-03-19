@@ -37,6 +37,8 @@ export * from './lib/json/FontSettingsType';
 export * from './lib/json/SceneSelectOptionsRequest';
 export * from './lib/json/CaptionScript';
 export * from './lib/json/Audio';
+export * from './lib/json/AudioAlbum';
+export * from './lib/json/AudioArtist';
 export * from './lib/json/CleanBackupsRequest';
 export * from './lib/json/MoveRequest';
 export * from './lib/json/SortRequest';

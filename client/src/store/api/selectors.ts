@@ -1,4 +1,4 @@
-import { FontSettingsType } from 'flipflip-common'
+import { Audio, FontSettingsType } from 'flipflip-common'
 import {
   useGetCacheSettingsQuery,
   useGetClipQuery,
@@ -1448,12 +1448,35 @@ export const selectScriptLibrarySelectedTagIDs = (ids: number[]) => {
   })
 }
 
+const createGetAudioSelector = createSelector(
+  (id: number) => id,
+  (id) => flipflipApi.endpoints.getAudio.select(id)
+)
+
+export const selectAudioLibrarySelectedTagIDs = (ids: number[]) => {
+  const inputs = ids.map((id) => createGetAudioSelector(id))
+  return createSelector(inputs, (...outputs) => {
+    const counts = new Map<number, number>()
+    outputs
+      .flatMap((output) => output?.data?.tags ?? [])
+      .forEach((tag: number) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
+    const tagIDs: number[] = []
+    counts.forEach((value, key) => {
+      if (value === outputs.length) {
+        tagIDs.push(key)
+      }
+    })
+
+    return tagIDs
+  })
+}
+
 const createGetTagSelector = createSelector(
   (id: number) => id,
   (id) => flipflipApi.endpoints.getTag.select(id)
 )
 
-export const selectScriptLibrarySelectedTagNames = (ids: number[]) => {
+export const selectLibrarySelectedTagNames = (ids: number[]) => {
   const inputs = ids.map((id) => createGetTagSelector(id))
   return createSelector(inputs, (...outputs) =>
     outputs.map((output) => output?.data?.name ?? '').sort()

@@ -7,7 +7,7 @@ import React, {
   useCallback
 } from 'react'
 import { cx } from '@emotion/css'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Route, Routes, useNavigate, useLocation } from 'react-router'
 
 import {
   AppBar,
@@ -70,7 +70,7 @@ import SortIcon from '@mui/icons-material/Sort'
 
 import { red } from '@mui/material/colors'
 
-import { en, AF, ASF, ALT, MO, SP, PR, PLT, Audio } from 'flipflip-common'
+import { en, AF, ASF, ALT, MO, SP, BatchTagOperation } from 'flipflip-common'
 import LibrarySearch from './LibrarySearch'
 import AudioSourceList from './AudioSourceList'
 import AudioArtistList from './AudioArtistList'
@@ -78,21 +78,30 @@ import AudioAlbumList from './AudioAlbumList'
 import PlaylistSelect from '../common/PlaylistSelect'
 import PlaylistList from './PlaylistList'
 import AudioEdit from './AudioEdit'
-import { useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
+  useBatchTagAudiosMutation,
   useCreateAudiosMutation,
   useGetAudioBatchTagOptionsQuery,
   useGetAudioSearchOptionsQuery,
   useGetAudiosQuery,
   useGetFilteredAudiosQuery,
   useGetTutorialsQuery,
-  useSortAudiosMutation
+  useSortAudiosMutation,
+  useMarkAudiosMutation,
+  useDeleteAudiosMutation
 } from '../../store/api/slice'
+import {
+  selectAudioLibrarySelectedTagIDs,
+  selectLibrarySelectedTagNames
+} from '../../store/api/selectors'
 import FilePicker from '../common/FilePicker'
+import { setAudioLibraryFilters } from '../../store/audioLibrary/slice'
 import { selectAudioLibraryFilters } from '../../store/audioLibrary/selectors'
 import { editAudioEdit } from '../../store/audioEdit/thunks'
+import { saveAudioLibraryYOffset } from '../../store/audioLibrary/thunks'
+import { setSpecialMode } from '../../store/app/slice'
 
 const drawerWidth = 240
 
@@ -438,96 +447,182 @@ const getOpenTab = (pathname: string) => {
     : index
 }
 
+interface PlaylistsTabProps {
+  specialMode?: string
+  filters: string[]
+  displaySources: number[]
+  onClickPlaylist: (playlist: string) => void
+}
+
+function PlaylistsTab(props: PlaylistsTabProps) {
+  const {classes} = useStyles()
+  const {specialMode,filters,onClickPlaylist} = props
+  return (<Box p={2} className={classes.fill}>
+    <PlaylistList
+      showHelp={!specialMode && filters.length === 0}
+      onClickPlaylist={onClickPlaylist}
+    />
+  </Box>)
+}
+
+interface ArtistsTabProps {
+  specialMode?: string
+  filters: string[]
+  displaySources: number[]
+  onClickArtist: (artist: string) => void
+}
+
+function ArtistsTab(props: ArtistsTabProps) {
+  const {classes} = useStyles()
+  const {specialMode,filters,displaySources,onClickArtist} = props
+  return (<Box p={2} className={classes.fill}>
+    <AudioArtistList
+      sources={displaySources ?? []}
+      showHelp={!specialMode && filters.length === 0}
+      onClickArtist={onClickArtist}
+    />
+  </Box>)
+}
+
+interface AlbumsTabProps {
+  specialMode?: string
+  filters: string[]
+  displaySources: number[]
+  onClickAlbum: (album: string) => void
+  onClickArtist: (artist: string) => void
+}
+
+function AlbumsTab(props: AlbumsTabProps) {
+  const {classes} = useStyles()
+  const {specialMode,filters,displaySources,onClickAlbum,onClickArtist} = props
+  return (<Box p={2} className={classes.fill}>
+    <AudioAlbumList
+      sources={displaySources ?? []}
+      showHelp={!specialMode && filters.length === 0}
+      onClickAlbum={onClickAlbum}
+      onClickArtist={onClickArtist}
+    />
+  </Box>)
+}
+
+interface TracksTabProps {
+  cachePath: string
+  specialMode?: string
+  selected: number[]
+  filters: string[]
+  audios: number[]
+  displaySources: number[]
+  playlist?: string
+  onClickAlbum: (album: string) => void
+  onClickArtist: (artist: string) => void
+  onUpdateSelected: (selected: number[]) => void
+}
+
+function TracksTab(props: TracksTabProps) {
+  const {classes} = useStyles()
+  const {cachePath,specialMode,selected,filters,audios,displaySources,playlist,onClickAlbum,onClickArtist,onUpdateSelected} = props
+  return (<Box className={classes.fill}>
+    <AudioSourceList
+      cachePath={cachePath}
+      isSelect={!!specialMode}
+      selected={selected}
+      showHelp={!specialMode && filters.length === 0}
+      audios={audios}
+      filters={filters}
+      sources={displaySources}
+      playlist={playlist}
+      onClickAlbum={onClickAlbum}
+      onClickArtist={onClickArtist}
+      onUpdateSelected={onUpdateSelected}
+    />
+  </Box>)
+}
+
 function AudioLibrary() {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const [createAudios] = useCreateAudiosMutation()
   const [sortAudios] = useSortAudiosMutation()
+  const [batchTagAudios] = useBatchTagAudiosMutation()
+  const [markAudios] = useMarkAudiosMutation()
   const { data: tutorials } = useGetTutorialsQuery()
   const { data: audios } = useGetAudiosQuery()
   const { data: tagOptions } = useGetAudioBatchTagOptionsQuery()
   const { data: searchOptions } = useGetAudioSearchOptionsQuery()
 
-  const tutorial = ''
-  const playlistId = 0
+  const openTab = getOpenTab(location.pathname)
+  const tutorial = undefined
+  const playlistId = undefined
   const tagsCount = 0
   const specialMode = useAppSelector(selectSpecialMode())
   const progressMode = ''
   const progressCurrent = 0
   const progressTotal = 100
-  const selected: number[] = []
   const loadingSources = false
   const loadingMetadata = false
-  const selectedTags: string[] = []
   const error = false
-  const commonAudio: Partial<Audio> = {
-    id: 0,
-    marked: false,
-    tags: [],
-    volume: 0,
-    speed: 1,
-    stopAtEnd: false,
-    nextSceneAtEnd: false,
-    tick: false,
-    tickMode: '',
-    tickDelay: 0,
-    tickMinDelay: 0,
-    tickMaxDelay: 0,
-    tickSinRate: 0,
-    tickBPMMulti: 0,
-    bpm: 0,
-    playedCount: 0
-  }
 
   const [openMenu, setOpenMenu] = useState<string>()
   const [cachePath, setCachePath] = useState<string>('')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selected, setSelected] = useState<number[]>([])
   const [importURL, setImportURL] = useState<string>()
 
   const _menuAnchorEl = useRef<any>()
 
+  const selectedTagIDs = useAppSelector(
+    selectAudioLibrarySelectedTagIDs(selected)
+  )
+  const selectedTagNames = useAppSelector(
+    selectLibrarySelectedTagNames(selectedTagIDs)
+  )
   const filters = useAppSelector(selectAudioLibraryFilters())
   const { data: displaySources } = useGetFilteredAudiosQuery(filters)
+  const [deleteAudios] = useDeleteAudiosMutation()
 
-  const toggleMarked = useCallback(
-    () => {
-      // dispatch(toggleAudiosMarked(displaySources))
-    },
-    [
-      /*dispatch, displaySources*/
-    ]
-  )
+  const goBack = useCallback(() => {
+    const modes = [SP.batchTag, SP.batchEdit, SP.addToPlaylist]
+    if(specialMode != null && modes.includes(specialMode)) {
+      setSelected([])
+      setSelectedTags([])
+    }
 
-  useEffect(
-    () => {
-      // getCachePath(cachingDirectory)
-      //   .then((path) => path ?? '')
-      //   .then(setCachePath)
+    if (specialMode === SP.batchTag) {
+      onBatchTag()
+    } else if (specialMode === SP.batchEdit) {
+      onBatchEdit()
+    } else if (specialMode === SP.addToPlaylist) {
+      onAddToPlaylist()
+    } else {
+      dispatch(saveAudioLibraryYOffset())
+      navigate(-1)
+    }
 
-      // Use alt+M to toggle highlighting  sources
-      const onKeyDown = (e: KeyboardEvent) => {
-        // if (
-        //   !e.shiftKey &&
-        //   !e.ctrlKey &&
-        //   e.altKey &&
-        //   (e.key === 'm' || e.key === 'µ')
-        // ) {
-        //   toggleMarked()
-        // } else if (e.key === 'Escape' && specialMode != null) {
-        //   dispatch(goBack())
-        // }
+    dispatch(setSpecialMode(undefined))
+  }, [dispatch, specialMode])
+
+  useEffect(() => {
+    const onKeyDown = async (e: KeyboardEvent) => {
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        e.altKey &&
+        (e.key === 'm' || e.key === 'µ') &&
+        displaySources != null
+      ) {
+        await markAudios(displaySources)
+      } else if (e.key === 'Escape' && specialMode) {
+        goBack()
       }
+    }
 
-      window.addEventListener('keydown', onKeyDown, false)
-      return () => {
-        window.removeEventListener('keydown', onKeyDown)
-      }
-    },
-    [
-      /*cachingDirectory, dispatch, specialMode, toggleMarked*/
-    ]
-  )
+    window.addEventListener('keydown', onKeyDown, false)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [goBack, specialMode, markAudios, displaySources])
 
   // useEffect(() => {
   //   getCachePath(cachingDirectory)
@@ -541,56 +636,56 @@ function AudioLibrary() {
     }
   }, [tutorial, drawerOpen])
 
-  const onChangeTab = (e: any, newTab: number) => {
-    // if (newTab !== openTab) {
-    //   dispatch(setAudioOpenTab(newTab))
-    // }
-  }
-
   const onClickPlaylist = (playlist: string) => {
     // dispatch(setAudioOpenTab(3))
     // dispatch(setAudioFilters(['playlist:' + playlist]))
   }
 
   const onClickArtist = (artist: string) => {
-    // dispatch(setAudioOpenTab(2))
-    // dispatch(
-    //   setAudioFilters(
-    //     filters
-    //       .filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
-    //       .concat(['artist:' + artist])
-    //   )
-    // )
+    const newFilters = filters.filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
+    newFilters.push('artist:' + artist)
+    dispatch(setAudioLibraryFilters(newFilters))
+    gotoTracksTab()
   }
 
   const onClickAlbum = (album: string) => {
-    // dispatch(setAudioOpenTab(3))
-    // dispatch(
-    //   setAudioFilters(
-    //     filters
-    //       .filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
-    //       .concat(['album:' + album])
-    //   )
-    // )
+    const newFilters = filters.filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
+    newFilters.push('album:' + album)
+    dispatch(setAudioLibraryFilters(newFilters))
+    gotoTracksTab()
+  }
+
+  const gotoTracksTab = () => {
+    if(openTab != 3) {
+      navigate(tabRoutes[3], {replace: true})
+    }
   }
 
   const onAddToPlaylist = () => {
     onCloseDialog()
+    dispatch(setSpecialMode(SP.addToPlaylist))
+    gotoTracksTab()
     // dispatch(addToPlaylist())
   }
 
   const onBatchTag = () => {
     onCloseDialog()
-    // dispatch(batchTag())
+    dispatch(setSpecialMode(SP.batchTag))
+    gotoTracksTab()
   }
 
   const onBatchEdit = () => {
     onCloseDialog()
-    // dispatch(batchEdit())
+    dispatch(setSpecialMode(SP.batchEdit))
+    gotoTracksTab()
   }
 
-  const onUpdateFilters = (filters: string[]) => {
-    // dispatch(setAudioFilters(filters))
+  const onTabChange = (tabIndex: number) => {
+    if(openTab === 3) {
+      dispatch(saveAudioLibraryYOffset())
+    }
+
+    navigate(tabRoutes[tabIndex], {replace: true})
   }
 
   const onURLChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -610,8 +705,15 @@ function AudioLibrary() {
     }
   }
 
-  const onAddURL = () => {
-    // dispatch(onAddAudioUrl(importURL as string, cachePath as string))
+  const onOpenLocalFiles = async (chosenFiles?: string[]) => {
+    onCloseDialog()
+    if (chosenFiles != null) {
+      await createAudios(chosenFiles)
+    }
+  }
+
+  const onAddURL = async () => {
+    await createAudios([importURL as string])
     onCloseDialog()
   }
 
@@ -620,13 +722,13 @@ function AudioLibrary() {
   }
 
   const onToggleBatchTagModal = () => {
-    // if (openMenu === MO.batchTag) {
-    //   setOpenMenu(undefined)
-    //   dispatch(setSelectedTags([]))
-    // } else {
-    //   setOpenMenu(MO.batchTag)
-    //   dispatch(setSelectedTags(selectedTagNames))
-    // }
+    if (openMenu === MO.batchTag) {
+      setOpenMenu(undefined)
+      setSelectedTags([])
+    } else {
+      setOpenMenu(MO.batchTag)
+      setSelectedTags(selectedTagNames)
+    }
   }
 
   const onShowBatchEditModal = () => {
@@ -664,7 +766,7 @@ function AudioLibrary() {
   }
 
   const onSelectTags = (selectedTags: string[]) => {
-    // dispatch(setSelectedTags(selectedTags))
+    setSelectedTags(selectedTags)
   }
 
   const onToggleDrawer = () => {
@@ -693,8 +795,8 @@ function AudioLibrary() {
     setOpenMenu(MO.removeAllAlert)
   }
 
-  const onFinishRemoveAll = () => {
-    // dispatch(setAudios([]))
+  const onFinishRemoveAll = async () => {
+    await deleteAudios(undefined)
     onCloseDialog()
   }
 
@@ -707,51 +809,48 @@ function AudioLibrary() {
     // dispatch(setAudioFilters([]))
   }
 
-  const onFinishRemoveVisible = () => {
-    // dispatch(removeAudios(displaySources))
+  const onFinishRemoveVisible = async () => {
+    await deleteAudios(displaySources)
     onCloseDialog()
-    // dispatch(setAudioFilters([]))
+    dispatch(setAudioLibraryFilters([]))
   }
 
   const onImportFromLibrary = () => {
     // dispatch(importAudioFromLibrary(selected))
   }
   const onUpdateSelected = (selected: number[]) => {
-    // dispatch(setAudioSelected(selected))
+    setSelected(selected)
   }
   const onSelectAll = () => {
-    // dispatch(setAudioSelected(displaySources))
+    setSelected(displaySources ?? [])
   }
   const onSelectNone = () => {
-    // dispatch(
-    //   setAudioSelected(selected.filter((id) => !displaySources.includes(id)))
-    // )
+    setSelected([])
   }
 
-  const batchTagOverwrite = () => {
-    // dispatch(setAudiosTags(selected, selectedTags))
+  const batchTagOverwrite = async () => {
+    await batchTag('overwrite')
     onCloseDialog()
   }
 
-  const batchTagAdd = () => {
-    // dispatch(setAudiosAddTags(selected, selectedTags))
+  const batchTagAdd = async () => {
+    await batchTag('add')
     onCloseDialog()
   }
 
-  const batchTagRemove = () => {
-    // dispatch(setAudiosRemoveTags(selected, selectedTags))
+  const batchTagRemove = async () => {
+    await batchTag('remove')
     onCloseDialog()
   }
 
-  const onOpenLocalFiles = async (chosenFiles?: string[]) => {
-    onCloseDialog()
-    if (chosenFiles != null) {
-      await createAudios(chosenFiles)
-    }
-  }
+  const batchTag = async (operation: BatchTagOperation) =>
+    await batchTagAudios({
+      operation,
+      ids: selected,
+      tags: selectedTags
+    })
 
   const { classes } = useStyles()
-  const openTab = getOpenTab(location.pathname)
   const open = drawerOpen
   const playlist = filters
     .find((f) => f.startsWith('playlist:'))
@@ -778,9 +877,7 @@ function AudioLibrary() {
                 color="inherit"
                 aria-label="Back"
                 className={classes.backButton}
-                onClick={() => {
-                  navigate(-1)
-                }}
+                onClick={goBack}
                 size="large"
               >
                 <ArrowBackIcon />
@@ -826,7 +923,9 @@ function AudioLibrary() {
                 options={searchOptions ?? []}
                 placeholder={'Search ...'}
                 isCreatable
-                onUpdateFilters={onUpdateFilters}
+                onUpdateFilters={(filters) =>
+                  dispatch(setAudioLibraryFilters(filters))
+                }
               />
             </div>
           </div>
@@ -870,7 +969,6 @@ function AudioLibrary() {
           <Tabs
             orientation="vertical"
             value={openTab}
-            onChange={onChangeTab}
             aria-label="audio library tabs"
             className={classes.tabs}
           >
@@ -884,9 +982,7 @@ function AudioLibrary() {
                 classes.playlistsTab,
                 !open && classes.tabClose
               )}
-              component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[0]} />
-              )}
+              onClick={() => onTabChange(0)}
             />
             <Tab
               id="vertical-tab-1"
@@ -898,9 +994,7 @@ function AudioLibrary() {
                 classes.artistsTab,
                 !open && classes.tabClose
               )}
-              component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[1]} />
-              )}
+              onClick={() => onTabChange(1)}
             />
             <Tab
               id="vertical-tab-2"
@@ -912,9 +1006,7 @@ function AudioLibrary() {
                 classes.albumsTab,
                 !open && classes.tabClose
               )}
-              component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[2]} />
-              )}
+              onClick={() => onTabChange(2)}
             />
             <Tab
               id="vertical-tab-3"
@@ -926,9 +1018,7 @@ function AudioLibrary() {
                 classes.songsTab,
                 !open && classes.tabClose
               )}
-              component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[3]} />
-              )}
+              onClick={() => onTabChange(3)}
             />
           </Tabs>
         </div>
@@ -938,7 +1028,10 @@ function AudioLibrary() {
         <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
             <ListItemButton
-              onClick={() => navigate('/tags')}
+              onClick={() => {
+                dispatch(saveAudioLibraryYOffset())
+                navigate('/tags')
+              }}
               disabled={specialMode != null}
             >
               <ListItemIcon>
@@ -1043,71 +1136,42 @@ function AudioLibrary() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth={false} className={classes.container}>
-          {openTab === 0 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <PlaylistList
-                    showHelp={!specialMode && filters.length === 0}
-                    onClickPlaylist={onClickPlaylist}
-                  />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 1 && (
-            <Typography className={classes.tabSection} component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <AudioArtistList
-                    sources={displaySources ?? []}
-                    showHelp={!specialMode && filters.length === 0}
-                    onClickArtist={onClickArtist}
-                  />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 2 && (
-            <Typography className={classes.tabSection} component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <AudioAlbumList
-                    sources={displaySources ?? []}
-                    showHelp={!specialMode && filters.length === 0}
-                    onClickAlbum={onClickAlbum}
-                    onClickArtist={onClickArtist}
-                  />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 3 && (
-            <Typography className={classes.tabSection} component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box className={classes.fill}>
-                  <AudioSourceList
-                    cachePath={cachePath}
-                    isSelect={!!specialMode}
-                    selected={selected}
-                    showHelp={!specialMode && filters.length === 0}
-                    audios={displaySources ?? []}
-                    playlist={playlist}
-                    onClickAlbum={onClickAlbum}
-                    onClickArtist={onClickArtist}
-                    onUpdateSelected={onUpdateSelected}
-                  />
-                </Box>
-              </div>
-            </Typography>
-          )}
+          <div className={classes.tabPanel}>
+            <div className={classes.drawerSpacer} />
+            <Routes>
+              <Route path="/playlists" element={<PlaylistsTab 
+                specialMode={specialMode}
+                filters={filters}
+                displaySources={displaySources ?? []}
+                onClickPlaylist={onClickPlaylist}
+              />} />
+              <Route path="/artists" element={<ArtistsTab 
+                specialMode={specialMode}
+                filters={filters}
+                displaySources={displaySources ?? []}
+                onClickArtist={onClickArtist}
+              />} />
+              <Route path="/albums" element={<AlbumsTab 
+                specialMode={specialMode}
+                filters={filters}
+                displaySources={displaySources ?? []}
+                onClickArtist={onClickArtist}
+                onClickAlbum={onClickAlbum}
+              />} />
+              <Route path="*" element={<TracksTab 
+                  cachePath={cachePath}
+                  specialMode={specialMode}
+                  selected={selected}
+                  filters={filters}
+                  audios={audios ?? []}
+                  displaySources={displaySources ?? []}
+                  playlist={playlist}
+                  onClickAlbum={onClickAlbum}
+                  onClickArtist={onClickArtist}
+                  onUpdateSelected={onUpdateSelected}
+              />} />
+            </Routes>
+          </div>
         </Container>
       </main>
 
@@ -1243,10 +1307,10 @@ function AudioLibrary() {
               disableInteractive
               title={
                 filters.length === 0
-                  ? 'Delete All Sources'
+                  ? 'Delete All Tracks'
                   : playlist
                     ? 'Delete Playlist'
-                    : 'Delete These Sources'
+                    : 'Delete These Tracks'
               }
               placement="left"
             >
@@ -1272,8 +1336,7 @@ function AudioLibrary() {
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you really wanna delete your entire audio
-                    library...? ಠ_ಠ
+                    Are you sure you want to delete your entire audio library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -1281,18 +1344,17 @@ function AudioLibrary() {
                     Cancel
                   </Button>
                   <Button onClick={onFinishRemoveAll} color="primary">
-                    Yea... I'm sure
+                    Confirm
                   </Button>
                 </DialogActions>
               </React.Fragment>
             )}
             {filters.length > 0 && !playlist && (
               <React.Fragment>
-                <DialogTitle id="remove-all-title">Delete Sources</DialogTitle>
+                <DialogTitle id="remove-all-title">Delete Audio Tracks</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you want to remove these sources from your
-                    audio library?
+                    Are you sure you want to remove these tracks from your library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -1484,7 +1546,7 @@ function AudioLibrary() {
               fullWidth
               placeholder="Paste URL Here"
               margin="dense"
-              value={importURL == null ? '' : importURL}
+              value={importURL ?? ''}
               onChange={onURLChange}
             />
           </DialogContent>
@@ -1496,6 +1558,7 @@ function AudioLibrary() {
               className={cx(error && classes.error)}
               onClick={onAddURL}
               color="primary"
+              disabled={!importURL}
             >
               Import
             </Button>

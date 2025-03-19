@@ -37,7 +37,9 @@ import {
   SelectOption,
   BatchTagRequest,
   AudioSortRequest,
-  ContentSortRequest
+  ContentSortRequest,
+  AudioAlbum,
+  AudioArtist
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -821,7 +823,7 @@ export const flipflipApi = createApi({
     }),
     getFilteredCaptionScripts: builder.query<number[], string[]>({
       query: (filters) => {
-        let filtersQuery = encodeURIComponent(filters.join(','))
+        let filtersQuery = encodeURIComponent(JSON.stringify(filters))
         if (filtersQuery !== '') {
           filtersQuery = '?filters=' + filtersQuery
         }
@@ -888,15 +890,9 @@ export const flipflipApi = createApi({
             const status = reason.meta?.response?.status
             // TODO implement etags (412)
             // TODO implement userId checks (403)
-            if (status === 412 || status === 403) {
+            if (status === 412 || status === 403 || status === 400) {
               dispatch(
                 flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
-              )
-            } else if (status === 400) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'CaptionScript', id }
-                ])
               )
             } else if (status === 404) {
               dispatch(
@@ -1216,8 +1212,12 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted(v, { dispatch, queryFulfilled }) {
         await queryFulfilled
-          .then(({ meta }) => {
+          .then(({ data, meta }) => {
             if (meta?.response?.ok) {
+              if(data != null) {
+                snackbar().showMessages(data)
+              }
+
               dispatch(
                 flipflipApi.util.invalidateTags([
                   { type: 'Audio', id: 'List' },
@@ -1237,9 +1237,31 @@ export const flipflipApi = createApi({
       }),
       providesTags: [{ type: 'Audio', id: 'List' }]
     }),
+    getAudioAlbums: builder.query<AudioAlbum[], number[]>({
+      query: (ids) => {
+        let idsQuery = encodeURIComponent(JSON.stringify(ids))
+        if (idsQuery !== '') {
+          idsQuery = '?ids=' + idsQuery
+        }
+
+        return { url: `api/audios/albums${idsQuery}` }
+      },
+      providesTags: [{ type: 'Audio', id: 'AlbumList' }]
+    }),
+    getAudioArtists: builder.query<AudioArtist[], number[]>({
+      query: (ids) => {
+        let idsQuery = encodeURIComponent(JSON.stringify(ids))
+        if (idsQuery !== '') {
+          idsQuery = '?ids=' + idsQuery
+        }
+
+        return { url: `api/audios/artists${idsQuery}` }
+      },
+      providesTags: [{ type: 'Audio', id: 'ArtistList' }]
+    }),
     getFilteredAudios: builder.query<number[], string[]>({
       query: (filters) => {
-        let filtersQuery = encodeURIComponent(filters.join(','))
+        let filtersQuery = encodeURIComponent(JSON.stringify(filters))
         if (filtersQuery !== '') {
           filtersQuery = '?filters=' + filtersQuery
         }
@@ -1287,6 +1309,22 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    deleteAudios: builder.mutation<void, number[] | undefined>({
+      query: (ids) => ({
+        url: `api/audios`,
+        method: 'DELETE',
+        body: { ids }
+      }),
+      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Audio' }])
+            )
+          }
+        })
+      }
+    }),
     updateAudio: builder.mutation<void, Pick<Audio, 'id'> & Partial<Audio>>({
       query: ({ id, ...patch }) => ({
         url: `api/audios/${id}`,
@@ -1294,14 +1332,40 @@ export const flipflipApi = createApi({
         body: patch
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(flipflipApi.util.invalidateTags([{ type: 'Audio', id }]))
-          }
-        })
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'Audio', id: 'FilteredList' },
+                  { type: 'Audio', id: 'AlbumList'},
+                  { type: 'Audio', id: 'ArtistList'}
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            if(typeof reason.error === 'object' && reason.error != null && 'data' in reason.error) {
+              snackbar().showMessage(reason.error.data as Message)
+            }
+
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403 || status === 400) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'Audio', id }])
+              )
+            } else if (status === 404) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'Audio', id },
+                  { type: 'Audio', id: 'FilteredList' },
+                  { type: 'Audio', id: 'List' }
+                ])
+              )
+            }
+          })
       }
     }),
     uploadAudioThumb: builder.mutation<Pick<Audio, 'thumb'>, Pick<Audio, 'thumb'>>({
@@ -1554,11 +1618,14 @@ export const {
   useUpdateCaptionScriptFontSettingsMutation,
   useCreateAudiosMutation,
   useGetAudiosQuery,
+  useGetAudioAlbumsQuery,
+  useGetAudioArtistsQuery,
   useGetFilteredAudiosQuery,
   useGetAudioQuery,
   useLazyGetAudioBPMQuery,
   useLazyGetAudioMetadataQuery,
   useDeleteAudioMutation,
+  useDeleteAudiosMutation,
   useUpdateAudioMutation,
   useUploadAudioThumbMutation,
   useSortAudiosMutation,

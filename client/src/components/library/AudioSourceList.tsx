@@ -3,7 +3,6 @@ import React, {
   useState,
   useRef,
   ChangeEvent,
-  useCallback
 } from 'react'
 import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -23,9 +22,10 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import AudioSourceListItem from './AudioSourceListItem'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
 import { deleteAudio, moveAudio } from '../../store/api/thunks'
+import { selectAudioLibraryYOffset } from '../../store/audioLibrary/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -83,7 +83,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
 
-  const yOffset = 0
+  const yOffset = useAppSelector(selectAudioLibraryYOffset())
   const deleteDialogURL = ''
 
   const onSortEnd = ({
@@ -104,20 +104,6 @@ function AudioSourceList(props: AudioSourceListProps) {
     dispatch(moveAudio(newAudios, props.filters, newSources))
   }
 
-  const savePosition = useCallback(
-    () => {
-      // const sortableList = document.getElementById('sortable-list')
-      // if (sortableList) {
-      //   const scrollElement = sortableList.firstElementChild
-      //   const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      //   dispatch(setAudioYOffset(scrollTop))
-      // }
-    },
-    [
-      /*dispatch*/
-    ]
-  )
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Shift') _shiftDown.current = true
@@ -137,9 +123,8 @@ function AudioSourceList(props: AudioSourceListProps) {
       window.removeEventListener('keyup', onKeyUp)
       _shiftDown.current = undefined
       _lastChecked.current = undefined
-      savePosition()
     }
-  }, [savePosition])
+  }, [])
 
   const onDelete = (audioID: number) => {
     setDeleteDialog(audioID)
@@ -174,11 +159,11 @@ function AudioSourceList(props: AudioSourceListProps) {
     } else {
       if (
         _lastChecked.current &&
-        props.audios.includes(_lastChecked.current) &&
+        props.sources.includes(_lastChecked.current) &&
         _shiftDown.current
       ) {
         let start = false
-        for (const id of props.audios) {
+        for (const id of props.sources) {
           if (start && (id === audioID || id === _lastChecked.current)) {
             break
           }
@@ -240,7 +225,6 @@ function AudioSourceList(props: AudioSourceListProps) {
           onDelete={onDelete}
           onRemove={onRemove}
           onToggleSelect={onToggleSelect}
-          savePosition={savePosition}
         />
       )
     }
@@ -252,7 +236,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const { classes } = useStyles()
-  if (props.audios.length === 0) {
+  if (props.sources.length === 0) {
     return (
       <React.Fragment>
         <Typography
@@ -303,9 +287,9 @@ function AudioSourceList(props: AudioSourceListProps) {
                 document.getElementById('sortable-list') as HTMLElement
               }
               distance={5}
-              height={height - 1}
+              height={height}
               width={width}
-              audios={props.audios}
+              audios={props.sources}
               yOffset={yOffset}
               onSortEnd={onSortEnd}
             />

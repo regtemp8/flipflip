@@ -55,6 +55,16 @@ test('Audio BPM', async ({ page }) => {
 })
 
 test('Audio URL', async ({ page }) => {
+    /*
+    update url:
+      empty url:
+        show error message: 'Invalid audio path: ""'
+      duplicate url:
+        show error message: 'Duplicate audio URL: $URL'
+      duplicate path:
+        show error message: 'Duplicate audio path: $URL'
+    */
+
     // change from .mp3 to .mp4
     // audio stops playing
     // audio duration is 0:00

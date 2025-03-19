@@ -31,6 +31,7 @@ import { editAudioOptions } from '../../store/audioOptions/thunks'
 import { editAudioEdit } from '../../store/audioEdit/thunks'
 import { selectAudioLibraryIsLastSelected } from '../../store/audioLibrary/selectors'
 import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
+import { saveAudioLibraryYOffset } from '../../store/audioLibrary/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -187,7 +188,6 @@ export interface AudioSourceListItemProps {
   onDelete: (audioID: number) => void
   onRemove: (audioID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
-  savePosition: () => void
 }
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
@@ -201,8 +201,8 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
         .open(audio?.fileUrl, '_blank')
         ?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
+      dispatch(saveAudioLibraryYOffset())
       // TODO get playAudio to work
-      // props.savePosition()
       // try {
       //   dispatch(playAudio(props.audioID, props.audios))
       // } catch (e) {
@@ -366,31 +366,27 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
 
         <ListItemText classes={{ primary: classes.root }}>
           <Typography noWrap className={classes.trackName}>
-            {audio?.name}
+            {audio?.name ?? ''}
           </Typography>
           <Typography className={classes.trackDuration}>
-            {getTimestamp(audio?.duration as number)}
+            {audio?.duration != null ? getTimestamp(audio.duration) : ''}
           </Typography>
-          {audio?.artist && (
-            <div
-              className={classes.artistContainer}
-              onClick={() => props.onClickArtist(audio?.artist as string)}
-            >
-              <Typography noWrap className={classes.trackArtist}>
-                {audio?.artist}
-              </Typography>
-            </div>
-          )}
-          {audio?.album && (
-            <div
-              className={classes.albumContainer}
-              onClick={() => props.onClickAlbum(audio?.album as string)}
-            >
-              <Typography className={classes.trackAlbum}>
-                {audio?.album}
-              </Typography>
-            </div>
-          )}
+          <div
+            className={classes.artistContainer}
+            onClick={audio?.artist != null ? () => props.onClickArtist(audio.artist as string) : undefined}
+          >
+            <Typography noWrap className={classes.trackArtist}>
+              {audio?.artist ?? ''}
+            </Typography>
+          </div>
+          <div
+            className={classes.albumContainer}
+            onClick={audio?.album != null ? () => props.onClickAlbum(audio.album as string) : undefined}
+          >
+            <Typography className={classes.trackAlbum}>
+              {audio?.album ?? ''}
+            </Typography>
+          </div>
         </ListItemText>
       </ListItem>
     </div>

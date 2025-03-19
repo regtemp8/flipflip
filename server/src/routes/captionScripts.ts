@@ -101,7 +101,7 @@ router.get('/filtered', async (req, res) => {
 
   const filteredScripts: number[] = []
   filtersQuery = decodeURIComponent(filtersQuery as string)
-  const filters = filtersQuery.split(',')
+  const filters = JSON.parse(filtersQuery)
   for (const source of scripts) {
     let matchesFilter = true
     for (const filter of filters) {
@@ -131,22 +131,20 @@ router.get('/filtered', async (req, res) => {
       ) {
         if (filter.startsWith('-')) {
           const pattern = filter.substring(2, filter.length - 1)
-          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          const regex = new RegExp(pattern, 'i')
           matchesFilter = source.url != null && !regex.test(source.url)
         } else {
           const pattern = filter.substring(1, filter.length - 1)
-          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          const regex = new RegExp(pattern, 'i')
           matchesFilter = source.url != null && regex.test(source.url)
         }
       } else {
         // This is a search filter
-        let pattern = filter.replace('\\', '\\\\')
-        if (pattern.startsWith('-')) {
-          pattern = pattern.substring(1, pattern.length)
-          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+        if (filter.startsWith('-')) {
+          const regex = new RegExp(filter.substring(1, filter.length), 'i')
           matchesFilter = source.url != null && !regex.test(source.url)
         } else {
-          const regex = new RegExp(pattern.replace('\\', '\\\\'), 'i')
+          const regex = new RegExp(filter, 'i')
           matchesFilter = source.url != null && regex.test(source.url)
         }
       }

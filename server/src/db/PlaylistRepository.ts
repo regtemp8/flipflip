@@ -1,4 +1,4 @@
-import { PlaylistType } from 'flipflip-common'
+import { PlaylistType, PLT } from 'flipflip-common'
 import db from './database'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
@@ -84,4 +84,18 @@ export async function deletePlaylist(id: number) {
 export async function clonePlaylist(id: number) {
   // TODO clone, also all child items
   return null
+}
+
+export async function isAudioPlaylistItem(audioId: number, playlistName: string) {
+  const rows = await db()
+    .query()
+    .selectFrom('audioPlaylistItem as pi')
+    .innerJoin('playlist as p', 'p.id', 'pi.playlistId')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('p.type', '=', PLT.audio)
+    .where('p.name', '=', playlistName)
+    .where('pi.audioId', '=', audioId)
+    .execute()
+
+  return rows.length > 0
 }

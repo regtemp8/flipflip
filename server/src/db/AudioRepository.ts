@@ -1,16 +1,18 @@
-import { Insertable, Kysely, SelectExpression, Updateable } from 'kysely'
+import { DeleteResult, Insertable, Kysely, SelectExpression, sql, Updateable } from 'kysely'
 import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'
 import {
   ASF,
+  AudioAlbum,
   AudioSortRequest,
   getSourceType,
   randomizeList,
   Audio as AudioJson,
   TF,
-  MoveRequest
+  MoveRequest,
+  AudioArtist
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 
@@ -36,14 +38,14 @@ export async function findAudioIds(): Promise<number[]> {
 export async function findAudioById(
   userId: number,
   id: number
-): Promise<Audio> {
+): Promise<Audio|undefined> {
   return await db()
     .query()
     .selectFrom('audio')
     .selectAll()
     .where('userId', '=', userId)
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export async function findAudioTagIds(
@@ -52,10 +54,13 @@ export async function findAudioTagIds(
 ): Promise<number[]> {
   return await db()
     .query()
-    .selectFrom('audioTag')
-    .select('tagId')
-    .where('userId', '=', userId)
-    .where('id', '=', id)
+    .selectFrom('audioTag as at')
+    .innerJoin('tag as t', 't.id', 'at.tagId')
+    .select('at.tagId')
+    .where('at.userId', '=', userId)
+    .where('t.userId', '=', userId)
+    .where('at.audioId', '=', id)
+    .orderBy('t.name asc')
     .execute()
     .then((value) => value.map(({ tagId }) => tagId))
 }
@@ -80,6 +85,61 @@ export async function findAudioThumbById(id: number, userId: number): Promise<st
     .where('userId', '=', userId)
     .executeTakeFirst()
     .then((row) => row?.thumb ?? undefined)
+}
+
+export async function findAudioAlbums(ids: number[], userId: number): Promise<AudioAlbum[]> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => [
+      'album', 
+      sql<string>`json_group_array(artist)`.as('artists'),
+      eb.fn.max('thumb').as('thumb'), 
+      eb.fn.countAll<number>().as('count')
+    ])
+    .where('id', 'in', ids)
+    .where('userId', '=', userId)
+    .where('album', '<>', '')
+    .groupBy('album')
+    .orderBy('album asc')
+    .execute()
+    .then((rows) => {
+      return rows.map((row) => {
+        let artist: string
+        let isSingleArtist = false
+        const artists = JSON.parse(row.artists).filter((a: string) => !!a)
+        if(artists.length === 1) {
+          artist = artists[0]
+          isSingleArtist = true
+        } else if (artists.length > 1) {
+          artist = 'Various Artists'
+        } else {
+          artist = 'Unknown Artist'
+        }
+
+        return {
+          name: row.album as string,
+          artist,
+          isSingleArtist,
+          thumb: row.thumb ?? undefined,
+          count: row.count
+        }
+      })
+    })
+}
+
+export async function findAudioArtists(ids: number[], userId: number): Promise<AudioArtist[]> {
+  return await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => ['artist', eb.fn.max('thumb').as('thumb')])
+    .where('id', 'in', ids)
+    .where('userId', '=', userId)
+    .where('artist', '<>', '')
+    .groupBy('artist')
+    .orderBy('artist asc')
+    .execute()
+    .then((rows) => rows.map((row) => ({name: row.artist as string, thumb: row.thumb ?? undefined})))
 }
 
 export async function createAudios(
@@ -127,26 +187,156 @@ export async function createAudios(
         }
       })
 
-      await trx
+      return await trx
         .insertInto('audio')
         .values(values)
         .onConflict((oc) => oc.doNothing())
+        .returning('id')
         .execute()
     })
 }
 
 export type AudioUpdate = Updateable<Audio>
-export async function updateAudio(id: number, update: AudioUpdate) {
-  if (update.url != null) {
+export async function updateAudio(
+  id: number,
+  update: AudioUpdate
+) {
+  if (update.url == null) {
+    await db()
+      .query()
+      .updateTable('audio')
+      .set(update)
+      .where('id', '=', id)
+      .execute()
+
+    return false
+  } else {
     update.type = getSourceType(update.url)
   }
 
   return await db()
     .query()
-    .updateTable('audio')
-    .set(update)
-    .where('id', '=', id)
+    .transaction()
+    .execute(async (trx) => {
+      const url = update.url as string
+      const sameUrl = await trx
+        .selectFrom('audio')
+        .select(['id', 'index'])
+        .where('id', '<>', id)
+        .where('url', '=', url)
+        .executeTakeFirst()
+
+      if (sameUrl != null) {
+        await trx
+          .deleteFrom('audioPlaylistItem')
+          .where('audioId', '=', id)
+          .execute()
+        await trx
+          .deleteFrom('audioTag')
+          .where('audioId', '=', id)
+          .execute()
+
+        const { index } = await trx
+          .deleteFrom('audio')
+          .where('id', '=', id)
+          .returning('index')
+          .executeTakeFirstOrThrow()
+
+        if (index < sameUrl.index) {
+          await trx
+            .updateTable('audio')
+            .set({ index })
+            .where('id', '=', sameUrl.id)
+            .execute()
+        }
+
+        await trx
+          .updateTable('audio')
+          .set((eb) => ({ index: eb('index', '-', 1) }))
+          .where('index', '>', Math.max(index, sameUrl.index))
+          .execute()
+      } else {
+        await trx
+          .updateTable('audio')
+          .set(update)
+          .where('id', '=', id)
+          .execute()
+      }
+
+      return sameUrl != null
+    })
+}
+
+export async function isUntagged(id: number) {
+  const { count } = await db()
+    .query()
+    .selectFrom('audioTag')
+    .select((eb) => eb.fn.countAll<number>().as('count'))
+    .where('audioId', '=', id)
+    .executeTakeFirstOrThrow()
+
+  return count === 0
+}
+
+export async function hasTag(id: number, tagName: string) {
+  const rows = await db()
+    .query()
+    .selectFrom('tag as t')
+    .select((eb) => eb.lit(1).as('exists'))
+    .innerJoin('audioTag as at', 'at.tagId', 't.id')
+    .where('at.audioId', '=', id)
+    .where('t.name', '=', tagName)
     .execute()
+
+  return rows.length === 1
+}
+
+export async function isArtistDefined(id: number) {
+  const rows = await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('id', '=', id)
+    .where('artist', '<>', '')
+    .execute()
+
+  return rows.length === 1
+}
+
+export async function hasArtist(id: number, artist: string) {
+  const rows = await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('id', '=', id)
+    .where('artist', '=', artist)
+    .execute()
+
+  return rows.length === 1
+}
+
+export async function isAlbumDefined(id: number) {
+  const rows = await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('id', '=', id)
+    .where('album', '<>', '')
+    .execute()
+
+  return rows.length === 1
+}
+
+export async function hasAlbum(id: number, album: string) {
+  const rows = await db()
+    .query()
+    .selectFrom('audio')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('id', '=', id)
+    .where('album', '=', album)
+    .execute()
+
+  return rows.length === 1
 }
 
 export async function findBatchTagOptions(
@@ -244,7 +434,11 @@ async function insertAudioTags(
     }
   }
 
-  return await trx.insertInto('audioTag').values(values).execute()
+  return await trx
+    .insertInto('audioTag')
+    .values(values)
+    .onConflict((oc) => oc.doNothing())
+    .execute()
 }
 
 export async function setAudioTags(
@@ -262,8 +456,10 @@ export async function setAudioTags(
         .where('audioId', 'in', ids)
         .execute()
 
-      const tagIds = await findTagIdsByName(tags, trx)
-      await insertAudioTags(userId, ids, tagIds, trx)
+      if (tags.length > 0) {
+        const tagIds = await findTagIdsByName(tags, trx)
+        await insertAudioTags(userId, ids, tagIds, trx)
+      }
     })
 }
 
@@ -344,6 +540,40 @@ export async function deleteAudio(id: number) {
         .execute()
 
       return result
+    })
+}
+
+export async function deleteAllAudios(ids?: number[]) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      let playlistItemQuery = trx.deleteFrom('audioPlaylistItem')
+      let tagQuery = trx.deleteFrom('audioTag')
+      let audioQuery = trx.deleteFrom('audio')
+
+      if (ids != null) {
+        playlistItemQuery = playlistItemQuery.where(
+          'audioId',
+          'in',
+          ids
+        )
+        tagQuery = tagQuery.where('audioId', 'in', ids)
+        audioQuery = audioQuery.where('id', 'in', ids)
+      }
+
+      const result = await Promise.all(
+        [playlistItemQuery, tagQuery, audioQuery].map(
+          (query) => query.execute()
+        )
+      )
+      const numDeletedRows = result
+        .flatMap((r) => r)
+        .map((r) => r.numDeletedRows)
+        .reduce<bigint>((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, BigInt(0))
+      return new DeleteResult(numDeletedRows)
     })
 }
 
