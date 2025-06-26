@@ -394,22 +394,18 @@ router.patch('/:id', async (req, res, next) => {
         !isAudio(update.url, false) ||
         (!isUrl && !fs.existsSync(update.url))
       ) {
-        res
-          .status(400)
-          .send({
-            error: `Invalid audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
-          })
+        res.status(400).send({
+          error: `Invalid audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
+        })
         return
       }
     }
 
     const didDeleteRow = await updateAudio(Number(req.params.id), update)
     if (didDeleteRow) {
-      res
-        .status(404)
-        .send({
-          error: `Duplicate audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
-        })
+      res.status(404).send({
+        error: `Duplicate audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
+      })
     } else {
       res.status(204).end()
     }

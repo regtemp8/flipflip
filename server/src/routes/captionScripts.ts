@@ -247,11 +247,9 @@ router.patch('/:id', async (req, res, next) => {
       update
     )
     if (didDeleteRow) {
-      res
-        .status(404)
-        .send({
-          error: `Duplicate caption script ${isUrl ? 'URL' : 'path'}: ${update.url}`
-        })
+      res.status(404).send({
+        error: `Duplicate caption script ${isUrl ? 'URL' : 'path'}: ${update.url}`
+      })
     } else {
       res.status(204).end()
     }
