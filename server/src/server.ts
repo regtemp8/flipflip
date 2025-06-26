@@ -43,12 +43,10 @@ void (async function () {
 
   const SQLiteStore = connect(session)
   const app = express()
-  app.use(
-    cors({
-      origin: 'http://localhost:5173',
-      credentials: true
-    })
-  )
+  if (process.env.NODE_ENV !== "production") {
+    const {default: cors} = await import(path.join(__dirname, "cors"));
+    app.use(cors);
+  }
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
@@ -79,8 +77,8 @@ void (async function () {
   app.use('/api/tags', tags)
   app.use('/api/audios', audios)
   app.use('/api/caption-scripts', captionScripts)
-  app.use('api/display-playlist-items', displayPlaylistItems)
-  app.use('api/scene-playlist-items', scenePlaylistItems)
+  app.use('/api/display-playlist-items', displayPlaylistItems)
+  app.use('/api/scene-playlist-items', scenePlaylistItems)
   app.use('/fs', files)
   app.use(
     (
