@@ -43,9 +43,9 @@ void (async function () {
 
   const SQLiteStore = connect(session)
   const app = express()
-  if (process.env.NODE_ENV !== "production") {
-    const {default: cors} = await import(path.join(__dirname, "cors"));
-    app.use(cors);
+  if (process.env.NODE_ENV !== 'production') {
+    const { default: cors } = await import(path.join(__dirname, 'cors'))
+    app.use(cors)
   }
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
@@ -95,9 +95,21 @@ void (async function () {
     }
   )
 
-  // start the Express server
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     logger.info(`Server listening on port ${port}`)
+  })
+
+  const signals = ['SIGTERM', 'SIGINT'] 
+  signals.forEach((signal) => {
+    process.on(signal, () => {
+      logger.info(`${signal} signal received: closing HTTP server`)
+      server.close(async () => {
+        logger.info('HTTP server closed')
+        await db().destroy()
+        logger.info('Database connection closed')
+        process.exit(0)
+      })
+    })
   })
 
   scheduler().init()
