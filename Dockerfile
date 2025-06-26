@@ -1,25 +1,45 @@
-ARG NODE_VERSION=20.0.0
-FROM node:${NODE_VERSION}-alpine AS builder
+ARG SERVER_PORT="8080"
+ARG NODE_ENV="production"
 
-WORKDIR /app
-COPY ./common ./common
-COPY ./client ./client
-COPY ./server ./server
+FROM node:20-alpine AS builder
+ARG SERVER_PORT
+ARG NODE_ENV
 
 RUN corepack enable
 RUN corepack prepare yarn@stable --activate
 
-ENV NODE_ENV production
+COPY --chown=node:node . /home/node/builder
 
-RUN cd ./common \
-    && yarn install --immutable \
-    && yarn build:main \
-    && yarn build:module \
-    && cd ../client \
-    && yarn install --immutable \
-    && yarn build \
-    && cd ../server \
-    && yarn install --immutable \
-    && yarn build
+WORKDIR /home/node/builder/common
+RUN yarn install --immutable
+RUN yarn build:main
+RUN yarn build:module
 
-# TODO add second build stage where copy from server/bin to ./ and client/dist to ./public
+WORKDIR /home/node/builder/client
+RUN yarn install --immutable
+RUN yarn build
+
+WORKDIR /home/node/builder/server
+RUN yarn install --immutable
+RUN yarn prod
+
+FROM node:20-alpine
+ARG SERVER_PORT
+ARG NODE_ENV
+ENV NODE_ENV=$NODE_ENV
+ENV FF_PORT=$SERVER_PORT
+ENV FF_USERNAME=admin
+ENV FF_PASSWORD=admin
+
+COPY --chown=node:node ./server/package.json /home/node/server/
+COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
+COPY --chown=node:node --from=builder /home/node/builder/client/dist /home/node/server/public
+COPY --chown=node:node --from=builder /home/node/builder/common/build/module /home/node/common
+WORKDIR /home/node/server
+
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
+RUN yarn workspaces focus --production
+
+EXPOSE ${SERVER_PORT}
+ENTRYPOINT ["yarn", "node", "./server.js"]
