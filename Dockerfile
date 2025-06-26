@@ -34,7 +34,7 @@ ENV FF_PASSWORD=admin
 COPY --chown=node:node ./server/package.json /home/node/server/
 COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
 COPY --chown=node:node --from=builder /home/node/builder/client/dist /home/node/server/public
-COPY --chown=node:node --from=builder /home/node/builder/common/build/module /home/node/common
+COPY --chown=node:node --from=builder /home/node/builder/common/build/main /home/node/common
 WORKDIR /home/node/server
 
 RUN corepack enable
