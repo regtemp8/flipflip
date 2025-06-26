@@ -28,8 +28,6 @@ ARG SERVER_PORT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 ENV FF_PORT=$SERVER_PORT
-ENV FF_USERNAME=admin
-ENV FF_PASSWORD=admin
 
 COPY --chown=node:node ./server/package.json /home/node/server/
 COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
