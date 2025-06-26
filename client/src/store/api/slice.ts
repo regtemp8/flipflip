@@ -1,7 +1,4 @@
-import {
-  createApi,
-  fetchBaseQuery
-} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Credentials } from '../../data/Credentials'
 import {
   AccountChange,
@@ -47,7 +44,7 @@ import snackbar from '../../data/Snackbar'
 export const flipflipApi = createApi({
   reducerPath: 'flipflipApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:5050/',
+    baseUrl: `http://localhost:${import.meta.env.VITE_PORT}/`,
     credentials: 'include'
   }),
   tagTypes: [
@@ -134,7 +131,7 @@ export const flipflipApi = createApi({
           url: `logout`
         }
       },
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(flipflipApi.util.resetApiState())
       }
@@ -147,7 +144,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(flipflipApi.util.resetApiState())
       }
@@ -160,7 +157,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(flipflipApi.util.resetApiState())
       }
@@ -199,7 +196,7 @@ export const flipflipApi = createApi({
           method: 'POST'
         }
       },
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(flipflipApi.util.resetApiState())
       }
@@ -211,7 +208,7 @@ export const flipflipApi = createApi({
           method: 'POST'
         }
       },
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(flipflipApi.util.resetApiState())
       }
@@ -254,7 +251,7 @@ export const flipflipApi = createApi({
     }),
     getPlaylistOptions: builder.query<SceneGroupItem[], string>({
       query: (type: string) => `api/playlists/options/${type}`,
-      providesTags: (result, error, type) =>
+      providesTags: (result, _error, type) =>
         result != null ? [{ type: 'PlaylistOptions', id: type }] : []
     }),
     getTutorials: builder.query<Tutorials, void>({
@@ -273,7 +270,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -296,7 +293,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -319,7 +316,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -342,7 +339,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -373,7 +370,7 @@ export const flipflipApi = createApi({
           body
         }
       },
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
           .then(async (reason) => {
             if (!reason.meta?.response?.ok) {
@@ -433,27 +430,27 @@ export const flipflipApi = createApi({
     }),
     getSceneWeightGroups: builder.query<WeightGroup[], number>({
       query: (id) => `api/scenes/${id}/weight-groups`,
-      providesTags: (weightGroups, error, id) =>
+      providesTags: (weightGroups, _error, id) =>
         weightGroups != null ? [{ type: 'SceneWeightGroups', id }] : []
     }),
     getSceneScriptPlaylists: builder.query<string[], number>({
       query: (id) => `api/scenes/${id}/script-playlists`,
-      providesTags: (playlists, error, id) =>
+      providesTags: (playlists, _error, id) =>
         playlists != null ? [{ type: 'SceneScriptPlaylists', id }] : []
     }),
     getSceneAudioPlaylists: builder.query<string[], number>({
       query: (id) => `api/scenes/${id}/audio-playlists`,
-      providesTags: (playlists, error, id) =>
+      providesTags: (playlists, _error, id) =>
         playlists != null ? [{ type: 'SceneAudioPlaylists', id }] : []
     }),
     getSceneDisableWeightOptions: builder.query<boolean, number>({
       query: (id) => `api/scenes/${id}/disable-weight-options`,
-      providesTags: (result, error, id) =>
+      providesTags: (_result, error, id) =>
         error == null ? [{ type: 'SceneDisableWeightOptions', id }] : []
     }),
     getSceneHasBPM: builder.query<boolean, number>({
       query: (id) => `api/scenes/${id}/has-bpm`,
-      providesTags: (result, error, id) =>
+      providesTags: (_result, error, id) =>
         error == null ? [{ type: 'SceneHasBPM', id }] : []
     }),
     getSceneSettings: builder.query<Scene, void>({
@@ -483,10 +480,9 @@ export const flipflipApi = createApi({
         url: `api/scene-playlists`,
         method: 'POST'
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     addSceneScriptPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
@@ -494,10 +490,9 @@ export const flipflipApi = createApi({
         url: `api/scenes/${id}/script-playlists`,
         method: 'POST'
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     deleteSceneScriptPlaylist: builder.mutation<
@@ -508,10 +503,9 @@ export const flipflipApi = createApi({
         url: `api/scenes/${sceneID}/script-playlists/${playlistID}`,
         method: 'DELETE'
       }),
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     addSceneAudioPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
@@ -519,10 +513,9 @@ export const flipflipApi = createApi({
         url: `api/scenes/${id}/audio-playlists`,
         method: 'POST'
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     deleteSceneAudioPlaylist: builder.mutation<
@@ -533,10 +526,9 @@ export const flipflipApi = createApi({
         url: `api/scenes/${sceneID}/audio-playlists/${playlistID}`,
         method: 'DELETE'
       }),
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     getTags: builder.query<number[], void>({
@@ -549,7 +541,7 @@ export const flipflipApi = createApi({
         url: `api/tags`,
         method: 'DELETE'
       }),
-      async onQueryStarted(res, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(({ meta }) => {
           if (meta?.response?.ok) {
             dispatch(flipflipApi.util.invalidateTags(['Tag']))
@@ -621,21 +613,19 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'ContentSource', id: 'List' },
-                  { type: 'ContentSource', id: 'FilteredList' }
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'ContentSource', id: 'List' },
+                { type: 'ContentSource', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     getDisplays: builder.query<number[], void>({
@@ -727,10 +717,9 @@ export const flipflipApi = createApi({
         url: `api/playlists/${id}/clone`,
         method: 'POST'
       }),
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     deletePlaylist: builder.mutation<void, number>({
@@ -738,10 +727,9 @@ export const flipflipApi = createApi({
         url: `api/playlists/${id}`,
         method: 'DELETE'
       }),
-      async onQueryStarted({}, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          // TODO error handling needed?
-        })
+      async onQueryStarted(_ /*{ queryFulfilled }*/) {
+        // TODO error handling needed?
+        // await queryFulfilled.catch((reason) => {})
       }
     }),
     getSceneSelectOptions: builder.query<
@@ -794,25 +782,23 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ data, meta }) => {
-            if (meta?.response?.ok) {
-              if(data != null) {
-                snackbar().showMessages(data)
-              }
-
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'CaptionScript', id: 'List' },
-                  { type: 'CaptionScript', id: 'FilteredList' }
-                ])
-              )
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ data, meta }) => {
+          if (meta?.response?.ok) {
+            if (data != null) {
+              snackbar().showMessages(data)
             }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'CaptionScript', id: 'List' },
+                { type: 'CaptionScript', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     getCaptionScripts: builder.query<number[], void>({
@@ -861,7 +847,7 @@ export const flipflipApi = createApi({
         method: 'DELETE',
         body: { ids }
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(({ meta }) => {
           if (meta?.response?.ok) {
             dispatch(
@@ -881,29 +867,32 @@ export const flipflipApi = createApi({
         body: patch
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .catch((reason) => {
-            if(typeof reason.error === 'object' && reason.error != null && 'data' in reason.error) {
-              snackbar().showMessage(reason.error.data as Message)
-            }
+        await queryFulfilled.catch((reason) => {
+          if (
+            typeof reason.error === 'object' &&
+            reason.error != null &&
+            'data' in reason.error
+          ) {
+            snackbar().showMessage(reason.error.data as Message)
+          }
 
-            const status = reason.meta?.response?.status
-            // TODO implement etags (412)
-            // TODO implement userId checks (403)
-            if (status === 412 || status === 403 || status === 400) {
-              dispatch(
-                flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
-              )
-            } else if (status === 404) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'CaptionScript', id },
-                  { type: 'CaptionScript', id: 'FilteredList' },
-                  { type: 'CaptionScript', id: 'List' }
-                ])
-              )
-            }
-          })
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403 || status === 400) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'CaptionScript', id }])
+            )
+          } else if (status === 404) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'CaptionScript', id },
+                { type: 'CaptionScript', id: 'FilteredList' },
+                { type: 'CaptionScript', id: 'List' }
+              ])
+            )
+          }
+        })
       }
     }),
     getCaptionScriptFontSettings: builder.query<
@@ -913,7 +902,7 @@ export const flipflipApi = createApi({
       query: ({ id, type }) => ({
         url: `api/caption-scripts/${id}/font-settings/${type}`
       }),
-      providesTags: (result, error, { id, type }) => {
+      providesTags: (result, _error, { id, type }) => {
         return result != null
           ? [{ type: 'CaptionScriptFontSettings', id: `${id}:${type}` }]
           : []
@@ -1008,21 +997,19 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(request, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...request.ids.map((id) => ({ type: 'Audio' as const, id })),
-                  'AudioBatchTagOptions',
-                  'AudioSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...request.ids.map((id) => ({ type: 'Audio' as const, id })),
+                'AudioBatchTagOptions',
+                'AudioSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     batchTagContentSources: builder.mutation<void, BatchTagRequest>({
@@ -1034,25 +1021,23 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(request, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...request.ids.map((id) => ({
-                    type: 'ContentSource' as const,
-                    id
-                  })),
-                  'ContentSourceBatchTagOptions',
-                  'IgnoredTagOptions',
-                  'ContentSourceSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...request.ids.map((id) => ({
+                  type: 'ContentSource' as const,
+                  id
+                })),
+                'ContentSourceBatchTagOptions',
+                'IgnoredTagOptions',
+                'ContentSourceSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     batchTagCaptionScripts: builder.mutation<void, BatchTagRequest>({
@@ -1064,24 +1049,22 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(request, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...request.ids.map((id) => ({
-                    type: 'CaptionScript' as const,
-                    id
-                  })),
-                  'CaptionScriptBatchTagOptions',
-                  'CaptionScriptSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...request.ids.map((id) => ({
+                  type: 'CaptionScript' as const,
+                  id
+                })),
+                'CaptionScriptBatchTagOptions',
+                'CaptionScriptSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     markAudios: builder.mutation<void, number[]>({
@@ -1093,20 +1076,18 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(ids, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...ids.map((id) => ({ type: 'Audio' as const, id })),
-                  'AudioSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...ids.map((id) => ({ type: 'Audio' as const, id })),
+                'AudioSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     markContentSources: builder.mutation<void, number[]>({
@@ -1118,20 +1099,18 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(ids, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...ids.map((id) => ({ type: 'ContentSource' as const, id })),
-                  'ContentSourceSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...ids.map((id) => ({ type: 'ContentSource' as const, id })),
+                'ContentSourceSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     markCaptionScripts: builder.mutation<void, number[]>({
@@ -1143,20 +1122,18 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(ids, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  ...ids.map((id) => ({ type: 'CaptionScript' as const, id })),
-                  'CaptionScriptSearchOptions'
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                ...ids.map((id) => ({ type: 'CaptionScript' as const, id })),
+                'CaptionScriptSearchOptions'
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     sortCaptionScripts: builder.mutation<void, SortRequest>({
@@ -1165,21 +1142,19 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'CaptionScript', id: 'List' },
-                  { type: 'CaptionScript', id: 'FilteredList' }
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'CaptionScript', id: 'List' },
+                { type: 'CaptionScript', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     moveCaptionScript: builder.mutation<void, MoveRequest>({
@@ -1188,7 +1163,7 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -1210,25 +1185,23 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ data, meta }) => {
-            if (meta?.response?.ok) {
-              if(data != null) {
-                snackbar().showMessages(data)
-              }
-
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'Audio', id: 'List' },
-                  { type: 'Audio', id: 'FilteredList' }
-                ])
-              )
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ data, meta }) => {
+          if (meta?.response?.ok) {
+            if (data != null) {
+              snackbar().showMessages(data)
             }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'Audio', id: 'List' },
+                { type: 'Audio', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     getAudios: builder.query<number[], void>({
@@ -1303,7 +1276,11 @@ export const flipflipApi = createApi({
         await queryFulfilled.then(({ meta }) => {
           if (meta?.response?.ok) {
             dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'Audio', id }, { type: 'AudioBPM', id }, { type: 'AudioMetadata', id }])
+              flipflipApi.util.invalidateTags([
+                { type: 'Audio', id },
+                { type: 'AudioBPM', id },
+                { type: 'AudioMetadata', id }
+              ])
             )
           }
         })
@@ -1315,12 +1292,10 @@ export const flipflipApi = createApi({
         method: 'DELETE',
         body: { ids }
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(({ meta }) => {
           if (meta?.response?.ok) {
-            dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'Audio' }])
-            )
+            dispatch(flipflipApi.util.invalidateTags([{ type: 'Audio' }]))
           }
         })
       }
@@ -1338,14 +1313,18 @@ export const flipflipApi = createApi({
               dispatch(
                 flipflipApi.util.invalidateTags([
                   { type: 'Audio', id: 'FilteredList' },
-                  { type: 'Audio', id: 'AlbumList'},
-                  { type: 'Audio', id: 'ArtistList'}
+                  { type: 'Audio', id: 'AlbumList' },
+                  { type: 'Audio', id: 'ArtistList' }
                 ])
               )
             }
           })
           .catch((reason) => {
-            if(typeof reason.error === 'object' && reason.error != null && 'data' in reason.error) {
+            if (
+              typeof reason.error === 'object' &&
+              reason.error != null &&
+              'data' in reason.error
+            ) {
               snackbar().showMessage(reason.error.data as Message)
             }
 
@@ -1353,9 +1332,7 @@ export const flipflipApi = createApi({
             // TODO implement etags (412)
             // TODO implement userId checks (403)
             if (status === 412 || status === 403 || status === 400) {
-              dispatch(
-                flipflipApi.util.invalidateTags([{ type: 'Audio', id }])
-              )
+              dispatch(flipflipApi.util.invalidateTags([{ type: 'Audio', id }]))
             } else if (status === 404) {
               dispatch(
                 flipflipApi.util.invalidateTags([
@@ -1368,11 +1345,14 @@ export const flipflipApi = createApi({
           })
       }
     }),
-    uploadAudioThumb: builder.mutation<Pick<Audio, 'thumb'>, Pick<Audio, 'thumb'>>({
+    uploadAudioThumb: builder.mutation<
+      Pick<Audio, 'thumb'>,
+      Pick<Audio, 'thumb'>
+    >({
       query: ({ thumb }) => ({
         url: `api/audios/upload-thumb`,
         method: 'POST',
-        body: {thumb}
+        body: { thumb }
       })
     }),
     sortAudios: builder.mutation<void, AudioSortRequest>({
@@ -1381,21 +1361,19 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'Audio', id: 'List' },
-                  { type: 'Audio', id: 'FilteredList' }
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'Audio', id: 'List' },
+                { type: 'Audio', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     moveAudio: builder.mutation<void, MoveRequest>({
@@ -1404,7 +1382,7 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
@@ -1426,18 +1404,16 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Tag', id: 'List' }])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     createTag: builder.mutation<void, Omit<Tag, 'id'>>({
@@ -1446,23 +1422,21 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-          .then(({ meta }) => {
-            if (meta?.response?.ok) {
-              dispatch(
-                flipflipApi.util.invalidateTags([
-                  { type: 'Tag', id: 'List' },
-                  { type: 'CaptionScriptBatchTagOptions' },
-                  { type: 'ContentSourceBatchTagOptions' },
-                  { type: 'AudioBatchTagOptions' }
-                ])
-              )
-            }
-          })
-          .catch((reason) => {
-            // TODO error handling needed?
-          })
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'Tag', id: 'List' },
+                { type: 'CaptionScriptBatchTagOptions' },
+                { type: 'ContentSourceBatchTagOptions' },
+                { type: 'AudioBatchTagOptions' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
       }
     }),
     moveTag: builder.mutation<void, MoveRequest>({
@@ -1471,7 +1445,7 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted(v, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
