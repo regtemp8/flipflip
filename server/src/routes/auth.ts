@@ -69,7 +69,13 @@ passport.use(
   })
 )
 
-const allowed = ['/login/password', '/login/token']
+const allowed = [
+  '/login/password',
+  '/login/token',
+  '/',
+  '/index.html',
+  '/index.js'
+]
 const router = express.Router()
 router.use((req: Request, res: Response, next: NextFunction) => {
   if (req.user != null || allowed.includes(req.path)) {

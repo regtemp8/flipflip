@@ -42,7 +42,10 @@ export async function findContentSourceTagIds(
     .then((value) => value.map(({ tagId }) => tagId))
 }
 
-export async function findContentSourceUrlById(id: number, userId: number): Promise<string> {
+export async function findContentSourceUrlById(
+  id: number,
+  userId: number
+): Promise<string> {
   return await db()
     .query()
     .selectFrom('contentSource')

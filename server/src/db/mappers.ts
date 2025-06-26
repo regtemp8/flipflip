@@ -1236,7 +1236,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
   } = row
 
   let thumb: string | undefined = undefined
-  if(row.thumb != null) {
+  if (row.thumb != null) {
     thumb = toAudioThumb(row.thumb)
   }
 
@@ -1270,9 +1270,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
   }
 }
 
-export function toAudioUpdate(
-  audio: Partial<Audio>
-): AudioUpdate {
+export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
   const {
     url,
     marked,

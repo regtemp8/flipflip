@@ -76,7 +76,7 @@ export function getFileGroup(url: string): string {
     case ST.redgifs:
       let redgifID = ''
       if (url.includes('/browse?')) {
-        let redgifRegex =
+        const redgifRegex =
           /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(url)
         return redgifRegex != null ? redgifRegex[1] : 'all'
       } else if (url.includes('/users/')) {
@@ -209,7 +209,7 @@ export function getFileGroup(url: string): string {
       } else {
         sep = path.sep
       }
-      let name = url.substring(0, url.lastIndexOf(sep))
+      const name = url.substring(0, url.lastIndexOf(sep))
       return name.substring(name.lastIndexOf(sep) + 1)
     case ST.bdsmlr:
       let bdsmlrID = url.replace(/https?:\/\//, '')
@@ -269,7 +269,7 @@ export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
   }
   if (audio.name == null) {
     const sep = url.startsWith('http') ? '/' : path.sep
-    audio.name = url.substring(url.lastIndexOf(sep) + 1, url.lastIndexOf("."));
+    audio.name = url.substring(url.lastIndexOf(sep) + 1, url.lastIndexOf('.'))
   }
 
   return audio
@@ -311,7 +311,7 @@ export async function copyThumbFile(thumb: string) {
   const hash = await getFileHash(thumb)
   const extension = thumb.split('.').pop() ?? ''
   const thumbPath = path.join(getThumbsDir(), `${hash}.${extension}`)
-  if(!fs.existsSync(thumbPath)) {
+  if (!fs.existsSync(thumbPath)) {
     await fs.promises.copyFile(thumb, thumbPath)
   }
 

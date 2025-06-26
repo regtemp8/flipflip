@@ -19,28 +19,28 @@ class ProxyService {
     this.server = createProxyServer({})
     this.server.on('proxyRes', (proxyRes, req, res) => {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*')
-      if(proxyRes.statusCode != null && proxyRes.statusCode !== 200) {
+      if (proxyRes.statusCode != null && proxyRes.statusCode !== 200) {
         res.statusCode = proxyRes.statusCode
         res.statusMessage = proxyRes.statusMessage ?? ''
-        if(proxyRes.statusCode === 416) {
+        if (proxyRes.statusCode === 416) {
           const value = proxyRes.headers['content-range']
-          if(value != null) {
+          if (value != null) {
             res.setHeader('content-range', value)
           }
         }
-        
+
         res.end()
         return
       }
-      
+
       const headers = ['accept-ranges', 'content-type', 'date']
-      if(req.headers.range) {
+      if (req.headers.range) {
         headers.push('content-range')
       }
 
       headers.forEach((key) => {
         const value = proxyRes.headers[key]
-        if(value != null) {
+        if (value != null) {
           res.setHeader(key, value)
         }
       })
@@ -72,15 +72,10 @@ class ProxyService {
         proxyTimeout: 5000,
         selfHandleResponse: true
       }
-      this.server.web(
-        req,
-        res,
-        options,
-        (error, req, res) => {
-          logger.error(`Failed to proxy request ${url}`, { error });
-          (res as Response).status(500).end()
-        }
-      )
+      this.server.web(req, res, options, (error, req, res) => {
+        logger.error(`Failed to proxy request ${url}`, { error })
+        ;(res as Response).status(500).end()
+      })
     }
   }
 

@@ -148,7 +148,7 @@ void (async function () {
     'https://pastebin.com/raw/LDvJvg0C'
   ]
   for (const url of scriptUrls) {
-    const response = await fetch(url, {method: 'HEAD'})
+    const response = await fetch(url, { method: 'HEAD' })
     if (!response.ok) {
       throw new Error(`${response.status} - ${response.statusText}: ${url}`)
     }
@@ -172,7 +172,7 @@ void (async function () {
     'https://feeds.soundcloud.com/stream/338313073-royaltyfreemusic-nocopyrightmusic-foundation-vibe-tracks-free-download.mp3'
   ]
   for (const url of audioUrls) {
-    const response = await fetch(url, {method: 'HEAD'})
+    const response = await fetch(url, { method: 'HEAD' })
     if (!response.ok) {
       throw new Error(`${response.status} - ${response.statusText}: ${url}`)
     }

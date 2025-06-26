@@ -86,7 +86,10 @@ export async function clonePlaylist(id: number) {
   return null
 }
 
-export async function isAudioPlaylistItem(audioId: number, playlistName: string) {
+export async function isAudioPlaylistItem(
+  audioId: number,
+  playlistName: string
+) {
   const rows = await db()
     .query()
     .selectFrom('audioPlaylistItem as pi')

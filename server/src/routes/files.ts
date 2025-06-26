@@ -1,7 +1,13 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
 import express from 'express'
-import { FilePickerData, FilePickerItem, isAudio, isImage, isVideo } from 'flipflip-common'
+import {
+  FilePickerData,
+  FilePickerItem,
+  isAudio,
+  isImage,
+  isVideo
+} from 'flipflip-common'
 import logger from '../logger'
 import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
@@ -89,13 +95,13 @@ router.get('/file/audio-thumb/:name', async (req, res, next) => {
   const { name } = req.params
   try {
     const thumb = path.join(getThumbsDir(), name)
-    if(fs.existsSync(thumb)) {
+    if (fs.existsSync(thumb)) {
       res.status(200).type(name.substring(name.lastIndexOf('.')))
       fs.createReadStream(thumb).pipe(res)
     } else {
       res.status(404).end()
     }
-  } catch(error) {
+  } catch (error) {
     next(error)
   }
 })
@@ -117,21 +123,21 @@ router.get('/file/:type/:id', async (req, res, next) => {
   try {
     const userId = (req.user as User).id as number
     const url = await query(Number(id), userId)
-    if(url == null) {
+    if (url == null) {
       res.status(404).end()
     } else if (url.startsWith('http')) {
-      if(isVideo(url, true) || isAudio(url, true)) {
-        const uuid = proxy().set({url})
+      if (isVideo(url, true) || isAudio(url, true)) {
+        const uuid = proxy().set({ url })
         proxy().get(uuid, req, res)
       } else {
         res.status(302).location(url).end()
       }
-    } else if(!fs.existsSync(url)) {
+    } else if (!fs.existsSync(url)) {
       res.status(404).end()
     } else {
       let ranges = undefined
-      const {size} = await fs.promises.stat(url)
-      if(isVideo(url, true) || isAudio(url, true)) {
+      const { size } = await fs.promises.stat(url)
+      if (isVideo(url, true) || isAudio(url, true)) {
         res.setHeader('Accept-Ranges', 'bytes')
         ranges = req.range(size)
       }
@@ -146,7 +152,7 @@ router.get('/file/:type/:id', async (req, res, next) => {
         let status = 200
         let start = undefined
         let end = undefined
-        if(ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
+        if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
           status = 206
 
           // TODO handle multi part ranges
@@ -159,14 +165,14 @@ router.get('/file/:type/:id', async (req, res, next) => {
         res.on('error', (error) => {
           logger.error(`Failed to process file request ${req.url}`, { error })
         })
-        const stream = fs.createReadStream(url, {start, end})
+        const stream = fs.createReadStream(url, { start, end })
         stream.on('error', (error) => {
           logger.error(`Failed to read file ${req.url}`, { error })
         })
         stream.pipe(res)
       }
     }
-  } catch(error) {
+  } catch (error) {
     next(error)
   }
 })

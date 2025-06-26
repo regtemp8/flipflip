@@ -1,4 +1,11 @@
-import { DeleteResult, Insertable, Kysely, SelectExpression, sql, Updateable } from 'kysely'
+import {
+  DeleteResult,
+  Insertable,
+  Kysely,
+  SelectExpression,
+  sql,
+  Updateable
+} from 'kysely'
 import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
@@ -38,7 +45,7 @@ export async function findAudioIds(): Promise<number[]> {
 export async function findAudioById(
   userId: number,
   id: number
-): Promise<Audio|undefined> {
+): Promise<Audio | undefined> {
   return await db()
     .query()
     .selectFrom('audio')
@@ -65,7 +72,10 @@ export async function findAudioTagIds(
     .then((value) => value.map(({ tagId }) => tagId))
 }
 
-export async function findAudioUrlById(id: number, userId: number): Promise<string> {
+export async function findAudioUrlById(
+  id: number,
+  userId: number
+): Promise<string> {
   return await db()
     .query()
     .selectFrom('audio')
@@ -76,7 +86,10 @@ export async function findAudioUrlById(id: number, userId: number): Promise<stri
     .then((row) => row.url)
 }
 
-export async function findAudioThumbById(id: number, userId: number): Promise<string|undefined> {
+export async function findAudioThumbById(
+  id: number,
+  userId: number
+): Promise<string | undefined> {
   return await db()
     .query()
     .selectFrom('audio')
@@ -87,14 +100,17 @@ export async function findAudioThumbById(id: number, userId: number): Promise<st
     .then((row) => row?.thumb ?? undefined)
 }
 
-export async function findAudioAlbums(ids: number[], userId: number): Promise<AudioAlbum[]> {
+export async function findAudioAlbums(
+  ids: number[],
+  userId: number
+): Promise<AudioAlbum[]> {
   return await db()
     .query()
     .selectFrom('audio')
     .select((eb) => [
-      'album', 
+      'album',
       sql<string>`json_group_array(artist)`.as('artists'),
-      eb.fn.max('thumb').as('thumb'), 
+      eb.fn.max('thumb').as('thumb'),
       eb.fn.countAll<number>().as('count')
     ])
     .where('id', 'in', ids)
@@ -108,7 +124,7 @@ export async function findAudioAlbums(ids: number[], userId: number): Promise<Au
         let artist: string
         let isSingleArtist = false
         const artists = JSON.parse(row.artists).filter((a: string) => !!a)
-        if(artists.length === 1) {
+        if (artists.length === 1) {
           artist = artists[0]
           isSingleArtist = true
         } else if (artists.length > 1) {
@@ -128,7 +144,10 @@ export async function findAudioAlbums(ids: number[], userId: number): Promise<Au
     })
 }
 
-export async function findAudioArtists(ids: number[], userId: number): Promise<AudioArtist[]> {
+export async function findAudioArtists(
+  ids: number[],
+  userId: number
+): Promise<AudioArtist[]> {
   return await db()
     .query()
     .selectFrom('audio')
@@ -139,7 +158,12 @@ export async function findAudioArtists(ids: number[], userId: number): Promise<A
     .groupBy('artist')
     .orderBy('artist asc')
     .execute()
-    .then((rows) => rows.map((row) => ({name: row.artist as string, thumb: row.thumb ?? undefined})))
+    .then((rows) =>
+      rows.map((row) => ({
+        name: row.artist as string,
+        thumb: row.thumb ?? undefined
+      }))
+    )
 }
 
 export async function createAudios(
@@ -197,10 +221,7 @@ export async function createAudios(
 }
 
 export type AudioUpdate = Updateable<Audio>
-export async function updateAudio(
-  id: number,
-  update: AudioUpdate
-) {
+export async function updateAudio(id: number, update: AudioUpdate) {
   if (update.url == null) {
     await db()
       .query()
@@ -231,10 +252,7 @@ export async function updateAudio(
           .deleteFrom('audioPlaylistItem')
           .where('audioId', '=', id)
           .execute()
-        await trx
-          .deleteFrom('audioTag')
-          .where('audioId', '=', id)
-          .execute()
+        await trx.deleteFrom('audioTag').where('audioId', '=', id).execute()
 
         const { index } = await trx
           .deleteFrom('audio')
@@ -525,10 +543,7 @@ export async function deleteAudio(id: number) {
         .deleteFrom('audioPlaylistItem')
         .where('audioId', '=', id)
         .execute()
-      await trx
-        .deleteFrom('audioTag')
-        .where('audioId', '=', id)
-        .execute()
+      await trx.deleteFrom('audioTag').where('audioId', '=', id).execute()
       const result = await trx
         .deleteFrom('audio')
         .where('id', '=', id)
@@ -553,18 +568,14 @@ export async function deleteAllAudios(ids?: number[]) {
       let audioQuery = trx.deleteFrom('audio')
 
       if (ids != null) {
-        playlistItemQuery = playlistItemQuery.where(
-          'audioId',
-          'in',
-          ids
-        )
+        playlistItemQuery = playlistItemQuery.where('audioId', 'in', ids)
         tagQuery = tagQuery.where('audioId', 'in', ids)
         audioQuery = audioQuery.where('id', 'in', ids)
       }
 
       const result = await Promise.all(
-        [playlistItemQuery, tagQuery, audioQuery].map(
-          (query) => query.execute()
+        [playlistItemQuery, tagQuery, audioQuery].map((query) =>
+          query.execute()
         )
       )
       const numDeletedRows = result
@@ -664,7 +675,7 @@ function audioSortFunction(
         bValue = (b.name ?? '').replace(reA, '')
 
         const compare = aValue.localeCompare(bValue, 'en', { numeric: true })
-        if(compare != 0) {
+        if (compare != 0) {
           return ascending ? compare : compare * -1
         }
 
@@ -711,7 +722,7 @@ function audioSortFunction(
     } else if (aValue > bValue) {
       return ascending ? 1 : -1
     } else {
-      if (!!secondary) {
+      if (secondary) {
         return audioSortFunction(secondary, true)(a, b)
       } else {
         return 0

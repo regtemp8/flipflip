@@ -3,7 +3,8 @@ import {
   toContentSource,
   toContentSourceUpdate,
   toSearchSelectOptions,
-  toTagSelectOptions
+  toTagSelectOptions,
+  toIgnoredTagSelectOptions
 } from '../db/mappers'
 import {
   findContentSourceById,
@@ -22,7 +23,6 @@ import {
   findTotalCount,
   sortContentSources
 } from '../db/ContentSourceRepository'
-import { toIgnoredTagSelectOptions } from '../db/mappers'
 import { User } from '../db/types/generated'
 import { BatchTagRequest, ContentSortRequest } from 'flipflip-common'
 

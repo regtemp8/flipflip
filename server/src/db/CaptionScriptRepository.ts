@@ -157,7 +157,10 @@ export async function findCaptionScriptTagIds(
     .then((value) => value.map(({ tagId }) => tagId))
 }
 
-export async function findCaptionScriptUrlById(id: number, userId: number): Promise<string> {
+export async function findCaptionScriptUrlById(
+  id: number,
+  userId: number
+): Promise<string> {
   return await db()
     .query()
     .selectFrom('captionScript')
@@ -334,8 +337,15 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
       let query = trx
         .selectFrom('captionScript')
         .select(['id', trx.fn<string>('lower', ['url']).as('url')])
-      
-      sortColumns.get(sortBy)?.forEach((sort) => query = query.orderBy(`${sort as keyof CaptionScript} ${sortOrder}`))
+
+      sortColumns
+        .get(sortBy)
+        ?.forEach(
+          (sort) =>
+            (query = query.orderBy(
+              `${sort as keyof CaptionScript} ${sortOrder}`
+            ))
+        )
       let rows = await query.execute()
       if (sortBy === SF.random) {
         rows = randomizeList(rows)

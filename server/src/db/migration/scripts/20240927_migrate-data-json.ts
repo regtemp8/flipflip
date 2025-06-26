@@ -1,6 +1,5 @@
-import fs from 'fs'
+import fs, { existsSync, readFileSync } from 'fs'
 import crypto from 'crypto'
-import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { Kysely } from 'kysely'
 import { generateUsername } from 'unique-username-generator'
@@ -1152,7 +1151,9 @@ const audioInsert = async (
 
     let thumb: string | undefined = undefined
     if (audio.thumb != null && fs.existsSync(audio.thumb)) {
-      logger.info(`+ Create audio thumb {path} (id: ${id})`, { path: audio.thumb })
+      logger.info(`+ Create audio thumb {path} (id: ${id})`, {
+        path: audio.thumb
+      })
       thumb = await copyThumbFile(audio.thumb)
     }
 

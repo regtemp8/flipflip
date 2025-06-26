@@ -297,9 +297,13 @@ test('Edit Caption Script Options', async ({ page }) => {
   await expect(page).toHaveURL('/scripts/1/options')
   await page.getByTestId('ArrowBackIcon').click()
   await expect(page).toHaveURL('/script-library')
-  await expect(page.locator('#sortable-list > div > div > div').nth(0)).toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await expect(
+    page.locator('#sortable-list > div > div > div').nth(0)
+  ).toHaveCSS('background-color', 'rgb(159, 168, 218)')
   await page.locator('#sortable-list > div').click()
-  await expect(page.locator('#sortable-list > div > div > div').nth(0)).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await expect(
+    page.locator('#sortable-list > div > div > div').nth(0)
+  ).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
 })
 
 test('Edit Caption Script in Scriptor', async ({ page }) => {
@@ -307,9 +311,13 @@ test('Edit Caption Script in Scriptor', async ({ page }) => {
   await expect(page).toHaveURL('/scriptor/1')
   await page.getByTestId('ArrowBackIcon').click()
   await expect(page).toHaveURL('/script-library')
-  await expect(page.locator('#sortable-list > div > div > div').nth(0)).toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await expect(
+    page.locator('#sortable-list > div > div > div').nth(0)
+  ).toHaveCSS('background-color', 'rgb(159, 168, 218)')
   await page.locator('#sortable-list > div').click()
-  await expect(page.locator('#sortable-list > div > div > div').nth(0)).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
+  await expect(
+    page.locator('#sortable-list > div > div > div').nth(0)
+  ).not.toHaveCSS('background-color', 'rgb(159, 168, 218)')
 })
 
 test('Delete Single Caption Script', async ({ page }) => {
@@ -387,7 +395,9 @@ test('Add Same Local Caption Script', async ({ page }) => {
     )
   })
   await page.getByRole('button', { name: 'Choose', exact: true }).click()
-  await expect(page.getByText('No new caption scripts added', {exact: true})).toBeVisible()
+  await expect(
+    page.getByText('No new caption scripts added', { exact: true })
+  ).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
@@ -424,36 +434,60 @@ test('Add Same Local Caption Script', async ({ page }) => {
     )
   })
 
-  const filePath = path.join(__dirname, '..', '..', 'data', 'scripts', 'bpm-timing.txt')
-  await page
-    .locator('#sortable-list li input')
-    .fill(filePath)
+  const filePath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'data',
+    'scripts',
+    'bpm-timing.txt'
+  )
+  await page.locator('#sortable-list li input').fill(filePath)
   await expect(page.locator('#sortable-list li input')).toHaveValue(filePath)
   await page.locator('.MuiDrawer-root').click()
-  await expect(page.getByText(`Duplicate caption script path: ${filePath}`, {exact: true})).toBeVisible()
+  await expect(
+    page.getByText(`Duplicate caption script path: ${filePath}`, {
+      exact: true
+    })
+  ).toBeVisible()
 })
 
-test('Invalid Local Caption Script Path', async ({page}) => {
-  const filePath = path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.mp3')
+test('Invalid Local Caption Script Path', async ({ page }) => {
+  const filePath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'data',
+    'scripts',
+    'phrase-groups.mp3'
+  )
   await page.locator('#sortable-list li p').nth(1).click()
-  await page
-    .locator('#sortable-list li input')
-    .fill(filePath)
+  await page.locator('#sortable-list li input').fill(filePath)
   await expect(page.locator('#sortable-list li input')).toHaveValue(filePath)
   await page.locator('.MuiDrawer-root').click()
-  await expect(page.getByText(`Invalid caption script path: ${filePath}`, {exact: true})).toBeVisible()
+  await expect(
+    page.getByText(`Invalid caption script path: ${filePath}`, { exact: true })
+  ).toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
   )
 
-  const dirPath = path.join(__dirname, '..', '..', 'data', 'scripts', 'invalid', 'phrase-groups.txt')
+  const dirPath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'data',
+    'scripts',
+    'invalid',
+    'phrase-groups.txt'
+  )
   await page.locator('#sortable-list li p').nth(1).click()
-  await page
-    .locator('#sortable-list li input')
-    .fill(dirPath)
+  await page.locator('#sortable-list li input').fill(dirPath)
   await expect(page.locator('#sortable-list li input')).toHaveValue(dirPath)
   await page.locator('.MuiDrawer-root').click()
-  await expect(page.getByText(`Invalid caption script path: ${dirPath}`, {exact: true})).toBeVisible()
+  await expect(
+    page.getByText(`Invalid caption script path: ${dirPath}`, { exact: true })
+  ).toBeVisible()
   await expect(page.locator('#sortable-list li p').nth(1)).toHaveText(
     path.join(__dirname, '..', '..', 'data', 'scripts', 'phrase-groups.txt')
   )
@@ -560,7 +594,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   await responsePromise
 })
 
-test.fixme('Click Remote Script', async ({page}) => {
+test.fixme('Click Remote Script', async ({ page }) => {
   // TODO play remote script
 })
 
@@ -1134,7 +1168,7 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   ).not.toBeChecked()
 
   await page.getByTestId('ClearIcon').click()
-  for(let i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     await expect(page.getByRole('checkbox').nth(i)).not.toBeChecked()
   }
 
@@ -1151,7 +1185,7 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
       hasText: 'https://pastebin.com/raw/ZNJ5A40S'
     })
   ).toBeVisible()
-  
+
   await page.getByTestId('SelectAllIcon').click()
   for (let i = 0; i < 2; i++) {
     await expect(page.getByRole('checkbox').nth(i)).toBeChecked()
@@ -2008,7 +2042,12 @@ test('Add Same Remote Caption Script', async ({ page }) => {
     'https://pastebin.com/raw/ZNJ5A40S'
   )
   await page.locator('.MuiDrawer-root').click()
-  await expect(page.getByText('Duplicate caption script URL: https://pastebin.com/raw/ZNJ5A40S', {exact: true})).toBeVisible()
+  await expect(
+    page.getByText(
+      'Duplicate caption script URL: https://pastebin.com/raw/ZNJ5A40S',
+      { exact: true }
+    )
+  ).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
   await expect(page.locator('#sortable-list li p').nth(0)).toHaveText(
     'https://pastebin.com/raw/ZNJ5A40S'
