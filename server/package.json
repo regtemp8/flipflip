@@ -56,6 +56,7 @@
   "scripts": {
     "build": "yarn tsc",
     "dev": "yarn build && node --env-file=.env ./bin/server.js",
+    "prod": "yarn build -p tsconfig.production.json",
     "test": "yarn test:prepare && yarn build && node --env-file=./tests/config/.env ./bin/server.js",
     "test:prepare": "npx ts-node ./tests/config/create-test-env.ts",
     "lint": "eslint --fix --ignore-path .eslintignore --ext .js,.ts,.tsx .",
