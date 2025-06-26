@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -145,7 +145,9 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const specialMode = useAppSelector(selectSpecialMode())
-  const lastSelected = useAppSelector(selectScriptLibraryIsLastSelected(props.scriptID))
+  const lastSelected = useAppSelector(
+    selectScriptLibraryIsLastSelected(props.scriptID)
+  )
   const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
   const [urlInput, setUrlInput] = useState<string>('')
@@ -158,9 +160,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
 
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey && !e.ctrlKey) {
-      window
-        .open(script?.fileUrl, '_blank')
-        ?.focus()
+      window.open(script?.fileUrl, '_blank')?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
       props.onPlay(props.scriptID)
     }
@@ -220,8 +220,8 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation()
-                  props.onRemove(props.scriptID)}
-                }
+                  props.onRemove(props.scriptID)
+                }}
                 className={cx(classes.deleteButton, classes.actionButton)}
                 edge="end"
                 size="small"
@@ -298,7 +298,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
             </form>
           )}
           {props.isEditing !== props.scriptID && (
-            <React.Fragment>
+            <>
               <Typography
                 noWrap
                 className={classes.noUserSelect}
@@ -309,7 +309,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
               {script?.tags?.map((tagID) => (
                 <ListItemTagChip key={tagID} tagID={tagID} />
               ))}
-            </React.Fragment>
+            </>
           )}
         </ListItemText>
       </ListItem>

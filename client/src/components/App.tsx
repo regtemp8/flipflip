@@ -22,14 +22,16 @@ import CaptionScriptor from './sceneDetail/CaptionScriptor'
 import AppThemeProvider from './AppThemeProvider'
 import ScriptOptions from './library/ScriptOptions'
 import AudioOptions from './library/AudioOptions'
-import {SnackbarKey, SnackbarProvider, closeSnackbar} from 'notistack'
+import { SnackbarKey, SnackbarProvider, closeSnackbar } from 'notistack'
 import CloseIcon from '@mui/icons-material/Close'
 import { AUTO_HIDE_DURATION, MAX_SNACKS } from '../data/Snackbar'
 
 const CloseSnackBarAction = (key: SnackbarKey) => {
-  return(<IconButton onClick={() => closeSnackbar(key)} size="small">
-    <CloseIcon />
-  </IconButton>)
+  return (
+    <IconButton onClick={() => closeSnackbar(key)} size="small">
+      <CloseIcon />
+    </IconButton>
+  )
 }
 
 const App = () => {
@@ -38,9 +40,13 @@ const App = () => {
       <CacheProvider value={createCache({ key: 'css' })}>
         <AppThemeProvider>
           <ErrorBoundary>
-            <SnackbarProvider maxSnack={MAX_SNACKS} autoHideDuration={AUTO_HIDE_DURATION} action={CloseSnackBarAction}>
+            <SnackbarProvider
+              maxSnack={MAX_SNACKS}
+              autoHideDuration={AUTO_HIDE_DURATION}
+              action={CloseSnackBarAction}
+            >
               <CssBaseline />
-              <AudioOptions/>
+              <AudioOptions />
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route

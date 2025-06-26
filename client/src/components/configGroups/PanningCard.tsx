@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
@@ -77,7 +76,6 @@ import {
 } from '../../store/api/slice'
 import MoveCard from '../common/MoveCard'
 import BaseSwitch from '../common/BaseSwitch'
-import { useLocation } from 'react-router'
 import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -277,7 +275,7 @@ function PanningCard(props: PanningCardProps) {
         </Collapse>
       </Grid2>
       {easingControls && (
-        <React.Fragment>
+        <>
           <Grid2 size={12} className={cx(!panning && classes.noPadding)}>
             <Collapse in={panning} className={classes.fullWidth}>
               <Divider />
@@ -343,7 +341,7 @@ function PanningCard(props: PanningCardProps) {
               />
             </Collapse>
           </Grid2>
-        </React.Fragment>
+        </>
       )}
     </Grid2>
   )

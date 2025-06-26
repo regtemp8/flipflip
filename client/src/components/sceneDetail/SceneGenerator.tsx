@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -37,8 +37,6 @@ import EditIcon from '@mui/icons-material/Edit'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import { en, SDGT, TT, WeightGroup } from 'flipflip-common'
-import LibrarySearch from '../library/LibrarySearch'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   useGetSceneWeightGroupsQuery,
   useGetTutorialsQuery
@@ -132,7 +130,6 @@ export interface SceneGeneratorProps {
 }
 
 function SceneGenerator(props: SceneGeneratorProps) {
-  const dispatch = useAppDispatch()
   const { data: tutorial } = useGetTutorialsQuery()
   // const library = useAppSelector(selectAppLibrary())
   const { data: generatorWeights } = useGetSceneWeightGroupsQuery(props.sceneID)
@@ -213,26 +210,26 @@ function SceneGenerator(props: SceneGeneratorProps) {
     }
   }
 
-  const onAddRule = (filters: string[]) => {
-    const weights = generatorWeights as WeightGroup[]
-    const wg = weights[isEditingIndex]
-    for (const search of filters) {
-      const rules = wg.rules as WeightGroup[]
-      if (
-        search.length > 0 &&
-        rules.find((wg) => wg.search === search) == null
-      ) {
-        const newWG: WeightGroup = {
-          percent: 0,
-          type: TT.weight,
-          search
-        }
+  // const onAddRule = (filters: string[]) => {
+  //   const weights = generatorWeights as WeightGroup[]
+  //   const wg = weights[isEditingIndex]
+  //   for (const search of filters) {
+  //     const rules = wg.rules as WeightGroup[]
+  //     if (
+  //       search.length > 0 &&
+  //       rules.find((wg) => wg.search === search) == null
+  //     ) {
+  //       const newWG: WeightGroup = {
+  //         percent: 0,
+  //         type: TT.weight,
+  //         search
+  //       }
 
-        wg.rules = rules.concat([newWG])
-      }
-    }
-    changeGeneratorWeights(weights)
-  }
+  //       wg.rules = rules.concat([newWG])
+  //     }
+  //   }
+  //   changeGeneratorWeights(weights)
+  // }
 
   const onClickAddRule = (e: MouseEvent) => {
     setMenuAnchorEl(e.currentTarget)
@@ -378,13 +375,13 @@ function SceneGenerator(props: SceneGeneratorProps) {
     changeGeneratorWeights(weights)
   }
 
-  const onMoveRight = (index: number) => {
+  const onMoveRight = (_index: number) => {
     // const weights = generatorWeights as WeightGroup[]
     // arrayMove(weights, index, index + 1)
     // dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
   }
 
-  const onMoveLeft = (index: number) => {
+  const onMoveLeft = (_index: number) => {
     // const weights = generatorWeights as WeightGroup[]
     // arrayMove(weights, index, index - 1)
     // dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
@@ -473,7 +470,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                       </IconButton>
                     }
                     action={
-                      <React.Fragment>
+                      <>
                         {wg.chosen && (
                           <Chip
                             label={wg.chosen + '/' + wg.max}
@@ -514,19 +511,19 @@ function SceneGenerator(props: SceneGeneratorProps) {
                         >
                           <DeleteIcon color="error" />
                         </IconButton>
-                      </React.Fragment>
+                      </>
                     }
                     title={getRuleName(wg)}
                   />
                   {wg.rules && (
-                    <React.Fragment>
+                    <>
                       <Divider />
                       <CardContent className={classes.listElement}>
                         <List>
                           {wg.rules.map((wg, i) => (
                             <ListItem key={i}>
                               <ListItemIcon>
-                                <React.Fragment>
+                                <>
                                   {wg.type === TT.weight && (
                                     <Avatar>{wg.percent}</Avatar>
                                   )}
@@ -545,7 +542,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                                       <AdjustIcon />
                                     </Avatar>
                                   )}
-                                </React.Fragment>
+                                </>
                               </ListItemIcon>
                               <ListItemText
                                 primary={getSearchText(wg.search as string)}
@@ -554,7 +551,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                           ))}
                         </List>
                       </CardContent>
-                    </React.Fragment>
+                    </>
                   )}
                 </Card>
               </Grid2>
@@ -606,7 +603,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                 (weights[isWeighingIndex].percent as number)
               }
               defaultValue={weights[isWeighingIndex].percent}
-              onChangeCommitted={(e, value) =>
+              onChangeCommitted={(_, value) =>
                 onGroupSliderChange(isWeighingIndex, 'percent', value)
               }
               valueLabelDisplay={'auto'}

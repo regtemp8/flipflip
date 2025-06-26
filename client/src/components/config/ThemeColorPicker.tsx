@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 import { Fab, Grid2, TextField, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'

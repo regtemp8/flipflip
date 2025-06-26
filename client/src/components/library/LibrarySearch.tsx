@@ -1,9 +1,7 @@
-import React, { SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
   Chip,
   FilterOptionsState,
   Stack,
@@ -59,10 +57,8 @@ function LibrarySearch(props: LibrarySearchProps) {
   }, [props.filters, props.options])
 
   const handleChange = (
-    event: SyntheticEvent<Element, Event>,
-    value: (string | { value: string; label: string })[],
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<{ value: string; label: string }>
+    _event: SyntheticEvent<Element, Event>,
+    value: (string | { value: string; label: string })[]
   ) => {
     if (value == null) {
       props.onUpdateFilters([])

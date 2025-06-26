@@ -34,7 +34,6 @@ function PlaylistsTab() {
               type={item.type as string}
               name={item.name}
               toDelete={false}
-              action={() => {}}
             />
           ))}
         </UngroupedSortable>

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { type Theme, Typography } from '@mui/material'
@@ -34,7 +33,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 function ThemeCard() {
   const { classes } = useStyles()
   return (
-    <React.Fragment>
+    <>
       <div>
         <BaseSwitch
           label="Dark Mode"
@@ -56,7 +55,7 @@ function ThemeCard() {
           action={setThemeSecondaryColor()}
         />
       </div>
-    </React.Fragment>
+    </>
   )
 }
 

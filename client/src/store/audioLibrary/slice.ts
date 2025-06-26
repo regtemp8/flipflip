@@ -20,13 +20,19 @@ export const audioLibrarySlice = createSlice({
     setAudioLibraryFilters: (state, action: PayloadAction<string[]>) => {
       state.filters = action.payload
     },
-    setAudioLibraryLastSelected: (state, action: PayloadAction<number|undefined>) => {
+    setAudioLibraryLastSelected: (
+      state,
+      action: PayloadAction<number | undefined>
+    ) => {
       state.lastSelected = action.payload
     }
   }
 })
 
-export const { setAudioLibraryYOffset, setAudioLibraryFilters, setAudioLibraryLastSelected } =
-audioLibrarySlice.actions
+export const {
+  setAudioLibraryYOffset,
+  setAudioLibraryFilters,
+  setAudioLibraryLastSelected
+} = audioLibrarySlice.actions
 
 export default audioLibrarySlice.reducer

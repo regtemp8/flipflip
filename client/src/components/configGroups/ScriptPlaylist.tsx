@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent } from 'react'
+import { MouseEvent } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -22,9 +22,10 @@ import RepeatIcon from '@mui/icons-material/Repeat'
 import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 
-import { RP } from 'flipflip-common'
+import { Playlist, PLT, RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import { useNavigate } from 'react-router'
+// import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
@@ -78,33 +79,33 @@ export interface ScriptPlaylistItemProps {
 }
 
 export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
-  const { playlistID, index } = props
+  // const { playlistID, index } = props
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
-  const type = useAppSelector(selectCaptionScriptType(props.scriptID))
+  // const dispatch = useAppDispatch()
+  const url = '' //useAppSelector(selectCaptionScriptUrl(props.scriptID))
+  const type = '' //useAppSelector(selectCaptionScriptType(props.scriptID))
 
-  const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
-    const sourceURL = url as string
-    if (e.shiftKey && !e.ctrlKey) {
-      flipflip()
-        .api.getFileUrl(sourceURL)
-        .then((fileURL) => window.open(fileURL, '_blank')?.focus())
-    } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip().api.showItemInFolder(sourceURL)
-    } else if (!e.shiftKey && !e.ctrlKey) {
-      // TODO make playScript work
-      // dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
-    }
+  const onSourceIconClick = (_e: MouseEvent<HTMLDivElement>) => {
+    // const sourceURL = url as string
+    // if (e.shiftKey && !e.ctrlKey) {
+    //   flipflip()
+    //     .api.getFileUrl(sourceURL)
+    //     .then((fileURL) => window.open(fileURL, '_blank')?.focus())
+    // } else if (!e.shiftKey && e.ctrlKey) {
+    //   flipflip().api.showItemInFolder(sourceURL)
+    // } else if (!e.shiftKey && !e.ctrlKey) {
+    //   // TODO make playScript work
+    //   // dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
+    // }
   }
 
   const removeScript = () => {
-    dispatch(
-      setPlaylistRemoveItem({
-        id: playlistID,
-        value: index
-      })
-    )
+    // dispatch(
+    //   setPlaylistRemoveItem({
+    //     id: playlistID,
+    //     value: index
+    //   })
+    // )
   }
 
   const { classes } = useStyles()
@@ -164,18 +165,26 @@ export interface ScriptPlaylistProps {
 
 function ScriptPlaylist(props: ScriptPlaylistProps) {
   const { playlistID } = props
-  const dispatch = useAppDispatch()
-  const playlist = useAppSelector(selectPlaylist(playlistID))
+  // const dispatch = useAppDispatch()
+  // const playlist = useAppSelector(selectPlaylist(playlistID))
+  const playlist: Playlist = {
+    id: 1,
+    name: 'playlist',
+    type: PLT.script,
+    items: [],
+    shuffle: false,
+    repeat: RP.none
+  }
 
   const sceneID = 0
   // const [sceneID, setSceneID] = useState<number>(0)
 
   const toggleShuffle = () => {
-    dispatch(setPlaylistToggleShuffle(playlistID))
+    // dispatch(setPlaylistToggleShuffle(playlistID))
   }
 
   const changeRepeat = () => {
-    dispatch(setPlaylistChangeRepeat(playlistID))
+    // dispatch(setPlaylistChangeRepeat(playlistID))
   }
 
   const { classes } = useStyles()
@@ -188,14 +197,14 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          onChange={(order: any, sortable: any, evt: any) => {
-            const { oldIndex, newIndex } = evt
-            dispatch(
-              setPlaylistSortItems({
-                id: props.playlistID,
-                value: { oldIndex, newIndex }
-              })
-            )
+          onChange={(_order: any, _sortable: any, _evt: any) => {
+            // const { oldIndex, newIndex } = evt
+            // dispatch(
+            //   setPlaylistSortItems({
+            //     id: props.playlistID,
+            //     value: { oldIndex, newIndex }
+            //   })
+            // )
           }}
         >
           {playlist.items.map((id, index) => (
@@ -241,7 +250,7 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={() => dispatch(addScript(props.playlistID))}
+              // onClick={() => dispatch(addScript(props.playlistID))}
               size="large"
             >
               <AddIcon />

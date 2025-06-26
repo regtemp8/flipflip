@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent, useState } from 'react'
+import { MouseEvent } from 'react'
 import Sortable from 'react-sortablejs'
 
 import {
@@ -104,7 +104,7 @@ function PlaylistItem(props: PlaylistItemProps) {
   // const dispatch = useAppDispatch()
   const { data: audio } = useGetAudioQuery(props.audioID)
 
-  const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
+  const onSourceIconClick = (_e: MouseEvent<HTMLDivElement>) => {
     // const sourceURL = url as string
     // if (e.shiftKey && !e.ctrlKey) {
     //   flipflip()
@@ -171,9 +171,7 @@ function PlaylistItem(props: PlaylistItemProps) {
                   <div className={classes.tagChips}>
                     {audio?.tags &&
                       audio?.tags.map((tagID) => (
-                        <React.Fragment key={tagID}>
-                          <TagChip tagID={tagID} />
-                        </React.Fragment>
+                        <TagChip key={tagID} tagID={tagID} />
                       ))}
                   </div>
                 </div>
@@ -257,7 +255,7 @@ function AudioPlaylist(props: AudioPlaylistProps) {
     await updatePlaylist({ id: playlistID, repeat })
   }
 
-  const removeTrack = (index: number) => {
+  const removeTrack = (_index: number) => {
     // dispatch(setPlaylistRemoveItem({ id: props.playlistID, value: index }))
   }
 
@@ -271,15 +269,15 @@ function AudioPlaylist(props: AudioPlaylistProps) {
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          onChange={(order: any, sortable: any, evt: any) => {
-            // const { oldIndex, newIndex } = evt
-            // dispatch(
-            //   setPlaylistSortItems({
-            //     id: props.playlistID,
-            //     value: { oldIndex, newIndex }
-            //   })
-            // )
-          }}
+          // onChange={(order: any, sortable: any, evt: any) => {
+          //   const { oldIndex, newIndex } = evt
+          //   dispatch(
+          //     setPlaylistSortItems({
+          //       id: props.playlistID,
+          //       value: { oldIndex, newIndex }
+          //     })
+          //   )
+          // }}
         >
           {playlist?.items.map((audioID: number, index: number) => (
             <PlaylistItem

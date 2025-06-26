@@ -7,10 +7,7 @@ import { makeStyles } from 'tss-react/mui'
 import { SDT } from 'flipflip-common'
 import ImageVideoCard from '../configGroups/ImageVideoCard'
 import SceneOptionCard from '../configGroups/SceneOptionCard'
-import {
-  useGetSceneSettingsQuery,
-  useGetTutorialsQuery
-} from '../../store/api/slice'
+import { useGetTutorialsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   backdropTop: {

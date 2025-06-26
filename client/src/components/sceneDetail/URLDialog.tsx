@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
+import { type ChangeEvent, type MouseEvent, useState } from 'react'
 
 import {
   Button,

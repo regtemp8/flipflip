@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import wretch from 'wretch'
 
 import {
@@ -12,7 +12,7 @@ import {
 import { FontSettings, RP, TF } from 'flipflip-common'
 import type ChildCallbackHack from './ChildCallbackHack'
 import { Box, CircularProgress } from '@mui/material'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
 import { HTMLContentElement } from './HTMLContentElement'
 import DurationCalculator from '../../data/DurationCalculator'
 import { useNavigate } from 'react-router'
@@ -1170,13 +1170,13 @@ export default function CaptionProgram(props: CaptionProgramProps) {
   }, [dispatch, script?.nextSceneAtEnd, props, state, script?.stopAtEnd])
 
   const start = useCallback(() => {
-    _runningPromise.current = new CancelablePromise((resolve, reject) => {
+    _runningPromise.current = new CancelablePromise((resolve) => {
       if (script?.script != null) {
         resolve({ data: [script?.script] })
       } else {
         wretch(script?.url)
           .get()
-          .error(503, (error) => {
+          .error(503, () => {
             console.warn(
               'Unable to access ' + script?.url + ' - Service is unavailable'
             )
@@ -1885,7 +1885,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
     }
   }
   return (
-    <React.Fragment>
+    <>
       <div
         style={{
           zIndex: 6,
@@ -1968,7 +1968,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
           )}
         </div>
       )}
-    </React.Fragment>
+    </>
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Button,
@@ -32,7 +32,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 import Sortable from 'react-sortablejs'
 import { RP } from 'flipflip-common'
 import SceneSelect from '../configGroups/SceneSelect'
-import { useNavigate } from 'react-router'
+// import { useNavigate } from 'react-router'
 import {
   useGetPlaylistQuery,
   useGetScenePlaylistItemQuery,
@@ -127,7 +127,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   }
 
   const onChangePlayAfterAllImages = (
-    event: ChangeEvent<HTMLInputElement>,
+    _event: ChangeEvent<HTMLInputElement>,
     checked: boolean
   ) => {
     setUnsavedPlayAfterAllImages(checked)
@@ -255,8 +255,8 @@ interface ScenePlaylistItemProps {
 }
 
 function ScenePlaylistItem(props: ScenePlaylistItemProps) {
-  const { playlistID, itemID, index } = props
-  const navigate = useNavigate()
+  const { itemID } = props
+  // const navigate = useNavigate()
   // const sceneID = useAppSelector(selectScenePlaylistItemSceneID(itemID))
   // const sceneNameSelector =
   //   sceneID === 0
@@ -366,17 +366,17 @@ function ScenePlaylist(props: ScenePlaylistProps) {
           animation: 150,
           easing: 'cubic-bezier(1, 0, 0, 1)'
         }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          // dispatch(
-          //   setPlaylistSortItems({
-          //     id: playlistID,
-          //     value: {
-          //       oldIndex: evt.oldIndex,
-          //       newIndex: evt.newIndex
-          //     }
-          //   })
-          // )
-        }}
+        // onChange={(order: any, sortable: any, evt: any) => {
+        //   dispatch(
+        //     setPlaylistSortItems({
+        //       id: playlistID,
+        //       value: {
+        //         oldIndex: evt.oldIndex,
+        //         newIndex: evt.newIndex
+        //       }
+        //     })
+        //   )
+        // }}
       >
         {playlist?.items.map((id, index) => (
           <ScenePlaylistItem

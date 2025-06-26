@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FocusEvent, useState } from 'react'
+import { ChangeEvent, FocusEvent, useState } from 'react'
 
 import {
   Button,
@@ -10,8 +10,7 @@ import {
   DialogTitle,
   Grid2,
   InputAdornment,
-  TextField,
-  type Theme
+  TextField
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -68,15 +67,15 @@ function BatchClipDialog(props: BatchClipDialogProps) {
   }
 
   const batchClipFinish = () => {
-    const index = -1
-    const errorCallback = (msg: string) => {
-      console.error(msg)
-      createBatchClips()
-    }
-    const successCallback = (video: HTMLVideoElement, sourceURL: string) => {
-      // dispatch(clipLibrarySource(sourceURL, video.duration, clipOffset))
-      // createBatchClips()
-    }
+    // const index = -1
+    // const errorCallback = (msg: string) => {
+    //   console.error(msg)
+    //   createBatchClips()
+    // }
+    // const successCallback = (video: HTMLVideoElement, sourceURL: string) => {
+    //   dispatch(clipLibrarySource(sourceURL, video.duration, clipOffset))
+    //   createBatchClips()
+    // }
     const createBatchClips = () => {
       // index++
       // if (index === sourceURLs.length) {

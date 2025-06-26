@@ -1,10 +1,4 @@
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, TextField, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
@@ -12,6 +6,7 @@ import { grey } from '@mui/material/colors'
 import { useGetDisplaySelectOptionsQuery } from '../../store/api/slice'
 
 import { SyntheticEvent } from 'react'
+import { SelectOption } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -43,13 +38,11 @@ function DisplaySelect(props: DisplaySelectProps) {
   })
 
   const onChange = (
-    event: SyntheticEvent<Element, Event>,
-    option: unknown,
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<unknown>
+    _event: SyntheticEvent<Element, Event>,
+    option: unknown
   ) => {
     if (option != null) {
-      const { value } = option as { value: string; label: string }
+      const { value } = option as SelectOption
       props.onChange(Number(value))
     }
   }

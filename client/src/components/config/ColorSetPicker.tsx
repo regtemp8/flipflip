@@ -1,4 +1,4 @@
-import React, { useState, type MouseEvent } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 import { SketchPicker } from 'react-color'
 

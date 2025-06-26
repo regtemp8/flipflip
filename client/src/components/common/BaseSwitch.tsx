@@ -20,11 +20,11 @@ export default function BaseSwitch(props: BaseSwitchProps) {
   if (props.onChange != null) {
     onChange = props.onChange
   } else if (props.action != null) {
-    onChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    onChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
       dispatch(props.action!(checked))
     }
   } else {
-    onChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    onChange = () => {
       console.warn('No change event handler assigned to switch')
     }
   }

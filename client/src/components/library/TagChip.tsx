@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Chip } from '@mui/material'
 import { useGetTagQuery } from '../../store/api/slice'
 

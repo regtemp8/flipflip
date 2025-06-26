@@ -1,4 +1,4 @@
-import React, { useState, useRef, type ChangeEvent } from 'react'
+import { useState, useRef, type ChangeEvent } from 'react'
 import { cx } from '@emotion/css'
 import { v4 as uuidv4 } from 'uuid'
 import wretch from 'wretch'
@@ -30,7 +30,7 @@ import {
 
 import { makeStyles } from 'tss-react/mui'
 
-import { en, IG, MO, SS, ST } from 'flipflip-common'
+import { en, IG, MO, ST } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import BaseSwitch from '../common/BaseSwitch'
 import {
@@ -284,9 +284,9 @@ function APICard() {
   const onFinishAuthTumblr = async () => {
     onCloseDialog()
     // Tumblr endpoints
-    const authorizeUrl = 'https://www.tumblr.com/oauth/authorize'
-    const requestTokenUrl = 'https://www.tumblr.com/oauth/request_token'
-    const accessTokenUrl = 'https://www.tumblr.com/oauth/access_token'
+    // const authorizeUrl = 'https://www.tumblr.com/oauth/authorize'
+    // const requestTokenUrl = 'https://www.tumblr.com/oauth/request_token'
+    // const accessTokenUrl = 'https://www.tumblr.com/oauth/access_token'
 
     // Tumblr oauth
     // TODO re-implement Tumblr oauth flow
@@ -359,9 +359,9 @@ function APICard() {
     onCloseDialog()
 
     // Twitter endpoints
-    const authorizeUrl = 'https://api.twitter.com/oauth/authorize'
-    const requestTokenUrl = 'https://api.twitter.com/oauth/request_token'
-    const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
+    // const authorizeUrl = 'https://api.twitter.com/oauth/authorize'
+    // const requestTokenUrl = 'https://api.twitter.com/oauth/request_token'
+    // const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
 
     // Twitter OAuth
     const data: any | undefined = undefined
@@ -560,7 +560,7 @@ function APICard() {
   const menuTypeSignOut = getMenuTypeSignOut()
 
   return (
-    <React.Fragment>
+    <>
       <Typography align="center" className={classes.title}>
         API Sign In
       </Typography>
@@ -1142,7 +1142,7 @@ function APICard() {
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </>
   )
 }
 

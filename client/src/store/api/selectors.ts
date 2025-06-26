@@ -1,4 +1,4 @@
-import { Audio, FontSettingsType } from 'flipflip-common'
+import { FontSettingsType } from 'flipflip-common'
 import {
   useGetCacheSettingsQuery,
   useGetClipQuery,

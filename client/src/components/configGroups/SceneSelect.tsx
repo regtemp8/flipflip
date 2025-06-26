@@ -1,10 +1,4 @@
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, TextField, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
@@ -53,10 +47,8 @@ function SceneSelect(props: SceneSelectProps) {
   })
 
   const onChange = (
-    event: SyntheticEvent<Element, Event>,
-    option: unknown,
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<unknown>
+    _event: SyntheticEvent<Element, Event>,
+    option: unknown
   ) => {
     if (option != null) {
       const { value } = option as SceneSelectOption
@@ -68,10 +60,10 @@ function SceneSelect(props: SceneSelectProps) {
   return (
     <Autocomplete
       className={classes.select}
-      value={options[props.value.toString()]}
+      // value={options[props.value.toString()]}
       options={optionsList}
       renderInput={(params) => <TextField {...params} variant="standard" />}
-      renderOption={(props, option, { selected }) => {
+      renderOption={(props, option) => {
         const { ...optionProps } = props
         const { value, label } = option as SceneSelectOption
         return (

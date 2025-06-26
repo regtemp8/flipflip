@@ -20,13 +20,19 @@ export const scriptLibrarySlice = createSlice({
     setScriptLibraryFilters: (state, action: PayloadAction<string[]>) => {
       state.filters = action.payload
     },
-    setScriptLibraryLastSelected: (state, action: PayloadAction<number|undefined>) => {
+    setScriptLibraryLastSelected: (
+      state,
+      action: PayloadAction<number | undefined>
+    ) => {
       state.lastSelected = action.payload
     }
   }
 })
 
-export const { setScriptLibraryYOffset, setScriptLibraryFilters, setScriptLibraryLastSelected } =
-scriptLibrarySlice.actions
+export const {
+  setScriptLibraryYOffset,
+  setScriptLibraryFilters,
+  setScriptLibraryLastSelected
+} = scriptLibrarySlice.actions
 
 export default scriptLibrarySlice.reducer

@@ -85,17 +85,14 @@ const deleteLocalAudio = (id: number) => {
   }
 }
 
-const deleteRemoteAudio = debounce(
-  (id: number, dispatch: AppDispatch) => {
-    dispatch(flipflipApi.endpoints.deleteAudio.initiate({ id }))
-  },
-  250
-)
+const deleteRemoteAudio = debounce((id: number, dispatch: AppDispatch) => {
+  dispatch(flipflipApi.endpoints.deleteAudio.initiate({ id }))
+}, 250)
 
 export const deleteAudio = (id: number) => {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    if(state.audioLibrary.lastSelected === id) {
+    if (state.audioLibrary.lastSelected === id) {
       dispatch(setAudioLibraryLastSelected(undefined))
     }
 
@@ -181,7 +178,7 @@ const deleteRemoteCaptionScript = debounce(
 export const deleteCaptionScript = (id: number) => {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
-    if(state.scriptLibrary.lastSelected === id) {
+    if (state.scriptLibrary.lastSelected === id) {
       dispatch(setScriptLibraryLastSelected(undefined))
     }
 
@@ -2084,12 +2081,16 @@ const moveLocalCaptionScript = (
   filtered: number[],
   dispatch: AppDispatch
 ) => {
-  dispatch(flipflipApi.util.updateQueryData('getCaptionScripts', undefined, () => ids))
-  dispatch(flipflipApi.util.updateQueryData(
-    'getFilteredCaptionScripts',
-    filters,
-    () => filtered
-  ))
+  dispatch(
+    flipflipApi.util.updateQueryData('getCaptionScripts', undefined, () => ids)
+  )
+  dispatch(
+    flipflipApi.util.updateQueryData(
+      'getFilteredCaptionScripts',
+      filters,
+      () => filtered
+    )
+  )
 }
 
 const moveRemoteCaptionScript = debounce(
@@ -2117,19 +2118,18 @@ const moveLocalAudio = (
   dispatch: AppDispatch
 ) => {
   dispatch(flipflipApi.util.updateQueryData('getAudios', undefined, () => ids))
-  dispatch(flipflipApi.util.updateQueryData(
-    'getFilteredAudios',
-    filters,
-    () => filtered
-  ))
+  dispatch(
+    flipflipApi.util.updateQueryData(
+      'getFilteredAudios',
+      filters,
+      () => filtered
+    )
+  )
 }
 
-const moveRemoteAudio = debounce(
-  (ids: number[], dispatch: AppDispatch) => {
-    dispatch(flipflipApi.endpoints.moveAudio.initiate({ ids }))
-  },
-  250
-)
+const moveRemoteAudio = debounce((ids: number[], dispatch: AppDispatch) => {
+  dispatch(flipflipApi.endpoints.moveAudio.initiate({ ids }))
+}, 250)
 
 export const moveAudio = (
   ids: number[],

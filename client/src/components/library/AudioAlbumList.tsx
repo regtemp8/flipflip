@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent } from 'react'
+import { useState, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -60,7 +60,7 @@ export interface AudioAlbumListProps {
 }
 
 function AudioAlbumList(props: AudioAlbumListProps) {
-  const {data: albums, isLoading} = useGetAudioAlbumsQuery(props.sources)
+  const { data: albums, isLoading } = useGetAudioAlbumsQuery(props.sources)
   const [hover, setHover] = useState<string>()
 
   const onMouseEnter = (album: string) => {
@@ -77,11 +77,11 @@ function AudioAlbumList(props: AudioAlbumListProps) {
   }
 
   const { classes } = useStyles()
-  if(isLoading) {
-    return <LinearProgress/>
+  if (isLoading) {
+    return <LinearProgress />
   } else if (albums == null || albums.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -111,14 +111,14 @@ function AudioAlbumList(props: AudioAlbumListProps) {
             Add tracks by going to the "Songs" tab and clicking the +
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
     <Grid2 container spacing={2}>
       {albums.map((album) => {
-        const {name, artist, isSingleArtist, thumb, count} = album
+        const { name, artist, isSingleArtist, thumb, count } = album
         return (
           <Grid2
             key={name}
@@ -132,7 +132,11 @@ function AudioAlbumList(props: AudioAlbumListProps) {
           >
             <Card classes={{ root: classes.root }}>
               {thumb && (
-                <CardMedia className={classes.media} image={thumb} title={name} />
+                <CardMedia
+                  className={classes.media}
+                  image={thumb}
+                  title={name}
+                />
               )}
               {!thumb && <AudiotrackIcon className={classes.mediaIcon} />}
               <CardContent classes={{ root: classes.cardContent }}>
@@ -148,7 +152,9 @@ function AudioAlbumList(props: AudioAlbumListProps) {
                 <Typography
                   id={'artist-link'}
                   noWrap
-                  onClick={isSingleArtist ? (e) => onClickArtist(e, artist) : undefined}
+                  onClick={
+                    isSingleArtist ? (e) => onClickArtist(e, artist) : undefined
+                  }
                   className={cx(isSingleArtist && classes.artist)}
                   color="textSecondary"
                   variant="body2"

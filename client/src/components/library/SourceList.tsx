@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useState,
   useRef,
@@ -67,10 +67,9 @@ import {
 //   setLibrarySelected,
 //   swapLibrary
 // } from '../../store/app/slice'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSelect from '../common/BaseSelect'
-import { RootState } from '../../store/store'
 import {
   useGetClipQuery,
   useGetContentSourceQuery,
@@ -525,8 +524,8 @@ function SourceList(props: SourceListProps) {
   const savePosition = useCallback(() => {
     const sortableList = document.getElementById('sortable-list')
     if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
+      const scrollTop = sortableList.firstElementChild?.scrollTop ?? 0
+      console.log(scrollTop)
       // dispatch(setLibraryYOffset(scrollTop))
     }
   }, [dispatch])
@@ -564,6 +563,7 @@ function SourceList(props: SourceListProps) {
   }) => {
     const oldSourceID = props.sources[oldIndex]
     const newSourceID = props.sources[newIndex]
+    oldSourceID + newSourceID // TODO remove this
     // if (props.isLibrary) {
     //   dispatch(swapLibrary({ oldSourceID, newSourceID }))
     // } else {
@@ -578,7 +578,7 @@ function SourceList(props: SourceListProps) {
     setDeleteDialog(undefined)
   }
 
-  const onFinishDelete = async (sourceID: number, sourceURL: string) => {
+  const onFinishDelete = async (sourceID: number, _sourceURL: string) => {
     // const fileType = getSourceType(sourceURL)
     // if (fileType === ST.local) {
     //   flipflip().api.rimrafSync(sourceURL)
@@ -593,7 +593,7 @@ function SourceList(props: SourceListProps) {
     onCloseDeleteDialog()
   }
 
-  const onRemove = (sourceID: number) => {
+  const onRemove = (_sourceID: number) => {
     // if (props.isLibrary) {
     //   const selected = props.selected as number[]
     //   dispatch(setLibrarySelected(selected.filter((id) => id !== sourceID)))
@@ -641,13 +641,13 @@ function SourceList(props: SourceListProps) {
     setIsEditing(sourceID)
   }
 
-  const onEndEdit = (newURL: string) => {
+  const onEndEdit = (_newURL: string) => {
     // const action = props.isLibrary ? setLibraryEditUrl : setSceneSourcesEditUrl
     // dispatch(action(isEditing, newURL))
     setIsEditing(-1)
   }
 
-  const onClean = async (sourceURL: string) => {
+  const onClean = async (_sourceURL: string) => {
     // TODO fix cache clean
     // const fileType = getSourceType(sourceURL)
     // if (fileType !== ST.local) {
@@ -668,7 +668,7 @@ function SourceList(props: SourceListProps) {
     setCachePath(undefined)
   }
 
-  const openDirectory = (cachePath: string) => {
+  const openDirectory = (_cachePath: string) => {
     // if (isWin32) {
     //   openExternalURL(cachePath)
     // } else {
@@ -697,7 +697,7 @@ function SourceList(props: SourceListProps) {
     setBlacklistSource(undefined)
   }
 
-  const onFinishBlacklist = (url: string, blacklist: string) => {
+  const onFinishBlacklist = (_url: string, _blacklist: string) => {
     // dispatch(editBlacklist(url, blacklist))
     onCloseBlacklist()
   }
@@ -777,7 +777,7 @@ function SourceList(props: SourceListProps) {
   const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -797,7 +797,7 @@ function SourceList(props: SourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -810,14 +810,14 @@ function SourceList(props: SourceListProps) {
             <div className={classes.arrowWrapper}>
               <div className={classes.arrow}>→</div>
             </div>
-          </React.Fragment>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List
@@ -950,7 +950,7 @@ function SourceList(props: SourceListProps) {
           onFinishDelete={onFinishDelete}
         />
       )}
-    </React.Fragment>
+    </>
   )
 }
 

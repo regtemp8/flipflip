@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Card,
@@ -145,7 +145,7 @@ function DisplaySetup() {
   const displayID = Number(id)
   const navigate = useNavigate()
 
-  const { data: displaySettings } = useGetDisplaySettingsQuery()
+  const { data: _displaySettings } = useGetDisplaySettingsQuery()
   const { data: display } = useGetDisplayQuery(displayID)
 
   const [isEditingName, setIsEditingName] = useState(false)
@@ -153,9 +153,9 @@ function DisplaySetup() {
   const [openMenu, setOpenMenu] = useState<string>()
 
   const dispatch = useAppDispatch()
-  const selectedView = useAppSelector(selectDisplaySelectedView(displayID))
+  const selectedView = useAppSelector(selectDisplaySelectedView())
   const selectedViewName = null
-  const yOffset = useAppSelector(selectDisplayViewsListYOffset(displayID))
+  const yOffset = useAppSelector(selectDisplayViewsListYOffset())
 
   const getScrollTop = useCallback(() => {
     let scrollTop: number | undefined = undefined

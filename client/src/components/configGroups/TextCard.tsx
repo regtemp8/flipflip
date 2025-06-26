@@ -1,19 +1,14 @@
-import React from 'react'
-
 import {
   Collapse,
   Divider,
   Fab,
   Grid2,
   IconButton,
-  Theme,
   Tooltip
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
-import { PLT } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
-import PlaylistSelect from '../common/PlaylistSelect'
 import { makeStyles } from 'tss-react/mui'
 import { useIsPlayerRoute } from '../useIsPlayerRoute'
 import { useGetSceneTextEnabledQuery } from '../../store/api/selectors'
@@ -24,7 +19,7 @@ import {
 } from '../../store/api/slice'
 import { setSceneTextEnabled } from '../../store/api/thunks'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   addButton: {
     boxShadow: 'none'
   }
@@ -47,8 +42,9 @@ function TextCard(props: TextCardProps) {
     addSceneScriptPlaylist({ id: props.sceneID })
   }
 
-  const onDeletePlaylist = (index: number) => {
-    deleteSceneScriptPlaylist({ id: props.sceneID })
+  const onDeletePlaylist = (_index: number) => {
+    const { sceneID } = props
+    deleteSceneScriptPlaylist({ sceneID, playlistID: -1 })
   }
 
   const { classes } = useStyles()
@@ -96,7 +92,7 @@ function TextCard(props: TextCardProps) {
       </Grid2>
       <Collapse in={textEnabled}>
         <Grid2 container spacing={1} sx={{ mt: 2 }}>
-          {scriptPlaylists?.map((playlist, i) => (
+          {scriptPlaylists?.map((_playlist, i) => (
             <>
               <Grid2 size="grow">
                 {/* <PlaylistSelect

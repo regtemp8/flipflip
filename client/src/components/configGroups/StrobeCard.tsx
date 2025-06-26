@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid2, MenuItem, type Theme } from '@mui/material'

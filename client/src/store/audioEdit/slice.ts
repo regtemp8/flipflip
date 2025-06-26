@@ -12,30 +12,35 @@ export const audioEditSlice = createSlice({
   initialState,
   reducers: {
     updateAudioEditEditing: (state, action: PayloadAction<Partial<Audio>>) => {
-      if(state.editing == null) {
+      if (state.editing == null) {
         return
       }
 
-      const keys = ["thumb", "name", "artist", "album", "comment", "trackNum"];
-      for(const key of keys) {
+      const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
+      for (const key of keys) {
         const value = action.payload[key]
-        if(value) {
-          state.editing[key] = value 
+        if (value) {
+          state.editing[key] = value
         }
       }
     },
-    setAudioEditEditing: (state, action: PayloadAction<Audio[]|undefined>) => {
-      if(action.payload != null) {
+    setAudioEditEditing: (
+      state,
+      action: PayloadAction<Audio[] | undefined>
+    ) => {
+      if (action.payload != null) {
         state.ids = action.payload.map((a) => a.id)
 
         state.editing = {}
-        const keys = ["thumb", "name", "artist", "album", "comment", "trackNum"];
-        for(const key of keys) {
-          const values = new Set<string|number|boolean|number[]|undefined>()
-          for(const audio of action.payload) {
+        const keys = ['thumb', 'name', 'artist', 'album', 'comment', 'trackNum']
+        for (const key of keys) {
+          const values = new Set<
+            string | number | boolean | number[] | undefined
+          >()
+          for (const audio of action.payload) {
             values.add(audio[key])
           }
-          if(values.size === 1) {
+          if (values.size === 1) {
             state.editing[key] = values.values().next().value
           }
         }
@@ -44,33 +49,33 @@ export const audioEditSlice = createSlice({
         state.editing = undefined
       }
     },
-    setAudioEditThumb: (state, action: PayloadAction<string|undefined>) => {
-      if(state.editing != null) {
+    setAudioEditThumb: (state, action: PayloadAction<string | undefined>) => {
+      if (state.editing != null) {
         state.editing.thumb = action.payload
       }
     },
     setAudioEditName: (state, action: PayloadAction<string>) => {
-      if(state.editing != null) {
+      if (state.editing != null) {
         state.editing.name = action.payload
       }
     },
     setAudioEditArtist: (state, action: PayloadAction<string>) => {
-      if(state.editing != null) {
+      if (state.editing != null) {
         state.editing.artist = action.payload
       }
     },
     setAudioEditAlbum: (state, action: PayloadAction<string>) => {
-      if(state.editing != null) {
+      if (state.editing != null) {
         state.editing.album = action.payload
       }
     },
     setAudioEditComment: (state, action: PayloadAction<string>) => {
-      if(state.editing != null) {
+      if (state.editing != null) {
         state.editing.comment = action.payload
       }
     },
     setAudioEditTrackNum: (state, action: PayloadAction<number>) => {
-      if(state.editing != null) {
+      if (state.editing != null) {
         state.editing.trackNum = action.payload
       }
     }

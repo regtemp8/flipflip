@@ -1,4 +1,4 @@
-import React, { CSSProperties, ChangeEvent, useState } from 'react'
+import { CSSProperties, ChangeEvent, useState } from 'react'
 import {
   IconButton,
   ListItem,
@@ -137,7 +137,7 @@ export interface DisplayViewListItemProps {
 }
 
 function DisplayViewListItem(props: DisplayViewListItemProps) {
-  const { index, viewID, displayID, selected } = props
+  const { index, viewID, selected } = props
   const dispatch = useAppDispatch()
   const { data: view } = useGetDisplayViewQuery(viewID)
 

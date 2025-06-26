@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Button,
@@ -31,10 +31,10 @@ import Sortable from 'react-sortablejs'
 import { RP } from 'flipflip-common'
 import DisplaySelect from '../configGroups/DisplaySelect'
 import MultiDisplaySelect from '../configGroups/MultiDisplaySelect'
-import { useNavigate } from 'react-router'
+// import { useNavigate } from 'react-router'
 import {
   useGetDisplayPlaylistItemQuery,
-  useGetDisplaysQuery,
+  // useGetDisplaysQuery,
   useGetPlaylistQuery,
   useUpdatePlaylistMutation
 } from '../../store/api/slice'
@@ -91,7 +91,7 @@ function DisplayPlaylistItemEditDialog(
   props: DisplayPlaylistItemEditDialogProps
 ) {
   const { itemID, open, onClose } = props
-  const { data: allDisplays } = useGetDisplaysQuery()
+  // const { data: allDisplays } = useGetDisplaysQuery()
   const { data: item } = useGetDisplayPlaylistItemQuery(itemID)
 
   const [unsavedDisplayID, setUnsavedDisplayID] = useState<number>()
@@ -229,8 +229,8 @@ interface DisplayPlaylistItemProps {
 }
 
 function DisplayPlaylistItem(props: DisplayPlaylistItemProps) {
-  const navigate = useNavigate()
-  const { playlistID, index, itemID } = props
+  // const navigate = useNavigate()
+  const { /*playlistID, index,*/ itemID } = props
   // const displayID = useAppSelector(selectDisplayPlaylistItemDisplayID(itemID))
   // const displayNameSelector =
   //   displayID === 0
@@ -340,17 +340,17 @@ function DisplayPlaylist(props: DisplayPlaylistProps) {
           animation: 150,
           easing: 'cubic-bezier(1, 0, 0, 1)'
         }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          // dispatch(
-          //   setPlaylistSortItems({
-          //     id: playlistID,
-          //     value: {
-          //       oldIndex: evt.oldIndex,
-          //       newIndex: evt.newIndex
-          //     }
-          //   })
-          // )
-        }}
+        // onChange={(order: any, sortable: any, evt: any) => {
+        //   dispatch(
+        //     setPlaylistSortItems({
+        //       id: playlistID,
+        //       value: {
+        //         oldIndex: evt.oldIndex,
+        //         newIndex: evt.newIndex
+        //       }
+        //     })
+        //   )
+        // }}
       >
         {playlist?.items.map((id, index) => (
           <DisplayPlaylistItem

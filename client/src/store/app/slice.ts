@@ -10,7 +10,7 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    setSpecialMode: (state, action: PayloadAction<string|undefined>) => {
+    setSpecialMode: (state, action: PayloadAction<string | undefined>) => {
       state.specialMode = action.payload
     }
   }

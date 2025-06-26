@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -47,7 +47,6 @@ import {
   useGetGeneralSettingsAutoCleanBackupMonthsQuery,
   useGetGeneralSettingsCleanRetainQuery
 } from '../../store/api/selectors'
-import { useAppDispatch } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import {
   useCleanBackupsMutation,
@@ -90,8 +89,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function BackupCard() {
-  const dispatch = useAppDispatch()
-
   const [createBackup] = useCreateBackupMutation()
   const [restoreBackup] = useRestoreBackupMutation()
   const [cleanBackups] = useCleanBackupsMutation()
@@ -154,7 +151,7 @@ function BackupCard() {
   const { classes } = useStyles()
   const hasBackup = backups && backups.length > 0
   return (
-    <React.Fragment>
+    <>
       <Grid2
         container
         spacing={2}
@@ -353,7 +350,7 @@ function BackupCard() {
             </DialogContentText>
           )}
           {!generalSettings?.autoCleanBackup && (
-            <React.Fragment>
+            <>
               <DialogContentText id="remove-all-description">
                 You are about to clean your backups. How many of the most recent
                 backups would you like to retain?
@@ -371,7 +368,7 @@ function BackupCard() {
                   }}
                 />
               )}
-            </React.Fragment>
+            </>
           )}
         </DialogContent>
         <DialogActions>
@@ -427,7 +424,7 @@ function BackupCard() {
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </>
   )
 }
 

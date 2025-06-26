@@ -33,11 +33,11 @@ export interface SceneEffectsProps {
 
 function SceneEffects(props: SceneEffectsProps) {
   const { data: tutorial } = useGetTutorialsQuery()
-  const tutorialZoom =
-    tutorial === SDT.zoom1 ||
-    tutorial === SDT.zoom2 ||
-    tutorial === SDT.zoom3 ||
-    tutorial === SDT.zoom4
+  // const tutorialZoom =
+  //   tutorial === SDT.zoom1 ||
+  //   tutorial === SDT.zoom2 ||
+  //   tutorial === SDT.zoom3 ||
+  //   tutorial === SDT.zoom4
   const tutorialFade = tutorial === SDT.fade1 || tutorial === SDT.fade2
   const { classes } = useStyles()
   return (

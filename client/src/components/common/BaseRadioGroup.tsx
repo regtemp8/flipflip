@@ -1,4 +1,4 @@
-import React, { type ChangeEvent } from 'react'
+import { type ChangeEvent } from 'react'
 import { Radio, RadioGroup, FormControlLabel } from '@mui/material'
 import type ReduxProps from './ReduxProps'
 import { en } from 'flipflip-common'

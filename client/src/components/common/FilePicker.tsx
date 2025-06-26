@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState, useEffect, useRef } from 'react'
+import { CSSProperties, MouseEvent, useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -132,7 +132,7 @@ const CreateDirectoryPopover = (props: CreateDirectoryPopoverProps) => {
   const [folderName, setFolderName] = useState('')
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
 

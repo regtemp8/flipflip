@@ -1,13 +1,6 @@
 import { useRef } from 'react'
 import { filesize } from 'filesize'
-import {
-  Backup,
-  ContentSource,
-  Message,
-  ScraperHelpers,
-  TF
-} from 'flipflip-common'
-import { enqueueSnackbar } from 'notistack'
+import { Backup, ContentSource, ScraperHelpers, TF } from 'flipflip-common'
 
 export const captionProgramDefaults = {
   program: Array<Function>(),

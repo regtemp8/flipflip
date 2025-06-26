@@ -1,10 +1,4 @@
-import React, {
-  ChangeEvent,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
+import { ChangeEvent, useEffect, useState, useRef, useCallback } from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
@@ -142,7 +136,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     )
     dispatch(moveCaptionScript(newScripts, props.filters, newSources))
   }
-  
+
   const clearLastSelected = () => {
     dispatch(setScriptLibraryLastSelected(undefined))
   }
@@ -218,8 +212,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   const onFinishPlay = () => {
     dispatch(saveScriptLibraryYOffset())
     try {
-      const scriptID = beginPlay as number
-      const sceneID = playWithScene as number
+      // const scriptID = beginPlay as number
+      // const sceneID = playWithScene as number
       // dispatch(playScript(scriptID, sceneID, sources))
     } catch (e) {
       snackbar().showMessage({
@@ -293,7 +287,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -313,7 +307,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -326,16 +320,16 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             <div className={classes.arrowWrapper}>
               <div className={classes.arrow}>→</div>
             </div>
-          </React.Fragment>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   const SortableVirtualList =
     SortableContainer<SortableVirtualListProps>(VirtualList)
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List id="sortable-list" disablePadding onClick={clearLastSelected}>
@@ -384,7 +378,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           </DialogActions>
         </Dialog>
       )}
-    </React.Fragment>
+    </>
   )
 }
 

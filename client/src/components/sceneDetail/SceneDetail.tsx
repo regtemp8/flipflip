@@ -1,10 +1,4 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  MouseEvent,
-  useEffect,
-  useState
-} from 'react'
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -59,7 +53,6 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import FilterListOffIcon from '@mui/icons-material/FilterListOff'
 import FolderIcon from '@mui/icons-material/Folder'
 import HttpIcon from '@mui/icons-material/Http'
-import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
 import MenuIcon from '@mui/icons-material/Menu'
 import MovieIcon from '@mui/icons-material/Movie'
@@ -67,24 +60,21 @@ import PhotoFilterIcon from '@mui/icons-material/PhotoFilter'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
 import RestoreIcon from '@mui/icons-material/Restore'
-import SaveIcon from '@mui/icons-material/Save'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 
-import { en, AF, MO, SDGT, SDT, SF, SP, ST, TT, WF } from 'flipflip-common'
+import { en, AF, MO, SDGT, SDT, SF, ST, WF } from 'flipflip-common'
 import SceneEffects from './SceneEffects'
 import SceneGenerator from './SceneGenerator'
 import SceneOptions from './SceneOptions'
 import GooninatorDialog from './GooninatorDialog'
-import LibrarySearch from '../library/LibrarySearch'
 import SourceList from '../library/SourceList'
 import SourceIcon from '../library/SourceIcon'
 import URLDialog from './URLDialog'
 import AudioTextEffects from './AudioTextEffects'
 import PiwigoDialog from './PiwigoDialog'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
-import { setSceneDetailFilters } from '../../store/sceneDetail/slice'
 import {
   selectSceneDetailFilters,
   selectSceneDetailDisplaySources
@@ -97,7 +87,6 @@ import {
   Routes
 } from 'react-router'
 import {
-  useGetDisplaySettingsFullScreenQuery,
   useGetGeneralSettingsConfirmSceneDeletionQuery,
   useGetRemoteSettingsPiwigoConfiguredQuery,
   useGetSceneGeneratorMaxQuery,
@@ -442,7 +431,6 @@ function SceneDetail() {
   const sceneID = Number(id)
   const navigate = useNavigate()
 
-  const dispatch = useAppDispatch()
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: tutorial } = useGetTutorialsQuery()
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
@@ -455,14 +443,14 @@ function SceneDetail() {
   const displaySources = useAppSelector(
     selectSceneDetailDisplaySources(sceneID)
   )
-  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+  // const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
   const [sceneEffects, setSceneEffects] = useState('')
-  const [confirmCopy, setConfirmCopy] = useState(false)
+  const [confirmCopy, _setConfirmCopy] = useState(false)
 
   useEffect(() => {
     // Use alt+P to access import modal
@@ -492,8 +480,8 @@ function SceneDetail() {
   //   }
   // }, [autoEdit, scene?.name])
 
-  const onUpdateFilters = (filters: string[]) =>
-    dispatch(setSceneDetailFilters(filters))
+  // const onUpdateFilters = (filters: string[]) =>
+  //   dispatch(setSceneDetailFilters(filters))
 
   const onOpenMaxMenu = (e: MouseEvent) => {
     setMenuAnchorEl(e.currentTarget)
@@ -562,28 +550,28 @@ function SceneDetail() {
     // )
   }
 
-  const onAddRule = (filters: string[]) => {
-    if (tutorial === SDGT.buttons) {
-      // dispatch(doneTutorial(SDGT.buttons))
-      onCloseDialog()
-    }
+  // const onAddRule = (filters: string[]) => {
+  //   if (tutorial === SDGT.buttons) {
+  //     dispatch(doneTutorial(SDGT.buttons))
+  //     onCloseDialog()
+  //   }
 
-    // const weights = generatorWeights as WeightGroup[]
-    // for (const search of filters) {
-    //   if (
-    //     search.length > 0 &&
-    //     weights.find((wg) => wg.search === search) == null
-    //   ) {
-    //     weights.push({
-    //       percent: 0,
-    //       type: TT.weight,
-    //       search
-    //     })
-    //   }
-    // }
+  //   const weights = generatorWeights as WeightGroup[]
+  //   for (const search of filters) {
+  //     if (
+  //       search.length > 0 &&
+  //       weights.find((wg) => wg.search === search) == null
+  //     ) {
+  //       weights.push({
+  //         percent: 0,
+  //         type: TT.weight,
+  //         search
+  //       })
+  //     }
+  //   }
 
-    // dispatch(setSceneGeneratorWeights({ id: id, value: weights }))
-  }
+  //   dispatch(setSceneGeneratorWeights({ id: id, value: weights }))
+  // }
 
   const onFinishRemoveAllRules = () => {
     // dispatch(setSceneGeneratorWeights({ id: id, value: [] }))
@@ -594,7 +582,10 @@ function SceneDetail() {
     setOpenMenu(MO.simpleRule)
   }
 
-  const onAddSource = (addFunction: string, e?: MouseEvent, ...args: any[]) => {
+  const onAddSource = (
+    addFunction: string,
+    e?: MouseEvent /*...args: any[]*/
+  ) => {
     onCloseDialog()
     if (tutorial === SDT.add2) {
       // dispatch(doneTutorial(SDT.add2))
@@ -759,7 +750,7 @@ function SceneDetail() {
             </form>
           )}
           {isEditingName == null && (
-            <React.Fragment>
+            <>
               <div className={classes.fill} />
               <Typography
                 component="h1"
@@ -776,12 +767,12 @@ function SceneDetail() {
                 {scene?.name}
               </Typography>
               <div className={classes.fill} />
-            </React.Fragment>
+            </>
           )}
 
           {openTab === 3 && (
             <div className={classes.librarySearch}>
-              <LibrarySearch
+              {/* <LibrarySearch
                 appBar
                 displaySources={displaySources}
                 filters={filters}
@@ -790,7 +781,7 @@ function SceneDetail() {
                 isCreatable
                 onlyUsed
                 onUpdateFilters={onUpdateFilters}
-              />
+              /> */}
             </div>
           )}
 
@@ -1221,7 +1212,7 @@ function SceneDetail() {
       </Dialog>
 
       {openTab === 3 && (
-        <React.Fragment>
+        <>
           {(scene?.sources?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
@@ -1255,7 +1246,7 @@ function SceneDetail() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Remove All Sources
                 </DialogTitle>
@@ -1272,10 +1263,10 @@ function SceneDetail() {
                     OK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Remove Sources</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1291,7 +1282,7 @@ function SceneDetail() {
                     OK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           {piwigoConfigured && (
@@ -1407,7 +1398,7 @@ function SceneDetail() {
           />
 
           {(scene?.sources?.length ?? 0) >= 2 && (
-            <React.Fragment>
+            <>
               {scene?.weightFunction === WF.sources && (
                 <Fab
                   className={classes.weightButton}
@@ -1505,15 +1496,15 @@ function SceneDetail() {
                   <ListItemText primary={en.get(SF.random)} />
                 </ListItem>
               </Menu>
-            </React.Fragment>
+            </>
           )}
-        </React.Fragment>
+        </>
       )}
 
       {openTab === 4 && (
-        <React.Fragment>
+        <>
           {(scene?.generatorWeights?.length ?? 0) > 0 && (
-            <React.Fragment>
+            <>
               <Tooltip
                 disableInteractive
                 title="Remove All Rules"
@@ -1548,7 +1539,7 @@ function SceneDetail() {
                   </Button>
                 </DialogActions>
               </Dialog>
-            </React.Fragment>
+            </>
           )}
           <Tooltip
             disableInteractive
@@ -1725,7 +1716,7 @@ function SceneDetail() {
               />
             )} */}
           </Menu>
-        </React.Fragment>
+        </>
       )}
     </div>
   )

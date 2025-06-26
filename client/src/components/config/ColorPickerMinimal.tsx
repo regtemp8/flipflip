@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useState } from 'react'
+import { type MouseEvent, useState } from 'react'
 import { SketchPicker } from 'react-color'
 
 import { Fab, Menu, type Theme, Tooltip } from '@mui/material'

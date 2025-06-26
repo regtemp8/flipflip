@@ -8,8 +8,8 @@ export const selectSceneDetailFilters = () => {
 }
 
 const empty: number[] = []
-export const selectSceneDetailDisplaySources = (sceneID: number) => {
-  return (state: RootState) => empty
+export const selectSceneDetailDisplaySources = (_sceneID: number) => {
+  return (_state: RootState) => empty
 }
 
 // export const selectSceneDetailDisplaySources = (sceneID: number) => {

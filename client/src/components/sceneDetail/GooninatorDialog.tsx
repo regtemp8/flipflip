@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
+import { type ChangeEvent, type MouseEvent, useState } from 'react'
 
 import {
   Button,
@@ -40,7 +40,7 @@ export interface GooninatorDialogProps {
 function GooninatorDialog(props: GooninatorDialogProps) {
   const [importType, setImportType] = useState(GT.tumblr)
   const [importURL, setImportURL] = useState('')
-  const [rootDir, setRootDir] = useState('')
+  const [rootDir, _setRootDir] = useState('')
 
   const onTypeChange = (e: SelectChangeEvent<string>) => {
     setImportType(e.target.value)

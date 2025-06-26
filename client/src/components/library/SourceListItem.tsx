@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, Fragment, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -162,7 +162,7 @@ export interface SourceListItemProps {
 function SourceListItem(props: SourceListItemProps) {
   const { data: tutorial } = useGetTutorialsQuery()
   const { data: cachingEnabled } = useGetCachingEnabledQuery()
-  const { data: cachingDirectory } = useGetCachingDirectoryQuery()
+  const { data: _cachingDirectory } = useGetCachingDirectoryQuery()
   const { data: source } = useGetContentSourceQuery(props.source)
 
   const [urlInput, setUrlInput] = useState<string>()
@@ -171,7 +171,7 @@ function SourceListItem(props: SourceListItemProps) {
     setUrlInput(source?.url)
   }, [source?.url])
 
-  const onSourceIconClick = async (e: MouseEvent<HTMLButtonElement>) => {
+  const onSourceIconClick = async (/*e: MouseEvent<HTMLButtonElement>*/) => {
     // const sourceURL = source?.url as string
     // const sourceType = getSourceType(sourceURL)
     // if (e.shiftKey && e.ctrlKey && e.altKey) {
@@ -239,7 +239,7 @@ function SourceListItem(props: SourceListItemProps) {
     }
   }
 
-  const clearBlacklist = (sourceURL: string) => {
+  const clearBlacklist = (_sourceURL: string) => {
     // dispatch(blacklistFile(sourceURL, undefined))
   }
 
@@ -255,18 +255,18 @@ function SourceListItem(props: SourceListItemProps) {
     props.onEndEdit(urlInput as string)
   }
 
-  const openDirectory = (cachePath: string) => {
-    // TODO create directory picker
-    // if (isWin32) {
-    //   openExternalURL(cachePath)
-    // } else {
-    //   openExternalURL(urlToPath(cachePath, isWin32))
-    // }
-  }
+  // const openDirectory = (cachePath: string) => {
+  //   TODO create directory picker
+  //   if (isWin32) {
+  //     openExternalURL(cachePath)
+  //   } else {
+  //     openExternalURL(urlToPath(cachePath, isWin32))
+  //   }
+  // }
 
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
-  }
+  // const openExternalURL = (url: string) => {
+  //   window.open(url, '_blank')?.focus()
+  // }
 
   const { classes } = useStyles()
   const sourceType = source?.type
@@ -288,7 +288,7 @@ function SourceListItem(props: SourceListItemProps) {
               )}
             >
               {props.useWeights && (
-                <React.Fragment>
+                <>
                   <Chip
                     className={classes.countChip}
                     clickable
@@ -299,7 +299,7 @@ function SourceListItem(props: SourceListItemProps) {
                       props.onOpenWeightMenu(props.source, e)
                     }
                   />
-                </React.Fragment>
+                </>
               )}
               {sourceType === ST.video && source?.duration && (
                 <Chip
@@ -420,7 +420,7 @@ function SourceListItem(props: SourceListItemProps) {
                 sourceType !== ST.local &&
                 ((sourceType !== ST.video && sourceType !== ST.playlist) ||
                   /^https?:\/\//g.exec(source?.url as string) != null) && (
-                  <React.Fragment>
+                  <>
                     <IconButton
                       onClick={() => props.onClean(source?.url as string)}
                       className={classes.actionButton}
@@ -436,7 +436,7 @@ function SourceListItem(props: SourceListItemProps) {
                         />
                       </SvgIcon>
                     </IconButton>
-                  </React.Fragment>
+                  </>
                 )}
               <IconButton
                 onClick={() => props.onRemove(props.source)}
@@ -512,7 +512,7 @@ function SourceListItem(props: SourceListItemProps) {
                 )}
               >
                 <SourceIcon
-                  type={source?.type}
+                  type={source?.type ?? ''}
                   className={cx(
                     classes.sourceIcon,
                     source?.marked && classes.sourceMarkedIcon
@@ -539,7 +539,7 @@ function SourceListItem(props: SourceListItemProps) {
             </form>
           )}
           {props.isEditing !== props.source && (
-            <React.Fragment>
+            <>
               <Typography
                 noWrap
                 className={cx(
@@ -552,7 +552,7 @@ function SourceListItem(props: SourceListItemProps) {
               </Typography>
               {source?.tags &&
                 source?.tags.map((tagID) => (
-                  <React.Fragment key={tagID}>
+                  <Fragment key={tagID}>
                     <TagChip
                       tagID={tagID}
                       className={cx(
@@ -576,9 +576,9 @@ function SourceListItem(props: SourceListItemProps) {
                       outlined
                       simpleTag
                     />
-                  </React.Fragment>
+                  </Fragment>
                 ))}
-            </React.Fragment>
+            </>
           )}
         </ListItemText>
       </ListItem>

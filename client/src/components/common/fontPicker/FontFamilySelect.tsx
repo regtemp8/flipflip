@@ -1,4 +1,6 @@
 import {
+  ReactNode,
+  HTMLAttributes,
   forwardRef,
   createContext,
   useContext,
@@ -61,11 +63,11 @@ function useResetCache(data: any) {
 // Adapter for react-window
 const ListboxComponent = forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLElement>
+  HTMLAttributes<HTMLElement>
 >(function ListboxComponent(props, ref) {
   const { children, ...other } = props
-  const itemData: React.ReactNode[] = []
-  ;(children as React.ReactNode[]).forEach((item) => {
+  const itemData: ReactNode[] = []
+  ;(children as ReactNode[]).forEach((item) => {
     itemData.push(item)
   })
 
@@ -74,7 +76,7 @@ const ListboxComponent = forwardRef<
   const itemCount = itemData.length
   const itemSize = smUp ? 36 : 48
 
-  const getChildSize = (child: React.ReactNode) => itemSize
+  const getChildSize = (_child: ReactNode) => itemSize
 
   const getHeight = () => {
     if (itemCount > 8) {
@@ -147,7 +149,7 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
       disableListWrap
       options={fontInfo}
       value={value}
-      onChange={(event, value) => {
+      onChange={(_, value) => {
         dispatch(props.action(value?.name ?? ''))
       }}
       renderInput={(params) => (
@@ -158,7 +160,7 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
           props,
           { ...option, selected: option.name === fontFamily },
           state.index
-        ] as React.ReactNode
+        ] as ReactNode
       }
       getOptionLabel={(option) => option.name}
       slots={{

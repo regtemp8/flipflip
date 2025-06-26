@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
@@ -165,7 +164,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
         </Collapse>
       </Grid2>
       {easingControls && (
-        <React.Fragment>
+        <>
           <Grid2 size={12}>
             <Collapse in={crossFade} className={classes.fullWidth}>
               <Divider />
@@ -202,7 +201,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
               />
             </Collapse>
           </Grid2>
-        </React.Fragment>
+        </>
       )}
     </Grid2>
   )

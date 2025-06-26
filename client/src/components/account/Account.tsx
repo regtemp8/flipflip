@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { useState, SyntheticEvent } from 'react'
+import { useState } from 'react'
 import {
   Link as RouterLink,
   Route,

@@ -1,6 +1,4 @@
-import { Collapse, Grid2, InputAdornment, type Theme } from '@mui/material'
-
-import { makeStyles } from 'tss-react/mui'
+import { Collapse, Grid2, InputAdornment } from '@mui/material'
 
 import { type FontSettingsType } from 'flipflip-common'
 import ColorPicker from '../config/ColorPicker'
@@ -24,26 +22,6 @@ import {
   useGetCaptionScriptFontSettingsFontSizeQuery,
   useGetCaptionScriptFontSettingsBorderPxQuery
 } from '../../store/api/selectors'
-
-const useStyles = makeStyles()((theme: Theme) => ({
-  fullWidth: {
-    width: '100%'
-  },
-  noPadding: {
-    padding: '0 !important'
-  },
-  endInput: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: 0
-  },
-  fontDivider: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2)
-  },
-  fontProgress: {
-    position: 'absolute'
-  }
-}))
 
 export interface FontOptionsProps {
   name: string

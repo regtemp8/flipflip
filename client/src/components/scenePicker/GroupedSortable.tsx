@@ -16,11 +16,11 @@ function GroupedSortable(props: PropsWithChildren) {
         handle: '.group-handle',
         easing: 'cubic-bezier(1, 0, 0, 1)'
       }}
-      onChange={(order: any, sortable: any, evt: any) => {
-        // dispatch(
-        //   onScenePickerChangeSceneGroupSort(type, evt.oldIndex, evt.newIndex)
-        // )
-      }}
+      // onChange={(order: any, sortable: any, evt: any) => {
+      //   dispatch(
+      //     onScenePickerChangeSceneGroupSort(type, evt.oldIndex, evt.newIndex)
+      //   )
+      // }}
     >
       {children}
     </Sortable>

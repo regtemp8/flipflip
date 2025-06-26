@@ -1,13 +1,6 @@
-import React, { SyntheticEvent, useState } from 'react'
+import { SyntheticEvent, useState } from 'react'
 
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  AutocompleteInputChangeReason,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, TextField, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { grey } from '@mui/material/colors'
 
@@ -40,20 +33,15 @@ function SceneSearch(props: SceneSearchProps) {
 
   const [searchInput, setSearchInput] = useState('')
   const handleInputChange = (
-    event: SyntheticEvent<Element, Event>,
-    searchInput: string,
-    reason: AutocompleteInputChangeReason
+    _event: SyntheticEvent<Element, Event>,
+    searchInput: string
   ) => {
     setSearchInput(searchInput)
   }
 
   const handleChange = (
-    event: SyntheticEvent<Element, Event>,
-    value: (string | { value: string; label: string })[],
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<
-      string | { value: string; label: string }
-    >
+    _event: SyntheticEvent<Element, Event>,
+    value: (string | { value: string; label: string })[]
   ) => {
     const filters: string[] = []
     const search = value.map((v) =>
@@ -93,7 +81,7 @@ function SceneSearch(props: SceneSearchProps) {
       renderOption={(props, option, state) => {
         const { ...optionProps } = props
         return (
-          <li key={state.index} {...optionProps}>
+          <li {...optionProps} key={state.index}>
             {typeof option === 'string' ? option : option.label}
           </li>
         )

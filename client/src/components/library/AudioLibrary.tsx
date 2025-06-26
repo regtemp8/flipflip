@@ -1,4 +1,4 @@
-import React, {
+import {
   ChangeEvent,
   MouseEvent,
   useEffect,
@@ -75,7 +75,6 @@ import LibrarySearch from './LibrarySearch'
 import AudioSourceList from './AudioSourceList'
 import AudioArtistList from './AudioArtistList'
 import AudioAlbumList from './AudioAlbumList'
-import PlaylistSelect from '../common/PlaylistSelect'
 import PlaylistList from './PlaylistList'
 import AudioEdit from './AudioEdit'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
@@ -87,7 +86,6 @@ import {
   useGetAudioSearchOptionsQuery,
   useGetAudiosQuery,
   useGetFilteredAudiosQuery,
-  useGetTutorialsQuery,
   useSortAudiosMutation,
   useMarkAudiosMutation,
   useDeleteAudiosMutation
@@ -455,14 +453,16 @@ interface PlaylistsTabProps {
 }
 
 function PlaylistsTab(props: PlaylistsTabProps) {
-  const {classes} = useStyles()
-  const {specialMode,filters,onClickPlaylist} = props
-  return (<Box p={2} className={classes.fill}>
-    <PlaylistList
-      showHelp={!specialMode && filters.length === 0}
-      onClickPlaylist={onClickPlaylist}
-    />
-  </Box>)
+  const { classes } = useStyles()
+  const { specialMode, filters, onClickPlaylist } = props
+  return (
+    <Box p={2} className={classes.fill}>
+      <PlaylistList
+        showHelp={!specialMode && filters.length === 0}
+        onClickPlaylist={onClickPlaylist}
+      />
+    </Box>
+  )
 }
 
 interface ArtistsTabProps {
@@ -473,15 +473,17 @@ interface ArtistsTabProps {
 }
 
 function ArtistsTab(props: ArtistsTabProps) {
-  const {classes} = useStyles()
-  const {specialMode,filters,displaySources,onClickArtist} = props
-  return (<Box p={2} className={classes.fill}>
-    <AudioArtistList
-      sources={displaySources ?? []}
-      showHelp={!specialMode && filters.length === 0}
-      onClickArtist={onClickArtist}
-    />
-  </Box>)
+  const { classes } = useStyles()
+  const { specialMode, filters, displaySources, onClickArtist } = props
+  return (
+    <Box p={2} className={classes.fill}>
+      <AudioArtistList
+        sources={displaySources ?? []}
+        showHelp={!specialMode && filters.length === 0}
+        onClickArtist={onClickArtist}
+      />
+    </Box>
+  )
 }
 
 interface AlbumsTabProps {
@@ -493,16 +495,19 @@ interface AlbumsTabProps {
 }
 
 function AlbumsTab(props: AlbumsTabProps) {
-  const {classes} = useStyles()
-  const {specialMode,filters,displaySources,onClickAlbum,onClickArtist} = props
-  return (<Box p={2} className={classes.fill}>
-    <AudioAlbumList
-      sources={displaySources ?? []}
-      showHelp={!specialMode && filters.length === 0}
-      onClickAlbum={onClickAlbum}
-      onClickArtist={onClickArtist}
-    />
-  </Box>)
+  const { classes } = useStyles()
+  const { specialMode, filters, displaySources, onClickAlbum, onClickArtist } =
+    props
+  return (
+    <Box p={2} className={classes.fill}>
+      <AudioAlbumList
+        sources={displaySources ?? []}
+        showHelp={!specialMode && filters.length === 0}
+        onClickAlbum={onClickAlbum}
+        onClickArtist={onClickArtist}
+      />
+    </Box>
+  )
 }
 
 interface TracksTabProps {
@@ -519,23 +524,36 @@ interface TracksTabProps {
 }
 
 function TracksTab(props: TracksTabProps) {
-  const {classes} = useStyles()
-  const {cachePath,specialMode,selected,filters,audios,displaySources,playlist,onClickAlbum,onClickArtist,onUpdateSelected} = props
-  return (<Box className={classes.fill}>
-    <AudioSourceList
-      cachePath={cachePath}
-      isSelect={!!specialMode}
-      selected={selected}
-      showHelp={!specialMode && filters.length === 0}
-      audios={audios}
-      filters={filters}
-      sources={displaySources}
-      playlist={playlist}
-      onClickAlbum={onClickAlbum}
-      onClickArtist={onClickArtist}
-      onUpdateSelected={onUpdateSelected}
-    />
-  </Box>)
+  const { classes } = useStyles()
+  const {
+    cachePath,
+    specialMode,
+    selected,
+    filters,
+    audios,
+    displaySources,
+    playlist,
+    onClickAlbum,
+    onClickArtist,
+    onUpdateSelected
+  } = props
+  return (
+    <Box className={classes.fill}>
+      <AudioSourceList
+        cachePath={cachePath}
+        isSelect={!!specialMode}
+        selected={selected}
+        showHelp={!specialMode && filters.length === 0}
+        audios={audios}
+        filters={filters}
+        sources={displaySources}
+        playlist={playlist}
+        onClickAlbum={onClickAlbum}
+        onClickArtist={onClickArtist}
+        onUpdateSelected={onUpdateSelected}
+      />
+    </Box>
+  )
 }
 
 function AudioLibrary() {
@@ -546,7 +564,7 @@ function AudioLibrary() {
   const [sortAudios] = useSortAudiosMutation()
   const [batchTagAudios] = useBatchTagAudiosMutation()
   const [markAudios] = useMarkAudiosMutation()
-  const { data: tutorials } = useGetTutorialsQuery()
+  // const { data: tutorials } = useGetTutorialsQuery()
   const { data: audios } = useGetAudiosQuery()
   const { data: tagOptions } = useGetAudioBatchTagOptionsQuery()
   const { data: searchOptions } = useGetAudioSearchOptionsQuery()
@@ -564,7 +582,7 @@ function AudioLibrary() {
   const error = false
 
   const [openMenu, setOpenMenu] = useState<string>()
-  const [cachePath, setCachePath] = useState<string>('')
+  const [cachePath, _setCachePath] = useState<string>('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selected, setSelected] = useState<number[]>([])
@@ -584,7 +602,7 @@ function AudioLibrary() {
 
   const goBack = useCallback(() => {
     const modes = [SP.batchTag, SP.batchEdit, SP.addToPlaylist]
-    if(specialMode != null && modes.includes(specialMode)) {
+    if (specialMode != null && modes.includes(specialMode)) {
       setSelected([])
       setSelectedTags([])
     }
@@ -636,28 +654,32 @@ function AudioLibrary() {
     }
   }, [tutorial, drawerOpen])
 
-  const onClickPlaylist = (playlist: string) => {
+  const onClickPlaylist = (_playlist: string) => {
     // dispatch(setAudioOpenTab(3))
     // dispatch(setAudioFilters(['playlist:' + playlist]))
   }
 
   const onClickArtist = (artist: string) => {
-    const newFilters = filters.filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
+    const newFilters = filters.filter(
+      (f) => !f.startsWith('album:') && !f.startsWith('artist:')
+    )
     newFilters.push('artist:' + artist)
     dispatch(setAudioLibraryFilters(newFilters))
     gotoTracksTab()
   }
 
   const onClickAlbum = (album: string) => {
-    const newFilters = filters.filter((f) => !f.startsWith('album:') && !f.startsWith('artist:'))
+    const newFilters = filters.filter(
+      (f) => !f.startsWith('album:') && !f.startsWith('artist:')
+    )
     newFilters.push('album:' + album)
     dispatch(setAudioLibraryFilters(newFilters))
     gotoTracksTab()
   }
 
   const gotoTracksTab = () => {
-    if(openTab != 3) {
-      navigate(tabRoutes[3], {replace: true})
+    if (openTab != 3) {
+      navigate(tabRoutes[3], { replace: true })
     }
   }
 
@@ -681,18 +703,18 @@ function AudioLibrary() {
   }
 
   const onTabChange = (tabIndex: number) => {
-    if(openTab === 3) {
+    if (openTab === 3) {
       dispatch(saveAudioLibraryYOffset())
     }
 
-    navigate(tabRoutes[tabIndex], {replace: true})
+    navigate(tabRoutes[tabIndex], { replace: true })
   }
 
   const onURLChange = (e: ChangeEvent<HTMLInputElement>) => {
     setImportURL(e.target.value)
   }
 
-  const onAddSource = async (type: string, e: MouseEvent) => {
+  const onAddSource = async (type: string) => {
     onCloseDialog()
     switch (type) {
       case AF.url:
@@ -717,9 +739,9 @@ function AudioLibrary() {
     onCloseDialog()
   }
 
-  const addAudioSources = (newSources: string[]) => {
-    // dispatch(onAddAudioSources(newSources, cachePath as string))
-  }
+  // const addAudioSources = (newSources: string[]) => {
+  //   dispatch(onAddAudioSources(newSources, cachePath as string))
+  // }
 
   const onToggleBatchTagModal = () => {
     if (openMenu === MO.batchTag) {
@@ -735,7 +757,7 @@ function AudioLibrary() {
     dispatch(editAudioEdit(selected))
   }
 
-  const onTogglePlaylistDialog = (e: MouseEvent) => {
+  const onTogglePlaylistDialog = (_e: MouseEvent) => {
     // if (openMenu === MO.playlist) {
     //   _menuAnchorEl.current = null
     //   setOpenMenu(undefined)
@@ -1105,7 +1127,7 @@ function AudioLibrary() {
         </div>
 
         {progressMode != null && (
-          <React.Fragment>
+          <>
             <Divider />
 
             <div>
@@ -1127,7 +1149,7 @@ function AudioLibrary() {
                 value={Math.round((progressCurrent / progressTotal) * 100)}
               />
             </div>
-          </React.Fragment>
+          </>
         )}
 
         <div className={classes.fill} />
@@ -1139,37 +1161,57 @@ function AudioLibrary() {
           <div className={classes.tabPanel}>
             <div className={classes.drawerSpacer} />
             <Routes>
-              <Route path="/playlists" element={<PlaylistsTab 
-                specialMode={specialMode}
-                filters={filters}
-                displaySources={displaySources ?? []}
-                onClickPlaylist={onClickPlaylist}
-              />} />
-              <Route path="/artists" element={<ArtistsTab 
-                specialMode={specialMode}
-                filters={filters}
-                displaySources={displaySources ?? []}
-                onClickArtist={onClickArtist}
-              />} />
-              <Route path="/albums" element={<AlbumsTab 
-                specialMode={specialMode}
-                filters={filters}
-                displaySources={displaySources ?? []}
-                onClickArtist={onClickArtist}
-                onClickAlbum={onClickAlbum}
-              />} />
-              <Route path="*" element={<TracksTab 
-                  cachePath={cachePath}
-                  specialMode={specialMode}
-                  selected={selected}
-                  filters={filters}
-                  audios={audios ?? []}
-                  displaySources={displaySources ?? []}
-                  playlist={playlist}
-                  onClickAlbum={onClickAlbum}
-                  onClickArtist={onClickArtist}
-                  onUpdateSelected={onUpdateSelected}
-              />} />
+              <Route
+                path="/playlists"
+                element={
+                  <PlaylistsTab
+                    specialMode={specialMode}
+                    filters={filters}
+                    displaySources={displaySources ?? []}
+                    onClickPlaylist={onClickPlaylist}
+                  />
+                }
+              />
+              <Route
+                path="/artists"
+                element={
+                  <ArtistsTab
+                    specialMode={specialMode}
+                    filters={filters}
+                    displaySources={displaySources ?? []}
+                    onClickArtist={onClickArtist}
+                  />
+                }
+              />
+              <Route
+                path="/albums"
+                element={
+                  <AlbumsTab
+                    specialMode={specialMode}
+                    filters={filters}
+                    displaySources={displaySources ?? []}
+                    onClickArtist={onClickArtist}
+                    onClickAlbum={onClickAlbum}
+                  />
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  <TracksTab
+                    cachePath={cachePath}
+                    specialMode={specialMode}
+                    selected={selected}
+                    filters={filters}
+                    audios={audios ?? []}
+                    displaySources={displaySources ?? []}
+                    playlist={playlist}
+                    onClickAlbum={onClickAlbum}
+                    onClickArtist={onClickArtist}
+                    onUpdateSelected={onUpdateSelected}
+                  />
+                }
+              />
             </Routes>
           </div>
         </Container>
@@ -1182,7 +1224,7 @@ function AudioLibrary() {
       />
 
       {specialMode && openTab === 3 && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Clear" placement="top-end">
             <Fab
               className={classes.selectNoneButton}
@@ -1297,11 +1339,11 @@ function AudioLibrary() {
               </Badge>
             </Tooltip>
           )}
-        </React.Fragment>
+        </>
       )}
 
       {!specialMode && openTab === 3 && (
-        <React.Fragment>
+        <>
           {(audios?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
@@ -1330,7 +1372,7 @@ function AudioLibrary() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Delete Audio Library
                 </DialogTitle>
@@ -1347,14 +1389,17 @@ function AudioLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && !playlist && (
-              <React.Fragment>
-                <DialogTitle id="remove-all-title">Delete Audio Tracks</DialogTitle>
+              <>
+                <DialogTitle id="remove-all-title">
+                  Delete Audio Tracks
+                </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you want to remove these tracks from your library?
+                    Are you sure you want to remove these tracks from your
+                    library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -1365,10 +1410,10 @@ function AudioLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && playlist && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Delete Playlist</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1383,7 +1428,7 @@ function AudioLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           <Tooltip
@@ -1400,7 +1445,7 @@ function AudioLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.audios, e)}
+              onClick={() => onAddSource(AF.audios)}
               size="small"
             >
               <AudiotrackIcon className={classes.icon} />
@@ -1420,7 +1465,7 @@ function AudioLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.url, e)}
+              onClick={() => onAddSource(AF.url)}
               size="small"
             >
               <HttpIcon className={classes.icon} />
@@ -1444,11 +1489,11 @@ function AudioLibrary() {
           >
             <AddIcon className={classes.icon} />
           </Fab>
-        </React.Fragment>
+        </>
       )}
 
       {openTab === 3 && (
-        <React.Fragment>
+        <>
           <Fab
             disabled={(audios?.length ?? 0) < 2}
             className={classes.sortMenuButton}
@@ -1486,8 +1531,12 @@ function AudioLibrary() {
                     <>
                       <IconButton
                         edge="end"
-                        onClick={async() => {
-                          await sortAudios({ sortBy: sf, sortOrder: 'asc', playlistId })
+                        onClick={async () => {
+                          await sortAudios({
+                            sortBy: sf,
+                            sortOrder: 'asc',
+                            playlistId
+                          })
                         }}
                         size="large"
                       >
@@ -1495,8 +1544,12 @@ function AudioLibrary() {
                       </IconButton>
                       <IconButton
                         edge="end"
-                        onClick={async() => {
-                          await sortAudios({ sortBy: sf, sortOrder: 'desc', playlistId })
+                        onClick={async () => {
+                          await sortAudios({
+                            sortBy: sf,
+                            sortOrder: 'desc',
+                            playlistId
+                          })
                         }}
                         size="large"
                       >
@@ -1513,8 +1566,12 @@ function AudioLibrary() {
               secondaryAction={
                 <IconButton
                   edge="end"
-                  onClick={async() => {
-                    await sortAudios({ sortBy: ASF.random, sortOrder: 'asc', playlistId })
+                  onClick={async () => {
+                    await sortAudios({
+                      sortBy: ASF.random,
+                      sortOrder: 'asc',
+                      playlistId
+                    })
                   }}
                   size="large"
                 >
@@ -1525,7 +1582,7 @@ function AudioLibrary() {
               <ListItemText primary={en.get(ASF.random)} />
             </ListItem>
           </Menu>
-        </React.Fragment>
+        </>
       )}
 
       {openMenu === MO.urlImport && (

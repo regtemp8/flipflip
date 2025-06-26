@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -373,7 +372,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           </Collapse>
         </Grid2>
         {!isPlayer && (
-          <React.Fragment>
+          <>
             <Grid2
               size={{ xs: 12, sm: sidebar ? 12 : 6 }}
               className={cx(
@@ -407,7 +406,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
               size={{ xs: 12, sm: 6 }}
               className={classes.noPadding}
             ></Grid2>
-          </React.Fragment>
+          </>
         )}
         <Grid2
           size={{ xs: 12, sm: sidebar ? 12 : 8 }}

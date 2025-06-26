@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -186,7 +186,7 @@ function PlaylistSetup() {
   const [deletePlaylist] = useDeletePlaylistMutation()
   const [clonePlaylist] = useClonePlaylistMutation()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
-  const { data: displaySettings } = useGetDisplaySettingsQuery()
+  const { data: _displaySettings } = useGetDisplaySettingsQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -283,7 +283,7 @@ function PlaylistSetup() {
             </form>
           )}
           {isEditingName == null && (
-            <React.Fragment>
+            <>
               <div className={classes.fill} />
               <Typography
                 component="h1"
@@ -299,7 +299,7 @@ function PlaylistSetup() {
                 {playlist?.name}
               </Typography>
               <div className={classes.fill} />
-            </React.Fragment>
+            </>
           )}
 
           {(playlist?.type === PLT.audio || playlist?.type === PLT.script) && (

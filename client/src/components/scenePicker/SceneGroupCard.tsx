@@ -5,7 +5,6 @@ import { IconButton, type Theme, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import DragHandleIcon from '@mui/icons-material/DragHandle'
 import { makeStyles } from 'tss-react/mui'
-import BaseTextField from '../common/text/BaseTextField'
 import { SG, SceneGroup } from 'flipflip-common'
 import SceneCard from './SceneCard'
 import PlaylistCard from './PlaylistCard'
@@ -48,7 +47,7 @@ export interface SceneGroupCardProps {
 }
 
 function SceneGroupCard(props: PropsWithChildren<SceneGroupCardProps>) {
-  const { group, isEditingName, beginEditingName, endEditingName } = props
+  const { group, isEditingName, beginEditingName } = props
   const { classes } = useStyles()
 
   return (
@@ -103,19 +102,19 @@ function SceneGroupCard(props: PropsWithChildren<SceneGroupCardProps>) {
           animation: 150,
           easing: 'cubic-bezier(1, 0, 0, 1)'
         }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          //   dispatch(
-          //     onScenePickerChangeSceneGroupItemsSort(
-          //       id,
-          //       items,
-          //       evt.type,
-          //       evt.oldIndex,
-          //       evt.newIndex,
-          //       Number(evt.item.id),
-          //       order.length
-          //     )
-          //   )
-        }}
+        // onChange={(order: any, sortable: any, evt: any) => {
+        //     dispatch(
+        //       onScenePickerChangeSceneGroupItemsSort(
+        //         id,
+        //         items,
+        //         evt.type,
+        //         evt.oldIndex,
+        //         evt.newIndex,
+        //         Number(evt.item.id),
+        //         order.length
+        //       )
+        //     )
+        // }}
       >
         {group.type === SG.playlist
           ? group.items.map((item) => (
@@ -124,7 +123,6 @@ function SceneGroupCard(props: PropsWithChildren<SceneGroupCardProps>) {
                 type={item.type as string}
                 name={item.name}
                 toDelete={false}
-                action={() => {}}
               />
             ))
           : group.items.map((item) => (

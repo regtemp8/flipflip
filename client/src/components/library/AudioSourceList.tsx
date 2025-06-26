@@ -1,10 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  ChangeEvent,
-} from 'react'
-import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc'
+import { useEffect, useState, useRef, ChangeEvent } from 'react'
+import {
+  arrayMove,
+  SortableContainer,
+  SortableElement
+} from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
 
@@ -141,7 +140,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const onRemove = (audioID: number) => {
-    if(props.playlist) {
+    if (props.playlist) {
       return // TODO add playlist delete
     }
 
@@ -199,7 +198,7 @@ function AudioSourceList(props: AudioSourceListProps) {
         itemSize={56}
         itemCount={audios.length}
         itemData={audios}
-        itemKey={(index: number, data: any) => index}
+        itemKey={(index: number) => index}
         overscanCount={10}
       >
         {Row}
@@ -238,7 +237,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -258,7 +257,7 @@ function AudioSourceList(props: AudioSourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -271,14 +270,14 @@ function AudioSourceList(props: AudioSourceListProps) {
             <div className={classes.arrowWrapper}>
               <div className={classes.arrow}>→</div>
             </div>
-          </React.Fragment>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List id="sortable-list" disablePadding onClick={clearLastSelected}>
@@ -317,7 +316,7 @@ function AudioSourceList(props: AudioSourceListProps) {
           </DialogActions>
         </Dialog>
       )}
-    </React.Fragment>
+    </>
   )
 }
 

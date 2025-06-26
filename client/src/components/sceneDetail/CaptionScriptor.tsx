@@ -1,10 +1,4 @@
-import React, {
-  MouseEvent,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
+import { MouseEvent, useEffect, useState, useRef, useCallback } from 'react'
 import wretch from 'wretch'
 import { cx } from '@emotion/css'
 
@@ -62,10 +56,10 @@ import CodeMirror, {
   tupleSetters
 } from './CodeMirror'
 import BaseSlider from '../common/slider/BaseSlider'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate /*, useParams*/ } from 'react-router'
 import {
   useGetCaptionScriptQuery,
-  useGetSceneQuery,
+  // useGetSceneQuery,
   useGetTutorialsQuery
 } from '../../store/api/slice'
 import { useAppSelector } from '../../store/hooks'
@@ -249,7 +243,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function CaptionScriptor() {
-  const { id } = useParams() // TODO use this as captionscript id, if not null
+  // const { id } = useParams() // TODO use this as captionscript id, if not null
   const navigate = useNavigate()
   const { data: tutorial } = useGetTutorialsQuery()
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())
@@ -257,8 +251,8 @@ function CaptionScriptor() {
   const captionScriptID = useAppSelector(selectCaptionScriptorCaptionScriptID())
   const loadFromSceneError = false
 
-  const { data: scene } = useGetSceneQuery(sceneID)
-  const audioEnabled = scene?.audioEnabled === true
+  // const { data: scene } = useGetSceneQuery(sceneID)
+  // const audioEnabled = scene?.audioEnabled === true
   const { data: script } = useGetCaptionScriptQuery(captionScriptID)
 
   const [selectScript, setSelectScript] = useState('')
@@ -315,7 +309,7 @@ function CaptionScriptor() {
     }
   }, [script])
 
-  const onPlaying = (position: number, duration: number) => {
+  const onPlaying = (position: number) => {
     _currentTimestamp.current = position
   }
 
@@ -450,13 +444,13 @@ function CaptionScriptor() {
     setError(e)
   }
 
-  const onUpdateScript = (script: string, changed = false) => {
+  const onUpdateScript = (_script: string, changed = false) => {
     setError(undefined)
     setScriptChanged(changed ? true : scriptChanged)
     // dispatch(setCaptionScriptScript({ id: captionScriptID, value: script }))
   }
 
-  const onGutterClick = (editor: any, clickedLine: number) => {
+  const onGutterClick = (_editor: any, clickedLine: number) => {
     let lineNum = clickedLine - 1
     const text = script?.script as string
     const lines = text.split('\n')
@@ -638,7 +632,7 @@ function CaptionScriptor() {
 
   const { classes } = useStyles()
   const { menuName, menuThen } = getMenu()
-  const getTimestamp = () => _currentTimestamp.current
+  // const getTimestamp = () => _currentTimestamp.current
 
   return (
     <div className={classes.root}>
@@ -879,14 +873,16 @@ function CaptionScriptor() {
                       )}
                       <SceneSelect
                         value={sceneID}
-                        onChange={(sceneID: number) => {
-                          // dispatch(
-                          //   onCaptionScriptorChangeScene(
-                          //     sceneID,
-                          //     captionScriptID
-                          //   )
-                          // )
-                        }}
+                        onChange={
+                          (/*sceneID: number*/) => {
+                            // dispatch(
+                            //   onCaptionScriptorChangeScene(
+                            //     sceneID,
+                            //     captionScriptID
+                            //   )
+                            // )
+                          }
+                        }
                       />
                     </Grid2>
                     <Grid2

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import {
   Slider as MaterialSlider,
   Grid2,
@@ -65,7 +65,7 @@ export default function BaseSlider(props: BaseSliderProps) {
     )
   }
 
-  const onSliderChange = (event: Event, value: number | number[]) => {
+  const onSliderChange = (_event: Event, value: number | number[]) => {
     const numberValue = Array.isArray(value) ? value[0] : value
     dispatchValueChange(numberValue)
   }

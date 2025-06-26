@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { Fragment, useEffect, useState, useRef } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -30,7 +30,10 @@ import DurationCalculator from '../../data/DurationCalculator'
 import { AppDispatch } from '../../store/store'
 import { useAppSelector } from '../../store/hooks'
 import { setAudioOptionsVolume } from '../../store/audioOptions/slice'
-import { selectAudioOptions, selectAudioOptionsVolume } from '../../store/audioOptions/selectors'
+import {
+  selectAudioOptions,
+  selectAudioOptionsVolume
+} from '../../store/audioOptions/selectors'
 
 const useStyles = makeStyles()(() => ({
   fullWidth: {
@@ -69,12 +72,21 @@ function AudioControl(props: AudioControlProps) {
   const [duration, setDuration] = useState(0)
 
   const _duration = useRef(new DurationCalculator())
-  const _control = useRef<HTMLAudioElement|null>(null)
+  const _control = useRef<HTMLAudioElement | null>(null)
   const _tickDuration = useRef<number>(0)
 
   const onTimeUpdate = (currentTime: number) => {
-    const {tick, tickMode, tickDelay, tickMaxDelay, tickMinDelay, tickBPMMulti, tickSinRate, bpm} = audio as Audio
-    if(tick && currentTime >= _tickDuration.current) {
+    const {
+      tick,
+      tickMode,
+      tickDelay,
+      tickMaxDelay,
+      tickMinDelay,
+      tickBPMMulti,
+      tickSinRate,
+      bpm
+    } = audio as Audio
+    if (tick && currentTime >= _tickDuration.current) {
       _control.current!.currentTime = 0
       const nextTick = _duration.current.calc(
         {
@@ -101,14 +113,23 @@ function AudioControl(props: AudioControlProps) {
   }, [audio?.url])
 
   useEffect(() => {
-    if(!_control.current || audio == null) {
+    if (!_control.current || audio == null) {
       return
     }
 
     _control.current.currentTime = 0
-    const {tick, tickMode, tickDelay, tickMaxDelay, tickMinDelay, tickBPMMulti, tickSinRate, bpm} = audio
+    const {
+      tick,
+      tickMode,
+      tickDelay,
+      tickMaxDelay,
+      tickMinDelay,
+      tickBPMMulti,
+      tickSinRate,
+      bpm
+    } = audio
     let nextTick = 0
-    if(tick) {
+    if (tick) {
       nextTick = _duration.current.calc(
         {
           timingFunction: tickMode,
@@ -124,30 +145,35 @@ function AudioControl(props: AudioControlProps) {
     }
 
     _tickDuration.current = nextTick / 1000
-  }, [audio?.tick, audio?.tickMode, audio?.tickDelay, audio?.tickMaxDelay, audio?.tickMinDelay, audio?.tickBPMMulti, audio?.tickSinRate, audio?.bpm])
+  }, [
+    audio?.tick,
+    audio?.tickMode,
+    audio?.tickDelay,
+    audio?.tickMaxDelay,
+    audio?.tickMinDelay,
+    audio?.tickBPMMulti,
+    audio?.tickSinRate,
+    audio?.bpm
+  ])
 
   useEffect(() => {
-    if(!_control.current || audio == null) {
+    if (!_control.current || audio == null) {
       return
     }
 
     _control.current.volume = audio.volume / 100
-  },[audio?.volume])
+  }, [audio?.volume])
 
   useEffect(() => {
-    if(!_control.current || audio == null) {
+    if (!_control.current || audio == null) {
       return
     }
 
     _control.current.playbackRate = audio.speed / 10
   }, [audio?.speed])
 
-  const onChangePosition = (
-    e: Event,
-    value: number | number[],
-    activeThumb: number
-  ) => {
-    if(!_control.current || audio == null) {
+  const onChangePosition = (_: Event, value: number | number[]) => {
+    if (!_control.current || audio == null) {
       return
     }
 
@@ -155,20 +181,20 @@ function AudioControl(props: AudioControlProps) {
   }
 
   const togglePlay = () => {
-    if(!_control.current) {
+    if (!_control.current) {
       return
     }
 
-    if(_control.current.paused) {
+    if (_control.current.paused) {
       _control.current.play()
     } else {
       _control.current.pause()
     }
-    setPlaying(value => !value)
+    setPlaying((value) => !value)
   }
 
   const onBack = () => {
-    if(!_control.current) {
+    if (!_control.current) {
       return
     }
 
@@ -177,7 +203,7 @@ function AudioControl(props: AudioControlProps) {
   }
 
   const onForward = () => {
-    if(!_control.current) {
+    if (!_control.current) {
       return
     }
 
@@ -196,15 +222,15 @@ function AudioControl(props: AudioControlProps) {
   }
 
   return (
-    <React.Fragment key={props.audioID}>
+    <Fragment key={props.audioID}>
       {props.audioEnabled && (
-        <audio 
-          ref={_control} 
-          src={audio?.fileUrl ?? ''} 
-          autoPlay={props.startPlaying} 
-          onLoadedData={(e) => setDuration(e.currentTarget.duration)} 
+        <audio
+          ref={_control}
+          src={audio?.fileUrl ?? ''}
+          autoPlay={props.startPlaying}
+          onLoadedData={(e) => setDuration(e.currentTarget.duration)}
           onTimeUpdate={(e) => onTimeUpdate(e.currentTarget.currentTime)}
-          onEnded={(e) => console.log('ENDED PLAYING')} // TODO play next track and/or switch to next scene
+          onEnded={(_) => console.log('ENDED PLAYING')} // TODO play next track and/or switch to next scene
         />
       )}
       <Grid2 size={12} className={cx(!props.audioEnabled && classes.noPadding)}>
@@ -269,10 +295,7 @@ function AudioControl(props: AudioControlProps) {
                     disableInteractive
                     title={playing ? 'Pause' : 'Play'}
                   >
-                    <IconButton
-                      onClick={togglePlay}
-                      size="large"
-                    >
+                    <IconButton onClick={togglePlay} size="large">
                       {playing ? <PauseIcon /> : <PlayArrowIcon />}
                     </IconButton>
                   </Tooltip>
@@ -299,7 +322,9 @@ function AudioControl(props: AudioControlProps) {
                 <Grid2 size="grow">
                   <BaseSlider
                     selector={() => useAppSelector(selectAudioOptionsVolume())}
-                    action={(volume: number) => (dispatch: AppDispatch) => dispatch(setAudioOptionsVolume(volume))}
+                    action={(volume: number) => (dispatch: AppDispatch) =>
+                      dispatch(setAudioOptionsVolume(volume))
+                    }
                     labelledBy="audio-volume-slider"
                   />
                 </Grid2>
@@ -311,7 +336,7 @@ function AudioControl(props: AudioControlProps) {
           </Grid2>
         </Collapse>
       </Grid2>
-    </React.Fragment>
+    </Fragment>
   )
 }
 

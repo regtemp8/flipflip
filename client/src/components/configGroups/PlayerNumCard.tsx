@@ -42,9 +42,8 @@ function PlayerNumCard() {
   //   useGetDisplaySettingsIgnoredTags()
   // )
 
-  const library: number[] = []
   const ignoredTags: string[] = []
-  const onSelectTags = (selectedTags: string[]) => {
+  const onSelectTags = (_selectedTags: string[]) => {
     // dispatch(setConfigDisplaySettingsIgnoredTags(selectedTags))
   }
 

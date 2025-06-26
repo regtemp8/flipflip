@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { ErrorInfo, useEffect, useRef, useState } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -33,7 +33,7 @@ import {
 
 export interface ErrorCardProps {
   error: Error
-  info: React.ErrorInfo
+  info: ErrorInfo
   onClearError: () => void
 }
 
@@ -238,7 +238,7 @@ export default function ErrorCard(props: ErrorCardProps) {
         >
           <DialogTitle id="restore-title">Restore Backup</DialogTitle>
           {backups.length > 0 && (
-            <React.Fragment>
+            <>
               <DialogContent>
                 <DialogContentText id="restore-description">
                   Choose a backup to restore from:
@@ -275,10 +275,10 @@ export default function ErrorCard(props: ErrorCardProps) {
                   Restore
                 </Button>
               </DialogActions>
-            </React.Fragment>
+            </>
           )}
           {backups.length === 0 && (
-            <React.Fragment>
+            <>
               <DialogContent>
                 <DialogContentText id="restore-description">
                   You don't have any backups available
@@ -289,7 +289,7 @@ export default function ErrorCard(props: ErrorCardProps) {
                   Cancel
                 </Button>
               </DialogActions>
-            </React.Fragment>
+            </>
           )}
         </Dialog>
       )}

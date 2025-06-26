@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type ReactNode } from 'react'
+import { type ChangeEvent, type ReactNode } from 'react'
 import { TextField, type TextFieldVariants, Tooltip } from '@mui/material'
 import { useAppDispatch } from '../../../store/hooks'
 import type ReduxProps from '../ReduxProps'

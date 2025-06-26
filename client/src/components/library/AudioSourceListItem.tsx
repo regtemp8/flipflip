@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent } from 'react'
+import { ChangeEvent, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -192,14 +192,14 @@ export interface AudioSourceListItemProps {
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
   const dispatch = useAppDispatch()
-  const lastSelected = useAppSelector(selectAudioLibraryIsLastSelected(props.audioID))
+  const lastSelected = useAppSelector(
+    selectAudioLibraryIsLastSelected(props.audioID)
+  )
   const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.shiftKey && !e.ctrlKey) {
-      window
-        .open(audio?.fileUrl, '_blank')
-        ?.focus()
+      window.open(audio?.fileUrl, '_blank')?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
       dispatch(saveAudioLibraryYOffset())
       // TODO get playAudio to work
@@ -313,9 +313,7 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
                       {audio?.comment && audio?.tags.length > 0 && <br />}
                       <div className={classes.tagChips}>
                         {audio?.tags?.map((tagID: number) => (
-                          <React.Fragment key={tagID}>
-                            <TagChip tagID={tagID} />
-                          </React.Fragment>
+                          <TagChip key={tagID} tagID={tagID} />
                         ))}
                       </div>
                     </div>
@@ -373,7 +371,11 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
           </Typography>
           <div
             className={classes.artistContainer}
-            onClick={audio?.artist != null ? () => props.onClickArtist(audio.artist as string) : undefined}
+            onClick={
+              audio?.artist != null
+                ? () => props.onClickArtist(audio.artist as string)
+                : undefined
+            }
           >
             <Typography noWrap className={classes.trackArtist}>
               {audio?.artist ?? ''}
@@ -381,7 +383,11 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
           </div>
           <div
             className={classes.albumContainer}
-            onClick={audio?.album != null ? () => props.onClickAlbum(audio.album as string) : undefined}
+            onClick={
+              audio?.album != null
+                ? () => props.onClickAlbum(audio.album as string)
+                : undefined
+            }
           >
             <Typography className={classes.trackAlbum}>
               {audio?.album ?? ''}

@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren, useState } from 'react'
+import { type PropsWithChildren, useState } from 'react'
 import { animated, useSpring } from '@react-spring/web'
 
 export default function VSpin(props: PropsWithChildren<any>) {

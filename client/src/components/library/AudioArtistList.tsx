@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import { Avatar, LinearProgress, type Theme, Typography } from '@mui/material'
@@ -58,7 +58,7 @@ export interface AudioArtistListProps {
 }
 
 function AudioArtistList(props: AudioArtistListProps) {
-  const {data: artists, isLoading} = useGetAudioArtistsQuery(props.sources)
+  const { data: artists, isLoading } = useGetAudioArtistsQuery(props.sources)
   const [hover, setHover] = useState<string>()
 
   const onMouseEnter = (artist: string) => {
@@ -70,11 +70,11 @@ function AudioArtistList(props: AudioArtistListProps) {
   }
 
   const { classes } = useStyles()
-  if(isLoading) {
-    return <LinearProgress/>
+  if (isLoading) {
+    return <LinearProgress />
   } else if (artists == null || artists.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -104,7 +104,7 @@ function AudioArtistList(props: AudioArtistListProps) {
             Add tracks by going to the "Songs" tab and clicking the +
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
@@ -115,7 +115,7 @@ function AudioArtistList(props: AudioArtistListProps) {
   return (
     <div className={classes.artistContainer}>
       {artists.map((artist) => {
-        const {name, thumb} = artist
+        const { name, thumb } = artist
         return (
           <div
             key={name}

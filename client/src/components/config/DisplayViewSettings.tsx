@@ -24,7 +24,7 @@ import BaseSlider from '../common/slider/BaseSlider'
 import BaseSwitch from '../common/BaseSwitch'
 import DisplayViewSyncOptions from './DisplayViewSyncOptions'
 import { PLT } from 'flipflip-common'
-import { useCreateScenePlaylistMutation } from '../../store/api/slice'
+// import { useCreateScenePlaylistMutation } from '../../store/api/slice'
 import PlaylistSelect from '../common/PlaylistSelect'
 
 const useStyles = makeStyles()((theme: Theme) => ({

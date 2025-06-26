@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useState,
   type MouseEvent,
@@ -379,7 +379,6 @@ function Library() {
   const filters: string[] = []
   const selected: number[] = []
   const displaySources: number[] = []
-  const selectedTagNames: string[] = []
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -486,11 +485,14 @@ function Library() {
     }
   }
 
-  const onUpdateFilters = (filters: string[]) => {
+  const onUpdateFilters = (_filters: string[]) => {
     // dispatch(setLibraryFilters(filters))
   }
 
-  const onAddSource = (addFunction: string, e?: MouseEvent, ...args: any[]) => {
+  const onAddSource = (
+    addFunction: string,
+    e?: MouseEvent /*, ...args: any[]*/
+  ) => {
     onCloseDialog()
     if (addFunction === AF.videos && e?.shiftKey) {
       addFunction = AF.videoDir
@@ -596,11 +598,11 @@ function Library() {
             // TODO import as subset of AppStorage
             // dispatch(importLibrary(json))
             onCloseDialog()
-          } catch (e) {
+          } catch {
             snackbar().showMessage({ error: 'This is not a valid JSON file' })
           }
         })
-        .catch((e) => {
+        .catch(() => {
           snackbar().showMessage({ error: 'Error accessing URL' })
         })
     } else {
@@ -742,7 +744,7 @@ function Library() {
               )}
               <LibrarySearch
                 appBar
-                options={searchOptions}
+                options={searchOptions ?? []}
                 filters={filters}
                 placeholder={'Search ...'}
                 isCreatable
@@ -850,7 +852,7 @@ function Library() {
         </div>
 
         {remoteAuthorized && (
-          <React.Fragment>
+          <>
             <Divider />
 
             <div className={cx(tutorial != null && classes.disable)}>
@@ -914,7 +916,7 @@ function Library() {
                 </Tooltip>
               )}
             </div>
-          </React.Fragment>
+          </>
         )}
 
         <Divider />
@@ -955,7 +957,7 @@ function Library() {
         </div>
 
         {progressMode != null && (
-          <React.Fragment>
+          <>
             <Divider />
 
             <div>
@@ -990,7 +992,7 @@ function Library() {
                   />
                 )}
             </div>
-          </React.Fragment>
+          </>
         )}
 
         <div className={classes.fill} />
@@ -1055,7 +1057,7 @@ function Library() {
       />
 
       {specialMode && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Clear" placement="top-end">
             <Fab
               className={classes.selectNoneButton}
@@ -1130,11 +1132,11 @@ function Library() {
               </Fab>
             </Badge>
           </Tooltip>
-        </React.Fragment>
+        </>
       )}
 
       {!specialMode && (
-        <React.Fragment>
+        <>
           {library.length > 0 && (
             <Tooltip
               disableInteractive
@@ -1206,7 +1208,7 @@ function Library() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Delete Library</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1222,10 +1224,10 @@ function Library() {
                     Yea... I'm sure
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Delete Sources</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1241,7 +1243,7 @@ function Library() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           <Dialog
@@ -1251,7 +1253,7 @@ function Library() {
             aria-describedby="delete-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="delete-all-title">
                   PERMANENTLY Delete Library
                 </DialogTitle>
@@ -1272,10 +1274,10 @@ function Library() {
                     PERMANENTLY DELETE FROM DISK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="delete-all-title">
                   PERMANENTLY Delete Sources
                 </DialogTitle>
@@ -1296,7 +1298,7 @@ function Library() {
                     PERMANENTLY DELETE FROM DISK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           {piwigoConfigured && (
@@ -1398,7 +1400,7 @@ function Library() {
           >
             <AddIcon className={classes.icon} />
           </Fab>
-        </React.Fragment>
+        </>
       )}
 
       <PiwigoDialog
@@ -1444,8 +1446,8 @@ function Library() {
                 <>
                   <IconButton
                     edge="end"
-                    onClick={async() => {
-                      await sortContentSources({sortBy: sf, sortOrder: 'asc'})
+                    onClick={async () => {
+                      await sortContentSources({ sortBy: sf, sortOrder: 'asc' })
                     }}
                     size="large"
                   >
@@ -1453,8 +1455,11 @@ function Library() {
                   </IconButton>
                   <IconButton
                     edge="end"
-                    onClick={async() => {
-                      await sortContentSources({sortBy: sf, sortOrder: 'desc'})
+                    onClick={async () => {
+                      await sortContentSources({
+                        sortBy: sf,
+                        sortOrder: 'desc'
+                      })
                     }}
                     size="large"
                   >
@@ -1471,8 +1476,11 @@ function Library() {
           secondaryAction={
             <IconButton
               edge="end"
-              onClick={async() => {
-                await sortContentSources({sortBy: SF.random, sortOrder: 'asc'})
+              onClick={async () => {
+                await sortContentSources({
+                  sortBy: SF.random,
+                  sortOrder: 'asc'
+                })
               }}
               size="large"
             >
@@ -1509,7 +1517,7 @@ function Library() {
           {openMenu === MO.batchTag && (
             <LibrarySearch
               filters={selectedTags}
-              options={tagOptions}
+              options={tagOptions ?? []}
               placeholder={'Tag These Sources'}
               showCheckboxes
               inputVariant="standard"

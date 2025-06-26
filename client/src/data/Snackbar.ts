@@ -1,5 +1,5 @@
-import { Message } from "flipflip-common"
-import { enqueueSnackbar } from "notistack"
+import { Message } from 'flipflip-common'
+import { enqueueSnackbar } from 'notistack'
 
 export const MAX_SNACKS = 3
 export const AUTO_HIDE_DURATION = 4500

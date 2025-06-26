@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -71,7 +71,7 @@ function PlaylistList(props: PlaylistListProps) {
   const { classes } = useStyles()
   if (Object.keys(playlistThumbs).length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -101,7 +101,7 @@ function PlaylistList(props: PlaylistListProps) {
             Create playlists by clicking "Add to Playlist" in the sidebar
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
@@ -51,7 +50,6 @@ import {
 } from '../../store/api/slice'
 import EasingCard from '../common/EasingCard'
 import BaseSwitch from '../common/BaseSwitch'
-import { useLocation } from 'react-router'
 import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -148,7 +146,7 @@ function FadeIOCard(props: FadeIOCardProps) {
         </Collapse>
       </Grid2>
       {easingControls && (
-        <React.Fragment>
+        <>
           <Grid2 size={12}>
             <Collapse in={fadeInOut} className={classes.fullWidth}>
               <Divider />
@@ -215,7 +213,7 @@ function FadeIOCard(props: FadeIOCardProps) {
               />
             </Collapse>
           </Grid2>
-        </React.Fragment>
+        </>
       )}
     </Grid2>
   )

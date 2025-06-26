@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent, useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import wretch from 'wretch'
 import AbortAddon from 'wretch/addons/abort'
 import FormUrlAddon from 'wretch/addons/formUrl'
@@ -41,8 +41,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
 import { en, AF, PW, PWS } from 'flipflip-common'
-import { useAppSelector } from '../../store/hooks'
 import { useGetRemoteSettingsQuery } from '../../store/api/slice'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   list: {},
@@ -131,7 +131,7 @@ function AlbumListItem(props: AlbumListItemProps) {
   const isSelected = selectedAlbums.includes(album.id)
 
   return (
-    <React.Fragment>
+    <>
       <ListItemButton
         key={album.id}
         selected={isSelected}
@@ -168,7 +168,7 @@ function AlbumListItem(props: AlbumListItemProps) {
           ))}
         </List>
       )}
-    </React.Fragment>
+    </>
   )
 }
 
@@ -253,7 +253,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
           //
         }
       })
-      .catch((e) => {
+      .catch((_e) => {
         //
       })
   }
@@ -291,7 +291,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
             //
           }
         })
-        .catch((e) => {
+        .catch((_e) => {
           //
         })
     }
@@ -332,7 +332,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
             //
           }
         })
-        .catch((e) => {
+        .catch((_e) => {
           //
         })
     }
@@ -344,7 +344,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
     }
   }
 
-  const createAPICall = (e: MouseEvent) => {
+  const createAPICall = () => {
     let url = `${makeURL()}&method=${listType}`
 
     if (listType === PW.apiTypeCategory) {
@@ -471,7 +471,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
           </Select>
         </FormControl>
         {listType === PW.apiTypeCategory && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -507,10 +507,10 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               }
               label="Recursive"
             />
-          </React.Fragment>
+          </>
         )}
         {listType === PW.apiTypeTag && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -547,10 +547,10 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               }
               label="Must Match All Tags"
             />
-          </React.Fragment>
+          </>
         )}
         <Divider orientation="horizontal" flexItem />
-        <React.Fragment>
+        <>
           <Typography
             component="h2"
             variant="h6"
@@ -576,9 +576,9 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               animation: 150,
               easing: 'cubic-bezier(1, 0, 0, 1)'
             }}
-            onChange={(order: any, sortable: any, evt: any) => {
+            onChange={(_order: any, _sortable: any, evt: any) => {
               const newSortOrder = Array.from(sortOrder)
-              // arrayMove(newSortOrder, evt.oldIndex, evt.newIndex)
+              arrayMove(newSortOrder, evt.oldIndex, evt.newIndex)
               setSortOrder(newSortOrder)
             }}
           >
@@ -620,9 +620,9 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               </Card>
             ))}
           </Sortable>
-        </React.Fragment>
+        </>
         {(listType === PW.apiTypeTag || listType === PW.apiTypeCategory) && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -643,7 +643,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
                 <Rating name="pwg-image-max" precision={0.5} />
               </Container>
             </Container>
-          </React.Fragment>
+          </>
         )}
       </DialogContent>
       <DialogActions>

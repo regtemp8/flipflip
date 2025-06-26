@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { getTimingFromString } from '../../utils'
 import type ChildCallbackHack from '../player/ChildCallbackHack'
 import {
@@ -469,7 +469,7 @@ export default function CodeMirror(props: CodeMirrorProps) {
 
   const onBeforeChangeScript = (
     editor: Editor,
-    data: EditorChange,
+    _data: EditorChange,
     value: string
   ) => {
     if (scriptText !== value) {

@@ -1,11 +1,10 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { useState, SyntheticEvent } from 'react'
+import { useState } from 'react'
 import {
   Link as RouterLink,
   Route,
   Routes,
   useLocation,
-  Navigate,
   useNavigate
 } from 'react-router'
 import { cx } from '@emotion/css'
@@ -411,7 +410,7 @@ function ScenePicker() {
   const scriptLibraryCount = 1
 
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [newVersion, setNewVersion] = useState('')
+  const [newVersion, _setNewVersion] = useState('')
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
   const openGitRelease = () => {}

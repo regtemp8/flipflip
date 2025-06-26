@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
 
@@ -372,7 +372,7 @@ function TagManager() {
                 animation: 150,
                 easing: 'cubic-bezier(1, 0, 0, 1)'
               }}
-              onChange={async (order: any, sortable: any, evt: any) => {
+              onChange={async (_order: any, _sortable: any, evt: any) => {
                 const newTags = arrayMove(
                   tags as number[],
                   evt.oldIndex,
@@ -391,7 +391,7 @@ function TagManager() {
       </main>
 
       {(tags?.length ?? 0) > 0 && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Remove All Tags">
             <Fab
               className={cx(
@@ -426,11 +426,11 @@ function TagManager() {
               </Button>
             </DialogActions>
           </Dialog>
-        </React.Fragment>
+        </>
       )}
 
       {(tags?.length ?? 0) >= 2 && (
-        <React.Fragment>
+        <>
           <Fab
             className={classes.sortMenuButton}
             aria-haspopup="true"
@@ -488,7 +488,7 @@ function TagManager() {
               </ListItem>
             ))}
           </Menu>
-        </React.Fragment>
+        </>
       )}
 
       <Fab className={classes.addMenuButton} onClick={onAddTag} size="large">

@@ -1,11 +1,8 @@
-import React from 'react'
-
 import {
   Collapse,
   Divider,
   Fab,
   Grid2,
-  type Theme,
   Tooltip,
   IconButton
 } from '@mui/material'
@@ -14,9 +11,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 
-import { PLT } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
-import PlaylistSelect from '../common/PlaylistSelect'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   useAddSceneAudioPlaylistMutation,
@@ -54,8 +49,10 @@ function AudioCard(props: AudioCardProps) {
     addSceneAudioPlaylist({ id: props.sceneID })
   }
 
-  const onDeletePlaylist = (index: number) => {
-    deleteSceneAudioPlaylist({ id: props.sceneID })
+  const onDeletePlaylist = (_index: number) => {
+    const { sceneID } = props
+    const playlistID = -1
+    deleteSceneAudioPlaylist({ sceneID, playlistID })
   }
 
   const { classes } = useStyles()
@@ -87,7 +84,7 @@ function AudioCard(props: AudioCardProps) {
       </Grid2>
       <Collapse in={audioEnabled || props.persist}>
         <Grid2 container spacing={1} sx={{ mt: 2 }}>
-          {audioPlaylists?.map((playlist, i) => (
+          {audioPlaylists?.map((_playlist, i) => (
             <>
               <Grid2 size="grow">
                 {/* <PlaylistSelect

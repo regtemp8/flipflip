@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useEffect, useState, useCallback } from 'react'
+import { type MouseEvent, useEffect, useState, useCallback } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -404,7 +404,7 @@ function ScriptLibrary() {
     onCloseDialog()
   }
 
-  const onAddSource = async (type: string, e: MouseEvent) => {
+  const onAddSource = async (type: string) => {
     switch (type) {
       case AF.url:
         await createScripts([''])
@@ -705,7 +705,7 @@ function ScriptLibrary() {
       />
 
       {specialMode && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Clear" placement="top-end">
             <Fab
               className={classes.selectNoneButton}
@@ -760,11 +760,11 @@ function ScriptLibrary() {
               </Fab>
             </Badge>
           </Tooltip>
-        </React.Fragment>
+        </>
       )}
 
       {!specialMode && (
-        <React.Fragment>
+        <>
           {(scripts?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
@@ -791,7 +791,7 @@ function ScriptLibrary() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Delete Caption Script Library
                 </DialogTitle>
@@ -809,10 +809,10 @@ function ScriptLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Delete Caption Scripts
                 </DialogTitle>
@@ -830,7 +830,7 @@ function ScriptLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           <Tooltip
@@ -847,7 +847,7 @@ function ScriptLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.script, e)}
+              onClick={() => onAddSource(AF.script)}
               size="small"
             >
               <DescriptionIcon className={classes.icon} />
@@ -867,7 +867,7 @@ function ScriptLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.url, e)}
+              onClick={() => onAddSource(AF.url)}
               size="small"
             >
               <HttpIcon className={classes.icon} />
@@ -884,7 +884,7 @@ function ScriptLibrary() {
           >
             <AddIcon className={classes.icon} />
           </Fab>
-        </React.Fragment>
+        </>
       )}
 
       <Fab

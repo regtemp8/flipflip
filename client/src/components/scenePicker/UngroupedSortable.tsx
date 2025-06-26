@@ -33,19 +33,19 @@ function UngroupedSortable(props: PropsWithChildren<UngroupedSortableProps>) {
         animation: 150,
         easing: 'cubic-bezier(1, 0, 0, 1)'
       }}
-      onChange={(order: any, sortable: any, evt: any) => {
-        // dispatch(
-        //   onScenePickerChangeUngroupedSort(
-        //     ungrouped,
-        //     type,
-        //     evt.type,
-        //     evt.oldIndex,
-        //     evt.newIndex,
-        //     Number(evt.item.id),
-        //     order.length
-        //   )
-        // )
-      }}
+      // onChange={(order: any, sortable: any, evt: any) => {
+      //   dispatch(
+      //     onScenePickerChangeUngroupedSort(
+      //       ungrouped,
+      //       type,
+      //       evt.type,
+      //       evt.oldIndex,
+      //       evt.newIndex,
+      //       Number(evt.item.id),
+      //       order.length
+      //     )
+      //   )
+      // }}
     >
       {children}
     </Sortable>
