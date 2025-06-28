@@ -1,4 +1,4 @@
-ARG SERVER_PORT="8080"
+ARG SERVER_PORT="5050"
 ARG NODE_ENV="production"
 
 FROM node:20-alpine AS builder

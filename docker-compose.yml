@@ -1,0 +1,69 @@
+services:
+  flipflip:
+    image: flipflip
+    build:
+      context: .
+    pull_policy: build
+    environment:
+      FF_USERNAME: admin
+      FF_PASSWORD: admin
+      FF_SAVE_DIR: /var/lib/flipflip
+    volumes:
+      - ./docker-data/flipflip:/var/lib/flipflip
+    ports:
+      - 5050:5050
+    profiles:
+      - flipflip
+      - hydrus
+      - piwigo
+
+  hydrusclient:
+    image: ghcr.io/hydrusnetwork/hydrus:latest
+    container_name: hydrusclient
+    restart: unless-stopped
+    environment:
+      - UID=1000
+      - GID=1000
+    volumes:
+      - ./docker-data/hydrus:/var/lib/hydrus/db
+    tmpfs:
+      - /tmp
+    ports:
+      - 5800:5800   #noVNC
+      - 5900:5900   #VNC
+      - 45868:45868 #Booru
+      - 45869:45869 #API
+    profiles:
+      - hydrus
+
+  piwigo:
+    image: lscr.io/linuxserver/piwigo:latest
+    container_name: piwigo
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./docker-data/piwigo/config:/var/lib/piwigo/config
+      - ./docker-data/piwigo/gallery:/var/lib/piwigo/gallery
+    ports:
+      - 5080:80
+    restart: unless-stopped
+    profiles:
+      - piwigo
+    
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_USER=piwigo
+      - MYSQL_PASSWORD=piwigo
+      - MYSQL_DATABASE=piwigo
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    restart: unless-stopped
+    profiles:
+      - piwigo
