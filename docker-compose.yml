@@ -3,7 +3,7 @@ services:
     image: flipflip
     build:
       context: .
-    pull_policy: build
+    # pull_policy: build # force build
     environment:
       FF_USERNAME: admin
       FF_PASSWORD: admin
@@ -12,10 +12,6 @@ services:
       - ./docker-data/flipflip:/var/lib/flipflip
     ports:
       - 5050:5050
-    profiles:
-      - flipflip
-      - hydrus
-      - piwigo
 
   hydrusclient:
     image: ghcr.io/hydrusnetwork/hydrus:latest
@@ -29,16 +25,18 @@ services:
     tmpfs:
       - /tmp
     ports:
-      - 5800:5800   #noVNC
-      - 5900:5900   #VNC
-      - 45868:45868 #Booru
-      - 45869:45869 #API
+      - 5800:5800   # noVNC
+      - 5900:5900   # VNC
+      - 45868:45868 # Booru
+      - 45869:45869 # API
     profiles:
       - hydrus
 
   piwigo:
     image: lscr.io/linuxserver/piwigo:latest
     container_name: piwigo
+    depends_on:
+      - mysql
     environment:
       - PUID=1000
       - PGID=1000
