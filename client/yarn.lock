@@ -1032,6 +1032,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@juggle/resize-observer@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "@juggle/resize-observer@npm:3.4.0"
+  checksum: 10c0/12930242357298c6f2ad5d4ec7cf631dfb344ca7c8c830ab7f64e6ac11eb1aae486901d8d880fd08fb1b257800c160a0da3aee1e7ed9adac0ccbb9b7c5d93347
+  languageName: node
+  linkType: hard
+
 "@mui/base@npm:5.0.0-beta.58":
   version: 5.0.0-beta.58
   resolution: "@mui/base@npm:5.0.0-beta.58"
@@ -1647,6 +1654,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-ease@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/d3-ease@npm:3.0.2"
+  checksum: 10c0/aff5a1e572a937ee9bff6465225d7ba27d5e0c976bd9eacdac2e6f10700a7cb0c9ea2597aff6b43a6ed850a3210030870238894a77ec73e309b4a9d0333f099c
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
@@ -1698,6 +1712,15 @@ __metadata:
   dependencies:
     "@types/react": "npm:*"
   checksum: 10c0/6c90d2ed72c5a0e440d2c75d99287e4b5df3e7b011838cdc03ae5cd518ab52164d86990e73246b9d812eaf02ec351d74e3b4f5bd325bf341e13bf980392fd53b
+  languageName: node
+  linkType: hard
+
+"@types/react-page-visibility@npm:^6.4.4":
+  version: 6.4.4
+  resolution: "@types/react-page-visibility@npm:6.4.4"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/44994357e10e50b572972d477ef0844842ec52d68936660044723d6cf468ed182efd5c7b1b4f332ed3f458fbb52c24f39230ca6d811a47d5f10d0bc87b4c3165
   languageName: node
   linkType: hard
 
@@ -2148,20 +2171,24 @@ __metadata:
     "@emotion/react": "npm:^11.13.3"
     "@emotion/styled": "npm:^11.13.0"
     "@eslint/js": "npm:^9.9.0"
+    "@juggle/resize-observer": "npm:^3.4.0"
     "@mui/icons-material": "npm:^6.1.1"
     "@mui/lab": "npm:6.0.0-beta.11"
     "@mui/material": "npm:^6.1.3"
     "@reduxjs/toolkit": "npm:^2.2.7"
     "@types/codemirror": "npm:^5.60.15"
+    "@types/d3-ease": "npm:^3.0.2"
     "@types/fscreen": "npm:^1"
     "@types/react": "npm:^18.3.3"
     "@types/react-color": "npm:^2"
     "@types/react-dom": "npm:^18.3.0"
+    "@types/react-page-visibility": "npm:^6.4.4"
     "@types/react-window": "npm:^1.8.8"
     "@types/sortablejs": "npm:^1"
     "@types/uuid": "npm:^10.0.0"
     "@vitejs/plugin-react": "npm:^4.3.1"
     codemirror: "npm:5.x"
+    d3-ease: "npm:^3.0.1"
     debounce: "npm:^2.2.0"
     eslint: "npm:^9.9.0"
     eslint-plugin-react-hooks: "npm:^5.1.0-rc.0"
@@ -2178,11 +2205,14 @@ __metadata:
     react-color: "npm:^2.19.3"
     react-dom: "npm:^18.3.1"
     react-idle-timer: "npm:^5.7.2"
+    react-page-visibility: "npm:^7.0.0"
     react-redux: "npm:^9.1.2"
     react-router: "npm:^7.1.5"
+    react-screen-wake-lock: "npm:^3.1.1"
     react-sortable-hoc: "npm:^2.0.0"
     react-sortablejs: "npm:^1.5.1"
     react-spring: "npm:^9.7.4"
+    react-use-measure: "npm:^2.1.7"
     react-virtualized-auto-sizer: "npm:^1.0.20"
     react-window: "npm:^1.8.9"
     sortablejs: "npm:1.6.1"
@@ -2191,6 +2221,7 @@ __metadata:
     typescript: "npm:^5.5.3"
     typescript-eslint: "npm:^8.0.1"
     use-debounce: "npm:^10.0.4"
+    use-stay-awake: "npm:^0.1.7"
     uuid: "npm:^9.0.1"
     vite: "npm:^5.4.1"
     web-audio-beat-detector: "npm:^8.2.20"
@@ -2307,6 +2338,13 @@ __metadata:
   version: 3.1.3
   resolution: "csstype@npm:3.1.3"
   checksum: 10c0/80c089d6f7e0c5b2bd83cf0539ab41474198579584fa10d86d0cafe0642202343cbc119e076a0b1aece191989477081415d66c9fefbf3c957fc2fc4b7009f248
+  languageName: node
+  linkType: hard
+
+"d3-ease@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "d3-ease@npm:3.0.1"
+  checksum: 10c0/fec8ef826c0cc35cda3092c6841e07672868b1839fcaf556e19266a3a37e6bc7977d8298c0fcb9885e7799bfdcef7db1baaba9cd4dcf4bc5e952cf78574a88b0
   languageName: node
   linkType: hard
 
@@ -3794,7 +3832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:>=15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.7, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:>=15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.7, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -3891,6 +3929,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-page-visibility@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "react-page-visibility@npm:7.0.0"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    react: ^16.13.1 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/34d2f614581646d556c09285478b4a6b06d582b6cf202dd4bb7f8ed54d0c2ad4ba95b52bde80e0258f2861936ac3b34e8b275486e3e508b3f5e677f7bef0363f
+  languageName: node
+  linkType: hard
+
 "react-redux@npm:^9.1.2":
   version: 9.1.2
   resolution: "react-redux@npm:9.1.2"
@@ -3932,6 +3981,15 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10c0/c0013102c7a02d26cd2353fa3749bd229fbcfedd291710540be1765d703861f96a34ef0114dd5ee8d9a728e87f3a5698387058f9539b39604f331505f507d912
+  languageName: node
+  linkType: hard
+
+"react-screen-wake-lock@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "react-screen-wake-lock@npm:3.1.1"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/171343500f7ff0f178de6faefbe70ac199ec54a9145ef2f0230bee84589c467ada4b686c2a3649e47cc853e0aa287e61c4460b951e7735a87419741a33411214
   languageName: node
   linkType: hard
 
@@ -3992,6 +4050,19 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 10c0/2ba754ba748faefa15f87c96dfa700d5525054a0141de8c75763aae6734af0740e77e11261a1e8f4ffc08fd9ab78510122e05c21c2d79066c38bb6861a886c82
+  languageName: node
+  linkType: hard
+
+"react-use-measure@npm:^2.1.7":
+  version: 2.1.7
+  resolution: "react-use-measure@npm:2.1.7"
+  peerDependencies:
+    react: ">=16.13"
+    react-dom: ">=16.13"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10c0/ff24130e6f95e853feb6892fb74af08dbc5aae3574b701169e3bc3adb392c3162f51a58ddfe39bb7337db13ae609bbec0bb51a9de8b5fae5420f9d17e1f8b542
   languageName: node
   linkType: hard
 
@@ -4612,6 +4683,16 @@ __metadata:
   peerDependencies:
     react: "*"
   checksum: 10c0/73494fc44b2bd58a7ec799a528fc20077c45fe2e94fedff6dcd88d136f7a39f417d77f584d5613aac615ed32aeb2ea393797ae1f7d5b2645eab57cb497a6d0cb
+  languageName: node
+  linkType: hard
+
+"use-stay-awake@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "use-stay-awake@npm:0.1.7"
+  peerDependencies:
+    react: ^16.8.0
+    react-dom: ^16.8.0
+  checksum: 10c0/8c3bf12a67a21fbba3fb12c460d8dfca5b25210b136b8e4add95a6c34db318e404ea1fe6348b971d4bb4f8c11a954603c5e5abe37e7504470876868dc21624da
   languageName: node
   linkType: hard
 

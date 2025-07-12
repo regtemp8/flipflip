@@ -1,6 +1,7 @@
+import * as easings from 'd3-ease'
 import { useRef } from 'react'
 import { filesize } from 'filesize'
-import { Backup, ContentSource, ScraperHelpers, TF } from 'flipflip-common'
+import { Backup, ContentSource, ScraperHelpers, EA, TF } from 'flipflip-common'
 
 export const captionProgramDefaults = {
   program: Array<Function>(),
@@ -265,7 +266,83 @@ export class CancelablePromise extends Promise<CancelablePromiseData> {
   }
 }
 
-// debug util to optimize component re-renders
+export function getBrowserName() {
+  const agent = window.navigator.userAgent.toLowerCase()
+  if (agent.indexOf('chrome') > -1 && window.chrome != null) {
+    return 'chrome'
+  } else if (agent.indexOf('safari') > -1) {
+    return 'safari'
+  } else if (agent.indexOf('edge') > -1) {
+    return 'edge'
+  } else if (agent.indexOf('edg') > -1) {
+    return 'chromium based edge'
+  } else if (agent.indexOf('firefox') > -1) {
+    return 'firefox'
+  } else if (agent.indexOf('opr') > -1 && window.opr != null) {
+    return 'opera'
+  } else if (agent.indexOf('trident') > -1) {
+    return 'ie'
+  } else {
+    return 'other'
+  }
+}
+
+export function getEaseFunction(
+  ea: string,
+  exp: number,
+  amp: number,
+  per: number,
+  ov: number
+) {
+  switch (ea) {
+    case EA.linear:
+      return easings.easeLinear
+    case EA.sinIn:
+      return easings.easeSinIn
+    case EA.sinOut:
+      return easings.easeSinOut
+    case EA.sinInOut:
+      return easings.easeSinInOut
+    case EA.expIn:
+      return easings.easeExpIn
+    case EA.expOut:
+      return easings.easeExpOut
+    case EA.expInOut:
+      return easings.easeExpInOut
+    case EA.circleIn:
+      return easings.easeCircleIn
+    case EA.circleOut:
+      return easings.easeCircleOut
+    case EA.circleInOut:
+      return easings.easeCircleInOut
+    case EA.bounceIn:
+      return easings.easeBounceIn
+    case EA.bounceOut:
+      return easings.easeBounceOut
+    case EA.bounceInOut:
+      return easings.easeBounceInOut
+    case EA.polyIn:
+      return easings.easePolyIn.exponent(exp)
+    case EA.polyOut:
+      return easings.easePolyOut.exponent(exp)
+    case EA.polyInOut:
+      return easings.easePolyInOut.exponent(exp)
+    case EA.elasticIn:
+      return easings.easeElasticIn.amplitude(amp).period(per)
+    case EA.elasticOut:
+      return easings.easeElasticOut.amplitude(amp).period(per)
+    case EA.elasticInOut:
+      return easings.easeElasticInOut.amplitude(amp).period(per)
+    case EA.backIn:
+      return easings.easeBackIn.overshoot(ov)
+    case EA.backOut:
+      return easings.easeBackOut.overshoot(ov)
+    case EA.backInOut:
+      return easings.easeBackInOut.overshoot(ov)
+  }
+}
+
+// debug util to help optimize component re-renders
 export default function useTrackVariableChanges<T>(
   variables: Record<string, T>
 ) {

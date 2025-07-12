@@ -25,6 +25,7 @@ import AudioOptions from './library/AudioOptions'
 import { SnackbarKey, SnackbarProvider, closeSnackbar } from 'notistack'
 import CloseIcon from '@mui/icons-material/Close'
 import { AUTO_HIDE_DURATION, MAX_SNACKS } from '../data/Snackbar'
+import DisplayManager from './player/DisplayManager'
 
 const CloseSnackBarAction = (key: SnackbarKey) => {
   return (
@@ -134,6 +135,14 @@ const App = () => {
                   element={
                     <PrivateRoute>
                       <CaptionScriptor />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/player/:id"
+                  element={
+                    <PrivateRoute>
+                      <DisplayManager />
                     </PrivateRoute>
                   }
                 />

@@ -287,3 +287,203 @@ export function getSourceType(url: string): string {
     return ST.local
   }
 }
+
+export function getFileGroup(url: string, pathSep: string) {
+  switch (getSourceType(url)) {
+    case ST.tumblr:
+      return url.replace(/https?:\/\//, '').replace(/\.tumblr\.com\/?/, '');
+    case ST.reddit:
+      if (url.endsWith('/')) {
+        url = url.slice(0, url.lastIndexOf('/'));
+      }
+      if (url.endsWith('/saved')) {
+        url = url.replace('/saved', '');
+      }
+
+      return url.substring(url.lastIndexOf('/') + 1);
+    case ST.redgifs:
+      if (url.includes('/browse?')) {
+        const redgifRegex =
+          /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(
+            url
+          );
+        return redgifRegex?.length ? redgifRegex[1] : 'all';
+      } else if (url.includes('/users/')) {
+        url = url.replace(/^https?:\/\/(www\.)?redgifs\.com\/users\//, '');
+        if (url.includes('/')) {
+          url = url.substring(0, url.indexOf('/'));
+        }
+
+        return url;
+      }
+      return undefined;
+    case ST.imagefap:
+      return url
+        .replace(/https?:\/\/www.imagefap.com\//, '')
+        .replace(/pictures\//, '')
+        .replace(/gallery\//, '')
+        .replace(/organizer\//, '')
+        .replace(/gallery\.php\?gid=/, '')
+        .replace(/video\.php\?vid=/, '')
+        .split('/')[0];
+    case ST.sexcom:
+      url = url
+        .replace(/https?:\/\/www.sex.com\//, '')
+        .replace(/user\//, '')
+        .split('?')[0];
+
+      if (url.endsWith('/')) {
+        url = url.substring(0, url.length - 1);
+      }
+
+      return url;
+    case ST.imgur:
+      return url.replace(/https?:\/\/imgur.com\//, '').replace(/a\//, '');
+    case ST.twitter:
+      url = url.replace(/https?:\/\/twitter.com\//, '');
+      if (url.includes('?')) {
+        url = url.substring(0, url.indexOf('?'));
+      }
+      if (url.endsWith('/')) {
+        url = url.substring(0, url.length - 1);
+      }
+      return url;
+    case ST.deviantart:
+      url = url.replace(/https?:\/\/www.deviantart.com\//, '');
+      if (url.includes('/')) {
+        url = url.substring(0, url.indexOf('/'));
+      }
+      return url;
+    case ST.instagram:
+      url = url.replace(/https?:\/\/www.instagram.com\//, '');
+      if (url.includes('/')) {
+        url = url.substring(0, url.indexOf('/'));
+      }
+      return url;
+    case ST.e621: {
+      const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g;
+      const hostRegexResult = hostRegexE621.exec(url);
+      const hostE621 = hostRegexResult != null ? hostRegexResult[1] : '';
+      const tryGetTag = (url: string): string => {
+        const tagRegex = /[?&]tags=(.*)&?/g;
+        const tags = tagRegex.exec(url);
+        const tag = tags != null ? tags[1] : '';
+        return tag.endsWith('+') ? tag.substring(0, tag.length - 1) : tag;
+      };
+
+      const E621ID = url.includes('/pools/')
+        ? 'pool' + url.substring(url.lastIndexOf('/'))
+        : tryGetTag(url);
+
+      return hostE621 + '/' + decodeURIComponent(E621ID);
+    }
+    case ST.luscious:
+      url = url.replace(
+        /^https?:\/\/(www\.|members\.)?luscious\.net\/(albums|users)\//,
+        ''
+      );
+      if (url.includes('/')) {
+        url = url.substring(0, url.indexOf('/'));
+      }
+      return url;
+    case ST.danbooru:
+    case ST.gelbooru1:
+    case ST.gelbooru2: {
+      const createFileGroup = (host: string, id: string) => {
+        return host + '/' + decodeURIComponent(id);
+      };
+      const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g;
+      const hostRegexResult = hostRegex.exec(url);
+      const host = hostRegexResult != null ? hostRegexResult[1] : '';
+      if (url.includes('/pools/')) {
+        const danbooruID = 'pools/' + url.substring(url.lastIndexOf('/'));
+        return createFileGroup(host, danbooruID);
+      } else if (url.includes('/favorite_groups/')) {
+        const danbooruID =
+          'favorite_groups/' + url.substring(url.lastIndexOf('/'));
+        return createFileGroup(host, danbooruID);
+      } else {
+        const tagRegex = /[?&]tags=(.*)&?/g;
+        const tags = tagRegex.exec(url);
+        const tagsValue = tags != null ? tags[1] : '';
+        const tagsValueHasPlus = tagsValue.endsWith('+');
+
+        const titleRegex = /[?&]title=(.*)&?/g;
+        const title = titleRegex.exec(url);
+        const titleValue = title != null ? title[1] : undefined;
+        if (titleValue != null) {
+          const separator: string = tagsValueHasPlus === true ? '' : '+';
+          const danbooruID = [tagsValue, titleValue].join(separator);
+          return createFileGroup(host, danbooruID);
+        } else {
+          const danbooruID = tagsValueHasPlus
+            ? tagsValue.substring(0, tagsValue.length - 1)
+            : tagsValue;
+          return createFileGroup(host, danbooruID);
+        }
+      }
+    }
+    case ST.ehentai: {
+      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^/]*)/g;
+      const gallery = galleryRegex.exec(url);
+      return gallery != null ? gallery[1] : undefined;
+    }
+    case ST.list: {
+      const sep = /^https?:\/\//g.exec(url) != null ? '/' : pathSep;
+      return url.substring(url.lastIndexOf(sep) + 1).replace('.txt', '');
+    }
+    case ST.local:
+      if (url.endsWith(pathSep)) {
+        url = url.substring(0, url.length - 1);
+      }
+      return url.substring(url.lastIndexOf(pathSep) + 1);
+    case ST.video:
+    case ST.playlist:
+    case ST.nimja: {
+      const sep = /^https?:\/\//g.exec(url) != null ? '/' : pathSep;
+      const name = url.substring(0, url.lastIndexOf(sep));
+      return name.substring(name.lastIndexOf(sep) + 1);
+    }
+    case ST.bdsmlr:
+      return url
+        .replace(/https?:\/\//, '')
+        .replace(/\/rss/, '')
+        .replace(/\.bdsmlr\.com\/?/, '');
+    case ST.hydrus: {
+      const tagsRegex = /tags=([^&]*)&?.*$/.exec(url);
+      if (tagsRegex == null) return 'hydrus';
+      const tags = tagsRegex[1];
+      const tagsValue = !tags.startsWith('[') ? decodeURIComponent(tags) : tags;
+
+      return tagsValue.substring(1, tags.length - 1).replace(/"/g, '');
+    }
+    case ST.piwigo: {
+      const catRegex = /cat_id\[]=(\d*)/.exec(url);
+      if (catRegex != null) return catRegex[1];
+
+      const tagRegex = /tag_id\[]=(\d*)/.exec(url);
+      if (tagRegex != null) return tagRegex[1];
+
+      return 'piwigo';
+    }
+    default:
+      return undefined;
+  }
+}
+
+export function getFileName(url: string, pathSep: string, extension = true) {
+  let sep;
+  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
+    sep = '/';
+  } else {
+    sep = pathSep;
+  }
+  url = url.substring(url.lastIndexOf(sep) + 1);
+  if (url.includes('?')) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  if (!extension) {
+    url = url.substring(0, url.lastIndexOf('.'));
+  }
+  return url;
+}

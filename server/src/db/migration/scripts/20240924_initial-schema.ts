@@ -630,6 +630,7 @@ const displayTable = async (trx: Kysely<DB>) => {
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('sceneGroupId', 'integer')
+    .addColumn('temporary', 'boolean', (col) => col.notNull())
     .addForeignKeyConstraint('FK_display_user_userId', ['userId'], 'user', [
       'id'
     ])
