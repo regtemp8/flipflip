@@ -416,10 +416,10 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-const tabRoutes = ['options', 'effects', 'audio-text', 'sources', 'generator']
+const tabRoutes = ['/options', '/effects', '/audio-text', '/sources', '/generator']
 const getOpenTab = (pathname: string) => {
   const index = tabRoutes.findIndex((tab) => {
-    const lastSlash = pathname.lastIndexOf('/') + 1
+    const lastSlash = pathname.lastIndexOf('/')
     return tab === pathname.substring(lastSlash)
   })
 
@@ -852,7 +852,7 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[0]} />
+                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[0]}`} />
               )}
             />
             <Tab
@@ -868,7 +868,7 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.highlight
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[1]} />
+                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[1]}`} />
               )}
             />
             <Tab
@@ -885,7 +885,7 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[2]} />
+                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[2]}`} />
               )}
             />
             <Tab
@@ -901,7 +901,7 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={tabRoutes[3]} />
+                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[3]}`} />
               )}
             />
             {/* {generatorWeights && (
