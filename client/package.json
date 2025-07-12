@@ -25,6 +25,7 @@
     "debounce": "^2.2.0",
     "filesize": "^10.1.6",
     "flipflip-common": "link:./../common",
+    "fscreen": "^1.2.0",
     "notistack": "^3.0.2",
     "qrcode.react": "^4.0.1",
     "react": "^18.3.1",
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/codemirror": "^5.60.15",
+    "@types/fscreen": "^1",
     "@types/react": "^18.3.3",
     "@types/react-color": "^2",
     "@types/react-dom": "^18.3.0",
