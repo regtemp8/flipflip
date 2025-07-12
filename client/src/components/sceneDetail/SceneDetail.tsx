@@ -87,14 +87,16 @@ import {
   Routes
 } from 'react-router'
 import {
+  useGetDisplaySettingsFullScreenQuery,
   useGetGeneralSettingsConfirmSceneDeletionQuery,
   useGetRemoteSettingsPiwigoConfiguredQuery,
   useGetSceneGeneratorMaxQuery,
   useGetSceneRegenerateQuery
 } from '../../store/api/selectors'
-import { useGetSceneQuery, useGetTutorialsQuery } from '../../store/api/slice'
+import { useGetSceneQuery, useGetTutorialsQuery, usePlaySceneMutation } from '../../store/api/slice'
 import { setSceneGeneratorMax } from '../../store/api/thunks'
 import snackbar from '../../data/Snackbar'
+import { setFullScreen } from '../../data/fullscreen'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -431,6 +433,7 @@ function SceneDetail() {
   const sceneID = Number(id)
   const navigate = useNavigate()
 
+  const [playScene] = usePlaySceneMutation()
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: tutorial } = useGetTutorialsQuery()
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
@@ -443,7 +446,7 @@ function SceneDetail() {
   const displaySources = useAppSelector(
     selectSceneDetailDisplaySources(sceneID)
   )
-  // const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -488,14 +491,16 @@ function SceneDetail() {
     setOpenMenu(MO.max)
   }
 
-  const onPlayScene = () => {
+  const onPlayScene = async () => {
     // if (tutorial === SDT.play) {
     //   dispatch(doneTutorial(SDT.play))
     // }
-    // // Regenerate scene(s) before playback
-    // dispatch(generateScenes(id))
-    // dispatch(playScene(id))
-    // setFullScreen(fullScreen)
+
+    const {data} = await playScene(sceneID)
+    if(data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.id}`)
+    }
   }
 
   const onToggleOverrideIgnore = () => {
@@ -706,7 +711,7 @@ function SceneDetail() {
   const { classes } = useStyles()
   const open = drawerOpen
   const specialMode = '' // TODO fix this
-  const generatorWeightsValid = false // TODO fix this
+  const generatorWeightsValid = true // TODO fix this
   const openTab = getOpenTab(location.pathname)
   return (
     <div className={classes.root}>

@@ -428,6 +428,9 @@ export const flipflipApi = createApi({
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
+    playScene: builder.mutation<Pick<Display, 'id'>, number>({
+      query: (id) => ({url:`api/scenes/${id}/play`, method: 'POST'})
+    }),
     getSceneWeightGroups: builder.query<WeightGroup[], number>({
       query: (id) => `api/scenes/${id}/weight-groups`,
       providesTags: (weightGroups, _error, id) =>
@@ -1555,6 +1558,7 @@ export const {
   useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,
+  usePlaySceneMutation,
   useGetSceneWeightGroupsQuery,
   useGetSceneScriptPlaylistsQuery,
   useGetSceneAudioPlaylistsQuery,

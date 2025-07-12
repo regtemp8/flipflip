@@ -1,5 +1,5 @@
 import express from 'express'
-import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
+import { Display, SG, SceneSelectOptionsRequest } from 'flipflip-common'
 import {
   findDefaultScene,
   findSceneById,
@@ -17,6 +17,8 @@ import {
   toSceneUpdate
 } from '../db/mappers'
 import { findContentSources } from '../db/ContentSourceRepository'
+import { User } from '../db/types/generated'
+import { createTempDisplayForScene } from '../db/DisplayRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -117,6 +119,14 @@ router.post('/:id/audio-playlists', (req, res) => {
 router.delete('/:id/audio-playlists', (req, res) => {
   // delete 1 playlist
   res.status(501).end()
+})
+
+router.post('/:id/play', async (req, res) => {
+  const sceneId = Number(req.params.id)
+  const userId = (req.user as User).id as number
+  const id = await createTempDisplayForScene(sceneId, userId)
+  const body: Pick<Display, 'id'> = {id}
+  res.status(200).send(body)
 })
 
 export default router
