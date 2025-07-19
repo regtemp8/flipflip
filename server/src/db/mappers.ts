@@ -23,7 +23,10 @@ import {
   DefaultCleanBackupsRequest,
   AutoCleanBackupsRequest,
   CacheSize,
-  SelectOption
+  SelectOption,
+  DisplayView,
+  ImagePlayerData,
+  RP
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -38,6 +41,7 @@ import {
   Clip as ClipRow,
   Tag as TagRow,
   Display as DisplayRow,
+  DisplayView as DisplayViewRow,
   Playlist as PlaylistRow,
   CaptionScript as CaptionScriptRow,
   FontSettings as FontSettingsRow,
@@ -1176,6 +1180,42 @@ export function toDisplayUpdate(display: Partial<Display>): DisplayUpdate {
   return { name }
 }
 
+export function toDisplayView(row: DisplayViewRow): DisplayView {
+  const {
+    color,
+    height,
+    id,
+    mirrorSyncedView,
+    name,
+    opacity,
+    playlistId,
+    sync,
+    syncWithView,
+    visible,
+    width,
+    x,
+    y,
+    z
+  } = row
+
+  return {
+    id: id as number,
+    name,
+    x,
+    y,
+    z,
+    width,
+    height,
+    color,
+    opacity,
+    visible: toBoolean(visible),
+    playlistID: playlistId ?? undefined,
+    sync: toBoolean(sync),
+    syncWithView: syncWithView ?? undefined,
+    mirrorSyncedView
+  }
+}
+
 export function toPlaylist(row: PlaylistRow): Playlist {
   const { id, name, repeat, shuffle, type } = row
 
@@ -1519,4 +1559,40 @@ export function toIgnoredTagSelectOptions(
     options.push({ label: `-${name} (${count})`, value: `-{${name}}` })
   )
   return options
+}
+
+export function toIdsArray(rows: {id: number | null}[]): number[] {
+  return rows.map((row) => row.id).filter((id) => id != null)
+}
+
+export function toImagePlayerData(displayViewId: number, row: Partial<PlaylistRow>, itemRows: Array<{id: number | null, duration: number | null, sceneId: number | null}>, maxCanLoad: number, allScenes: number[]): ImagePlayerData {
+  const itemsById: Record<number, Array<{id: number | null, duration: number | null, sceneId: number | null}>> = {}
+  itemRows.forEach((itemRow) => {
+    const id = itemRow.id as number
+    if(itemsById[id] == null) {
+      itemsById[id] = []
+    }
+
+    itemsById[id].push(itemRow)
+  })
+
+  const items = Object.entries(itemsById)
+    .map(([key, value]) => {
+      const duration = value[0].duration as number
+      let scenes = value.filter((sceneId) => sceneId != null).map(({sceneId}) => sceneId as number)
+      if(scenes.length === 0) {
+        scenes = allScenes
+      }
+
+      return {duration, scenes}
+    })
+
+  const playlist = {
+    id: row.id as number,
+    shuffle: toBoolean(row.shuffle),
+    repeat: row.repeat ?? RP.none,
+    items
+  }
+  
+  return {displayViewId, maxCanLoad, playlist}
 }

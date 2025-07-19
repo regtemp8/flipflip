@@ -30,7 +30,7 @@ import GIFDataLoader from './GIFDataLoader'
 //   getRandomInteger
 // } from '../../data/utils'
 import { CSSProperties } from 'react'
-import { RootState } from '../../store/store'
+import { RootState } from '../store'
 // import Scene from '../../store/scene/Scene'
 // import flipflip from '../../FlipFlipService'
 import { ImageViewState } from './slice'

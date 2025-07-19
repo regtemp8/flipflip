@@ -89,12 +89,12 @@ export interface DisplayManagerAppBarProps {
   hasStarted: boolean
   play: () => void
   pause: () => void
+  goBack: () => void
   displayID: number
 }
 
 function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
-    const navigate = useNavigate()
-  const { drawerHover, isPlaying, hasStarted, play, pause } = props
+  const { drawerHover, isPlaying, hasStarted, play, pause, goBack } = props
   const [appBarHover, setAppBarHover] = useState(false)
 
   const _appBarTimeout = useRef<number>()
@@ -116,10 +116,10 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
     _appBarTimeout.current = window.setTimeout(closeAppBar, 1000)
   }
 
-  const goBack = () => {
+  const navigateBack = useCallback(async () => {
     setFullScreen(false)
-    navigate(-1)
-  }
+    goBack()
+  }, [goBack])
 
   const historyGoBack = useCallback(
     () => {
@@ -213,7 +213,7 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
           break
         case 'Escape':
           e.preventDefault()
-          goBack()
+          navigateBack()
           break
         case 'f':
           if (!e.ctrlKey && !e.shiftKey) {
@@ -234,7 +234,7 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
     historyGoForward,
     isPlaying,
     hasStarted,
-    goBack,
+    navigateBack,
     setPlayPause
   ])
 
@@ -267,7 +267,7 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
                 edge="start"
                 color="inherit"
                 aria-label="Back"
-                onClick={goBack}
+                onClick={navigateBack}
                 size="large"
               >
                 <ArrowBackIcon />

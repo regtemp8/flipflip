@@ -1,5 +1,5 @@
 import express from 'express'
-import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
+import { SG } from 'flipflip-common'
 import {
   findDisplayById,
   findDisplaysWithSceneGroup,
@@ -10,8 +10,10 @@ import {
   toSceneGroups,
   toSceneGroupItems,
   toDisplay,
-  toDisplayUpdate
+  toDisplayUpdate,
+  toIdsArray
 } from '../db/mappers'
+import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -31,6 +33,11 @@ router.get('/:id', async (req, res) => {
   } else {
     res.status(404).end()
   }
+})
+
+router.get('/:id/visible-views', async (req, res) => {
+  const views = await findVisibleDisplayViewIds(Number(req.params.id))
+  res.status(200).send(toIdsArray(views))
 })
 
 router.patch('/:id', async (req, res) => {

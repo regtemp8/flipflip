@@ -530,6 +530,7 @@ export async function findSceneIds(): Promise<number[]> {
     .query()
     .selectFrom('scene')
     .select('id')
+    .where('scene.defaultScene', '=', toNumber(false))
     .execute()
     .then((value) => value.map((v) => v.id as number))
 }

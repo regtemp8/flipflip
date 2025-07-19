@@ -4,13 +4,13 @@ import express, { NextFunction, Request, Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import connect from 'connect-sqlite3'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import auth from './routes/auth'
 import backups from './routes/backups'
 import scenes from './routes/scenes'
 import generators from './routes/generators'
 import displays from './routes/displays'
+import displayViews from './routes/displayViews'
 import playlists from './routes/playlists'
 import version from './routes/version'
 import tutorials from './routes/tutorials'
@@ -23,6 +23,7 @@ import files from './routes/files'
 import captionScripts from './routes/captionScripts'
 import displayPlaylistItems from './routes/displayPlaylistItems'
 import scenePlaylistItems from './routes/scenePlaylistItems'
+import contentLoader from './routes/contentLoader'
 import db from './db/database'
 import { getBackupsDir, getCacheDir, getSaveDir, getThumbsDir } from './utils'
 import scheduler from './scheduler'
@@ -69,6 +70,7 @@ void (async function () {
   app.use('/api/scenes', scenes)
   app.use('/api/generators', generators)
   app.use('/api/displays', displays)
+  app.use('/api/display-views', displayViews)
   app.use('/api/playlists', playlists)
   app.use('/api/settings', settings)
   app.use('/api/backups', backups)
@@ -79,6 +81,7 @@ void (async function () {
   app.use('/api/caption-scripts', captionScripts)
   app.use('/api/display-playlist-items', displayPlaylistItems)
   app.use('/api/scene-playlist-items', scenePlaylistItems)
+  app.use('/api/content-loader', contentLoader)
   app.use('/fs', files)
   app.use(
     (

@@ -36,7 +36,8 @@ import {
   AudioSortRequest,
   ContentSortRequest,
   AudioAlbum,
-  AudioArtist
+  AudioArtist,
+  ImagePlayerData
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -661,10 +662,16 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    getDisplayVisibleViews: builder.query<number[], number>({
+      query: (id) => `api/displays/${id}/visible-views`
+    }),
     getDisplayView: builder.query<DisplayView, number>({
       query: (id) => `api/display-views/${id}`,
       providesTags: (view) =>
         view != null ? [{ type: 'DisplayView', id: view.id }] : []
+    }),
+    getImagePlayerData: builder.query<ImagePlayerData | undefined, number>({
+      query: (id) => `api/display-views/${id}/image-player-data`
     }),
     updateDisplayView: builder.mutation<
       void,
@@ -1579,7 +1586,9 @@ export const {
   useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,
+  useGetDisplayVisibleViewsQuery,
   useGetDisplayViewQuery,
+  useGetImagePlayerDataQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
   useUpdatePlaylistMutation,

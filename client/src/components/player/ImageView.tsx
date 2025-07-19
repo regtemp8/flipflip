@@ -15,7 +15,7 @@ import {
   StrobeData,
   TransformData,
   ViewData
-} from '../../store/player/ContentPreloadService'
+} from '../../store/imagePlayer/ContentPreloadService'
 import { cx } from '@emotion/css'
 import Strobe from './Strobe'
 import ZoomMove from './ZoomMove'

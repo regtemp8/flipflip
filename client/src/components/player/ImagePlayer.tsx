@@ -25,7 +25,7 @@ import { Box, Theme } from '@mui/material'
 // } from '../../store/player/thunks'
 import useMeasure from 'react-use-measure'
 import { ResizeObserver } from '@juggle/resize-observer'
-import { ImageViewState } from '../../store/player/slice'
+import { ImageViewState } from '../../store/imagePlayer/slice'
 
 class ImageTimer {
   lastTick: DOMHighResTimeStamp
@@ -86,7 +86,7 @@ interface DisplayItem {
 }
 
 export interface ImagePlayerProps {
-  uuid: string
+  viewID: number
   currentAudio?: number
   advanceHack: ChildCallbackHack
   isPlaying: boolean
@@ -104,7 +104,6 @@ export interface ImagePlayerProps {
 const noop = () => {}
 export default function ImagePlayer(props: ImagePlayerProps) {
   const { classes } = useStyles()
-  const applyAdvance = props.synced !== true
 
   const _sceneID = useRef<number>()
   const _readyToDisplay = useRef<Record<number, DisplayItem[]>>({})
@@ -123,6 +122,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
   const hasStarted = false // useAppSelector(selectPlayerHasStarted(props.uuid))
   const sceneID = 0 //useAppSelector(selectPlayerPlaylistPlayerSceneID(props.uuid))
   const imageViews: ImageViewState[] = [] //useAppSelector(selectPlayerImageViews(props.uuid))
+  const applyAdvance = props.synced !== true
 
 //   useEffect(() => {
 //     if (

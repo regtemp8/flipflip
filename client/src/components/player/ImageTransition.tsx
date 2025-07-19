@@ -6,7 +6,7 @@ import {
   CrossFadeData,
   EasingParams,
   SlideData
-} from '../../store/player/ContentPreloadService'
+} from '../../store/imagePlayer/ContentPreloadService'
 import { getEaseFunction } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => {

@@ -50,7 +50,7 @@ import {
 } from 'flipflip-common'
 import { copyThumbFile, readAudioMetadata } from '../utils'
 import { toBoolean } from '../db/utils'
-import { isAudioPlaylistItem } from '../db/PlaylistRepository'
+import { isAudioPlaylistItem } from '../db/PlaylistItemRepository'
 
 const router = express.Router()
 router.get('/', async (req, res) => {

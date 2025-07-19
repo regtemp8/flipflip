@@ -4,7 +4,7 @@ import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { getEaseFunction } from '../../utils'
-import { FadeInOutData } from '../../store/player/ContentPreloadService'
+import { FadeInOutData } from '../../store/imagePlayer/ContentPreloadService'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {

@@ -86,19 +86,13 @@ export async function clonePlaylist(id: number) {
   return null
 }
 
-export async function isAudioPlaylistItem(
-  audioId: number,
-  playlistName: string
-) {
-  const rows = await db()
+export async function findPlaylistByDisplayView(displayViewId: number) {
+  return await db()
     .query()
-    .selectFrom('audioPlaylistItem as pi')
-    .innerJoin('playlist as p', 'p.id', 'pi.playlistId')
-    .select((eb) => eb.lit(1).as('exists'))
-    .where('p.type', '=', PLT.audio)
-    .where('p.name', '=', playlistName)
-    .where('pi.audioId', '=', audioId)
-    .execute()
-
-  return rows.length > 0
+    .selectFrom('displayView as dv')
+    .innerJoin('playlist as p', 'p.id', 'dv.playlistId')
+    .select(['p.id', 'p.repeat', 'p.shuffle'])
+    .where('dv.id', '=', displayViewId)
+    .where('p.type', '=', PLT.scene)
+    .executeTakeFirst()
 }

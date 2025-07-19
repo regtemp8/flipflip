@@ -1,5 +1,3 @@
-// import { selectDisplayVisibleViews } from '../../store/display/selectors'
-// import { setRouteGoBack } from '../../store/app/thunks'
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { makeStyles } from 'tss-react/mui'
 import {
@@ -10,7 +8,6 @@ import {
   Theme,
   Typography
 } from '@mui/material'
-// import { selectDisplayView } from '../../store/displayView/selectors'
 import ImagePlayer from './ImagePlayer'
 import ChildCallbackHack from './ChildCallbackHack'
 import { MVF } from 'flipflip-common'
@@ -19,13 +16,13 @@ import useStayAwake from 'use-stay-awake'
 import { usePageVisibility } from 'react-page-visibility'
 import { useWakeLock } from 'react-screen-wake-lock'
 import { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router'
-// import { selectSourceScraperProgress } from '../../store/sourceScraper/selectors'
-// import {
-//   selectDisplayCanStart,
-//   selectDisplayHasStarted
-// } from '../../store/player/selectors'
-// import { setDisplayHasStarted } from '../../store/player/thunks'
+import { useNavigate, useParams } from 'react-router'
+import { useGetDisplayViewQuery, useGetDisplayVisibleViewsQuery, useGetImagePlayerDataQuery } from '../../store/api/slice'
+import { setImagePlayersStarted } from '../../store/imagePlayer/slice'
+import {
+  selectDisplayCanStart,
+  selectDisplayHasStarted
+} from '../../store/imagePlayer/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -65,17 +62,16 @@ interface ProgressCardProps {
 function ProgressCard(props: ProgressCardProps) {
   const { displayID } = props
   const { classes } = useStyles()
-//   const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch()
   const { total, current, message } = {total: 0, current: 0, message: []} //useAppSelector(
 //     selectSourceScraperProgress(displayID)
 //   )
-//   const canStart = useAppSelector(selectDisplayCanStart(displayID))
-
-//   useEffect(() => {
-//     if (canStart) {
-//       dispatch(setDisplayHasStarted(displayID))
-//     }
-//   }, [canStart, dispatch, displayID])
+  const canStart = useAppSelector(selectDisplayCanStart())
+  useEffect(() => {
+    if (canStart) {
+      dispatch(setImagePlayersStarted())
+    }
+  }, [canStart, dispatch, displayID])
 
   return (
     <div className={classes.progressMain}>
@@ -135,17 +131,11 @@ interface DisplayViewProps {
 
 const hack = new ChildCallbackHack() // TODO get rid of hacks
 function DisplayView(props: DisplayViewProps) {
-//   const view = useAppSelector(selectDisplayView(props.viewID))
-  const view = {
-    sync: false,
-    mirrorSyncedView: undefined,
-    y: 0,
-    x: 0,
-    z: 0,
-    width: 0,
-    height: 0,
-    opacity: 0,
-    playerUUID: 'player'
+  const { data: view } = useGetDisplayViewQuery(props.viewID)
+  const { isLoading } = useGetImagePlayerDataQuery(props.viewID)
+
+  if(isLoading || view == null) {
+    return null
   }
 
   let transform: string | undefined = undefined
@@ -171,7 +161,7 @@ function DisplayView(props: DisplayViewProps) {
       }}
     >
       <ImagePlayer
-        uuid={view.playerUUID as string}
+        viewID={view.id}
         isPlaying={props.isPlaying}
         historyOffset={0}
         setHistoryOffset={() => {}}
@@ -189,13 +179,14 @@ function DisplayView(props: DisplayViewProps) {
 function DisplayManager() {
   const {id} = useParams()
   const displayID = Number(id)
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
-  const dispatch = useAppDispatch()
-  const views: number[] = [] //useAppSelector(selectDisplayVisibleViews(displayID))
-  const hasStarted = false //useAppSelector(selectDisplayHasStarted(displayID))
-  const canStart = false //useAppSelector(selectDisplayCanStart(displayID))
+  const {data: views} = useGetDisplayVisibleViewsQuery(displayID)
+  const hasStarted = useAppSelector(selectDisplayHasStarted())
+  const canStart = useAppSelector(selectDisplayCanStart())
 
   const wakeLock = useWakeLock()
   const stayAwake = useStayAwake()
@@ -239,15 +230,14 @@ function DisplayManager() {
         stayAwake.allowSleeping()
       }
 
-    //   dispatch(setRouteGoBack())
+      navigate(-1)
     }
-  }, [dispatch, recentPictureGrid, stayAwake, wakeLock])
+  }, [recentPictureGrid, stayAwake, wakeLock])
 
   const { classes } = useStyles()
-  const start = undefined
-//   const start = canStart
-//     ? () => dispatch(setDisplayHasStarted(props.displayID))
-//     : undefined
+  const start = canStart
+    ? () => dispatch(setImagePlayersStarted())
+    : undefined
   return (
     <>
       <DisplayManagerAppBar
@@ -263,7 +253,7 @@ function DisplayManager() {
         <ProgressCard displayID={displayID} start={start} />
       )}
       <Box className={classes.container}>
-        {views.map((id) => (
+        {views && views.map((id) => (
           <DisplayView key={id} viewID={id} isPlaying={isPlaying} />
         ))}
       </Box>

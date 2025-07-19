@@ -9,8 +9,8 @@ export type DisplayView = {
   color: string;
   opacity: number;
   visible: boolean;
-  playlistID: number;
+  playlistID?: number;
   sync: boolean;
-  syncWithView: number;
+  syncWithView?: number;
   mirrorSyncedView: string;
 };
