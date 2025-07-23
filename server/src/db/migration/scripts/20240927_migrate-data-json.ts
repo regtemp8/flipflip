@@ -1247,7 +1247,8 @@ const audioPlaylistInsert = async (
         name: name ?? '',
         type: PLT.audio,
         repeat: RP.none,
-        shuffle: toNumber(false)
+        shuffle: toNumber(false),
+        temporary: toNumber(false)
       })
       .execute()
 
@@ -1415,7 +1416,8 @@ const playlistInsert = async (
       type,
       name: name ?? '',
       shuffle: toNumber(shuffle),
-      repeat
+      repeat,
+      temporary: toNumber(false)
     })
     .returningAll()
     .executeTakeFirstOrThrow()

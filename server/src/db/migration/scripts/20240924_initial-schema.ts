@@ -820,6 +820,7 @@ const playlistTable = async (trx: Kysely<DB>) => {
     .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('shuffle', 'boolean', (col) => col.notNull())
     .addColumn('repeat', 'text', (col) => col.notNull())
+    .addColumn('temporary', 'boolean', (col) => col.notNull())
     .addForeignKeyConstraint('FK_playlist_user_userId', ['userId'], 'user', [
       'id'
     ])

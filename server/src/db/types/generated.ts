@@ -251,6 +251,7 @@ export interface Playlist {
   repeat: string
   sceneGroupId: number | null
   shuffle: number
+  temporary: number
   type: string
   userId: number
 }

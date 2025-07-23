@@ -68,7 +68,8 @@ export async function createTempDisplayForScene(
           name: `Temp playlist for scene ${sceneId}`,
           type: PLT.scene,
           shuffle: toNumber(false),
-          repeat: RP.none
+          repeat: RP.none,
+          temporary: toNumber(true)
         })
         .returning('id')
         .execute()

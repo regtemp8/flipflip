@@ -4,6 +4,7 @@ import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
 import { Playlist } from './types/generated'
 import { Updateable } from 'kysely'
+import { toNumber } from './utils'
 
 export async function findPlaylistsWithSceneGroup(): Promise<
   PlaylistGroupRow[]
@@ -20,6 +21,7 @@ export async function findPlaylistsWithSceneGroup(): Promise<
       'p.name as itemName',
       'p.type as itemType'
     ])
+    .where('p.temporary', '=', toNumber(false))
     .execute()
 }
 
@@ -30,6 +32,7 @@ export async function findPlaylistsWithoutSceneGroup(): Promise<
     .query()
     .selectFrom('playlist as p')
     .select(['p.id as itemId', 'p.name as itemName', 'p.type as itemType'])
+    .where('p.temporary', '=', toNumber(false))
     .where('p.sceneGroupId', 'is', null)
     .execute()
 }
@@ -46,6 +49,7 @@ export async function findPlaylistOptionsByType(
 }
 
 export async function findPlaylistIds(): Promise<number[]> {
+  // TODO exclude temporary playlists?
   return await db()
     .query()
     .selectFrom('playlist')
