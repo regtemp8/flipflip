@@ -1,9 +1,9 @@
-import { PlaylistType, PLT } from 'flipflip-common'
+import { PlaylistType, PLT, RP } from 'flipflip-common'
 import db from './database'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
 import { Playlist } from './types/generated'
-import { Updateable } from 'kysely'
+import { Insertable, Updateable } from 'kysely'
 import { toNumber } from './utils'
 
 export async function findPlaylistsWithSceneGroup(): Promise<
@@ -99,4 +99,23 @@ export async function findPlaylistByDisplayView(displayViewId: number) {
     .where('dv.id', '=', displayViewId)
     .where('p.type', '=', PLT.scene)
     .executeTakeFirst()
+}
+
+type PlaylistInsert = Insertable<Playlist>
+export async function createPlaylist(type: string, userId: number) {
+  const values: PlaylistInsert = {
+    userId,
+    name: 'New playlist',
+    type,
+    shuffle: toNumber(false),
+    repeat: RP.all,
+    temporary: toNumber(false)
+  }
+
+  return await db()
+    .query()
+    .insertInto('playlist')
+    .values(values)
+    .returning('id')
+    .executeTakeFirstOrThrow()
 }

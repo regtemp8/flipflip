@@ -739,6 +739,22 @@ export const flipflipApi = createApi({
       providesTags: (view) =>
         view != null ? [{ type: 'Playlist', id: view.id }] : []
     }),
+    createPlaylist: builder.mutation<ValueResponse, string>({
+      query: (type) => ({
+        url: `api/playlists`,
+        method: 'POST',
+        body: { type }
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'GroupedPlaylists',
+            'UngroupedPlaylists'
+          ])
+        )
+      }
+    }),
     updatePlaylist: builder.mutation<
       void,
       Pick<Playlist, 'id'> & Partial<Playlist>
@@ -1634,6 +1650,7 @@ export const {
   useGetDisplayViewQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
+  useCreatePlaylistMutation,
   useUpdatePlaylistMutation,
   useClonePlaylistMutation,
   useDeletePlaylistMutation,

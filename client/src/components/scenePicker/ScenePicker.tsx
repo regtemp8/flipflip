@@ -12,13 +12,20 @@ import { cx } from '@emotion/css'
 import {
   AppBar,
   Badge,
+  Button,
   Chip,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Drawer,
   Fab,
   IconButton,
   Link,
+  List,
   ListItemButton,
   ListItemIcon,
   ListItemSecondaryAction,
@@ -64,7 +71,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
 
-import { en, MO, SF, SPT } from 'flipflip-common'
+import { en, MO, PLT, SF, SPT } from 'flipflip-common'
 import VSpin from '../animations/VSpin'
 // import SceneSearch from './SceneSearch'
 import DisplaysTab from './DisplaysTab'
@@ -72,6 +79,7 @@ import GeneratorsTab from './GeneratorsTab'
 import PlaylistsTab from './PlaylistsTab'
 import ScenesTab from './ScenesTab'
 import {
+  useCreatePlaylistMutation,
   useCreateSceneMutation,
   useGetVersionQuery
 } from '../../store/api/slice'
@@ -423,6 +431,7 @@ function ScenePicker() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [createScene] = useCreateSceneMutation()
+  const [createPlaylist] = useCreatePlaylistMutation()
   const { data: version } = useGetVersionQuery()
   const sceneCount = 0
   const generatorCount = 0
@@ -440,6 +449,7 @@ function ScenePicker() {
   const [newVersion, _setNewVersion] = useState('')
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement>()
   const [openMenu, setOpenMenu] = useState<string>()
+  const [createPlaylistType, setCreatePlaylistType] = useState<string>()
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
   const openGitRelease = () => {}
@@ -458,7 +468,19 @@ function ScenePicker() {
   }
   const onAddGenerator = () => {}
   const onAddDisplay = () => {}
-  const onAddPlaylist = () => {}
+  const onAddPlaylist = () => {
+    setOpenMenu(MO.createPlaylist)
+  }
+
+  const onFinishCreatePlaylist = async () => {
+    const { data } = await createPlaylist(createPlaylistType as string)
+    setCreatePlaylistType(undefined)
+    setOpenMenu(undefined)
+    if (data != null) {
+      navigate(`/playlists/${data.value}`)
+    }
+  }
+
   const onAddGroup = () => {}
 
   const onToggleNewMenu = () => {
@@ -982,6 +1004,67 @@ function ScenePicker() {
           </Tooltip> */}
         </>
       )}
+      <Dialog
+        open={openMenu === MO.createPlaylist}
+        onClose={onCloseDialog}
+        aria-labelledby="create-playlist-title"
+        aria-describedby="create-playlist-description"
+      >
+        <DialogTitle id="create-playlist-title">Create Playlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="create-playlist-description">
+            Choose the type of playlist you want to create.
+          </DialogContentText>
+          <List>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.audio)}
+              selected={createPlaylistType === PLT.audio}
+            >
+              <ListItemIcon>
+                <AudiotrackIcon />
+              </ListItemIcon>
+              <ListItemText primary="Audio Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.display)}
+              selected={createPlaylistType === PLT.display}
+            >
+              <ListItemIcon>
+                <TvIcon />
+              </ListItemIcon>
+              <ListItemText primary="Display Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.scene)}
+              selected={createPlaylistType === PLT.scene}
+            >
+              <ListItemIcon>
+                <MovieIcon />
+              </ListItemIcon>
+              <ListItemText primary="Scene Playlist" />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => setCreatePlaylistType(PLT.script)}
+              selected={createPlaylistType === PLT.script}
+            >
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Script Playlist" />
+            </ListItemButton>
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onCloseDialog}>Cancel</Button>
+          <Button
+            color="primary"
+            disabled={createPlaylistType == null}
+            onClick={() => onFinishCreatePlaylist()}
+          >
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

@@ -1,5 +1,10 @@
 import express from 'express'
-import { SG, SceneSelectOptionsRequest } from 'flipflip-common'
+import {
+  PLT,
+  SG,
+  SceneSelectOptionsRequest,
+  ValueResponse
+} from 'flipflip-common'
 import {
   findPlaylistOptionsByType,
   findPlaylistsWithSceneGroup,
@@ -8,7 +13,8 @@ import {
   findPlaylistById,
   updatePlaylist,
   deletePlaylist,
-  clonePlaylist
+  clonePlaylist,
+  createPlaylist
 } from '../db/PlaylistRepository'
 import {
   toSceneGroups,
@@ -16,6 +22,7 @@ import {
   toPlaylistUpdate,
   toPlaylist
 } from '../db/mappers'
+import { User } from '../db/types/generated'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -77,6 +84,22 @@ router.get('/', async (req, res) => {
     res.status(200).send(ids)
   } else {
     res.status(500).end()
+  }
+})
+
+router.post('/', async (req, res, next) => {
+  const { type } = req.body
+  if (![PLT.audio, PLT.display, PLT.scene, PLT.script].includes(type)) {
+    res.status(400).end()
+  }
+
+  const user = req.user as User
+  try {
+    const { id } = await createPlaylist(type, user.id as number)
+    const response: ValueResponse = { value: id as number }
+    res.status(200).send(response)
+  } catch (error) {
+    next(error)
   }
 })
 
