@@ -64,10 +64,11 @@ class SourceScraperService {
   }
 
   public clear() {
-    this.subscriptions
-      .values()
-      .filter((subscription) => subscription.subscribers > 0)
-      .forEach((subscription) => subscription.scraper.stop())
+    this.subscriptions.forEach((subscription) => {
+      if (subscription.subscribers > 0) {
+        subscription.scraper.stop()
+      }
+    })
 
     this.subscriptions.clear()
   }

@@ -61,7 +61,7 @@ export async function createTempDisplayForScene(
     .query()
     .transaction()
     .execute(async (trx) => {
-      const playlists = await trx
+      const playlist = await trx
         .insertInto('playlist')
         .values({
           userId,
@@ -72,10 +72,10 @@ export async function createTempDisplayForScene(
           temporary: toNumber(true)
         })
         .returning('id')
-        .execute()
+        .executeTakeFirstOrThrow()
 
-      const playlistId = playlists[0].id as number
-      const scenePlaylistItems = await trx
+      const playlistId = playlist.id as number
+      const scenePlaylistItem = await trx
         .insertInto('scenePlaylistItem')
         .values({
           playlistId,
@@ -84,15 +84,15 @@ export async function createTempDisplayForScene(
           playAfterAllImages: toNumber(false)
         })
         .returning('id')
-        .execute()
+        .executeTakeFirstOrThrow()
 
-      const scenePlaylistItemId = scenePlaylistItems[0].id as number
+      const scenePlaylistItemId = scenePlaylistItem.id as number
       await trx
         .insertInto('scenePlaylistItemScene')
         .values({ scenePlaylistItemId, sceneId })
         .execute()
 
-      const displays = await trx
+      const display = await trx
         .insertInto('display')
         .values({
           name: `Temp display for scene ${sceneId}`,
@@ -100,9 +100,9 @@ export async function createTempDisplayForScene(
           userId
         })
         .returning('id')
-        .execute()
+        .executeTakeFirstOrThrow()
 
-      const displayId = displays[0].id as number
+      const displayId = display.id as number
       await trx
         .insertInto('displayView')
         .values({
@@ -123,5 +123,61 @@ export async function createTempDisplayForScene(
         .execute()
 
       return displayId
+    })
+}
+
+export async function deleteTemporaryDisplay(displayId: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const tempDisplay = await trx
+        .selectFrom('display')
+        .select((eb) => eb.lit(1).as('exists'))
+        .where('temporary', '=', toNumber(true))
+        .executeTakeFirst()
+
+      if (tempDisplay == null) {
+        return
+      }
+
+      const tempPlaylists = await trx
+        .selectFrom('displayView as dv')
+        .innerJoin('playlist as p', 'p.id', 'dv.playlistId')
+        .select('p.id')
+        .where('dv.displayId', '=', displayId)
+        .where('p.temporary', '=', toNumber(true))
+        .execute()
+
+      await trx
+        .deleteFrom('displayView')
+        .where('displayId', '=', displayId)
+        .execute()
+
+      for (const playlist of tempPlaylists) {
+        const playlistId = playlist.id as number
+        const playlistItems = await trx
+          .selectFrom('scenePlaylistItem')
+          .select('id')
+          .where('playlistId', '=', playlistId)
+          .execute()
+
+        for (const playlistItem of playlistItems) {
+          const playlistItemId = playlistItem.id as number
+          await trx
+            .deleteFrom('scenePlaylistItemScene')
+            .where('scenePlaylistItemId', '=', playlistItemId)
+            .execute()
+        }
+
+        await trx
+          .deleteFrom('scenePlaylistItem')
+          .where('playlistId', '=', playlistId)
+          .execute()
+
+        await trx.deleteFrom('playlist').where('id', '=', playlistId).execute()
+      }
+
+      await trx.deleteFrom('display').where('id', '=', displayId).execute()
     })
 }

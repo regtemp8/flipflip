@@ -20,7 +20,8 @@ import { useNavigate, useParams } from 'react-router'
 import {
   useGetPlayerScraperProgressQuery,
   useGetPlayerViewPlayersQuery,
-  useGetViewPlayerConfigQuery
+  useGetViewPlayerConfigQuery,
+  useStopPlayerMutation
 } from '../../store/api/slice'
 import { setImagePlayersStarted } from '../../store/imagePlayer/slice'
 import {
@@ -185,6 +186,7 @@ function DisplayManager() {
   const playerID = id as string
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const [stopPlayer] = useStopPlayerMutation()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
@@ -224,16 +226,22 @@ function DisplayManager() {
     play()
   }, [hasStarted, play])
 
-  const goBack = useCallback(() => {
+  const goBack = useCallback(async () => {
     if (recentPictureGrid) {
       setRecentPictureGrid(false)
     } else {
       if (wakeLock.isSupported && wakeLock.released === false) {
-        wakeLock.release().catch(() => {})
+        try {
+          await wakeLock.release()
+        } catch {
+          console.error('Failed to release wake lock')
+        }
       } else if (!wakeLock.isSupported && !stayAwake.canSleep) {
         stayAwake.allowSleeping()
       }
 
+      setIsPlaying(false)
+      await stopPlayer(playerID)
       navigate(-1)
     }
   }, [recentPictureGrid, stayAwake, wakeLock])

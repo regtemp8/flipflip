@@ -215,34 +215,39 @@ export const imagePlayerSlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder.addMatcher(
-      flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled,
-      (state, action) => {
-        const data = action.payload
-        if (data == null) {
-          return
-        }
+    builder
+      .addMatcher(
+        flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled,
+        (state, action) => {
+          const data = action.payload
+          if (data == null) {
+            return
+          }
 
-        const viewPlayerID = action.meta.arg.originalArgs
-        state[viewPlayerID] = {
-          firstImageLoaded: false,
-          mainLoaded: false,
-          isLoading: false,
-          currentSceneID: data.sceneId,
-          loader: {
-            zIndex: 0,
-            displayIndex: 0,
-            loadingCount: 0,
-            iframeCount: 0,
-            maxCanLoadAtOnce: data.maxCanLoadAtOnce,
-            readyToLoad: [...Array(data.maxCanLoad).keys()],
-            imageViews: []
-          },
-          isEmpty: false,
-          hasStarted: false
+          const viewPlayerID = action.meta.arg.originalArgs
+          state[viewPlayerID] = {
+            firstImageLoaded: false,
+            mainLoaded: false,
+            isLoading: false,
+            currentSceneID: data.sceneId,
+            loader: {
+              zIndex: 0,
+              displayIndex: 0,
+              loadingCount: 0,
+              iframeCount: 0,
+              maxCanLoadAtOnce: data.maxCanLoadAtOnce,
+              readyToLoad: [...Array(data.maxCanLoad).keys()],
+              imageViews: []
+            },
+            isEmpty: false,
+            hasStarted: false
+          }
         }
-      }
-    )
+      )
+      .addMatcher(
+        flipflipApi.endpoints.playScene.matchPending,
+        () => initialState
+      )
   }
 })
 

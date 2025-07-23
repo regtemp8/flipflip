@@ -2,7 +2,9 @@ import { randomUUID } from 'crypto'
 import Player from './Player'
 import sourceScrapers from '../scraper/SourceScraperService'
 import { User } from '../db/types/generated'
+import Logger from '../logging/Logger'
 
+const logger = Logger.create('PlayerService')
 class PlayerService {
   private static instance: PlayerService
 
@@ -21,16 +23,20 @@ class PlayerService {
   }
 
   public start(displayId: number, user: User): string {
+    logger.info('Starting player for display (id: {id})', { id: displayId })
     const id = randomUUID()
     const player = new Player()
     player.start(displayId, user)
     this.players.set(id, player)
+    logger.info('Started player (id: {id})', { id })
     return id
   }
 
   public stop(playerId: string) {
+    logger.info('Stopping player (id: {id})', { id: playerId })
     const player = this.players.get(playerId)
     if (player == null) {
+      logger.warn("Unable to stop player, '{id}' not found", { id: playerId })
       return
     }
 
@@ -39,6 +45,8 @@ class PlayerService {
     if (this.players.size === 0) {
       sourceScrapers().clear()
     }
+
+    logger.info('Stopped player (id: {id})', { id: playerId })
   }
 
   public get(playerId: string) {
