@@ -11,7 +11,10 @@ export async function findClipById(id: number): Promise<Clip> {
     .executeTakeFirstOrThrow()
 }
 
-export async function findContentSourceClipIds(userId: number, contentSourceId: number): Promise<number[]> {
+export async function findContentSourceClipIds(
+  userId: number,
+  contentSourceId: number
+): Promise<number[]> {
   return await db()
     .query()
     .selectFrom('clip')
@@ -19,10 +22,8 @@ export async function findContentSourceClipIds(userId: number, contentSourceId: 
     .where('userId', '=', userId)
     .where('contentSourceId', '=', contentSourceId)
     .execute()
-    .then((rows) => rows.map(({id}) => id as number))
+    .then((rows) => rows.map(({ id }) => id as number))
 }
-
-
 
 export type ClipUpdate = Updateable<Clip>
 export async function updateClip(id: number, update: ClipUpdate) {

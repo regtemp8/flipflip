@@ -20,7 +20,13 @@ import {
   ScraperHelpers
 } from 'flipflip-common'
 import { ScrapeResult } from './ScrapeResult'
-import { filterRequestsToJustPlayable, getCachePath, getServerHost, getServerPort, isWin32 } from '../utils'
+import {
+  filterRequestsToJustPlayable,
+  getCachePath,
+  getServerHost,
+  getServerPort,
+  isWin32
+} from '../utils'
 import tumblr from './TumblrClient'
 import reddit from './RedditClient'
 import imgur from './ImgurClient'
@@ -45,7 +51,10 @@ export type WorkerFunction = (
 export type ScrapeResultCallback = (result: ScrapeResult) => void
 
 const logger = Logger.create('Scrapers')
-export const getFileURL = async (path: string, host: string): Promise<string> => {
+export const getFileURL = async (
+  path: string,
+  host: string
+): Promise<string> => {
   if (!path.startsWith('file://')) {
     const fileUrl = (await import('file-url')).default
     path = fileUrl(path)
@@ -123,7 +132,7 @@ export const loadLocalDirectory = async (
       }
 
       const urls: string[] = []
-      for(const source of data.sources) {
+      for (const source of data.sources) {
         const url = await getFileURL(source, host)
         urls.push(url)
       }
@@ -139,7 +148,7 @@ export const loadLocalDirectory = async (
         },
         resolve
       )
-    } catch(e: any) {
+    } catch (e: any) {
       pm(
         {
           error: e.message,
@@ -173,7 +182,8 @@ const recursiveReadDirectory = async (
 
     if (sourceBlacklist != null && sourceBlacklist.length > 0) {
       sources = sources.filter(
-        (url_1: string) => !sourceBlacklist.includes(url_1) &&
+        (url_1: string) =>
+          !sourceBlacklist.includes(url_1) &&
           !sourceBlacklist.includes(urlToPath(url_1, isWin32))
       )
     }
@@ -1535,7 +1545,7 @@ export const loadImageFap: WorkerFunction = (
                 const newRes = Number(newResText)
                 const newVideoLink =
                   newRes > res
-                    ? quality.querySelector('videoLink')?.textContent ?? ''
+                    ? (quality.querySelector('videoLink')?.textContent ?? '')
                     : ''
 
                 if (newVideoLink !== '') {
@@ -1835,9 +1845,9 @@ export const loadDeviantArt: WorkerFunction = (
   const url = source.url
   fetch(
     'https://backend.deviantart.com/rss.xml?type=deviation&q=by%3A' +
-    getFileGroup(url, path.sep) +
-    '+sort%3Atime+meta%3Aall' +
-    (helpers.next !== 0 ? '&offset=' + helpers.next : ''),
+      getFileGroup(url, path.sep) +
+      '+sort%3Atime+meta%3Aall' +
+      (helpers.next !== 0 ? '&offset=' + helpers.next : ''),
     { signal: controller.signal }
   )
     .then((res) => {
@@ -2445,7 +2455,8 @@ export const loadGelbooru1: WorkerFunction = (
                   resolve
                 )
               }
-            }).catch((error) => {
+            })
+            .catch((error) => {
               pm(
                 {
                   error: error.message,
@@ -3569,9 +3580,9 @@ export const loadHydrus: WorkerFunction = (
       const pageIDs = fileIDs.slice(page * chunk, (page + 1) * chunk)
       fetch(
         hydrusURL +
-        '/get_files/file_metadata?file_ids=[' +
-        pageIDs.toString() +
-        ']',
+          '/get_files/file_metadata?file_ids=[' +
+          pageIDs.toString() +
+          ']',
         {
           signal: controller.signal,
           headers: { 'Hydrus-Client-API-Access-Key': apiKey }
@@ -3759,7 +3770,7 @@ async function convertURL(url: string): Promise<string[]> {
 
     return await fetch('https://api.redgifs.com/v2/gifs/' + redgifMatch[1], {
       headers: {
-        'Authorization': _redgifOAuth
+        Authorization: _redgifOAuth
       }
     })
       .then((res) => {
@@ -3802,7 +3813,9 @@ export async function scrapeFiles(
         return undefined
       }
 
-      const sourceCachePath = getCachePath(caching.directory, source.url) + getFileName(source.url, path.sep)
+      const sourceCachePath =
+        getCachePath(caching.directory, source.url) +
+        getFileName(source.url, path.sep)
       return fs.existsSync(sourceCachePath) ? sourceCachePath : undefined
     }
 
@@ -3912,7 +3925,14 @@ export async function scrapeFiles(
         workerFunction = loadPiwigo
       }
       if (workerFunction == null) {
-        resolve({ allPosts, allURLs, weight, helpers, source, error: `No worker for type: ${sourceType}` })
+        resolve({
+          allPosts,
+          allURLs,
+          weight,
+          helpers,
+          source,
+          error: `No worker for type: ${sourceType}`
+        })
         return
       }
       if (helpers.next === -1) {

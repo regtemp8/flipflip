@@ -62,7 +62,10 @@ const logFormat = (redacted?: boolean) => {
     splatf({ redacted }),
     timestamp(),
     align(),
-    printf((info) => `${info.timestamp} ${info.level.toUpperCase().padStart(5, ' ')} --- ${info.className}: ${info.message}`)
+    printf(
+      (info) =>
+        `${info.timestamp} ${info.level.toUpperCase().padStart(5, ' ')} --- ${info.className}: ${info.message}`
+    )
   )
 }
 

@@ -1,5 +1,5 @@
 export type ScraperProgress = {
-    total: number 
-    current: number
-    message: string[]
-}
+  total: number;
+  current: number;
+  message: string[];
+};

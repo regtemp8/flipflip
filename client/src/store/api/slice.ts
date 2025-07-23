@@ -434,7 +434,7 @@ export const flipflipApi = createApi({
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
     playScene: builder.mutation<ValueResponse, number>({
-      query: (id) => ({url:`api/scenes/${id}/play`, method: 'POST'})
+      query: (id) => ({ url: `api/scenes/${id}/play`, method: 'POST' })
     }),
     getSceneWeightGroups: builder.query<WeightGroup[], number>({
       query: (id) => `api/scenes/${id}/weight-groups`,
@@ -679,12 +679,15 @@ export const flipflipApi = createApi({
           await queryFulfilled
           dispatch(loadImageViews(id))
         } catch (err) {
-          console.error('Query failed:', err);
+          console.error('Query failed:', err)
         }
-      },
+      }
     }),
-    getViewPlayerItems: builder.query<ImageViewData[], {id: string, size: number}>({
-      query: ({id, size}) => `api/view-players/${id}/items?size=${size}`
+    getViewPlayerItems: builder.query<
+      ImageViewData[],
+      { id: string; size: number }
+    >({
+      query: ({ id, size }) => `api/view-players/${id}/items?size=${size}`
     }),
     getDisplayView: builder.query<DisplayView, number>({
       query: (id) => `api/display-views/${id}`,

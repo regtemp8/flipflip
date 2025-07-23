@@ -1,10 +1,10 @@
-import { ValueResponse, ImageViewData } from "flipflip-common"
-import ScenePlaylistPlayer from "./ScenePlaylistPlayer"
-import sourceScrapers from "../scraper/SourceScraperService"
-import ContentLoader from "./ContentLoader"
-import { User } from "../db/types/generated"
-import Logger from "../logging/Logger"
-import { findDisplaySettings } from "../db/DisplaySettingsRepository"
+import { ValueResponse, ImageViewData } from 'flipflip-common'
+import ScenePlaylistPlayer from './ScenePlaylistPlayer'
+import sourceScrapers from '../scraper/SourceScraperService'
+import ContentLoader from './ContentLoader'
+import { User } from '../db/types/generated'
+import Logger from '../logging/Logger'
+import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 
 interface ViewerEvent {
   event: 'shown' | 'discarded'
@@ -21,12 +21,22 @@ interface ViewPlayerItem {
   retries: number
 }
 
-async function getNextViewPlayerItem(playlistPlayer: ScenePlaylistPlayer, user: User): Promise<ViewPlayerItem | undefined> {
+async function getNextViewPlayerItem(
+  playlistPlayer: ScenePlaylistPlayer,
+  user: User
+): Promise<ViewPlayerItem | undefined> {
   const nextPlaylistItem = playlistPlayer.next()
   if (nextPlaylistItem != null) {
     const { sceneId, duration } = nextPlaylistItem
     const loader = await ContentLoader.create(sceneId, user)
-    return { sceneId, loaderTimeLeft: duration, viewerTimeLeft: duration, queue: [], loader, retries: 0 }
+    return {
+      sceneId,
+      loaderTimeLeft: duration,
+      viewerTimeLeft: duration,
+      queue: [],
+      loader,
+      retries: 0
+    }
   } else {
     return undefined
   }
@@ -34,7 +44,6 @@ async function getNextViewPlayerItem(playlistPlayer: ScenePlaylistPlayer, user: 
 
 const logger = Logger.create('ViewPlayer')
 export default class ViewPlayer {
-
   private readonly viewId: number
   private readonly user: User
   private readonly maxInMemory: number
@@ -85,7 +94,7 @@ export default class ViewPlayer {
   }
 
   public take(itemCount: number) {
-    if(itemCount > this.current.queue.length) {
+    if (itemCount > this.current.queue.length) {
       itemCount = this.current.queue.length
     }
 
@@ -99,7 +108,11 @@ export default class ViewPlayer {
   }
 
   // TODO if ValueResponse return 200 else 204
-  public async onEvent({ event, sceneId, duration }: ViewerEvent): Promise<ValueResponse | undefined> {
+  public async onEvent({
+    event,
+    sceneId,
+    duration
+  }: ViewerEvent): Promise<ValueResponse | undefined> {
     if (this.current.sceneId !== sceneId) {
       return
     }
@@ -133,14 +146,31 @@ export default class ViewPlayer {
     }
 
     let timeout = 0
-    if ((this.current.loaderTimeLeft > 0 && this.current.queue.length < this.maxInMemory) || this.current.queue.length < 3) {
-      logger.info('Load current image view - loaderTimeLeft: {timeLeft}, queue.length: {queue}', {timeLeft: this.current.loaderTimeLeft, queue: this.current.queue.length})
+    if (
+      (this.current.loaderTimeLeft > 0 &&
+        this.current.queue.length < this.maxInMemory) ||
+      this.current.queue.length < 3
+    ) {
+      logger.info(
+        'Load current image view - loaderTimeLeft: {timeLeft}, queue.length: {queue}',
+        {
+          timeLeft: this.current.loaderTimeLeft,
+          queue: this.current.queue.length
+        }
+      )
       await this.loadImageView(this.current)
-      timeout = (2 ** this.current.retries) * 100
-    } else if (!this.preloading && this.next != null && this.next.loaderTimeLeft > 0 && this.next.queue.length < this.maxInMemory) {
-      logger.info('Load next image view - loaderTimeLeft: {timeLeft}', {timeLeft: this.next.loaderTimeLeft})
+      timeout = 2 ** this.current.retries * 100
+    } else if (
+      !this.preloading &&
+      this.next != null &&
+      this.next.loaderTimeLeft > 0 &&
+      this.next.queue.length < this.maxInMemory
+    ) {
+      logger.info('Load next image view - loaderTimeLeft: {timeLeft}', {
+        timeLeft: this.next.loaderTimeLeft
+      })
       await this.loadImageView(this.next)
-      timeout = (2 ** this.next.retries) * 100
+      timeout = 2 ** this.next.retries * 100
     } else {
       logger.info('Stop loading')
       this.loading = false
@@ -165,10 +195,14 @@ export default class ViewPlayer {
     }
 
     let timeout = 0
-    if (this.next != null && this.next.queue.length < 5 && this.next.loaderTimeLeft > 0) {
+    if (
+      this.next != null &&
+      this.next.queue.length < 5 &&
+      this.next.loaderTimeLeft > 0
+    ) {
       logger.info('Preload')
       await this.loadImageView(this.next)
-      timeout = (2 ** this.next.retries) * 100
+      timeout = 2 ** this.next.retries * 100
     } else {
       logger.info('Stop preloading')
       this.preloading = false
@@ -215,9 +249,19 @@ export default class ViewPlayer {
   public static async create(viewId: number, user: User): Promise<ViewPlayer> {
     const playlistPlayer = await ScenePlaylistPlayer.create(viewId)
     // TODO must check beforehand that each scene playlist has at least 1 item
-    const current = await getNextViewPlayerItem(playlistPlayer, user) as ViewPlayerItem
+    const current = (await getNextViewPlayerItem(
+      playlistPlayer,
+      user
+    )) as ViewPlayerItem
     const next = await getNextViewPlayerItem(playlistPlayer, user)
-    const {maxInMemory} = await findDisplaySettings(user)
-    return new ViewPlayer(viewId, user, maxInMemory, playlistPlayer, current, next)
+    const { maxInMemory } = await findDisplaySettings(user)
+    return new ViewPlayer(
+      viewId,
+      user,
+      maxInMemory,
+      playlistPlayer,
+      current,
+      next
+    )
   }
 }

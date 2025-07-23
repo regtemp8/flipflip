@@ -111,7 +111,7 @@ export class TumblrClient {
     )
     const following = await client.userFollowing({ offset })
     const blogs: string[] = []
-    for(const blog of following.blogs) {
+    for (const blog of following.blogs) {
       blogs.push('http://' + blog.name + '.tumblr.com/')
     }
     return blogs

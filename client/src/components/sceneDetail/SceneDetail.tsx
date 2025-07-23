@@ -93,7 +93,11 @@ import {
   useGetSceneGeneratorMaxQuery,
   useGetSceneRegenerateQuery
 } from '../../store/api/selectors'
-import { useGetSceneQuery, useGetTutorialsQuery, usePlaySceneMutation } from '../../store/api/slice'
+import {
+  useGetSceneQuery,
+  useGetTutorialsQuery,
+  usePlaySceneMutation
+} from '../../store/api/slice'
 import { setSceneGeneratorMax } from '../../store/api/thunks'
 import snackbar from '../../data/Snackbar'
 import { setFullScreen } from '../../data/fullscreen'
@@ -418,7 +422,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-const tabRoutes = ['/options', '/effects', '/audio-text', '/sources', '/generator']
+const tabRoutes = [
+  '/options',
+  '/effects',
+  '/audio-text',
+  '/sources',
+  '/generator'
+]
 const getOpenTab = (pathname: string) => {
   const index = tabRoutes.findIndex((tab) => {
     const lastSlash = pathname.lastIndexOf('/')
@@ -496,8 +506,8 @@ function SceneDetail() {
     //   dispatch(doneTutorial(SDT.play))
     // }
 
-    const {data} = await playScene(sceneID)
-    if(data != null) {
+    const { data } = await playScene(sceneID)
+    if (data != null) {
       setFullScreen(fullScreen === true)
       navigate(`/player/${data.value}`)
     }
@@ -857,7 +867,11 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[0]}`} />
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[0]}`}
+                />
               )}
             />
             <Tab
@@ -873,7 +887,11 @@ function SceneDetail() {
                 tutorial === SDT.effects1 && classes.highlight
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[1]}`} />
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[1]}`}
+                />
               )}
             />
             <Tab
@@ -890,7 +908,11 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[2]}`} />
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[2]}`}
+                />
               )}
             />
             <Tab
@@ -906,7 +928,11 @@ function SceneDetail() {
                   classes.disable
               )}
               component={(props) => (
-                <RouterLink {...props} replace to={`/scenes/${id}${tabRoutes[3]}`} />
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[3]}`}
+                />
               )}
             />
             {/* {generatorWeights && (

@@ -1,9 +1,8 @@
-import { findVisibleDisplayViewIds } from "../db/DisplayViewRepository"
-import { User } from "../db/types/generated"
-import viewPlayers from "./ViewPlayerService"
+import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
+import { User } from '../db/types/generated'
+import viewPlayers from './ViewPlayerService'
 
 export default class Player {
-
   private readonly viewPlayerRefs: string[]
 
   constructor() {
@@ -12,7 +11,7 @@ export default class Player {
 
   public async start(displayId: number, user: User) {
     const viewIds = await findVisibleDisplayViewIds(displayId)
-    for(const {id} of viewIds) {
+    for (const { id } of viewIds) {
       const ref = await viewPlayers().start(id as number, user)
       this.viewPlayerRefs.push(ref)
     }

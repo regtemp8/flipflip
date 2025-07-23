@@ -26,7 +26,13 @@ import scenePlaylistItems from './routes/scenePlaylistItems'
 import viewPlayers from './routes/viewPlayers'
 import players from './routes/players'
 import db from './db/database'
-import { getBackupsDir, getCacheDir, getSaveDir, getServerPort, getThumbsDir } from './utils'
+import {
+  getBackupsDir,
+  getCacheDir,
+  getSaveDir,
+  getServerPort,
+  getThumbsDir
+} from './utils'
 import scheduler from './scheduler'
 import Logger from './logging/Logger'
 import proxy from './routes/proxy'
@@ -48,7 +54,7 @@ void (async function () {
   const SQLiteStore = connect(session)
   const app = express()
   if (process.env.NODE_ENV !== 'production') {
-    const {default: cors} = await import(path.join(__dirname, 'cors.js'))
+    const { default: cors } = await import(path.join(__dirname, 'cors.js'))
     app.use(cors.default)
   }
   app.use(express.json())
@@ -107,7 +113,7 @@ void (async function () {
     logger.info(`Server listening on port ${port}`)
   })
 
-  const signals = ['SIGTERM', 'SIGINT'] 
+  const signals = ['SIGTERM', 'SIGINT']
   signals.forEach((signal) => {
     process.on(signal, () => {
       logger.info(`${signal} signal received: closing HTTP server`)

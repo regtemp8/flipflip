@@ -1,5 +1,5 @@
-import {PLT} from 'flipflip-common'
-import db from "./database";
+import { PLT } from 'flipflip-common'
+import db from './database'
 
 export async function isAudioPlaylistItem(
   audioId: number,
@@ -19,12 +19,12 @@ export async function isAudioPlaylistItem(
 }
 
 export async function findScenePlaylistItemsByPlaylist(playlistId: number) {
-    return await db()
-        .query()
-        .selectFrom('scenePlaylistItem as pi')
-        .leftJoin('scenePlaylistItemScene as s', 's.scenePlaylistItemId', 'pi.id')
-        .select(['pi.id', 'pi.duration', 's.sceneId'])
-        .where('pi.playlistId', '=', playlistId)
-        .orderBy('pi.index asc')
-        .execute()
+  return await db()
+    .query()
+    .selectFrom('scenePlaylistItem as pi')
+    .leftJoin('scenePlaylistItemScene as s', 's.scenePlaylistItemId', 'pi.id')
+    .select(['pi.id', 'pi.duration', 's.sceneId'])
+    .where('pi.playlistId', '=', playlistId)
+    .orderBy('pi.index asc')
+    .execute()
 }

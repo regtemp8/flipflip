@@ -449,9 +449,9 @@ export async function updateContentSourceCount(
   count: number,
   countComplete: boolean
 ) {
-
-  if(countComplete) {
-    return await db().query()
+  if (countComplete) {
+    return await db()
+      .query()
       .updateTable('contentSource')
       .set({
         count,
@@ -460,9 +460,10 @@ export async function updateContentSourceCount(
       .where('url', '=', url)
       .execute()
   } else {
-    return await db().query()
+    return await db()
+      .query()
       .updateTable('contentSource')
-      .set({count})
+      .set({ count })
       .where('url', '=', url)
       .where('count', '<', count)
       .execute()

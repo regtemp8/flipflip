@@ -10,11 +10,7 @@ export default class DurationCalculator {
     this.sinStep = 0
   }
 
-  public calc(
-    timeToNextFrame: number,
-    bpm?: number,
-    min?: number
-  ): number {
+  public calc(timeToNextFrame: number, bpm?: number, min?: number): number {
     switch (this.timing.timingFunction) {
       case TF.constant:
         return this.calcConstant(min)
@@ -44,7 +40,8 @@ export default class DurationCalculator {
     const time = this.time(min)
     return (
       Math.floor(
-        Math.random() * (time(this.timing.timeMax) - time(this.timing.timeMin) + 1)
+        Math.random() *
+          (time(this.timing.timeMax) - time(this.timing.timeMin) + 1)
       ) + time(this.timing.timeMin)
     )
   }

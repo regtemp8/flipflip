@@ -142,55 +142,55 @@ router.get('/file/:type/:id', async (req, res, next) => {
 })
 
 async function handleFileUrl(req: Request, res: Response, url?: string) {
-    if (url == null) {
-      res.status(404).end()
-    } else if (url.startsWith('http')) {
-      if (isVideo(url, true) || isAudio(url, true)) {
-        const uuid = proxy().set({ url })
-        proxy().get(uuid, req, res)
-      } else {
-        res.status(302).location(url).end()
-      }
-    } else if (!fs.existsSync(url)) {
-      res.status(404).end()
+  if (url == null) {
+    res.status(404).end()
+  } else if (url.startsWith('http')) {
+    if (isVideo(url, true) || isAudio(url, true)) {
+      const uuid = proxy().set({ url })
+      proxy().get(uuid, req, res)
     } else {
-      let ranges = undefined
-      const { size } = await fs.promises.stat(url)
-      if (isVideo(url, true) || isAudio(url, true)) {
-        res.setHeader('Accept-Ranges', 'bytes')
-        ranges = req.range(size)
-      }
-
-      if (ranges == -1) {
-        // Unsatisfiable range parser result, return HTTP status 416: range not satisfiable
-        res.setHeader('Content-Range', `bytes */${size}`).status(416).end()
-      } else if (ranges == -2) {
-        // Syntactically invalid parser result, return HTTP status 400: bad request
-        res.status(400).end()
-      } else {
-        let status = 200
-        let start = undefined
-        let end = undefined
-        if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
-          status = 206
-
-          // TODO handle multi part ranges
-          start = ranges[0].start
-          end = ranges[0].end
-          res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
-        }
-
-        res.status(status).type(url.substring(url.lastIndexOf('.')))
-        res.on('error', (error) => {
-          logger.error(`Failed to process file request ${req.url}`, { error })
-        })
-        const stream = fs.createReadStream(url, { start, end })
-        stream.on('error', (error) => {
-          logger.error(`Failed to read file ${req.url}`, { error })
-        })
-        stream.pipe(res)
-      }
+      res.status(302).location(url).end()
     }
+  } else if (!fs.existsSync(url)) {
+    res.status(404).end()
+  } else {
+    let ranges = undefined
+    const { size } = await fs.promises.stat(url)
+    if (isVideo(url, true) || isAudio(url, true)) {
+      res.setHeader('Accept-Ranges', 'bytes')
+      ranges = req.range(size)
+    }
+
+    if (ranges == -1) {
+      // Unsatisfiable range parser result, return HTTP status 416: range not satisfiable
+      res.setHeader('Content-Range', `bytes */${size}`).status(416).end()
+    } else if (ranges == -2) {
+      // Syntactically invalid parser result, return HTTP status 400: bad request
+      res.status(400).end()
+    } else {
+      let status = 200
+      let start = undefined
+      let end = undefined
+      if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
+        status = 206
+
+        // TODO handle multi part ranges
+        start = ranges[0].start
+        end = ranges[0].end
+        res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
+      }
+
+      res.status(status).type(url.substring(url.lastIndexOf('.')))
+      res.on('error', (error) => {
+        logger.error(`Failed to process file request ${req.url}`, { error })
+      })
+      const stream = fs.createReadStream(url, { start, end })
+      stream.on('error', (error) => {
+        logger.error(`Failed to read file ${req.url}`, { error })
+      })
+      stream.pipe(res)
+    }
+  }
 }
 
 export default router

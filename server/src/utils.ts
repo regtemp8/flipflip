@@ -1,4 +1,13 @@
-import { Audio, en, getSourceType, IF, isImage, isImageOrVideo, isVideo, ST } from 'flipflip-common'
+import {
+  Audio,
+  en,
+  getSourceType,
+  IF,
+  isImage,
+  isImageOrVideo,
+  isVideo,
+  ST
+} from 'flipflip-common'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -410,13 +419,7 @@ export function cachePath(
     }
     if (source != null) {
       if (source !== ST.video && source !== ST.playlist) {
-        return (
-          baseDir +
-          typeDir +
-          path.sep +
-          getFileGroup(source) +
-          path.sep
-        )
+        return baseDir + typeDir + path.sep + getFileGroup(source) + path.sep
       } else {
         return baseDir + typeDir + path.sep
       }
@@ -428,12 +431,7 @@ export function cachePath(
     let cachePathParts
     if (source != null) {
       if (source !== ST.video && source !== ST.playlist) {
-        cachePathParts = [
-          saveDir,
-          'ImageCache',
-          typeDir,
-          getFileGroup(source)
-        ]
+        cachePathParts = [saveDir, 'ImageCache', typeDir, getFileGroup(source)]
       } else {
         cachePathParts = [saveDir, 'ImageCache', typeDir]
       }

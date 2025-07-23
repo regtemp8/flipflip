@@ -73,8 +73,8 @@ export interface VideoControlProps {
 }
 
 function VideoControl(props: VideoControlProps) {
-//   const volumeSelector =
-//     props.clipID != null ? selectClipVolume(props.clipID) : selectUndefined
+  //   const volumeSelector =
+  //     props.clipID != null ? selectClipVolume(props.clipID) : selectUndefined
   const volume = 0 //useAppSelector(volumeSelector)
   const clipStartMarks: number[] = [] //useAppSelector(selectClipStartMarks(props.clips))
 

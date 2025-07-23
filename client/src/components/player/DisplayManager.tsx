@@ -17,7 +17,11 @@ import { usePageVisibility } from 'react-page-visibility'
 import { useWakeLock } from 'react-screen-wake-lock'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { useGetPlayerScraperProgressQuery, useGetPlayerViewPlayersQuery, useGetViewPlayerConfigQuery } from '../../store/api/slice'
+import {
+  useGetPlayerScraperProgressQuery,
+  useGetPlayerViewPlayersQuery,
+  useGetViewPlayerConfigQuery
+} from '../../store/api/slice'
 import { setImagePlayersStarted } from '../../store/imagePlayer/slice'
 import {
   selectPlayerCanStart,
@@ -62,12 +66,14 @@ interface ProgressCardProps {
 function ProgressCard(props: ProgressCardProps) {
   const { playerID } = props
   const { classes } = useStyles()
-  const {data: progress} = useGetPlayerScraperProgressQuery(playerID, {pollingInterval: 10000})
+  const { data: progress } = useGetPlayerScraperProgressQuery(playerID, {
+    pollingInterval: 10000
+  })
 
   let current = 0
   let total = 0
   let message: string[] = []
-  if(progress != null) {
+  if (progress != null) {
     current = progress.current
     total = progress.total
     message = progress.message
@@ -131,11 +137,11 @@ interface DisplayViewProps {
 const hack = new ChildCallbackHack() // TODO get rid of hacks
 function DisplayView(props: DisplayViewProps) {
   const { data: config } = useGetViewPlayerConfigQuery(props.viewPlayerID)
-  if(config == null) {
+  if (config == null) {
     return null
   }
 
-  const {view} = config
+  const { view } = config
   let transform: string | undefined = undefined
   if (view.sync) {
     if (view.mirrorSyncedView === MVF.horizontal) {
@@ -175,14 +181,14 @@ function DisplayView(props: DisplayViewProps) {
 }
 
 function DisplayManager() {
-  const {id} = useParams()
+  const { id } = useParams()
   const playerID = id as string
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
-  const {data: viewPlayers} = useGetPlayerViewPlayersQuery(playerID)
+  const { data: viewPlayers } = useGetPlayerViewPlayersQuery(playerID)
   const hasStarted = useAppSelector(selectPlayerHasStarted())
   const canStart = useAppSelector(selectPlayerCanStart())
 
@@ -233,9 +239,7 @@ function DisplayManager() {
   }, [recentPictureGrid, stayAwake, wakeLock])
 
   const { classes } = useStyles()
-  const start = canStart
-    ? () => dispatch(setImagePlayersStarted())
-    : undefined
+  const start = canStart ? () => dispatch(setImagePlayersStarted()) : undefined
   return (
     <>
       <DisplayManagerAppBar
@@ -247,13 +251,12 @@ function DisplayManager() {
         playerID={playerID}
         goBack={goBack}
       />
-      {!hasStarted && (
-        <ProgressCard playerID={playerID} start={start} />
-      )}
+      {!hasStarted && <ProgressCard playerID={playerID} start={start} />}
       <Box className={classes.container}>
-        {viewPlayers && viewPlayers.map((id) => (
-          <DisplayView key={id} viewPlayerID={id} isPlaying={isPlaying} />
-        ))}
+        {viewPlayers &&
+          viewPlayers.map((id) => (
+            <DisplayView key={id} viewPlayerID={id} isPlaying={isPlaying} />
+          ))}
       </Box>
     </>
   )

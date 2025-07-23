@@ -9,7 +9,9 @@ import React, {
 import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
-  BT, IT, SL, 
+  BT,
+  IT,
+  SL,
   ContentData,
   EffectsData,
   StrobeData,
@@ -393,7 +395,7 @@ function ImageView(props: ImageViewProps) {
         iframe.contentWindow != null &&
         iframe.contentWindow.location.href === data.url
       const document = loaded
-        ? iframe.contentDocument ?? iframe.contentWindow?.document
+        ? (iframe.contentDocument ?? iframe.contentWindow?.document)
         : undefined
       if (document != null && document.readyState === 'complete') {
         const copyright = document.getElementsByClassName('copyright')
@@ -738,6 +740,6 @@ function ImageView(props: ImageViewProps) {
   )
 }
 
-; (ImageView as any).displayName = 'ImageView'
+;(ImageView as any).displayName = 'ImageView'
 
 export default React.memo(ImageView)

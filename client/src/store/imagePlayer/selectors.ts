@@ -1,5 +1,5 @@
-import { createSelector } from "@reduxjs/toolkit"
-import { RootState } from "../store"
+import { createSelector } from '@reduxjs/toolkit'
+import { RootState } from '../store'
 
 export const selectImagePlayerHasStarted = (uuid: string) => {
   return (state: RootState) => {
@@ -20,16 +20,14 @@ export const selectImagePlayerImageViews = (uuid: string) => {
 }
 
 export const selectPlayerHasStarted = () =>
-  createSelector(
-    [(state: RootState) => state.imagePlayer],
-    (imagePlayer) => Object.values(imagePlayer).every((value) => value.hasStarted)
+  createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
+    Object.values(imagePlayer).every((value) => value.hasStarted)
   )
 
 export const selectPlayerCanStart = () =>
-  createSelector(
-    [(state: RootState) => state.imagePlayer],
-    (imagePlayer) => Object.values(imagePlayer).every((value) => {
-        const { firstImageLoaded, hasStarted, loader } = value
-        return !hasStarted && firstImageLoaded && loader.readyToLoad.length === 0
+  createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
+    Object.values(imagePlayer).every((value) => {
+      const { firstImageLoaded, hasStarted, loader } = value
+      return !hasStarted && firstImageLoaded && loader.readyToLoad.length === 0
     })
   )

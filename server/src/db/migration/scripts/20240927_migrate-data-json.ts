@@ -1996,7 +1996,13 @@ const displayInsert = async (
     logger.info(`+ Insert display '{name}' (id: ${id})`, { name })
     await trx
       .insertInto('display')
-      .values({ id, name: name ?? '', userId, sceneGroupId, temporary: toNumber(false) })
+      .values({
+        id,
+        name: name ?? '',
+        userId,
+        sceneGroupId,
+        temporary: toNumber(false)
+      })
       .execute()
 
     const rows = grid.grid.length

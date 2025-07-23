@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto"
-import ViewPlayer from "./ViewPlayer"
-import { User } from "../db/types/generated"
+import { randomUUID } from 'crypto'
+import ViewPlayer from './ViewPlayer'
+import { User } from '../db/types/generated'
 
 class ViewPlayerService {
   private static instance: ViewPlayerService
@@ -29,8 +29,8 @@ class ViewPlayerService {
 
   public stop(viewId: string) {
     const view = this.views.get(viewId)
-    if(view == null) {
-        return
+    if (view == null) {
+      return
     }
 
     view.stop()

@@ -17,9 +17,7 @@ import {
 } from '../../store/imagePlayer/slice'
 import { makeStyles } from 'tss-react/mui'
 import { Box, Theme } from '@mui/material'
-import {
-  loadImageViews,
-} from '../../store/imagePlayer/thunks'
+import { loadImageViews } from '../../store/imagePlayer/thunks'
 import useMeasure from 'react-use-measure'
 import { ResizeObserver } from '@juggle/resize-observer'
 

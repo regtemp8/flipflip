@@ -1,3 +1,3 @@
-import { SortRequest } from "./SortRequest";
+import { SortRequest } from './SortRequest';
 
-export type ContentSortRequest = SortRequest & { sceneId?: number }
+export type ContentSortRequest = SortRequest & { sceneId?: number };

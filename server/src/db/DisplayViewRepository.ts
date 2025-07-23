@@ -1,22 +1,33 @@
-import db from "./database";
-import { toNumber } from "./utils";
+import db from './database'
+import { toNumber } from './utils'
 
 export async function findVisibleDisplayViewIds(displayId: number) {
-    return await db().query().selectFrom('displayView').select('id').where('displayId', '=', displayId).where('visible', '=', toNumber(true)).execute()
+  return await db()
+    .query()
+    .selectFrom('displayView')
+    .select('id')
+    .where('displayId', '=', displayId)
+    .where('visible', '=', toNumber(true))
+    .execute()
 }
 
 export async function findDisplayViewById(id: number) {
-    return await db().query().selectFrom('displayView').selectAll().where('id', '=', id).executeTakeFirst()
+  return await db()
+    .query()
+    .selectFrom('displayView')
+    .selectAll()
+    .where('id', '=', id)
+    .executeTakeFirst()
 }
 
 export async function isSyncedDisplayView(id: number) {
-    const rows = await db()
-        .query()
-        .selectFrom('displayView')        
-        .select((eb) => eb.lit(1).as('exists'))
-        .where('id', '=', id)
-        .where('sync', '=', toNumber(true))
-        .execute()
+  const rows = await db()
+    .query()
+    .selectFrom('displayView')
+    .select((eb) => eb.lit(1).as('exists'))
+    .where('id', '=', id)
+    .where('sync', '=', toNumber(true))
+    .execute()
 
-    return rows.length === 1;
+  return rows.length === 1
 }

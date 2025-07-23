@@ -335,29 +335,29 @@ export interface PlayerBarsProps {
 
 function PlayerBars(props: PlayerBarsProps) {
   const dispatch = useAppDispatch()
-//   const { isWin32 } = useAppSelector(selectConstants())
+  //   const { isWin32 } = useAppSelector(selectConstants())
   const allTags: number[] = [] //useAppSelector(selectPlayerAllTags())
   const tags: number[] = [] //useAppSelector(selectAppPlayerTags(props.sceneID))
-//   const cachingEnabled = useAppSelector(selectAppConfigCachingEnabled())
-//   const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
-//   const clickToProgress = useAppSelector(
-//     selectAppConfigDisplaySettingsClickToProgress()
-//   )
-//   const clickToProgressWhilePlaying = useAppSelector(
-//     selectAppConfigDisplaySettingsClickToProgressWhilePlaying()
-//   )
-//   const confirmBlacklist = useAppSelector(
-//     selectAppConfigGeneralSettingsConfirmBlacklist()
-//   )
-//   const confirmFileDeletion = useAppSelector(
-//     selectAppConfigGeneralSettingsConfirmFileDeletion()
-//   )
+  //   const cachingEnabled = useAppSelector(selectAppConfigCachingEnabled())
+  //   const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
+  //   const clickToProgress = useAppSelector(
+  //     selectAppConfigDisplaySettingsClickToProgress()
+  //   )
+  //   const clickToProgressWhilePlaying = useAppSelector(
+  //     selectAppConfigDisplaySettingsClickToProgressWhilePlaying()
+  //   )
+  //   const confirmBlacklist = useAppSelector(
+  //     selectAppConfigGeneralSettingsConfirmBlacklist()
+  //   )
+  //   const confirmFileDeletion = useAppSelector(
+  //     selectAppConfigGeneralSettingsConfirmFileDeletion()
+  //   )
   const tutorial = '' //useAppSelector(selectAppTutorial())
   const isAudioScene = false //useAppSelector(selectSceneIsAudioScene(props.sceneID))
   const isDisplayWithOneView = false
   const isDownloadScene = false //useAppSelector(selectSceneIsDownloadScene(props.sceneID))
-//   const isScriptScene = useAppSelector(selectSceneIsScriptScene(props.sceneID))
-//   const videoVolume = useAppSelector(selectSceneVideoVolume(props.sceneID))
+  //   const isScriptScene = useAppSelector(selectSceneIsScriptScene(props.sceneID))
+  //   const videoVolume = useAppSelector(selectSceneVideoVolume(props.sceneID))
   const nextSceneID = 0 //useAppSelector(selectSceneNextSceneID(props.sceneID))
   const sources: number[] = [] //useAppSelector(selectSceneSources(props.sceneID))
   const videoSkip = 0 //useAppSelector(selectSceneVideoSkip(props.sceneID))
@@ -398,50 +398,50 @@ function PlayerBars(props: PlayerBarsProps) {
     sceneID
   } = props
 
-//   const canChangeSource = useCallback(() => {
-//     return (
-//       !isDownloadScene && !isAudioScene && !isScriptScene && allTags != null
-//     )
-//   }, [allTags, isAudioScene, isDownloadScene, isScriptScene])
+  //   const canChangeSource = useCallback(() => {
+  //     return (
+  //       !isDownloadScene && !isAudioScene && !isScriptScene && allTags != null
+  //     )
+  //   }, [allTags, isAudioScene, isDownloadScene, isScriptScene])
 
-//   const copyImageToClipboard = useCallback(
-//     (sourceURL: string) => {
-//       let url = sourceURL
-//       if (!url) {
-//         url = historyPaths[historyPaths.length - 1 + historyOffset].src
-//       }
-//       const isFile = url.startsWith('file://')
-//       const path = urlToPath(url, isWin32)
-//       const imagePath = isFile ? path : url
-//       if (
-//         imagePath.toLocaleLowerCase().endsWith('.png') ||
-//         imagePath.toLocaleLowerCase().endsWith('.jpg') ||
-//         imagePath.toLocaleLowerCase().endsWith('.jpeg')
-//       ) {
-//         flipflip().clipboard.copyImageToClipboard(imagePath)
-//       } else {
-//         flipflip().clipboard.copyTextToClipboard(imagePath)
-//       }
-//     },
-//     [isWin32, historyOffset, historyPaths]
-//   )
+  //   const copyImageToClipboard = useCallback(
+  //     (sourceURL: string) => {
+  //       let url = sourceURL
+  //       if (!url) {
+  //         url = historyPaths[historyPaths.length - 1 + historyOffset].src
+  //       }
+  //       const isFile = url.startsWith('file://')
+  //       const path = urlToPath(url, isWin32)
+  //       const imagePath = isFile ? path : url
+  //       if (
+  //         imagePath.toLocaleLowerCase().endsWith('.png') ||
+  //         imagePath.toLocaleLowerCase().endsWith('.jpg') ||
+  //         imagePath.toLocaleLowerCase().endsWith('.jpeg')
+  //       ) {
+  //         flipflip().clipboard.copyImageToClipboard(imagePath)
+  //       } else {
+  //         flipflip().clipboard.copyTextToClipboard(imagePath)
+  //       }
+  //     },
+  //     [isWin32, historyOffset, historyPaths]
+  //   )
 
-//   const doDelete = useCallback(
-//     async (path: string) => {
-//       const errorMessage = await flipflip().api.deletePath(path)
-//       if (errorMessage != null) {
-//         setDeletePath(undefined)
-//         setDeleteError(
-//           'An error occurred while deleting the file: ' + errorMessage
-//         )
-//         console.error(errorMessage)
-//       } else {
-//         imagePlayerDeleteHack.fire()
-//         onCloseDialog()
-//       }
-//     },
-//     [imagePlayerDeleteHack]
-//   )
+  //   const doDelete = useCallback(
+  //     async (path: string) => {
+  //       const errorMessage = await flipflip().api.deletePath(path)
+  //       if (errorMessage != null) {
+  //         setDeletePath(undefined)
+  //         setDeleteError(
+  //           'An error occurred while deleting the file: ' + errorMessage
+  //         )
+  //         console.error(errorMessage)
+  //       } else {
+  //         imagePlayerDeleteHack.fire()
+  //         onCloseDialog()
+  //       }
+  //     },
+  //     [imagePlayerDeleteHack]
+  //   )
 
   const historyGoBack = useCallback(() => {
     if (
@@ -480,65 +480,65 @@ function PlayerBars(props: PlayerBarsProps) {
     goBack()
   }, [goBack])
 
-//   const onDeletePath = useCallback(
-//     async (path: string) => {
-//       const exists = await flipflip().api.pathExists(path)
-//       if (exists) {
-//         if (confirmFileDeletion) {
-//           setDeletePath(path)
-//         } else {
-//           doDelete(path)
-//         }
-//       } else {
-//         setDeletePath(undefined)
-//         setDeleteError("This file doesn't exist, cannot delete")
-//       }
-//     },
-//     [confirmFileDeletion, doDelete]
-//   )
+  //   const onDeletePath = useCallback(
+  //     async (path: string) => {
+  //       const exists = await flipflip().api.pathExists(path)
+  //       if (exists) {
+  //         if (confirmFileDeletion) {
+  //           setDeletePath(path)
+  //         } else {
+  //           doDelete(path)
+  //         }
+  //       } else {
+  //         setDeletePath(undefined)
+  //         setDeleteError("This file doesn't exist, cannot delete")
+  //       }
+  //     },
+  //     [confirmFileDeletion, doDelete]
+  //   )
 
-//   const onDelete = useCallback(() => {
-//     if (
-//       !drawerHover ||
-//       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
-//     ) {
-//       const img = historyPaths[historyPaths.length - 1 + historyOffset]
-//       const url = img.src
-//       const isFile = url.startsWith('file://')
-//       const path = urlToPath(url, isWin32)
-//       if (isFile) {
-//         onDeletePath(path)
-//       }
-//     }
-//   }, [drawerHover, isWin32, onDeletePath, historyOffset, historyPaths])
+  //   const onDelete = useCallback(() => {
+  //     if (
+  //       !drawerHover ||
+  //       document.activeElement!.tagName.toLocaleLowerCase() !== 'input'
+  //     ) {
+  //       const img = historyPaths[historyPaths.length - 1 + historyOffset]
+  //       const url = img.src
+  //       const isFile = url.startsWith('file://')
+  //       const path = urlToPath(url, isWin32)
+  //       if (isFile) {
+  //         onDeletePath(path)
+  //       }
+  //     }
+  //   }, [drawerHover, isWin32, onDeletePath, historyOffset, historyPaths])
 
-//   const onBlacklistFile = useCallback(
-//     (source: string, fileToBlacklist: string) => {
-//       if (confirmBlacklist) {
-//         setSourceToBlacklist(source)
-//         setFileToBlacklist(fileToBlacklist)
-//       } else {
-//         dispatch(blacklistFile(source, fileToBlacklist))
-//       }
-//     },
-//     [confirmBlacklist, dispatch]
-//   )
+  //   const onBlacklistFile = useCallback(
+  //     (source: string, fileToBlacklist: string) => {
+  //       if (confirmBlacklist) {
+  //         setSourceToBlacklist(source)
+  //         setFileToBlacklist(fileToBlacklist)
+  //       } else {
+  //         dispatch(blacklistFile(source, fileToBlacklist))
+  //       }
+  //     },
+  //     [confirmBlacklist, dispatch]
+  //   )
 
-//   const onBlacklist = useCallback(() => {
-//     const img = historyPaths[historyPaths.length - 1 + historyOffset]
-//     if (img == null) return
-//     const source = img.getAttribute('source')
-//     const url = img.src
-//     const isFile = url.startsWith('file://')
-//     const path = urlToPath(url, isWin32)
-//     const type = getSourceType(source)
-//     if (
-//       (!isFile && type !== ST.video && type !== ST.playlist) ||
-//       type === ST.local
-//     ) {
-//       onBlacklistFile(source, isFile ? path : url)
-//     }
-//   }, [isWin32, onBlacklistFile, historyOffset, historyPaths])
+  //   const onBlacklist = useCallback(() => {
+  //     const img = historyPaths[historyPaths.length - 1 + historyOffset]
+  //     if (img == null) return
+  //     const source = img.getAttribute('source')
+  //     const url = img.src
+  //     const isFile = url.startsWith('file://')
+  //     const path = urlToPath(url, isWin32)
+  //     const type = getSourceType(source)
+  //     if (
+  //       (!isFile && type !== ST.video && type !== ST.playlist) ||
+  //       type === ST.local
+  //     ) {
+  //       onBlacklistFile(source, isFile ? path : url)
+  //     }
+  //   }, [isWin32, onBlacklistFile, historyOffset, historyPaths])
 
   const setPlayPause = useCallback(
     (doPlay: boolean) => {
@@ -560,204 +560,204 @@ function PlayerBars(props: PlayerBarsProps) {
     }
   }, [drawerHover, isPlaying, setPlayPause])
 
-//   useEffect(() => {
-//     const abortController = new AbortController()
-//     flipflip().events.onPlayerPlayPause(playPause, abortController)
-//     flipflip().events.onPlayerHistoryBack(historyGoBack, abortController)
-//     flipflip().events.onPlayerHistoryForward(historyGoForward, abortController)
-//     flipflip().events.onPlayerNavigateBack(navigateBack, abortController)
-//     flipflip().events.onPlayerDelete(doDelete, abortController)
-//     flipflip().events.onPlayerPrevSource(prevSource, abortController)
-//     flipflip().events.onPlayerNextSource(nextSource, abortController)
-//     flipflip().events.onBlackListFile(async (source: string, file: string) => {
-//       await dispatch(blacklistFile(source, file))
-//     }, abortController)
-//     flipflip().events.onGotoTagSource(async (sourceURL: string) => {
-//       await dispatch(playSceneFromLibrary(sourceURL, []))
-//     }, abortController)
-//     flipflip().events.onGotoClipSource((sourceURL: string) => {
-//       dispatch(clipVideo(sourceURL, []))
-//     }, abortController)
-//     flipflip().events.onRecentPictureGrid(onRecentPictureGrid, abortController)
+  //   useEffect(() => {
+  //     const abortController = new AbortController()
+  //     flipflip().events.onPlayerPlayPause(playPause, abortController)
+  //     flipflip().events.onPlayerHistoryBack(historyGoBack, abortController)
+  //     flipflip().events.onPlayerHistoryForward(historyGoForward, abortController)
+  //     flipflip().events.onPlayerNavigateBack(navigateBack, abortController)
+  //     flipflip().events.onPlayerDelete(doDelete, abortController)
+  //     flipflip().events.onPlayerPrevSource(prevSource, abortController)
+  //     flipflip().events.onPlayerNextSource(nextSource, abortController)
+  //     flipflip().events.onBlackListFile(async (source: string, file: string) => {
+  //       await dispatch(blacklistFile(source, file))
+  //     }, abortController)
+  //     flipflip().events.onGotoTagSource(async (sourceURL: string) => {
+  //       await dispatch(playSceneFromLibrary(sourceURL, []))
+  //     }, abortController)
+  //     flipflip().events.onGotoClipSource((sourceURL: string) => {
+  //       dispatch(clipVideo(sourceURL, []))
+  //     }, abortController)
+  //     flipflip().events.onRecentPictureGrid(onRecentPictureGrid, abortController)
 
-//     const onClick = (e: MouseEvent) => {
-//       if (
-//         isAudioScene ||
-//         recentPictureGrid ||
-//         drawerHover ||
-//         tagDrawerHover ||
-//         appBarHover
-//       ) {
-//         return
-//       }
-//       if ((!isPlaying || clickToProgressWhilePlaying) && hasStarted) {
-//         imagePlayerAdvanceHacks[0][0].fire()
-//         // TODO Improve this to be able to advance specific views within display
-//         /* for (let x of props.imagePlayerAdvanceHacks) {
-//           for (let y of x) {
-//             y.fire();
-//           }
-//         } */
-//       }
-//     }
+  //     const onClick = (e: MouseEvent) => {
+  //       if (
+  //         isAudioScene ||
+  //         recentPictureGrid ||
+  //         drawerHover ||
+  //         tagDrawerHover ||
+  //         appBarHover
+  //       ) {
+  //         return
+  //       }
+  //       if ((!isPlaying || clickToProgressWhilePlaying) && hasStarted) {
+  //         imagePlayerAdvanceHacks[0][0].fire()
+  //         // TODO Improve this to be able to advance specific views within display
+  //         /* for (let x of props.imagePlayerAdvanceHacks) {
+  //           for (let y of x) {
+  //             y.fire();
+  //           }
+  //         } */
+  //       }
+  //     }
 
-//     const onScroll = (e: WheelEvent) => {
-//       if (recentPictureGrid || drawerHover) return
-//       const volumeChange = (e.deltaY / 100) * -5
-//       let newVolume = parseInt(videoVolume as any) + volumeChange
-//       if (newVolume < 0) {
-//         newVolume = 0
-//       } else if (newVolume > 100) {
-//         newVolume = 100
-//       }
-//       if (mainVideo) {
-//         mainVideo.volume = newVolume / 100
-//       }
+  //     const onScroll = (e: WheelEvent) => {
+  //       if (recentPictureGrid || drawerHover) return
+  //       const volumeChange = (e.deltaY / 100) * -5
+  //       let newVolume = parseInt(videoVolume as any) + volumeChange
+  //       if (newVolume < 0) {
+  //         newVolume = 0
+  //       } else if (newVolume > 100) {
+  //         newVolume = 100
+  //       }
+  //       if (mainVideo) {
+  //         mainVideo.volume = newVolume / 100
+  //       }
 
-//       dispatch(setSceneVideoVolume({ id: sceneID, value: newVolume }))
-//     }
-//     const showContextMenu = async (e: MouseEvent) => {
-//       if (tutorial != null) return
-//       // const img = props.recentPictureGrid
-//       //   ? e.target
-//       //   : props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
-//       // const url = img.src
-//       // let source = img.getAttribute('source')
-//       // const post = img.hasAttribute('post') ? img.getAttribute('post') : null
-//       // const literalSource = source
-//       // if (/^https?:\/\//g.exec(source) == null) {
-//       //   const fileUrl = await flipflip().api.getFileUrl(source)
-//       //   source = urlToPath(fileUrl, isWin32)
-//       // }
-//       // const isFile = url.startsWith('file://')
-//       // const path = urlToPath(url, isWin32)
-//       // const type = getSourceType(source)
+  //       dispatch(setSceneVideoVolume({ id: sceneID, value: newVolume }))
+  //     }
+  //     const showContextMenu = async (e: MouseEvent) => {
+  //       if (tutorial != null) return
+  //       // const img = props.recentPictureGrid
+  //       //   ? e.target
+  //       //   : props.historyPaths[props.historyPaths.length - 1 + props.historyOffset]
+  //       // const url = img.src
+  //       // let source = img.getAttribute('source')
+  //       // const post = img.hasAttribute('post') ? img.getAttribute('post') : null
+  //       // const literalSource = source
+  //       // if (/^https?:\/\//g.exec(source) == null) {
+  //       //   const fileUrl = await flipflip().api.getFileUrl(source)
+  //       //   source = urlToPath(fileUrl, isWin32)
+  //       // }
+  //       // const isFile = url.startsWith('file://')
+  //       // const path = urlToPath(url, isWin32)
+  //       // const type = getSourceType(source)
 
-//       // TODO show context menu
-//     }
-//     const onKeyDown = (e: KeyboardEvent) => {
-//       const focus = document.activeElement!.tagName.toLocaleLowerCase()
-//       switch (e.key) {
-//         case ' ':
-//           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-//             e.preventDefault()
-//             playPause()
-//           }
-//           break
-//         case 'ArrowLeft':
-//           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-//             e.preventDefault()
-//             historyGoBack()
-//           }
-//           break
-//         case 'ArrowRight':
-//           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
-//             e.preventDefault()
-//             historyGoForward()
-//           }
-//           break
-//         case 'Escape':
-//           e.preventDefault()
-//           navigateBack()
-//           break
-//         case 'c':
-//           if (e.ctrlKey) {
-//             e.preventDefault()
-//             copyImageToClipboard('')
-//           }
-//           break
-//         case 'f':
-//           if (e.ctrlKey) {
-//             e.preventDefault()
-//             toggleFullScreen()
-//           }
-//           break
-//         case 'b':
-//           if (e.ctrlKey) {
-//             e.preventDefault()
-//             onBlacklist()
-//           }
-//           break
-//         case 'Delete':
-//           if (!drawerHover || focus !== 'input') {
-//             if (cachingEnabled) {
-//               e.preventDefault()
-//               onDelete()
-//             }
-//           }
-//           break
-//         case '[':
-//           if (canChangeSource()) {
-//             e.preventDefault()
-//             prevSource()
-//           }
-//           break
-//         case ']':
-//           if (canChangeSource()) {
-//             e.preventDefault()
-//             nextSource()
-//           }
-//           break
-//       }
-//     }
+  //       // TODO show context menu
+  //     }
+  //     const onKeyDown = (e: KeyboardEvent) => {
+  //       const focus = document.activeElement!.tagName.toLocaleLowerCase()
+  //       switch (e.key) {
+  //         case ' ':
+  //           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+  //             e.preventDefault()
+  //             playPause()
+  //           }
+  //           break
+  //         case 'ArrowLeft':
+  //           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+  //             e.preventDefault()
+  //             historyGoBack()
+  //           }
+  //           break
+  //         case 'ArrowRight':
+  //           if ((!drawerHover || focus !== 'input') && !e.shiftKey) {
+  //             e.preventDefault()
+  //             historyGoForward()
+  //           }
+  //           break
+  //         case 'Escape':
+  //           e.preventDefault()
+  //           navigateBack()
+  //           break
+  //         case 'c':
+  //           if (e.ctrlKey) {
+  //             e.preventDefault()
+  //             copyImageToClipboard('')
+  //           }
+  //           break
+  //         case 'f':
+  //           if (e.ctrlKey) {
+  //             e.preventDefault()
+  //             toggleFullScreen()
+  //           }
+  //           break
+  //         case 'b':
+  //           if (e.ctrlKey) {
+  //             e.preventDefault()
+  //             onBlacklist()
+  //           }
+  //           break
+  //         case 'Delete':
+  //           if (!drawerHover || focus !== 'input') {
+  //             if (cachingEnabled) {
+  //               e.preventDefault()
+  //               onDelete()
+  //             }
+  //           }
+  //           break
+  //         case '[':
+  //           if (canChangeSource()) {
+  //             e.preventDefault()
+  //             prevSource()
+  //           }
+  //           break
+  //         case ']':
+  //           if (canChangeSource()) {
+  //             e.preventDefault()
+  //             nextSource()
+  //           }
+  //           break
+  //       }
+  //     }
 
-//     window.addEventListener('contextmenu', showContextMenu, false)
-//     window.addEventListener('keydown', onKeyDown, false)
-//     window.addEventListener('wheel', onScroll, false)
-//     if (clickToProgress) {
-//       window.addEventListener('click', onClick, false)
-//     }
+  //     window.addEventListener('contextmenu', showContextMenu, false)
+  //     window.addEventListener('keydown', onKeyDown, false)
+  //     window.addEventListener('wheel', onScroll, false)
+  //     if (clickToProgress) {
+  //       window.addEventListener('click', onClick, false)
+  //     }
 
-//     return () => {
-//       clearInterval(_interval.current)
-//       _interval.current = undefined
-//       clearTimeout(_appBarTimeout.current)
-//       clearTimeout(_drawerTimeout.current)
-//       clearTimeout(_tagDrawerTimeout.current)
-//       _appBarTimeout.current = null
-//       _drawerTimeout.current = null
-//       _tagDrawerTimeout.current = null
+  //     return () => {
+  //       clearInterval(_interval.current)
+  //       _interval.current = undefined
+  //       clearTimeout(_appBarTimeout.current)
+  //       clearTimeout(_drawerTimeout.current)
+  //       clearTimeout(_tagDrawerTimeout.current)
+  //       _appBarTimeout.current = null
+  //       _drawerTimeout.current = null
+  //       _tagDrawerTimeout.current = null
 
-//       abortController.abort()
+  //       abortController.abort()
 
-//       window.removeEventListener('contextmenu', showContextMenu)
-//       window.removeEventListener('keydown', onKeyDown)
-//       window.removeEventListener('wheel', onScroll)
-//       if (clickToProgress) {
-//         window.removeEventListener('click', onClick)
-//       }
-//     }
-//   }, [
-//     appBarHover,
-//     cachingEnabled,
-//     canChangeSource,
-//     clickToProgress,
-//     clickToProgressWhilePlaying,
-//     copyImageToClipboard,
-//     dispatch,
-//     doDelete,
-//     drawerHover,
-//     fullScreen,
-//     historyGoBack,
-//     historyGoForward,
-//     isAudioScene,
-//     navigateBack,
-//     nextSource,
-//     onBlacklist,
-//     onDelete,
-//     playPause,
-//     prevSource,
-//     hasStarted,
-//     imagePlayerAdvanceHacks,
-//     isPlaying,
-//     mainVideo,
-//     onRecentPictureGrid,
-//     recentPictureGrid,
-//     sceneID,
-//     tagDrawerHover,
-//     tutorial,
-//     videoVolume
-//   ])
+  //       window.removeEventListener('contextmenu', showContextMenu)
+  //       window.removeEventListener('keydown', onKeyDown)
+  //       window.removeEventListener('wheel', onScroll)
+  //       if (clickToProgress) {
+  //         window.removeEventListener('click', onClick)
+  //       }
+  //     }
+  //   }, [
+  //     appBarHover,
+  //     cachingEnabled,
+  //     canChangeSource,
+  //     clickToProgress,
+  //     clickToProgressWhilePlaying,
+  //     copyImageToClipboard,
+  //     dispatch,
+  //     doDelete,
+  //     drawerHover,
+  //     fullScreen,
+  //     historyGoBack,
+  //     historyGoForward,
+  //     isAudioScene,
+  //     navigateBack,
+  //     nextSource,
+  //     onBlacklist,
+  //     onDelete,
+  //     playPause,
+  //     prevSource,
+  //     hasStarted,
+  //     imagePlayerAdvanceHacks,
+  //     isPlaying,
+  //     mainVideo,
+  //     onRecentPictureGrid,
+  //     recentPictureGrid,
+  //     sceneID,
+  //     tagDrawerHover,
+  //     tutorial,
+  //     videoVolume
+  //   ])
 
   const openLink = (url: string) => {
     window.open(url, '_blank')?.focus()
@@ -822,11 +822,11 @@ function PlayerBars(props: PlayerBarsProps) {
   }
 
   const inheritClipTags = undefined
-    // isAudioScene || isScriptScene
-    //   ? undefined
-    //   : (libraryID: number) => {
-    //       dispatch(inheritTagsFromClips(libraryID))
-    //     }
+  // isAudioScene || isScriptScene
+  //   ? undefined
+  //   : (libraryID: number) => {
+  //       dispatch(inheritTagsFromClips(libraryID))
+  //     }
 
   const { classes } = useStyles()
   const canGoBack = props.historyOffset > -(props.historyPaths.length - 1)

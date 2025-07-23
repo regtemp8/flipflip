@@ -429,7 +429,7 @@ router.get('/:id/metadata', async (req, res, next) => {
     }
 
     res.status(200).send({ ...metadata, id })
-  } catch(error) {
+  } catch (error) {
     next(error)
   }
 })
@@ -440,7 +440,7 @@ router.get('/:id/bpm', async (req, res, next) => {
   try {
     const metadata = await readAudioMetadata(url)
     res.status(200).send({ id, bpm: metadata.bpm })
-  } catch(error) {
+  } catch (error) {
     next(error)
   }
 })

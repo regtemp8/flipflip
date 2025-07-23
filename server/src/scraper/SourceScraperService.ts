@@ -1,11 +1,11 @@
-import { randomUUID } from "crypto"
-import ViewPlayer from "../player/ViewPlayer"
-import SourceScraper from "./SourceScraper"
-import { User } from "../db/types/generated"
+import { randomUUID } from 'crypto'
+import ViewPlayer from '../player/ViewPlayer'
+import SourceScraper from './SourceScraper'
+import { User } from '../db/types/generated'
 
 interface SourceScraperSubscription {
-    subscribers: number
-    scraper: SourceScraper
+  subscribers: number
+  scraper: SourceScraper
 }
 
 class SourceScraperService {
@@ -27,15 +27,15 @@ class SourceScraperService {
 
   public async subscribe(sceneId: number, user: User) {
     let subscription = this.subscriptions.get(sceneId)
-    if(subscription != null) {
-        if(subscription.subscribers === 0) {
-            subscription.scraper.start()
-        }
-        subscription.subscribers++
+    if (subscription != null) {
+      if (subscription.subscribers === 0) {
+        subscription.scraper.start()
+      }
+      subscription.subscribers++
     } else {
-        const scraper = await SourceScraper.create(sceneId, user)
-        scraper.start()
-        subscription = {subscribers: 1, scraper}
+      const scraper = await SourceScraper.create(sceneId, user)
+      scraper.start()
+      subscription = { subscribers: 1, scraper }
     }
 
     this.subscriptions.set(sceneId, subscription)
@@ -43,13 +43,13 @@ class SourceScraperService {
 
   public unsubscribe(sceneId: number) {
     const subscription = this.subscriptions.get(sceneId)
-    if(subscription == null) {
-        return
+    if (subscription == null) {
+      return
     }
 
     subscription.subscribers--
-    if(subscription.subscribers == 0) {
-        subscription.scraper.stop()
+    if (subscription.subscribers == 0) {
+      subscription.scraper.stop()
     }
 
     this.subscriptions.set(sceneId, subscription)
@@ -64,9 +64,10 @@ class SourceScraperService {
   }
 
   public clear() {
-    this.subscriptions.values()
-        .filter(subscription => subscription.subscribers > 0)
-        .forEach(subscription => subscription.scraper.stop())
+    this.subscriptions
+      .values()
+      .filter((subscription) => subscription.subscribers > 0)
+      .forEach((subscription) => subscription.scraper.stop())
 
     this.subscriptions.clear()
   }

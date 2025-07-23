@@ -220,71 +220,71 @@ export function removeDuplicatesBy<T>(
 
 export function getSourceType(url: string): string {
   if (isAudio(url, false)) {
-    return ST.audio
+    return ST.audio;
   } else if (isVideo(url, false)) {
-    return ST.video
+    return ST.video;
   } else if (isVideoPlaylist(url, true)) {
-    return ST.playlist
+    return ST.playlist;
   } else if (/^https?:\/\/([^.]*|(66\.media))\.tumblr\.com/.exec(url) != null) {
-    return ST.tumblr
+    return ST.tumblr;
   } else if (/^https?:\/\/(www\.)?reddit\.com\//.exec(url) != null) {
-    return ST.reddit
+    return ST.reddit;
   } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
-    return ST.redgifs
+    return ST.redgifs;
   } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
-    return ST.imagefap
+    return ST.imagefap;
   } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
-    return ST.imgur
+    return ST.imgur;
   } else if (/^https?:\/\/(www\.)?(cdn\.)?sex\.com\//.exec(url) != null) {
-    return ST.sexcom
+    return ST.sexcom;
   } else if (/^https?:\/\/(www\.)?twitter\.com\//.exec(url) != null) {
-    return ST.twitter
+    return ST.twitter;
   } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
-    return ST.deviantart
+    return ST.deviantart;
   } else if (/^https?:\/\/(www\.)?instagram\.com\//.exec(url) != null) {
-    return ST.instagram
+    return ST.instagram;
   } else if (
     /^https?:\/\/(www\.)?(lolibooru\.moe|hypnohub\.net|danbooru\.donmai\.us)\//.exec(
       url
     ) != null
   ) {
-    return ST.danbooru
+    return ST.danbooru;
   } else if (
     /^https?:\/\/(www\.)?(gelbooru\.com|furry\.booru\.org|rule34\.xxx|realbooru\.com|safebooru\.org)\//.exec(
       url
     ) != null
   ) {
-    return ST.gelbooru2
+    return ST.gelbooru2;
   } else if (/^https?:\/\/(www\.)?(e621\.net)\//.exec(url) != null) {
-    return ST.e621
+    return ST.e621;
   } else if (
     /^https?:\/\/(www\.|members\.)?luscious\.net\//.exec(url) != null
   ) {
-    return ST.luscious
+    return ST.luscious;
   } else if (
     /^https?:\/\/(www\.)?(.*\.booru\.org|idol\.sankakucomplex\.com)\//.exec(
       url
     ) != null
   ) {
-    return ST.gelbooru1
+    return ST.gelbooru1;
   } else if (/^https?:\/\/(www\.)?e-hentai\.org\/g\//.exec(url) != null) {
-    return ST.ehentai
+    return ST.ehentai;
   } else if (/^https?:\/\/[^.]*\.bdsmlr\.com/.exec(url) != null) {
-    return ST.bdsmlr
+    return ST.bdsmlr;
   } else if (
     /^https?:\/\/[\w\\.]+:\d+\/get_files\/search_files/.exec(url) != null
   ) {
-    return ST.hydrus
+    return ST.hydrus;
   } else if (/^https?:\/\/[^.]*\.[a-z0-9.:]+\/ws.php/.exec(url) != null) {
-    return ST.piwigo
+    return ST.piwigo;
   } else if (/^https?:\/\/hypno\.nimja\.com\/visual\/\d+/.exec(url) != null) {
-    return ST.nimja
+    return ST.nimja;
   } else if (/(^https?:\/\/)|(\.txt$)/.exec(url) != null) {
     // Arbitrary URL, assume image list
-    return ST.list
+    return ST.list;
   } else {
     // Directory
-    return ST.local
+    return ST.local;
   }
 }
 

@@ -68,7 +68,13 @@ import {
   CaptionScriptUpdate,
   FontSettingsUpdate
 } from './CaptionScriptRepository'
-import { getBackupsDir, getCacheDir, getServerHost, getServerPort, getThumbsDir } from '../utils'
+import {
+  getBackupsDir,
+  getCacheDir,
+  getServerHost,
+  getServerPort,
+  getThumbsDir
+} from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
 
@@ -1570,31 +1576,49 @@ export function toIgnoredTagSelectOptions(
   return options
 }
 
-export function toIdsArray(rows: {id: number | null}[]): number[] {
+export function toIdsArray(rows: { id: number | null }[]): number[] {
   return rows.map((row) => row.id).filter((id) => id != null)
 }
 
-export function toImagePlayerData(displayViewId: number, row: Partial<PlaylistRow>, itemRows: Array<{id: number | null, duration: number | null, sceneId: number | null}>, maxCanLoad: number, allScenes: number[]): ImagePlayerData {
-  const itemsById: Record<number, Array<{id: number | null, duration: number | null, sceneId: number | null}>> = {}
+export function toImagePlayerData(
+  displayViewId: number,
+  row: Partial<PlaylistRow>,
+  itemRows: Array<{
+    id: number | null
+    duration: number | null
+    sceneId: number | null
+  }>,
+  maxCanLoad: number,
+  allScenes: number[]
+): ImagePlayerData {
+  const itemsById: Record<
+    number,
+    Array<{
+      id: number | null
+      duration: number | null
+      sceneId: number | null
+    }>
+  > = {}
   itemRows.forEach((itemRow) => {
     const id = itemRow.id as number
-    if(itemsById[id] == null) {
+    if (itemsById[id] == null) {
       itemsById[id] = []
     }
 
     itemsById[id].push(itemRow)
   })
 
-  const items = Object.entries(itemsById)
-    .map(([key, value]) => {
-      const duration = value[0].duration as number
-      let scenes = value.filter((sceneId) => sceneId != null).map(({sceneId}) => sceneId as number)
-      if(scenes.length === 0) {
-        scenes = allScenes
-      }
+  const items = Object.entries(itemsById).map(([key, value]) => {
+    const duration = value[0].duration as number
+    let scenes = value
+      .filter((sceneId) => sceneId != null)
+      .map(({ sceneId }) => sceneId as number)
+    if (scenes.length === 0) {
+      scenes = allScenes
+    }
 
-      return {duration, scenes}
-    })
+    return { duration, scenes }
+  })
 
   const playlist = {
     id: row.id as number,
@@ -1602,6 +1626,6 @@ export function toImagePlayerData(displayViewId: number, row: Partial<PlaylistRo
     repeat: row.repeat ?? RP.none,
     items
   }
-  
-  return {displayViewId, maxCanLoad, playlist}
+
+  return { displayViewId, maxCanLoad, playlist }
 }

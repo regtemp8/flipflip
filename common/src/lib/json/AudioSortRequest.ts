@@ -1,3 +1,3 @@
-import { SortRequest } from "./SortRequest";
+import { SortRequest } from './SortRequest';
 
-export type AudioSortRequest = SortRequest & { playlistId?: number }
+export type AudioSortRequest = SortRequest & { playlistId?: number };

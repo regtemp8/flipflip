@@ -16,7 +16,14 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
-import { getFileName, getFileGroup, urlToPath, WC, Tag, Playlist } from 'flipflip-common'
+import {
+  getFileName,
+  getFileGroup,
+  urlToPath,
+  WC,
+  Tag,
+  Playlist
+} from 'flipflip-common'
 import AudioAlert from './AudioAlert'
 import CaptionProgramPlaylist from './CaptionProgramPlaylist'
 import ChildCallbackHack from './ChildCallbackHack'
@@ -120,7 +127,7 @@ interface ProgressCardProps {
 
 function ProgressCard(props: ProgressCardProps) {
   const { classes } = useStyles()
-  const progress = {total: 0, current: 0, message: ['']}//useAppSelector(selectSourceScraperProgress(props.sceneID))
+  const progress = { total: 0, current: 0, message: [''] } //useAppSelector(selectSourceScraperProgress(props.sceneID))
   if (!progress) return null
 
   const { total, current, message } = progress
@@ -194,7 +201,7 @@ function Player(props: PlayerProps) {
   const [currentAudio, setCurrentAudio] = useState<number>()
 
   const dispatch = useAppDispatch()
-//   const { isWin32, pathSep } = useAppSelector(selectConstants())
+  //   const { isWin32, pathSep } = useAppSelector(selectConstants())
   const sceneID = 0 //useAppSelector(selectPlayerSceneID(props.uuid))
   const nextSceneID = 0
   const mainLoaded = false //useAppSelector(selectPlayerMainLoaded(props.uuid))
@@ -205,7 +212,7 @@ function Player(props: PlayerProps) {
   const audioAlert = undefined //useAppSelector(selectAppConfigDisplaySettingsAudioAlert())
   const startImmediately = false //useAppSelector(selectAppConfigDisplaySettingsStartImmediately())
   const tutorial = '' //useAppSelector(selectAppTutorial())
-  const allTags:Tag[] = [] //useAppSelector(selectPlayerAllTags())
+  const allTags: Tag[] = [] //useAppSelector(selectPlayerAllTags())
   const isAudioScene = false //useAppSelector(selectSceneIsAudioScene(sceneID))
   const isScriptScene = false //useAppSelector(selectSceneIsScriptScene(sceneID))
   const isDownloadScene = false //useAppSelector(selectSceneIsDownloadScene(sceneID))
@@ -221,20 +228,20 @@ function Player(props: PlayerProps) {
   const name = '' //useAppSelector(selectSceneName(sceneID))
   const firstSourceUrl = false //useAppSelector(selectSceneFirstSourceUrl(sceneID))
 
-//   const audioThumbSelector =
-//     currentAudio != null ? selectAudioThumb(currentAudio) : selectUndefined
+  //   const audioThumbSelector =
+  //     currentAudio != null ? selectAudioThumb(currentAudio) : selectUndefined
   const audioThumb = undefined //useAppSelector(audioThumbSelector)
-//   const audioUrlSelector =
-//     currentAudio != null ? selectAudioUrl(currentAudio) : selectUndefined
+  //   const audioUrlSelector =
+  //     currentAudio != null ? selectAudioUrl(currentAudio) : selectUndefined
   const audioUrl = undefined //useAppSelector(audioUrlSelector)
-//   const audioNameSelector =
-//     currentAudio != null ? selectAudioName(currentAudio) : selectUndefined
+  //   const audioNameSelector =
+  //     currentAudio != null ? selectAudioName(currentAudio) : selectUndefined
   const audioName = undefined //useAppSelector(audioNameSelector)
-//   const audioArtistSelector =
-//     currentAudio != null ? selectAudioArtist(currentAudio) : selectUndefined
+  //   const audioArtistSelector =
+  //     currentAudio != null ? selectAudioArtist(currentAudio) : selectUndefined
   const audioArtist = undefined //useAppSelector(audioArtistSelector)
-//   const audioAlbumSelector =
-//     currentAudio != null ? selectAudioAlbum(currentAudio) : selectUndefined
+  //   const audioAlbumSelector =
+  //     currentAudio != null ? selectAudioAlbum(currentAudio) : selectUndefined
   const audioAlbum = undefined //useAppSelector(audioAlbumSelector)
   const canStart = false
   const isDisplayWithOneView = false
@@ -283,40 +290,40 @@ function Player(props: PlayerProps) {
 
   const { uuid, allLoaded, captionScale, getCurrentTimestamp, onLoaded } = props
 
-//   const start = useCallback(
-//     (isMainLoaded: boolean, canStart: boolean, force = false) => {
-//       const isLoaded = !force && isMainLoaded
-//       if (onLoaded && isLoaded) {
-//         onLoaded()
-//       }
+  //   const start = useCallback(
+  //     (isMainLoaded: boolean, canStart: boolean, force = false) => {
+  //       const isLoaded = !force && isMainLoaded
+  //       if (onLoaded && isLoaded) {
+  //         onLoaded()
+  //       }
 
-//       if (
-//         force ||
-//         (canStart && ((isLoaded && allLoaded !== false) || startImmediately))
-//       ) {
-//         dispatch(setPlayerMainLoaded({ uuid, value: true }))
-//         if (!_startTime.current) {
-//           _startTime.current = new Date().getTime()
-//         }
-//       } else if (!isAudioScene && mainLoaded !== isLoaded) {
-//         dispatch(setPlayerMainLoaded({ uuid, value: isLoaded }))
-//       }
-//     },
-//     [
-//       dispatch,
-//       isAudioScene,
-//       allLoaded,
-//       onLoaded,
-//       uuid,
-//       startImmediately,
-//       mainLoaded
-//     ]
-//   )
+  //       if (
+  //         force ||
+  //         (canStart && ((isLoaded && allLoaded !== false) || startImmediately))
+  //       ) {
+  //         dispatch(setPlayerMainLoaded({ uuid, value: true }))
+  //         if (!_startTime.current) {
+  //           _startTime.current = new Date().getTime()
+  //         }
+  //       } else if (!isAudioScene && mainLoaded !== isLoaded) {
+  //         dispatch(setPlayerMainLoaded({ uuid, value: isLoaded }))
+  //       }
+  //     },
+  //     [
+  //       dispatch,
+  //       isAudioScene,
+  //       allLoaded,
+  //       onLoaded,
+  //       uuid,
+  //       startImmediately,
+  //       mainLoaded
+  //     ]
+  //   )
 
-//   const play = useCallback(() => {
-//     setIsPlaying(true)
-//     start(mainLoaded, canStart)
-//   }, [mainLoaded, canStart, start])
+  //   const play = useCallback(() => {
+  //     setIsPlaying(true)
+  //     start(mainLoaded, canStart)
+  //   }, [mainLoaded, canStart, start])
 
   const nextSceneLoop = useCallback(() => {
     if (
@@ -391,11 +398,11 @@ function Player(props: PlayerProps) {
     }
   }, [sceneID, allTags, nextSceneLoop, nextSceneID])
 
-//   useEffect(() => {
-//     if (!isEmpty && mainLoaded) {
-//       play()
-//     }
-//   }, [play, isEmpty, mainLoaded])
+  //   useEffect(() => {
+  //     if (!isEmpty && mainLoaded) {
+  //       play()
+  //     }
+  //   }, [play, isEmpty, mainLoaded])
 
   const onPlaying = (position: number, duration: number) => {
     _currentTimestamp.current = position
@@ -405,30 +412,30 @@ function Player(props: PlayerProps) {
     return _currentTimestamp.current
   }
 
-//   const changeCurrentAudio = (audioID: number) => {
-//     setCurrentAudio(audioID)
-//     if (isAudioScene) {
-//       dispatch(changeAudioRoute({ id: sceneID as number, value: audioID }))
-//     }
-//   }
+  //   const changeCurrentAudio = (audioID: number) => {
+  //     setCurrentAudio(audioID)
+  //     if (isAudioScene) {
+  //       dispatch(changeAudioRoute({ id: sceneID as number, value: audioID }))
+  //     }
+  //   }
 
   const pause = useCallback(() => {
     setIsPlaying(false)
   }, [])
 
-//   const goBack = useCallback(() => {
-//     if (recentPictureGrid) {
-//       setRecentPictureGrid(false)
-//     } else {
-//       if (wakeLock.isSupported && wakeLock.released === false) {
-//         wakeLock.release().catch(() => {})
-//       } else if (!wakeLock.isSupported && !stayAwake.canSleep) {
-//         stayAwake.allowSleeping()
-//       }
+  //   const goBack = useCallback(() => {
+  //     if (recentPictureGrid) {
+  //       setRecentPictureGrid(false)
+  //     } else {
+  //       if (wakeLock.isSupported && wakeLock.released === false) {
+  //         wakeLock.release().catch(() => {})
+  //       } else if (!wakeLock.isSupported && !stayAwake.canSleep) {
+  //         stayAwake.allowSleeping()
+  //       }
 
-//       dispatch(setRouteGoBack())
-//     }
-//   }, [dispatch, recentPictureGrid, stayAwake, wakeLock])
+  //       dispatch(setRouteGoBack())
+  //     }
+  //   }, [dispatch, recentPictureGrid, stayAwake, wakeLock])
 
   const historyBack = useCallback(() => {
     setIsPlaying(false)
@@ -448,17 +455,17 @@ function Player(props: PlayerProps) {
     setHideCursor(true)
   }
 
-//   const navigateTagging = useCallback(
-//     (offset: number) => {
-//       dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: false }))
-//       dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: false }))
-//       dispatch(setPlayerIsEmpty({ uuid: props.uuid, value: false }))
-//       setHistoryOffset(0)
-//       setHistoryPaths([])
-//       dispatch(navigateDisplayedLibrary(offset))
-//     },
-//     [dispatch, props.uuid]
-//   )
+  //   const navigateTagging = useCallback(
+  //     (offset: number) => {
+  //       dispatch(setPlayerFirstImageLoaded({ uuid: props.uuid, value: false }))
+  //       dispatch(setPlayerMainLoaded({ uuid: props.uuid, value: false }))
+  //       dispatch(setPlayerIsEmpty({ uuid: props.uuid, value: false }))
+  //       setHistoryOffset(0)
+  //       setHistoryPaths([])
+  //       dispatch(navigateDisplayedLibrary(offset))
+  //     },
+  //     [dispatch, props.uuid]
+  //   )
 
   const onRecentPictureGrid = useCallback(() => {
     setRecentPictureGrid(true)
@@ -502,96 +509,96 @@ function Player(props: PlayerProps) {
 
   let watermarkStyle: any = {}
   let watermarkText = ''
-//   if (watermark) {
-//     watermarkStyle = {
-//       position: 'absolute',
-//       zIndex: 11,
-//       whiteSpace: 'pre',
-//       fontFamily: watermark.fontFamily,
-//       fontSize: watermark.fontSize,
-//       color: watermark.color
-//     }
-//     switch (watermark.corner) {
-//       case WC.bottomRight:
-//         watermarkStyle.bottom = 5
-//         watermarkStyle.right = 5
-//         watermarkStyle.textAlign = 'right'
-//         break
-//       case WC.bottomLeft:
-//         watermarkStyle.bottom = 5
-//         watermarkStyle.left = 5
-//         watermarkStyle.textAlign = 'left'
-//         break
-//       case WC.topRight:
-//         watermarkStyle.top = 5
-//         watermarkStyle.right = 5
-//         watermarkStyle.textAlign = 'right'
-//         break
-//       case WC.topLeft:
-//         watermarkStyle.top = 5
-//         watermarkStyle.left = 5
-//         watermarkStyle.textAlign = 'left'
-//         break
-//     }
+  //   if (watermark) {
+  //     watermarkStyle = {
+  //       position: 'absolute',
+  //       zIndex: 11,
+  //       whiteSpace: 'pre',
+  //       fontFamily: watermark.fontFamily,
+  //       fontSize: watermark.fontSize,
+  //       color: watermark.color
+  //     }
+  //     switch (watermark.corner) {
+  //       case WC.bottomRight:
+  //         watermarkStyle.bottom = 5
+  //         watermarkStyle.right = 5
+  //         watermarkStyle.textAlign = 'right'
+  //         break
+  //       case WC.bottomLeft:
+  //         watermarkStyle.bottom = 5
+  //         watermarkStyle.left = 5
+  //         watermarkStyle.textAlign = 'left'
+  //         break
+  //       case WC.topRight:
+  //         watermarkStyle.top = 5
+  //         watermarkStyle.right = 5
+  //         watermarkStyle.textAlign = 'right'
+  //         break
+  //       case WC.topLeft:
+  //         watermarkStyle.top = 5
+  //         watermarkStyle.left = 5
+  //         watermarkStyle.textAlign = 'left'
+  //         break
+  //     }
 
-//     watermarkText = watermark.text.replace('{scene_name}', name)
-//     const img = historyPaths[historyPaths.length - 1 + historyOffset]
-//     if (img) {
-//       const source = img.getAttribute('source') as string
-//       watermarkText = watermarkText.replace('{source_url}', source)
+  //     watermarkText = watermark.text.replace('{scene_name}', name)
+  //     const img = historyPaths[historyPaths.length - 1 + historyOffset]
+  //     if (img) {
+  //       const source = img.getAttribute('source') as string
+  //       watermarkText = watermarkText.replace('{source_url}', source)
 
-//       const fileGroup = getFileGroup(source, pathSep) ?? ''
-//       watermarkText = watermarkText.replace('{source_name}', fileGroup)
-//       if (img.hasAttribute('post')) {
-//         const post = img.getAttribute('post') as string
-//         watermarkText = watermarkText.replace('{post_url}', post)
-//       } else {
-//         watermarkText = watermarkText.replace(/\{post_url\}\s*/g, '')
-//       }
-//       watermarkText = watermarkText.replace(
-//         '{file_url}',
-//         img.src.startsWith('file') ? urlToPath(img.src, isWin32) : img.src
-//       )
-//       watermarkText = watermarkText.replace(
-//         '{file_name}',
-//         decodeURIComponent(getFileName(img.src, pathSep))
-//       )
-//     } else {
-//       watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
-//     }
-//     if (currentAudio) {
-//       watermarkText = watermarkText.replace('{audio_url}', audioUrl as string)
-//       watermarkText = watermarkText.replace(
-//         '{audio_name}',
-//         getFileName(audioUrl as string, pathSep)
-//       )
-//       if (audioName) {
-//         watermarkText = watermarkText.replace('{audio_title}', audioName)
-//       } else {
-//         watermarkText = watermarkText.replace(/\{audio_title\}\s*/g, '')
-//       }
-//       if (audioArtist) {
-//         watermarkText = watermarkText.replace('{audio_artist}', audioArtist)
-//       } else {
-//         watermarkText = watermarkText.replace(/\{audio_artist\}\s*/g, '')
-//       }
-//       if (audioAlbum) {
-//         watermarkText = watermarkText.replace('{audio_album}', audioAlbum)
-//       } else {
-//         watermarkText = watermarkText.replace(/\{audio_album\}\s*/g, '')
-//       }
-//     } else {
-//       watermarkText = watermarkText.replace(/\s*\{audio_url\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{audio_name\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{audio_title\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{audio_artist\}\s*/g, '')
-//       watermarkText = watermarkText.replace(/\s*\{audio_album\}\s*/g, '')
-//     }
-//   }
+  //       const fileGroup = getFileGroup(source, pathSep) ?? ''
+  //       watermarkText = watermarkText.replace('{source_name}', fileGroup)
+  //       if (img.hasAttribute('post')) {
+  //         const post = img.getAttribute('post') as string
+  //         watermarkText = watermarkText.replace('{post_url}', post)
+  //       } else {
+  //         watermarkText = watermarkText.replace(/\{post_url\}\s*/g, '')
+  //       }
+  //       watermarkText = watermarkText.replace(
+  //         '{file_url}',
+  //         img.src.startsWith('file') ? urlToPath(img.src, isWin32) : img.src
+  //       )
+  //       watermarkText = watermarkText.replace(
+  //         '{file_name}',
+  //         decodeURIComponent(getFileName(img.src, pathSep))
+  //       )
+  //     } else {
+  //       watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
+  //     }
+  //     if (currentAudio) {
+  //       watermarkText = watermarkText.replace('{audio_url}', audioUrl as string)
+  //       watermarkText = watermarkText.replace(
+  //         '{audio_name}',
+  //         getFileName(audioUrl as string, pathSep)
+  //       )
+  //       if (audioName) {
+  //         watermarkText = watermarkText.replace('{audio_title}', audioName)
+  //       } else {
+  //         watermarkText = watermarkText.replace(/\{audio_title\}\s*/g, '')
+  //       }
+  //       if (audioArtist) {
+  //         watermarkText = watermarkText.replace('{audio_artist}', audioArtist)
+  //       } else {
+  //         watermarkText = watermarkText.replace(/\{audio_artist\}\s*/g, '')
+  //       }
+  //       if (audioAlbum) {
+  //         watermarkText = watermarkText.replace('{audio_album}', audioAlbum)
+  //       } else {
+  //         watermarkText = watermarkText.replace(/\{audio_album\}\s*/g, '')
+  //       }
+  //     } else {
+  //       watermarkText = watermarkText.replace(/\s*\{audio_url\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{audio_name\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{audio_title\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{audio_artist\}\s*/g, '')
+  //       watermarkText = watermarkText.replace(/\s*\{audio_album\}\s*/g, '')
+  //     }
+  //   }
 
   const { classes } = useStyles()
   return (
@@ -620,7 +627,9 @@ function Player(props: PlayerProps) {
       {!hasStarted && !isEmpty && !isDownloadScene && (
         <ProgressCard
           sceneID={sceneID as number}
-          start={/*canStart ? () => start(mainLoaded, canStart, true) :*/ undefined}
+          start={
+            /*canStart ? () => start(mainLoaded, canStart, true) :*/ undefined
+          }
         />
       )}
       {isEmpty && (
@@ -664,14 +673,14 @@ function Player(props: PlayerProps) {
           mainVideo={mainVideo}
           sceneID={sceneID}
           title={''}
-        //     allTags
-        //       ? isAudioScene
-        //         ? currentAudio
-        //           ? (audioName as string)
-        //           : 'Loading...'
-        //         : (firstSourceUrl as string)
-        //       : name
-        //   }
+          //     allTags
+          //       ? isAudioScene
+          //         ? currentAudio
+          //           ? (audioName as string)
+          //           : 'Loading...'
+          //         : (firstSourceUrl as string)
+          //       : name
+          //   }
           recentPictureGrid={recentPictureGrid}
           persistAudio={audioEnabled && persistAudio}
           persistText={textEnabled && persistText}

@@ -1,5 +1,5 @@
-import { findDisplayViewById } from "../db/DisplayViewRepository"
-import { toDisplayView } from "../db/mappers"
+import { findDisplayViewById } from '../db/DisplayViewRepository'
+import { toDisplayView } from '../db/mappers'
 
 class DisplayViewService {
   private static instance: DisplayViewService

@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto"
-import Player from "./Player"
-import sourceScrapers from "../scraper/SourceScraperService"
-import { User } from "../db/types/generated"
+import { randomUUID } from 'crypto'
+import Player from './Player'
+import sourceScrapers from '../scraper/SourceScraperService'
+import { User } from '../db/types/generated'
 
 class PlayerService {
   private static instance: PlayerService
@@ -30,13 +30,13 @@ class PlayerService {
 
   public stop(playerId: string) {
     const player = this.players.get(playerId)
-    if(player == null) {
-        return
+    if (player == null) {
+      return
     }
 
     player.stop()
     this.players.delete(playerId)
-    if(this.players.size === 0) {
+    if (this.players.size === 0) {
       sourceScrapers().clear()
     }
   }

@@ -44,59 +44,55 @@ export interface PictureGridProps {
 function PictureGrid(props: PictureGridProps) {
   const dispatch = useAppDispatch()
   const maxPictures = 0 //useAppSelector(selectAppConfigDisplaySettingsMaxInHistory())
-//   const { masonryDefaultHeight, masonryDefaultColumns } = useAppSelector(selectConstants())
+  //   const { masonryDefaultHeight, masonryDefaultColumns } = useAppSelector(selectConstants())
 
   const maxInMemory = 0 //useAppSelector(selectAppConfigDisplaySettingsMaxInMemory())
 
-//   useEffect(() => {
-//     for (let i = 0; i < maxPictures; i++) {
-//       dispatch(
-//         setPlayerState({
-//           uuid: 'picture-grid-img-' + i,
-//           value: {
-//             playlist: {
-//               playlistID: -1,
-//               loader: {
-//                 index: 0,
-//                 timeToNextScene: 0
-//               },
-//               player: {
-//                 index: 0,
-//                 timeToNextScene: 0
-//               },
-//               items: [],
-//               repeat: 0
-//             },
-//             firstImageLoaded: true,
-//             mainLoaded: true,
-//             isEmpty: false,
-//             hasStarted: true,
-//             loader: {
-//               iframeCount: 0,
-//               onlyIframes: false,
-//               loadingCount: 0,
-//               readyToLoad: [...Array(maxInMemory).keys()],
-//               shownIndex: -1,
-//               imageViews: [],
-//               displayIndex: 0,
-//               zIndex: 0
-//             }
-//           }
-//         })
-//       )
-//     }
-//   }, [maxPictures, maxInMemory, dispatch])
+  //   useEffect(() => {
+  //     for (let i = 0; i < maxPictures; i++) {
+  //       dispatch(
+  //         setPlayerState({
+  //           uuid: 'picture-grid-img-' + i,
+  //           value: {
+  //             playlist: {
+  //               playlistID: -1,
+  //               loader: {
+  //                 index: 0,
+  //                 timeToNextScene: 0
+  //               },
+  //               player: {
+  //                 index: 0,
+  //                 timeToNextScene: 0
+  //               },
+  //               items: [],
+  //               repeat: 0
+  //             },
+  //             firstImageLoaded: true,
+  //             mainLoaded: true,
+  //             isEmpty: false,
+  //             hasStarted: true,
+  //             loader: {
+  //               iframeCount: 0,
+  //               onlyIframes: false,
+  //               loadingCount: 0,
+  //               readyToLoad: [...Array(maxInMemory).keys()],
+  //               shownIndex: -1,
+  //               imageViews: [],
+  //               displayIndex: 0,
+  //               zIndex: 0
+  //             }
+  //           }
+  //         })
+  //       )
+  //     }
+  //   }, [maxPictures, maxInMemory, dispatch])
 
   const { classes } = useStyles()
   const pictures = Array.from(props.pictures).reverse()
   return (
     <div className={classes.content}>
       <div className={classes.masonry}>
-        <Masonry
-          columns={[1, 2, 3, 4]}
-          spacing={1}
-          defaultSpacing={1}
-        >
+        <Masonry columns={[1, 2, 3, 4]} spacing={1} defaultSpacing={1}>
           {pictures.map((p, x) => (
             <p>TODO build picture grid</p>
           ))}

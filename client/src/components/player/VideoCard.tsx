@@ -65,12 +65,14 @@ export default function VideoCard(props: VideoCardProps) {
               nextTrack={() => {
                 props.imagePlayerAdvanceHacks[0][0].fire()
               }}
-              onChangeSpeed={(speed: number) =>{}
+              onChangeSpeed={
+                (speed: number) => {}
                 // dispatch(
                 //   setSceneVideoSpeed({ id: props.sceneID, value: speed })
                 // )
               }
-              onChangeVolume={(volume: number) =>{}
+              onChangeVolume={
+                (volume: number) => {}
                 // dispatch(
                 //   setSceneVideoVolume({ id: props.sceneID, value: volume })
                 // )

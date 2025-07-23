@@ -1,4 +1,4 @@
-import fscreen from "fscreen"
+import fscreen from 'fscreen'
 
 function openFullScreen() {
   if (fscreen.fullscreenEnabled) {

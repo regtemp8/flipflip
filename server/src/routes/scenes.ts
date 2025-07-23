@@ -127,7 +127,7 @@ router.post('/:id/play', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = await createTempDisplayForScene(sceneId, userId)
   const playerId = players().start(id, req.user as User)
-  const body: ValueResponse = {value: playerId}
+  const body: ValueResponse = { value: playerId }
   res.status(200).send(body)
 })
 

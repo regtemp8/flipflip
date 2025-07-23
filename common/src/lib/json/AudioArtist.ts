@@ -1,4 +1,4 @@
-export type AudioArtist = { 
-    name: string;
-    thumb?: string;
-  };
+export type AudioArtist = {
+  name: string;
+  thumb?: string;
+};

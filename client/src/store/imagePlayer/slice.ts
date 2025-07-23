@@ -59,7 +59,10 @@ export const imagePlayerSlice = createSlice({
     setImagePlayerHasStarted: (state, action: PayloadAction<string[]>) => {
       action.payload.forEach((uuid) => (state[uuid].hasStarted = true))
     },
-    setImagePlayerIsEmpty: (state, action: PayloadAction<ImagePlayerUpdate<boolean>>) => {
+    setImagePlayerIsEmpty: (
+      state,
+      action: PayloadAction<ImagePlayerUpdate<boolean>>
+    ) => {
       state[action.payload.uuid].isEmpty = action.payload.value
     },
     setImagePlayerMainLoaded: (
@@ -153,18 +156,27 @@ export const imagePlayerSlice = createSlice({
       const { loader } = state[uuid]
       loader.imageViews[value.index] = value.view
     },
-    setImagePlayerIncrementDisplayIndex: (state, action: PayloadAction<string>) => {
+    setImagePlayerIncrementDisplayIndex: (
+      state,
+      action: PayloadAction<string>
+    ) => {
       const uuid = action.payload
       const { loader } = state[uuid]
       loader.displayIndex++
     },
-    setImagePlayerIncrementIFrameCount: (state, action: PayloadAction<string>) => {
+    setImagePlayerIncrementIFrameCount: (
+      state,
+      action: PayloadAction<string>
+    ) => {
       const uuid = action.payload
       const { loader } = state[uuid]
       loader.iframeCount++
     },
-    setImagePlayerIFrameCount: (state, action: PayloadAction<ImagePlayerUpdate<number>>) => {
-      const {uuid, value} = action.payload
+    setImagePlayerIFrameCount: (
+      state,
+      action: PayloadAction<ImagePlayerUpdate<number>>
+    ) => {
+      const { uuid, value } = action.payload
       state[uuid].loader.iframeCount = value
     },
     setImagePlayerDecrementLoaderTimeToNextScene: (
@@ -192,44 +204,45 @@ export const imagePlayerSlice = createSlice({
       // TODO still needed?
     },
     setImagePlayersStarted: (state) => {
-      Object.values(state).forEach((value) => value.hasStarted = true)
+      Object.values(state).forEach((value) => (value.hasStarted = true))
     },
     setImagePlayerIsLoading: (
       state,
       action: PayloadAction<ImagePlayerUpdate<boolean>>
     ) => {
-      const {uuid, value} = action.payload
+      const { uuid, value } = action.payload
       state[uuid].isLoading = value
     }
   },
   extraReducers: (builder) => {
-    builder.addMatcher(flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled, (state, action) => {
-      const data = action.payload
-      if(data == null) {
-        return
-      }
+    builder.addMatcher(
+      flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled,
+      (state, action) => {
+        const data = action.payload
+        if (data == null) {
+          return
+        }
 
-      const viewPlayerID = action.meta.arg.originalArgs      
-      state[viewPlayerID] = {
-        firstImageLoaded: false,
-        mainLoaded: false,
-        isLoading: false,
-        currentSceneID: data.sceneId,
-        loader: {
-          zIndex: 0,
-          displayIndex: 0,
-          loadingCount: 0,
-          iframeCount: 0,
-          maxCanLoadAtOnce: data.maxCanLoadAtOnce,
-          readyToLoad: [
-            ...Array(data.maxCanLoad).keys()
-          ],
-          imageViews: []
-        },
-        isEmpty: false,
-        hasStarted: false
+        const viewPlayerID = action.meta.arg.originalArgs
+        state[viewPlayerID] = {
+          firstImageLoaded: false,
+          mainLoaded: false,
+          isLoading: false,
+          currentSceneID: data.sceneId,
+          loader: {
+            zIndex: 0,
+            displayIndex: 0,
+            loadingCount: 0,
+            iframeCount: 0,
+            maxCanLoadAtOnce: data.maxCanLoadAtOnce,
+            readyToLoad: [...Array(data.maxCanLoad).keys()],
+            imageViews: []
+          },
+          isEmpty: false,
+          hasStarted: false
+        }
       }
-    })
+    )
   }
 })
 

@@ -1,19 +1,70 @@
 import fs from 'fs'
-import { BT, getRandomColor, getSourceType, isImage, isVideo, OF, OT, SOF, ST, WF, ContentSource, Scene, HTF, VTF, STF, TF, IT, IF, SL, VO, GO, SC, ImageViewData, ContentData, TransformData, ViewData, EffectsData, ContentType, EasingParams, VideoClipData, BackgroundStyle, StrobeData, ZoomMoveData, SlideData, CrossFadeData, FadeInOutLoopData, PanningLoopData, PanningData, ViewVideoData } from "flipflip-common"
-import DurationCalculator from "./DurationCalculator"
-import imageSize from "image-size"
-import sourceScrapers from "../scraper/SourceScraperService"
-import { flatten, getRandomBoolean, getRandomFloat, getRandomInteger, getRandomListItem, getServerHost, getServerPort } from "../utils"
-import Logger from "../logging/Logger"
+import {
+  BT,
+  getRandomColor,
+  getSourceType,
+  isImage,
+  isVideo,
+  OF,
+  OT,
+  SOF,
+  ST,
+  WF,
+  ContentSource,
+  Scene,
+  HTF,
+  VTF,
+  STF,
+  TF,
+  IT,
+  IF,
+  SL,
+  VO,
+  GO,
+  SC,
+  ImageViewData,
+  ContentData,
+  TransformData,
+  ViewData,
+  EffectsData,
+  ContentType,
+  EasingParams,
+  VideoClipData,
+  BackgroundStyle,
+  StrobeData,
+  ZoomMoveData,
+  SlideData,
+  CrossFadeData,
+  FadeInOutLoopData,
+  PanningLoopData,
+  PanningData,
+  ViewVideoData
+} from 'flipflip-common'
+import DurationCalculator from './DurationCalculator'
+import imageSize from 'image-size'
+import sourceScrapers from '../scraper/SourceScraperService'
+import {
+  flatten,
+  getRandomBoolean,
+  getRandomFloat,
+  getRandomInteger,
+  getRandomListItem,
+  getServerHost,
+  getServerPort
+} from '../utils'
+import Logger from '../logging/Logger'
 import gifInfo from 'gif-info'
 import ffprobe from 'ffprobe'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
-import { toContentSource, toScene } from "../db/mappers"
-import { findSceneById } from "../db/SceneRepository"
-import { Scene as SceneRow, User } from "../db/types/generated"
-import { findContentSources, findContentSourceTagIds } from "../db/ContentSourceRepository"
-import { findDisplaySettings } from "../db/DisplaySettingsRepository"
-import { toBoolean } from "../db/utils"
+import { toContentSource, toScene } from '../db/mappers'
+import { findSceneById } from '../db/SceneRepository'
+import { Scene as SceneRow, User } from '../db/types/generated'
+import {
+  findContentSources,
+  findContentSourceTagIds
+} from '../db/ContentSourceRepository'
+import { findDisplaySettings } from '../db/DisplaySettingsRepository'
+import { toBoolean } from '../db/utils'
 import fileRegistry from '../routes/FileRegistry'
 import proxy, { ProxyRequest } from '../routes/ProxyService'
 
@@ -125,17 +176,24 @@ export default class ContentLoader {
 
   private displayIndex?: number
 
-  public static async create(sceneId: number, user: User): Promise<ContentLoader> {
-    const scene = toScene(await findSceneById(sceneId) as SceneRow)
+  public static async create(
+    sceneId: number,
+    user: User
+  ): Promise<ContentLoader> {
+    const scene = toScene((await findSceneById(sceneId)) as SceneRow)
 
     const sources: ContentSource[] = []
     const sourceRows = await findContentSources(sceneId)
     for (const row of sourceRows) {
-      const tags = await findContentSourceTagIds(row.id as number, user.id as number)
+      const tags = await findContentSourceTagIds(
+        row.id as number,
+        user.id as number
+      )
       sources.push(toContentSource(row, tags))
     }
 
-    const { easingControls, minImageSize, minVideoSize } = await findDisplaySettings(user)
+    const { easingControls, minImageSize, minVideoSize } =
+      await findDisplaySettings(user)
 
     const loadCriteria = {
       minImageSize,
@@ -149,10 +207,22 @@ export default class ContentLoader {
       videoOrientation: scene.videoOrientation
     }
 
-    return new ContentLoader(scene, sources, toBoolean(easingControls), loadCriteria, transformCriteria)
+    return new ContentLoader(
+      scene,
+      sources,
+      toBoolean(easingControls),
+      loadCriteria,
+      transformCriteria
+    )
   }
 
-  private constructor(scene: Scene, sources: ContentSource[], easingControls: boolean, loadCriteria: LoadCriteria, transformCriteria: TransformCriteria) {
+  private constructor(
+    scene: Scene,
+    sources: ContentSource[],
+    easingControls: boolean,
+    loadCriteria: LoadCriteria,
+    transformCriteria: TransformCriteria
+  ) {
     this.scene = scene
     this.sources = sources
     this.loadCriteria = loadCriteria
@@ -307,33 +377,39 @@ export default class ContentLoader {
 
   private async getImageBuffer(imageUrl: string) {
     const url = new URL(imageUrl)
-    const isLocal = url.hostname === getServerHost() && url.port === getServerPort().toString()
+    const isLocal =
+      url.hostname === getServerHost() &&
+      url.port === getServerPort().toString()
 
     const fileRegistryPath = '/fs/file/registry/'
-    if(isLocal && url.pathname.startsWith(fileRegistryPath)) {
-        logger.info('Get local image: {url}', {url})
-        const path = fileRegistry().get(url.pathname.substring(fileRegistryPath.length))
-        return await fs.promises.readFile(path as string)
+    if (isLocal && url.pathname.startsWith(fileRegistryPath)) {
+      logger.info('Get local image: {url}', { url })
+      const path = fileRegistry().get(
+        url.pathname.substring(fileRegistryPath.length)
+      )
+      return await fs.promises.readFile(path as string)
     }
 
     const proxyPath = '/proxy/'
     let request: ProxyRequest
-    if(isLocal && url.pathname.startsWith(proxyPath)) {
-        logger.info('Get proxied image: {url}', {url})
-        const proxyRequest = proxy().getRequest(url.pathname.substring(proxyPath.length))
-        if(proxyRequest != null) {
-          request = proxyRequest
-        } else {
-          throw new Error('Failed to get proxy request')
-        }
+    if (isLocal && url.pathname.startsWith(proxyPath)) {
+      logger.info('Get proxied image: {url}', { url })
+      const proxyRequest = proxy().getRequest(
+        url.pathname.substring(proxyPath.length)
+      )
+      if (proxyRequest != null) {
+        request = proxyRequest
+      } else {
+        throw new Error('Failed to get proxy request')
+      }
     } else {
-      request = {url: imageUrl}
+      request = { url: imageUrl }
     }
 
-    logger.info('Fetch image: {url}', {url: request.url})
-    const response = await fetch(request.url, {headers: request.headers})
+    logger.info('Fetch image: {url}', { url: request.url })
+    const response = await fetch(request.url, { headers: request.headers })
     const buffer = await response.arrayBuffer()
-    return Buffer.from(buffer)    
+    return Buffer.from(buffer)
   }
 
   public async getData(): Promise<ContentData | undefined> {
@@ -405,8 +481,12 @@ export default class ContentLoader {
       let videoStream: ffprobe.FFProbeStream | undefined
       try {
         // TODO convert url, if proxied get original, if file registry get local path, else use url
-        const info = await ffprobe(clip?.url ?? url, { path: ffprobeInstaller.path })
-        videoStream = info.streams.find((stream) => stream.codec_type == 'video')
+        const info = await ffprobe(clip?.url ?? url, {
+          path: ffprobeInstaller.path
+        })
+        videoStream = info.streams.find(
+          (stream) => stream.codec_type == 'video'
+        )
         if (videoStream == null) {
           throw new Error('Video stream not found')
         }
@@ -435,7 +515,10 @@ export default class ContentLoader {
   private proxyNimjaURL(url: string) {
     const host = getServerHost()
     const port = getServerPort()
-    return url.replace('https://hypno.nimja.com', `http://${host}:${port}/proxy/nimja`)
+    return url.replace(
+      'https://hypno.nimja.com',
+      `http://${host}:${port}/proxy/nimja`
+    )
   }
 
   private getURL() {
@@ -482,7 +565,9 @@ export default class ContentLoader {
           if (this.urlState.nextIndex === -1 || this.urlState.sourceComplete) {
             if (forceAllSource) {
               // Filter the available urls to those not played yet
-              keys = keys.filter((s) => !this.urlState.loadedSources.includes(s))
+              keys = keys.filter(
+                (s) => !this.urlState.loadedSources.includes(s)
+              )
               // If there are no remaining urls for this source
               if (!(keys && keys.length > 0)) {
                 this.urlState.loadedSources = []
@@ -528,7 +613,9 @@ export default class ContentLoader {
       // If sorting randomly and forcing all
       if (orderFunction === OF.random && (forceAll || fullSource)) {
         // Filter the available urls to those not played yet
-        collection = collection.filter((u) => !this.urlState.loadedURLs.includes(u))
+        collection = collection.filter(
+          (u) => !this.urlState.loadedURLs.includes(u)
+        )
         // If there are no remaining urls for this source
         if (collection.length === 0) {
           if (fullSource) {
@@ -640,10 +727,7 @@ export default class ContentLoader {
     }
   }
 
-  public getViewData(
-    data: ContentData,
-    bpm?: number
-  ) {
+  public getViewData(data: ContentData, bpm?: number) {
     const timeToNextFrame = this.timeToNextFrameDuration.calc(0, bpm)
     const backgroundStyle = this.getBackgroundStyle()
     const view: ViewData = {
@@ -742,7 +826,8 @@ export default class ContentLoader {
   }
 
   private calcVideoSpeed() {
-    const { videoRandomSpeed, videoSpeed, videoSpeedMin, videoSpeedMax } = this.scene
+    const { videoRandomSpeed, videoSpeed, videoSpeedMin, videoSpeedMax } =
+      this.scene
     const speed = videoRandomSpeed
       ? getRandomFloat(videoSpeedMin, videoSpeedMax, 2)
       : videoSpeed
@@ -757,7 +842,10 @@ export default class ContentLoader {
       case VO.part:
         return this.scene.videoTimingConstant
       case VO.partr:
-        return getRandomInteger(this.scene.videoTimingMin, this.scene.videoTimingMax)
+        return getRandomInteger(
+          this.scene.videoTimingMin,
+          this.scene.videoTimingMax
+        )
       case VO.atLeast:
         const partDuration = end - start
         const loops = Math.ceil(this.scene.videoTimingConstant / partDuration)
@@ -774,7 +862,10 @@ export default class ContentLoader {
       case GO.part:
         return this.scene.gifTimingConstant
       case GO.partr:
-        return getRandomInteger(this.scene.gifTimingMin, this.scene.gifTimingMax)
+        return getRandomInteger(
+          this.scene.gifTimingMin,
+          this.scene.gifTimingMax
+        )
       case GO.atLeast:
         const loops = Math.ceil(this.scene.gifTimingConstant / duration)
         return duration * loops
@@ -783,42 +874,19 @@ export default class ContentLoader {
     }
   }
 
-  public getEffects(
-    data: ContentData,
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  public getEffects(data: ContentData, timeToNextFrame: number, bpm?: number) {
     const effects: EffectsData = {}
     effects.strobe = this.getStrobeEffect(timeToNextFrame, bpm)
-    effects.zoomMove = this.getZoomMoveEffect(
-      timeToNextFrame,
-      bpm
-    )
-    effects.slide = this.getSlideEffect(
-      timeToNextFrame,
-      bpm
-    )
-    effects.crossFade = this.getCrossFadeEffect(
-      timeToNextFrame,
-      bpm
-    )
-    effects.fadeInOut = this.getFadeInOutEffect(
-      timeToNextFrame,
-      bpm
-    )
-    effects.panning = this.getPanningEffect(
-      data,
-      timeToNextFrame,
-      bpm
-    )
+    effects.zoomMove = this.getZoomMoveEffect(timeToNextFrame, bpm)
+    effects.slide = this.getSlideEffect(timeToNextFrame, bpm)
+    effects.crossFade = this.getCrossFadeEffect(timeToNextFrame, bpm)
+    effects.fadeInOut = this.getFadeInOutEffect(timeToNextFrame, bpm)
+    effects.panning = this.getPanningEffect(data, timeToNextFrame, bpm)
 
     return effects
   }
 
-  private getStrobeEffect(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private getStrobeEffect(timeToNextFrame: number, bpm?: number) {
     if (!this.scene.strobe) {
       return undefined
     }
@@ -873,10 +941,7 @@ export default class ContentLoader {
     }
   }
 
-  private getZoomMoveEffect(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private getZoomMoveEffect(timeToNextFrame: number, bpm?: number) {
     if (
       this.scene.horizTransType === HTF.none &&
       this.scene.vertTransType === VTF.none &&
@@ -929,8 +994,16 @@ export default class ContentLoader {
     let scaleTo = 1
     if (this.scene.zoom) {
       if (this.scene.zoomRandom) {
-        scaleFrom = getRandomFloat(this.scene.zoomStartMin, this.scene.zoomStartMax, 2)
-        scaleTo = getRandomFloat(this.scene.zoomEndMin, this.scene.zoomEndMax, 2)
+        scaleFrom = getRandomFloat(
+          this.scene.zoomStartMin,
+          this.scene.zoomStartMax,
+          2
+        )
+        scaleTo = getRandomFloat(
+          this.scene.zoomEndMin,
+          this.scene.zoomEndMax,
+          2
+        )
       } else {
         scaleFrom = this.scene.zoomStart
         scaleTo = this.scene.zoomEnd
@@ -950,10 +1023,7 @@ export default class ContentLoader {
     return zoomMove
   }
 
-  private getSlideEffect(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private getSlideEffect(timeToNextFrame: number, bpm?: number) {
     if (!this.scene.slide) {
       return undefined
     }
@@ -1002,10 +1072,7 @@ export default class ContentLoader {
     return slide
   }
 
-  private getCrossFadeEffect(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private getCrossFadeEffect(timeToNextFrame: number, bpm?: number) {
     if (!this.scene.crossFade) {
       return undefined
     }
@@ -1015,10 +1082,7 @@ export default class ContentLoader {
     return crossFade
   }
 
-  private getFadeInOutEffect(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private getFadeInOutEffect(timeToNextFrame: number, bpm?: number) {
     if (!this.scene.fadeInOut) {
       return undefined
     }
@@ -1054,18 +1118,12 @@ export default class ContentLoader {
     let prevPanHorizTransType: string | undefined
     let prevPanVertTransType: string | undefined
     const start: PanningLoopData = { duration: 0 }
-    start.translateX = this.getPanningTranslateX(
-      data,
-      prevPanHorizTransType
-    )
+    start.translateX = this.getPanningTranslateX(data, prevPanHorizTransType)
     if (start.translateX != null) {
       prevPanHorizTransType = this.getHorizTransType(start.translateX.amount)
     }
 
-    start.translateY = this.getPanningTranslateY(
-      data,
-      prevPanVertTransType
-    )
+    start.translateY = this.getPanningTranslateY(data, prevPanVertTransType)
     if (start.translateY != null) {
       prevPanVertTransType = this.getVertTransType(start.translateY.amount)
     }
@@ -1073,18 +1131,12 @@ export default class ContentLoader {
     let loops: PanningLoopData[] = []
     let totalDuration = this.calcTotalDuration(timeToNextFrame, bpm)
     while (totalDuration > 0) {
-      const translateX = this.getPanningTranslateX(
-        data,
-        prevPanHorizTransType
-      )
+      const translateX = this.getPanningTranslateX(data, prevPanHorizTransType)
       if (translateX != null) {
         prevPanHorizTransType = this.getHorizTransType(translateX.amount)
       }
 
-      const translateY = this.getPanningTranslateY(
-        data,
-        prevPanVertTransType
-      )
+      const translateY = this.getPanningTranslateY(data, prevPanVertTransType)
       if (translateY != null) {
         prevPanVertTransType = this.getVertTransType(translateY.amount)
       }
@@ -1094,14 +1146,16 @@ export default class ContentLoader {
       totalDuration -= duration
     }
 
-    const panning: PanningData = { start, loops, startEasing: this.panningStartEasing, endEasing: this.panningEndEasing }
+    const panning: PanningData = {
+      start,
+      loops,
+      startEasing: this.panningStartEasing,
+      endEasing: this.panningEndEasing
+    }
     return panning
   }
 
-  private calcTotalDuration(
-    timeToNextFrame: number,
-    bpm?: number
-  ) {
+  private calcTotalDuration(timeToNextFrame: number, bpm?: number) {
     let maxSlideDuration = 0
     let maxCrossFadeDuration = 0
     if (this.scene.slide) {
@@ -1117,7 +1171,10 @@ export default class ContentLoader {
         maxCrossFadeDuration = this.scene.fadeDurationMax
       } else {
         this.maxCrossFadeDuration.reset()
-        maxCrossFadeDuration = this.maxCrossFadeDuration.calc(timeToNextFrame, bpm)
+        maxCrossFadeDuration = this.maxCrossFadeDuration.calc(
+          timeToNextFrame,
+          bpm
+        )
       }
     }
 
@@ -1132,10 +1189,7 @@ export default class ContentLoader {
     return amount < 0 ? VTF.down : VTF.up
   }
 
-  private getPanningTranslateX(
-    data: ContentData,
-    prevTransType?: string
-  ) {
+  private getPanningTranslateX(data: ContentData, prevTransType?: string) {
     if (this.scene.panHorizTransType === HTF.none) {
       return undefined
     }
@@ -1173,9 +1227,9 @@ export default class ContentLoader {
     } else {
       horizTransLevel = this.scene.panHorizTransRandom
         ? getRandomInteger(
-          this.scene.panHorizTransLevelMin,
-          this.scene.panHorizTransLevelMax
-        )
+            this.scene.panHorizTransLevelMin,
+            this.scene.panHorizTransLevelMax
+          )
         : this.scene.panHorizTransLevel
     }
     if (panHorizTransType === HTF.right) {
@@ -1186,10 +1240,7 @@ export default class ContentLoader {
     return { amount: horizTransLevel, unit: horizSuffix }
   }
 
-  private getPanningTranslateY(
-    data: ContentData,
-    prevTransType?: string
-  ) {
+  private getPanningTranslateY(data: ContentData, prevTransType?: string) {
     if (this.scene.panVertTransType === VTF.none) {
       return undefined
     }
@@ -1227,9 +1278,9 @@ export default class ContentLoader {
     } else {
       vertTransLevel = this.scene.panVertTransRandom
         ? getRandomInteger(
-          this.scene.panVertTransLevelMin,
-          this.scene.panVertTransLevelMax
-        )
+            this.scene.panVertTransLevelMin,
+            this.scene.panVertTransLevelMax
+          )
         : this.scene.panVertTransLevel
     }
 
@@ -1276,7 +1327,7 @@ export default class ContentLoader {
     }
 
     const displayIndex = this.displayIndex
-    if(this.displayIndex != null) {
+    if (this.displayIndex != null) {
       this.displayIndex++
     }
 
