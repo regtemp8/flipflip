@@ -13,8 +13,9 @@ import {
 import { Backup } from './db/types/generated'
 import { BackupSettings } from './db/types/BackupSettings'
 import { getBackupsDir } from './utils'
-import logger from './logger'
+import Logger from './logging/Logger'
 
+const logger = Logger.create('SchedulerService')
 export class SchedulerService {
   private static instance: SchedulerService
 

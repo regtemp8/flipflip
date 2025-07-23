@@ -1,7 +1,8 @@
 import { Kysely } from 'kysely'
 import { DB } from '../../types/generated'
-import logger from '../../../logger'
+import Logger from '../../../logging/Logger'
 
+const logger = Logger.create('DB Migration - initial-schema')
 const userTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create user table')
   return await trx.schema
@@ -339,7 +340,7 @@ const contentSourceBlacklistItemTable = async (trx: Kysely<DB>) => {
     .addColumn('contentSourceId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
     .addForeignKeyConstraint(
-      'FK_contentSourceClip_contentSource_contentSourceId',
+      'FK_contentSourceBlacklistItem_contentSource_contentSourceId',
       ['contentSourceId'],
       'contentSource',
       ['id']

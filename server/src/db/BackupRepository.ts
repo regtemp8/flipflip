@@ -1,7 +1,8 @@
-import logger from '../logger'
+import Logger from '../logging/Logger'
 import db from './database'
 import { Moment } from 'moment'
 
+const logger = Logger.create('BackupRepository')
 export async function createBackup(
   fileName: string,
   createdAt: Moment

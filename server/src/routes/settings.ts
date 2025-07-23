@@ -35,8 +35,9 @@ import {
 } from '../db/mappers'
 import { toNumber } from '../db/utils'
 import { WC } from 'flipflip-common'
-import logger from '../logger'
+import Logger from '../logging/Logger'
 
+const logger = Logger.create('settings')
 const router = express.Router()
 router.get('/theme', async (req, res) => {
   const settings = toThemeSettings(await findTheme(req.user as User))

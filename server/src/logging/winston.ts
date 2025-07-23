@@ -1,5 +1,5 @@
 import winston from 'winston'
-import { getLogsDir } from './utils'
+import { getLogsDir } from '../utils'
 import fastRedact from 'fast-redact'
 import format from 'string-template'
 import { inspect } from 'util'
@@ -62,7 +62,7 @@ const logFormat = (redacted?: boolean) => {
     splatf({ redacted }),
     timestamp(),
     align(),
-    printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
+    printf((info) => `${info.timestamp} ${info.level.toUpperCase().padStart(5, ' ')} --- ${info.className}: ${info.message}`)
   )
 }
 

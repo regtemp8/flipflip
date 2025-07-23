@@ -10,7 +10,7 @@ import {
 } from 'kysely'
 import { Backup, DB } from './types/generated'
 import { getSaveDir, getBackupsDir } from '../utils'
-import logger from '../logger'
+import Logger from '../logging/Logger'
 import { BackupSettings } from './types/BackupSettings'
 import {
   deleteByIdsToKeep,
@@ -18,6 +18,7 @@ import {
   findMostRecentToKeep
 } from './BackupRepository'
 
+const logger = Logger.create('DatabaseService')
 export class DatabaseService {
   private static instance: DatabaseService
 

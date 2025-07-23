@@ -44,9 +44,10 @@ import {
   getRandomColor,
   getSourceType
 } from 'flipflip-common'
-import logger from '../../../logger'
+import Logger from '../../../logging/Logger'
 import { IS_LIBRARY } from '../../ContentSourceRepository'
 
+const logger = Logger.create('DB Migration - migrate-data-json')
 const getDataJsonPath = () => {
   const saveDir = getElectronSaveDir()
   return saveDir != null ? path.join(saveDir, 'data.json') : undefined

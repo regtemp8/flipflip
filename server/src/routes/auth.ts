@@ -11,7 +11,6 @@ import {
 } from '../db/UserRepository'
 import { User } from '../db/types/generated'
 import { AccountChange, Message } from 'flipflip-common'
-import logger from '../logger'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
