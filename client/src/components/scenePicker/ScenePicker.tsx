@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Link as RouterLink,
   Route,
@@ -16,11 +16,15 @@ import {
   Container,
   Divider,
   Drawer,
+  Fab,
   IconButton,
   Link,
   ListItemButton,
   ListItemIcon,
+  ListItemSecondaryAction,
   ListItemText,
+  Menu,
+  MenuItem,
   Tab,
   Tabs,
   type Theme,
@@ -31,9 +35,21 @@ import {
 
 import { makeStyles } from 'tss-react/mui'
 
+import AddIcon from '@mui/icons-material/Add'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import CasinoIcon from '@mui/icons-material/Casino'
+import CloseIcon from '@mui/icons-material/Close'
 import CodeIcon from '@mui/icons-material/Code'
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder'
+import DeleteIcon from '@mui/icons-material/Delete'
+import DragHandleIcon from '@mui/icons-material/DragHandle'
+import FolderIcon from '@mui/icons-material/Folder'
+import GetAppIcon from '@mui/icons-material/GetApp'
 import TvIcon from '@mui/icons-material/Tv'
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay'
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+import DescriptionIcon from '@mui/icons-material/Description'
 import HelpIcon from '@mui/icons-material/Help'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
@@ -42,16 +58,23 @@ import MenuIcon from '@mui/icons-material/Menu'
 import MovieIcon from '@mui/icons-material/Movie'
 import MovieFilterIcon from '@mui/icons-material/MovieFilter'
 import PersonIcon from '@mui/icons-material/Person'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import SettingsIcon from '@mui/icons-material/Settings'
+import ShuffleIcon from '@mui/icons-material/Shuffle'
+import SortIcon from '@mui/icons-material/Sort'
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
-import { SPT } from 'flipflip-common'
+
+import { en, MO, SF, SPT } from 'flipflip-common'
 import VSpin from '../animations/VSpin'
 // import SceneSearch from './SceneSearch'
 import DisplaysTab from './DisplaysTab'
 import GeneratorsTab from './GeneratorsTab'
 import PlaylistsTab from './PlaylistsTab'
 import ScenesTab from './ScenesTab'
-import { useGetVersionQuery } from '../../store/api/slice'
+import {
+  useCreateSceneMutation,
+  useGetVersionQuery
+} from '../../store/api/slice'
 
 const drawerWidth = 240
 
@@ -399,7 +422,7 @@ function ScenePicker() {
   const { classes } = useStyles()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-
+  const [createScene] = useCreateSceneMutation()
   const { data: version } = useGetVersionQuery()
   const sceneCount = 0
   const generatorCount = 0
@@ -408,9 +431,15 @@ function ScenePicker() {
   const libraryCount = 1
   const audioLibraryCount = 1
   const scriptLibraryCount = 1
+  const scenesToDelete = null
+  const allScenesCount = 0
+  const importTitle = 'TODO import title'
+  const canGenerate = false
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [newVersion, _setNewVersion] = useState('')
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement>()
+  const [openMenu, setOpenMenu] = useState<string>()
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
   const openGitRelease = () => {}
@@ -418,6 +447,32 @@ function ScenePicker() {
   const openLink = (url: string) => {
     window.open(url, '_blank')?.focus()
   }
+
+  const onDeleteScenes = () => {}
+  const importAction = () => {}
+  const onAddScene = async () => {
+    const { data } = await createScene()
+    if (data != null) {
+      navigate(`/scenes/${data.value}`)
+    }
+  }
+  const onAddGenerator = () => {}
+  const onAddDisplay = () => {}
+  const onAddPlaylist = () => {}
+  const onAddGroup = () => {}
+
+  const onToggleNewMenu = () => {
+    if (openMenu === MO.new) {
+      setOpenMenu(undefined)
+    } else {
+      setOpenMenu(MO.new)
+    }
+  }
+
+  const onOpenSortMenu = () => {}
+  const onCloseDialog = () => {}
+  const sortScenes = (sortBy: string, asc: boolean) => {}
+  const onRandomScene = () => {}
 
   const openTab = getOpenTab(pathname)
   return (
@@ -717,6 +772,216 @@ function ScenePicker() {
           </Routes>
         </Container>
       </main>
+
+      {scenesToDelete == null && (
+        <>
+          {allScenesCount > 0 && (
+            <Tooltip disableInteractive title="Delete Scenes" placement="left">
+              <Fab
+                className={cx(
+                  classes.addButton,
+                  classes.deleteScenesButton,
+                  openMenu !== MO.new && classes.addButtonClose
+                )}
+                onClick={onDeleteScenes}
+                size="small"
+              >
+                <DeleteIcon className={classes.icon} />
+              </Fab>
+            </Tooltip>
+          )}
+          <Tooltip disableInteractive title={importTitle} placement="left">
+            <Fab
+              className={cx(
+                classes.addButton,
+                classes.importSceneButton,
+                openMenu !== MO.new && classes.addButtonClose
+              )}
+              onClick={importAction}
+              size="small"
+            >
+              <GetAppIcon className={classes.icon} />
+            </Fab>
+          </Tooltip>
+          <Tooltip disableInteractive title="Add Scene" placement="left">
+            <Fab
+              className={cx(
+                classes.addButton,
+                classes.addSceneButton,
+                openMenu !== MO.new && classes.addButtonClose,
+                tutorial === SPT.add2 &&
+                  cx(classes.backdropTop, classes.highlight)
+              )}
+              onClick={onAddScene}
+              size="small"
+            >
+              <MovieIcon className={classes.icon} />
+            </Fab>
+          </Tooltip>
+          <Tooltip
+            disableInteractive
+            title="Add Scene Generator"
+            placement="left"
+          >
+            <span
+              className={classes.generateTooltip}
+              style={!canGenerate ? { pointerEvents: 'none' } : {}}
+            >
+              <Fab
+                className={cx(
+                  classes.addButton,
+                  classes.addGeneratorButton,
+                  openMenu !== MO.new && classes.addButtonClose
+                )}
+                onClick={onAddGenerator}
+                disabled={!canGenerate}
+                size="small"
+              >
+                <MovieFilterIcon className={classes.icon} />
+              </Fab>
+            </span>
+          </Tooltip>
+          <Tooltip disableInteractive title="Add Display" placement="left">
+            <span className={classes.displayTooltip}>
+              <Fab
+                className={cx(
+                  classes.addButton,
+                  classes.addDisplayButton,
+                  openMenu !== MO.new && classes.addButtonClose
+                )}
+                onClick={onAddDisplay}
+                size="small"
+              >
+                <TvIcon className={classes.icon} />
+              </Fab>
+            </span>
+          </Tooltip>
+          <Tooltip disableInteractive title="Add Playlist" placement="left">
+            <span className={classes.playlistTooltip}>
+              <Fab
+                className={cx(
+                  classes.addButton,
+                  classes.addPlaylistButton,
+                  openMenu !== MO.new && classes.addButtonClose
+                )}
+                onClick={onAddPlaylist}
+                size="small"
+              >
+                <PlaylistPlayIcon className={classes.icon} />
+              </Fab>
+            </span>
+          </Tooltip>
+          <Tooltip disableInteractive title="Add Group" placement="left">
+            <Fab
+              className={cx(
+                classes.addButton,
+                classes.addPlaylistButton,
+                openMenu === MO.new && classes.addButtonClose
+              )}
+              onClick={onAddGroup}
+              size="small"
+            >
+              <CreateNewFolderIcon className={classes.icon} />
+            </Fab>
+          </Tooltip>
+          <Fab
+            className={cx(
+              classes.addMenuButton,
+              (tutorial === SPT.add1 || tutorial === SPT.add2) &&
+                classes.backdropTop,
+              tutorial === SPT.add1 && classes.highlight
+            )}
+            onClick={onToggleNewMenu}
+            size="large"
+          >
+            <AddIcon className={classes.icon} />
+          </Fab>
+
+          {allScenesCount >= 2 && (
+            <>
+              <Fab
+                className={classes.sortMenuButton}
+                aria-haspopup="true"
+                aria-controls="sort-menu"
+                aria-label="Sort Scenes"
+                onClick={onOpenSortMenu}
+                size="medium"
+              >
+                <SortIcon className={classes.icon} />
+              </Fab>
+              <Menu
+                id="sort-menu"
+                elevation={1}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center'
+                }}
+                transformOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                anchorEl={menuAnchorEl}
+                keepMounted
+                classes={{ paper: classes.sortMenu }}
+                open={openMenu === MO.sort}
+                onClose={onCloseDialog}
+              >
+                {[SF.alpha, SF.date, SF.count].map((sf) => (
+                  <MenuItem key={sf}>
+                    <ListItemText primary={en.get(sf)} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={() => {
+                          sortScenes(sf, true)
+                        }}
+                        size="large"
+                      >
+                        <ArrowUpwardIcon />
+                      </IconButton>
+                      <IconButton
+                        edge="end"
+                        onClick={() => {
+                          sortScenes(sf, false)
+                        }}
+                        size="large"
+                      >
+                        <ArrowDownwardIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </MenuItem>
+                ))}
+                <MenuItem key={SF.random}>
+                  <ListItemText primary={en.get(SF.random)} />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => {
+                        sortScenes(SF.random, true)
+                      }}
+                      size="large"
+                    >
+                      <ShuffleIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+          {/* <Tooltip disableInteractive title="Random Scene">
+            <Fab
+              className={cx(
+                classes.randomButton,
+                classes.extraWindowRandomButton
+              )}
+              onClick={onRandomScene}
+              size="small"
+            >
+              <CasinoIcon className={classes.icon} />
+            </Fab>
+          </Tooltip> */}
+        </>
+      )}
     </div>
   )
 }

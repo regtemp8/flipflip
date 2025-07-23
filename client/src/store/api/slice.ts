@@ -222,6 +222,18 @@ export const flipflipApi = createApi({
       query: () => `api/version`,
       providesTags: ['Version']
     }),
+    createScene: builder.mutation<ValueResponse, void>({
+      query: () => ({
+        url: `api/scenes`,
+        method: 'POST'
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes'])
+        )
+      }
+    }),
     getSceneGroups: builder.query<SceneGroup[], void>({
       query: () => `api/scenes/grouped`,
       providesTags: ['GroupedScenes']
@@ -1566,6 +1578,7 @@ export const {
   useRestoreBackupMutation,
   useResetDataMutation,
   useGetVersionQuery,
+  useCreateSceneMutation,
   useGetSceneGroupsQuery,
   useGetUngroupedScenesQuery,
   useGetGeneratorGroupsQuery,

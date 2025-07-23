@@ -138,6 +138,8 @@ export async function createScene(userId: number) {
       'backForthBpmMulti',
       'imageType',
       'backgroundType',
+      'backgroundColor',
+      'backgroundColorSet',
       'backgroundBlur',
       'imageTypeFilter',
       'fullSource',
@@ -240,6 +242,8 @@ export async function createScene(userId: number) {
       'strobeDelaySinRate',
       'strobeDelayBpmMulti',
       'strobeColorType',
+      'strobeColor',
+      'strobeColorSet',
       'strobeEase',
       'strobeExp',
       'strobeAmp',
@@ -318,7 +322,7 @@ export async function createScene(userId: number) {
         .select((eb) => [
           eb.lit(userId).as('userId'),
           eb.lit(toNumber(false)).as('defaultScene'),
-          'name',
+          eb.val('New scene').as('name'),
           'useWeights',
           'timingFunction',
           'timingConstant',
@@ -335,6 +339,8 @@ export async function createScene(userId: number) {
           'backForthBpmMulti',
           'imageType',
           'backgroundType',
+          'backgroundColor',
+          'backgroundColorSet',
           'backgroundBlur',
           'imageTypeFilter',
           'fullSource',
@@ -437,6 +443,8 @@ export async function createScene(userId: number) {
           'strobeDelaySinRate',
           'strobeDelayBpmMulti',
           'strobeColorType',
+          'strobeColor',
+          'strobeColorSet',
           'strobeEase',
           'strobeExp',
           'strobeAmp',
@@ -511,7 +519,7 @@ export async function createScene(userId: number) {
         ])
         .where('defaultScene', '=', toNumber(true))
     )
-    .returningAll()
+    .returning('id')
     .executeTakeFirstOrThrow()
 }
 
