@@ -17,11 +17,11 @@ import { usePageVisibility } from 'react-page-visibility'
 import { useWakeLock } from 'react-screen-wake-lock'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { useGetDisplayViewQuery, useGetDisplayVisibleViewsQuery, useGetImagePlayerDataQuery } from '../../store/api/slice'
+import { useGetPlayerScraperProgressQuery, useGetPlayerViewPlayersQuery, useGetViewPlayerConfigQuery } from '../../store/api/slice'
 import { setImagePlayersStarted } from '../../store/imagePlayer/slice'
 import {
-  selectDisplayCanStart,
-  selectDisplayHasStarted
+  selectPlayerCanStart,
+  selectPlayerHasStarted
 } from '../../store/imagePlayer/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => {
@@ -55,24 +55,23 @@ const useStyles = makeStyles()((theme: Theme) => {
 })
 
 interface ProgressCardProps {
-  displayID: number
+  playerID: string
   start?: () => void
 }
 
 function ProgressCard(props: ProgressCardProps) {
-  const { displayID } = props
+  const { playerID } = props
   const { classes } = useStyles()
-  const dispatch = useAppDispatch()
-  const { total, current, message } = {total: 0, current: 0, message: []} //useAppSelector(
-//     selectSourceScraperProgress(displayID)
-//   )
-  const canStart = useAppSelector(selectDisplayCanStart())
-  useEffect(() => {
-    if (canStart) {
-      dispatch(setImagePlayersStarted())
-    }
-  }, [canStart, dispatch, displayID])
+  const {data: progress} = useGetPlayerScraperProgressQuery(playerID, {pollingInterval: 10000})
 
+  let current = 0
+  let total = 0
+  let message: string[] = []
+  if(progress != null) {
+    current = progress.current
+    total = progress.total
+    message = progress.message
+  }
   return (
     <div className={classes.progressMain}>
       <Container maxWidth={false} className={classes.progressContainer}>
@@ -125,19 +124,18 @@ function ProgressCard(props: ProgressCardProps) {
 }
 
 interface DisplayViewProps {
-  viewID: number
+  viewPlayerID: string
   isPlaying: boolean
 }
 
 const hack = new ChildCallbackHack() // TODO get rid of hacks
 function DisplayView(props: DisplayViewProps) {
-  const { data: view } = useGetDisplayViewQuery(props.viewID)
-  const { isLoading } = useGetImagePlayerDataQuery(props.viewID)
-
-  if(isLoading || view == null) {
+  const { data: config } = useGetViewPlayerConfigQuery(props.viewPlayerID)
+  if(config == null) {
     return null
   }
 
+  const {view} = config
   let transform: string | undefined = undefined
   if (view.sync) {
     if (view.mirrorSyncedView === MVF.horizontal) {
@@ -161,7 +159,7 @@ function DisplayView(props: DisplayViewProps) {
       }}
     >
       <ImagePlayer
-        viewID={view.id}
+        uuid={props.viewPlayerID}
         isPlaying={props.isPlaying}
         historyOffset={0}
         setHistoryOffset={() => {}}
@@ -178,15 +176,15 @@ function DisplayView(props: DisplayViewProps) {
 
 function DisplayManager() {
   const {id} = useParams()
-  const displayID = Number(id)
+  const playerID = id as string
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
-  const {data: views} = useGetDisplayVisibleViewsQuery(displayID)
-  const hasStarted = useAppSelector(selectDisplayHasStarted())
-  const canStart = useAppSelector(selectDisplayCanStart())
+  const {data: viewPlayers} = useGetPlayerViewPlayersQuery(playerID)
+  const hasStarted = useAppSelector(selectPlayerHasStarted())
+  const canStart = useAppSelector(selectPlayerCanStart())
 
   const wakeLock = useWakeLock()
   const stayAwake = useStayAwake()
@@ -246,15 +244,15 @@ function DisplayManager() {
         hasStarted={hasStarted}
         play={play}
         pause={pause}
-        displayID={displayID}
+        playerID={playerID}
         goBack={goBack}
       />
       {!hasStarted && (
-        <ProgressCard displayID={displayID} start={start} />
+        <ProgressCard playerID={playerID} start={start} />
       )}
       <Box className={classes.container}>
-        {views && views.map((id) => (
-          <DisplayView key={id} viewID={id} isPlaying={isPlaying} />
+        {viewPlayers && viewPlayers.map((id) => (
+          <DisplayView key={id} viewPlayerID={id} isPlaying={isPlaying} />
         ))}
       </Box>
     </>

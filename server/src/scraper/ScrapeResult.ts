@@ -1,5 +1,4 @@
-import { LibrarySource } from './LibrarySource';
-import { ScraperHelpers } from './ScraperHelpers';
+import { ContentSource, ScraperHelpers } from 'flipflip-common';
 
 export type ScrapeResult = {
   data?: string[];
@@ -7,7 +6,7 @@ export type ScrapeResult = {
   allPosts?: Record<string, string>;
   weight?: string;
   helpers?: ScraperHelpers;
-  source?: LibrarySource;
+  source?: ContentSource;
   timeout?: number;
   systemMessage?: string;
   captcha?: string;

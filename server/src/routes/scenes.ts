@@ -1,5 +1,5 @@
 import express from 'express'
-import { Display, SG, SceneSelectOptionsRequest } from 'flipflip-common'
+import { SG, ValueResponse } from 'flipflip-common'
 import {
   findDefaultScene,
   findSceneById,
@@ -19,6 +19,7 @@ import {
 import { findContentSources } from '../db/ContentSourceRepository'
 import { User } from '../db/types/generated'
 import { createTempDisplayForScene } from '../db/DisplayRepository'
+import players from '../player/PlayerService'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -125,7 +126,8 @@ router.post('/:id/play', async (req, res) => {
   const sceneId = Number(req.params.id)
   const userId = (req.user as User).id as number
   const id = await createTempDisplayForScene(sceneId, userId)
-  const body: Pick<Display, 'id'> = {id}
+  const playerId = players().start(id, req.user as User)
+  const body: ValueResponse = {value: playerId}
   res.status(200).send(body)
 })
 

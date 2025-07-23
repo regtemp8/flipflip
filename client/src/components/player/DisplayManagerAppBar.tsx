@@ -90,7 +90,7 @@ export interface DisplayManagerAppBarProps {
   play: () => void
   pause: () => void
   goBack: () => void
-  displayID: number
+  playerID: string
 }
 
 function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {

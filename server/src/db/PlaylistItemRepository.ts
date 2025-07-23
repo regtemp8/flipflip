@@ -25,5 +25,6 @@ export async function findScenePlaylistItemsByPlaylist(playlistId: number) {
         .leftJoin('scenePlaylistItemScene as s', 's.scenePlaylistItemId', 'pi.id')
         .select(['pi.id', 'pi.duration', 's.sceneId'])
         .where('pi.playlistId', '=', playlistId)
+        .orderBy('pi.index asc')
         .execute()
 }

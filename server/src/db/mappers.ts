@@ -68,7 +68,7 @@ import {
   CaptionScriptUpdate,
   FontSettingsUpdate
 } from './CaptionScriptRepository'
-import { getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
+import { getBackupsDir, getCacheDir, getServerHost, getServerPort, getThumbsDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
 
@@ -1029,7 +1029,8 @@ export function toCacheSettingsUpdate(
 
 export function toContentSource(
   row: ContentSourceRow,
-  tags: number[]
+  tags: number[],
+  clips: number[] = []
 ): ContentSource {
   const {
     count,
@@ -1051,6 +1052,8 @@ export function toContentSource(
     weight
   } = row
 
+  const host = getServerHost()
+  const port = getServerPort()
   return {
     id: id as number,
     url,
@@ -1059,7 +1062,7 @@ export function toContentSource(
     marked: toBoolean(marked),
     lastCheck: opt<number>(lastCheck),
     tags,
-    clips: [],
+    clips,
     disabledClips: [],
     blacklist: [],
     count,
@@ -1073,7 +1076,7 @@ export function toContentSource(
     redditTime: opt<string>(redditTime),
     includeRetweets: toBoolean(twitterIncludeRetweets),
     includeReplies: toBoolean(twitterIncludeReplies),
-    fileUrl: `http://localhost:5050/fs/file/content-source/${id}`
+    fileUrl: `http://${host}:${port}/fs/file/content-source/${id}`
   }
 }
 
@@ -1241,7 +1244,9 @@ export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
 }
 
 export function toAudioThumb(thumb: string) {
-  return `http://localhost:5050/fs/file/audio-thumb/${thumb.split(path.sep).pop()}`
+  const host = getServerHost()
+  const port = getServerPort()
+  return `http://${host}:${port}/fs/file/audio-thumb/${thumb.split(path.sep).pop()}`
 }
 
 export function fromAudioThumb(thumb: string) {
@@ -1280,6 +1285,8 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     thumb = toAudioThumb(row.thumb)
   }
 
+  const host = getServerHost()
+  const port = getServerPort()
   return {
     id: id as number,
     url,
@@ -1306,7 +1313,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     duration: opt<number>(duration),
     comment: opt<string>(comment),
     playedCount,
-    fileUrl: `http://localhost:5050/fs/file/audio/${id}`
+    fileUrl: `http://${host}:${port}/fs/file/audio/${id}`
   }
 }
 
@@ -1378,6 +1385,8 @@ export function toCaptionScript(
     url
   } = row
 
+  const host = getServerHost()
+  const port = getServerPort()
   return {
     id: id as number,
     url,
@@ -1389,7 +1398,7 @@ export function toCaptionScript(
     stopAtEnd: toBoolean(stopAtEnd),
     nextSceneAtEnd: toBoolean(nextSceneAtEnd),
     syncWithAudio: toBoolean(syncWithAudio),
-    fileUrl: `http://localhost:5050/fs/file/caption-script/${id}`
+    fileUrl: `http://${host}:${port}/fs/file/caption-script/${id}`
   }
 }
 

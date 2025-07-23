@@ -23,13 +23,16 @@ import files from './routes/files'
 import captionScripts from './routes/captionScripts'
 import displayPlaylistItems from './routes/displayPlaylistItems'
 import scenePlaylistItems from './routes/scenePlaylistItems'
-import contentLoader from './routes/contentLoader'
+import viewPlayers from './routes/viewPlayers'
+import players from './routes/players'
 import db from './db/database'
-import { getBackupsDir, getCacheDir, getSaveDir, getThumbsDir } from './utils'
+import { getBackupsDir, getCacheDir, getSaveDir, getServerPort, getThumbsDir } from './utils'
 import scheduler from './scheduler'
-import logger from './logger'
+import Logger from './logging/Logger'
+import proxy from './routes/proxy'
 
-const port = process.env.FF_PORT || 5050
+const port = getServerPort()
+const logger = Logger.create('server')
 
 void (async function () {
   const dirs = [getSaveDir(), getBackupsDir(), getCacheDir(), getThumbsDir()]
@@ -81,8 +84,10 @@ void (async function () {
   app.use('/api/caption-scripts', captionScripts)
   app.use('/api/display-playlist-items', displayPlaylistItems)
   app.use('/api/scene-playlist-items', scenePlaylistItems)
-  app.use('/api/content-loader', contentLoader)
+  app.use('/api/players', players)
+  app.use('/api/view-players', viewPlayers)
   app.use('/fs', files)
+  app.use('/proxy', proxy)
   app.use(
     (
       error: NodeJS.ErrnoException,

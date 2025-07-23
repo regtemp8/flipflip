@@ -1,21 +1,24 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import {
   FilePickerData,
   FilePickerItem,
+  getSourceType,
   isAudio,
   isImage,
   isVideo
 } from 'flipflip-common'
-import logger from '../logger'
+import Logger from '../logging/Logger'
 import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById, findAudioThumbById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
 import { User } from '../db/types/generated'
-import proxy from './proxy'
+import proxy from './ProxyService'
+import fileRegistry from './FileRegistry'
 
+const logger = Logger.create('files')
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
   let dir = getSaveDir()
@@ -106,6 +109,15 @@ router.get('/file/audio-thumb/:name', async (req, res, next) => {
   }
 })
 
+router.get('/file/registry/:uuid', async (req, res, next) => {
+  try {
+    const url = fileRegistry().get(req.params.uuid)
+    await handleFileUrl(req, res, url)
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.get('/file/:type/:id', async (req, res, next) => {
   const { id, type } = req.params
   const queries = new Map([
@@ -123,6 +135,13 @@ router.get('/file/:type/:id', async (req, res, next) => {
   try {
     const userId = (req.user as User).id as number
     const url = await query(Number(id), userId)
+    await handleFileUrl(req, res, url)
+  } catch (error) {
+    next(error)
+  }
+})
+
+async function handleFileUrl(req: Request, res: Response, url?: string) {
     if (url == null) {
       res.status(404).end()
     } else if (url.startsWith('http')) {
@@ -172,9 +191,6 @@ router.get('/file/:type/:id', async (req, res, next) => {
         stream.pipe(res)
       }
     }
-  } catch (error) {
-    next(error)
-  }
-})
+}
 
 export default router

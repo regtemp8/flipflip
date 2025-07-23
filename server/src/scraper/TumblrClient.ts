@@ -1,0 +1,131 @@
+import { type Client, createClient } from 'tumblr.js'
+
+export class TumblrClient {
+  private static instance: TumblrClient
+
+  private client: Client | undefined
+
+  private constructor() {}
+
+  initializeIpcEvents(): void {
+    // ipcMain.handle(IPC.tumblrBlogPosts, this.onRequestTumblrBlogPosts)
+    // ipcMain.handle(IPC.tumblrTotalBlogs, this.onRequestTumblrTotalBlogs)
+    // ipcMain.handle(IPC.tumblrBlogs, this.onRequestTumblrBlogs)
+  }
+
+  getClient(
+    consumerKey: string,
+    consumerSecret: string,
+    token: string,
+    tokenSecret: string
+  ): Client {
+    if (this.client == null) {
+      this.client = createClient({
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret,
+        token,
+        token_secret: tokenSecret
+      })
+    }
+
+    return this.client
+  }
+
+  async getBlogPosts(
+    consumerKey: string,
+    consumerSecret: string,
+    token: string,
+    tokenSecret: string,
+    blogID: string,
+    offset: number
+  ): Promise<string[]> {
+    return await this.getClient(consumerKey, consumerSecret, token, tokenSecret)
+      .blogPosts(blogID, { offset })
+      .then((data) => {
+        const images: string[] = []
+        for (const post of data.posts) {
+          // Sometimes photos are listed separately
+          if (post.photos != null) {
+            for (const photo of post.photos) {
+              images.push(photo.original_size.url)
+            }
+          }
+          if (post.player != null) {
+            for (const embed of post.player) {
+              const regex =
+                /<iframe[^(?:src|/>)]*src=["']([^"']*)[^(?:/>)]*\/?>/g
+              let imageSource
+              while ((imageSource = regex.exec(embed.embed_code)) !== null) {
+                images.push(imageSource[1])
+              }
+            }
+          }
+          if (post.body != null) {
+            const regex = /<img[^(?:src|/>)]*src=["']([^"']*)[^>]*>/g
+            let imageSource
+            while ((imageSource = regex.exec(post.body)) != null) {
+              images.push(imageSource[1])
+            }
+            const regex2 = /<source[^(?:src|/>)]*src=["']([^"']*)[^>]*>/g
+            while ((imageSource = regex2.exec(post.body)) != null) {
+              images.push(imageSource[1])
+            }
+          }
+          if (post.video_url != null) {
+            images.push(post.video_url)
+          }
+        }
+
+        return images
+      })
+  }
+
+  async onRequestTumblrTotalBlogs(
+    consumerKey: string,
+    consumerSecret: string,
+    token: string,
+    tokenSecret: string
+  ): Promise<unknown[]> {
+    const client = this.getClient(
+      consumerKey,
+      consumerSecret,
+      token,
+      tokenSecret
+    )
+    const following = await client.userFollowing({ limit: 0 })
+    return following.total_blogs
+  }
+
+  async onRequestTumblrBlogs(
+    consumerKey: string,
+    consumerSecret: string,
+    token: string,
+    tokenSecret: string,
+    offset: number
+  ): Promise<unknown[]> {
+    const client = this.getClient(
+      consumerKey,
+      consumerSecret,
+      token,
+      tokenSecret
+    )
+    const following = await client.userFollowing({ offset })
+    const blogs: string[] = []
+    for(const blog of following.blogs) {
+      blogs.push('http://' + blog.name + '.tumblr.com/')
+    }
+    return blogs
+  }
+
+  public static getInstance(): TumblrClient {
+    if (!TumblrClient.instance) {
+      TumblrClient.instance = new TumblrClient()
+    }
+
+    return TumblrClient.instance
+  }
+}
+
+export default function tumblr() {
+  return TumblrClient.getInstance()
+}

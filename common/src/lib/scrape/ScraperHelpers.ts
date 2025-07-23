@@ -7,5 +7,4 @@ export type ScraperHelpers = {
     | undefined;
   count: number;
   retries: number;
-  uuid: string;
 };

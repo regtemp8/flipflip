@@ -1,97 +1,22 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import {
-  ContentData,
-  EffectsData,
-  TransformData,
-  ViewData
-} from './ContentPreloadService'
 import { flipflipApi } from '../api/slice'
-import { ImagePlayerDataPlaylist, randomizeList, RP } from 'flipflip-common'
-import { getRandomListItem } from '../../utils'
-
-function calcRepeats(playlist: ImagePlayerDataPlaylist) {
-  switch (playlist.repeat) {
-    case RP.all:
-      return -1
-    case RP.one:
-      return 2
-    default:
-      return 1
-  }
-}
-
-function createPlaylistItems(playlist: ImagePlayerDataPlaylist) {
-  const { items, shuffle } = playlist
-  const playlistItems = items
-    .map((item) => {
-      const { scenes, duration } = item
-      const sceneID = scenes.length === 1 ? scenes[0] : getRandomListItem(scenes)
-      return { sceneID, scenes, duration }
-    })
-
-  if (shuffle && playlistItems.length > 1) {
-    randomizeList(playlistItems)
-  }
-
-  return playlistItems
-}
-
-function createPlaylist(playlist: ImagePlayerDataPlaylist): PlaylistState {
-  const playlistItems = createPlaylistItems(playlist)
-  const timeToNextScene = playlistItems[0].duration
-  return {
-    playlistID: playlist.id,
-    player: {
-      index: 0,
-      timeToNextScene
-    },
-    loader: {
-      index: 0,
-      timeToNextScene
-    },
-    items: playlistItems,
-    repeat: calcRepeats(playlist)
-  }
-}
+import { ImageViewData } from 'flipflip-common'
 
 export interface ImagePlayerUpdate<T> {
-  id: number
+  uuid: string
   value: T
 }
 
-export interface ImageViewState {
+export interface ImageViewState extends ImageViewData {
   show: boolean
   zIndex: number
-  data: ContentData
-  transform: TransformData
-  view: ViewData
-  effects: EffectsData
-  sceneID: number
   displayIndex?: number
-}
-
-export interface PlaylistItem {
-  sceneID: number
-  scenes: number[]
-  duration: number
-}
-
-export interface PlaylistItemState {
-  index: number
-  timeToNextScene: number
-}
-
-export interface PlaylistState {
-  playlistID: number
-  player: PlaylistItemState
-  loader: PlaylistItemState
-  items: PlaylistItem[]
-  repeat: number
 }
 
 export interface ImageViewLoaderState {
   loadingCount: number
   iframeCount: number
+  maxCanLoadAtOnce: number
   readyToLoad: number[]
   displayIndex: number
   zIndex: number
@@ -100,7 +25,6 @@ export interface ImageViewLoaderState {
 }
 
 export interface ImagePlayerState {
-  playlist: PlaylistState
   firstImageLoaded: boolean
   mainLoaded: boolean
   loader: ImageViewLoaderState
@@ -108,6 +32,8 @@ export interface ImagePlayerState {
   hasStarted: boolean
   captcha?: ImagePlayerCaptcha
   currentAudio?: number
+  currentSceneID: number
+  isLoading: boolean
 }
 
 export interface ImagePlayerCaptcha {
@@ -116,69 +42,60 @@ export interface ImagePlayerCaptcha {
   helpers: any
 }
 
-export const initialState: Record<number, ImagePlayerState> = {}
+export const initialState: Record<string, ImagePlayerState> = {}
 export const imagePlayerSlice = createSlice({
   name: 'imagePlayers',
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
     setImagePlayerFirstImageLoaded: (
       state,
       action: PayloadAction<ImagePlayerUpdate<boolean>>
     ) => {
-      state[action.payload.id].firstImageLoaded = action.payload.value
+      state[action.payload.uuid].firstImageLoaded = action.payload.value
       if (action.payload.value === true) {
-        state[action.payload.id].isEmpty = false
+        state[action.payload.uuid].isEmpty = false
       }
     },
-    setImagePlayerHasStarted: (state, action: PayloadAction<number[]>) => {
-      action.payload.forEach((id) => (state[id].hasStarted = true))
+    setImagePlayerHasStarted: (state, action: PayloadAction<string[]>) => {
+      action.payload.forEach((uuid) => (state[uuid].hasStarted = true))
     },
     setImagePlayerIsEmpty: (state, action: PayloadAction<ImagePlayerUpdate<boolean>>) => {
-      state[action.payload.id].isEmpty = action.payload.value
+      state[action.payload.uuid].isEmpty = action.payload.value
     },
     setImagePlayerMainLoaded: (
       state,
       action: PayloadAction<ImagePlayerUpdate<boolean>>
     ) => {
-      state[action.payload.id].mainLoaded = action.payload.value
+      state[action.payload.uuid].mainLoaded = action.payload.value
     },
-    setImagePlayersLoaded: (state, action: PayloadAction<number>) => {
-      const sceneID = action.payload
-      Object.keys(state)
-        .map((key) => Number(key))
-        .filter((id) => {
-          const { playlist } = state[id]
-          const { index } = playlist.loader
-          return playlist.items[index].sceneID === sceneID
-        })
-        .forEach((id) => (state[id].mainLoaded = true))
+    setImagePlayersLoaded: (state) => {
+      Object.keys(state).forEach((uuid) => (state[uuid].mainLoaded = true))
     },
     setImagePlayerState: (
       state,
       action: PayloadAction<ImagePlayerUpdate<ImagePlayerState>>
     ) => {
-      state[action.payload.id] = action.payload.value
+      state[action.payload.uuid] = action.payload.value
     },
     setImagePlayerStates: (
       state,
       action: PayloadAction<ImagePlayerUpdate<ImagePlayerState>[]>
     ) => {
-      action.payload.forEach((update) => (state[update.id] = update.value))
+      action.payload.forEach((update) => (state[update.uuid] = update.value))
     },
     setImagePlayerCaptcha: (
       state,
       action: PayloadAction<ImagePlayerUpdate<ImagePlayerCaptcha | undefined>>
     ) => {
-      const { id, value } = action.payload
-      state[id].captcha = value
+      const { uuid, value } = action.payload
+      state[uuid].captcha = value
     },
     setImagePlayerStartLoading: (
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
-      const { id, value } = action.payload
-      const { loader } = state[id]
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       loader.loadingCount += value
       loader.readyToLoad.splice(0, value)
     },
@@ -186,14 +103,14 @@ export const imagePlayerSlice = createSlice({
       state,
       action: PayloadAction<ImagePlayerUpdate<number[]>>
     ) => {
-      const { id, value } = action.payload
-      const { loader } = state[id]
-      loader.loadingCount--
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
+      loader.loadingCount -= value.length
       loader.readyToLoad.push(...value)
     },
-    setImagePlayerReadyToDisplay: (state, action: PayloadAction<number>) => {
-      const id = action.payload
-      const player = state[id]
+    setImagePlayerReadyToDisplay: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const player = state[uuid]
       player.loader.loadingCount--
       if (!player.firstImageLoaded) {
         player.firstImageLoaded = true
@@ -203,8 +120,8 @@ export const imagePlayerSlice = createSlice({
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
-      const { id, value } = action.payload
-      const { loader } = state[id]
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       const oldShownIndex = loader.shownIndex
       const imageViews = loader.imageViews as ImageViewState[]
       if (oldShownIndex != null) {
@@ -219,13 +136,11 @@ export const imagePlayerSlice = createSlice({
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
-      const { id, value } = action.payload
-      const { loader, playlist } = state[id]
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
+      loader.readyToLoad.push(value)
       if (loader.imageViews[value]?.data.type === 'iframe') {
         loader.iframeCount--
-      }
-      if (playlist.repeat !== 0) {
-        loader.readyToLoad.push(value)
       }
     },
     setImagePlayerSetImageView: (
@@ -234,68 +149,78 @@ export const imagePlayerSlice = createSlice({
         ImagePlayerUpdate<{ index: number; view: ImageViewState }>
       >
     ) => {
-      const { id, value } = action.payload
-      const { loader } = state[id]
+      const { uuid, value } = action.payload
+      const { loader } = state[uuid]
       loader.imageViews[value.index] = value.view
     },
-    setImagePlayerIncrementDisplayIndex: (state, action: PayloadAction<number>) => {
-      const id = action.payload
-      const { loader } = state[id]
+    setImagePlayerIncrementDisplayIndex: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const { loader } = state[uuid]
       loader.displayIndex++
     },
-    setImagePlayerIncrementIFrameCount: (state, action: PayloadAction<number>) => {
-      const id = action.payload
-      const { loader } = state[id]
+    setImagePlayerIncrementIFrameCount: (state, action: PayloadAction<string>) => {
+      const uuid = action.payload
+      const { loader } = state[uuid]
       loader.iframeCount++
+    },
+    setImagePlayerIFrameCount: (state, action: PayloadAction<ImagePlayerUpdate<number>>) => {
+      const {uuid, value} = action.payload
+      state[uuid].loader.iframeCount = value
     },
     setImagePlayerDecrementLoaderTimeToNextScene: (
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
-      const { id, value } = action.payload
-      state[id].playlist.loader.timeToNextScene -= value
+      // TODO still needed?
     },
     setImagePlayerLoaderPlaylist: (
       state,
-      action: PayloadAction<ImagePlayerUpdate<PlaylistItemState>>
+      action: PayloadAction<ImagePlayerUpdate<any>>
     ) => {
-      const { id, value } = action.payload
-      state[id].playlist.loader = value
+      // TODO still needed?
     },
     setImagePlayerPlaylist: (
       state,
-      action: PayloadAction<ImagePlayerUpdate<PlaylistState>>
+      action: PayloadAction<ImagePlayerUpdate<any>>
     ) => {
-      const { id, value } = action.payload
-      state[id].playlist = value
+      // TODO still needed?
     },
     setImagePlayerDecrementTimeToNextScene: (
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
-      const { id, value } = action.payload
-      state[id].playlist.player.timeToNextScene -= value
+      // TODO still needed?
     },
     setImagePlayersStarted: (state) => {
-      Object.entries(state).forEach(([_key, value]) => value.hasStarted = true)
+      Object.values(state).forEach((value) => value.hasStarted = true)
+    },
+    setImagePlayerIsLoading: (
+      state,
+      action: PayloadAction<ImagePlayerUpdate<boolean>>
+    ) => {
+      const {uuid, value} = action.payload
+      state[uuid].isLoading = value
     }
   },
   extraReducers: (builder) => {
-    builder.addMatcher(flipflipApi.endpoints.getImagePlayerData.matchFulfilled, (state, action) => {      
+    builder.addMatcher(flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled, (state, action) => {
       const data = action.payload
       if(data == null) {
         return
       }
 
-      state[data.displayViewId] = {
-        playlist: createPlaylist(data.playlist),
+      const viewPlayerID = action.meta.arg.originalArgs      
+      state[viewPlayerID] = {
         firstImageLoaded: false,
         mainLoaded: false,
+        isLoading: false,
+        currentSceneID: data.sceneId,
         loader: {
           zIndex: 0,
           displayIndex: 0,
           loadingCount: 0,
           iframeCount: 0,
+          maxCanLoadAtOnce: data.maxCanLoadAtOnce,
           readyToLoad: [
             ...Array(data.maxCanLoad).keys()
           ],
@@ -325,11 +250,13 @@ export const {
   setImagePlayerReadyToDisplay,
   setImagePlayerIncrementDisplayIndex,
   setImagePlayerIncrementIFrameCount,
+  setImagePlayerIFrameCount,
   setImagePlayerDecrementLoaderTimeToNextScene,
   setImagePlayerLoaderPlaylist,
   setImagePlayerPlaylist,
   setImagePlayerDecrementTimeToNextScene,
-  setImagePlayersStarted
+  setImagePlayersStarted,
+  setImagePlayerIsLoading
 } = imagePlayerSlice.actions
 
 export default imagePlayerSlice.reducer

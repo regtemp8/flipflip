@@ -37,10 +37,14 @@ import {
   ContentSortRequest,
   AudioAlbum,
   AudioArtist,
-  ImagePlayerData
+  ViewPlayerConfig,
+  ValueResponse,
+  ScraperProgress,
+  ImageViewData
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
+import { loadImageViews } from '../imagePlayer/thunks'
 
 export const flipflipApi = createApi({
   reducerPath: 'flipflipApi',
@@ -429,7 +433,7 @@ export const flipflipApi = createApi({
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
-    playScene: builder.mutation<Pick<Display, 'id'>, number>({
+    playScene: builder.mutation<ValueResponse, number>({
       query: (id) => ({url:`api/scenes/${id}/play`, method: 'POST'})
     }),
     getSceneWeightGroups: builder.query<WeightGroup[], number>({
@@ -662,16 +666,30 @@ export const flipflipApi = createApi({
         })
       }
     }),
-    getDisplayVisibleViews: builder.query<number[], number>({
-      query: (id) => `api/displays/${id}/visible-views`
+    getPlayerViewPlayers: builder.query<string[], string>({
+      query: (id) => `api/players/${id}/view-players`
+    }),
+    getPlayerScraperProgress: builder.query<ScraperProgress, string>({
+      query: (id) => `api/players/${id}/scraper-progress`
+    }),
+    getViewPlayerConfig: builder.query<ViewPlayerConfig, string>({
+      query: (id) => `api/view-players/${id}/config`,
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled
+          dispatch(loadImageViews(id))
+        } catch (err) {
+          console.error('Query failed:', err);
+        }
+      },
+    }),
+    getViewPlayerItems: builder.query<ImageViewData[], {id: string, size: number}>({
+      query: ({id, size}) => `api/view-players/${id}/items?size=${size}`
     }),
     getDisplayView: builder.query<DisplayView, number>({
       query: (id) => `api/display-views/${id}`,
       providesTags: (view) =>
         view != null ? [{ type: 'DisplayView', id: view.id }] : []
-    }),
-    getImagePlayerData: builder.query<ImagePlayerData | undefined, number>({
-      query: (id) => `api/display-views/${id}/image-player-data`
     }),
     updateDisplayView: builder.mutation<
       void,
@@ -1586,9 +1604,11 @@ export const {
   useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,
-  useGetDisplayVisibleViewsQuery,
+  useGetPlayerViewPlayersQuery,
+  useGetPlayerScraperProgressQuery,
+  useGetViewPlayerConfigQuery,
+  useGetViewPlayerItemsQuery,
   useGetDisplayViewQuery,
-  useGetImagePlayerDataQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
   useUpdatePlaylistMutation,

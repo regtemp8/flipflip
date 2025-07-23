@@ -1,16 +1,35 @@
+import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
 
-export const selectDisplayHasStarted = () => {
+export const selectImagePlayerHasStarted = (uuid: string) => {
   return (state: RootState) => {
-    return Object.entries(state.imagePlayer).every(([_key, value]) => value.hasStarted)
+    return state.imagePlayer[uuid]?.hasStarted === true
   }
 }
 
-export const selectDisplayCanStart = () => {
+export const selectImagePlayerCurrentSceneID = (uuid: string) => {
   return (state: RootState) => {
-    return Object.entries(state.imagePlayer).every(([_key, value]) => {
-        const { firstImageLoaded, playlist, loader } = value
-        return firstImageLoaded && (playlist.loader.index > 0 || loader.readyToLoad.length === 0)
-    })
+    return state.imagePlayer[uuid]?.currentSceneID
   }
 }
+
+export const selectImagePlayerImageViews = (uuid: string) => {
+  return (state: RootState) => {
+    return state.imagePlayer[uuid]?.loader?.imageViews ?? []
+  }
+}
+
+export const selectPlayerHasStarted = () =>
+  createSelector(
+    [(state: RootState) => state.imagePlayer],
+    (imagePlayer) => Object.values(imagePlayer).every((value) => value.hasStarted)
+  )
+
+export const selectPlayerCanStart = () =>
+  createSelector(
+    [(state: RootState) => state.imagePlayer],
+    (imagePlayer) => Object.values(imagePlayer).every((value) => {
+        const { firstImageLoaded, hasStarted, loader } = value
+        return !hasStarted && firstImageLoaded && loader.readyToLoad.length === 0
+    })
+  )

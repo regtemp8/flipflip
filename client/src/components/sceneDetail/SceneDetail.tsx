@@ -499,7 +499,7 @@ function SceneDetail() {
     const {data} = await playScene(sceneID)
     if(data != null) {
       setFullScreen(fullScreen === true)
-      navigate(`/player/${data.id}`)
+      navigate(`/player/${data.value}`)
     }
   }
 

@@ -8,14 +8,14 @@ import React, {
 } from 'react'
 import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import { BT, IT, SL } from 'flipflip-common'
 import {
+  BT, IT, SL, 
   ContentData,
   EffectsData,
   StrobeData,
   TransformData,
   ViewData
-} from '../../store/imagePlayer/ContentPreloadService'
+} from 'flipflip-common'
 import { cx } from '@emotion/css'
 import Strobe from './Strobe'
 import ZoomMove from './ZoomMove'
@@ -738,6 +738,6 @@ function ImageView(props: ImageViewProps) {
   )
 }
 
-;(ImageView as any).displayName = 'ImageView'
+; (ImageView as any).displayName = 'ImageView'
 
 export default React.memo(ImageView)

@@ -1,9 +1,10 @@
-import { Audio, getSourceType, ST } from 'flipflip-common'
+import { Audio, en, getSourceType, IF, isImage, isImageOrVideo, isVideo, ST } from 'flipflip-common'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import logger from './logger'
+import { ProxyRequest } from './routes/ProxyService'
 export const isMacOSX = process.platform === 'darwin'
+export const isWin32 = process.platform === 'win32'
 
 export function getElectronSaveDir() {
   let directory: string | undefined
@@ -40,6 +41,14 @@ export function getCacheDir() {
 
 export function getLogsDir() {
   return path.resolve(getSaveDir(), 'logs')
+}
+
+export function getServerHost() {
+  return process.env.FF_HOST ?? 'localhost'
+}
+
+export function getServerPort() {
+  return process.env.FF_PORT != null ? Number(process.env.FF_PORT) : 5050
 }
 
 export function getFileName(url: string, extension = true): string {
@@ -280,7 +289,6 @@ async function parseAudioMetadata(url: string) {
   if (url.startsWith('http')) {
     const { ok, body, headers } = await fetch(url)
     if (!ok || body == null) {
-      logger.error('Failed to fetch audio {url}', { url })
       throw new Error(`Failed to fetch audio ${url}`)
     }
 
@@ -316,4 +324,123 @@ export async function copyThumbFile(thumb: string) {
   }
 
   return thumbPath
+}
+
+export function getRandomIndex(list: any[]) {
+  return Math.floor(Math.random() * list.length)
+}
+
+export function getRandomInteger(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+export function getRandomFloat(min: number, max: number, decimals: number) {
+  const float = Math.random() * (max - min) + min
+  return parseFloat(float.toFixed(decimals))
+}
+
+export function getRandomBoolean() {
+  return Math.random() < 0.5
+}
+
+export function getRandomListItem(list: any[], count: number = 1) {
+  if (count <= 0) {
+  } else if (count === 1) {
+    return list[getRandomIndex(list)]
+  } else {
+    const newList = []
+    for (let c = 0; c < count && list.length > 0; c++) {
+      newList.push(list.splice(getRandomIndex(list), 1)[0])
+    }
+    return newList
+  }
+}
+
+export function flatten(array: any[]) {
+  let values
+  try {
+    values = values = [].concat.apply([], array)
+  } catch (e) {
+    values = (array as any).flat(1)
+  }
+  return values
+}
+
+export function filterRequestsToJustPlayable(
+  imageTypeFilter: string,
+  requests: ProxyRequest[],
+  strict: boolean
+): ProxyRequest[] {
+  switch (imageTypeFilter) {
+    default:
+    case IF.any:
+      return requests.filter((r) => isImageOrVideo(r.url, strict))
+    case IF.stills:
+    case IF.images:
+      return requests.filter((r) => isImage(r.url, strict))
+    case IF.animated:
+      return requests.filter(
+        (r) => r.url.toLowerCase().endsWith('.gif') || isVideo(r.url, strict)
+      )
+    case IF.videos:
+      return requests.filter((r) => isVideo(r.url, strict))
+  }
+}
+
+export function getCachePath(
+  baseDir: string,
+  source?: string,
+  typeDir?: string
+) {
+  if (typeDir == null && source != null) {
+    typeDir = (en.get(getSourceType(source)) as string).toLowerCase()
+  }
+
+  return cachePath(baseDir, source, typeDir)
+}
+
+export function cachePath(
+  baseDir: string,
+  source?: string,
+  typeDir?: string
+): string {
+  if (baseDir !== '') {
+    if (!baseDir.endsWith(path.sep)) {
+      baseDir += path.sep
+    }
+    if (source != null) {
+      if (source !== ST.video && source !== ST.playlist) {
+        return (
+          baseDir +
+          typeDir +
+          path.sep +
+          getFileGroup(source) +
+          path.sep
+        )
+      } else {
+        return baseDir + typeDir + path.sep
+      }
+    } else {
+      return baseDir
+    }
+  } else {
+    const saveDir = getSaveDir()
+    let cachePathParts
+    if (source != null) {
+      if (source !== ST.video && source !== ST.playlist) {
+        cachePathParts = [
+          saveDir,
+          'ImageCache',
+          typeDir,
+          getFileGroup(source)
+        ]
+      } else {
+        cachePathParts = [saveDir, 'ImageCache', typeDir]
+      }
+    } else {
+      cachePathParts = [saveDir, 'ImageCache']
+    }
+
+    return cachePathParts.join(path.sep) + path.sep
+  }
 }

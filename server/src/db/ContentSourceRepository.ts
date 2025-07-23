@@ -443,3 +443,28 @@ function sortFunction(
     }
   }
 }
+
+export async function updateContentSourceCount(
+  url: string,
+  count: number,
+  countComplete: boolean
+) {
+
+  if(countComplete) {
+    return await db().query()
+      .updateTable('contentSource')
+      .set({
+        count,
+        countComplete: toNumber(countComplete)
+      })
+      .where('url', '=', url)
+      .execute()
+  } else {
+    return await db().query()
+      .updateTable('contentSource')
+      .set({count})
+      .where('url', '=', url)
+      .where('count', '<', count)
+      .execute()
+  }
+}

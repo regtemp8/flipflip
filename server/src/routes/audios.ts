@@ -418,22 +418,30 @@ router.delete('/:id', async (req, res) => {
   const status = result[0].numDeletedRows > 0n ? 204 : 500
   res.status(status).end()
 })
-router.get('/:id/metadata', async (req, res) => {
+router.get('/:id/metadata', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
   const url = await findAudioUrlById(id, userId)
-  const metadata = await readAudioMetadata(url)
-  if (metadata?.thumb != null) {
-    metadata.thumb = toAudioThumb(metadata.thumb)
-  }
+  try {
+    const metadata = await readAudioMetadata(url)
+    if (metadata?.thumb != null) {
+      metadata.thumb = toAudioThumb(metadata.thumb)
+    }
 
-  res.status(200).send({ ...metadata, id })
+    res.status(200).send({ ...metadata, id })
+  } catch(error) {
+    next(error)
+  }
 })
-router.get('/:id/bpm', async (req, res) => {
+router.get('/:id/bpm', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
   const url = await findAudioUrlById(id, userId)
-  const metadata = await readAudioMetadata(url)
-  res.status(200).send({ id, bpm: metadata.bpm })
+  try {
+    const metadata = await readAudioMetadata(url)
+    res.status(200).send({ id, bpm: metadata.bpm })
+  } catch(error) {
+    next(error)
+  }
 })
 export default router
