@@ -1239,13 +1239,12 @@ export function toPlaylist(row: PlaylistRow): Playlist {
 }
 
 export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
-  const { name, type, shuffle, repeat } = playlist
+  const { name, shuffle, repeat } = playlist
 
   return {
     name,
     repeat,
-    shuffle: toNumberOpt(shuffle),
-    type
+    shuffle: toNumberOpt(shuffle)
   }
 }
 
