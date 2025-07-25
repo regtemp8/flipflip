@@ -11,6 +11,17 @@ export async function findVisibleDisplayViewIds(displayId: number) {
     .execute()
 }
 
+export async function findDisplayViewIds(displayId: number) {
+  const rows = await db()
+    .query()
+    .selectFrom('displayView')
+    .select('id')
+    .where('displayId', '=', displayId)
+    .execute()
+
+  return rows.map((row) => row.id as number)
+}
+
 export async function findDisplayViewById(id: number) {
   return await db()
     .query()

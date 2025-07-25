@@ -14,7 +14,7 @@ import {
   toDisplayUpdate,
   toIdsArray
 } from '../db/mappers'
-import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
+import { findDisplayViewIds, findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
 import { User } from '../db/types/generated'
 
 const router = express.Router()
@@ -41,9 +41,11 @@ router.get('/ungrouped', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-  const source = await findDisplayById(Number(req.params.id))
-  if (source != null) {
-    res.status(200).send(toDisplay(source))
+  const id = Number(req.params.id)
+  const display = await findDisplayById(id)
+  const views = await findDisplayViewIds(id)
+  if (display != null) {
+    res.status(200).send(toDisplay(display, views))
   } else {
     res.status(404).end()
   }

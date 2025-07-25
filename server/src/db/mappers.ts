@@ -1197,13 +1197,13 @@ export function toTagUpdate(tag: Partial<Tag>): TagUpdate {
   }
 }
 
-export function toDisplay(row: DisplayRow): Display {
+export function toDisplay(row: DisplayRow, views: number[]): Display {
   const { id, name } = row
 
   return {
     id: id as number,
     name,
-    views: []
+    views
   }
 }
 
