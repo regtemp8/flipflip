@@ -187,10 +187,10 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
         >
           {view?.visible ? <Visibility /> : <VisibilityOff />}
         </IconButton>
-        <ColorPickerMinimal
+        {/* <ColorPickerMinimal
           selector={() => useGetDisplayViewColorQuery(viewID)}
           action={setDisplayViewColor(viewID)}
-        />
+        /> */}
         <ListItemText classes={{ primary: classes.root }} onClick={onItemClick}>
           {editingName != null ? (
             <form onSubmit={onEndEdit} className={classes.urlField}>
