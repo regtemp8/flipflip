@@ -1,10 +1,11 @@
 import express from 'express'
-import { SG } from 'flipflip-common'
+import { SG, ValueResponse } from 'flipflip-common'
 import {
   findDisplayById,
   findDisplaysWithSceneGroup,
   findDisplaysWithoutSceneGroup,
-  updateDisplay
+  updateDisplay,
+  createDisplay
 } from '../db/DisplayRepository'
 import {
   toSceneGroups,
@@ -14,8 +15,21 @@ import {
   toIdsArray
 } from '../db/mappers'
 import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
+import { User } from '../db/types/generated'
 
 const router = express.Router()
+
+router.post('/', async (req, res, next) => {
+  const user = req.user as User
+  try {
+    const id = await createDisplay(user.id as number)
+    const response: ValueResponse = { value: id as number }
+    res.status(200).send(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.get('/grouped', async (req, res) => {
   const groups = toSceneGroups(await findDisplaysWithSceneGroup(), SG.display)
   res.status(200).send(groups)

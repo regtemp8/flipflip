@@ -79,6 +79,7 @@ import GeneratorsTab from './GeneratorsTab'
 import PlaylistsTab from './PlaylistsTab'
 import ScenesTab from './ScenesTab'
 import {
+  useCreateDisplayMutation,
   useCreatePlaylistMutation,
   useCreateSceneMutation,
   useGetVersionQuery
@@ -432,6 +433,7 @@ function ScenePicker() {
   const { pathname } = useLocation()
   const [createScene] = useCreateSceneMutation()
   const [createPlaylist] = useCreatePlaylistMutation()
+  const [createDisplay] = useCreateDisplayMutation()
   const { data: version } = useGetVersionQuery()
   const sceneCount = 0
   const generatorCount = 0
@@ -467,7 +469,13 @@ function ScenePicker() {
     }
   }
   const onAddGenerator = () => {}
-  const onAddDisplay = () => {}
+  const onAddDisplay = async () => {
+    const { data } = await createDisplay()
+    if (data != null) {
+      navigate(`/displays/${data.value}`)
+    }
+  }
+
   const onAddPlaylist = () => {
     setOpenMenu(MO.createPlaylist)
   }

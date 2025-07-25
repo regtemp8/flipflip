@@ -649,6 +649,18 @@ export const flipflipApi = createApi({
         // .catch((reason) => {})
       }
     }),
+    createDisplay: builder.mutation<ValueResponse, void>({
+      query: () => ({
+        url: `api/displays`,
+        method: 'POST'
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }])
+        )
+      }
+    }),
     getDisplays: builder.query<number[], void>({
       query: () => `api/displays`,
       providesTags: (displays) =>
@@ -855,7 +867,8 @@ export const flipflipApi = createApi({
       SceneSelectOptionsRequest
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({
-        url: `api/displays/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
+        url: `api/displays/select-options`,
+        params: {includeExtra, includeRandom, onlyExtra}
       }),
       providesTags: (result) => {
         // TODO incorporate request params into cache key
@@ -1697,6 +1710,7 @@ export const {
   useGetContentSourceQuery,
   useUpdateContentSourceMutation,
   useSortContentSourcesMutation,
+  useCreateDisplayMutation,
   useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,

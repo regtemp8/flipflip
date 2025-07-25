@@ -1,5 +1,5 @@
 import { Updateable } from 'kysely'
-import { MVF, PLT, RP } from 'flipflip-common'
+import { getRandomColor, MVF, PLT, RP } from 'flipflip-common'
 import db from './database'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
@@ -221,5 +221,42 @@ export async function deleteTemporaryDisplay(displayId: number) {
       }
 
       await trx.deleteFrom('display').where('id', '=', displayId).execute()
+    })
+}
+
+export async function createDisplay(userId: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { id } = await trx
+        .insertInto('display')
+        .values({
+          userId,
+          name: 'New display',
+          temporary: toNumber(false)
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      await trx
+        .insertInto('displayView')
+        .values({
+          displayId: id as number,
+          name: 'New view',
+          x: 0,
+          y: 0,
+          z: 0,
+          width: 10,
+          height: 10,
+          color: getRandomColor(),
+          opacity: 100,
+          visible: toNumber(true),
+          sync: toNumber(false),
+          mirrorSyncedView: MVF.none
+        })
+        .execute()
+
+      return id
     })
 }
