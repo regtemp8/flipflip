@@ -10,6 +10,7 @@ import {
 } from '../../store/api/selectors'
 import { MVF, en } from 'flipflip-common'
 import { makeStyles } from 'tss-react/mui'
+import { useGetDisplayViewSyncOptionsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()(() => ({
   fullWidth: {
@@ -23,11 +24,9 @@ export interface DisplayViewSyncOptionsProps {
 }
 
 function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
-  const viewSyncOptions: Record<string, string> = {}
-  // const viewSyncOptions = useAppSelector(
-  //   selectDisplayViewSyncOptions(props.displayID)
-  // )
+  const { data } = useGetDisplayViewSyncOptionsQuery(props.displayID)
 
+  const viewSyncOptions: Record<string, string> = data ?? {}
   const { classes } = useStyles()
   return (
     <Grid2 container spacing={2}>

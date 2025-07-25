@@ -91,7 +91,6 @@ function AudioCard(props: AudioCardProps) {
                   type={PLT.audio}
                   selector={() => ({data: playlist})}
                   action={setSceneAudioPlaylist(props.sceneID, i)}
-                  create={createSceneAudioPlaylist(props.sceneID, i)}
                   hideLabel
                 /> */}
               </Grid2>

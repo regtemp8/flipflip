@@ -34,7 +34,9 @@ export async function findDisplaysWithoutSceneGroup(): Promise<
     .execute()
 }
 
-export async function findDisplayById(id: number): Promise<Display | undefined> {
+export async function findDisplayById(
+  id: number
+): Promise<Display | undefined> {
   return await db()
     .query()
     .selectFrom('display')

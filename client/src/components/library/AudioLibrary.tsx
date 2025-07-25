@@ -1644,7 +1644,6 @@ function AudioLibrary() {
             type={PLT.audio}
             selector={selectAudioLibraryPlaylistIDText()}
             action={setAudioLibraryPlaylistID}
-            create={createAudioLibraryPlaylist()}
           /> */}
         </Menu>
       )}

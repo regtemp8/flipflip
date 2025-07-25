@@ -81,8 +81,6 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             includeSingles
             selector={() => useGetDisplayViewScenePlaylistIDQuery(viewID)}
             action={setDisplayViewScenePlaylistID(viewID)}
-            create={() => {}}
-            // create={useCreateScenePlaylistMutation(viewID)}
           />
         </Collapse>
       </Grid2>

@@ -19,7 +19,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
+  Button,
+  Fab
 } from '@mui/material'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -60,9 +61,11 @@ import {
   useDeleteDisplayMutation,
   useDeleteDisplayViewMutation,
   useGetDisplayQuery,
-  useGetDisplaySettingsQuery
+  useGetVisibleDisplayViewIdsQuery,
+  usePlayDisplayMutation
 } from '../../store/api/slice'
-import { useGetDisplayNameQuery } from '../../store/api/selectors'
+import { useGetDisplayNameQuery, useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
+import { setFullScreen } from '../../data/fullscreen'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -143,12 +146,14 @@ function DisplaySetup() {
   const displayID = Number(id)
   const navigate = useNavigate()
   
+  const [playDisplay] = usePlayDisplayMutation()
   const [deleteDisplay] = useDeleteDisplayMutation()
   const [addDisplayView] = useAddDisplayViewMutation()
   const [cloneDisplayView] = useCloneDisplayViewMutation()
   const [deleteDisplayView] = useDeleteDisplayViewMutation()
-  const { data: _displaySettings } = useGetDisplaySettingsQuery()
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
   const { data: display } = useGetDisplayQuery(displayID)
+  const { data: visibleViewIDs } = useGetVisibleDisplayViewIdsQuery(displayID)
 
   const [isEditingName, setIsEditingName] = useState(false)
   const [userExpandedSettings, setUserExpandedSettings] = useState<boolean>()
@@ -195,9 +200,12 @@ function DisplaySetup() {
     navigate(-1)
   }
 
-  const onPlayDisplay = () => {
-    // dispatch(playDisplay(displayID))
-    // setFullScreen(displaySettings?.fullScreen)
+  const onPlayDisplay = async () => {
+    const { data } = await playDisplay(displayID)
+    if (data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.value}`)
+    }
   }
 
   const onCloneDisplay = () => {
@@ -353,15 +361,14 @@ function DisplaySetup() {
           )}
 
           <div className={classes.headerRight}>
-            <IconButton
-              edge="end"
-              color="inherit"
+            <Fab
+              disabled={(visibleViewIDs?.length ?? 0) === 0}
+              color="secondary"
               aria-label="Play"
               onClick={onPlayDisplay}
-              size="large"
             >
               <PlayCircleOutlineIcon fontSize="large" />
-            </IconButton>
+            </Fab>
           </div>
         </Toolbar>
       </AppBar>

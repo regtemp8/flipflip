@@ -20,9 +20,13 @@ import {
   findVisibleDisplayViewIds,
   addDisplayView,
   deleteDisplayView,
-  cloneDisplayView
+  cloneDisplayView,
+  findDisplayViewSyncOptions,
+  findDisplayViewById
 } from '../db/DisplayViewRepository'
-import { User } from '../db/types/generated'
+import { DisplayView, User } from '../db/types/generated'
+import players from '../player/PlayerService'
+import { toBoolean } from '../db/utils'
 
 const router = express.Router()
 
@@ -82,6 +86,17 @@ router.post('/:id/display-views', async (req, res, next) => {
   }
 })
 
+router.get('/:id/visible-display-views', async (req, res, next) => {
+  const id = Number(req.params.id)
+  try {
+    const rows = await findVisibleDisplayViewIds(id)
+    const ids = rows.map((row) => row.id as number)
+    res.status(200).send(ids)
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.delete('/:id/display-views/:viewId', async (req, res, next) => {
   const id = Number(req.params.id)
   const viewId = Number(req.params.viewId)
@@ -123,10 +138,42 @@ router.patch('/:id', async (req, res) => {
   res.status(status).end()
 })
 
-router.get('/select-options', (req, res) => {
+router.get('/select-options', async (req, res) => {
   // TODO do db query
   // const {includeExtra, includeRandom, onlyExtra} = req.params
   res.status(200).send({})
+})
+
+router.get('/:id/display-view-sync-options', async (req, res) => {
+  const id = Number(req.params.id)
+  const options = await findDisplayViewSyncOptions(id)
+  res.status(200).send(options)
+})
+
+router.post('/:id/play', async (req, res) => {
+  const id = Number(req.params.id)
+  const viewIds = await findVisibleDisplayViewIds(id)
+  if(viewIds.length === 0) {
+    res.status(400).send({error: 'No visible display views. Nothing to display'})
+    return
+  }
+
+  let canPlay = true
+  for(const {id} of viewIds) {
+    const view = await findDisplayViewById(id as number) as DisplayView
+    if(toBoolean(view.sync) === false && view.playlistId == null) {
+      canPlay = false
+      break
+    }
+  }
+
+  if(canPlay) {
+    const playerId = players().start(id, req.user as User)
+    const body: ValueResponse = { value: playerId }
+    res.status(200).send(body)
+  } else {
+    res.status(400).send({error: 'Not all display views have a playlist'})
+  }
 })
 
 export default router

@@ -1,8 +1,4 @@
-import { PlaylistType, SceneGroupItem } from 'flipflip-common'
-import { RootState } from '../../store/store'
 import ReduxProps from './ReduxProps'
-import { ThunkAction } from '@reduxjs/toolkit'
-import { Action } from 'redux'
 import BaseSelect from './BaseSelect'
 import { Box, IconButton, MenuItem, Theme, Tooltip } from '@mui/material'
 import { PLT } from 'flipflip-common'
@@ -12,7 +8,8 @@ import MovieIcon from '@mui/icons-material/Movie'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { makeStyles } from 'tss-react/mui'
 import { useNavigate } from 'react-router'
-import { useGetPlaylistOptionsQuery } from '../../store/api/slice'
+import { useCreatePlaylistMutation, useGetPlaylistOptionsQuery } from '../../store/api/slice'
+import { useAppDispatch } from '../../store/hooks'
 
 const playlistTypeDisplayNames: Record<string, string> = {}
 playlistTypeDisplayNames[PLT.audio] = 'Audio'
@@ -36,31 +33,32 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface PlaylistSelectProps extends ReduxProps<string> {
-  type: PlaylistType
-  create: ThunkAction<void, RootState, undefined, Action<string>>
+  type: string
   includeSingles?: boolean
   hideLabel?: boolean
 }
 
 export default function PlaylistSelect(props: PlaylistSelectProps) {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const [createPlaylist] = useCreatePlaylistMutation()
   const { data: options } = useGetPlaylistOptionsQuery(props.type)
   const { data: value } = props.selector()
 
   const playlistID = value != null ? Number(value) : 0
   const onOpen = () => {
-    navigate(`/playlist/${playlistID}`)
+    navigate(`/playlists/${playlistID}`)
+  }
+
+  const onCreate = async () => {
+    const { data } = await createPlaylist(props.type)
+    if (data != null) {
+      dispatch(props.action(data.value.toString()))
+      navigate(`/playlists/${data.value}`)
+    }
   }
 
   const { classes } = useStyles()
-  // TODO work in progress
-  // const singles =
-  //   props.includeSingles === true
-  //     ? [
-  //         { id: 9990, value: 'Wallpapers' },
-  //         { id: 9991, value: 'Cars' }
-  //       ]
-  //     : undefined
   const label = `${playlistTypeDisplayNames[props.type]} Playlist`
   return (
     <Box className={classes.flex}>
@@ -82,22 +80,15 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
         label={label}
         selector={props.selector}
         action={props.action}
-        create={props.create}
+        create={onCreate}
         controlClassName={classes.select}
         hideLabel={props.hideLabel}
       >
-        {options?.map((option: SceneGroupItem) => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.name}
+        {options?.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
           </MenuItem>
         ))}
-        {/* TODO work in progress */}
-        {/* {singles && <Divider>Single Scene</Divider>}
-        {singles?.map((option: SelectOption) => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.value}
-          </MenuItem>
-        ))} */}
       </BaseSelect>
     </Box>
   )

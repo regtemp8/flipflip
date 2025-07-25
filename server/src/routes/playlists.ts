@@ -6,6 +6,7 @@ import {
   SG,
   ScenePlaylistItem,
   SceneSelectOptionsRequest,
+  SelectOption,
   ValueResponse
 } from 'flipflip-common'
 import {
@@ -66,14 +67,6 @@ router.get('/grouped', async (req, res) => {
 
 router.get('/ungrouped', async (req, res) => {
   const items = toSceneGroupItems(await findPlaylistsWithoutSceneGroup())
-  res.status(200).send(items)
-})
-
-router.get('/options/:type', async (req, res) => {
-  const items = toSceneGroupItems(
-    await findPlaylistOptionsByType(req.params.type)
-  )
-  items.unshift({ id: 0, name: 'None' })
   res.status(200).send(items)
 })
 
@@ -299,10 +292,15 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.get('/select-options', (req, res) => {
-  const body = req.body as SceneSelectOptionsRequest
-  // TODO do db query
-  res.status(200).send({})
+router.get('/options/:type', async(req, res) => {
+  const rows = await findPlaylistOptionsByType(req.params.type)
+  const options: SelectOption[] = []
+  options.push({value: '0', label: 'None'})
+  for(const {itemId, itemName} of rows) {
+    options.push({value: (itemId as number).toString(), label: itemName})
+  }
+
+  res.status(200).send(options)
 })
 
 export default router

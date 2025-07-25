@@ -9,9 +9,6 @@ import {
 } from '@mui/material'
 import type ReduxProps from './ReduxProps'
 import { useAppDispatch } from '../../store/hooks'
-import { Action } from 'redux'
-import { RootState } from '../../store/store'
-import { ThunkAction } from '@reduxjs/toolkit'
 
 export interface BaseSelectProps extends ReduxProps<string> {
   label: string
@@ -21,7 +18,7 @@ export interface BaseSelectProps extends ReduxProps<string> {
   style?: any
   MenuProps?: any
   valueMapper?: (value: string) => string
-  create?: ThunkAction<void, RootState, undefined, Action<string>>
+  create?: () => Promise<void>
   hideLabel?: boolean
 }
 
@@ -39,19 +36,13 @@ export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
     return value
   }
 
-  const onChange = (event: SelectChangeEvent<string>) => {
+  const onChange = async (event: SelectChangeEvent<string>) => {
     const { value } = event.target
-    const action =
-      value === CREATE_NEW_VALUE
-        ? (props.create as ThunkAction<
-            void,
-            RootState,
-            undefined,
-            Action<string>
-          >)
-        : props.action(value)
-
-    dispatch(action)
+    if(value === CREATE_NEW_VALUE && props.create != null) {
+      await props.create()
+    } else if (value !== CREATE_NEW_VALUE) {
+      dispatch(props.action(value))
+    }
   }
 
   const hideLabel = props.hideLabel ?? false

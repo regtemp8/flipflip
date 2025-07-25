@@ -101,6 +101,7 @@ import {
   ScenePlaylistItemSceneInsert,
   ScenePlaylistItemUpdate
 } from './PlaylistItemRepository'
+import { DisplayViewUpdate } from './DisplayViewRepository'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,
@@ -1799,4 +1800,40 @@ export function toCaptionScriptPlaylistItemInsert(
 ): CaptionScriptPlaylistItemInsert {
   const { scriptID } = item
   return { playlistId, captionScriptId: scriptID as number, index: 0 }
+}
+
+export function toDisplayViewUpdate(
+  body: Partial<DisplayView>
+): DisplayViewUpdate {
+  const {
+    color,
+    height,
+    mirrorSyncedView,
+    name,
+    opacity,
+    playlistID,
+    sync,
+    syncWithView,
+    visible,
+    width,
+    x,
+    y,
+    z
+  } = body
+
+  return {
+    color,
+    height,
+    mirrorSyncedView,
+    name,
+    opacity,
+    playlistId: playlistID,
+    sync: toNumberOpt(sync),
+    syncWithView,
+    visible: toNumberOpt(visible),
+    width,
+    x,
+    y,
+    z
+  }
 }

@@ -1,6 +1,8 @@
 import { getRandomColor, MVF } from 'flipflip-common'
 import db from './database'
 import { toNumber } from './utils'
+import { DisplayView } from './types/generated'
+import { Updateable } from 'kysely'
 
 export async function findVisibleDisplayViewIds(displayId: number) {
   return await db()
@@ -9,6 +11,7 @@ export async function findVisibleDisplayViewIds(displayId: number) {
     .select('id')
     .where('displayId', '=', displayId)
     .where('visible', '=', toNumber(true))
+    .orderBy('index asc')
     .execute()
 }
 
@@ -18,6 +21,7 @@ export async function findDisplayViewIds(displayId: number) {
     .selectFrom('displayView')
     .select('id')
     .where('displayId', '=', displayId)
+    .orderBy('index asc')
     .execute()
 
   return rows.map((row) => row.id as number)
@@ -113,7 +117,7 @@ export async function deleteDisplayView(
         .where('displayId', '=', displayId)
         .where('id', '=', viewId)
         .executeTakeFirstOrThrow()
-        
+
       await trx
         .deleteFrom('displayView')
         .where('displayId', '=', displayId)
@@ -182,7 +186,7 @@ export async function cloneDisplayView(
         newName = name + ' #1'
       } else {
         const number = Number(names[names.length - 1])
-        if(!isNaN(number)) {
+        if (!isNaN(number)) {
           names[names.length - 1] = (number + 1).toString()
           newName = names.join('#')
         } else {
@@ -211,4 +215,31 @@ export async function cloneDisplayView(
         })
         .execute()
     })
+}
+
+export type DisplayViewUpdate = Updateable<DisplayView>
+export async function updateDisplayView(id: number, update: DisplayViewUpdate) {
+  return await db()
+    .query()
+    .updateTable('displayView')
+    .set(update)
+    .where('id', '=', id)
+    .execute()
+}
+
+export async function findDisplayViewSyncOptions(displayId: number): Promise<
+  Record<string, string>
+> {
+  const rows = await db()
+    .query()
+    .selectFrom('displayView')
+    .select(['id', 'name'])
+    .where('displayId', '=', displayId)
+    .where('sync', '=', toNumber(false))
+    .orderBy('index asc')
+    .execute()
+
+  const options: Record<string, string> = {}
+  rows.forEach(({ id, name }) => (options[(id as number).toString()] = name))
+  return options
 }

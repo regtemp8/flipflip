@@ -99,7 +99,6 @@ function TextCard(props: TextCardProps) {
                   type={PLT.script}
                   selector={() => ({ data: playlist })}
                   action={setSceneScriptPlaylist(props.sceneID, i)}
-                  create={createSceneScriptPlaylist(props.sceneID, i)}
                   hideLabel
                 /> */}
               </Grid2>

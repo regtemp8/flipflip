@@ -89,6 +89,8 @@ export const flipflipApi = createApi({
     'ContentSourceBatchTagOptions',
     'Display',
     'DisplayView',
+    'VisibleDisplayViewIds',
+    'DisplayViewSyncOptions',
     'Playlist',
     'SceneSelectOptions',
     'DisplaySelectOptions',
@@ -267,7 +269,7 @@ export const flipflipApi = createApi({
       query: () => `api/playlists/ungrouped`,
       providesTags: ['UngroupedPlaylists']
     }),
-    getPlaylistOptions: builder.query<SceneGroupItem[], string>({
+    getPlaylistOptions: builder.query<SelectOption[], string>({
       query: (type: string) => `api/playlists/options/${type}`,
       providesTags: (result, _error, type) =>
         result != null ? [{ type: 'PlaylistOptions', id: type }] : []
@@ -670,7 +672,7 @@ export const flipflipApi = createApi({
         await queryFulfilled
         // TODO update cache instead of invalidating it
         dispatch(
-          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }, { type: 'Display', id }])
+          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }, { type: 'Display', id },  {type: 'DisplayViewSyncOptions', id}])
         )
       }
     }),
@@ -696,7 +698,7 @@ export const flipflipApi = createApi({
         await queryFulfilled
         // TODO update cache instead of invalidating it
         dispatch(
-          flipflipApi.util.invalidateTags([{ type: 'Display', id: displayID }])
+          flipflipApi.util.invalidateTags([{ type: 'Display', id: displayID }, {type: 'DisplayViewSyncOptions', id: displayID}])
         )
       }
     }),
@@ -717,6 +719,18 @@ export const flipflipApi = createApi({
       query: () => `api/displays`,
       providesTags: (displays) =>
         displays != null ? [{ type: 'Display', id: 'List' }] : []
+    }),
+    playDisplay: builder.mutation<ValueResponse, number>({
+      query: (id) => ({ url: `api/displays/${id}/play`, method: 'POST' }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          if(status === 400) {
+            const message = (reason as any)?.error?.data as Message
+            snackbar().showMessage(message)
+          }
+        })
+      }
     }),
     getDisplay: builder.query<Display, number>({
       query: (id) => `api/displays/${id}`,
@@ -772,6 +786,22 @@ export const flipflipApi = createApi({
     >({
       query: ({ id, size }) => `api/view-players/${id}/items?size=${size}`
     }),
+    getDisplayViewSyncOptions: builder.query<
+      Record<string, string>,
+      number
+    >({
+      query: (id) => `api/displays/${id}/display-view-sync-options`,
+      providesTags: (options, error, id) =>
+        options != null ? [{type: 'DisplayViewSyncOptions', id}] : []
+    }),
+    getVisibleDisplayViewIds: builder.query<
+      number[],
+      number
+    >({
+      query: (id) => `api/displays/${id}/visible-display-views`,
+      providesTags: (ids, error, id) =>
+        ids != null ? [{type: 'VisibleDisplayViewIds', id}] : []
+    }),
     getDisplayView: builder.query<DisplayView, number>({
       query: (id) => `api/display-views/${id}`,
       providesTags: (view) =>
@@ -787,16 +817,22 @@ export const flipflipApi = createApi({
         body: patch
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'DisplayView', id }])
-            )
-          }
-        })
+        await queryFulfilled
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'DisplayView', id }])
+              )
+            }
+          })
+          .finally(() => {
+              dispatch(
+                flipflipApi.util.invalidateTags(['VisibleDisplayViewIds', 'DisplayViewSyncOptions'])
+              )
+          })
       }
     }),
     getPlaylist: builder.query<Playlist, number>({
@@ -813,12 +849,13 @@ export const flipflipApi = createApi({
         method: 'POST',
         body: { type }
       }),
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(type, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(
           flipflipApi.util.invalidateTags([
             'GroupedPlaylists',
-            'UngroupedPlaylists'
+            'UngroupedPlaylists',
+            { type: 'PlaylistOptions', id: type }
           ])
         )
       }
@@ -1768,6 +1805,7 @@ export const {
   useCloneDisplayViewMutation,
   useDeleteDisplayViewMutation,
   useGetDisplaysQuery,
+  usePlayDisplayMutation,
   useGetDisplayQuery,
   useUpdateDisplayMutation,
   useGetPlayerViewPlayersQuery,
@@ -1775,7 +1813,9 @@ export const {
   useStopPlayerMutation,
   useGetViewPlayerConfigQuery,
   useGetViewPlayerItemsQuery,
+  useGetVisibleDisplayViewIdsQuery,
   useGetDisplayViewQuery,
+  useGetDisplayViewSyncOptionsQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
   usePlayPlaylistMutation,
