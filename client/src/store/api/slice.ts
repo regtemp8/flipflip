@@ -661,6 +661,58 @@ export const flipflipApi = createApi({
         )
       }
     }),
+    deleteDisplay: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `api/displays/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }, { type: 'Display', id }])
+        )
+      }
+    }),
+    addDisplayView: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `api/displays/${id}/display-views`,
+        method: 'POST'
+      }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags([{ type: 'Display', id }])
+        )
+      }
+    }),
+    deleteDisplayView: builder.mutation<void, {displayID: number, viewID: number}>({
+      query: ({displayID, viewID}) => ({
+        url: `api/displays/${displayID}/display-views/${viewID}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({displayID}, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags([{ type: 'Display', id: displayID }])
+        )
+      }
+    }),
+    cloneDisplayView: builder.mutation<void, {displayID: number, viewID: number}>({
+      query: ({displayID, viewID}) => ({
+        url: `api/displays/${displayID}/display-views/${viewID}/clone`,
+        method: 'POST'
+      }),
+      async onQueryStarted({displayID}, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags([{ type: 'Display', id: displayID }])
+        )
+      }
+    }),
     getDisplays: builder.query<number[], void>({
       query: () => `api/displays`,
       providesTags: (displays) =>
@@ -1711,6 +1763,10 @@ export const {
   useUpdateContentSourceMutation,
   useSortContentSourcesMutation,
   useCreateDisplayMutation,
+  useDeleteDisplayMutation,
+  useAddDisplayViewMutation,
+  useCloneDisplayViewMutation,
+  useDeleteDisplayViewMutation,
   useGetDisplaysQuery,
   useGetDisplayQuery,
   useUpdateDisplayMutation,

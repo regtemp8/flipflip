@@ -36,16 +36,10 @@ import {
   selectDisplayViewsListYOffset
 } from '../../store/display/selectors'
 import { setDisplayName } from '../../store/api/thunks'
-// import {
-//   addDisplayView,
-//   cloneDisplay,
-//   cloneDisplayView,
-//   removeDisplay,
-//   removeDisplayView
-// } from '../../store/display/thunks'
 import BaseTextField from '../common/text/BaseTextField'
 import DisplayViewSettings from './DisplayViewSettings'
 import {
+  setDisplayAddedView,
   setDisplayViewsListYOffset
   // swapDisplayViews
 } from '../../store/display/slice'
@@ -61,6 +55,10 @@ import {
 import { MO } from 'flipflip-common'
 import { useNavigate, useParams } from 'react-router'
 import {
+  useAddDisplayViewMutation,
+  useCloneDisplayViewMutation,
+  useDeleteDisplayMutation,
+  useDeleteDisplayViewMutation,
   useGetDisplayQuery,
   useGetDisplaySettingsQuery
 } from '../../store/api/slice'
@@ -144,7 +142,11 @@ function DisplaySetup() {
   const { id } = useParams()
   const displayID = Number(id)
   const navigate = useNavigate()
-
+  
+  const [deleteDisplay] = useDeleteDisplayMutation()
+  const [addDisplayView] = useAddDisplayViewMutation()
+  const [cloneDisplayView] = useCloneDisplayViewMutation()
+  const [deleteDisplayView] = useDeleteDisplayViewMutation()
   const { data: _displaySettings } = useGetDisplaySettingsQuery()
   const { data: display } = useGetDisplayQuery(displayID)
 
@@ -215,21 +217,24 @@ function DisplaySetup() {
     setOpenMenu(undefined)
   }
 
-  const onFinishDeleteDisplay = () => {
+  const onFinishDeleteDisplay = async () => {
     setOpenMenu(undefined)
-    // dispatch(removeDisplay(displayID))
+    await deleteDisplay(displayID)
+    navigate('/displays')
   }
 
-  const onAddView = () => {
-    // dispatch(addDisplayView(displayID))
+  const onAddView = async () => {
+    dispatch(setDisplayAddedView(true))
+    await addDisplayView(displayID)
   }
 
-  const onCloneView = () => {
-    // dispatch(cloneDisplayView(displayID, selectedView as number))
+  const onCloneView = async () => {
+    dispatch(setDisplayAddedView(true))
+    await cloneDisplayView({displayID, viewID: selectedView as number})
   }
 
-  const onDeleteView = () => {
-    // dispatch(removeDisplayView(displayID, selectedView as number))
+  const onDeleteView = async () => {
+    await deleteDisplayView({displayID, viewID: selectedView as number})
   }
 
   const toggleSettingsExpand = () => {

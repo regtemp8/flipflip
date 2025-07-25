@@ -5,7 +5,8 @@ import {
   findDisplaysWithSceneGroup,
   findDisplaysWithoutSceneGroup,
   updateDisplay,
-  createDisplay
+  createDisplay,
+  deleteDisplay
 } from '../db/DisplayRepository'
 import {
   toSceneGroups,
@@ -14,7 +15,13 @@ import {
   toDisplayUpdate,
   toIdsArray
 } from '../db/mappers'
-import { findDisplayViewIds, findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
+import {
+  findDisplayViewIds,
+  findVisibleDisplayViewIds,
+  addDisplayView,
+  deleteDisplayView,
+  cloneDisplayView
+} from '../db/DisplayViewRepository'
 import { User } from '../db/types/generated'
 
 const router = express.Router()
@@ -43,11 +50,61 @@ router.get('/ungrouped', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const id = Number(req.params.id)
   const display = await findDisplayById(id)
-  const views = await findDisplayViewIds(id)
   if (display != null) {
+    const views = await findDisplayViewIds(id)
     res.status(200).send(toDisplay(display, views))
   } else {
     res.status(404).end()
+  }
+})
+
+router.delete('/:id', async (req, res, next) => {
+  const id = Number(req.params.id)
+  const user = req.user as User
+  const userId = user.id as number
+  try {
+    await deleteDisplay(id, userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/display-views', async (req, res, next) => {
+  const id = Number(req.params.id)
+  const user = req.user as User
+  const userId = user.id as number
+  try {
+    await addDisplayView(id, userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/:id/display-views/:viewId', async (req, res, next) => {
+  const id = Number(req.params.id)
+  const viewId = Number(req.params.viewId)
+  const user = req.user as User
+  const userId = user.id as number
+  try {
+    await deleteDisplayView(id, viewId, userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/display-views/:viewId/clone', async (req, res, next) => {
+  const id = Number(req.params.id)
+  const viewId = Number(req.params.viewId)
+  const user = req.user as User
+  const userId = user.id as number
+  try {
+    await cloneDisplayView(id, viewId, userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
   }
 })
 

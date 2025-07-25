@@ -34,13 +34,13 @@ export async function findDisplaysWithoutSceneGroup(): Promise<
     .execute()
 }
 
-export async function findDisplayById(id: number): Promise<Display> {
+export async function findDisplayById(id: number): Promise<Display | undefined> {
   return await db()
     .query()
     .selectFrom('display')
     .selectAll()
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export type DisplayUpdate = Updateable<Display>
@@ -118,7 +118,8 @@ export async function createTempDisplayForScene(
           visible: toNumber(true),
           playlistId,
           sync: toNumber(false),
-          mirrorSyncedView: MVF.none
+          mirrorSyncedView: MVF.none,
+          index: 0
         })
         .execute()
 
@@ -160,7 +161,8 @@ export async function createTempDisplayForPlaylist(
           visible: toNumber(true),
           playlistId,
           sync: toNumber(false),
-          mirrorSyncedView: MVF.none
+          mirrorSyncedView: MVF.none,
+          index: 0
         })
         .execute()
 
@@ -253,10 +255,32 @@ export async function createDisplay(userId: number) {
           opacity: 100,
           visible: toNumber(true),
           sync: toNumber(false),
-          mirrorSyncedView: MVF.none
+          mirrorSyncedView: MVF.none,
+          index: 0
         })
         .execute()
 
       return id
+    })
+}
+
+export async function deleteDisplay(id: number, userId: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const canDelete = await trx
+        .selectFrom('display')
+        .select((eb) => eb.lit(1).as('exists'))
+        .where('id', '=', id)
+        .where('userId', '=', userId)
+        .executeTakeFirst()
+
+      if (canDelete == null) {
+        return
+      }
+
+      await trx.deleteFrom('displayView').where('displayId', '=', id).execute()
+      await trx.deleteFrom('display').where('id', '=', id).execute()
     })
 }
