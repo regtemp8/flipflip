@@ -1,12 +1,12 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { flipflipApi } from '../api/slice'
 
 interface DisplayState {
-  selectedView: number
+  selectedView?: number
   displayViewsListYOffset: number
 }
 
 export const initialState: DisplayState = {
-  selectedView: 0,
   displayViewsListYOffset: 0
 }
 export const displaySlice = createSlice({
@@ -26,6 +26,16 @@ export const displaySlice = createSlice({
     setDisplayViewsListYOffset: (state, action: PayloadAction<number>) => {
       state.displayViewsListYOffset = action.payload
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addMatcher(
+        flipflipApi.endpoints.getDisplay.matchFulfilled,
+        (state, action) => {
+          const views = action.payload.views
+          state.selectedView = views.length > 0 ? views[0] : undefined
+        }
+      )
   }
 })
 
