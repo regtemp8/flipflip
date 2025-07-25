@@ -1,9 +1,7 @@
-import { PlaylistType } from './PlaylistType';
-
 export type Playlist = {
   id: number;
   name: string;
-  type: PlaylistType;
+  type: string;
   items: number[];
   shuffle: boolean;
   repeat: string;

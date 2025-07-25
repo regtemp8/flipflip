@@ -1,6 +1,7 @@
+import { PlaylistItem } from "./PlaylistItem";
+
 export type DisplayPlaylistItem = {
-  id: number;
   displayID: number;
   randomDisplays: number[];
   duration: number;
-};
+} & PlaylistItem;

@@ -549,6 +549,7 @@ const sceneTable = async (trx: Kysely<DB>) => {
     .addColumn('textEnabled', 'boolean', (col) => col.notNull())
     .addColumn('scriptStartIndex', 'integer', (col) => col.notNull())
     .addColumn('regenerate', 'boolean', (col) => col.notNull())
+    .addColumn('weightsValid', 'boolean', (col) => col.notNull())
     .addColumn('defaultScene', 'boolean', (col) => col.notNull())
     .addForeignKeyConstraint('FK_scene_user_userId', ['userId'], 'user', ['id'])
     .addForeignKeyConstraint(
@@ -776,7 +777,7 @@ const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
-    .addColumn('duration', 'integer')
+    .addColumn('duration', 'integer', (col) => col.notNull())
     .addColumn('playAfterAllImages', 'boolean', (col) => col.notNull())
     .addForeignKeyConstraint(
       'FK_scenePlaylistItem_playlist_playlistId',
@@ -793,7 +794,7 @@ const scenePlaylistItemSceneTable = async (trx: Kysely<DB>) => {
     .createTable('scenePlaylistItemScene')
     .addColumn('id', 'integer', (col) => col.primaryKey())
     .addColumn('scenePlaylistItemId', 'integer', (col) => col.notNull())
-    .addColumn('sceneId', 'integer', (col) => col.notNull())
+    .addColumn('sceneId', 'integer')
     .addForeignKeyConstraint(
       'FK_scenePlaylistItemScene_scenePlaylistItem_scenePlaylistItemId',
       ['scenePlaylistItemId'],

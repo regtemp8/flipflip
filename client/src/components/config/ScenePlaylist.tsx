@@ -30,16 +30,20 @@ import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import SelectAllIcon from '@mui/icons-material/SelectAll'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import Sortable from 'react-sortablejs'
-import { RP } from 'flipflip-common'
+import { PLT, RP, SCENE_NONE, SCENE_RANDOM, ScenePlaylistItem } from 'flipflip-common'
 import SceneSelect from '../configGroups/SceneSelect'
-// import { useNavigate } from 'react-router'
 import {
   useGetPlaylistQuery,
-  useGetScenePlaylistItemQuery,
   useGetScenesQuery,
-  useUpdatePlaylistMutation
+  useUpdatePlaylistMutation,
+  useCreatePlaylistItemMutation,
+  useGetPlaylistItemQuery,
+  useDeletePlaylistItemMutation,
+  useGetPlaylistItemIdsQuery,
+  useUpdatePlaylistItemMutation
 } from '../../store/api/slice'
 import MultiSceneSelect from '../configGroups/MultiSceneSelect'
+import { useNavigate } from 'react-router'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   randomSceneDialog: {
@@ -84,15 +88,17 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 interface ScenePlaylistItemEditDialogProps {
-  itemID: number
+  playlistID: number
+  item?: ScenePlaylistItem
   open: boolean
   onClose: () => void
 }
 
 function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
-  const { itemID, open, onClose } = props
+  const { playlistID, item, open, onClose } = props
+  const [createPlaylistItem] = useCreatePlaylistItemMutation()
+  const [updatePlaylistItem] = useUpdatePlaylistItemMutation()
   const { data: allScenes } = useGetScenesQuery()
-  const { data: item } = useGetScenePlaylistItemQuery(itemID)
 
   const [unsavedSceneID, setUnsavedSceneID] = useState<number>()
   const [unsavedRandomScenes, setUnsavedRandomScenes] = useState<number[]>()
@@ -133,21 +139,34 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
     setUnsavedPlayAfterAllImages(checked)
   }
 
-  const onSave = () => {
-    // const newItem = {
-    //   id: itemID,
-    //   sceneID: unsavedSceneID ?? item?.sceneID,
-    //   randomScenes: unsavedRandomScenes ?? item?.randomScenes,
-    //   duration: unsavedDuration ?? item?.duration,
-    //   playAfterAllImages: unsavedPlayAfterAllImages ?? item?.playAfterAllImages
-    // }
+  const onSave = async () => {
+    if(item == null) {
+      await createPlaylistItem({
+        id: playlistID, 
+        type: PLT.scene,
+        index: 0,
+        sceneName: '', // TODO remove or split up, only used for getting data
+        sceneID: unsavedSceneID ?? SCENE_NONE,
+        randomScenes: unsavedRandomScenes ?? [],
+        duration: unsavedDuration ?? 0,
+        playAfterAllImages: unsavedPlayAfterAllImages ?? false
+      })
+    } else {
+      await updatePlaylistItem({
+        playlistID, 
+        itemID: item.id,
+        sceneID: unsavedSceneID,
+        randomScenes: unsavedRandomScenes,
+        duration: unsavedDuration,
+        playAfterAllImages: unsavedPlayAfterAllImages
+      })
+    }
 
-    // dispatch(setScenePlaylistItem(newItem))
     onClose()
   }
 
   const { classes } = useStyles()
-  const currentSceneID = unsavedSceneID ?? item?.sceneID ?? 0
+  const currentSceneID = unsavedSceneID ?? item?.sceneID ?? SCENE_NONE
   const currentRandomScenes = unsavedRandomScenes ?? item?.randomScenes
   const currentDuration = unsavedDuration ?? item?.duration
   const currentPlayAfterAllImages =
@@ -248,44 +267,32 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   )
 }
 
-interface ScenePlaylistItemProps {
+interface ScenePlaylistRowProps {
   playlistID: number
   itemID: number
   index: number
+  onEdit: (item: ScenePlaylistItem) => void
 }
 
-function ScenePlaylistItem(props: ScenePlaylistItemProps) {
-  const { itemID } = props
-  // const navigate = useNavigate()
-  // const sceneID = useAppSelector(selectScenePlaylistItemSceneID(itemID))
-  // const sceneNameSelector =
-  //   sceneID === 0
-  //     ? (state: RootState) => 'None'
-  //     : sceneID === -1
-  //       ? (state: RootState) => 'Random'
-  //       : selectSceneName(sceneID)
-  // const sceneName = useAppSelector(sceneNameSelector)
+function ScenePlaylistRow(props: ScenePlaylistRowProps) {
+  const { playlistID, itemID } = props
+  const navigate = useNavigate()
+  const [deletePlaylistItem] = useDeletePlaylistItemMutation()
+  const {data} = useGetPlaylistItemQuery({playlistID, itemID})
 
-  // TODO include displayName in playlist item JSON?
-  const sceneID: number = 0
-  const sceneName = 'None'
-  const [editing, setEditing] = useState<boolean>(false)
-
+  const {sceneID, sceneName} = data != null ? data as ScenePlaylistItem : {sceneID: 0, sceneName: '' }
   const onOpenScene = () => {
-    // navigate(`/scenes/${sceneID}`)
+    navigate(`/scenes/${sceneID}`)
   }
 
-  const removeItem = () => {
-    // dispatch(
-    //   setPlaylistRemoveItem({
-    //     id: playlistID,
-    //     value: index
-    //   })
-    // )
+  const editItem = () => {
+    if(data != null) {
+      props.onEdit(data as ScenePlaylistItem)
+    }
   }
-
-  const openEdit = () => setEditing(true)
-  const closeEdit = () => setEditing(false)
+  const removeItem = async() => {
+    await deletePlaylistItem({playlistID, itemID})
+  }
 
   const { classes } = useStyles()
   return (
@@ -293,7 +300,7 @@ function ScenePlaylistItem(props: ScenePlaylistItemProps) {
       <ListItem
         secondaryAction={
           <>
-            <IconButton edge="end" onClick={openEdit} size="large">
+            <IconButton edge="end" onClick={editItem} size="large">
               <BuildIcon />
             </IconButton>
             <IconButton edge="end" onClick={removeItem} size="large">
@@ -309,7 +316,7 @@ function ScenePlaylistItem(props: ScenePlaylistItemProps) {
                 size="small"
                 className={classes.avatar}
                 onClick={onOpenScene}
-                disabled={sceneID === -1 || sceneID === 0}
+                disabled={sceneID === SCENE_RANDOM || sceneID === SCENE_NONE}
               >
                 <MovieIcon className={classes.sourceIcon} />
               </IconButton>
@@ -318,11 +325,6 @@ function ScenePlaylistItem(props: ScenePlaylistItemProps) {
         </ListItemAvatar>
         <ListItemText primary={sceneName} />
       </ListItem>
-      <ScenePlaylistItemEditDialog
-        itemID={itemID}
-        open={editing}
-        onClose={closeEdit}
-      />
     </>
   )
 }
@@ -334,10 +336,18 @@ export interface ScenePlaylistProps {
 function ScenePlaylist(props: ScenePlaylistProps) {
   const { playlistID } = props
   const { data: playlist } = useGetPlaylistQuery(playlistID)
+  const { data: itemIDs } = useGetPlaylistItemIdsQuery(playlistID)
   const [updatePlaylist] = useUpdatePlaylistMutation()
+
+  const [editingItem, setEditingItem] = useState<ScenePlaylistItem>()
+  const [editing, setEditing] = useState(false)
 
   const toggleShuffle = async () => {
     await updatePlaylist({ id: playlistID, shuffle: !playlist?.shuffle })
+  }
+
+  const addPlaylistItem = async () => {
+    setEditing(true)
   }
 
   const changeRepeat = async () => {
@@ -357,8 +367,18 @@ function ScenePlaylist(props: ScenePlaylistProps) {
     await updatePlaylist({ id: playlistID, repeat })
   }
 
+  const onShowEditDialog = (item?: ScenePlaylistItem) => {
+    setEditing(true)
+    setEditingItem(item)
+  }
+
+  const onCloseEditDialog = () => {
+    setEditing(false)
+    setEditingItem(undefined)
+  }
+
   const { classes } = useStyles()
-  return (
+  return (<>
     <List>
       <Sortable
         className={classes.scriptList}
@@ -366,24 +386,25 @@ function ScenePlaylist(props: ScenePlaylistProps) {
           animation: 150,
           easing: 'cubic-bezier(1, 0, 0, 1)'
         }}
-        // onChange={(order: any, sortable: any, evt: any) => {
-        //   dispatch(
-        //     setPlaylistSortItems({
-        //       id: playlistID,
-        //       value: {
-        //         oldIndex: evt.oldIndex,
-        //         newIndex: evt.newIndex
-        //       }
-        //     })
-        //   )
-        // }}
+        onChange={(order: any, sortable: any, evt: any) => {
+          // dispatch(
+          //   setPlaylistSortItems({
+          //     id: playlistID,
+          //     value: {
+          //       oldIndex: evt.oldIndex,
+          //       newIndex: evt.newIndex
+          //     }
+          //   })
+          // )
+        }}
       >
-        {playlist?.items.map((id, index) => (
-          <ScenePlaylistItem
+        {itemIDs?.map((id, index) => (
+          <ScenePlaylistRow
             key={index}
             playlistID={playlistID}
             itemID={id}
             index={index}
+            onEdit={onShowEditDialog}
           />
         ))}
       </Sortable>
@@ -419,7 +440,7 @@ function ScenePlaylist(props: ScenePlaylistProps) {
         </div>
         <Tooltip disableInteractive title="Add Scenes">
           <IconButton
-            onClick={() => {} /*dispatch(addToPlaylist(playlistID))*/}
+            onClick={addPlaylistItem}
             size="large"
           >
             <AddIcon />
@@ -427,6 +448,13 @@ function ScenePlaylist(props: ScenePlaylistProps) {
         </Tooltip>
       </div>
     </List>
+    <ScenePlaylistItemEditDialog
+        playlistID={playlistID}
+        item={editingItem}
+        open={editing}
+        onClose={onCloseEditDialog}
+      />
+    </>
   )
 }
 

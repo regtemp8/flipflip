@@ -33,7 +33,7 @@ import DisplaySelect from '../configGroups/DisplaySelect'
 import MultiDisplaySelect from '../configGroups/MultiDisplaySelect'
 // import { useNavigate } from 'react-router'
 import {
-  useGetDisplayPlaylistItemQuery,
+  // useGetDisplayPlaylistItemQuery,
   // useGetDisplaysQuery,
   useGetPlaylistQuery,
   useUpdatePlaylistMutation
@@ -92,7 +92,8 @@ function DisplayPlaylistItemEditDialog(
 ) {
   const { itemID, open, onClose } = props
   // const { data: allDisplays } = useGetDisplaysQuery()
-  const { data: item } = useGetDisplayPlaylistItemQuery(itemID)
+  // const { data: item } = useGetDisplayPlaylistItemQuery(itemID)
+  const item: any = undefined
 
   const [unsavedDisplayID, setUnsavedDisplayID] = useState<number>()
   const [unsavedRandomDisplays, setUnsavedRandomDisplays] = useState<number[]>()

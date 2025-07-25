@@ -6,6 +6,7 @@ import {
   findSceneById,
   findSceneHasBpm,
   findSceneIds,
+  findSceneSelectOptions,
   findScenesWithSceneGroup,
   findScenesWithoutSceneGroup,
   isDefaultScene,
@@ -58,10 +59,21 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.get('/select-options', (req, res) => {
-  // TODO do db query
-  // const {includeExtra, includeRandom, onlyExtra} = req.params
-  res.status(200).send({})
+router.get('/select-options', async (req, res) => {
+  const options = await findSceneSelectOptions()
+  const { includeExtra, includeRandom, onlyExtra } = req.query
+  if (includeExtra === 'true') {
+    options['0'] = 'None'
+    options['-1'] = 'Random'
+  } else if (includeRandom === 'true') {
+    options['-1'] = 'Random'
+  } else if (onlyExtra === 'true') {
+    options['-1'] = '~~EMPTY~~'
+  } else {
+    options['0'] = 'None'
+  }
+
+  res.status(200).send(options)
 })
 
 router.get('/:id', async (req, res) => {

@@ -475,6 +475,7 @@ export interface Scene {
   videoTimingMin: number
   videoVolume: number
   weightFunction: string
+  weightsValid: number
   zoom: number
   zoomEnd: number
   zoomEndMax: number
@@ -499,7 +500,7 @@ export interface ScenePlaylist {
 }
 
 export interface ScenePlaylistItem {
-  duration: number | null
+  duration: number
   id: number | null
   index: number
   playAfterAllImages: number
@@ -508,7 +509,7 @@ export interface ScenePlaylistItem {
 
 export interface ScenePlaylistItemScene {
   id: number | null
-  sceneId: number
+  sceneId: number | null
   scenePlaylistItemId: number
 }
 

@@ -604,6 +604,9 @@ const PLT = {
   script: 'plt.script',
 };
 
+const SCENE_RANDOM = -1
+const SCENE_NONE = 0
+
 export {
   AF,
   ALT,
@@ -654,4 +657,6 @@ export {
   WF,
   MVF,
   PLT,
+  SCENE_NONE,
+  SCENE_RANDOM
 };

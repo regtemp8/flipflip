@@ -20,7 +20,6 @@ import {
   Display,
   DisplayView,
   Playlist,
-  DisplayPlaylistItem,
   ScenePlaylistItem,
   FontSettings,
   FontSettingsType,
@@ -40,7 +39,9 @@ import {
   ViewPlayerConfig,
   ValueResponse,
   ScraperProgress,
-  ImageViewData
+  ImageViewData,
+  AudioPlaylistItem,
+  CaptionScriptPlaylistItem
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -91,8 +92,8 @@ export const flipflipApi = createApi({
     'Playlist',
     'SceneSelectOptions',
     'DisplaySelectOptions',
-    'DisplayPlaylistItems',
-    'ScenePlaylistItems',
+    'PlaylistItem',
+    'PlaylistItemIds',
     'CaptionScript',
     'CaptionScriptFontSettings',
     'CaptionScriptBatchTagOptions',
@@ -739,6 +740,9 @@ export const flipflipApi = createApi({
       providesTags: (view) =>
         view != null ? [{ type: 'Playlist', id: view.id }] : []
     }),
+    playPlaylist: builder.mutation<ValueResponse, number>({
+      query: (id) => ({ url: `api/playlists/${id}/play`, method: 'POST' })
+    }),
     createPlaylist: builder.mutation<ValueResponse, string>({
       query: (type) => ({
         url: `api/playlists`,
@@ -755,6 +759,36 @@ export const flipflipApi = createApi({
         )
       }
     }),
+    createPlaylistItem: builder.mutation<void, {id: number} & (AudioPlaylistItem | ScenePlaylistItem | CaptionScriptPlaylistItem)>({
+      query: ({id, ...item}) => ({
+        url: `api/playlists/${id}/items`,
+        method: 'POST',
+        body: item
+      }),
+      async onQueryStarted({id}, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            {type: 'PlaylistItemIds', id}
+          ])
+        )
+      }
+    }),
+    updatePlaylistItem: builder.mutation<void, {playlistID: number, itemID: number} & Partial<AudioPlaylistItem | ScenePlaylistItem | CaptionScriptPlaylistItem>>({
+      query: ({playlistID, itemID, ...patch}) => ({
+        url: `api/playlists/${playlistID}/items/${itemID}`,
+        method: 'PATCH',
+        body: patch
+      }),
+      async onQueryStarted({playlistID, itemID}, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            { type: 'PlaylistItem', id: `${playlistID}-${itemID}` }
+          ])
+        )
+      }
+    }),
     updatePlaylist: builder.mutation<
       void,
       Pick<Playlist, 'id'> & Partial<Playlist>
@@ -765,16 +799,22 @@ export const flipflipApi = createApi({
         body: patch
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
-            )
-          }
-        })
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
+        )
+
+        // TODO update cache, only invalidate tag if error
+        // await queryFulfilled.catch((reason) => {
+        //   const status = reason.meta?.response?.status
+        //   // TODO implement etags (412)
+        //   // TODO implement userId checks (403)
+        //   if (status === 412 || status === 403) {
+        //     dispatch(
+        //       flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
+        //     )
+        //   }
+        // })
       }
     }),
     clonePlaylist: builder.mutation<void, number>({
@@ -802,7 +842,8 @@ export const flipflipApi = createApi({
       SceneSelectOptionsRequest
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({
-        url: `api/scenes/select-options?includeExtra=${includeExtra}&includeRandom=${includeRandom}&onlyExtra=${onlyExtra}`
+        url: `api/scenes/select-options`,
+        params: {includeExtra, includeRandom, onlyExtra}
       }),
       providesTags: (result) => {
         // TODO incorporate request params into cache key
@@ -821,24 +862,41 @@ export const flipflipApi = createApi({
         return result != null ? ['DisplaySelectOptions'] : []
       }
     }),
-    getDisplayPlaylistItem: builder.query<DisplayPlaylistItem, number>({
+    getPlaylistItemIds: builder.query<number[], number>({
       query: (id) => ({
-        url: `api/display-playlist-items/${id}`
+        url: `api/playlists/${id}/items`
       }),
-      providesTags: (result) => {
+      providesTags: (result, error, id) => {
         return result != null
-          ? [{ type: 'DisplayPlaylistItems', id: result.id }]
+          ? [{ type: 'PlaylistItemIds', id }]
           : []
       }
     }),
-    getScenePlaylistItem: builder.query<ScenePlaylistItem, number>({
-      query: (id) => ({
-        url: `api/scene-playlist-items/${id}`
+    getPlaylistItem: builder.query<AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem, {playlistID: number, itemID: number}>({
+      query: ({playlistID, itemID}) => ({
+        url: `api/playlists/${playlistID}/items/${itemID}`
       }),
-      providesTags: (result) => {
+      providesTags: (result, error, {playlistID, itemID}) => {
         return result != null
-          ? [{ type: 'ScenePlaylistItems', id: result.id }]
+          ? [{ type: 'PlaylistItem', id: `${playlistID}-${itemID}` }]
           : []
+      }
+    }),
+    deletePlaylistItem: builder.mutation<void, {playlistID: number, itemID: number}>({
+      query: ({ playlistID, itemID }) => ({
+        url: `api/playlists/${playlistID}/items/${itemID}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted({ playlistID, itemID }, { dispatch, queryFulfilled }) {
+        const query = await queryFulfilled
+        if (query?.meta?.response?.ok) {
+          dispatch(
+            flipflipApi.util.invalidateTags([
+              { type: 'PlaylistItemIds', id: playlistID },
+              { type: 'PlaylistItem', id: `${playlistID}-${itemID}` }
+            ])
+          )
+        }
       }
     }),
     createCaptionScripts: builder.mutation<Message[] | undefined, string[]>({
@@ -1650,14 +1708,18 @@ export const {
   useGetDisplayViewQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
+  usePlayPlaylistMutation,
   useCreatePlaylistMutation,
+  useCreatePlaylistItemMutation,
+  useUpdatePlaylistItemMutation,
   useUpdatePlaylistMutation,
   useClonePlaylistMutation,
   useDeletePlaylistMutation,
   useGetSceneSelectOptionsQuery,
   useGetDisplaySelectOptionsQuery,
-  useGetDisplayPlaylistItemQuery,
-  useGetScenePlaylistItemQuery,
+  useGetPlaylistItemIdsQuery,
+  useGetPlaylistItemQuery,
+  useDeletePlaylistItemMutation,
   useGetCaptionScriptQuery,
   useDeleteCaptionScriptsMutation,
   useUpdateCaptionScriptMutation,

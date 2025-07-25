@@ -126,6 +126,48 @@ export async function createTempDisplayForScene(
     })
 }
 
+export async function createTempDisplayForPlaylist(
+  playlistId: number,
+  userId: number
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const display = await trx
+        .insertInto('display')
+        .values({
+          name: `Temp display for playlist ${playlistId}`,
+          temporary: toNumber(true),
+          userId
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      const displayId = display.id as number
+      await trx
+        .insertInto('displayView')
+        .values({
+          displayId,
+          name: 'View',
+          x: 0,
+          y: 0,
+          z: 0,
+          width: 100,
+          height: 100,
+          color: '#000000',
+          opacity: 100,
+          visible: toNumber(true),
+          playlistId,
+          sync: toNumber(false),
+          mirrorSyncedView: MVF.none
+        })
+        .execute()
+
+      return displayId
+    })
+}
+
 export async function deleteTemporaryDisplay(displayId: number) {
   return await db()
     .query()

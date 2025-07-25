@@ -53,10 +53,13 @@ import SceneSelect from '../configGroups/SceneSelect'
 import {
   useClonePlaylistMutation,
   useDeletePlaylistMutation,
-  useGetDisplaySettingsQuery,
-  useGetPlaylistQuery
+  useGetPlaylistItemIdsQuery,
+  useGetPlaylistQuery,
+  usePlayPlaylistMutation
 } from '../../store/api/slice'
 import { useNavigate, useParams } from 'react-router'
+import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
+import { setFullScreen } from '../../data/fullscreen'
 
 const drawerWidth = 240
 
@@ -185,8 +188,10 @@ function PlaylistSetup() {
   const autoEdit = false // useAppSelector(selectAppSpecialMode()) === SP.autoEdit
   const [deletePlaylist] = useDeletePlaylistMutation()
   const [clonePlaylist] = useClonePlaylistMutation()
+  const [playPlaylist] = usePlayPlaylistMutation()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
-  const { data: _displaySettings } = useGetDisplaySettingsQuery()
+  const { data: items} = useGetPlaylistItemIdsQuery(playlistID)
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -199,17 +204,13 @@ function PlaylistSetup() {
     }
   }, [autoEdit, playlist?.name])
 
-  const onPlayPlaylist = () => {
-    // if (type === PLT.audio) {
-    //   dispatch(playAudioPlaylist(playlistID, sceneID))
-    // } else if (type === PLT.display) {
-    //   dispatch(playDisplayPlaylist(playlistID))
-    // } else if (type === PLT.scene) {
-    //   dispatch(playScenePlaylist(playlistID))
-    // } else if (type === PLT.script) {
-    //   dispatch(playScriptPlaylist(playlistID, sceneID))
-    // }
-    // setFullScreen(displaySettings?.fullScreen)
+  const onPlayPlaylist = async () => {
+    const { data } = await playPlaylist(playlistID)
+    if (data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.value}`)
+    }
+
   }
 
   const onToggleDrawer = () => {
@@ -313,7 +314,7 @@ function PlaylistSetup() {
           )}
           <Fab
             className={classes.playButton}
-            disabled={(playlist?.items?.length ?? 0) === 0}
+            disabled={(items?.length ?? 0) === 0}
             color="secondary"
             aria-label="Play"
             onClick={onPlayPlaylist}

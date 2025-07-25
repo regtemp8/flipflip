@@ -542,3 +542,38 @@ export async function findSceneIds(): Promise<number[]> {
     .execute()
     .then((value) => value.map((v) => v.id as number))
 }
+
+export async function findSceneSelectOptions(): Promise<
+  Record<string, string>
+> {
+  const scenesWithSources = await db()
+    .query()
+    .selectFrom('contentSource')
+    .select('sceneId')
+    .distinct()
+    .execute()
+
+  const scenesWithValidWeights = await db()
+    .query()
+    .selectFrom('scene')
+    .select('id')
+    .where('regenerate', '=', toNumber(true))
+    .where('weightsValid', '=', toNumber(true))
+    .execute()
+
+  const ids = new Set<number>()
+  scenesWithSources.forEach(({ sceneId }) => ids.add(sceneId))
+  scenesWithValidWeights.forEach(({ id }) => ids.add(id as number))
+
+  const rows = await db()
+    .query()
+    .selectFrom('scene')
+    .select(['id', 'name'])
+    .where('id', 'in', Array.from(ids))
+    .where('name', '<>', 'library_scene_temp')
+    .execute()
+
+  const options: Record<string, string> = {}
+  rows.forEach(({ id, name }) => (options[(id as number).toString()] = name))
+  return options
+}

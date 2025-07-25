@@ -34,6 +34,7 @@ import { toNumber, toText } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
 import { WeightGroup } from '../data/migrate-data-json/WeightGroup'
+import { areWeightsValid } from '../data/migrate-data-json/utils'
 import {
   MVF,
   PLT,
@@ -922,7 +923,8 @@ const sceneSettingsInsert = async (
       audioStartIndex,
       textEnabled: toNumber(textEnabled),
       scriptStartIndex,
-      regenerate: toNumber(regenerate)
+      regenerate: toNumber(regenerate),
+      weightsValid: toNumber(false)
     })
     .execute()
 }
@@ -1899,6 +1901,7 @@ const sceneInsert = async (
         textEnabled: toNumber(textEnabled),
         scriptStartIndex,
         regenerate: toNumber(regenerate),
+        weightsValid: toNumber(areWeightsValid(scene)),
         defaultScene: toNumber(false)
       })
       .execute()

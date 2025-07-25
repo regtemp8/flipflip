@@ -26,7 +26,13 @@ import {
   SelectOption,
   DisplayView,
   ImagePlayerData,
-  RP
+  RP,
+  ScenePlaylistItem,
+  PLT,
+  CaptionScriptPlaylistItem,
+  AudioPlaylistItem,
+  SCENE_RANDOM,
+  SCENE_NONE
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -45,11 +51,20 @@ import {
   Playlist as PlaylistRow,
   CaptionScript as CaptionScriptRow,
   FontSettings as FontSettingsRow,
-  Backup as BackupRow
+  Backup as BackupRow,
+  ScenePlaylistItem as ScenePlaylistItemRow,
+  AudioPlaylistItem as AudioPlaylistItemRow,
+  CaptionScriptPlaylistItem as CaptionScriptPlaylistItemRow
 } from './types/generated'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
-import { toBoolean, toNumberOpt, toStringArray, toTextOpt } from './utils'
+import {
+  toBoolean,
+  toNumber,
+  toNumberOpt,
+  toStringArray,
+  toTextOpt
+} from './utils'
 import { SceneUpdate } from './SceneRepository'
 import { ThemeUpdate } from './ThemeRepository'
 import { GeneralSettingsUpdate } from './GeneralSettingsRepository'
@@ -77,6 +92,15 @@ import {
 } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
+import {
+  AudioPlaylistItemInsert,
+  AudioPlaylistItemUpdate,
+  CaptionScriptPlaylistItemInsert,
+  CaptionScriptPlaylistItemUpdate,
+  ScenePlaylistItemInsert,
+  ScenePlaylistItemSceneInsert,
+  ScenePlaylistItemUpdate
+} from './PlaylistItemRepository'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,
@@ -1627,4 +1651,152 @@ export function toImagePlayerData(
   }
 
   return { displayViewId, maxCanLoad, playlist }
+}
+
+export function toAudioPlaylistItem(
+  item?: AudioPlaylistItemRow
+): AudioPlaylistItem | undefined {
+  if (item == null) {
+    return undefined
+  }
+
+  const { audioId, id, index } = item
+
+  return {
+    id: id as number,
+    index,
+    type: PLT.audio,
+    audioID: audioId
+  }
+}
+
+export function toScenePlaylistItem(
+  item?: ScenePlaylistItemRow,
+  scenes?: number[],
+  sceneName?: string
+): ScenePlaylistItem | undefined {
+  if (item == null) {
+    return undefined
+  }
+
+  const { duration, id, index, playAfterAllImages } = item
+  scenes = scenes as number[]
+  const sceneID = scenes.length === 1 ? scenes[0] : SCENE_RANDOM
+  return {
+    id: id as number,
+    index,
+    type: PLT.scene,
+    sceneID,
+    sceneName: sceneName as string,
+    randomScenes: scenes,
+    duration,
+    playAfterAllImages: toBoolean(playAfterAllImages)
+  }
+}
+
+export function toCaptionScriptPlaylistItem(
+  item?: CaptionScriptPlaylistItemRow
+): CaptionScriptPlaylistItem | undefined {
+  if (item == null) {
+    return undefined
+  }
+
+  const { captionScriptId, id, index } = item
+  return {
+    id: id as number,
+    index,
+    type: PLT.script,
+    scriptID: captionScriptId
+  }
+}
+
+export function toAudioPlaylistItemUpdate(
+  item: Partial<AudioPlaylistItem>
+): AudioPlaylistItemUpdate {
+  const { audioID, id, index } = item
+  return {
+    audioId: audioID,
+    id,
+    index
+  }
+}
+
+export function toCaptionScriptPlaylistItemUpdate(
+  item: Partial<CaptionScriptPlaylistItem>
+): CaptionScriptPlaylistItemUpdate {
+  const { scriptID, id, index } = item
+  return {
+    captionScriptId: scriptID,
+    id,
+    index
+  }
+}
+
+export function toScenePlaylistItemUpdate(
+  item: Partial<ScenePlaylistItem>
+): ScenePlaylistItemUpdate {
+  const { id, index, duration, playAfterAllImages } = item
+  return {
+    id,
+    index,
+    duration,
+    playAfterAllImages: toNumberOpt(playAfterAllImages)
+  }
+}
+
+export function toScenePlaylistItemInsert(
+  playlistId: number,
+  item: ScenePlaylistItem
+): ScenePlaylistItemInsert {
+  const { id, index, duration, playAfterAllImages } = item
+  return {
+    id,
+    index,
+    playlistId,
+    duration,
+    playAfterAllImages: toNumber(playAfterAllImages)
+  }
+}
+
+export function toScenePlaylistItemSceneInsert(
+  item: Partial<ScenePlaylistItem>
+): ScenePlaylistItemSceneInsert[] | undefined {
+  const { sceneID, randomScenes, id } = item
+  if (sceneID == null) {
+    return undefined
+  }
+
+  const scenePlaylistItemId = id as number
+  const updates: ScenePlaylistItemSceneInsert[] = []
+  if (sceneID == SCENE_NONE) {
+    updates.push({ scenePlaylistItemId, sceneId: null })
+  } else if (sceneID == SCENE_RANDOM) {
+    randomScenes?.forEach((randomSceneId) => {
+      updates.push({ scenePlaylistItemId, sceneId: randomSceneId })
+    })
+  } else {
+    updates.push({ scenePlaylistItemId, sceneId: sceneID })
+  }
+
+  return updates
+}
+
+export function toAudioPlaylistItemInsert(
+  playlistId: number,
+  item: AudioPlaylistItem
+): AudioPlaylistItemInsert {
+  const { audioID } = item
+  return {
+    playlistId,
+    audioId: audioID as number,
+    index: 0
+  }
+}
+
+export function toCaptionScriptPlaylistItemInsert(
+  playlistId: number,
+  item: CaptionScriptPlaylistItem
+): CaptionScriptPlaylistItemInsert {
+  const { scriptID } = item
+  return { playlistId, captionScriptId: scriptID as number, index: 0 }
 }
