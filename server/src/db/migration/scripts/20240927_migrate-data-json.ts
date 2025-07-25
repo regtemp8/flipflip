@@ -2014,6 +2014,7 @@ const displayInsert = async (
     const cols = grid.grid[0].length
     const width = 100 / cols
     const height = 100 / rows
+    let index = 0;
     const insertedViews: DBDisplayView[][] = []
     for (let r = 0; r < rows; r++) {
       insertedViews[r] = []
@@ -2037,12 +2038,14 @@ const displayInsert = async (
             opacity: 100,
             visible: toNumber(true),
             sync: toNumber(sync),
-            mirrorSyncedView: MVF.none
+            mirrorSyncedView: MVF.none,
+            index
           })
           .returningAll()
           .executeTakeFirstOrThrow()
 
         insertedViews[r][c] = view
+        index++
       }
     }
     for (let r = 0; r < rows; r++) {

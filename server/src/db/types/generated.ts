@@ -189,6 +189,7 @@ export interface DisplayView {
   displayId: number
   height: number
   id: number | null
+  index: number
   mirrorSyncedView: string
   name: string
   opacity: number
