@@ -9,15 +9,16 @@ import {
 } from '../../store/imagePlayer/selectors'
 import { HTMLContentElement } from './HTMLContentElement'
 import ImageView from './ImageView'
-import {
-  setImagePlayerLoadingComplete,
-  setImagePlayerPushReadyToLoad,
-  setImagePlayerReadyToDisplay,
-  setImagePlayerShownImageView
-} from '../../store/imagePlayer/slice'
+import { setImagePlayerPushReadyToLoad } from '../../store/imagePlayer/slice'
 import { makeStyles } from 'tss-react/mui'
 import { Box, Theme } from '@mui/material'
-import { loadImageViews } from '../../store/imagePlayer/thunks'
+import {
+  discardedImageView,
+  imagePlayerLoadingComplete,
+  loadImageViews,
+  readyToDisplayImageView,
+  shownImageView
+} from '../../store/imagePlayer/thunks'
 import useMeasure from 'react-use-measure'
 import { ResizeObserver } from '@juggle/resize-observer'
 
@@ -74,8 +75,9 @@ const useStyles = makeStyles()((theme: Theme) => {
   }
 })
 
-interface DisplayItem {
+export interface DisplayItem {
   index: number
+  sceneID: number
   duration: number
 }
 
@@ -114,11 +116,12 @@ export default function ImagePlayer(props: ImagePlayerProps) {
 
   const dispatch = useAppDispatch()
   const hasStarted = useAppSelector(selectImagePlayerHasStarted(props.uuid))
-  const sceneID = useAppSelector(selectImagePlayerCurrentSceneID(props.uuid))
+  const currentSceneID = useAppSelector(selectImagePlayerCurrentSceneID(props.uuid))
   const imageViews = useAppSelector(selectImagePlayerImageViews(props.uuid))
   const applyAdvance = props.synced !== true
 
   useEffect(() => {
+    console.log('sceneChange | SCENE_ID: ' + _sceneID.current, currentSceneID)
     if (
       _sceneID.current != null &&
       _readyToDisplay.current[_sceneID.current] != null
@@ -126,21 +129,15 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       const indexes = _readyToDisplay.current[_sceneID.current].map(
         (item) => item.index
       )
-      dispatch(
-        setImagePlayerLoadingComplete({
-          uuid: props.uuid,
-          value: indexes
-        })
-      )
-      dispatch(loadImageViews(props.uuid))
+      dispatch(imagePlayerLoadingComplete(props.uuid, indexes))
       _readyToDisplay.current[_sceneID.current] = []
     }
     if (_prevTimestamp.current != null) {
       _timer.current.timeToNextFrame = _prevTimestamp.current
     }
 
-    _sceneID.current = sceneID
-  }, [sceneID, dispatch, props.uuid])
+    _sceneID.current = currentSceneID
+  }, [currentSceneID, dispatch, props.uuid])
 
   const doAdvance = useCallback(
     (timestamp: DOMHighResTimeStamp) => {
@@ -154,6 +151,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
         return
       }
 
+      console.log('doAdvance | SCENE_ID: ' + _sceneID.current)
       const sceneReadyToDisplay = _readyToDisplay.current[_sceneID.current]
       if (sceneReadyToDisplay[0] == null) {
         _timer.current.retry()
@@ -170,13 +168,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       const item = sceneReadyToDisplay.shift() as DisplayItem
       _displayOffset.current++
       _timer.current.next(item.duration)
-      // TODO send shown event back to server
-      dispatch(
-        setImagePlayerShownImageView({
-          uuid: props.uuid,
-          value: item.index
-        })
-      )
+      dispatch(shownImageView(props.uuid, item))
       _advanceTimeout.current = window.requestAnimationFrame(doAdvance)
     },
     [dispatch, props.uuid]
@@ -214,14 +206,9 @@ export default function ImagePlayer(props: ImagePlayerProps) {
   }, [hasStarted, advance])
 
   const failedToDisplay = useCallback(
-    (index: number) => {
-      dispatch(
-        setImagePlayerLoadingComplete({
-          uuid: props.uuid,
-          value: [index]
-        })
-      )
-      dispatch(loadImageViews(props.uuid))
+    (index: number, duration: number, sceneID: number) => {
+      const item: DisplayItem = { index, duration, sceneID }
+      dispatch(discardedImageView(props.uuid, item))
     },
     [dispatch, props.uuid]
   )
@@ -233,18 +220,20 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       sceneID: number,
       displayIndex?: number
     ) => {
+      console.log('readyToDisplay | SCENE_ID: ' + sceneID)
       if (_readyToDisplay.current[sceneID] == null) {
         _readyToDisplay.current[sceneID] = []
       }
+
+      const item: DisplayItem = { index, duration, sceneID }
       if (displayIndex == null) {
-        _readyToDisplay.current[sceneID].push({ index, duration })
+        _readyToDisplay.current[sceneID].push(item)
       } else if (displayIndex >= _displayOffset.current) {
         displayIndex -= _displayOffset.current
-        _readyToDisplay.current[sceneID][displayIndex] = { index, duration }
+        _readyToDisplay.current[sceneID][displayIndex] = item
       }
 
-      dispatch(setImagePlayerReadyToDisplay(props.uuid))
-      dispatch(loadImageViews(props.uuid))
+      dispatch(readyToDisplayImageView(props.uuid, item))
     },
     [dispatch, props.uuid]
   )

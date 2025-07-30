@@ -135,6 +135,13 @@ export const imagePlayerSlice = createSlice({
     ) => {
       const { uuid, value } = action.payload
       state[uuid].isLoading = value
+    },
+    setImagePlayerCurrentSceneID: (
+      state,
+      action: PayloadAction<ImagePlayerUpdate<number>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].currentSceneID = value
     }
   },
   extraReducers: (builder) => {
@@ -184,7 +191,8 @@ export const {
   setImagePlayerIncrementDisplayIndex,
   setImagePlayerIFrameCount,
   setImagePlayersStarted,
-  setImagePlayerIsLoading
+  setImagePlayerIsLoading,
+  setImagePlayerCurrentSceneID
 } = imagePlayerSlice.actions
 
 export default imagePlayerSlice.reducer

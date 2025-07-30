@@ -3,7 +3,7 @@ import viewPlayers from '../player/ViewPlayerService'
 import displayViews from '../services/displayViewService'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { User } from '../db/types/generated'
-import { ViewPlayerConfig } from 'flipflip-common'
+import { ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/:id/config', async (req, res) => {
@@ -50,6 +50,21 @@ router.get('/:id/items', async (req, res) => {
 
   const items = viewPlayer.take(size)
   res.status(200).send(items)
+})
+
+router.post('/:id/event', async (req, res) => {
+  const viewPlayer = viewPlayers().get(req.params.id)
+  if (viewPlayer == null) {
+    res.status(404).end()
+    return
+  }
+
+  const response = await viewPlayer.onEvent(req.body as ViewerEvent)
+  if (response != null) {
+    res.status(200).send(response)
+  } else {
+    res.status(204).end()
+  }
 })
 
 export default router

@@ -1,4 +1,4 @@
-import { ValueResponse, ImageViewData } from 'flipflip-common'
+import { ValueResponse, ImageViewData, ViewerEvent } from 'flipflip-common'
 import ScenePlaylistPlayer from './ScenePlaylistPlayer'
 import sourceScrapers from '../scraper/SourceScraperService'
 import ContentLoader from './ContentLoader'
@@ -6,16 +6,11 @@ import { User } from '../db/types/generated'
 import Logger from '../logging/Logger'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 
-interface ViewerEvent {
-  event: 'shown' | 'discarded'
-  sceneId: number
-  duration: number
-}
-
 interface ViewPlayerItem {
   sceneId: number
   loaderTimeLeft: number
-  viewerTimeLeft: number
+  viewerShownTimeLeft: number
+  viewerLoadedTimeLeft: number
   queue: ImageViewData[]
   loader: ContentLoader
   retries: number
@@ -32,7 +27,8 @@ async function getNextViewPlayerItem(
     return {
       sceneId,
       loaderTimeLeft: duration,
-      viewerTimeLeft: duration,
+      viewerLoadedTimeLeft: duration,
+      viewerShownTimeLeft: duration,
       queue: [],
       loader,
       retries: 0
@@ -93,12 +89,26 @@ export default class ViewPlayer {
     this.preloading = false
   }
 
-  public take(itemCount: number) {
-    if (itemCount > this.current.queue.length) {
-      itemCount = this.current.queue.length
+  public take(totalCount: number) {
+    const currentCount = Math.min(totalCount, this.current.queue.length)
+    let items: ImageViewData[] = []
+    if(this.current.viewerLoadedTimeLeft > 0) {
+      items = items.concat(this.current.queue.splice(0, currentCount))
+    }
+    if (
+      this.current.viewerLoadedTimeLeft <= 0 &&
+      totalCount > currentCount &&
+      this.next != null &&
+      this.next.queue.length > 0 &&
+      this.next.viewerLoadedTimeLeft > 0
+    ) {
+      const nextCount = Math.min(
+        totalCount - currentCount,
+        this.next.queue.length
+      )
+      items = items.concat(this.next.queue.splice(0, nextCount))
     }
 
-    const items = this.current.queue.splice(0, itemCount)
     this.startLoading()
     return items
   }
@@ -113,17 +123,43 @@ export default class ViewPlayer {
     sceneId,
     duration
   }: ViewerEvent): Promise<ValueResponse | undefined> {
-    if (this.current.sceneId !== sceneId) {
+    logger.info(
+      "Received event: '{event}' for scene: {sceneId}, duration: {duration}",
+      { event, sceneId, duration }
+    )
+
+    let item: ViewPlayerItem
+    if(this.current.sceneId === sceneId) {
+      item = this.current
+    } else if (this.next != null && this.next.sceneId === sceneId) {
+      item = this.next
+    } else {
+      logger.info(
+        'Event sceneId does not match current or next sceneId, ignoring event (event: {sceneId}, current: {current}, next: {next})',
+        { current: this.current.sceneId, next: this.next?.sceneId, sceneId }
+      )
       return
     }
+
     if (event === 'discarded') {
-      this.current.loaderTimeLeft += duration
+      item.loaderTimeLeft += duration
       this.startLoading()
+    } else if (event === 'loaded') {
+      item.viewerLoadedTimeLeft -= duration
+      logger.info('Viewer loaded time left: {viewerLoadedTimeLeft}', {
+        viewerLoadedTimeLeft: item.viewerLoadedTimeLeft
+      })
     } else if (event === 'shown') {
-      this.current.viewerTimeLeft -= duration
-      if (this.current.viewerTimeLeft <= 0) {
+      item.viewerShownTimeLeft -= duration
+      logger.info('Viewer shown time left: {viewerShownTimeLeft}', {
+        viewerShownTimeLeft: item.viewerShownTimeLeft
+      })
+      if (item.viewerShownTimeLeft <= 0) {
         const newSceneId = await this.changeViewPlayerItem()
         if (newSceneId != null) {
+          logger.info('Scene changed, new scene id: {sceneId}', {
+            sceneId: newSceneId
+          })
           return { value: newSceneId }
         }
       }
@@ -149,7 +185,7 @@ export default class ViewPlayer {
     if (
       (this.current.loaderTimeLeft > 0 &&
         this.current.queue.length < this.maxInMemory) ||
-      this.current.queue.length < 3
+      (this.current.viewerLoadedTimeLeft > 0 && this.current.queue.length < 3)
     ) {
       logger.info(
         'Load current image view - loaderTimeLeft: {timeLeft}, queue.length: {queue}',
@@ -231,8 +267,10 @@ export default class ViewPlayer {
   }
 
   private async changeViewPlayerItem() {
+    logger.info('Change View Player Item')
     sourceScrapers().unsubscribe(this.current.sceneId)
     if (this.next == null) {
+      logger.info('No next view player item, stopping view player')
       this.stop()
       return
     }
@@ -242,8 +280,9 @@ export default class ViewPlayer {
     if (this.next != null) {
       sourceScrapers().subscribe(this.next.sceneId, this.user)
       this.startPreloading()
-      return this.next.sceneId
     }
+
+    return this.current.sceneId
   }
 
   public static async create(viewId: number, user: User): Promise<ViewPlayer> {
