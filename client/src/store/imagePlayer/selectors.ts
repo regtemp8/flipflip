@@ -24,6 +24,11 @@ export const selectPlayerHasStarted = () =>
     Object.values(imagePlayer).every((value) => value.hasStarted)
   )
 
+export const selectPlayerIsPlaying = () =>
+  createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
+    Object.values(imagePlayer).every((value) => value.isPlaying)
+  )
+
 export const selectPlayerCanStart = () =>
   createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
     Object.values(imagePlayer).every((value) => {

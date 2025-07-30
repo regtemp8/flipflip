@@ -34,6 +34,7 @@ export interface ImagePlayerState {
   currentAudio?: number
   currentSceneID: number
   isLoading: boolean
+  isPlaying: boolean
 }
 
 export interface ImagePlayerCaptcha {
@@ -127,7 +128,21 @@ export const imagePlayerSlice = createSlice({
       state[uuid].loader.iframeCount = value
     },
     setImagePlayersStarted: (state) => {
-      Object.values(state).forEach((value) => (value.hasStarted = true))
+      Object.values(state).forEach((value) => {
+        value.hasStarted = true
+        value.isPlaying = true
+      })
+    },
+    setImagePlayersPlaying: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      const isPlaying = action.payload
+      Object.values(state).forEach((value) => {
+        if(value.hasStarted) {
+          value.isPlaying = isPlaying
+        }
+      })
     },
     setImagePlayerIsLoading: (
       state,
@@ -159,6 +174,7 @@ export const imagePlayerSlice = createSlice({
             firstImageLoaded: false,
             mainLoaded: false,
             isLoading: false,
+            isPlaying: false,
             currentSceneID: data.sceneId,
             loader: {
               zIndex: 0,
@@ -187,7 +203,7 @@ export const imagePlayerSlice = createSlice({
         () => initialState
       )
       .addMatcher(
-        flipflipApi.endpoints.stopPlayer.matchFulfilled,
+        flipflipApi.endpoints.stopPlayer.matchPending,
         (state) => {
           // stop loadImageViews loop
           Object.values(state).forEach(value => value.isLoading = true)
@@ -206,6 +222,7 @@ export const {
   setImagePlayerIncrementDisplayIndex,
   setImagePlayerIFrameCount,
   setImagePlayersStarted,
+  setImagePlayersPlaying,
   setImagePlayerIsLoading,
   setImagePlayerCurrentSceneID
 } = imagePlayerSlice.actions

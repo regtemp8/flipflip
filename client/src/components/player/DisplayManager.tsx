@@ -23,7 +23,7 @@ import {
   useGetViewPlayerConfigQuery,
   useStopPlayerMutation
 } from '../../store/api/slice'
-import { setImagePlayersStarted } from '../../store/imagePlayer/slice'
+import { setImagePlayersPlaying, setImagePlayersStarted } from '../../store/imagePlayer/slice'
 import {
   selectPlayerCanStart,
   selectPlayerHasStarted
@@ -132,7 +132,6 @@ function ProgressCard(props: ProgressCardProps) {
 
 interface DisplayViewProps {
   viewPlayerID: string
-  isPlaying: boolean
 }
 
 const hack = new ChildCallbackHack() // TODO get rid of hacks
@@ -167,7 +166,6 @@ function DisplayView(props: DisplayViewProps) {
     >
       <ImagePlayer
         uuid={props.viewPlayerID}
-        isPlaying={props.isPlaying}
         historyOffset={0}
         setHistoryOffset={() => {}}
         setHistoryPaths={() => {}}
@@ -188,7 +186,6 @@ function DisplayManager() {
   const dispatch = useAppDispatch()
   const [stopPlayer] = useStopPlayerMutation()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
-  const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
   const { data: viewPlayers } = useGetPlayerViewPlayersQuery(playerID)
   const hasStarted = useAppSelector(selectPlayerHasStarted())
@@ -210,22 +207,6 @@ function DisplayManager() {
     }
   }, [isPageVisible, stayAwake, wakeLock])
 
-  const play = useCallback(() => {
-    if (hasStarted) {
-      setIsPlaying(true)
-    }
-  }, [hasStarted])
-
-  const pause = useCallback(() => {
-    if (hasStarted) {
-      setIsPlaying(false)
-    }
-  }, [hasStarted])
-
-  useEffect(() => {
-    play()
-  }, [hasStarted, play])
-
   const goBack = useCallback(async () => {
     if (recentPictureGrid) {
       setRecentPictureGrid(false)
@@ -240,7 +221,7 @@ function DisplayManager() {
         stayAwake.allowSleeping()
       }
 
-      setIsPlaying(false)
+      dispatch(setImagePlayersPlaying(false))
       await stopPlayer(playerID)
       navigate(-1)
     }
@@ -252,10 +233,6 @@ function DisplayManager() {
     <>
       <DisplayManagerAppBar
         drawerHover={false} // TODO add settings drawer for single view
-        isPlaying={isPlaying}
-        hasStarted={hasStarted}
-        play={play}
-        pause={pause}
         playerID={playerID}
         goBack={goBack}
       />
@@ -263,7 +240,7 @@ function DisplayManager() {
       <Box className={classes.container}>
         {viewPlayers &&
           viewPlayers.map((id) => (
-            <DisplayView key={id} viewPlayerID={id} isPlaying={isPlaying} />
+            <DisplayView key={id} viewPlayerID={id} />
           ))}
       </Box>
     </>

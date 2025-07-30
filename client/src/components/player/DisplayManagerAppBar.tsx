@@ -21,8 +21,10 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 import { PT } from 'flipflip-common'
 import { setFullScreen, toggleFullScreen } from '../../data/fullscreen'
-import { useAppSelector } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { useNavigate } from 'react-router'
+import { setImagePlayersPlaying } from '../../store/imagePlayer/slice'
+import { selectPlayerHasStarted, selectPlayerIsPlaying } from '../../store/imagePlayer/selectors'
 // import { selectAppTutorial } from '../../store/app/selectors'
 // import { selectDisplayName } from '../../store/display/selectors'
 
@@ -85,16 +87,15 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export interface DisplayManagerAppBarProps {
   drawerHover: boolean
-  isPlaying: boolean
-  hasStarted: boolean
-  play: () => void
-  pause: () => void
   goBack: () => void
   playerID: string
 }
 
 function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
-  const { drawerHover, isPlaying, hasStarted, play, pause, goBack } = props
+  const dispatch = useAppDispatch()
+  const isPlaying = useAppSelector(selectPlayerIsPlaying())
+  const hasStarted = useAppSelector(selectPlayerHasStarted())
+  const { drawerHover, goBack } = props
   const [appBarHover, setAppBarHover] = useState(false)
 
   const _appBarTimeout = useRef<number>()
@@ -120,6 +121,9 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
     setFullScreen(false)
     goBack()
   }, [goBack])
+
+  const play = () => dispatch(setImagePlayersPlaying(true))
+  const pause = () => dispatch(setImagePlayersPlaying(false))
 
   const historyGoBack = useCallback(
     () => {

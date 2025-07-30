@@ -5,7 +5,8 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   selectImagePlayerHasStarted,
   selectImagePlayerCurrentSceneID,
-  selectImagePlayerImageViews
+  selectImagePlayerImageViews,
+  selectPlayerIsPlaying
 } from '../../store/imagePlayer/selectors'
 import { HTMLContentElement } from './HTMLContentElement'
 import ImageView from './ImageView'
@@ -85,7 +86,6 @@ export interface ImagePlayerProps {
   uuid: string
   currentAudio?: number
   advanceHack: ChildCallbackHack
-  isPlaying: boolean
   historyOffset: number
   deleteHack?: ChildCallbackHack
   strobeLayer?: string
@@ -100,6 +100,7 @@ export interface ImagePlayerProps {
 const noop = () => {}
 export default function ImagePlayer(props: ImagePlayerProps) {
   const { classes } = useStyles()
+  const isPlaying = useAppSelector(selectPlayerIsPlaying())
 
   const _sceneID = useRef<number>()
   const _readyToDisplay = useRef<Record<number, DisplayItem[]>>({})
@@ -179,16 +180,16 @@ export default function ImagePlayer(props: ImagePlayerProps) {
     : noop
 
   useEffect(() => {
-    if (props.isPlaying && _wasPlaying.current) {
+    if (isPlaying && _wasPlaying.current) {
       _wasPlaying.current = false
       _advanceTimeout.current = window.requestAnimationFrame(advance)
-    } else if (!props.isPlaying && _advanceTimeout.current != null) {
+    } else if (!isPlaying && _advanceTimeout.current != null) {
       _wasPlaying.current = true
       window.cancelAnimationFrame(_advanceTimeout.current)
       _advanceTimeout.current = undefined
       _timer.current.pause()
     }
-  }, [props.isPlaying, advance])
+  }, [isPlaying, advance])
 
   useEffect(() => {
     return () => {
@@ -279,7 +280,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
             index={index}
             sceneID={state.sceneId}
             show={state.show}
-            isPlaying={props.isPlaying}
+            isPlaying={isPlaying}
             zIndex={state.zIndex}
             onLoad={onLoad}
             onError={onError}
