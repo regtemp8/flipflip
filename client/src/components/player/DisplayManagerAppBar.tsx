@@ -22,9 +22,14 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { PT } from 'flipflip-common'
 import { setFullScreen, toggleFullScreen } from '../../data/fullscreen'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { useNavigate } from 'react-router'
-import { setImagePlayersPlaying } from '../../store/imagePlayer/slice'
-import { selectPlayerHasStarted, selectPlayerIsPlaying } from '../../store/imagePlayer/selectors'
+import {
+  selectPlayerHasStarted,
+  selectPlayerIsPlaying
+} from '../../store/imagePlayer/selectors'
+import {
+  pauseImagePlayers,
+  resumeImagePlayers
+} from '../../store/imagePlayer/thunks'
 // import { selectAppTutorial } from '../../store/app/selectors'
 // import { selectDisplayName } from '../../store/display/selectors'
 
@@ -122,8 +127,8 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
     goBack()
   }, [goBack])
 
-  const play = () => dispatch(setImagePlayersPlaying(true))
-  const pause = () => dispatch(setImagePlayersPlaying(false))
+  const play = () => dispatch(resumeImagePlayers())
+  const pause = () => dispatch(pauseImagePlayers())
 
   const historyGoBack = useCallback(
     () => {

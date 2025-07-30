@@ -1,10 +1,8 @@
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useCallback } from 'react'
 
 import type ChildCallbackHack from './ChildCallbackHack'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
-  selectImagePlayerHasStarted,
-  selectImagePlayerCurrentSceneID,
   selectImagePlayerImageViews,
   selectPlayerIsPlaying
 } from '../../store/imagePlayer/selectors'
@@ -12,58 +10,16 @@ import { HTMLContentElement } from './HTMLContentElement'
 import ImageView from './ImageView'
 import { setImagePlayerPushReadyToLoad } from '../../store/imagePlayer/slice'
 import { makeStyles } from 'tss-react/mui'
-import { Box, Theme } from '@mui/material'
+import { Box } from '@mui/material'
 import {
   discardedImageView,
-  imagePlayerLoadingComplete,
   loadImageViews,
-  readyToDisplayImageView,
-  shownImageView
+  readyToDisplayImageView
 } from '../../store/imagePlayer/thunks'
 import useMeasure from 'react-use-measure'
 import { ResizeObserver } from '@juggle/resize-observer'
 
-class ImageTimer {
-  lastTick: DOMHighResTimeStamp
-  timeToNextFrame: DOMHighResTimeStamp
-  displayDuration: number
-  paused: boolean
-  retries: number
-
-  constructor() {
-    this.lastTick = 0
-    this.timeToNextFrame = 0
-    this.displayDuration = 0
-    this.paused = false
-    this.retries = 0
-  }
-
-  public tick(timestamp: DOMHighResTimeStamp) {
-    this.lastTick = timestamp
-    if (this.paused) {
-      this.paused = false
-      this.timeToNextFrame = this.lastTick + this.displayDuration
-    }
-  }
-
-  public pause() {
-    this.paused = true
-    this.displayDuration = this.timeToNextFrame - this.lastTick
-  }
-
-  public next(timeToDisplay: number) {
-    this.displayDuration = timeToDisplay
-    this.timeToNextFrame = this.lastTick + this.displayDuration
-    this.retries = 0
-  }
-
-  public retry() {
-    this.retries++
-    this.timeToNextFrame = this.lastTick + this.retries * 16
-  }
-}
-
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     container: {
       top: 0,
@@ -102,109 +58,13 @@ export default function ImagePlayer(props: ImagePlayerProps) {
   const { classes } = useStyles()
   const isPlaying = useAppSelector(selectPlayerIsPlaying())
 
-  const _sceneID = useRef<number>()
-  const _readyToDisplay = useRef<Record<number, DisplayItem[]>>({})
-  const _displayOffset = useRef<number>(0)
-  const _advanceTimeout = useRef<number>()
-  const _prevTimestamp = useRef<DOMHighResTimeStamp>()
-  const _timer = useRef<ImageTimer>(new ImageTimer())
-  const _wasPlaying = useRef<boolean>(false)
-
   const [containerRef, containerBounds] = useMeasure({
     polyfill: ResizeObserver,
     offsetSize: true
   })
 
   const dispatch = useAppDispatch()
-  const hasStarted = useAppSelector(selectImagePlayerHasStarted(props.uuid))
-  const currentSceneID = useAppSelector(selectImagePlayerCurrentSceneID(props.uuid))
   const imageViews = useAppSelector(selectImagePlayerImageViews(props.uuid))
-  const applyAdvance = props.synced !== true
-
-  useEffect(() => {
-    console.log('sceneChange | SCENE_ID: ' + _sceneID.current, currentSceneID)
-    if (
-      _sceneID.current != null &&
-      _readyToDisplay.current[_sceneID.current] != null
-    ) {
-      const indexes = _readyToDisplay.current[_sceneID.current].map(
-        (item) => item.index
-      )
-      dispatch(imagePlayerLoadingComplete(props.uuid, indexes))
-      _readyToDisplay.current[_sceneID.current] = []
-    }
-    if (_prevTimestamp.current != null) {
-      _timer.current.timeToNextFrame = _prevTimestamp.current
-    }
-
-    _sceneID.current = currentSceneID
-  }, [currentSceneID, dispatch, props.uuid])
-
-  const doAdvance = useCallback(
-    (timestamp: DOMHighResTimeStamp) => {
-      _prevTimestamp.current = timestamp
-      _timer.current.tick(timestamp)
-      if (
-        timestamp < _timer.current.timeToNextFrame ||
-        _sceneID.current == null
-      ) {
-        _advanceTimeout.current = window.requestAnimationFrame(doAdvance)
-        return
-      }
-
-      console.log('doAdvance | SCENE_ID: ' + _sceneID.current)
-      const sceneReadyToDisplay = _readyToDisplay.current[_sceneID.current]
-      if (sceneReadyToDisplay[0] == null) {
-        _timer.current.retry()
-        _advanceTimeout.current = window.requestAnimationFrame(doAdvance)
-        if (_timer.current.retries === 6 && sceneReadyToDisplay.length > 0) {
-          // waited long enough, try next
-          sceneReadyToDisplay.shift()
-          _displayOffset.current++
-        } else {
-          return
-        }
-      }
-
-      const item = sceneReadyToDisplay.shift() as DisplayItem
-      _displayOffset.current++
-      _timer.current.next(item.duration)
-      dispatch(shownImageView(props.uuid, item))
-      _advanceTimeout.current = window.requestAnimationFrame(doAdvance)
-    },
-    [dispatch, props.uuid]
-  )
-
-  const advance: (timestamp: DOMHighResTimeStamp) => void = applyAdvance
-    ? doAdvance
-    : noop
-
-  useEffect(() => {
-    if (isPlaying && _wasPlaying.current) {
-      _wasPlaying.current = false
-      _advanceTimeout.current = window.requestAnimationFrame(advance)
-    } else if (!isPlaying && _advanceTimeout.current != null) {
-      _wasPlaying.current = true
-      window.cancelAnimationFrame(_advanceTimeout.current)
-      _advanceTimeout.current = undefined
-      _timer.current.pause()
-    }
-  }, [isPlaying, advance])
-
-  useEffect(() => {
-    return () => {
-      if (_advanceTimeout.current != null) {
-        window.cancelAnimationFrame(_advanceTimeout.current)
-        _advanceTimeout.current = undefined
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (hasStarted === true && _advanceTimeout.current == null) {
-      _advanceTimeout.current = window.requestAnimationFrame(advance)
-    }
-  }, [hasStarted, advance])
 
   const failedToDisplay = useCallback(
     (index: number, duration: number, sceneID: number) => {
@@ -221,20 +81,8 @@ export default function ImagePlayer(props: ImagePlayerProps) {
       sceneID: number,
       displayIndex?: number
     ) => {
-      console.log('readyToDisplay | SCENE_ID: ' + sceneID)
-      if (_readyToDisplay.current[sceneID] == null) {
-        _readyToDisplay.current[sceneID] = []
-      }
-
       const item: DisplayItem = { index, duration, sceneID }
-      if (displayIndex == null) {
-        _readyToDisplay.current[sceneID].push(item)
-      } else if (displayIndex >= _displayOffset.current) {
-        displayIndex -= _displayOffset.current
-        _readyToDisplay.current[sceneID][displayIndex] = item
-      }
-
-      dispatch(readyToDisplayImageView(props.uuid, item))
+      dispatch(readyToDisplayImageView(props.uuid, item, displayIndex))
     },
     [dispatch, props.uuid]
   )
@@ -265,7 +113,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
     displayIndex?: number
   ) => void = noop
   let onHide: (index: number) => void = noop
-  if (applyAdvance) {
+  if (props.synced !== true) {
     onLoad = readyToDisplay
     onError = failedToDisplay
     onHide = readyToLoad

@@ -3,6 +3,7 @@ import { flipflipApi } from '../api/slice'
 import { AppDispatch, RootState } from '../store'
 import {
   ImageViewState,
+  setImagePlayerAdvanceTimeout,
   setImagePlayerCurrentSceneID,
   setImagePlayerIFrameCount,
   setImagePlayerIsLoading,
@@ -10,9 +11,89 @@ import {
   setImagePlayerReadyToDisplay,
   setImagePlayerSetImageView,
   setImagePlayerShownImageView,
+  setImagePlayersPaused,
+  setImagePlayersPlaying,
   setImagePlayerStartLoading
 } from './slice'
 import { DisplayItem } from '../../components/player/ImagePlayer'
+import imageTimers from './ImageTimerService'
+
+export function pauseImagePlayers() {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    Object.entries(state.imagePlayer).forEach(([uuid, value]) => {
+      if (value.hasStarted && value.isPlaying && value.advanceTimeout != null) {
+        window.cancelAnimationFrame(value.advanceTimeout)
+        imageTimers().pause(uuid)
+      }
+    })
+    dispatch(setImagePlayersPaused())
+  }
+}
+
+export function resumeImagePlayers() {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    const resume = Object.values(state.imagePlayer).every(
+      (value) => value.hasStarted && !value.isPlaying
+    )
+    if (resume) {
+      dispatch(startImagePlayers())
+    }
+  }
+}
+
+export function startImagePlayers() {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const advanceImagePlayerFn = (uuid: string) => {
+      return (timestamp: DOMHighResTimeStamp) => {
+        const requestPlayerAdvance = (id: string) => {
+          const advanceTimeout = window.requestAnimationFrame(
+            advanceImagePlayerFn(id)
+          )
+          dispatch(setImagePlayerAdvanceTimeout({ uuid: id, value: advanceTimeout }))
+        }
+
+        const skipFrame = imageTimers().tick(uuid, timestamp)
+        if(skipFrame) {
+          requestPlayerAdvance(uuid)
+          return
+        }
+
+        let index = 0
+        const state = getState()
+        const { readyToDisplay, currentSceneID } = state.imagePlayer[uuid]
+        console.log('doAdvance | SCENE_ID: ' + currentSceneID)
+        const sceneReadyToDisplay = readyToDisplay[currentSceneID]
+        if (sceneReadyToDisplay[index] == null) {
+          const retries = imageTimers().retry(uuid)
+          if (retries === 6 && sceneReadyToDisplay.length > 0) {
+            // waited long enough, try next
+            index++
+          } else {
+            requestPlayerAdvance(uuid)
+            return
+          }
+        }
+
+        const item = sceneReadyToDisplay[index]
+        imageTimers().next(uuid, item.duration)
+        dispatch(shownImageView(uuid, item, index))
+        requestPlayerAdvance(uuid)
+      }
+    }
+
+    const state = getState()
+    const advanceTimeouts: Record<string, number> = {}
+    Object.keys(state.imagePlayer).forEach((uuid) => {
+      const advanceTimeout = window.requestAnimationFrame(
+        advanceImagePlayerFn(uuid)
+      )
+      advanceTimeouts[uuid] = advanceTimeout
+    })
+    dispatch(setImagePlayersPlaying(advanceTimeouts))
+  }
+}
 
 export function loadImageViews(uuid: string) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
@@ -93,7 +174,7 @@ export function loadImageViews(uuid: string) {
   }
 }
 
-export function shownImageView(uuid: string, item: DisplayItem) {
+export function shownImageView(uuid: string, item: DisplayItem, index: number) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const event: ViewerEvent = {
       event: 'shown',
@@ -103,16 +184,20 @@ export function shownImageView(uuid: string, item: DisplayItem) {
     const { data } = await dispatch(
       flipflipApi.endpoints.sendViewPlayerEvent.initiate({ id: uuid, event })
     )
+    dispatch(setImagePlayerShownImageView({ uuid, value: index }))
     if (data != null) {
       dispatch(
         setImagePlayerCurrentSceneID({ uuid, value: data.value as number })
       )
     }
-    dispatch(setImagePlayerShownImageView({ uuid, value: item.index }))
   }
 }
 
-export function readyToDisplayImageView(uuid: string, item: DisplayItem) {
+export function readyToDisplayImageView(
+  uuid: string,
+  item: DisplayItem,
+  displayIndex?: number
+) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const event: ViewerEvent = {
       event: 'loaded',
@@ -122,7 +207,9 @@ export function readyToDisplayImageView(uuid: string, item: DisplayItem) {
     await dispatch(
       flipflipApi.endpoints.sendViewPlayerEvent.initiate({ id: uuid, event })
     )
-    dispatch(setImagePlayerReadyToDisplay(uuid))
+    dispatch(
+      setImagePlayerReadyToDisplay({ uuid, value: { item, displayIndex } })
+    )
     dispatch(loadImageViews(uuid))
   }
 }
@@ -138,16 +225,10 @@ export function discardedImageView(uuid: string, item: DisplayItem) {
       flipflipApi.endpoints.sendViewPlayerEvent.initiate({ id: uuid, event })
     )
 
-    dispatch(imagePlayerLoadingComplete(uuid, [item.index]))
-  }
-}
-
-export function imagePlayerLoadingComplete(uuid: string, indexes: number[]) {
-  return async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(
       setImagePlayerLoadingComplete({
         uuid,
-        value: indexes
+        value: item.index
       })
     )
     dispatch(loadImageViews(uuid))

@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { flipflipApi } from '../api/slice'
 import { ImageViewData } from 'flipflip-common'
+import { DisplayItem } from '../../components/player/ImagePlayer'
+import imageTimers from './ImageTimerService'
 
 export interface ImagePlayerUpdate<T> {
   uuid: string
@@ -35,6 +37,9 @@ export interface ImagePlayerState {
   currentSceneID: number
   isLoading: boolean
   isPlaying: boolean
+  advanceTimeout?: number
+  readyToDisplay: Record<number, DisplayItem[]>
+  displayOffset: number
 }
 
 export interface ImagePlayerCaptcha {
@@ -59,19 +64,38 @@ export const imagePlayerSlice = createSlice({
     },
     setImagePlayerLoadingComplete: (
       state,
-      action: PayloadAction<ImagePlayerUpdate<number[]>>
+      action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
       const { uuid, value } = action.payload
       const { loader } = state[uuid]
-      loader.loadingCount -= value.length
-      loader.readyToLoad.push(...value)
+      loader.loadingCount--
+      loader.readyToLoad.push(value)
     },
-    setImagePlayerReadyToDisplay: (state, action: PayloadAction<string>) => {
-      const uuid = action.payload
+    setImagePlayerReadyToDisplay: (
+      state,
+      action: PayloadAction<
+        ImagePlayerUpdate<{ item: DisplayItem; displayIndex?: number }>
+      >
+    ) => {
+      const { uuid, value } = action.payload
       const player = state[uuid]
       player.loader.loadingCount--
       if (!player.firstImageLoaded) {
         player.firstImageLoaded = true
+      }
+
+      const item = value.item
+      console.log('readyToDisplay | SCENE_ID: ' + item.sceneID)
+      if (player.readyToDisplay[item.sceneID] == null) {
+        player.readyToDisplay[item.sceneID] = []
+      }
+
+      if (value.displayIndex == null) {
+        player.readyToDisplay[item.sceneID].push(item)
+      } else if (value.displayIndex >= player.displayOffset) {
+        player.readyToDisplay[item.sceneID][
+          value.displayIndex - player.displayOffset
+        ] = item
       }
     },
     setImagePlayerShownImageView: (
@@ -79,16 +103,21 @@ export const imagePlayerSlice = createSlice({
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
       const { uuid, value } = action.payload
-      const { loader } = state[uuid]
+      const { loader, readyToDisplay, currentSceneID } = state[uuid]
       const oldShownIndex = loader.shownIndex
       const imageViews = loader.imageViews as ImageViewState[]
       if (oldShownIndex != null) {
         imageViews[oldShownIndex].show = false
       }
 
-      imageViews[value].zIndex = loader.zIndex++
-      imageViews[value].show = true
-      loader.shownIndex = value
+      const item = readyToDisplay[currentSceneID][value]
+      imageViews[item.index].zIndex = loader.zIndex++
+      imageViews[item.index].show = true
+      loader.shownIndex = item.index
+      const count = value + 1
+      state[uuid].displayOffset += count
+      readyToDisplay[currentSceneID] =
+        readyToDisplay[currentSceneID].slice(count)
     },
     setImagePlayerPushReadyToLoad: (
       state,
@@ -127,20 +156,21 @@ export const imagePlayerSlice = createSlice({
       const { uuid, value } = action.payload
       state[uuid].loader.iframeCount = value
     },
-    setImagePlayersStarted: (state) => {
-      Object.values(state).forEach((value) => {
-        value.hasStarted = true
-        value.isPlaying = true
-      })
-    },
     setImagePlayersPlaying: (
       state,
-      action: PayloadAction<boolean>
+      action: PayloadAction<Record<string, number>>
     ) => {
-      const isPlaying = action.payload
+      Object.keys(action.payload).forEach((key) => {
+        state[key].advanceTimeout = action.payload[key]
+        state[key].hasStarted = true
+        state[key].isPlaying = true
+      })
+    },
+    setImagePlayersPaused: (state) => {
       Object.values(state).forEach((value) => {
-        if(value.hasStarted) {
-          value.isPlaying = isPlaying
+        if (value.hasStarted) {
+          value.isPlaying = false
+          value.advanceTimeout = undefined
         }
       })
     },
@@ -156,7 +186,21 @@ export const imagePlayerSlice = createSlice({
       action: PayloadAction<ImagePlayerUpdate<number>>
     ) => {
       const { uuid, value } = action.payload
+      const { loader, readyToDisplay, currentSceneID } = state[uuid]
+      const indexes = readyToDisplay[currentSceneID].map((item) => item.index)
+
+      loader.loadingCount -= indexes.length
+      loader.readyToLoad.push(...indexes)
+
+      state[uuid].readyToDisplay[currentSceneID] = []
       state[uuid].currentSceneID = value
+    },
+    setImagePlayerAdvanceTimeout: (
+      state,
+      action: PayloadAction<ImagePlayerUpdate<number>>
+    ) => {
+      const { uuid, value } = action.payload
+      state[uuid].advanceTimeout = value
     }
   },
   extraReducers: (builder) => {
@@ -169,7 +213,11 @@ export const imagePlayerSlice = createSlice({
             return
           }
 
+          const readyToDisplay: Record<number, DisplayItem[]> = {}
+          readyToDisplay[data.sceneId] = []
+
           const viewPlayerID = action.meta.arg.originalArgs
+          imageTimers().start(viewPlayerID)
           state[viewPlayerID] = {
             firstImageLoaded: false,
             mainLoaded: false,
@@ -186,7 +234,9 @@ export const imagePlayerSlice = createSlice({
               imageViews: []
             },
             isEmpty: false,
-            hasStarted: false
+            hasStarted: false,
+            readyToDisplay,
+            displayOffset: 0
           }
         }
       )
@@ -202,13 +252,17 @@ export const imagePlayerSlice = createSlice({
         flipflipApi.endpoints.playDisplay.matchPending,
         () => initialState
       )
-      .addMatcher(
-        flipflipApi.endpoints.stopPlayer.matchPending,
-        (state) => {
-          // stop loadImageViews loop
-          Object.values(state).forEach(value => value.isLoading = true)
-        }
-      )
+      .addMatcher(flipflipApi.endpoints.stopPlayer.matchPending, (state) => {
+        Object.entries(state).forEach(([uuid, value]) => {
+          value.isLoading = true // stop loadImageViews loop
+          if (value.advanceTimeout != null) {
+            window.cancelAnimationFrame(value.advanceTimeout)
+            value.advanceTimeout = undefined
+          }
+
+          imageTimers().stop(uuid)
+        })
+      })
   }
 })
 
@@ -221,10 +275,11 @@ export const {
   setImagePlayerReadyToDisplay,
   setImagePlayerIncrementDisplayIndex,
   setImagePlayerIFrameCount,
-  setImagePlayersStarted,
   setImagePlayersPlaying,
+  setImagePlayersPaused,
   setImagePlayerIsLoading,
-  setImagePlayerCurrentSceneID
+  setImagePlayerCurrentSceneID,
+  setImagePlayerAdvanceTimeout
 } = imagePlayerSlice.actions
 
 export default imagePlayerSlice.reducer

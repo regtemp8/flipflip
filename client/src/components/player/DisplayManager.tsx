@@ -23,11 +23,14 @@ import {
   useGetViewPlayerConfigQuery,
   useStopPlayerMutation
 } from '../../store/api/slice'
-import { setImagePlayersPlaying, setImagePlayersStarted } from '../../store/imagePlayer/slice'
 import {
   selectPlayerCanStart,
   selectPlayerHasStarted
 } from '../../store/imagePlayer/selectors'
+import {
+  pauseImagePlayers,
+  startImagePlayers
+} from '../../store/imagePlayer/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -221,14 +224,14 @@ function DisplayManager() {
         stayAwake.allowSleeping()
       }
 
-      dispatch(setImagePlayersPlaying(false))
+      dispatch(pauseImagePlayers())
       await stopPlayer(playerID)
       navigate(-1)
     }
   }, [recentPictureGrid, stayAwake, wakeLock])
 
   const { classes } = useStyles()
-  const start = canStart ? () => dispatch(setImagePlayersStarted()) : undefined
+  const start = canStart ? () => dispatch(startImagePlayers()) : undefined
   return (
     <>
       <DisplayManagerAppBar
@@ -239,9 +242,7 @@ function DisplayManager() {
       {!hasStarted && <ProgressCard playerID={playerID} start={start} />}
       <Box className={classes.container}>
         {viewPlayers &&
-          viewPlayers.map((id) => (
-            <DisplayView key={id} viewPlayerID={id} />
-          ))}
+          viewPlayers.map((id) => <DisplayView key={id} viewPlayerID={id} />)}
       </Box>
     </>
   )
