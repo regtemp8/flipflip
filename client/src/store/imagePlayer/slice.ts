@@ -178,6 +178,21 @@ export const imagePlayerSlice = createSlice({
         flipflipApi.endpoints.playScene.matchPending,
         () => initialState
       )
+      .addMatcher(
+        flipflipApi.endpoints.playPlaylist.matchPending,
+        () => initialState
+      )
+      .addMatcher(
+        flipflipApi.endpoints.playDisplay.matchPending,
+        () => initialState
+      )
+      .addMatcher(
+        flipflipApi.endpoints.stopPlayer.matchFulfilled,
+        (state) => {
+          // stop loadImageViews loop
+          Object.values(state).forEach(value => value.isLoading = true)
+        }
+      )
   }
 })
 
