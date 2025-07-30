@@ -47,52 +47,6 @@ export const imagePlayerSlice = createSlice({
   name: 'imagePlayers',
   initialState,
   reducers: {
-    setImagePlayerFirstImageLoaded: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<boolean>>
-    ) => {
-      state[action.payload.uuid].firstImageLoaded = action.payload.value
-      if (action.payload.value === true) {
-        state[action.payload.uuid].isEmpty = false
-      }
-    },
-    setImagePlayerHasStarted: (state, action: PayloadAction<string[]>) => {
-      action.payload.forEach((uuid) => (state[uuid].hasStarted = true))
-    },
-    setImagePlayerIsEmpty: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<boolean>>
-    ) => {
-      state[action.payload.uuid].isEmpty = action.payload.value
-    },
-    setImagePlayerMainLoaded: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<boolean>>
-    ) => {
-      state[action.payload.uuid].mainLoaded = action.payload.value
-    },
-    setImagePlayersLoaded: (state) => {
-      Object.keys(state).forEach((uuid) => (state[uuid].mainLoaded = true))
-    },
-    setImagePlayerState: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<ImagePlayerState>>
-    ) => {
-      state[action.payload.uuid] = action.payload.value
-    },
-    setImagePlayerStates: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<ImagePlayerState>[]>
-    ) => {
-      action.payload.forEach((update) => (state[update.uuid] = update.value))
-    },
-    setImagePlayerCaptcha: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<ImagePlayerCaptcha | undefined>>
-    ) => {
-      const { uuid, value } = action.payload
-      state[uuid].captcha = value
-    },
     setImagePlayerStartLoading: (
       state,
       action: PayloadAction<ImagePlayerUpdate<number>>
@@ -160,17 +114,10 @@ export const imagePlayerSlice = createSlice({
       state,
       action: PayloadAction<string>
     ) => {
+      // TODO implement strict order playback
       const uuid = action.payload
       const { loader } = state[uuid]
       loader.displayIndex++
-    },
-    setImagePlayerIncrementIFrameCount: (
-      state,
-      action: PayloadAction<string>
-    ) => {
-      const uuid = action.payload
-      const { loader } = state[uuid]
-      loader.iframeCount++
     },
     setImagePlayerIFrameCount: (
       state,
@@ -178,30 +125,6 @@ export const imagePlayerSlice = createSlice({
     ) => {
       const { uuid, value } = action.payload
       state[uuid].loader.iframeCount = value
-    },
-    setImagePlayerDecrementLoaderTimeToNextScene: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<number>>
-    ) => {
-      // TODO still needed?
-    },
-    setImagePlayerLoaderPlaylist: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<any>>
-    ) => {
-      // TODO still needed?
-    },
-    setImagePlayerPlaylist: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<any>>
-    ) => {
-      // TODO still needed?
-    },
-    setImagePlayerDecrementTimeToNextScene: (
-      state,
-      action: PayloadAction<ImagePlayerUpdate<number>>
-    ) => {
-      // TODO still needed?
     },
     setImagePlayersStarted: (state) => {
       Object.values(state).forEach((value) => (value.hasStarted = true))
@@ -252,14 +175,6 @@ export const imagePlayerSlice = createSlice({
 })
 
 export const {
-  setImagePlayerFirstImageLoaded,
-  setImagePlayerHasStarted,
-  setImagePlayerIsEmpty,
-  setImagePlayerMainLoaded,
-  setImagePlayersLoaded,
-  setImagePlayerState,
-  setImagePlayerStates,
-  setImagePlayerCaptcha,
   setImagePlayerStartLoading,
   setImagePlayerLoadingComplete,
   setImagePlayerShownImageView,
@@ -267,12 +182,7 @@ export const {
   setImagePlayerSetImageView,
   setImagePlayerReadyToDisplay,
   setImagePlayerIncrementDisplayIndex,
-  setImagePlayerIncrementIFrameCount,
   setImagePlayerIFrameCount,
-  setImagePlayerDecrementLoaderTimeToNextScene,
-  setImagePlayerLoaderPlaylist,
-  setImagePlayerPlaylist,
-  setImagePlayerDecrementTimeToNextScene,
   setImagePlayersStarted,
   setImagePlayerIsLoading
 } = imagePlayerSlice.actions
