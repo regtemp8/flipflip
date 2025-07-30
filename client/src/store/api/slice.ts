@@ -41,7 +41,8 @@ import {
   ScraperProgress,
   ImageViewData,
   AudioPlaylistItem,
-  CaptionScriptPlaylistItem
+  CaptionScriptPlaylistItem,
+  ViewerEvent
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -659,7 +660,11 @@ export const flipflipApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(
-          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }])
+          flipflipApi.util.invalidateTags([
+            'GroupedDisplays',
+            'UngroupedDisplays',
+            { type: 'Display', id: 'List' }
+          ])
         )
       }
     }),
@@ -672,7 +677,13 @@ export const flipflipApi = createApi({
         await queryFulfilled
         // TODO update cache instead of invalidating it
         dispatch(
-          flipflipApi.util.invalidateTags(['GroupedDisplays', 'UngroupedDisplays', { type: 'Display', id: 'List' }, { type: 'Display', id },  {type: 'DisplayViewSyncOptions', id}])
+          flipflipApi.util.invalidateTags([
+            'GroupedDisplays',
+            'UngroupedDisplays',
+            { type: 'Display', id: 'List' },
+            { type: 'Display', id },
+            { type: 'DisplayViewSyncOptions', id }
+          ])
         )
       }
     }),
@@ -684,30 +695,37 @@ export const flipflipApi = createApi({
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
-        dispatch(
-          flipflipApi.util.invalidateTags([{ type: 'Display', id }])
-        )
+        dispatch(flipflipApi.util.invalidateTags([{ type: 'Display', id }]))
       }
     }),
-    deleteDisplayView: builder.mutation<void, {displayID: number, viewID: number}>({
-      query: ({displayID, viewID}) => ({
+    deleteDisplayView: builder.mutation<
+      void,
+      { displayID: number; viewID: number }
+    >({
+      query: ({ displayID, viewID }) => ({
         url: `api/displays/${displayID}/display-views/${viewID}`,
         method: 'DELETE'
       }),
-      async onQueryStarted({displayID}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ displayID }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
         dispatch(
-          flipflipApi.util.invalidateTags([{ type: 'Display', id: displayID }, {type: 'DisplayViewSyncOptions', id: displayID}])
+          flipflipApi.util.invalidateTags([
+            { type: 'Display', id: displayID },
+            { type: 'DisplayViewSyncOptions', id: displayID }
+          ])
         )
       }
     }),
-    cloneDisplayView: builder.mutation<void, {displayID: number, viewID: number}>({
-      query: ({displayID, viewID}) => ({
+    cloneDisplayView: builder.mutation<
+      void,
+      { displayID: number; viewID: number }
+    >({
+      query: ({ displayID, viewID }) => ({
         url: `api/displays/${displayID}/display-views/${viewID}/clone`,
         method: 'POST'
       }),
-      async onQueryStarted({displayID}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ displayID }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
         dispatch(
@@ -725,7 +743,7 @@ export const flipflipApi = createApi({
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
-          if(status === 400) {
+          if (status === 400) {
             const message = (reason as any)?.error?.data as Message
             snackbar().showMessage(message)
           }
@@ -786,21 +804,25 @@ export const flipflipApi = createApi({
     >({
       query: ({ id, size }) => `api/view-players/${id}/items?size=${size}`
     }),
-    getDisplayViewSyncOptions: builder.query<
-      Record<string, string>,
-      number
+    sendViewPlayerEvent: builder.mutation<
+      ValueResponse | undefined,
+      { id: string; event: ViewerEvent }
     >({
+      query: ({ id, event }) => ({
+        url: `api/view-players/${id}/event`,
+        method: 'POST',
+        body: event
+      })
+    }),
+    getDisplayViewSyncOptions: builder.query<Record<string, string>, number>({
       query: (id) => `api/displays/${id}/display-view-sync-options`,
       providesTags: (options, error, id) =>
-        options != null ? [{type: 'DisplayViewSyncOptions', id}] : []
+        options != null ? [{ type: 'DisplayViewSyncOptions', id }] : []
     }),
-    getVisibleDisplayViewIds: builder.query<
-      number[],
-      number
-    >({
+    getVisibleDisplayViewIds: builder.query<number[], number>({
       query: (id) => `api/displays/${id}/visible-display-views`,
       providesTags: (ids, error, id) =>
-        ids != null ? [{type: 'VisibleDisplayViewIds', id}] : []
+        ids != null ? [{ type: 'VisibleDisplayViewIds', id }] : []
     }),
     getDisplayView: builder.query<DisplayView, number>({
       query: (id) => `api/display-views/${id}`,
@@ -829,9 +851,12 @@ export const flipflipApi = createApi({
             }
           })
           .finally(() => {
-              dispatch(
-                flipflipApi.util.invalidateTags(['VisibleDisplayViewIds', 'DisplayViewSyncOptions'])
-              )
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                'VisibleDisplayViewIds',
+                'DisplayViewSyncOptions'
+              ])
+            )
           })
       }
     }),
@@ -860,28 +885,41 @@ export const flipflipApi = createApi({
         )
       }
     }),
-    createPlaylistItem: builder.mutation<void, {id: number} & (AudioPlaylistItem | ScenePlaylistItem | CaptionScriptPlaylistItem)>({
-      query: ({id, ...item}) => ({
+    createPlaylistItem: builder.mutation<
+      void,
+      { id: number } & (
+        | AudioPlaylistItem
+        | ScenePlaylistItem
+        | CaptionScriptPlaylistItem
+      )
+    >({
+      query: ({ id, ...item }) => ({
         url: `api/playlists/${id}/items`,
         method: 'POST',
         body: item
       }),
-      async onQueryStarted({id}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(
-          flipflipApi.util.invalidateTags([
-            {type: 'PlaylistItemIds', id}
-          ])
+          flipflipApi.util.invalidateTags([{ type: 'PlaylistItemIds', id }])
         )
       }
     }),
-    updatePlaylistItem: builder.mutation<void, {playlistID: number, itemID: number} & Partial<AudioPlaylistItem | ScenePlaylistItem | CaptionScriptPlaylistItem>>({
-      query: ({playlistID, itemID, ...patch}) => ({
+    updatePlaylistItem: builder.mutation<
+      void,
+      { playlistID: number; itemID: number } & Partial<
+        AudioPlaylistItem | ScenePlaylistItem | CaptionScriptPlaylistItem
+      >
+    >({
+      query: ({ playlistID, itemID, ...patch }) => ({
         url: `api/playlists/${playlistID}/items/${itemID}`,
         method: 'PATCH',
         body: patch
       }),
-      async onQueryStarted({playlistID, itemID}, { dispatch, queryFulfilled }) {
+      async onQueryStarted(
+        { playlistID, itemID },
+        { dispatch, queryFulfilled }
+      ) {
         await queryFulfilled
         dispatch(
           flipflipApi.util.invalidateTags([
@@ -901,9 +939,7 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         await queryFulfilled
-        dispatch(
-          flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
-        )
+        dispatch(flipflipApi.util.invalidateTags([{ type: 'Playlist', id }]))
 
         // TODO update cache, only invalidate tag if error
         // await queryFulfilled.catch((reason) => {
@@ -944,7 +980,7 @@ export const flipflipApi = createApi({
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({
         url: `api/scenes/select-options`,
-        params: {includeExtra, includeRandom, onlyExtra}
+        params: { includeExtra, includeRandom, onlyExtra }
       }),
       providesTags: (result) => {
         // TODO incorporate request params into cache key
@@ -957,7 +993,7 @@ export const flipflipApi = createApi({
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({
         url: `api/displays/select-options`,
-        params: {includeExtra, includeRandom, onlyExtra}
+        params: { includeExtra, includeRandom, onlyExtra }
       }),
       providesTags: (result) => {
         // TODO incorporate request params into cache key
@@ -969,27 +1005,34 @@ export const flipflipApi = createApi({
         url: `api/playlists/${id}/items`
       }),
       providesTags: (result, error, id) => {
-        return result != null
-          ? [{ type: 'PlaylistItemIds', id }]
-          : []
+        return result != null ? [{ type: 'PlaylistItemIds', id }] : []
       }
     }),
-    getPlaylistItem: builder.query<AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem, {playlistID: number, itemID: number}>({
-      query: ({playlistID, itemID}) => ({
+    getPlaylistItem: builder.query<
+      AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem,
+      { playlistID: number; itemID: number }
+    >({
+      query: ({ playlistID, itemID }) => ({
         url: `api/playlists/${playlistID}/items/${itemID}`
       }),
-      providesTags: (result, error, {playlistID, itemID}) => {
+      providesTags: (result, error, { playlistID, itemID }) => {
         return result != null
           ? [{ type: 'PlaylistItem', id: `${playlistID}-${itemID}` }]
           : []
       }
     }),
-    deletePlaylistItem: builder.mutation<void, {playlistID: number, itemID: number}>({
+    deletePlaylistItem: builder.mutation<
+      void,
+      { playlistID: number; itemID: number }
+    >({
       query: ({ playlistID, itemID }) => ({
         url: `api/playlists/${playlistID}/items/${itemID}`,
         method: 'DELETE'
       }),
-      async onQueryStarted({ playlistID, itemID }, { dispatch, queryFulfilled }) {
+      async onQueryStarted(
+        { playlistID, itemID },
+        { dispatch, queryFulfilled }
+      ) {
         const query = await queryFulfilled
         if (query?.meta?.response?.ok) {
           dispatch(
@@ -1813,6 +1856,7 @@ export const {
   useStopPlayerMutation,
   useGetViewPlayerConfigQuery,
   useGetViewPlayerItemsQuery,
+  useSendViewPlayerEventMutation,
   useGetVisibleDisplayViewIdsQuery,
   useGetDisplayViewQuery,
   useGetDisplayViewSyncOptionsQuery,

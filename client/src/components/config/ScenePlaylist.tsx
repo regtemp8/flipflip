@@ -30,7 +30,13 @@ import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import SelectAllIcon from '@mui/icons-material/SelectAll'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import Sortable from 'react-sortablejs'
-import { PLT, RP, SCENE_NONE, SCENE_RANDOM, ScenePlaylistItem } from 'flipflip-common'
+import {
+  PLT,
+  RP,
+  SCENE_NONE,
+  SCENE_RANDOM,
+  ScenePlaylistItem
+} from 'flipflip-common'
 import SceneSelect from '../configGroups/SceneSelect'
 import {
   useGetPlaylistQuery,
@@ -140,9 +146,9 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   }
 
   const onSave = async () => {
-    if(item == null) {
+    if (item == null) {
       await createPlaylistItem({
-        id: playlistID, 
+        id: playlistID,
         type: PLT.scene,
         index: 0,
         sceneName: '', // TODO remove or split up, only used for getting data
@@ -153,7 +159,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
       })
     } else {
       await updatePlaylistItem({
-        playlistID, 
+        playlistID,
         itemID: item.id,
         sceneID: unsavedSceneID,
         randomScenes: unsavedRandomScenes,
@@ -278,20 +284,21 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
   const { playlistID, itemID } = props
   const navigate = useNavigate()
   const [deletePlaylistItem] = useDeletePlaylistItemMutation()
-  const {data} = useGetPlaylistItemQuery({playlistID, itemID})
+  const { data } = useGetPlaylistItemQuery({ playlistID, itemID })
 
-  const {sceneID, sceneName} = data != null ? data as ScenePlaylistItem : {sceneID: 0, sceneName: '' }
+  const { sceneID, sceneName } =
+    data != null ? (data as ScenePlaylistItem) : { sceneID: 0, sceneName: '' }
   const onOpenScene = () => {
     navigate(`/scenes/${sceneID}`)
   }
 
   const editItem = () => {
-    if(data != null) {
+    if (data != null) {
       props.onEdit(data as ScenePlaylistItem)
     }
   }
-  const removeItem = async() => {
-    await deletePlaylistItem({playlistID, itemID})
+  const removeItem = async () => {
+    await deletePlaylistItem({ playlistID, itemID })
   }
 
   const { classes } = useStyles()
@@ -378,77 +385,79 @@ function ScenePlaylist(props: ScenePlaylistProps) {
   }
 
   const { classes } = useStyles()
-  return (<>
-    <List>
-      <Sortable
-        className={classes.scriptList}
-        options={{
-          animation: 150,
-          easing: 'cubic-bezier(1, 0, 0, 1)'
-        }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          // dispatch(
-          //   setPlaylistSortItems({
-          //     id: playlistID,
-          //     value: {
-          //       oldIndex: evt.oldIndex,
-          //       newIndex: evt.newIndex
-          //     }
-          //   })
-          // )
-        }}
-      >
-        {itemIDs?.map((id, index) => (
-          <ScenePlaylistRow
-            key={index}
-            playlistID={playlistID}
-            itemID={id}
-            index={index}
-            onEdit={onShowEditDialog}
-          />
-        ))}
-      </Sortable>
-      <div className={classes.playlistAction}>
-        <div className={classes.left}>
-          <Tooltip
-            disableInteractive
-            title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
-          >
-            <IconButton onClick={toggleShuffle} size="large">
-              <ShuffleIcon color={playlist?.shuffle ? 'primary' : undefined} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            disableInteractive
-            title={
-              'Repeat ' +
-              (playlist?.repeat === RP.none
-                ? '(Off)'
-                : playlist?.repeat === RP.all
-                  ? '(All)'
-                  : '(One)')
-            }
-          >
-            <IconButton onClick={changeRepeat} size="large">
-              {playlist?.repeat === RP.none && <RepeatIcon />}
-              {playlist?.repeat === RP.all && <RepeatIcon color={'primary'} />}
-              {playlist?.repeat === RP.one && (
-                <RepeatOneIcon color={'primary'} />
-              )}
+  return (
+    <>
+      <List>
+        <Sortable
+          className={classes.scriptList}
+          options={{
+            animation: 150,
+            easing: 'cubic-bezier(1, 0, 0, 1)'
+          }}
+          onChange={(order: any, sortable: any, evt: any) => {
+            // dispatch(
+            //   setPlaylistSortItems({
+            //     id: playlistID,
+            //     value: {
+            //       oldIndex: evt.oldIndex,
+            //       newIndex: evt.newIndex
+            //     }
+            //   })
+            // )
+          }}
+        >
+          {itemIDs?.map((id, index) => (
+            <ScenePlaylistRow
+              key={index}
+              playlistID={playlistID}
+              itemID={id}
+              index={index}
+              onEdit={onShowEditDialog}
+            />
+          ))}
+        </Sortable>
+        <div className={classes.playlistAction}>
+          <div className={classes.left}>
+            <Tooltip
+              disableInteractive
+              title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
+            >
+              <IconButton onClick={toggleShuffle} size="large">
+                <ShuffleIcon
+                  color={playlist?.shuffle ? 'primary' : undefined}
+                />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              disableInteractive
+              title={
+                'Repeat ' +
+                (playlist?.repeat === RP.none
+                  ? '(Off)'
+                  : playlist?.repeat === RP.all
+                    ? '(All)'
+                    : '(One)')
+              }
+            >
+              <IconButton onClick={changeRepeat} size="large">
+                {playlist?.repeat === RP.none && <RepeatIcon />}
+                {playlist?.repeat === RP.all && (
+                  <RepeatIcon color={'primary'} />
+                )}
+                {playlist?.repeat === RP.one && (
+                  <RepeatOneIcon color={'primary'} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </div>
+          <Tooltip disableInteractive title="Add Scenes">
+            <IconButton onClick={addPlaylistItem} size="large">
+              <AddIcon />
             </IconButton>
           </Tooltip>
         </div>
-        <Tooltip disableInteractive title="Add Scenes">
-          <IconButton
-            onClick={addPlaylistItem}
-            size="large"
-          >
-            <AddIcon />
-          </IconButton>
-        </Tooltip>
-      </div>
-    </List>
-    <ScenePlaylistItemEditDialog
+      </List>
+      <ScenePlaylistItemEditDialog
         playlistID={playlistID}
         item={editingItem}
         open={editing}

@@ -292,12 +292,12 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.get('/options/:type', async(req, res) => {
+router.get('/options/:type', async (req, res) => {
   const rows = await findPlaylistOptionsByType(req.params.type)
   const options: SelectOption[] = []
-  options.push({value: '0', label: 'None'})
-  for(const {itemId, itemName} of rows) {
-    options.push({value: (itemId as number).toString(), label: itemName})
+  options.push({ value: '0', label: 'None' })
+  for (const { itemId, itemName } of rows) {
+    options.push({ value: (itemId as number).toString(), label: itemName })
   }
 
   res.status(200).send(options)

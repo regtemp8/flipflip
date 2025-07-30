@@ -8,7 +8,10 @@ import MovieIcon from '@mui/icons-material/Movie'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { makeStyles } from 'tss-react/mui'
 import { useNavigate } from 'react-router'
-import { useCreatePlaylistMutation, useGetPlaylistOptionsQuery } from '../../store/api/slice'
+import {
+  useCreatePlaylistMutation,
+  useGetPlaylistOptionsQuery
+} from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 
 const playlistTypeDisplayNames: Record<string, string> = {}

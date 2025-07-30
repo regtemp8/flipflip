@@ -38,7 +38,7 @@ export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
 
   const onChange = async (event: SelectChangeEvent<string>) => {
     const { value } = event.target
-    if(value === CREATE_NEW_VALUE && props.create != null) {
+    if (value === CREATE_NEW_VALUE && props.create != null) {
       await props.create()
     } else if (value !== CREATE_NEW_VALUE) {
       dispatch(props.action(value))

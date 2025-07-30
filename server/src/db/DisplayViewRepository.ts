@@ -227,9 +227,9 @@ export async function updateDisplayView(id: number, update: DisplayViewUpdate) {
     .execute()
 }
 
-export async function findDisplayViewSyncOptions(displayId: number): Promise<
-  Record<string, string>
-> {
+export async function findDisplayViewSyncOptions(
+  displayId: number
+): Promise<Record<string, string>> {
   const rows = await db()
     .query()
     .selectFrom('displayView')

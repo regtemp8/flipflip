@@ -190,7 +190,7 @@ function PlaylistSetup() {
   const [clonePlaylist] = useClonePlaylistMutation()
   const [playPlaylist] = usePlayPlaylistMutation()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
-  const { data: items} = useGetPlaylistItemIdsQuery(playlistID)
+  const { data: items } = useGetPlaylistItemIdsQuery(playlistID)
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
@@ -210,7 +210,6 @@ function PlaylistSetup() {
       setFullScreen(fullScreen === true)
       navigate(`/player/${data.value}`)
     }
-
   }
 
   const onToggleDrawer = () => {

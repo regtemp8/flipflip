@@ -64,7 +64,10 @@ import {
   useGetVisibleDisplayViewIdsQuery,
   usePlayDisplayMutation
 } from '../../store/api/slice'
-import { useGetDisplayNameQuery, useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
+import {
+  useGetDisplayNameQuery,
+  useGetDisplaySettingsFullScreenQuery
+} from '../../store/api/selectors'
 import { setFullScreen } from '../../data/fullscreen'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -145,7 +148,7 @@ function DisplaySetup() {
   const { id } = useParams()
   const displayID = Number(id)
   const navigate = useNavigate()
-  
+
   const [playDisplay] = usePlayDisplayMutation()
   const [deleteDisplay] = useDeleteDisplayMutation()
   const [addDisplayView] = useAddDisplayViewMutation()
@@ -238,11 +241,11 @@ function DisplaySetup() {
 
   const onCloneView = async () => {
     dispatch(setDisplayAddedView(true))
-    await cloneDisplayView({displayID, viewID: selectedView as number})
+    await cloneDisplayView({ displayID, viewID: selectedView as number })
   }
 
   const onDeleteView = async () => {
-    await deleteDisplayView({displayID, viewID: selectedView as number})
+    await deleteDisplayView({ displayID, viewID: selectedView as number })
   }
 
   const toggleSettingsExpand = () => {

@@ -153,26 +153,28 @@ router.get('/:id/display-view-sync-options', async (req, res) => {
 router.post('/:id/play', async (req, res) => {
   const id = Number(req.params.id)
   const viewIds = await findVisibleDisplayViewIds(id)
-  if(viewIds.length === 0) {
-    res.status(400).send({error: 'No visible display views. Nothing to display'})
+  if (viewIds.length === 0) {
+    res
+      .status(400)
+      .send({ error: 'No visible display views. Nothing to display' })
     return
   }
 
   let canPlay = true
-  for(const {id} of viewIds) {
-    const view = await findDisplayViewById(id as number) as DisplayView
-    if(toBoolean(view.sync) === false && view.playlistId == null) {
+  for (const { id } of viewIds) {
+    const view = (await findDisplayViewById(id as number)) as DisplayView
+    if (toBoolean(view.sync) === false && view.playlistId == null) {
       canPlay = false
       break
     }
   }
 
-  if(canPlay) {
+  if (canPlay) {
     const playerId = players().start(id, req.user as User)
     const body: ValueResponse = { value: playerId }
     res.status(200).send(body)
   } else {
-    res.status(400).send({error: 'Not all display views have a playlist'})
+    res.status(400).send({ error: 'Not all display views have a playlist' })
   }
 })
 

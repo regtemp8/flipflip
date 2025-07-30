@@ -33,26 +33,28 @@ export const displaySlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder
-      .addMatcher(
-        flipflipApi.endpoints.getDisplay.matchFulfilled,
-        (state, action) => {
-          const views = action.payload.views
-          if(views.length > 0) {
-            const index = state.addedView ? views.length - 1 : 0
-            state.selectedView = views[index]
-          } else {
-            state.selectedView = undefined
-          }
-
-          // TODO if addedView, then scroll to bottom (displayViewsListYOffset)
-          state.addedView = false
+    builder.addMatcher(
+      flipflipApi.endpoints.getDisplay.matchFulfilled,
+      (state, action) => {
+        const views = action.payload.views
+        if (views.length > 0) {
+          const index = state.addedView ? views.length - 1 : 0
+          state.selectedView = views[index]
+        } else {
+          state.selectedView = undefined
         }
-      )
+
+        // TODO if addedView, then scroll to bottom (displayViewsListYOffset)
+        state.addedView = false
+      }
+    )
   }
 })
 
-export const { setDisplaySelectedView, setDisplayAddedView, setDisplayViewsListYOffset } =
-  displaySlice.actions
+export const {
+  setDisplaySelectedView,
+  setDisplayAddedView,
+  setDisplayViewsListYOffset
+} = displaySlice.actions
 
 export default displaySlice.reducer
