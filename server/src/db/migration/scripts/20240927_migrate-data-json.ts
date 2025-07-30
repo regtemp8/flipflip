@@ -1008,7 +1008,6 @@ const contentSourceInsert = async (
   const insertedSource = await trx
     .insertInto('contentSource')
     .values({
-      id,
       sceneId,
       userId,
       url,
@@ -1033,6 +1032,7 @@ const contentSourceInsert = async (
     .returningAll()
     .executeTakeFirstOrThrow()
 
+  const contentSourceId = insertedSource.id as number
   if (source.tags.length > 0) {
     logger.info('+ Insert content source tags')
   }
@@ -1051,7 +1051,7 @@ const contentSourceInsert = async (
     await trx
       .insertInto('contentSourceTag')
       .values({
-        contentSourceId: insertedSource.id as number,
+        contentSourceId,
         tagId,
         userId
       })
@@ -1063,7 +1063,7 @@ const contentSourceInsert = async (
   }
   for (const clip of clips) {
     const disabled = disabledClips.includes(clip.id)
-    await clipInsert(trx, clip, userId, id, disabled, tags)
+    await clipInsert(trx, clip, userId, contentSourceId, disabled, tags)
   }
 
   if (blacklist.length > 0) {
@@ -1074,7 +1074,7 @@ const contentSourceInsert = async (
     await trx
       .insertInto('contentSourceBlacklistItem')
       .values({
-        contentSourceId: id,
+        contentSourceId,
         url
       })
       .execute()
