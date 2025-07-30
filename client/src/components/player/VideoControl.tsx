@@ -36,7 +36,7 @@ import { getTimestamp } from '../../utils'
 //   selectClipVolume,
 //   selectClipStartMarks
 // } from '../../store/clip/selectors'
-import { useAppSelector } from '../../store/hooks'
+// import { useAppSelector } from '../../store/hooks'
 // import { selectUndefined } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -84,7 +84,7 @@ function VideoControl(props: VideoControlProps) {
   const _interval = useRef<number>()
 
   const onChangeVolume = useCallback(
-    (e: Event, volume: number | number[]) => {
+    (_e: Event, volume: number | number[]) => {
       let newVolume = Array.isArray(volume) ? volume[0] : volume
       if (newVolume > 100) {
         newVolume = 100
@@ -111,7 +111,7 @@ function VideoControl(props: VideoControlProps) {
   }, [props.video])
 
   const onChangePosition = useCallback(
-    (e: Event, value: number | number[]) => {
+    (_e: Event, value: number | number[]) => {
       const newPosition: number = Array.isArray(value) ? value[0] : value
       props.video.currentTime = newPosition
     },
@@ -267,7 +267,7 @@ function VideoControl(props: VideoControlProps) {
   }
 
   const onChangeSpeed = (
-    e: Event | SyntheticEvent<Element>,
+    _e: Event | SyntheticEvent<Element>,
     speed: number | number[]
   ) => {
     const newSpeed = Array.isArray(speed) ? speed[0] : speed

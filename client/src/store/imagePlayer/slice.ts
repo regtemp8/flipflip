@@ -85,7 +85,6 @@ export const imagePlayerSlice = createSlice({
       }
 
       const item = value.item
-      console.log('readyToDisplay | SCENE_ID: ' + item.sceneID)
       if (player.readyToDisplay[item.sceneID] == null) {
         player.readyToDisplay[item.sceneID] = []
       }

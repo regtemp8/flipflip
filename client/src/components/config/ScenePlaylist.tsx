@@ -394,7 +394,7 @@ function ScenePlaylist(props: ScenePlaylistProps) {
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          onChange={(order: any, sortable: any, evt: any) => {
+          onChange={(_order: any, _sortable: any, _evt: any) => {
             // dispatch(
             //   setPlaylistSortItems({
             //     id: playlistID,

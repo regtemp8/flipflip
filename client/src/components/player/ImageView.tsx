@@ -6,7 +6,6 @@ import React, {
   useEffect,
   SyntheticEvent
 } from 'react'
-import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
   BT,
@@ -87,7 +86,7 @@ const enableStobeTopOrBottom = (strobe: StrobeData) => {
   return strobe.layer === SL.top || strobe.layer === SL.bottom
 }
 
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     rotate: {
       position: 'absolute',

@@ -90,7 +90,7 @@ interface DisplayPlaylistItemEditDialogProps {
 function DisplayPlaylistItemEditDialog(
   props: DisplayPlaylistItemEditDialogProps
 ) {
-  const { itemID, open, onClose } = props
+  const { open, onClose } = props
   // const { data: allDisplays } = useGetDisplaysQuery()
   // const { data: item } = useGetDisplayPlaylistItemQuery(itemID)
   const item: any = undefined

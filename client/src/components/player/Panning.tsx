@@ -5,7 +5,7 @@ import { getEaseFunction } from '../../utils'
 import {
   PanningData,
   PanningLoopData
-} from '../../store/imagePlayer/ContentPreloadService'
+} from 'flipflip-common'
 import { IT } from 'flipflip-common'
 
 const toTranslate = (

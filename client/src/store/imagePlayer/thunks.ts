@@ -63,7 +63,6 @@ export function startImagePlayers() {
         let index = 0
         const state = getState()
         const { readyToDisplay, currentSceneID } = state.imagePlayer[uuid]
-        console.log('doAdvance | SCENE_ID: ' + currentSceneID)
         const sceneReadyToDisplay = readyToDisplay[currentSceneID]
         if (sceneReadyToDisplay[index] == null) {
           const retries = imageTimers().retry(uuid)
@@ -175,7 +174,7 @@ export function loadImageViews(uuid: string) {
 }
 
 export function shownImageView(uuid: string, item: DisplayItem, index: number) {
-  return async (dispatch: AppDispatch, getState: () => RootState) => {
+  return async (dispatch: AppDispatch) => {
     const event: ViewerEvent = {
       event: 'shown',
       sceneId: item.sceneID,
@@ -198,7 +197,7 @@ export function readyToDisplayImageView(
   item: DisplayItem,
   displayIndex?: number
 ) {
-  return async (dispatch: AppDispatch, getState: () => RootState) => {
+  return async (dispatch: AppDispatch) => {
     const event: ViewerEvent = {
       event: 'loaded',
       sceneId: item.sceneID,
@@ -215,7 +214,7 @@ export function readyToDisplayImageView(
 }
 
 export function discardedImageView(uuid: string, item: DisplayItem) {
-  return async (dispatch: AppDispatch, getState: () => RootState) => {
+  return async (dispatch: AppDispatch) => {
     const event: ViewerEvent = {
       event: 'discarded',
       sceneId: item.sceneID,

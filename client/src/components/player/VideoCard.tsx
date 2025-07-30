@@ -5,7 +5,7 @@ import { Grid, Typography } from '@mui/material'
 import { getSourceType, ST } from 'flipflip-common'
 import VideoControl from './VideoControl'
 import type ChildCallbackHack from './ChildCallbackHack'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+// import { useAppDispatch, useAppSelector } from '../../store/hooks'
 // import {
 //   setSceneVideoSpeed,
 //   setSceneVideoVolume
@@ -25,7 +25,7 @@ export interface VideoCardProps {
 }
 
 export default function VideoCard(props: VideoCardProps) {
-  const dispatch = useAppDispatch()
+  // const dispatch = useAppDispatch()
   const videoVolume = 0 //useAppSelector(selectSceneVideoVolume(props.sceneID))
   const videoSkip = 10 //useAppSelector(selectSceneVideoSkip(props.sceneID))
 
@@ -66,13 +66,13 @@ export default function VideoCard(props: VideoCardProps) {
                 props.imagePlayerAdvanceHacks[0][0].fire()
               }}
               onChangeSpeed={
-                (speed: number) => {}
+                (_speed: number) => {}
                 // dispatch(
                 //   setSceneVideoSpeed({ id: props.sceneID, value: speed })
                 // )
               }
               onChangeVolume={
-                (volume: number) => {}
+                (_volume: number) => {}
                 // dispatch(
                 //   setSceneVideoVolume({ id: props.sceneID, value: volume })
                 // )

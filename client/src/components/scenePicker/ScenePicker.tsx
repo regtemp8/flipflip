@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   Link as RouterLink,
   Route,
@@ -45,13 +45,9 @@ import { makeStyles } from 'tss-react/mui'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import CasinoIcon from '@mui/icons-material/Casino'
-import CloseIcon from '@mui/icons-material/Close'
 import CodeIcon from '@mui/icons-material/Code'
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder'
 import DeleteIcon from '@mui/icons-material/Delete'
-import DragHandleIcon from '@mui/icons-material/DragHandle'
-import FolderIcon from '@mui/icons-material/Folder'
 import GetAppIcon from '@mui/icons-material/GetApp'
 import TvIcon from '@mui/icons-material/Tv'
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay'
@@ -65,7 +61,6 @@ import MenuIcon from '@mui/icons-material/Menu'
 import MovieIcon from '@mui/icons-material/Movie'
 import MovieFilterIcon from '@mui/icons-material/MovieFilter'
 import PersonIcon from '@mui/icons-material/Person'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
@@ -449,7 +444,7 @@ function ScenePicker() {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [newVersion, _setNewVersion] = useState('')
-  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement>()
+  const [menuAnchorEl, _setMenuAnchorEl] = useState<HTMLButtonElement>()
   const [openMenu, setOpenMenu] = useState<string>()
   const [createPlaylistType, setCreatePlaylistType] = useState<string>()
 
@@ -501,8 +496,7 @@ function ScenePicker() {
 
   const onOpenSortMenu = () => {}
   const onCloseDialog = () => {}
-  const sortScenes = (sortBy: string, asc: boolean) => {}
-  const onRandomScene = () => {}
+  const sortScenes = (_sortBy: string, _asc: boolean) => {}
 
   const openTab = getOpenTab(pathname)
   return (

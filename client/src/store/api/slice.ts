@@ -740,7 +740,7 @@ export const flipflipApi = createApi({
     }),
     playDisplay: builder.mutation<ValueResponse, number>({
       query: (id) => ({ url: `api/displays/${id}/play`, method: 'POST' }),
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           if (status === 400) {
@@ -816,12 +816,12 @@ export const flipflipApi = createApi({
     }),
     getDisplayViewSyncOptions: builder.query<Record<string, string>, number>({
       query: (id) => `api/displays/${id}/display-view-sync-options`,
-      providesTags: (options, error, id) =>
+      providesTags: (options, _error, id) =>
         options != null ? [{ type: 'DisplayViewSyncOptions', id }] : []
     }),
     getVisibleDisplayViewIds: builder.query<number[], number>({
       query: (id) => `api/displays/${id}/visible-display-views`,
-      providesTags: (ids, error, id) =>
+      providesTags: (ids, _error, id) =>
         ids != null ? [{ type: 'VisibleDisplayViewIds', id }] : []
     }),
     getDisplayView: builder.query<DisplayView, number>({
@@ -1004,7 +1004,7 @@ export const flipflipApi = createApi({
       query: (id) => ({
         url: `api/playlists/${id}/items`
       }),
-      providesTags: (result, error, id) => {
+      providesTags: (result, _error, id) => {
         return result != null ? [{ type: 'PlaylistItemIds', id }] : []
       }
     }),
@@ -1015,7 +1015,7 @@ export const flipflipApi = createApi({
       query: ({ playlistID, itemID }) => ({
         url: `api/playlists/${playlistID}/items/${itemID}`
       }),
-      providesTags: (result, error, { playlistID, itemID }) => {
+      providesTags: (result, _error, { playlistID, itemID }) => {
         return result != null
           ? [{ type: 'PlaylistItem', id: `${playlistID}-${itemID}` }]
           : []

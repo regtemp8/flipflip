@@ -1,12 +1,11 @@
 import { useRef, type PropsWithChildren, useMemo } from 'react'
 import { animated, useSpring } from '@react-spring/web'
-import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { getEaseFunction } from '../../utils'
-import { FadeInOutData } from '../../store/imagePlayer/ContentPreloadService'
+import { FadeInOutData } from 'flipflip-common'
 
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     fadeInOutContainer: {
       position: 'absolute',

@@ -1,6 +1,6 @@
 import { useRef, type PropsWithChildren, useMemo } from 'react'
 import { animated, useSpring } from '@react-spring/web'
-import { ZoomMoveData } from '../../store/imagePlayer/ContentPreloadService'
+import { ZoomMoveData } from 'flipflip-common'
 import { getEaseFunction } from '../../utils'
 
 interface EffectProps {

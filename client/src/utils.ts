@@ -266,27 +266,6 @@ export class CancelablePromise extends Promise<CancelablePromiseData> {
   }
 }
 
-export function getBrowserName() {
-  const agent = window.navigator.userAgent.toLowerCase()
-  if (agent.indexOf('chrome') > -1 && window.chrome != null) {
-    return 'chrome'
-  } else if (agent.indexOf('safari') > -1) {
-    return 'safari'
-  } else if (agent.indexOf('edge') > -1) {
-    return 'edge'
-  } else if (agent.indexOf('edg') > -1) {
-    return 'chromium based edge'
-  } else if (agent.indexOf('firefox') > -1) {
-    return 'firefox'
-  } else if (agent.indexOf('opr') > -1 && window.opr != null) {
-    return 'opera'
-  } else if (agent.indexOf('trident') > -1) {
-    return 'ie'
-  } else {
-    return 'other'
-  }
-}
-
 export function getEaseFunction(
   ea: string,
   exp: number,

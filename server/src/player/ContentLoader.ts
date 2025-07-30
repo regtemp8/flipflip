@@ -54,8 +54,8 @@ import {
 } from '../utils'
 import Logger from '../logging/Logger'
 import gifInfo from 'gif-info'
-import ffprobe from 'ffprobe'
-import ffprobeInstaller from '@ffprobe-installer/ffprobe'
+// import ffprobe from 'ffprobe'
+// import ffprobeInstaller from '@ffprobe-installer/ffprobe'
 import { toContentSource, toScene } from '../db/mappers'
 import { findSceneById } from '../db/SceneRepository'
 import { Scene as SceneRow, User } from '../db/types/generated'
@@ -478,26 +478,29 @@ export default class ContentLoader {
         }
       }
 
-      let videoStream: ffprobe.FFProbeStream | undefined
-      try {
-        // TODO convert url, if proxied get original, if file registry get local path, else use url
-        const info = await ffprobe(clip?.url ?? url, {
-          path: ffprobeInstaller.path
-        })
-        videoStream = info.streams.find(
-          (stream) => stream.codec_type == 'video'
-        )
-        if (videoStream == null) {
-          throw new Error('Video stream not found')
-        }
-      } catch {
-        const errorData = newContentData(url)
-        errorData.error = true
-        this.dataCache.set(url, errorData)
-        return errorData
-      }
+      // TODO get ffprobe to work with pkg
+      // let videoStream: ffprobe.FFProbeStream | undefined
+      // try {
+      //   // TODO convert url, if proxied get original, if file registry get local path, else use url
+      //   const info = await ffprobe(clip?.url ?? url, {
+      //     path: ffprobeInstaller.path
+      //   })
+      //   videoStream = info.streams.find(
+      //     (stream) => stream.codec_type == 'video'
+      //   )
+      //   if (videoStream == null) {
+      //     throw new Error('Video stream not found')
+      //   }
+      // } catch {
+      //   const errorData = newContentData(url)
+      //   errorData.error = true
+      //   this.dataCache.set(url, errorData)
+      //   return errorData
+      // }
 
-      const { width, height, duration } = videoStream
+      // const { width, height, duration } = videoStream
+      let width, height, duration
+      width = height = duration = 0
       const data = newContentData(url, 'video', width, height)
       data.clip = clip
       if (duration != null) {
