@@ -53,7 +53,7 @@ void (async function () {
 
   const SQLiteStore = connect(session)
   const app = express()
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'testing') {
     const { default: cors } = await import(path.join(__dirname, 'cors.js'))
     app.use(cors.default)
   }

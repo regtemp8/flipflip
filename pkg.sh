@@ -20,8 +20,9 @@ cd ../server
 rm -rf ./bin 
 yarn install --immutable
 yarn prod
-mv ../client/dist bin/public/
+
 echo 'Creating package'
+mv ../client/dist bin/public/
 yarn pkg .
 
 cd ..

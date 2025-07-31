@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import moment from 'moment'
 
-process.env.NODE_ENV = 'test'
+process.env.NODE_ENV = 'testing'
 process.env.FF_USERNAME = 'admin'
 process.env.FF_PASSWORD = 'admin'
 process.env.FF_SAVE_DIR = path.join(process.cwd(), 'tests', 'data')

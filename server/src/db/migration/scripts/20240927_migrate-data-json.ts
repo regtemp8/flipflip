@@ -59,7 +59,7 @@ const getDataJsonPortablePath = () => {
 }
 
 const readDataJsonFile = (): AppStorage | undefined => {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'testing') {
     logger.info(": Generating test database, don't read data.json file")
     return undefined
   }
