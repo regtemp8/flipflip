@@ -94,6 +94,9 @@ void (async function () {
   app.use('/api/view-players', viewPlayers)
   app.use('/fs', files)
   app.use('/proxy', proxy)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  })
   app.use(
     (
       error: NodeJS.ErrnoException,
