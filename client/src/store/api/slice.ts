@@ -38,7 +38,6 @@ import {
   AudioArtist,
   ViewPlayerConfig,
   ValueResponse,
-  ScraperProgress,
   ImageViewData,
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,

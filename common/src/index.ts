@@ -51,7 +51,6 @@ export * from './lib/json/BatchTagRequest';
 export * from './lib/json/ImagePlayerData';
 export * from './lib/json/ValueResponse';
 export * from './lib/json/ViewPlayerConfig';
-export * from './lib/json/ScraperProgress';
 export * from './lib/json/ContentData';
 export * from './lib/json/TransformData';
 export * from './lib/json/ViewData';

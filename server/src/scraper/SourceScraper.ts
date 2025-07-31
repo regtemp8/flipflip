@@ -10,8 +10,7 @@ import {
   Scene,
   RemoteSettings,
   ScraperHelpers,
-  PlayerCaptcha,
-  ScraperProgress
+  PlayerCaptcha
 } from 'flipflip-common'
 import {
   toCacheSettings,
@@ -39,6 +38,12 @@ async function getDirectories(path: string) {
   return dirs
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
+}
+
+interface ScraperProgress {
+  total: number
+  current: number
+  message: string[]
 }
 
 export interface ScrapedSourcePromise {
