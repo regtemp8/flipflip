@@ -229,11 +229,13 @@ router.patch('/:id/items/:itemId', async (req, res, next) => {
     switch (playlist?.type) {
       case PLT.audio: {
         const item = req.body as Partial<AudioPlaylistItem>
+        item.id = Number(req.params.itemId)
         await updateAudioPlaylistItem(toAudioPlaylistItemUpdate(item))
         break
       }
       case PLT.scene: {
         const item = req.body as Partial<ScenePlaylistItem>
+        item.id = Number(req.params.itemId)
         const update = toScenePlaylistItemUpdate(item)
         const scenes = toScenePlaylistItemSceneInsert(item)
         await updateScenePlaylistItem(update, scenes)
@@ -241,6 +243,7 @@ router.patch('/:id/items/:itemId', async (req, res, next) => {
       }
       case PLT.script: {
         const item = req.body as Partial<CaptionScriptPlaylistItem>
+        item.id = Number(req.params.itemId)
         await updateCaptionScriptPlaylistItem(
           toCaptionScriptPlaylistItemUpdate(item)
         )

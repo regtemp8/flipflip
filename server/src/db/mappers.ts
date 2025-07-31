@@ -1749,9 +1749,8 @@ export function toScenePlaylistItemInsert(
   playlistId: number,
   item: ScenePlaylistItem
 ): ScenePlaylistItemInsert {
-  const { id, index, duration, playAfterAllImages } = item
+  const { index, duration, playAfterAllImages } = item
   return {
-    id,
     index,
     playlistId,
     duration,
