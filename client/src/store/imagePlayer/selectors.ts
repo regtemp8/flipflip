@@ -32,7 +32,20 @@ export const selectPlayerIsPlaying = () =>
 export const selectPlayerCanStart = () =>
   createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
     Object.values(imagePlayer).every((value) => {
-      const { firstImageLoaded, hasStarted, loader } = value
-      return !hasStarted && firstImageLoaded && loader.readyToLoad.length === 0
+      const { firstImageLoaded, hasStarted } = value
+      return !hasStarted && firstImageLoaded
     })
+  )
+
+export const selectPlayerProgress = () =>
+  createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) => {
+    let total = 0
+    let current = 0
+    Object.values(imagePlayer).forEach((player) => {
+      total += player.loader.maxCanLoad
+      Object.values(player.readyToDisplay).forEach((ready) => current += ready.length)
+    })
+
+    return {total, current}
+  }
   )

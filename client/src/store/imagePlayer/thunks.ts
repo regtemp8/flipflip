@@ -2,6 +2,7 @@ import { ImageViewData, ViewerEvent } from 'flipflip-common'
 import { flipflipApi } from '../api/slice'
 import { AppDispatch, RootState } from '../store'
 import {
+  ImagePlayerState,
   ImageViewState,
   setImagePlayerAdvanceTimeout,
   setImagePlayerCurrentSceneID,
@@ -98,7 +99,7 @@ export function loadImageViews(uuid: string) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState()
     const player = state.imagePlayer[uuid]
-    if (player == null || player.isLoading) {
+    if (player == null || player.loader.done || player.isLoading) {
       return
     }
 
@@ -197,20 +198,35 @@ export function readyToDisplayImageView(
   item: DisplayItem,
   displayIndex?: number
 ) {
-  return async (dispatch: AppDispatch) => {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
     const event: ViewerEvent = {
       event: 'loaded',
       sceneId: item.sceneID,
       duration: item.duration
     }
-    await dispatch(
+    const {data} = await dispatch(
       flipflipApi.endpoints.sendViewPlayerEvent.initiate({ id: uuid, event })
     )
+
+    const done = data?.value === true
     dispatch(
-      setImagePlayerReadyToDisplay({ uuid, value: { item, displayIndex } })
+      setImagePlayerReadyToDisplay({ uuid, value: { item, displayIndex, done } })
     )
+
+    const state = getState()
+    const start = Object.values(state.imagePlayer).every((player) => !player.hasStarted && (player.loader.done || isReadyToDisplayFull(player)))
+    if(start) {
+      dispatch(startImagePlayers())
+    }
+
     dispatch(loadImageViews(uuid))
   }
+}
+
+function isReadyToDisplayFull(player: ImagePlayerState) {
+  let totalReadyToDisplay = 0
+  Object.values(player.readyToDisplay).forEach((ready) => totalReadyToDisplay += ready.length)
+  return totalReadyToDisplay === player.loader.maxCanLoad
 }
 
 export function discardedImageView(uuid: string, item: DisplayItem) {

@@ -48,6 +48,7 @@ export default class ViewPlayer {
   private next?: ViewPlayerItem
   private loading: boolean
   private preloading: boolean
+  private doneLoading: boolean
 
   private constructor(
     viewId: number,
@@ -65,6 +66,7 @@ export default class ViewPlayer {
     this.next = next
     this.loading = false
     this.preloading = false
+    this.doneLoading = false
   }
 
   public getViewId() {
@@ -113,11 +115,6 @@ export default class ViewPlayer {
     return items
   }
 
-  public getProgress() {
-    return sourceScrapers().getProgress(this.current.sceneId)
-  }
-
-  // TODO if ValueResponse return 200 else 204
   public async onEvent({
     event,
     sceneId,
@@ -149,6 +146,9 @@ export default class ViewPlayer {
       logger.info('Viewer loaded time left: {viewerLoadedTimeLeft}', {
         viewerLoadedTimeLeft: item.viewerLoadedTimeLeft
       })
+
+      this.doneLoading = this.current.viewerLoadedTimeLeft <= 0 && (this.next?.viewerLoadedTimeLeft ?? 0) <= 0
+      return {value: this.doneLoading}
     } else if (event === 'shown') {
       item.viewerShownTimeLeft -= duration
       logger.info('Viewer shown time left: {viewerShownTimeLeft}', {
@@ -167,7 +167,7 @@ export default class ViewPlayer {
   }
 
   private startLoading() {
-    if (this.loading) {
+    if (this.loading || this.doneLoading) {
       return
     }
 
@@ -216,7 +216,7 @@ export default class ViewPlayer {
   }
 
   private startPreloading() {
-    if (this.preloading) {
+    if (this.preloading || this.doneLoading) {
       return
     }
 
@@ -275,6 +275,7 @@ export default class ViewPlayer {
       return
     }
 
+    this.doneLoading = false
     this.current = this.next
     this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user)
     if (this.next != null) {

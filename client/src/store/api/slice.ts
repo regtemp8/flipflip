@@ -778,9 +778,6 @@ export const flipflipApi = createApi({
     getPlayerViewPlayers: builder.query<string[], string>({
       query: (id) => `api/players/${id}/view-players`
     }),
-    getPlayerScraperProgress: builder.query<ScraperProgress, string>({
-      query: (id) => `api/players/${id}/scraper-progress`
-    }),
     stopPlayer: builder.mutation<void, string>({
       query: (id) => ({
         url: `api/players/${id}/stop`,
@@ -1854,7 +1851,6 @@ export const {
   useGetDisplayQuery,
   useUpdateDisplayMutation,
   useGetPlayerViewPlayersQuery,
-  useGetPlayerScraperProgressQuery,
   useStopPlayerMutation,
   useGetViewPlayerConfigQuery,
   useGetViewPlayerItemsQuery,

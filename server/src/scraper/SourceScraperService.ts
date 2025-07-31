@@ -59,10 +59,6 @@ class SourceScraperService {
     return this.subscriptions.get(sceneId)?.scraper.getUrls()
   }
 
-  public getProgress(sceneId: number) {
-    return this.subscriptions.get(sceneId)?.scraper.getProgress()
-  }
-
   public clear() {
     this.subscriptions.forEach((subscription) => {
       if (subscription.subscribers > 0) {

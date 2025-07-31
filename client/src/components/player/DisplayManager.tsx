@@ -18,14 +18,14 @@ import { useWakeLock } from 'react-screen-wake-lock'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import {
-  useGetPlayerScraperProgressQuery,
   useGetPlayerViewPlayersQuery,
   useGetViewPlayerConfigQuery,
   useStopPlayerMutation
 } from '../../store/api/slice'
 import {
   selectPlayerCanStart,
-  selectPlayerHasStarted
+  selectPlayerHasStarted,
+  selectPlayerProgress
 } from '../../store/imagePlayer/selectors'
 import {
   pauseImagePlayers,
@@ -62,26 +62,12 @@ const useStyles = makeStyles()((theme: Theme) => {
   }
 })
 
-interface ProgressCardProps {
-  playerID: string
-  start?: () => void
-}
-
-function ProgressCard(props: ProgressCardProps) {
-  const { playerID } = props
+function ProgressCard() {
   const { classes } = useStyles()
-  const { data: progress } = useGetPlayerScraperProgressQuery(playerID, {
-    pollingInterval: 10000
-  })
+  const dispatch = useAppDispatch()
+  const canStart = useAppSelector(selectPlayerCanStart())
+  const { total, current } = useAppSelector(selectPlayerProgress())
 
-  let current = 0
-  let total = 0
-  let message: string[] = []
-  if (progress != null) {
-    current = progress.current
-    total = progress.total
-    message = progress.message
-  }
   return (
     <div className={classes.progressMain}>
       <Container maxWidth={false} className={classes.progressContainer}>
@@ -102,26 +88,13 @@ function ProgressCard(props: ProgressCardProps) {
           <Typography component="h1" variant="h6" color="inherit" noWrap>
             {current} / {total}
           </Typography>
-          {message.map((line, index) => (
-            <Typography
-              key={'msg-' + index}
-              component="h1"
-              variant="h5"
-              color="inherit"
-              noWrap
-            >
-              {line}
-            </Typography>
-          ))}
-          {props.start && (
+          {canStart && (
             <Button
               className={classes.startNowBtn}
               variant="contained"
               color="secondary"
               onClick={() => {
-                if (props.start != null) {
-                  props.start()
-                }
+                dispatch(startImagePlayers())
               }}
             >
               Start Now
@@ -192,7 +165,6 @@ function DisplayManager() {
 
   const { data: viewPlayers } = useGetPlayerViewPlayersQuery(playerID)
   const hasStarted = useAppSelector(selectPlayerHasStarted())
-  const canStart = useAppSelector(selectPlayerCanStart())
 
   const wakeLock = useWakeLock()
   const stayAwake = useStayAwake()
@@ -231,7 +203,6 @@ function DisplayManager() {
   }, [recentPictureGrid, stayAwake, wakeLock])
 
   const { classes } = useStyles()
-  const start = canStart ? () => dispatch(startImagePlayers()) : undefined
   return (
     <>
       <DisplayManagerAppBar
@@ -239,7 +210,7 @@ function DisplayManager() {
         playerID={playerID}
         goBack={goBack}
       />
-      {!hasStarted && <ProgressCard playerID={playerID} start={start} />}
+      {!hasStarted && <ProgressCard />}
       <Box className={classes.container}>
         {viewPlayers &&
           viewPlayers.map((id) => <DisplayView key={id} viewPlayerID={id} />)}

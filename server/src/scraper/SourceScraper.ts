@@ -155,10 +155,6 @@ export default class SourceScraper {
     return this.allURLs
   }
 
-  public getProgress() {
-    return this.progress
-  }
-
   public async start() {
     if (this.running || this.completed) {
       return

@@ -18,12 +18,14 @@ export interface ImageViewState extends ImageViewData {
 export interface ImageViewLoaderState {
   loadingCount: number
   iframeCount: number
+  maxCanLoad: number
   maxCanLoadAtOnce: number
   readyToLoad: number[]
   displayIndex: number
   zIndex: number
   shownIndex?: number
   imageViews: Array<ImageViewState | undefined>
+  done: boolean
 }
 
 export interface ImagePlayerState {
@@ -74,11 +76,12 @@ export const imagePlayerSlice = createSlice({
     setImagePlayerReadyToDisplay: (
       state,
       action: PayloadAction<
-        ImagePlayerUpdate<{ item: DisplayItem; displayIndex?: number }>
+        ImagePlayerUpdate<{ item: DisplayItem; displayIndex?: number, done: boolean }>
       >
     ) => {
       const { uuid, value } = action.payload
       const player = state[uuid]
+      player.loader.done = value.done
       player.loader.loadingCount--
       if (!player.firstImageLoaded) {
         player.firstImageLoaded = true
@@ -114,7 +117,7 @@ export const imagePlayerSlice = createSlice({
       imageViews[item.index].show = true
       loader.shownIndex = item.index
       const count = value + 1
-      state[uuid].displayOffset += count
+      state[uuid].displayOffset += count  
       readyToDisplay[currentSceneID] =
         readyToDisplay[currentSceneID].slice(count)
     },
@@ -188,6 +191,7 @@ export const imagePlayerSlice = createSlice({
       const { loader, readyToDisplay, currentSceneID } = state[uuid]
       const indexes = readyToDisplay[currentSceneID].map((item) => item.index)
 
+      loader.done = false
       loader.loadingCount -= indexes.length
       loader.readyToLoad.push(...indexes)
 
@@ -228,9 +232,11 @@ export const imagePlayerSlice = createSlice({
               displayIndex: 0,
               loadingCount: 0,
               iframeCount: 0,
+              maxCanLoad: data.maxCanLoad,
               maxCanLoadAtOnce: data.maxCanLoadAtOnce,
               readyToLoad: [...Array(data.maxCanLoad).keys()],
-              imageViews: []
+              imageViews: [],
+              done: false
             },
             isEmpty: false,
             hasStarted: false,
