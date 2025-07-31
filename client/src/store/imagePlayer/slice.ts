@@ -208,7 +208,7 @@ export const imagePlayerSlice = createSlice({
         flipflipApi.endpoints.getViewPlayerConfig.matchFulfilled,
         (state, action) => {
           const data = action.payload
-          if (data == null) {
+          if (data == null || data.view.sync) {
             return
           }
 

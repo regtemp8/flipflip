@@ -791,8 +791,10 @@ export const flipflipApi = createApi({
       query: (id) => `api/view-players/${id}/config`,
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled
-          dispatch(loadImageViews(id))
+          const {data} = await queryFulfilled
+          if(!data.view.sync) {
+            dispatch(loadImageViews(id))
+          }
         } catch (err) {
           console.error('Query failed:', err)
         }

@@ -1,35 +1,54 @@
 import express from 'express'
 import viewPlayers from '../player/ViewPlayerService'
-import displayViews from '../services/displayViewService'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { User } from '../db/types/generated'
-import { ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
+import { SCENE_NONE, ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
+import { findDisplayViewById } from '../db/DisplayViewRepository'
+import { toDisplayView } from '../db/mappers'
 
 const router = express.Router()
 router.get('/:id/config', async (req, res) => {
-  const viewPlayer = viewPlayers().get(req.params.id)
-  if (viewPlayer == null) {
+  const viewId = viewPlayers().getViewId(req.params.id)
+  if (viewId == null) {
     res.status(404).end()
     return
   }
 
-  const view = await displayViews().getById(viewPlayer.getViewId())
-  if (view != null) {
-    const sceneId = viewPlayer.getCurrentSceneId()
-    const { maxInMemory, maxLoadingAtOnce } = await findDisplaySettings(
-      req.user as User
-    )
-    const body: ViewPlayerConfig = {
-      view,
-      sceneId,
-      maxCanLoad: maxInMemory,
-      maxCanLoadAtOnce: maxLoadingAtOnce
+  const displayView = await findDisplayViewById(viewId)
+  const view = displayView != null ? toDisplayView(displayView) : undefined
+  if(view == null) {
+    res.status(404).end()
+    return
+  }
+
+  let sceneId = SCENE_NONE
+  let maxCanLoad = 0
+  let maxCanLoadAtOnce = 0
+  let uuid = req.params.id
+  if(!view.sync) {
+    const viewPlayer = viewPlayers().get(req.params.id)
+    if(viewPlayer == null) {
+      res.status(404).end()
+      return
     }
 
-    res.status(200).send(body)
+    const displaySettings = await findDisplaySettings(req.user as User)
+    maxCanLoad = displaySettings.maxInMemory
+    maxCanLoadAtOnce = displaySettings.maxLoadingAtOnce
+    sceneId = viewPlayer.getCurrentSceneId()
   } else {
-    res.status(404).end()
+    uuid = viewPlayers().getViewPlayerId(view.syncWithView as number)
   }
+
+  const body: ViewPlayerConfig = {
+    uuid,
+    view,
+    sceneId,
+    maxCanLoad,
+    maxCanLoadAtOnce
+  }
+
+  res.status(200).send(body)
 })
 
 router.get('/:id/items', async (req, res) => {

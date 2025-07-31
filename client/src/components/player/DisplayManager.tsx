@@ -144,7 +144,7 @@ function DisplayView(props: DisplayViewProps) {
     return null
   }
 
-  const { view } = config
+  const { view, uuid } = config
   let transform: string | undefined = undefined
   if (view.sync) {
     if (view.mirrorSyncedView === MVF.horizontal) {
@@ -168,7 +168,7 @@ function DisplayView(props: DisplayViewProps) {
       }}
     >
       <ImagePlayer
-        uuid={props.viewPlayerID}
+        uuid={uuid}
         historyOffset={0}
         setHistoryOffset={() => {}}
         setHistoryPaths={() => {}}
