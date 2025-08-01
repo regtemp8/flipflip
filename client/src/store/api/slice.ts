@@ -1,7 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Credentials } from '../../data/Credentials'
 import {
-  AccountChange,
   Backup,
   CacheSettings,
   DisplaySettings,

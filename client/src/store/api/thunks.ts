@@ -23,16 +23,6 @@ import {
 import { setScriptLibraryLastSelected } from '../scriptLibrary/slice'
 import { setAudioLibraryLastSelected } from '../audioLibrary/slice'
 
-export const refreshConnectToken = () => {
-  return (dispatch: AppDispatch): void => {
-    dispatch(
-      flipflipApi.endpoints.getConnectToken.initiate(undefined, {
-        forceRefetch: true
-      })
-    )
-  }
-}
-
 const updateLocalAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
   return flipflipApi.util.updateQueryData('getAudio', update.id, (draft) => {
     Object.assign(draft, update)

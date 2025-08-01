@@ -6,7 +6,6 @@ export * from './lib/twitter/TwitterFollowers';
 export * from './lib/twitter/TwitterItems';
 export * from './lib/instagram/InstagramItems';
 export * from './lib/SystemConstants';
-export * from './lib/json/AccountChange';
 export * from './lib/json/Backup';
 export * from './lib/json/AudioPlaylistItem';
 export * from './lib/json/CaptionScriptPlaylistItem';
