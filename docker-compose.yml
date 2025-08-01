@@ -5,8 +5,6 @@ services:
       context: .
     # pull_policy: build # force build
     environment:
-      FF_USERNAME: admin
-      FF_PASSWORD: admin
       FF_SAVE_DIR: /var/lib/flipflip
     volumes:
       - ./docker-data/flipflip:/var/lib/flipflip

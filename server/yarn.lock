@@ -648,7 +648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.5.5":
+"@types/node@npm:*":
   version: 22.7.7
   resolution: "@types/node@npm:22.7.7"
   dependencies:
@@ -666,6 +666,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^20.18.0":
+  version: 20.19.9
+  resolution: "@types/node@npm:20.19.9"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/c6738131f1698258a5ac1e0185e4fc56977f7f566cd0ee11167f93f2339478470257bd82c5e1908a936a204e0ad7996d741356a1a07c04997a236161ea23a874
+  languageName: node
+  linkType: hard
+
 "@types/oauth@npm:^0.9.1":
   version: 0.9.6
   resolution: "@types/oauth@npm:0.9.6"
@@ -675,28 +684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport-local@npm:^1":
-  version: 1.0.38
-  resolution: "@types/passport-local@npm:1.0.38"
-  dependencies:
-    "@types/express": "npm:*"
-    "@types/passport": "npm:*"
-    "@types/passport-strategy": "npm:*"
-  checksum: 10c0/a8464df03f073a4bb9aef7fa7cc9e76a355f149a1148330da88346d0e9c600f845601e99ed40949a13287eacae0a7ad01cd0eb5ca00d8b81da263b1dfc3aee60
-  languageName: node
-  linkType: hard
-
-"@types/passport-strategy@npm:*":
-  version: 0.2.38
-  resolution: "@types/passport-strategy@npm:0.2.38"
-  dependencies:
-    "@types/express": "npm:*"
-    "@types/passport": "npm:*"
-  checksum: 10c0/d7d2b1782a0845bd8914250aa9213a23c8d9c2225db46d854b77f2bf0129a789f46d4a5e9ad336eca277fc7e0a051c0a2942da5c864e7c6710763f102d9d4295
-  languageName: node
-  linkType: hard
-
-"@types/passport@npm:*, @types/passport@npm:^1.0.16":
+"@types/passport@npm:^1.0.16":
   version: 1.0.16
   resolution: "@types/passport@npm:1.0.16"
   dependencies:
@@ -4855,28 +4843,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"passport-local@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "passport-local@npm:1.0.0"
+"passport-custom@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "passport-custom@npm:1.1.1"
   dependencies:
     passport-strategy: "npm:1.x.x"
-  checksum: 10c0/59becb988014921a5d6056470d9373c41db452fcf113323064f39d53baa6f184e72151bf269ca6770511f7f0260e13632dacc7b6afdbf60ebf63e90327e186d4
+  checksum: 10c0/49b6fcd125dcd60272d4f02c27acb3b61b2659f3148bc10b31b7c439314054ce32c83a12f422215bdfa83d0463668a1f38ca6e8d68ccd32c922f73ccaa5ac9b3
   languageName: node
   linkType: hard
 
-"passport-strategy@npm:1.x.x, passport-strategy@npm:^1.0.0":
+"passport-strategy@npm:1.x.x":
   version: 1.0.0
   resolution: "passport-strategy@npm:1.0.0"
   checksum: 10c0/cf4cd32e1bf2538a239651581292fbb91ccc83973cde47089f00d2014c24bed63d3e65af21da8ddef649a8896e089eb9c3ac9ca639f36c797654ae9ee4ed65e1
-  languageName: node
-  linkType: hard
-
-"passport-unique-token@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "passport-unique-token@npm:3.0.0"
-  dependencies:
-    passport-strategy: "npm:^1.0.0"
-  checksum: 10c0/2074e1c73abeb3d162d5818b7cfb2d3a4174d407c7a3c9f51f467b4614a892ef2a1c8480ae1212d0adbaa0f40f2f143a3d2a68bc10c42dc8d45db965f6b39cda
   languageName: node
   linkType: hard
 
@@ -5583,10 +5562,9 @@ __metadata:
     "@types/ffprobe": "npm:^1"
     "@types/http-proxy": "npm:^1"
     "@types/jsdom": "npm:^21.1.7"
-    "@types/node": "npm:^22.5.5"
+    "@types/node": "npm:^20.18.0"
     "@types/node-schedule": "npm:^2"
     "@types/passport": "npm:^1.0.16"
-    "@types/passport-local": "npm:^1"
     "@types/recursive-readdir": "npm:^2"
     "@types/string-template": "npm:^1"
     "@typescript-eslint/eslint-plugin": "npm:^5.0.0"
@@ -5617,8 +5595,7 @@ __metadata:
     music-metadata: "npm:^10.7.0"
     node-schedule: "npm:^2.1.1"
     passport: "npm:^0.7.0"
-    passport-local: "npm:^1.0.0"
-    passport-unique-token: "npm:^3.0.0"
+    passport-custom: "npm:^1.1.1"
     prettier: "npm:^3.2.4"
     recursive-readdir: "npm:^2.2.3"
     snoowrap: "npm:^1.23.0"
@@ -6501,6 +6478,13 @@ __metadata:
   version: 6.19.8
   resolution: "undici-types@npm:6.19.8"
   checksum: 10c0/078afa5990fba110f6824823ace86073b4638f1d5112ee26e790155f481f2a868cc3e0615505b6f4282bdf74a3d8caad715fd809e870c2bb0704e3ea6082f344
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
   languageName: node
   linkType: hard
 

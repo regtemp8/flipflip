@@ -56,7 +56,6 @@ export const flipflipApi = createApi({
   tagTypes: [
     'Authenticated',
     'Theme',
-    'ConnectToken',
     'Backup',
     'Version',
     'GroupedScenes',
@@ -114,65 +113,6 @@ export const flipflipApi = createApi({
     isAuthenticated: builder.query<boolean, void>({
       query: () => `authenticated`,
       providesTags: ['Authenticated']
-    }),
-    passwordLogin: builder.mutation<boolean, Credentials>({
-      query(body) {
-        return {
-          url: `login/password`,
-          method: 'POST',
-          body
-        }
-      },
-      invalidatesTags: ['Authenticated', 'Theme']
-    }),
-    tokenLogin: builder.mutation<boolean, string>({
-      query(token) {
-        return {
-          url: `login/token?token=${token}`
-        }
-      },
-      invalidatesTags: ['Authenticated', 'Theme']
-    }),
-    logout: builder.mutation<boolean, void>({
-      query() {
-        return {
-          url: `logout`
-        }
-      },
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(flipflipApi.util.resetApiState())
-      }
-    }),
-    changeUsername: builder.mutation<Message, AccountChange>({
-      query(body) {
-        return {
-          url: `change-username`,
-          method: 'POST',
-          body
-        }
-      },
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(flipflipApi.util.resetApiState())
-      }
-    }),
-    changePassword: builder.mutation<Message, AccountChange>({
-      query(body) {
-        return {
-          url: `change-password`,
-          method: 'POST',
-          body
-        }
-      },
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(flipflipApi.util.resetApiState())
-      }
-    }),
-    getConnectToken: builder.query<string, void>({
-      query: () => `connect`,
-      providesTags: ['ConnectToken']
     }),
     getBackups: builder.query<Backup[], void>({
       query: () => `api/backups`,
@@ -1783,12 +1723,6 @@ export const {
   useGetFilePickerDataQuery,
   useCreateDirectoryMutation,
   useIsAuthenticatedQuery,
-  usePasswordLoginMutation,
-  useTokenLoginMutation,
-  useLogoutMutation,
-  useChangeUsernameMutation,
-  useChangePasswordMutation,
-  useGetConnectTokenQuery,
   useGetBackupsQuery,
   useCreateBackupMutation,
   useCleanBackupsMutation,

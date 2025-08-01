@@ -7,8 +7,6 @@ import { CacheProvider } from '@emotion/react'
 import store from '../store/store'
 import { Provider } from 'react-redux'
 import PrivateRoute from './common/PrivateRoute'
-import Login from './login/Login'
-import Account from './account/Account'
 import SceneDetail from './sceneDetail/SceneDetail'
 import ScenePicker from './scenePicker/ScenePicker'
 import ConfigForm from './config/ConfigForm'
@@ -49,15 +47,6 @@ const App = () => {
               <CssBaseline />
               <AudioOptions />
               <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/account/*"
-                  element={
-                    <PrivateRoute>
-                      <Account />
-                    </PrivateRoute>
-                  }
-                />
                 <Route
                   path="/settings/*"
                   element={

@@ -2077,17 +2077,14 @@ const displayInsert = async (
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     const json = readDataJsonFile() ?? initialAppStorage
-    const username = process.env.FF_USERNAME ?? generateUsername()
-    const password =
-      process.env.FF_PASSWORD ??
-      generator.generate({
-        numbers: true,
-        length: 12,
-        excludeSimilarCharacters: true,
-        strict: true
-      })
+    const password = generator.generate({
+      numbers: true,
+      length: 12,
+      excludeSimilarCharacters: true,
+      strict: true
+    })
 
-    const userId = await userInsert(trx, username, password)
+    const userId = await userInsert(trx, 'dummy', password)
     await generalSettingsInsert(trx, json, userId)
     await remoteSettingsInsert(trx, json, userId)
     await cacheSettingsInsert(trx, json, userId)
@@ -2107,18 +2104,6 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await sceneInsert(trx, json, userId, tags)
     await sceneSettingsInsert(trx, json, userId)
     await displayInsert(trx, json, userId)
-
-    logger.info(
-      `
-      +-----------------------------------------------------------------------------------------+
-       username: {username}                   
-       password: {password}                 
-      +-----------------------------------------------------------------------------------------+
-      IMPORTANT: The username and password are only shown once. Please store them somewhere safe. 
-      You can change the username and password in the account settings after logging in. 
-    `,
-      { username, password }
-    )
   })
 }
 

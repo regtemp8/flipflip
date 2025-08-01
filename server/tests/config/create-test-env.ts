@@ -3,8 +3,6 @@ import path from 'path'
 import moment from 'moment'
 
 process.env.NODE_ENV = 'testing'
-process.env.FF_USERNAME = 'admin'
-process.env.FF_PASSWORD = 'admin'
 process.env.FF_SAVE_DIR = path.join(process.cwd(), 'tests', 'data')
 
 // imports that depend on env variables
@@ -21,12 +19,6 @@ void (async function () {
 
   // TEST DATABASE
   await db().migrateToLatest()
-  await db()
-    .query()
-    .updateTable('user')
-    .set({ tokenValue: '987654', tokenExpiry: 9223372036854775807 })
-    .where('username', '=', process.env.FF_USERNAME as string)
-    .execute()
 
   // BACKUP TEST DATA
   const now = moment('2024-10-18', 'YYYY-MM-DD')
