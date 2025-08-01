@@ -35,46 +35,16 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'login-chromium',
-      testMatch: /login\/login\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome']
-      }
-    },
-    {
-      name: 'auth-chromium',
-      testMatch: /login\/auth.spec.ts/,
-      use: {
-        ...devices['Desktop Chrome']
-      }
-    },
-    {
       name: 'app-chromium',
       testMatch: /app\/.*\.spec\.ts/,
-      dependencies: ['auth-chromium'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'server/tests/data/session.json'
       }
     },
     {
-      name: 'login-firefox',
-      testMatch: /login\/login\.spec\.ts/,
-      use: {
-        ...devices['Desktop Firefox']
-      }
-    },
-    {
-      name: 'auth-firefox',
-      testMatch: /login\/auth.spec.ts/,
-      use: {
-        ...devices['Desktop Firefox']
-      }
-    },
-    {
       name: 'app-firefox',
       testMatch: /app\/.*\.spec\.ts/,
-      dependencies: ['auth-firefox'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'server/tests/data/session.json'
