@@ -2,8 +2,6 @@ import fs, { existsSync, readFileSync } from 'fs'
 import crypto from 'crypto'
 import path from 'path'
 import { Kysely } from 'kysely'
-import { generateUsername } from 'unique-username-generator'
-import generator from 'generate-password'
 import {
   DB,
   Tag as DBTag,
@@ -2077,14 +2075,7 @@ const displayInsert = async (
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     const json = readDataJsonFile() ?? initialAppStorage
-    const password = generator.generate({
-      numbers: true,
-      length: 12,
-      excludeSimilarCharacters: true,
-      strict: true
-    })
-
-    const userId = await userInsert(trx, 'dummy', password)
+    const userId = await userInsert(trx, 'dummy', 'password')
     await generalSettingsInsert(trx, json, userId)
     await remoteSettingsInsert(trx, json, userId)
     await cacheSettingsInsert(trx, json, userId)
