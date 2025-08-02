@@ -4,7 +4,6 @@ import express, { Request, Response } from 'express'
 import {
   FilePickerData,
   FilePickerItem,
-  getSourceType,
   isAudio,
   isImage,
   isVideo
@@ -12,7 +11,7 @@ import {
 import Logger from '../logging/Logger'
 import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
-import { findAudioUrlById, findAudioThumbById } from '../db/AudioRepository'
+import { findAudioUrlById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
 import { User } from '../db/types/generated'
 import proxy from './ProxyService'
@@ -167,28 +166,26 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
     } else if (ranges == -2) {
       // Syntactically invalid parser result, return HTTP status 400: bad request
       res.status(400).end()
-    } else {
-      let status = 200
-      let start = undefined
-      let end = undefined
-      if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
-        status = 206
+    } else if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
+      const {start, end} = ranges[0]
+      res.status(206)
+        .set({
+          'Content-Range': `bytes ${start}-${end}/${size}`,
+          'Accept-Ranges': 'bytes',
+          "Content-Length": end - start + 1
+        })
+        .type(url.substring(url.lastIndexOf('.')))
+        .on('error', (error) => {
+          logger.error(`Failed to process file request ${req.url}`, { error })
+        })
 
-        // TODO handle multi part ranges
-        start = ranges[0].start
-        end = ranges[0].end
-        res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
-      }
-
-      res.status(status).type(url.substring(url.lastIndexOf('.')))
-      res.on('error', (error) => {
-        logger.error(`Failed to process file request ${req.url}`, { error })
-      })
       const stream = fs.createReadStream(url, { start, end })
       stream.on('error', (error) => {
         logger.error(`Failed to read file ${req.url}`, { error })
       })
       stream.pipe(res)
+    } else {
+      res.status(200).sendFile(url)
     }
   }
 }
