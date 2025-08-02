@@ -1,7 +1,7 @@
 ARG SERVER_PORT="5050"
 ARG NODE_ENV="production"
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 ARG SERVER_PORT
 ARG NODE_ENV
 
@@ -23,7 +23,7 @@ WORKDIR /home/node/builder/server
 RUN yarn install --immutable
 RUN yarn prod
 
-FROM node:20-alpine
+FROM node:22-alpine
 ARG SERVER_PORT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
