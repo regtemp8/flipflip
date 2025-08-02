@@ -36,6 +36,7 @@ import {
 import { toNumber } from '../db/utils'
 import { WC } from 'flipflip-common'
 import Logger from '../logging/Logger'
+import getFolderSize from 'get-folder-size'
 
 const logger = Logger.create('settings')
 const router = express.Router()
@@ -106,17 +107,14 @@ router.get('/cache/size', async (req, res) => {
     return
   }
 
-  const { default: getFolderSize } = await import('get-folder-size')
-  const result = await getFolderSize(settings.directory)
-  if (result.errors != null) {
-    for (const error of result.errors) {
+  getFolderSize(settings.directory, (error, size) => {
+    if (error != null) {
       logger.error('Failed to get folder size', { error })
+      res.status(500).end()
+    } else {
+      res.status(200).send(toCacheSize(size / (1024 * 1024)))
     }
-
-    res.status(500).end()
-  } else {
-    res.status(200).send(toCacheSize(result.size / (1024 * 1024)))
-  }
+  })
 })
 router.patch('/cache', async (req, res) => {
   const result = await updateCacheSettings(

@@ -56,7 +56,7 @@ const splatf = winston.format((info, opts) => {
   return info
 })
 
-const logFormat = (redacted?: boolean) => {
+const logFormat = (redacted: boolean) => {
   const { combine, timestamp, align, printf } = winston.format
   return combine(
     splatf({ redacted }),
@@ -73,7 +73,7 @@ const logger = winston.createLogger({
   level: 'info',
   transports: [
     new winston.transports.Console({
-      format: logFormat()
+      format: logFormat(false)
     }),
     new winston.transports.File({
       dirname: getLogsDir(),

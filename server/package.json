@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@ffprobe-installer/ffprobe": "^2.1.2",
     "better-sqlite3": "^11.3.0",
     "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.6",
@@ -12,18 +13,18 @@
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "fast-redact": "^3.5.0",
-    "file-url": "^4.0.0",
+    "ffprobe": "^1.1.2",
     "flipflip-common": "link:./../common",
-    "get-folder-size": "^5.0.0",
+    "get-folder-size": "^2.0.1",
     "gif-info": "^1.0.1",
     "http-proxy": "^1.18.1",
     "image-size": "^2.0.2",
     "imgur": "^2.5.0",
     "jsdom": "^26.1.0",
     "kysely": "^0.27.4",
-    "mime": "^4.0.6",
+    "mime-types": "^3.0.1",
     "moment": "^2.30.1",
-    "music-metadata": "^10.7.0",
+    "music-metadata": "^7.14.0",
     "node-schedule": "^2.1.1",
     "passport": "^0.7.0",
     "passport-custom": "^1.1.1",
@@ -43,10 +44,12 @@
     "@types/express": "^4.17.21",
     "@types/express-session": "^1",
     "@types/fast-redact": "^3",
-    "@types/ffprobe": "^1",
+    "@types/ffprobe": "^1.1.8",
+    "@types/get-folder-size": "^2.0.0",
     "@types/http-proxy": "^1",
     "@types/jsdom": "^21.1.7",
-    "@types/node": "^20.18.0",
+    "@types/mime-types": "^3",
+    "@types/node": "^22.13.14",
     "@types/node-schedule": "^2",
     "@types/passport": "^1.0.16",
     "@types/recursive-readdir": "^2",
@@ -77,9 +80,13 @@
   "bin": "bin/server.js",
   "pkg": {
     "scripts": "bin/**/*.js",
-    "assets": "bin/public/**/*",
+    "assets": [
+      "bin/public/**/*",
+      "node_modules/@ffprobe-installer/linux-x64/*",
+      "node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+    ],
     "targets": [
-      "node20-linux-x64"
+      "node22-linux-x64"
     ],
     "outputPath": "dist"
   },

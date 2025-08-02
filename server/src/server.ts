@@ -31,17 +31,35 @@ import {
   getCacheDir,
   getSaveDir,
   getServerPort,
-  getThumbsDir
+  getThumbsDir,
+  getBinDir,
+  getFfprobePath
 } from './utils'
 import scheduler from './scheduler'
 import Logger from './logging/Logger'
 import proxy from './routes/proxy'
+import ffprobeInstaller from '@ffprobe-installer/ffprobe'
+import { pipeline } from 'stream/promises'
 
 const port = getServerPort()
 const logger = Logger.create('server')
 
+const extractBinaries = async () => {
+  if(process.pkg == null) {
+    return
+  }
+
+  if(!fs.existsSync(getFfprobePath())) {
+    const file = fs.createWriteStream(getFfprobePath());
+    await pipeline(fs.createReadStream(ffprobeInstaller.path), file);
+
+    fs.chmodSync(getFfprobePath(), 0o755);
+    logger.info('+ ffprobe copied to {path}', {path: getFfprobePath()});
+  }
+};
+
 void (async function () {
-  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir(), getThumbsDir()]
+  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir(), getThumbsDir(), getBinDir()]
   for (const path of dirs) {
     if (!fs.existsSync(path)) {
       logger.info('+ Creating directory {path}', { path })
@@ -49,6 +67,7 @@ void (async function () {
     }
   }
 
+  await extractBinaries()
   await db().migrateToLatest()
 
   const SQLiteStore = connect(session)

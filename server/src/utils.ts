@@ -15,6 +15,10 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import { ProxyRequest } from './routes/ProxyService'
+import ffprobeInstaller from '@ffprobe-installer/ffprobe'
+import { parseBuffer, parseFile, selectCover } from 'music-metadata'
+import mime from 'mime-types'
+
 export const isMacOSX = process.platform === 'darwin'
 export const isWin32 = process.platform === 'win32'
 
@@ -43,6 +47,10 @@ export function getBackupsDir() {
   return path.resolve(getSaveDir(), 'backups')
 }
 
+export function getBinDir() {
+  return path.resolve(getSaveDir(), 'bin')
+}
+
 export function getThumbsDir() {
   return path.resolve(getSaveDir(), 'thumbs')
 }
@@ -53,6 +61,10 @@ export function getCacheDir() {
 
 export function getLogsDir() {
   return path.resolve(getSaveDir(), 'logs')
+}
+
+export function getFfprobePath() {
+  return process.pkg != null ? path.join(getBinDir(), 'ffprobe') : ffprobeInstaller.path
 }
 
 export function getServerHost() {
@@ -275,12 +287,10 @@ export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
     trackNum: track.no ?? undefined
   }
 
-  const { selectCover } = await import('music-metadata')
   const cover = selectCover(picture)
   if (cover != null) {
     const hash = crypto.createHash('sha256').update(cover.data).digest('hex')
-    const mime = await import('mime')
-    const extension = mime.default.getExtension(cover.format)
+    const extension = mime.extension(cover.format)
     const thumb = path.join(getThumbsDir(), `${hash}.${extension}`)
     if (!fs.existsSync(thumb)) {
       await fs.promises.writeFile(thumb, cover.data)
@@ -297,21 +307,20 @@ export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
 }
 
 async function parseAudioMetadata(url: string) {
-  const { parseFile, parseWebStream } = await import('music-metadata')
   if (url.startsWith('http')) {
-    const { ok, body, headers } = await fetch(url)
-    if (!ok || body == null) {
+    const response = await fetch(url)
+    if (!response.ok || response.body == null) {
       throw new Error(`Failed to fetch audio ${url}`)
     }
 
-    let type = headers.get('Content-Type')
+    let type = response.headers.get('Content-Type')
     if (type == null || !type.startsWith('audio/')) {
-      const mime = await import('mime')
       const path = url.split('/').pop() ?? url
-      type = mime.default.getType(path)
+      type = mime.contentType(path) || null
     }
 
-    return await parseWebStream(body, type ?? undefined, { duration: true })
+    const buffer = await response.arrayBuffer ()
+    return await parseBuffer(new Uint8Array(buffer), type ?? undefined, { duration: true })
   } else {
     return await parseFile(url, { duration: true })
   }

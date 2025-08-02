@@ -42,7 +42,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 router.get(
   '/authenticated',
   passport.authenticate('dummy', { failureMessage: true }),
-  (req, res) => res.status(req.user != null ? 200 : 401).send(req.user != null)
+  (req, res) => {
+    const status = req.user != null ? 200 : 401
+    res.status(status).send(req.user != null)
+  }
 )
 
 export default router

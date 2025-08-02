@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { pathToFileURL } from 'url';
 import recursiveReaddir from 'recursive-readdir'
 import { JSDOM } from 'jsdom'
 import {
@@ -56,8 +57,7 @@ export const getFileURL = async (
   host: string
 ): Promise<string> => {
   if (!path.startsWith('file://')) {
-    const fileUrl = (await import('file-url')).default
-    path = fileUrl(path)
+    path = pathToFileURL(path).toString()
   }
   const uuid = fileRegistry().set(path)
   return `http://${host}/fs/file/registry/${uuid}`
@@ -175,9 +175,8 @@ const recursiveReadDirectory = async (
       numeric: true,
       sensitivity: 'base'
     })
-    const fileUrl = (await import('file-url')).default
     let sources: string[] = filterPathsToJustPlayable(filter, rawFiles, true)
-      .map((p: string) => fileUrl(p))
+      .map((p: string) => pathToFileURL(p).toString())
       .sort((a: string, b: string) => collator.compare(a, b))
 
     if (sourceBlacklist != null && sourceBlacklist.length > 0) {

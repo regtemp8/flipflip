@@ -45,6 +45,7 @@ import imageSize from 'image-size'
 import sourceScrapers from '../scraper/SourceScraperService'
 import {
   flatten,
+  getFfprobePath,
   getRandomBoolean,
   getRandomFloat,
   getRandomInteger,
@@ -54,8 +55,7 @@ import {
 } from '../utils'
 import Logger from '../logging/Logger'
 import gifInfo from 'gif-info'
-// import ffprobe from 'ffprobe'
-// import ffprobeInstaller from '@ffprobe-installer/ffprobe'
+import ffprobe from 'ffprobe'
 import { toContentSource, toScene } from '../db/mappers'
 import { findSceneById } from '../db/SceneRepository'
 import { Scene as SceneRow, User } from '../db/types/generated'
@@ -375,37 +375,44 @@ export default class ContentLoader {
     }
   }
 
-  private async getImageBuffer(imageUrl: string) {
-    const url = new URL(imageUrl)
-    const isLocal =
-      url.hostname === getServerHost() &&
+  private isLocal(url: URL) {
+    return url.hostname === getServerHost() &&
       url.port === getServerPort().toString()
+  }
 
+  private getLocalFilePath(url: URL) {
     const fileRegistryPath = '/fs/file/registry/'
-    if (isLocal && url.pathname.startsWith(fileRegistryPath)) {
-      logger.info('Get local image: {url}', { url })
-      const path = fileRegistry().get(
+    if (this.isLocal(url) && url.pathname.startsWith(fileRegistryPath)) {
+      logger.info('Get local file: {url}', { url })
+      return fileRegistry().get(
         url.pathname.substring(fileRegistryPath.length)
       )
-      return await fs.promises.readFile(path as string)
     }
+  }
 
+  private getProxyRequest(url: URL) {
     const proxyPath = '/proxy/'
-    let request: ProxyRequest
-    if (isLocal && url.pathname.startsWith(proxyPath)) {
-      logger.info('Get proxied image: {url}', { url })
-      const proxyRequest = proxy().getRequest(
+    if (this.isLocal(url) && url.pathname.startsWith(proxyPath)) {
+      logger.info('Get proxied file: {url}', { url })
+      const request = proxy().getRequest(
         url.pathname.substring(proxyPath.length)
       )
-      if (proxyRequest != null) {
-        request = proxyRequest
-      } else {
+      if(request == null) {
         throw new Error('Failed to get proxy request')
       }
-    } else {
-      request = { url: imageUrl }
+
+      return request
+    }
+  }
+
+  private async getImageBuffer(imageUrl: string) {
+    const url = new URL(imageUrl)
+    const localFilePath = this.getLocalFilePath(url)
+    if (localFilePath != null) {
+      return await fs.promises.readFile(localFilePath)
     }
 
+    const request = this.getProxyRequest(url) ?? { url: imageUrl }
     logger.info('Fetch image: {url}', { url: request.url })
     const response = await fetch(request.url, { headers: request.headers })
     const buffer = await response.arrayBuffer()
@@ -478,29 +485,28 @@ export default class ContentLoader {
         }
       }
 
-      // TODO get ffprobe to work with pkg
-      // let videoStream: ffprobe.FFProbeStream | undefined
-      // try {
-      //   // TODO convert url, if proxied get original, if file registry get local path, else use url
-      //   const info = await ffprobe(clip?.url ?? url, {
-      //     path: ffprobeInstaller.path
-      //   })
-      //   videoStream = info.streams.find(
-      //     (stream) => stream.codec_type == 'video'
-      //   )
-      //   if (videoStream == null) {
-      //     throw new Error('Video stream not found')
-      //   }
-      // } catch {
-      //   const errorData = newContentData(url)
-      //   errorData.error = true
-      //   this.dataCache.set(url, errorData)
-      //   return errorData
-      // }
+      let videoStream: ffprobe.FFProbeStream | undefined
+      try {
+        const videoUrl = clip?.url ?? url
+        const probeUrl = this.getLocalFilePath(new URL(videoUrl)) ?? this.getProxyRequest(new URL(videoUrl))?.url ?? videoUrl
+        const info = await ffprobe(probeUrl, {
+          path: getFfprobePath()
+        })
+        videoStream = info.streams.find(
+          (stream) => stream.codec_type == 'video'
+        )
+        if (videoStream == null) {
+          throw new Error('Video stream not found')
+        }
+      } catch (error){
+        logger.error('Failed to read video stream', {error})
+        const errorData = newContentData(url)
+        errorData.error = true
+        this.dataCache.set(url, errorData)
+        return errorData
+      }
 
-      // const { width, height, duration } = videoStream
-      let width, height, duration
-      width = height = duration = 0
+      const { width, height, duration } = videoStream
       const data = newContentData(url, 'video', width, height)
       data.clip = clip
       if (duration != null) {
