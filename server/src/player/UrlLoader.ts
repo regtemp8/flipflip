@@ -1,6 +1,6 @@
 import { ContentSource, OF, Scene, SOF, WF } from 'flipflip-common'
 import sourceScrapers from '../scraper/SourceScraperService'
-import { flatten, getRandomListItem } from '../utils'
+import { flatten, getRandomIndex, getRandomListItem } from '../utils'
 
 interface URLState {
   nextIndex: number
@@ -33,12 +33,7 @@ export default class UrlLoader {
       return undefined
     }
 
-    const {
-      weightFunction,
-      orderFunction,
-      fullSource,
-      forceAll,
-    } = this.scene
+    const { weightFunction, orderFunction, fullSource, forceAll } = this.scene
 
     const url =
       weightFunction === WF.sources
@@ -100,14 +95,12 @@ export default class UrlLoader {
             }
           }
 
-          source = getRandomListItem(keys)
-          this.urlState.nextIndex = keys.indexOf(source)
+          this.urlState.nextIndex = getRandomIndex(keys)
+          this.urlState.loadedSources.push(keys[this.urlState.nextIndex])
           this.urlState.sourceComplete = false
-          this.urlState.loadedSources.push(source)
-        } else {
-          // Play same source
-          source = keys[this.urlState.nextIndex]
         }
+
+        source = keys[this.urlState.nextIndex]
       } else {
         source = getRandomListItem(keys)
         this.urlState.loadedSources.push(source)
@@ -118,12 +111,11 @@ export default class UrlLoader {
       if (fullSource) {
         // If this is the first loop or source is done get next source
         if (this.urlState.nextIndex === -1 || this.urlState.sourceComplete) {
-          source = keys[++this.urlState.nextIndex % keys.length]
+          this.urlState.nextIndex = (this.urlState.nextIndex + 1) % keys.length
           this.urlState.sourceComplete = false
-        } else {
-          // Play same source
-          source = keys[this.urlState.nextIndex % keys.length]
         }
+
+        source = keys[this.urlState.nextIndex]
       } else {
         source = keys[++this.urlState.nextIndex % keys.length]
       }
