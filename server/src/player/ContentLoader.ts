@@ -67,24 +67,7 @@ import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { toBoolean } from '../db/utils'
 import fileRegistry from '../routes/FileRegistry'
 import proxy, { ProxyRequest } from '../routes/ProxyService'
-
-interface URLState {
-  nextIndex: number
-  nextSourceIndex: Record<string, number>
-  sourceComplete: boolean
-  loadedSources: string[]
-  loadedURLs: string[]
-}
-
-function newURLState(): URLState {
-  return {
-    nextIndex: 0,
-    nextSourceIndex: {},
-    sourceComplete: false,
-    loadedSources: [],
-    loadedURLs: []
-  }
-}
+import UrlLoader from './UrlLoader'
 
 function newContentData(
   url: string,
@@ -145,10 +128,9 @@ export interface SceneData {
 const logger = Logger.create('ContentLoader')
 export default class ContentLoader {
   private readonly scene: Scene
-  private readonly sources: ContentSource[]
   private readonly loadCriteria: LoadCriteria
   private readonly transformCriteria: TransformCriteria
-  private urlState: URLState
+  private urlLoader: UrlLoader
   private dataCache: Map<string, ContentData>
   private loadCache: Map<string, boolean>
   private transformCache: Map<string, TransformData>
@@ -224,10 +206,9 @@ export default class ContentLoader {
     transformCriteria: TransformCriteria
   ) {
     this.scene = scene
-    this.sources = sources
     this.loadCriteria = loadCriteria
     this.transformCriteria = transformCriteria
-    this.urlState = newURLState()
+    this.urlLoader = new UrlLoader(scene, sources)
     this.dataCache = new Map<string, ContentData>()
     this.loadCache = new Map<string, boolean>()
     this.transformCache = new Map<string, TransformData>()
@@ -420,7 +401,7 @@ export default class ContentLoader {
   }
 
   public async getData(): Promise<ContentData | undefined> {
-    const url = this.getURL()
+    const url = this.urlLoader.getURL()
     if (url == null) {
       logger.warn('Failed to get URL')
       return
@@ -531,179 +512,6 @@ export default class ContentLoader {
       'https://hypno.nimja.com',
       `http://${host}:${port}/proxy/nimja`
     )
-  }
-
-  private getURL() {
-    const allURLs = sourceScrapers().getUrls(this.scene.id as number)
-    if (allURLs == null) {
-      return undefined
-    }
-
-    let source: string
-    let collection: string[]
-    let url: string
-    const {
-      weightFunction,
-      useWeights,
-      orderFunction,
-      sourceOrderFunction,
-      fullSource,
-      forceAll,
-      forceAllSource
-    } = this.scene
-
-    // For source weighted
-    if (weightFunction === WF.sources) {
-      let keys: string[]
-      if (useWeights) {
-        const validKeys = Object.keys(allURLs)
-        keys = []
-        for (const source of this.sources) {
-          if (validKeys.includes(source.url as string)) {
-            for (let w = source.weight; w > 0; w--) {
-              keys.push(source.url as string)
-            }
-          }
-        }
-      } else {
-        keys = Object.keys(allURLs)
-      }
-
-      // If sorting randomly, get a random source
-      if (sourceOrderFunction === SOF.random) {
-        // If we're playing full sources
-        if (fullSource) {
-          // If this is the first loop or source is done get next source
-          if (this.urlState.nextIndex === -1 || this.urlState.sourceComplete) {
-            if (forceAllSource) {
-              // Filter the available urls to those not played yet
-              keys = keys.filter(
-                (s) => !this.urlState.loadedSources.includes(s)
-              )
-              // If there are no remaining urls for this source
-              if (!(keys && keys.length > 0)) {
-                this.urlState.loadedSources = []
-                keys = Object.keys(allURLs)
-              }
-            }
-
-            source = getRandomListItem(keys)
-            this.urlState.nextIndex = keys.indexOf(source)
-            this.urlState.sourceComplete = false
-            this.urlState.loadedSources.push(source)
-          } else {
-            // Play same source
-            source = keys[this.urlState.nextIndex]
-          }
-        } else {
-          source = getRandomListItem(keys)
-          this.urlState.loadedSources.push(source)
-        }
-      } else {
-        // Else get the next source
-        // If we're playing full sources
-        if (fullSource) {
-          // If this is the first loop or source is done get next source
-          if (this.urlState.nextIndex === -1 || this.urlState.sourceComplete) {
-            source = keys[++this.urlState.nextIndex % keys.length]
-            this.urlState.sourceComplete = false
-          } else {
-            // Play same source
-            source = keys[this.urlState.nextIndex % keys.length]
-          }
-        } else {
-          source = keys[++this.urlState.nextIndex % keys.length]
-        }
-      }
-
-      // Get the urls from the source
-      collection = allURLs[source] ?? []
-      if (collection.length === 0) {
-        return undefined
-      }
-
-      // If sorting randomly and forcing all
-      if (orderFunction === OF.random && (forceAll || fullSource)) {
-        // Filter the available urls to those not played yet
-        collection = collection.filter(
-          (u) => !this.urlState.loadedURLs.includes(u)
-        )
-        // If there are no remaining urls for this source
-        if (collection.length === 0) {
-          if (fullSource) {
-            this.urlState.loadedURLs = []
-            this.urlState.sourceComplete = true
-            return undefined
-          } else {
-            // Make sure all the other sources are also extinguished
-            const remainingLibrary = flatten(Object.values(allURLs)).filter(
-              (u: string) => !this.urlState.loadedURLs.includes(u)
-            )
-            // If they are, clear loadedURLs
-            if (remainingLibrary.length === 0) {
-              this.urlState.loadedURLs = []
-              collection = allURLs[source] || []
-            } else {
-              return undefined
-            }
-          }
-        }
-      }
-
-      // If sorting randomly, get a random URL
-      if (orderFunction === OF.random) {
-        url = getRandomListItem(collection)
-      } else {
-        // Else get the next index for this source
-        const index = this.urlState.nextSourceIndex[source] ?? 0
-        if (fullSource && index % collection.length === collection.length - 1) {
-          this.urlState.sourceComplete = true
-        }
-        url = collection[index % collection.length]
-        this.urlState.nextSourceIndex[source] = index + 1
-      }
-    } else {
-      // For image weighted
-
-      // Concat all images together
-      const urlKeys = Object.keys(allURLs).filter(
-        (key) => allURLs[key].length > 0
-      )
-      collection = urlKeys
-      if (collection.length === 0) {
-        return undefined
-      }
-
-      // If sorting randomly and forcing all
-      if (orderFunction === OF.random && forceAll) {
-        // Filter the available ulls to those not played yet
-        collection = collection.filter(
-          (u: string) => !this.urlState.loadedURLs.includes(u)
-        )
-        // If there are no remaining urls, clear loadedURLs
-        if (collection.length === 0) {
-          this.urlState.loadedURLs = []
-          collection = urlKeys
-        }
-      }
-
-      // If sorting randomly, get a random url
-      if (orderFunction === OF.random) {
-        url = getRandomListItem(collection)
-      } else {
-        // Else get the next index
-        url = collection[++this.urlState.nextIndex % collection.length]
-      }
-    }
-
-    if (
-      orderFunction === OF.random &&
-      (forceAll || (weightFunction === WF.sources && fullSource))
-    ) {
-      this.urlState.loadedURLs.push(url)
-    }
-
-    return url
   }
 
   public getTransform(data: ContentData): TransformData {
