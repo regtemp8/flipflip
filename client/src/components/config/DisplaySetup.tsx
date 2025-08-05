@@ -231,7 +231,7 @@ function DisplaySetup() {
   const onFinishDeleteDisplay = async () => {
     setOpenMenu(undefined)
     await deleteDisplay(displayID)
-    navigate('/displays')
+    goBack()
   }
 
   const onAddView = async () => {

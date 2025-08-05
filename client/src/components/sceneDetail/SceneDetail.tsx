@@ -94,6 +94,8 @@ import {
   useGetSceneRegenerateQuery
 } from '../../store/api/selectors'
 import {
+  useCloneSceneMutation,
+  useDeleteSceneMutation,
   useGetSceneQuery,
   useGetTutorialsQuery,
   usePlaySceneMutation
@@ -443,6 +445,8 @@ function SceneDetail() {
   const sceneID = Number(id)
   const navigate = useNavigate()
 
+  const [deleteScene] = useDeleteSceneMutation()
+  const [cloneScene] = useCloneSceneMutation()
   const [playScene] = usePlaySceneMutation()
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: tutorial } = useGetTutorialsQuery()
@@ -692,16 +696,18 @@ function SceneDetail() {
     setIsEditingName(e.currentTarget.value)
   }
 
-  const onDeleteScene = () => {
+  const onDeleteScene = async () => {
     if (confirmSceneDeletion) {
       setOpenMenu(MO.deleteAlert)
     } else {
-      // dispatch(deleteScene(id))
+      await onFinishDeleteScene()
     }
   }
 
-  const onFinishDeleteScene = () => {
-    // dispatch(deleteScene(id))
+  const onFinishDeleteScene = async () => {
+    await deleteScene(sceneID)
+    setOpenMenu(undefined)
+    goBack()
   }
 
   const onRemoveAll = () => {
@@ -717,6 +723,15 @@ function SceneDetail() {
     // dispatch(setSceneRemoveSources({ id: id, value: displaySources }))
     onCloseDialog()
   }
+
+  const onCloneScene = async () => {
+    const {data} = await cloneScene(sceneID)
+    if(data != null) {
+      await navigate(`/scenes/${data.value}`)
+    }
+  }
+
+  const goBack = () => navigate(-1)
 
   const { classes } = useStyles()
   const open = drawerOpen
@@ -740,9 +755,7 @@ function SceneDetail() {
               edge="start"
               color="inherit"
               aria-label="Back"
-              onClick={() => {
-                navigate(-1)
-              }}
+              onClick={goBack}
               size="large"
             >
               <ArrowBackIcon />
@@ -982,9 +995,7 @@ function SceneDetail() {
             }
           >
             <ListItemButton
-              onClick={() => {
-                // dispatch(cloneScene(id))
-              }}
+              onClick={onCloneScene}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable

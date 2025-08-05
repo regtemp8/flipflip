@@ -10,7 +10,10 @@ import {
   findScenesWithSceneGroup,
   findScenesWithoutSceneGroup,
   isDefaultScene,
-  updateScene
+  updateScene,
+  deleteScene,
+  cloneScene,
+  isSceneCreator
 } from '../db/SceneRepository'
 import {
   toSceneGroups,
@@ -82,6 +85,34 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(toScene(scene))
   } else {
     res.status(404).end()
+  }
+})
+
+router.post('/:id/clone', async (req, res, next) => {
+  try {
+    const userId = (req.user as User).id as number
+    const newSceneId = await cloneScene(Number(req.params.id), userId)
+    res.status(200).send({value: newSceneId})
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/:id', async (req, res, next) => {
+  const userId = (req.user as User).id as number
+  const sceneId = Number(req.params.id)
+  try {
+    const canDelete = await isSceneCreator(sceneId, userId)
+    if(canDelete == null) {
+      res.status(403).end()
+      return
+    }
+
+    const result = await deleteScene(Number(req.params.id), userId)
+    const status = result[0].numDeletedRows > 0n ? 204 : 500
+    res.status(status).end()
+  } catch (error) {
+    next(error)
   }
 })
 

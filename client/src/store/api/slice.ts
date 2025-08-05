@@ -163,18 +163,6 @@ export const flipflipApi = createApi({
       query: () => `api/version`,
       providesTags: ['Version']
     }),
-    createScene: builder.mutation<ValueResponse, void>({
-      query: () => ({
-        url: `api/scenes`,
-        method: 'POST'
-      }),
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(
-          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes'])
-        )
-      }
-    }),
     getSceneGroups: builder.query<SceneGroup[], void>({
       query: () => `api/scenes/grouped`,
       providesTags: ['GroupedScenes']
@@ -385,6 +373,49 @@ export const flipflipApi = createApi({
       query: (id) => `api/scenes/${id}`,
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
+    }),
+    deleteScene: builder.mutation<void,number>({
+      query: (id) => ({
+        url: `api/scenes/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'GroupedScenes', 
+            'UngroupedScenes',
+            { type: 'Scene', id },
+            { type: 'Scene', id: 'List' }
+          ])
+        )
+      }
+    }),
+    createScene: builder.mutation<ValueResponse, void>({
+      query: () => ({
+        url: `api/scenes`,
+        method: 'POST'
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes', {type: 'Scene', id: 'List'}])
+        )
+      }
+    }),
+    cloneScene: builder.mutation<ValueResponse, number>({
+      query: (id) => ({
+        url: `api/scenes/${id}/clone`,
+        method: 'POST'
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        snackbar().showMessage({success: 'Clone successful!'})
+        dispatch(
+          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes', {type: 'Scene', id: 'List'}])
+        )
+      }
     }),
     playScene: builder.mutation<ValueResponse, number>({
       query: (id) => ({ url: `api/scenes/${id}/play`, method: 'POST' })
@@ -1727,7 +1758,6 @@ export const {
   useRestoreBackupMutation,
   useResetDataMutation,
   useGetVersionQuery,
-  useCreateSceneMutation,
   useGetSceneGroupsQuery,
   useGetUngroupedScenesQuery,
   useGetGeneratorGroupsQuery,
@@ -1754,6 +1784,9 @@ export const {
   useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,
+  useDeleteSceneMutation,
+  useCreateSceneMutation,
+  useCloneSceneMutation,
   usePlaySceneMutation,
   useGetSceneWeightGroupsQuery,
   useGetSceneScriptPlaylistsQuery,

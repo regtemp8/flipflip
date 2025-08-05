@@ -288,6 +288,7 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
 
   const { sceneID, sceneName } =
     data != null ? (data as ScenePlaylistItem) : { sceneID: 0, sceneName: '' }
+  
   const onOpenScene = () => {
     navigate(`/scenes/${sceneID}`)
   }
