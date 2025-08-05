@@ -94,7 +94,7 @@ export default class ViewPlayer {
   public take(totalCount: number) {
     const currentCount = Math.min(totalCount, this.current.queue.length)
     let items: ImageViewData[] = []
-    if(this.current.viewerLoadedTimeLeft > 0) {
+    if (this.current.viewerLoadedTimeLeft > 0) {
       items = items.concat(this.current.queue.splice(0, currentCount))
     }
     if (
@@ -126,7 +126,7 @@ export default class ViewPlayer {
     )
 
     let item: ViewPlayerItem
-    if(this.current.sceneId === sceneId) {
+    if (this.current.sceneId === sceneId) {
       item = this.current
     } else if (this.next != null && this.next.sceneId === sceneId) {
       item = this.next
@@ -147,8 +147,10 @@ export default class ViewPlayer {
         viewerLoadedTimeLeft: item.viewerLoadedTimeLeft
       })
 
-      this.doneLoading = this.current.viewerLoadedTimeLeft <= 0 && (this.next?.viewerLoadedTimeLeft ?? 0) <= 0
-      return {value: this.doneLoading}
+      this.doneLoading =
+        this.current.viewerLoadedTimeLeft <= 0 &&
+        (this.next?.viewerLoadedTimeLeft ?? 0) <= 0
+      return { value: this.doneLoading }
     } else if (event === 'shown') {
       item.viewerShownTimeLeft -= duration
       logger.info('Viewer shown time left: {viewerShownTimeLeft}', {

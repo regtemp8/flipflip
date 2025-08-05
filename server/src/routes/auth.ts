@@ -1,10 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express'
 import passport from 'passport'
-import passportCustom from 'passport-custom';
-import {
-  findUserByUsername,
-} from '../db/UserRepository'
-import { User } from '../db/types/generated';
+import passportCustom from 'passport-custom'
+import { findUserByUsername } from '../db/UserRepository'
+import { User } from '../db/types/generated'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
@@ -19,17 +17,15 @@ passport.deserializeUser((user: User, cb) => {
   })
 })
 
-passport.use('dummy', new passportCustom.Strategy(async (req, callback) => {
-  const user = await findUserByUsername('dummy')
-  callback(null, user)
-}))
+passport.use(
+  'dummy',
+  new passportCustom.Strategy(async (req, callback) => {
+    const user = await findUserByUsername('dummy')
+    callback(null, user)
+  })
+)
 
-const allowed = [
-  '/authenticated',
-  '/',
-  '/index.html',
-  '/index.js'
-]
+const allowed = ['/authenticated', '/', '/index.html', '/index.js']
 const router = express.Router()
 router.use((req: Request, res: Response, next: NextFunction) => {
   if (req.user != null || allowed.includes(req.path)) {

@@ -45,21 +45,27 @@ const port = getServerPort()
 const logger = Logger.create('server')
 
 const extractBinaries = async () => {
-  if(process.pkg == null) {
+  if (process.pkg == null) {
     return
   }
 
-  if(!fs.existsSync(getFfprobePath())) {
-    const file = fs.createWriteStream(getFfprobePath());
-    await pipeline(fs.createReadStream(ffprobeInstaller.path), file);
+  if (!fs.existsSync(getFfprobePath())) {
+    const file = fs.createWriteStream(getFfprobePath())
+    await pipeline(fs.createReadStream(ffprobeInstaller.path), file)
 
-    fs.chmodSync(getFfprobePath(), 0o755);
-    logger.info('+ ffprobe copied to {path}', {path: getFfprobePath()});
+    fs.chmodSync(getFfprobePath(), 0o755)
+    logger.info('+ ffprobe copied to {path}', { path: getFfprobePath() })
   }
-};
+}
 
 void (async function () {
-  const dirs = [getSaveDir(), getBackupsDir(), getCacheDir(), getThumbsDir(), getBinDir()]
+  const dirs = [
+    getSaveDir(),
+    getBackupsDir(),
+    getCacheDir(),
+    getThumbsDir(),
+    getBinDir()
+  ]
   for (const path of dirs) {
     if (!fs.existsSync(path)) {
       logger.info('+ Creating directory {path}', { path })
@@ -72,7 +78,10 @@ void (async function () {
 
   const SQLiteStore = connect(session)
   const app = express()
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'testing') {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.NODE_ENV === 'testing'
+  ) {
     const { default: cors } = await import(path.join(__dirname, 'cors.js'))
     app.use(cors.default)
   }
@@ -114,7 +123,7 @@ void (async function () {
   app.use('/fs', files)
   app.use('/proxy', proxy)
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'))
   })
   app.use(
     (

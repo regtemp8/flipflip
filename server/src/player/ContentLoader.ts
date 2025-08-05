@@ -376,17 +376,17 @@ export default class ContentLoader {
   }
 
   private isLocal(url: URL) {
-    return url.hostname === getServerHost() &&
+    return (
+      url.hostname === getServerHost() &&
       url.port === getServerPort().toString()
+    )
   }
 
   private getLocalFilePath(url: URL) {
     const fileRegistryPath = '/fs/file/registry/'
     if (this.isLocal(url) && url.pathname.startsWith(fileRegistryPath)) {
       logger.info('Get local file: {url}', { url })
-      return fileRegistry().get(
-        url.pathname.substring(fileRegistryPath.length)
-      )
+      return fileRegistry().get(url.pathname.substring(fileRegistryPath.length))
     }
   }
 
@@ -397,7 +397,7 @@ export default class ContentLoader {
       const request = proxy().getRequest(
         url.pathname.substring(proxyPath.length)
       )
-      if(request == null) {
+      if (request == null) {
         throw new Error('Failed to get proxy request')
       }
 
@@ -488,7 +488,10 @@ export default class ContentLoader {
       let videoStream: ffprobe.FFProbeStream | undefined
       try {
         const videoUrl = clip?.url ?? url
-        const probeUrl = this.getLocalFilePath(new URL(videoUrl)) ?? this.getProxyRequest(new URL(videoUrl))?.url ?? videoUrl
+        const probeUrl =
+          this.getLocalFilePath(new URL(videoUrl)) ??
+          this.getProxyRequest(new URL(videoUrl))?.url ??
+          videoUrl
         const info = await ffprobe(probeUrl, {
           path: getFfprobePath()
         })
@@ -498,8 +501,8 @@ export default class ContentLoader {
         if (videoStream == null) {
           throw new Error('Video stream not found')
         }
-      } catch (error){
-        logger.error('Failed to read video stream', {error})
+      } catch (error) {
+        logger.error('Failed to read video stream', { error })
         const errorData = newContentData(url)
         errorData.error = true
         this.dataCache.set(url, errorData)

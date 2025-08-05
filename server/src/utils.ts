@@ -64,7 +64,9 @@ export function getLogsDir() {
 }
 
 export function getFfprobePath() {
-  return process.pkg != null ? path.join(getBinDir(), 'ffprobe') : ffprobeInstaller.path
+  return process.pkg != null
+    ? path.join(getBinDir(), 'ffprobe')
+    : ffprobeInstaller.path
 }
 
 export function getServerHost() {
@@ -319,8 +321,10 @@ async function parseAudioMetadata(url: string) {
       type = mime.contentType(path) || null
     }
 
-    const buffer = await response.arrayBuffer ()
-    return await parseBuffer(new Uint8Array(buffer), type ?? undefined, { duration: true })
+    const buffer = await response.arrayBuffer()
+    return await parseBuffer(new Uint8Array(buffer), type ?? undefined, {
+      duration: true
+    })
   } else {
     return await parseFile(url, { duration: true })
   }

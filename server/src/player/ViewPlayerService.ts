@@ -26,7 +26,7 @@ class ViewPlayerService {
   public async start(viewId: number, user: User): Promise<string> {
     const id = randomUUID()
     const view = (await findDisplayViewById(viewId)) as DisplayViewRow
-    if(toBoolean(view.sync)) {
+    if (toBoolean(view.sync)) {
       this.syncedViews.set(id, viewId)
     } else {
       const viewPlayer = await ViewPlayer.create(viewId, user)
@@ -53,7 +53,7 @@ class ViewPlayerService {
 
   public getViewId(viewPlayerId: string) {
     const viewPlayer = this.viewPlayers.get(viewPlayerId)
-    if(viewPlayer != null) {
+    if (viewPlayer != null) {
       return viewPlayer.getViewId()
     } else {
       return this.syncedViews.get(viewPlayerId)
@@ -62,14 +62,14 @@ class ViewPlayerService {
 
   public getViewPlayerId(viewId: number) {
     let viewPlayerId: string | undefined = undefined
-    for(const [key, value] of this.viewPlayers.entries()) {
-      if(value.getViewId() === viewId) {
+    for (const [key, value] of this.viewPlayers.entries()) {
+      if (value.getViewId() === viewId) {
         viewPlayerId = key
         break
       }
     }
 
-    if(viewPlayerId == null) {
+    if (viewPlayerId == null) {
       throw new Error(`Failed to get view player id for view: ${viewId}`)
     }
 

@@ -16,7 +16,7 @@ router.get('/:id/config', async (req, res) => {
 
   const displayView = await findDisplayViewById(viewId)
   const view = displayView != null ? toDisplayView(displayView) : undefined
-  if(view == null) {
+  if (view == null) {
     res.status(404).end()
     return
   }
@@ -25,9 +25,9 @@ router.get('/:id/config', async (req, res) => {
   let maxCanLoad = 0
   let maxCanLoadAtOnce = 0
   let uuid = req.params.id
-  if(!view.sync) {
+  if (!view.sync) {
     const viewPlayer = viewPlayers().get(req.params.id)
-    if(viewPlayer == null) {
+    if (viewPlayer == null) {
       res.status(404).end()
       return
     }

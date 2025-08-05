@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from 'url'
 import recursiveReaddir from 'recursive-readdir'
 import { JSDOM } from 'jsdom'
 import {

@@ -167,12 +167,13 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
       // Syntactically invalid parser result, return HTTP status 400: bad request
       res.status(400).end()
     } else if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
-      const {start, end} = ranges[0]
-      res.status(206)
+      const { start, end } = ranges[0]
+      res
+        .status(206)
         .set({
           'Content-Range': `bytes ${start}-${end}/${size}`,
           'Accept-Ranges': 'bytes',
-          "Content-Length": end - start + 1
+          'Content-Length': end - start + 1
         })
         .type(url.substring(url.lastIndexOf('.')))
         .on('error', (error) => {
