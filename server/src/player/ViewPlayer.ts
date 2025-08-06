@@ -1,10 +1,12 @@
 import { ValueResponse, ImageViewData, ViewerEvent } from 'flipflip-common'
 import ScenePlaylistPlayer from './ScenePlaylistPlayer'
-import sourceScrapers from '../scraper/SourceScraperService'
 import ContentLoader from './ContentLoader'
-import { User } from '../db/types/generated'
+import { User, Scene as SceneRow } from '../db/types/generated'
 import Logger from '../logging/Logger'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
+import UrlLoader from './UrlLoader'
+import { findSceneById } from '../db/SceneRepository'
+import { toScene } from '../db/mappers'
 
 interface ViewPlayerItem {
   sceneId: number
@@ -12,7 +14,8 @@ interface ViewPlayerItem {
   viewerShownTimeLeft: number
   viewerLoadedTimeLeft: number
   queue: ImageViewData[]
-  loader: ContentLoader
+  urlLoader: UrlLoader
+  contentLoader: ContentLoader
   retries: number
 }
 
@@ -23,14 +26,17 @@ async function getNextViewPlayerItem(
   const nextPlaylistItem = playlistPlayer.next()
   if (nextPlaylistItem != null) {
     const { sceneId, duration } = nextPlaylistItem
-    const loader = await ContentLoader.create(sceneId, user)
+    const scene = toScene((await findSceneById(sceneId)) as SceneRow)
+    const urlLoader = await UrlLoader.create(scene, user)
+    const contentLoader = await ContentLoader.create(scene, user)
     return {
       sceneId,
       loaderTimeLeft: duration,
       viewerLoadedTimeLeft: duration,
       viewerShownTimeLeft: duration,
       queue: [],
-      loader,
+      urlLoader,
+      contentLoader,
       retries: 0
     }
   } else {
@@ -78,11 +84,6 @@ export default class ViewPlayer {
   }
 
   public start() {
-    sourceScrapers().register(this.current.sceneId, this.user)
-    if (this.next != null) {
-      sourceScrapers().register(this.next.sceneId, this.user)
-    }
-
     this.startLoading()
   }
 
@@ -250,15 +251,27 @@ export default class ViewPlayer {
   }
 
   private async loadImageView(item: ViewPlayerItem) {
-    const data = await item.loader.getData()
-    if (data == null || data.error || !item.loader.shouldLoad(data)) {
+    const url = await item.urlLoader.getUrl()
+    if (url == null) {
+      item.retries++
+      logger.warn('Failed to get URL')
       return undefined
     }
 
-    const view = item.loader.getViewData(data) // TODO audio BPM
-    const transform = item.loader.getTransform(data)
-    const effects = item.loader.getEffects(data, view.timeToNextFrame) // TODO audio BPM
-    const imageView = item.loader.getImageView(data, effects, view, transform)
+    const data = await item.contentLoader.getData(url)
+    if (data == null || data.error || !item.contentLoader.shouldLoad(data)) {
+      return undefined
+    }
+
+    const view = item.contentLoader.getViewData(data) // TODO audio BPM
+    const transform = item.contentLoader.getTransform(data)
+    const effects = item.contentLoader.getEffects(data, view.timeToNextFrame) // TODO audio BPM
+    const imageView = item.contentLoader.getImageView(
+      data,
+      effects,
+      view,
+      transform
+    )
     if (imageView != null) {
       item.queue.push(imageView)
       item.loaderTimeLeft -= imageView.view.timeToNextFrame
@@ -280,7 +293,6 @@ export default class ViewPlayer {
     this.current = this.next
     this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user)
     if (this.next != null) {
-      sourceScrapers().register(this.next.sceneId, this.user)
       this.startPreloading()
     }
 

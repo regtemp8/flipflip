@@ -130,7 +130,6 @@ export default class ContentLoader {
   private readonly scene: Scene
   private readonly loadCriteria: LoadCriteria
   private readonly transformCriteria: TransformCriteria
-  private urlLoader: UrlLoader
   private dataCache: Map<string, ContentData>
   private loadCache: Map<string, boolean>
   private transformCache: Map<string, TransformData>
@@ -158,22 +157,7 @@ export default class ContentLoader {
 
   private displayIndex?: number
 
-  public static async create(
-    sceneId: number,
-    user: User
-  ): Promise<ContentLoader> {
-    const scene = toScene((await findSceneById(sceneId)) as SceneRow)
-
-    const sources: ContentSource[] = []
-    const sourceRows = await findContentSources(sceneId)
-    for (const row of sourceRows) {
-      const tags = await findContentSourceTagIds(
-        row.id as number,
-        user.id as number
-      )
-      sources.push(toContentSource(row, tags))
-    }
-
+  public static async create(scene: Scene, user: User): Promise<ContentLoader> {
     const { easingControls, minImageSize, minVideoSize } =
       await findDisplaySettings(user)
 
@@ -191,7 +175,6 @@ export default class ContentLoader {
 
     return new ContentLoader(
       scene,
-      sources,
       toBoolean(easingControls),
       loadCriteria,
       transformCriteria
@@ -200,7 +183,6 @@ export default class ContentLoader {
 
   private constructor(
     scene: Scene,
-    sources: ContentSource[],
     easingControls: boolean,
     loadCriteria: LoadCriteria,
     transformCriteria: TransformCriteria
@@ -208,7 +190,6 @@ export default class ContentLoader {
     this.scene = scene
     this.loadCriteria = loadCriteria
     this.transformCriteria = transformCriteria
-    this.urlLoader = UrlLoader.create(scene, sources)
     this.dataCache = new Map<string, ContentData>()
     this.loadCache = new Map<string, boolean>()
     this.transformCache = new Map<string, TransformData>()
@@ -400,13 +381,7 @@ export default class ContentLoader {
     return Buffer.from(buffer)
   }
 
-  public async getData(): Promise<ContentData | undefined> {
-    const url = await this.urlLoader.getUrl()
-    if (url == null) {
-      logger.warn('Failed to get URL')
-      return
-    }
-
+  public async getData(url: string): Promise<ContentData | undefined> {
     const data = this.dataCache.get(url)
     if (data != null) {
       return data

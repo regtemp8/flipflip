@@ -1,6 +1,12 @@
 import { ContentSource, OF, Scene, SOF, WF } from 'flipflip-common'
 import sourceScrapers from '../scraper/SourceScraperService'
 import { getRandomIndex, getRandomListItem } from '../utils'
+import {
+  findContentSources,
+  findContentSourceTagIds
+} from '../db/ContentSourceRepository'
+import { User } from '../db/types/generated'
+import { toContentSource } from '../db/mappers'
 
 interface SourceState {
   sourceIndex: number
@@ -15,7 +21,18 @@ interface UrlState {
 }
 
 export default abstract class UrlLoader {
-  public static create(scene: Scene, sources: ContentSource[]) {
+  public static async create(scene: Scene, user: User) {
+    const sources: ContentSource[] = []
+    const sourceRows = await findContentSources(scene.id)
+    for (const row of sourceRows) {
+      const tags = await findContentSourceTagIds(
+        row.id as number,
+        user.id as number
+      )
+      sources.push(toContentSource(row, tags))
+    }
+
+    await sourceScrapers().register(scene.id, user)
     return scene.weightFunction === WF.sources
       ? new SourceWeightedUrlLoader(scene, sources)
       : new ImageWeightedUrlLoader(scene, sources)
