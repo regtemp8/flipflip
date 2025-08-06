@@ -46,7 +46,7 @@ export default abstract class UrlLoader {
     this.sources = sources
   }
 
-  public abstract getUrl(): Promise<string | undefined>
+  public abstract getUrl(canScrape: boolean): Promise<string | undefined>
 }
 
 class SourceWeightedUrlLoader extends UrlLoader {
@@ -62,7 +62,7 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
   }
 
-  public async getUrl() {
+  public async getUrl(canScrape: boolean) {
     const {
       orderFunction,
       sourceOrderFunction,
@@ -107,7 +107,7 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
 
     // Get the urls from the source
-    let collection = await sourceScrapers().getSourceUrls(this.scene.id, source)
+    let collection = await sourceScrapers().getSourceUrls(this.scene.id, canScrape, source)
     if (collection.length === 0) {
       return undefined
     }
@@ -213,11 +213,11 @@ class ImageWeightedUrlLoader extends UrlLoader {
     }
   }
 
-  public async getUrl() {
+  public async getUrl(canScrape: boolean) {
     const { weightFunction, orderFunction, fullSource, forceAll } = this.scene
 
     // Concat all images together
-    let collection = await sourceScrapers().getSourceUrls(this.scene.id)
+    let collection = await sourceScrapers().getSourceUrls(this.scene.id, canScrape)
     if (collection.length === 0) {
       return undefined
     }

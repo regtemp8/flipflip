@@ -88,7 +88,7 @@ export default class SourceScraper {
   private allPosts: Record<string, string>
   private scrapeQueue: Record<string, Array<ScrapedSourcePromise>>
   private sourceIndex: number
-  private canScrape: boolean
+  private queueEmpty: boolean
   private captcha?: PlayerCaptcha
   private systemMessage?: string
 
@@ -148,7 +148,7 @@ export default class SourceScraper {
     this.allPosts = {}
     this.allURLs = {}
     this.sourceIndex = 0
-    this.canScrape = true
+    this.queueEmpty = sceneSources.length === 0
 
     for (const source of sceneSources) {
       this.allURLs[source.url] = []
@@ -158,26 +158,28 @@ export default class SourceScraper {
     }
   }
 
-  public async getSourceUrls(sourceUrl?: string) {
-    let scrapeUrl = sourceUrl
-    if (this.canScrape && scrapeUrl == null) {
-      const sourceUrls = Object.keys(this.scrapeQueue)
-      const length = this.sourceIndex + sourceUrls.length
-      for (let i = this.sourceIndex; i < length; i++) {
-        const index = i % sourceUrls.length
-        const url = sourceUrls[index]
-        if (this.scrapeQueue[url].length > 0) {
-          scrapeUrl = url
-          this.sourceIndex = index
-          break
+  public async getSourceUrls(canScrape: boolean, sourceUrl?: string) {
+    if(canScrape) {
+      let scrapeUrl = sourceUrl
+      if (!this.queueEmpty && scrapeUrl == null) {
+        const sourceUrls = Object.keys(this.scrapeQueue)
+        const length = this.sourceIndex + sourceUrls.length
+        for (let i = this.sourceIndex; i < length; i++) {
+          const index = i % sourceUrls.length
+          const url = sourceUrls[index]
+          if (this.scrapeQueue[url].length > 0) {
+            scrapeUrl = url
+            this.sourceIndex = index
+            break
+          }
         }
       }
-    }
 
-    if (scrapeUrl != null) {
-      await this.scrapeSource(scrapeUrl)
-    } else {
-      this.canScrape = false
+      if (scrapeUrl != null) {
+        await this.scrapeSource(scrapeUrl)
+      } else {
+        this.queueEmpty = true
+      }
     }
 
     return sourceUrl != null
@@ -246,7 +248,7 @@ export default class SourceScraper {
         const { source, helpers } = object
         if (helpers?.next != null) {
           this.scrapeQueue[source.url].push({ source, helpers })
-          this.canScrape = true
+          this.queueEmpty = false
         }
 
         await updateContentSourceCount(

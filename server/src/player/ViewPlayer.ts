@@ -7,6 +7,7 @@ import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import UrlLoader from './UrlLoader'
 import { findSceneById } from '../db/SceneRepository'
 import { toScene } from '../db/mappers'
+import ViewPlayerPressureCalculator from './ViewPlayerPressureCalculator'
 
 interface ViewPlayerItem {
   sceneId: number
@@ -14,6 +15,7 @@ interface ViewPlayerItem {
   viewerShownTimeLeft: number
   viewerLoadedTimeLeft: number
   queue: ImageViewData[]
+  pressure: ViewPlayerPressureCalculator
   urlLoader: UrlLoader
   contentLoader: ContentLoader
   retries: number
@@ -21,7 +23,8 @@ interface ViewPlayerItem {
 
 async function getNextViewPlayerItem(
   playlistPlayer: ScenePlaylistPlayer,
-  user: User
+  user: User,
+  maxInMemory: number
 ): Promise<ViewPlayerItem | undefined> {
   const nextPlaylistItem = playlistPlayer.next()
   if (nextPlaylistItem != null) {
@@ -35,6 +38,7 @@ async function getNextViewPlayerItem(
       viewerLoadedTimeLeft: duration,
       viewerShownTimeLeft: duration,
       queue: [],
+      pressure: new ViewPlayerPressureCalculator(maxInMemory),
       urlLoader,
       contentLoader,
       retries: 0
@@ -153,6 +157,7 @@ export default class ViewPlayer {
         (this.next?.viewerLoadedTimeLeft ?? 0) <= 0
       return { value: this.doneLoading }
     } else if (event === 'shown') {
+      item.pressure.increase()
       item.viewerShownTimeLeft -= duration
       logger.info('Viewer shown time left: {viewerShownTimeLeft}', {
         viewerShownTimeLeft: item.viewerShownTimeLeft
@@ -251,7 +256,7 @@ export default class ViewPlayer {
   }
 
   private async loadImageView(item: ViewPlayerItem) {
-    const url = await item.urlLoader.getUrl()
+    const url = await item.urlLoader.getUrl(item.pressure.isLow())
     if (url == null) {
       item.retries++
       logger.warn('Failed to get URL')
@@ -273,6 +278,7 @@ export default class ViewPlayer {
       transform
     )
     if (imageView != null) {
+      item.pressure.decrease()
       item.queue.push(imageView)
       item.loaderTimeLeft -= imageView.view.timeToNextFrame
       item.retries = 0
@@ -291,7 +297,7 @@ export default class ViewPlayer {
 
     this.doneLoading = false
     this.current = this.next
-    this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user)
+    this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user, this.maxInMemory)
     if (this.next != null) {
       this.startPreloading()
     }
@@ -301,13 +307,14 @@ export default class ViewPlayer {
 
   public static async create(viewId: number, user: User): Promise<ViewPlayer> {
     const playlistPlayer = await ScenePlaylistPlayer.create(viewId)
+    const { maxInMemory } = await findDisplaySettings(user)
     // TODO must check beforehand that each scene playlist has at least 1 item
     const current = (await getNextViewPlayerItem(
       playlistPlayer,
-      user
+      user,
+      maxInMemory
     )) as ViewPlayerItem
-    const next = await getNextViewPlayerItem(playlistPlayer, user)
-    const { maxInMemory } = await findDisplaySettings(user)
+    const next = await getNextViewPlayerItem(playlistPlayer, user, maxInMemory)
     return new ViewPlayer(
       viewId,
       user,
