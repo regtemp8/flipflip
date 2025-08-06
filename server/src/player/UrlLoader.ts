@@ -1,110 +1,60 @@
 import { ContentSource, OF, Scene, SOF, WF } from 'flipflip-common'
 import sourceScrapers from '../scraper/SourceScraperService'
-import { flatten, getRandomIndex, getRandomListItem } from '../utils'
+import { getRandomIndex, getRandomListItem } from '../utils'
 
-interface URLState {
+interface SourceState {
   sourceIndex: number
-  nextSourceIndex: Record<string, number>
   sourceComplete: boolean
   loadedSources: string[]
-  loadedURLs: string[]
+  urlState: Record<string, UrlState>
 }
 
-export default class UrlLoader {
-  private readonly scene: Scene
-  private readonly sources: ContentSource[]
-  private urlState: URLState
+interface UrlState {
+  urlIndex: number
+  loadedUrls: string[]
+}
 
-  constructor(scene: Scene, sources: ContentSource[]) {
+export default abstract class UrlLoader {
+  public static create(scene: Scene, sources: ContentSource[]) {
+    return scene.weightFunction === WF.sources
+      ? new SourceWeightedUrlLoader(scene, sources)
+      : new ImageWeightedUrlLoader(scene, sources)
+  }
+
+  protected readonly scene: Scene
+  protected readonly sources: ContentSource[]
+
+  protected constructor(scene: Scene, sources: ContentSource[]) {
     this.scene = scene
     this.sources = sources
-    this.urlState = {
+  }
+
+  public abstract getUrl(): Promise<string | undefined>
+}
+
+class SourceWeightedUrlLoader extends UrlLoader {
+  private state: SourceState
+
+  constructor(scene: Scene, sources: ContentSource[]) {
+    super(scene, sources)
+    this.state = {
       sourceIndex: -1,
-      nextSourceIndex: {},
       sourceComplete: false,
       loadedSources: [],
-      loadedURLs: []
+      urlState: {}
     }
   }
 
-  public getURL(): string | undefined {
-    const allURLs = sourceScrapers().getUrls(this.scene.id as number)
-    if (allURLs == null) {
-      return undefined
-    }
-
-    const { weightFunction, orderFunction, fullSource, forceAll } = this.scene
-
-    const url =
-      weightFunction === WF.sources
-        ? this.getSourceWeightedUrl(allURLs)
-        : this.getImageWeightedUrl(allURLs)
-
-    if (
-      url != null &&
-      orderFunction === OF.random &&
-      (forceAll || (weightFunction === WF.sources && fullSource))
-    ) {
-      this.urlState.loadedURLs.push(url)
-    }
-
-    return url
-  }
-
-  private getSourceKeys(allURLs: Record<string, string[]>) {
-    const { useWeights, sourceOrderFunction, forceAllSource } = this.scene
-    if (!useWeights) {
-      this.sources.forEach((source) => source.weight = 1)
-    }
-
-    const validKeys = Object.keys(allURLs)
-    let keys: string[] = []
-    for (const source of this.sources) {
-      if (validKeys.includes(source.url as string)) {
-        for (let w = source.weight; w > 0; w--) {
-          keys.push(source.url as string)
-        }
-      }
-    }
-
-    if (sourceOrderFunction === SOF.random && forceAllSource) {
-      const fullKeys = keys
-      // Filter the available urls to those not played yet
-      const toRemove = new Map<string, number>()
-      this.urlState.loadedSources.forEach((s) => {
-        const count = toRemove.get(s) ?? 0
-        toRemove.set(s, count + 1)
-      })
-
-      keys = []
-      for(const key of fullKeys) {
-        const count = toRemove.get(key) ?? 0
-        if(count > 0) {
-          toRemove.set(key, count - 1)
-        } else {
-          keys.push(key)
-        }
-      }
-
-      // If there are no remaining urls for this source
-      if (keys.length === 0) {
-        this.urlState.loadedSources = []
-        keys = fullKeys
-      }
-    }
-
-    return keys
-  }
-
-  private getSourceWeightedUrl(allURLs: Record<string, string[]>) {
+  public async getUrl() {
     const {
       orderFunction,
       sourceOrderFunction,
       fullSource,
-      forceAll
+      forceAll,
+      weightFunction
     } = this.scene
 
-    const keys = this.getSourceKeys(allURLs)
+    const keys = this.getSourceKeys()
 
     let source: string
     // If sorting randomly, get a random source
@@ -112,63 +62,56 @@ export default class UrlLoader {
       // If we're playing full sources
       if (fullSource) {
         // If this is the first loop or source is done get next source
-        if (this.urlState.sourceIndex === -1 || this.urlState.sourceComplete) {
-          this.urlState.loadedSources.push(keys[this.urlState.sourceIndex])
-          this.urlState.sourceIndex = getRandomIndex(keys)
-          this.urlState.sourceComplete = false
+        if (this.state.sourceIndex === -1 || this.state.sourceComplete) {
+          this.state.loadedSources.push(keys[this.state.sourceIndex])
+          this.state.sourceIndex = getRandomIndex(keys)
+          this.state.sourceComplete = false
         }
 
-        source = keys[this.urlState.sourceIndex]
+        source = keys[this.state.sourceIndex]
       } else {
         source = getRandomListItem(keys)
-        this.urlState.loadedSources.push(source)
+        this.state.loadedSources.push(source)
       }
     } else {
       // Else get the next source
       // If we're playing full sources
       if (fullSource) {
         // If this is the first loop or source is done get next source
-        if (this.urlState.sourceIndex === -1 || this.urlState.sourceComplete) {
-          this.urlState.sourceIndex = (this.urlState.sourceIndex + 1) % keys.length
-          this.urlState.sourceComplete = false
+        if (this.state.sourceIndex === -1 || this.state.sourceComplete) {
+          this.state.sourceIndex = (this.state.sourceIndex + 1) % keys.length
+          this.state.sourceComplete = false
         }
 
-        source = keys[this.urlState.sourceIndex]
+        source = keys[this.state.sourceIndex]
       } else {
-        source = keys[++this.urlState.sourceIndex % keys.length]
+        source = keys[++this.state.sourceIndex % keys.length]
       }
     }
 
     // Get the urls from the source
-    let collection = allURLs[source] ?? []
+    let collection = await sourceScrapers().getSourceUrls(this.scene.id, source)
     if (collection.length === 0) {
       return undefined
     }
 
+    const urlState = this.state.urlState[source] ?? {
+      urlIndex: 0,
+      loadedUrls: []
+    }
     // If sorting randomly and forcing all
     if (orderFunction === OF.random && (forceAll || fullSource)) {
+      const fullCollection = collection
       // Filter the available urls to those not played yet
-      collection = collection.filter(
-        (u) => !this.urlState.loadedURLs.includes(u)
-      )
+      collection = collection.filter((u) => !urlState.loadedUrls.includes(u))
       // If there are no remaining urls for this source
       if (collection.length === 0) {
+        urlState.loadedUrls = []
         if (fullSource) {
-          this.urlState.loadedURLs = []
-          this.urlState.sourceComplete = true
+          this.state.sourceComplete = true
           return undefined
         } else {
-          // Make sure all the other sources are also extinguished
-          const remainingLibrary = flatten(Object.values(allURLs)).filter(
-            (u: string) => !this.urlState.loadedURLs.includes(u)
-          )
-          // If they are, clear loadedURLs
-          if (remainingLibrary.length === 0) {
-            this.urlState.loadedURLs = []
-            collection = allURLs[source] || []
-          } else {
-            return undefined
-          }
+          collection = fullCollection
         }
       }
     }
@@ -179,24 +122,85 @@ export default class UrlLoader {
       url = getRandomListItem(collection)
     } else {
       // Else get the next index for this source
-      const index = this.urlState.nextSourceIndex[source] ?? 0
-      if (fullSource && index % collection.length === collection.length - 1) {
-        this.urlState.sourceComplete = true
+      const index = urlState.urlIndex % collection.length
+      if (fullSource && index === collection.length - 1) {
+        this.state.sourceComplete = true
       }
-      url = collection[index % collection.length]
-      this.urlState.nextSourceIndex[source] = index + 1
+      url = collection[index]
+      urlState.urlIndex++
     }
 
+    if (
+      url != null &&
+      orderFunction === OF.random &&
+      (forceAll || (weightFunction === WF.sources && fullSource))
+    ) {
+      urlState.loadedUrls.push(url)
+    }
+
+    this.state.urlState[source] = urlState
     return url
   }
 
-  private getImageWeightedUrl(allURLs: Record<string, string[]>) {
-    const { orderFunction, forceAll } = this.scene
+  private getSourceKeys() {
+    const { useWeights, sourceOrderFunction, forceAllSource } = this.scene
+    if (!useWeights) {
+      this.sources.forEach((source) => (source.weight = 1))
+    }
+
+    let keys: string[] = []
+    for (const source of this.sources) {
+      for (let w = source.weight; w > 0; w--) {
+        keys.push(source.url as string)
+      }
+    }
+
+    if (sourceOrderFunction === SOF.random && forceAllSource) {
+      const fullKeys = keys
+      // Filter the available urls to those not played yet
+      const toRemove = new Map<string, number>()
+      this.state.loadedSources.forEach((s) => {
+        const count = toRemove.get(s) ?? 0
+        toRemove.set(s, count + 1)
+      })
+
+      keys = []
+      for (const key of fullKeys) {
+        const count = toRemove.get(key) ?? 0
+        if (count > 0) {
+          toRemove.set(key, count - 1)
+        } else {
+          keys.push(key)
+        }
+      }
+
+      // If there are no remaining urls for this source
+      if (keys.length === 0) {
+        this.state.loadedSources = []
+        keys = fullKeys
+      }
+    }
+
+    return keys
+  }
+}
+
+class ImageWeightedUrlLoader extends UrlLoader {
+  private state: UrlState
+
+  constructor(scene: Scene, sources: ContentSource[]) {
+    super(scene, sources)
+    this.state = {
+      urlIndex: -1,
+      loadedUrls: []
+    }
+  }
+
+  public async getUrl() {
+    const { weightFunction, orderFunction, fullSource, forceAll } = this.scene
 
     // Concat all images together
-    let collection = Object.keys(allURLs).filter(
-      (key) => allURLs[key].length > 0
-    )
+    let collection = await sourceScrapers().getSourceUrls(this.scene.id)
     if (collection.length === 0) {
       return undefined
     }
@@ -206,21 +210,32 @@ export default class UrlLoader {
       const fullCollection = collection
       // Filter the available ulls to those not played yet
       collection = collection.filter(
-        (u: string) => !this.urlState.loadedURLs.includes(u)
+        (u: string) => !this.state.loadedUrls.includes(u)
       )
       // If there are no remaining urls, clear loadedURLs
       if (collection.length === 0) {
-        this.urlState.loadedURLs = []
+        this.state.loadedUrls = []
         collection = fullCollection
       }
     }
 
+    let url: string
     // If sorting randomly, get a random url
     if (orderFunction === OF.random) {
-      return getRandomListItem(collection)
+      url = getRandomListItem(collection)
     } else {
       // Else get the next index
-      return collection[++this.urlState.sourceIndex % collection.length]
+      url = collection[++this.state.urlIndex % collection.length]
     }
+
+    if (
+      url != null &&
+      orderFunction === OF.random &&
+      (forceAll || (weightFunction === WF.sources && fullSource))
+    ) {
+      this.state.loadedUrls.push(url)
+    }
+
+    return url
   }
 }

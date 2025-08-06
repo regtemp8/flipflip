@@ -208,7 +208,7 @@ export default class ContentLoader {
     this.scene = scene
     this.loadCriteria = loadCriteria
     this.transformCriteria = transformCriteria
-    this.urlLoader = new UrlLoader(scene, sources)
+    this.urlLoader = UrlLoader.create(scene, sources)
     this.dataCache = new Map<string, ContentData>()
     this.loadCache = new Map<string, boolean>()
     this.transformCache = new Map<string, TransformData>()
@@ -401,7 +401,7 @@ export default class ContentLoader {
   }
 
   public async getData(): Promise<ContentData | undefined> {
-    const url = this.urlLoader.getURL()
+    const url = await this.urlLoader.getUrl()
     if (url == null) {
       logger.warn('Failed to get URL')
       return
