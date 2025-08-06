@@ -21,20 +21,15 @@ import {
   ScraperHelpers
 } from 'flipflip-common'
 import { ScrapeResult } from './ScrapeResult'
-import {
-  filterRequestsToJustPlayable,
-  getCachePath,
-  getServerHost,
-  getServerPort,
-  isWin32
-} from '../utils'
+import { ScrapeRequest } from './ScrapeRequest'
+import { filterRequestsToJustPlayable, getCachePath, isWin32 } from '../utils'
 import tumblr from './TumblrClient'
 import reddit from './RedditClient'
 import imgur from './ImgurClient'
-import fileRegistry from '../routes/FileRegistry'
-import proxy, { ProxyRequest } from '../routes/ProxyService'
+import { ProxyRequest } from '../routes/ProxyService'
 import Logger from '../logging/Logger'
 import { findClipById } from '../db/ClipRepository'
+import { parentPort } from 'worker_threads'
 
 export type WorkerFunction = (
   allURLs: Record<string, string[]>,
@@ -45,31 +40,18 @@ export type WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => void
 
 export type ScrapeResultCallback = (result: ScrapeResult) => void
 
 const logger = Logger.create('Scrapers')
-export const getFileURL = async (
-  path: string,
-  host: string
-): Promise<string> => {
+export const getFileURL = (path: string): string => {
   if (!path.startsWith('file://')) {
     path = pathToFileURL(path).toString()
   }
-  const uuid = fileRegistry().set(path)
-  return `http://${host}/fs/file/registry/${uuid}`
-}
 
-const getProxyURL = (
-  host: string,
-  request: ProxyRequest,
-  ext?: string
-): string => {
-  const uuid = proxy().set(request, ext)
-  return `http://${host}/proxy/${uuid}`
+  return path
 }
 
 export const loadNimja: WorkerFunction = (
@@ -81,7 +63,6 @@ export const loadNimja: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const sources = [source.url]
@@ -109,7 +90,6 @@ export const loadLocalDirectory = async (
   weight: string,
   helpers: ScraperHelpers,
   cachePath: string,
-  host: string,
   resolve: ScrapeResultCallback
 ) => {
   const blacklist = ['*.css', '*.html', 'avatar.png', '*.txt']
@@ -133,8 +113,7 @@ export const loadLocalDirectory = async (
 
       const urls: string[] = []
       for (const source of data.sources) {
-        const url = await getFileURL(source, host)
-        urls.push(url)
+        urls.push(getFileURL(source))
       }
       pm(
         {
@@ -205,7 +184,6 @@ export const loadVideo = async (
   weight: string,
   helpers: ScraperHelpers,
   cachePath: string,
-  host: string,
   resolve: ScrapeResultCallback
 ) => {
   const url = cachePath || source.url
@@ -224,9 +202,9 @@ export const loadVideo = async (
       resolve
     )
   }
-  const ifExists = async (url: string, host: string) => {
+  const ifExists = async (url: string) => {
     if (!url.startsWith('http')) {
-      url = await getFileURL(url, host)
+      url = getFileURL(url)
     }
     helpers.count = 1
 
@@ -287,12 +265,12 @@ export const loadVideo = async (
       if (res.status === 404) {
         missingVideo()
       } else {
-        ifExists(url, host)
+        ifExists(url)
       }
     })
   } else {
     if (fs.existsSync(url)) {
-      ifExists(url, host)
+      ifExists(url)
     } else {
       missingVideo()
     }
@@ -383,73 +361,7 @@ export const loadPlaylist = (
 }
 
 const pm = (object: ScrapeResult, resolve: ScrapeResultCallback) => {
-  if (
-    object?.source &&
-    object?.data &&
-    object?.allURLs &&
-    object?.weight &&
-    object?.helpers
-  ) {
-    const source = object.source
-    if (source.blacklist && source.blacklist.length > 0) {
-      object.data = object.data.filter(
-        (url: string) => !source.blacklist.includes(url)
-      )
-    }
-    object.allURLs = processAllURLs(
-      object.data,
-      object.allURLs,
-      object.source,
-      object.weight,
-      object.helpers
-    )
-  }
-
   resolve(object)
-}
-
-export const processAllURLs = (
-  data: string[],
-  allURLs: Record<string, string[]>,
-  source: ContentSource,
-  weight: string,
-  helpers: ScraperHelpers
-): Record<string, string[]> => {
-  const newAllURLs = { ...allURLs }
-  if (helpers.next != null && (helpers.next as number) <= 0) {
-    if (weight === WF.sources) {
-      newAllURLs[source.url] = data
-    } else {
-      for (const d of data) {
-        newAllURLs[d] = [source.url]
-      }
-    }
-  } else {
-    if (weight === WF.sources) {
-      const sourceURLs = newAllURLs[source.url] ?? []
-      newAllURLs[source.url] = sourceURLs.concat(
-        data.filter((u: string) => {
-          const fileName = getFileName(u, path.sep)
-          const found = sourceURLs
-            .map((u: string) => getFileName(u, path.sep))
-            .includes(fileName)
-          return !found
-        })
-      )
-    } else {
-      for (const d of data.filter((u: string) => {
-        const fileName = getFileName(u, path.sep)
-        const found = Object.keys(newAllURLs)
-          .map((u: string) => getFileName(u, path.sep))
-          .includes(fileName)
-        return !found
-      })) {
-        newAllURLs[d] = [source.url]
-      }
-    }
-  }
-
-  return newAllURLs
 }
 
 let redditAlerted = false
@@ -581,7 +493,6 @@ export const loadTumblr: WorkerFunction = async (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 3000
@@ -761,7 +672,6 @@ export const loadReddit: WorkerFunction = async (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 3000
@@ -1105,7 +1015,6 @@ export const loadRedGifs: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 10000
@@ -1242,7 +1151,6 @@ const loadImageFapGallery = (
   timeout: number,
   images: Array<string>,
   baseGalleryURL: string,
-  serverHost: string,
   onFinishedLoading: (helpers: ScraperHelpers) => void,
   resolve: ScrapeResultCallback
 ) => {
@@ -1288,7 +1196,7 @@ const loadImageFapGallery = (
             if (ahrefs.length > 0) {
               for (let i = 0; i < ahrefs.length; i++) {
                 const url = ahrefs.item(i).getAttribute('href') as string
-                images.push(getProxyURL(serverHost, { url }))
+                images.push(url)
               }
             } else {
               captcha = imageURL
@@ -1360,7 +1268,6 @@ export const loadImageFap: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   if (helpers.next === 0) {
@@ -1389,7 +1296,6 @@ export const loadImageFap: WorkerFunction = (
       timeout,
       images,
       baseGalleryURL,
-      serverHost,
       (h) => {
         if (next[2] === -1) {
           h.next = undefined
@@ -1453,7 +1359,6 @@ export const loadImageFap: WorkerFunction = (
             timeout,
             images,
             baseGalleryURL,
-            serverHost,
             (h) => {
               const n = h.next as number[]
               if (n[2] === -1) {
@@ -1558,7 +1463,6 @@ export const loadImageFap: WorkerFunction = (
                 : []
               if (data.length > 0) {
                 helpers.count = helpers.count + data.length
-                data = data.map((url) => getProxyURL(serverHost, { url }))
               }
 
               helpers.next = undefined
@@ -1643,7 +1547,6 @@ export const loadSexCom: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -1790,7 +1693,6 @@ export const loadImgur: WorkerFunction = async (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 3000
@@ -1835,7 +1737,6 @@ export const loadDeviantArt: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 3000
@@ -1889,9 +1790,7 @@ export const loadDeviantArt: WorkerFunction = (
         helpers.next = undefined
       }
       helpers.count += filterPathsToJustPlayable(IF.any, images, false).length
-      const data = filterPathsToJustPlayable(filter, images, false).map((url) =>
-        getProxyURL(serverHost, { url })
-      )
+      const data = filterPathsToJustPlayable(filter, images, false)
       pm(
         {
           data,
@@ -1927,7 +1826,6 @@ export const loadE621: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -2151,7 +2049,6 @@ export const loadDanbooru: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -2361,7 +2258,6 @@ export const loadGelbooru1: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -2512,7 +2408,6 @@ export const loadGelbooru2: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -2612,7 +2507,6 @@ export const loadEHentai: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -2739,7 +2633,6 @@ export const loadLuscious: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 5000
@@ -2825,9 +2718,7 @@ export const loadLuscious: WorkerFunction = (
           helpers.next = hasNextPage ? (helpers.next as number) + 1 : undefined
           helpers.count = totalItems
           // If cdnio image server goes down, use this: filterPathsToJustPlayable(filter, images, true).map((s) => s.replace('cdnio.', 'w1680.')),
-          const data = filterPathsToJustPlayable(filter, images, true).map(
-            (url) => getProxyURL(serverHost, { url })
-          )
+          const data = filterPathsToJustPlayable(filter, images, true)
           pm(
             {
               data,
@@ -3039,11 +2930,7 @@ export const loadLuscious: WorkerFunction = (
                   images,
                   true
                 ).length
-                const data = filterPathsToJustPlayable(
-                  filter,
-                  images,
-                  true
-                ).map((url) => getProxyURL(serverHost, { url }))
+                const data = filterPathsToJustPlayable(filter, images, true)
                 pm(
                   {
                     data,
@@ -3124,7 +3011,6 @@ export const loadBDSMlr: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -3209,7 +3095,7 @@ export const loadBDSMlr: WorkerFunction = (
           true
         ).length
         const data = filterRequestsToJustPlayable(filter, requests, true).map(
-          (request) => getProxyURL(serverHost, request)
+          (request) => request.url + ':::' + JSON.stringify(request.headers)
         )
         pm(
           {
@@ -3267,7 +3153,6 @@ export const loadPiwigo: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -3488,7 +3373,6 @@ export const loadHydrus: WorkerFunction = (
   filter: string,
   weight: string,
   helpers: ScraperHelpers,
-  serverHost: string,
   resolve: ScrapeResultCallback
 ) => {
   const timeout = 8000
@@ -3616,8 +3500,7 @@ export const loadHydrus: WorkerFunction = (
             ) {
               const { file_id, ext } = metadata
               const url = `${hydrusURL}/get_files/file?file_id=${file_id}&Hydrus-Client-API-Access-Key=${apiKey}&ext=${ext}`
-              const proxyURL = getProxyURL(serverHost, { url }, ext)
-              images.push(proxyURL)
+              images.push(url)
             }
           }
 
@@ -3796,6 +3679,31 @@ async function convertURL(url: string): Promise<string[]> {
   return [url]
 }
 
+parentPort?.on('message', async (request) => {
+  const {
+    allURLs,
+    allPosts,
+    caching,
+    remoteSettings,
+    source,
+    filter,
+    weight,
+    helpers
+  } = request as ScrapeRequest
+
+  const result = await scrapeFiles(
+    allURLs,
+    allPosts,
+    caching,
+    remoteSettings,
+    source,
+    filter,
+    weight,
+    helpers
+  )
+  parentPort?.postMessage(result)
+})
+
 export async function scrapeFiles(
   allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
@@ -3818,7 +3726,6 @@ export async function scrapeFiles(
       return fs.existsSync(sourceCachePath) ? sourceCachePath : undefined
     }
 
-    const host = `${getServerHost()}:${getServerPort()}`
     const sourceType = getSourceType(source.url)
     if (sourceType === ST.local) {
       // Local files
@@ -3831,7 +3738,6 @@ export async function scrapeFiles(
         weight,
         helpers,
         '',
-        host,
         resolve
       )
     } else if (sourceType === ST.list) {
@@ -3858,7 +3764,6 @@ export async function scrapeFiles(
         weight,
         helpers,
         path,
-        host,
         resolve
       )
     } else if (sourceType === ST.playlist) {
@@ -3884,7 +3789,6 @@ export async function scrapeFiles(
         filter,
         weight,
         helpers,
-        host,
         resolve
       )
     } else {
@@ -3953,7 +3857,6 @@ export async function scrapeFiles(
             weight,
             helpers,
             cacheDir,
-            host,
             resolve
           )
         } else {
@@ -3966,7 +3869,6 @@ export async function scrapeFiles(
             filter,
             weight,
             helpers,
-            host,
             resolve
           )
         }
@@ -3980,7 +3882,6 @@ export async function scrapeFiles(
           filter,
           weight,
           helpers,
-          host,
           resolve
         )
       }

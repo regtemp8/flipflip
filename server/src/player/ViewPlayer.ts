@@ -78,9 +78,9 @@ export default class ViewPlayer {
   }
 
   public start() {
-    sourceScrapers().subscribe(this.current.sceneId, this.user)
+    sourceScrapers().register(this.current.sceneId, this.user)
     if (this.next != null) {
-      sourceScrapers().subscribe(this.next.sceneId, this.user)
+      sourceScrapers().register(this.next.sceneId, this.user)
     }
 
     this.startLoading()
@@ -270,7 +270,6 @@ export default class ViewPlayer {
 
   private async changeViewPlayerItem() {
     logger.info('Change View Player Item')
-    sourceScrapers().unsubscribe(this.current.sceneId)
     if (this.next == null) {
       logger.info('No next view player item, stopping view player')
       this.stop()
@@ -281,7 +280,7 @@ export default class ViewPlayer {
     this.current = this.next
     this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user)
     if (this.next != null) {
-      sourceScrapers().subscribe(this.next.sceneId, this.user)
+      sourceScrapers().register(this.next.sceneId, this.user)
       this.startPreloading()
     }
 
