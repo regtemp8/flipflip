@@ -21,8 +21,16 @@ class SourceScraperService {
     }
   }
 
-  public async getSourceUrls(sceneId: number, canScrape: boolean, source?: string) {
-    return (await this.subscriptions.get(sceneId)?.getSourceUrls(canScrape, source)) ?? []
+  public async getSourceUrls(
+    sceneId: number,
+    canScrape: boolean,
+    source?: string
+  ) {
+    return (
+      (await this.subscriptions
+        .get(sceneId)
+        ?.getSourceUrls(canScrape, source)) ?? []
+    )
   }
 
   public clear() {
