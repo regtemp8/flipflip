@@ -396,6 +396,7 @@ export default class ContentLoader {
     } else if (isImage(url, false)) {
       let buffer: Buffer
       try {
+        // TODO loading image into memory is quite expensive, optimize this
         buffer = await this.getImageBuffer(url)
       } catch {
         const errorData = newContentData(url)
