@@ -76,7 +76,7 @@ function toContentSourceUrl(url: string): ContentSource {
 
 export default class SourceScraper {
   private static readonly pool = new StaticPool({
-    size: os.cpus().length * 2, // TODO make thread pool size configurable?
+    size: os.cpus().length - 2, // TODO make thread pool size configurable?
     task: path.join(__dirname, 'Scrapers.js')
   })
 
@@ -151,7 +151,6 @@ export default class SourceScraper {
     this.queueEmpty = sceneSources.length === 0
 
     for (const source of sceneSources) {
-      this.allURLs[source.url] = []
       this.scrapeQueue[source.url] = [
         { source, helpers: { next: -1, count: 0, retries: 0 } }
       ]
@@ -159,7 +158,7 @@ export default class SourceScraper {
   }
 
   public async getSourceUrls(canScrape: boolean, sourceUrl?: string) {
-    if(canScrape) {
+    if (canScrape) {
       let scrapeUrl = sourceUrl
       if (!this.queueEmpty && scrapeUrl == null) {
         const sourceUrls = Object.keys(this.scrapeQueue)
@@ -182,9 +181,8 @@ export default class SourceScraper {
       }
     }
 
-    return sourceUrl != null
-      ? this.allURLs[sourceUrl]
-      : Object.keys(this.allURLs).filter((key) => this.allURLs[key].length > 0)
+    const key = sourceUrl ?? WF.images
+    return this.allURLs[key]
   }
 
   private async scrapeSource(sourceUrl: string) {
@@ -197,7 +195,6 @@ export default class SourceScraper {
 
     const { imageTypeFilter, weightFunction } = this.scene
     const request: ScrapeRequest = {
-      allURLs: this.allURLs,
       allPosts: this.allPosts,
       caching: this.caching,
       remoteSettings: this.remoteSettings,
@@ -207,8 +204,8 @@ export default class SourceScraper {
       helpers: promiseData.helpers
     }
 
-    const response = await SourceScraper.pool.exec(request)
-    const object = this.processResponse(response)
+    const object = await SourceScraper.pool.exec(request)
+    this.processResponse(object)
     if (object?.captcha != null) {
       this.captcha = {
         captcha: object.captcha,
@@ -238,10 +235,6 @@ export default class SourceScraper {
     // If we are not at the end of a source
     if (object?.source) {
       if (object?.data) {
-        if (object.allURLs) {
-          this.allURLs = object.allURLs
-        }
-
         this.allPosts = object.allPosts ?? {}
 
         // Add the next promise to the queue
@@ -261,13 +254,7 @@ export default class SourceScraper {
   }
 
   private processResponse(object: ScrapeResult) {
-    if (
-      object?.source &&
-      object?.data &&
-      object?.allURLs &&
-      object?.weight &&
-      object?.helpers
-    ) {
+    if (object?.source && object?.data && object?.weight && object?.helpers) {
       const source = object.source
       if ((source.blacklist?.length ?? 0) > 0) {
         object.data = object.data.filter(
@@ -276,16 +263,8 @@ export default class SourceScraper {
       }
 
       object.data = this.rewriteURLs(object.data)
-      object.allURLs = this.processAllURLs(
-        object.data,
-        object.allURLs,
-        object.source,
-        object.weight,
-        object.helpers
-      )
+      this.processAllURLs(object.data, object.source, object.weight)
     }
-
-    return object
   }
 
   private rewriteURLs(data: string[]) {
@@ -324,45 +303,14 @@ export default class SourceScraper {
 
   private processAllURLs(
     data: string[],
-    allURLs: Record<string, string[]>,
     source: ContentSource,
-    weight: string,
-    helpers: ScraperHelpers
-  ): Record<string, string[]> {
-    const newAllURLs = { ...allURLs }
-    if (helpers.next != null && (helpers.next as number) <= 0) {
-      if (weight === WF.sources) {
-        newAllURLs[source.url] = data
-      } else {
-        for (const d of data) {
-          newAllURLs[d] = [source.url]
-        }
-      }
+    weight: string
+  ) {
+    const key = weight === WF.images ? WF.images : source.url
+    if (this.allURLs[key] == null) {
+      this.allURLs[key] = data
     } else {
-      if (weight === WF.sources) {
-        const sourceURLs = newAllURLs[source.url] ?? []
-        newAllURLs[source.url] = sourceURLs.concat(
-          data.filter((u: string) => {
-            const fileName = getFileName(u, path.sep)
-            const found = sourceURLs
-              .map((u: string) => getFileName(u, path.sep))
-              .includes(fileName)
-            return !found
-          })
-        )
-      } else {
-        for (const d of data.filter((u: string) => {
-          const fileName = getFileName(u, path.sep)
-          const found = Object.keys(newAllURLs)
-            .map((u: string) => getFileName(u, path.sep))
-            .includes(fileName)
-          return !found
-        })) {
-          newAllURLs[d] = [source.url]
-        }
-      }
+      this.allURLs[key].push(...data)
     }
-
-    return newAllURLs
   }
 }
