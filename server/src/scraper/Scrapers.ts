@@ -32,7 +32,6 @@ import { findClipById } from '../db/ClipRepository'
 import { parentPort } from 'worker_threads'
 
 export type WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -55,7 +54,6 @@ export const getFileURL = (path: string): string => {
 }
 
 export const loadNimja: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -65,12 +63,10 @@ export const loadNimja: WorkerFunction = (
   helpers: ScraperHelpers,
   resolve: ScrapeResultCallback
 ) => {
-  const sources = [source.url]
   helpers.next = undefined
   pm(
     {
-      data: sources,
-      allURLs,
+      data: [source.url],
       allPosts,
       weight,
       helpers,
@@ -82,7 +78,6 @@ export const loadNimja: WorkerFunction = (
 }
 
 export const loadLocalDirectory = async (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   source: ContentSource,
@@ -118,7 +113,6 @@ export const loadLocalDirectory = async (
       pm(
         {
           data: urls,
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -176,7 +170,6 @@ const recursiveReadDirectory = async (
 }
 
 export const loadVideo = async (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   source: ContentSource,
@@ -192,7 +185,6 @@ export const loadVideo = async (
       {
         error: 'Could not find ' + source.url,
         data: [],
-        allURLs,
         allPosts,
         weight,
         helpers,
@@ -246,7 +238,6 @@ export const loadVideo = async (
     pm(
       {
         data: paths,
-        allURLs,
         allPosts,
         weight,
         helpers,
@@ -278,7 +269,6 @@ export const loadVideo = async (
 }
 
 export const loadPlaylist = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   source: ContentSource,
@@ -337,7 +327,6 @@ export const loadPlaylist = (
       pm(
         {
           data: urls,
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -379,7 +368,6 @@ export const reset = () => {
 }
 
 export const loadRemoteImageURLList = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   source: ContentSource,
@@ -420,7 +408,6 @@ export const loadRemoteImageURLList = (
                       convertedSource,
                       true
                     ),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -447,7 +434,6 @@ export const loadRemoteImageURLList = (
                       convertedSource,
                       true
                     ),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -485,7 +471,6 @@ export const loadRemoteImageURLList = (
 }
 
 export const loadTumblr: WorkerFunction = async (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -533,7 +518,6 @@ export const loadTumblr: WorkerFunction = async (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -566,7 +550,6 @@ export const loadTumblr: WorkerFunction = async (
                       convertedSource,
                       false
                     ),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -593,7 +576,6 @@ export const loadTumblr: WorkerFunction = async (
                       convertedSource,
                       false
                     ),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -610,7 +592,6 @@ export const loadTumblr: WorkerFunction = async (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -664,7 +645,6 @@ export const loadTumblr: WorkerFunction = async (
 }
 
 export const loadReddit: WorkerFunction = async (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -715,7 +695,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -743,7 +722,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -760,7 +738,6 @@ export const loadReddit: WorkerFunction = async (
             pm(
               {
                 data: [],
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -817,7 +794,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -845,7 +821,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -862,7 +837,6 @@ export const loadReddit: WorkerFunction = async (
             pm(
               {
                 data: [],
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -919,7 +893,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -947,7 +920,6 @@ export const loadReddit: WorkerFunction = async (
                           convertedListing,
                           false
                         ),
-                        allURLs,
                         allPosts,
                         weight,
                         helpers,
@@ -964,7 +936,6 @@ export const loadReddit: WorkerFunction = async (
             pm(
               {
                 data: [],
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -1007,7 +978,6 @@ export const loadReddit: WorkerFunction = async (
 }
 
 export const loadRedGifs: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1113,7 +1083,6 @@ export const loadRedGifs: WorkerFunction = (
       pm(
         {
           data: filterPathsToJustPlayable(filter, images, false),
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -1142,7 +1111,6 @@ export const loadRedGifs: WorkerFunction = (
 
 const loadImageFapGallery = (
   galleryURL: string,
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   source: ContentSource,
   filter: string,
@@ -1207,7 +1175,6 @@ const loadImageFapGallery = (
               {
                 captcha,
                 data: images,
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -1222,7 +1189,6 @@ const loadImageFapGallery = (
         if (html.includes('Enter the captcha')) {
           helpers.count = source.count
           captcha = galleryURL
-          images = allURLs[source.url] ?? []
           pm({ warning: source.url + ' - blocked due to captcha' }, resolve)
         }
 
@@ -1230,8 +1196,7 @@ const loadImageFapGallery = (
         pm(
           {
             captcha,
-            data: images,
-            allURLs,
+            data: [],
             allPosts,
             weight,
             helpers,
@@ -1260,7 +1225,6 @@ const loadImageFapGallery = (
 }
 
 export const loadImageFap: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1287,7 +1251,6 @@ export const loadImageFap: WorkerFunction = (
     const baseGalleryURL = 'https://www.imagefap.com/gallery/' + gid
     loadImageFapGallery(
       baseGalleryURL + '?gid=' + gid + '&page=' + next[2] + '&view=0',
-      allURLs,
       allPosts,
       source,
       filter,
@@ -1332,7 +1295,6 @@ export const loadImageFap: WorkerFunction = (
             {
               captcha,
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -1350,7 +1312,6 @@ export const loadImageFap: WorkerFunction = (
           const baseGalleryURL = 'https://www.imagefap.com/gallery/' + albumID
           loadImageFapGallery(
             baseGalleryURL + '?gid=' + albumID + '&page=' + next[2] + '&view=0',
-            allURLs,
             allPosts,
             source,
             filter,
@@ -1377,7 +1338,6 @@ export const loadImageFap: WorkerFunction = (
               'https://www.imagefap.com/gallery/' +
               getFileGroup(url, path.sep) +
               '?view=0'
-            images = allURLs[url] ?? []
             pm({ warning: source.url + ' - blocked due to captcha' }, resolve)
           } else {
             next[0] += 1
@@ -1386,8 +1346,7 @@ export const loadImageFap: WorkerFunction = (
           pm(
             {
               captcha,
-              data: images,
-              allURLs,
+              data: [],
               allPosts,
               weight,
               helpers,
@@ -1469,7 +1428,6 @@ export const loadImageFap: WorkerFunction = (
               pm(
                 {
                   data,
-                  allURLs,
                   allPosts,
                   weight,
                   helpers,
@@ -1496,7 +1454,6 @@ export const loadImageFap: WorkerFunction = (
           pm(
             {
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -1526,7 +1483,6 @@ export const loadImageFap: WorkerFunction = (
     pm(
       {
         data: [],
-        allURLs,
         allPosts,
         weight,
         helpers,
@@ -1539,7 +1495,6 @@ export const loadImageFap: WorkerFunction = (
 }
 
 export const loadSexCom: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1556,7 +1511,6 @@ export const loadSexCom: WorkerFunction = (
   pm(
     {
       data: [],
-      allURLs,
       allPosts,
       weight,
       helpers,
@@ -1604,7 +1558,6 @@ export const loadSexCom: WorkerFunction = (
           helpers.count = helpers.count + filterPathsToJustPlayable(IF.any, images, false).length;
           pm({
             data: filterPathsToJustPlayable(filter, images, false),
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -1658,7 +1611,6 @@ export const loadSexCom: WorkerFunction = (
                   helpers.count = helpers.count + filePaths.length;
                   pm({
                     data: filePaths,
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -1673,7 +1625,6 @@ export const loadSexCom: WorkerFunction = (
         helpers.next = undefined;
         pm({
           data: [],
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -1685,7 +1636,6 @@ export const loadSexCom: WorkerFunction = (
 }
 
 export const loadImgur: WorkerFunction = async (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1706,7 +1656,6 @@ export const loadImgur: WorkerFunction = async (
     pm(
       {
         data: filterPathsToJustPlayable(filter, images, true),
-        allURLs,
         allPosts,
         weight,
         helpers,
@@ -1729,7 +1678,6 @@ export const loadImgur: WorkerFunction = async (
 }
 
 export const loadDeviantArt: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1794,7 +1742,6 @@ export const loadDeviantArt: WorkerFunction = (
       pm(
         {
           data,
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -1818,7 +1765,6 @@ export const loadDeviantArt: WorkerFunction = (
 }
 
 export const loadE621: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -1860,7 +1806,6 @@ export const loadE621: WorkerFunction = (
           pm(
             {
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -1916,7 +1861,6 @@ export const loadE621: WorkerFunction = (
                 pm(
                   {
                     data: filterPathsToJustPlayable(filter, images, true),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -1986,7 +1930,6 @@ export const loadE621: WorkerFunction = (
           pm(
             {
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -2015,7 +1958,6 @@ export const loadE621: WorkerFunction = (
         pm(
           {
             data: filterPathsToJustPlayable(filter, images, true),
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2041,7 +1983,6 @@ export const loadE621: WorkerFunction = (
 }
 
 export const loadDanbooru: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -2105,7 +2046,6 @@ export const loadDanbooru: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2123,7 +2063,6 @@ export const loadDanbooru: WorkerFunction = (
           pm(
             {
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -2179,7 +2118,6 @@ export const loadDanbooru: WorkerFunction = (
                 pm(
                   {
                     data: filterPathsToJustPlayable(filter, images, true),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -2224,7 +2162,6 @@ export const loadDanbooru: WorkerFunction = (
         pm(
           {
             data: filterPathsToJustPlayable(filter, images, true),
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2250,7 +2187,6 @@ export const loadDanbooru: WorkerFunction = (
 }
 
 export const loadGelbooru1: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -2340,7 +2276,6 @@ export const loadGelbooru1: WorkerFunction = (
                 pm(
                   {
                     data: filterPathsToJustPlayable(filter, images, false),
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -2374,7 +2309,6 @@ export const loadGelbooru1: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2400,7 +2334,6 @@ export const loadGelbooru1: WorkerFunction = (
 }
 
 export const loadGelbooru2: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -2448,7 +2381,6 @@ export const loadGelbooru2: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2474,7 +2406,6 @@ export const loadGelbooru2: WorkerFunction = (
       pm(
         {
           data: filterPathsToJustPlayable(filter, images, true),
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -2499,7 +2430,6 @@ export const loadGelbooru2: WorkerFunction = (
 }
 
 export const loadEHentai: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -2553,7 +2483,6 @@ export const loadEHentai: WorkerFunction = (
             pm(
               {
                 data: filterPathsToJustPlayable(filter, images, true),
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -2599,7 +2528,6 @@ export const loadEHentai: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -2625,7 +2553,6 @@ export const loadEHentai: WorkerFunction = (
 }
 
 export const loadLuscious: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -2722,7 +2649,6 @@ export const loadLuscious: WorkerFunction = (
           pm(
             {
               data,
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -2736,7 +2662,6 @@ export const loadLuscious: WorkerFunction = (
           pm(
             {
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -2934,7 +2859,6 @@ export const loadLuscious: WorkerFunction = (
                 pm(
                   {
                     data,
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -2947,7 +2871,6 @@ export const loadLuscious: WorkerFunction = (
                 pm(
                   {
                     data: [],
-                    allURLs,
                     allPosts,
                     weight,
                     helpers,
@@ -2976,7 +2899,6 @@ export const loadLuscious: WorkerFunction = (
             {
               warning: json,
               data: [],
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -3003,7 +2925,6 @@ export const loadLuscious: WorkerFunction = (
 }
 
 export const loadBDSMlr: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -3024,7 +2945,6 @@ export const loadBDSMlr: WorkerFunction = (
       pm(
         {
           data: [],
-          allURLs,
           allPosts,
           weight,
           helpers,
@@ -3100,7 +3020,6 @@ export const loadBDSMlr: WorkerFunction = (
         pm(
           {
             data,
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -3114,7 +3033,6 @@ export const loadBDSMlr: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -3145,7 +3063,6 @@ export const loadBDSMlr: WorkerFunction = (
 
 let piwigoLoggedIn = false
 export const loadPiwigo: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -3233,7 +3150,6 @@ export const loadPiwigo: WorkerFunction = (
         pm(
           {
             data: [],
-            allURLs,
             allPosts,
             weight,
             helpers,
@@ -3282,7 +3198,6 @@ export const loadPiwigo: WorkerFunction = (
             pm(
               {
                 data: [],
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -3316,7 +3231,6 @@ export const loadPiwigo: WorkerFunction = (
           pm(
             {
               data: filterPathsToJustPlayable(filter, images, true),
-              allURLs,
               allPosts,
               weight,
               helpers,
@@ -3365,7 +3279,6 @@ export const loadPiwigo: WorkerFunction = (
 }
 
 export const loadHydrus: WorkerFunction = (
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -3509,7 +3422,6 @@ export const loadHydrus: WorkerFunction = (
             pm(
               {
                 data: images,
-                allURLs,
                 allPosts,
                 weight,
                 helpers,
@@ -3680,19 +3592,10 @@ async function convertURL(url: string): Promise<string[]> {
 }
 
 parentPort?.on('message', async (request) => {
-  const {
-    allURLs,
-    allPosts,
-    caching,
-    remoteSettings,
-    source,
-    filter,
-    weight,
-    helpers
-  } = request as ScrapeRequest
+  const { allPosts, caching, remoteSettings, source, filter, weight, helpers } =
+    request as ScrapeRequest
 
   const result = await scrapeFiles(
-    allURLs,
     allPosts,
     caching,
     remoteSettings,
@@ -3705,7 +3608,6 @@ parentPort?.on('message', async (request) => {
 })
 
 export async function scrapeFiles(
-  allURLs: Record<string, string[]>,
   allPosts: Record<string, string>,
   caching: CacheSettings,
   remoteSettings: RemoteSettings,
@@ -3730,7 +3632,6 @@ export async function scrapeFiles(
     if (sourceType === ST.local) {
       // Local files
       loadLocalDirectory(
-        allURLs,
         allPosts,
         caching,
         source,
@@ -3744,7 +3645,6 @@ export async function scrapeFiles(
       // Image List
       helpers.next = undefined
       loadRemoteImageURLList(
-        allURLs,
         allPosts,
         caching,
         source,
@@ -3756,7 +3656,6 @@ export async function scrapeFiles(
     } else if (sourceType === ST.video) {
       const path = cachePath(caching, source) ?? ''
       loadVideo(
-        allURLs,
         allPosts,
         caching,
         source,
@@ -3769,7 +3668,6 @@ export async function scrapeFiles(
     } else if (sourceType === ST.playlist) {
       const path = cachePath(caching, source) ?? ''
       loadPlaylist(
-        allURLs,
         allPosts,
         caching,
         source,
@@ -3781,7 +3679,6 @@ export async function scrapeFiles(
       )
     } else if (sourceType === ST.nimja) {
       loadNimja(
-        allURLs,
         allPosts,
         caching,
         remoteSettings,
@@ -3830,7 +3727,6 @@ export async function scrapeFiles(
       if (workerFunction == null) {
         resolve({
           allPosts,
-          allURLs,
           weight,
           helpers,
           source,
@@ -3841,7 +3737,6 @@ export async function scrapeFiles(
       if (helpers.next === -1) {
         helpers.next = 0
         const cacheDir = getCachePath(caching.directory, source.url)
-
         if (
           caching.enabled &&
           fs.existsSync(cacheDir) &&
@@ -3849,7 +3744,6 @@ export async function scrapeFiles(
         ) {
           // If the cache directory exists, use it
           loadLocalDirectory(
-            allURLs,
             allPosts,
             caching,
             source,
@@ -3861,7 +3755,6 @@ export async function scrapeFiles(
           )
         } else {
           workerFunction(
-            allURLs,
             allPosts,
             caching,
             remoteSettings,
@@ -3874,7 +3767,6 @@ export async function scrapeFiles(
         }
       } else {
         workerFunction(
-          allURLs,
           allPosts,
           caching,
           remoteSettings,
