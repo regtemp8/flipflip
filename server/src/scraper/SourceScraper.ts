@@ -84,9 +84,10 @@ export default class SourceScraper {
   private readonly caching: CacheSettings
   private readonly remoteSettings: RemoteSettings
 
-  private allURLs: Record<string, string[]>
+  private allURLs: Map<string, string[]>
   private allPosts: Record<string, string>
   private scrapeQueue: Record<string, Array<ScrapedSourcePromise>>
+  private availableToScrape: string[]
   private sourceIndex: number
   private queueEmpty: boolean
   private captcha?: PlayerCaptcha
@@ -146,18 +147,29 @@ export default class SourceScraper {
     this.remoteSettings = remoteSettings
     this.scrapeQueue = {}
     this.allPosts = {}
-    this.allURLs = {}
+    this.allURLs = new Map<string, string[]>()
     this.sourceIndex = 0
     this.queueEmpty = sceneSources.length === 0
+    this.availableToScrape = []
 
     for (const source of sceneSources) {
+      this.availableToScrape.push(source.url)
       this.scrapeQueue[source.url] = [
         { source, helpers: { next: -1, count: 0, retries: 0 } }
       ]
     }
   }
 
-  public async getSourceUrls(canScrape: boolean, sourceUrl?: string) {
+  public getSourceUrls(willScrape: boolean): string[] {
+    const sourceUrls = Array.from(this.allURLs.keys())
+    if(willScrape && this.availableToScrape.length > 0) {
+      const scrapeUrl = this.availableToScrape.pop()
+      sourceUrls.push(scrapeUrl as string)
+    }
+    return sourceUrls
+  }
+
+  public async getScrapedUrls(canScrape: boolean, sourceUrl?: string): Promise<string[] | undefined> {
     if (canScrape) {
       let scrapeUrl = sourceUrl
       if (!this.queueEmpty && scrapeUrl == null) {
@@ -182,7 +194,7 @@ export default class SourceScraper {
     }
 
     const key = sourceUrl ?? WF.images
-    return this.allURLs[key]
+    return this.allURLs.get(key)
   }
 
   private async scrapeSource(sourceUrl: string) {
@@ -307,10 +319,13 @@ export default class SourceScraper {
     weight: string
   ) {
     const key = weight === WF.images ? WF.images : source.url
-    if (this.allURLs[key] == null) {
-      this.allURLs[key] = data
+    let urls = this.allURLs.get(key)
+    if(urls == null) {
+      urls = data
     } else {
-      this.allURLs[key].push(...data)
+      urls.push(...data)
     }
+
+    this.allURLs.set(key, urls)
   }
 }
