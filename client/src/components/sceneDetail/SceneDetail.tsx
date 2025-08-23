@@ -95,7 +95,6 @@ import {
   useDeleteSceneMutation,
   useGetFilteredSceneContentSourcesQuery,
   useGetSceneQuery,
-  useGetTutorialsQuery,
   usePlaySceneMutation
 } from '../../store/api/slice'
 import { setSceneGeneratorMax } from '../../store/api/thunks'
@@ -398,7 +397,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     width: '100%'
   },
   backdropTop: {
-    zIndex: `${theme.zIndex.modal + 1} !important` as any
+    zIndex: `${theme.zIndex.modal + 1} !important`
   },
   highlight: {
     borderWidth: 2,
@@ -447,7 +446,6 @@ function SceneDetail() {
   const [cloneScene] = useCloneSceneMutation()
   const [playScene] = usePlaySceneMutation()
   const { data: scene } = useGetSceneQuery(sceneID)
-  const { data: tutorial } = useGetTutorialsQuery()
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
 
   const { data: confirmSceneDeletion } =
@@ -467,6 +465,8 @@ function SceneDetail() {
   const [openMenu, setOpenMenu] = useState<string>()
   const [sceneEffects, setSceneEffects] = useState('')
   const [confirmCopy, _setConfirmCopy] = useState(false)
+
+  const tutorial = ''
 
   useEffect(() => {
     // Use alt+P to access import modal
