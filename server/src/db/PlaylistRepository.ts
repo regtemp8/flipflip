@@ -44,16 +44,17 @@ export async function findPlaylistOptionsByType(
     .query()
     .selectFrom('playlist as p')
     .select(['p.id as itemId', 'p.name as itemName', 'p.type as itemType'])
+    .where('p.temporary', '=', toNumber(false))
     .where('p.type', '=', type)
     .execute()
 }
 
 export async function findPlaylistIds(): Promise<number[]> {
-  // TODO exclude temporary playlists?
   return await db()
     .query()
     .selectFrom('playlist')
     .select('id')
+    .where('temporary', '=', toNumber(false))
     .execute()
     .then((value) => value.map((v) => v.id as number))
 }

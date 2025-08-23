@@ -270,6 +270,7 @@ router.delete('/:id/items/:itemId', async (req, res, next) => {
   }
 })
 
+// TODO remove if not used (currently not used)
 router.get('/', async (req, res) => {
   const ids = await findPlaylistIds()
   if (ids != null) {
