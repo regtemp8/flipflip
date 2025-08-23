@@ -1,4 +1,4 @@
-import { ErrorInfo, useEffect, useRef, useState } from 'react'
+import { ErrorInfo, useCallback, useEffect, useRef, useState } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -52,6 +52,15 @@ export default function ErrorCard(props: ErrorCardProps) {
 
   const _pathname = useRef<string>()
 
+  const clearError = useCallback(() => {
+    props.onClearError()
+    _pathname.current = undefined
+    setResetCheck(false)
+    setBackupCheck(false)
+    setBackup(undefined)
+    setBackups([])
+  }, [props, setResetCheck, setBackupCheck, setBackup, setBackups])
+
   // clear error when going back
   useEffect(() => {
     if (_pathname.current == null) {
@@ -89,15 +98,6 @@ export default function ErrorCard(props: ErrorCardProps) {
   const reset = async () => {
     await resetData()
     window.location.reload()
-  }
-
-  const clearError = () => {
-    props.onClearError()
-    _pathname.current = undefined
-    setResetCheck(false)
-    setBackupCheck(false)
-    setBackup(undefined)
-    setBackups([])
   }
 
   const goBack = () => {
