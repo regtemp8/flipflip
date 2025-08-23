@@ -71,6 +71,7 @@ import { useAppDispatch } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSelect from '../common/BaseSelect'
 import {
+  useDeleteContentSourceMutation,
   useGetClipQuery,
   useGetContentSourceQuery,
   useGetTutorialsQuery
@@ -496,6 +497,7 @@ export interface SourceListProps {
 
 function SourceList(props: SourceListProps) {
   const dispatch = useAppDispatch()
+  const [deleteContentSource] = useDeleteContentSourceMutation()
   // const yOffsetSelector = props.isLibrary
   //   ? selectAppLibraryYOffset()
   //   : (state: RootState) => 0
@@ -593,14 +595,14 @@ function SourceList(props: SourceListProps) {
     onCloseDeleteDialog()
   }
 
-  const onRemove = (_sourceID: number) => {
-    // if (props.isLibrary) {
-    //   const selected = props.selected as number[]
-    //   dispatch(setLibrarySelected(selected.filter((id) => id !== sourceID)))
-    //   dispatch(setLibraryRemoveOne(sourceID))
-    // } else {
-    //   dispatch(setSceneSourcesRemoveOne(sourceID))
-    // }
+  const onRemove = async (sourceID: number) => {
+    if (props.isLibrary) {
+      // const selected = props.selected as number[]
+      // dispatch(setLibrarySelected(selected.filter((id) => id !== sourceID)))
+      // dispatch(setLibraryRemoveOne(sourceID))
+    } else {
+      await deleteContentSource(sourceID)
+    }
   }
 
   const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {

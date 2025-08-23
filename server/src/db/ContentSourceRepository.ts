@@ -15,17 +15,30 @@ import { getFileName, getFileGroup } from '../utils'
 
 export const IS_LIBRARY = 0
 
+export async function findSceneContentSourceIds(
+  sceneId: number
+): Promise<number[]> {
+  return await db()
+    .query()
+    .selectFrom('contentSource')
+    .select('id')
+    .where('sceneId', '=', sceneId)
+    .orderBy('index asc')
+    .execute()
+    .then((value) => value.map((v) => v.id as number))
+}
+
 export async function findContentSourceById(
   userId: number,
   id: number
-): Promise<ContentSource> {
+): Promise<ContentSource | undefined> {
   return await db()
     .query()
     .selectFrom('contentSource')
     .selectAll()
     .where('userId', '=', userId)
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export async function findContentSourceTagIds(
@@ -468,4 +481,42 @@ export async function updateContentSourceCount(
       .where('count', '<', count)
       .execute()
   }
+}
+
+export async function deleteContentSource(id: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { index } = await trx
+        .selectFrom('contentSource')
+        .select('index')
+        .where('id', '=', id)
+        .executeTakeFirstOrThrow()
+
+      await trx
+        .deleteFrom('contentSourceBlacklistItem')
+        .where('contentSourceId', '=', id)
+        .execute()
+
+      await trx.deleteFrom('clip').where('contentSourceId', '=', id).execute()
+
+      await trx
+        .deleteFrom('contentSourceTag')
+        .where('contentSourceId', '=', id)
+        .execute()
+
+      const result = await trx
+        .deleteFrom('contentSource')
+        .where('id', '=', id)
+        .execute()
+
+      await trx
+        .updateTable('contentSource')
+        .set((eb) => ({ index: eb('index', '-', 1) }))
+        .where('index', '>', index)
+        .execute()
+
+      return result
+    })
 }

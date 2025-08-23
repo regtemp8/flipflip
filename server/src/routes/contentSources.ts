@@ -21,7 +21,8 @@ import {
   markContentSources,
   findContentSourceTagIds,
   findTotalCount,
-  sortContentSources
+  sortContentSources,
+  deleteContentSource
 } from '../db/ContentSourceRepository'
 import { User } from '../db/types/generated'
 import { BatchTagRequest, ContentSortRequest } from 'flipflip-common'
@@ -113,6 +114,11 @@ router.patch('/:id', async (req, res) => {
   )
   const status =
     result.length === 1 && result[0].numUpdatedRows === 1n ? 204 : 500
+  res.status(status).end()
+})
+router.delete('/:id', async (req, res) => {
+  const result = await deleteContentSource(Number(req.params.id))
+  const status = result[0].numDeletedRows > 0n ? 204 : 500
   res.status(status).end()
 })
 export default router

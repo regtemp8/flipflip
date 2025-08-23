@@ -21,7 +21,10 @@ import {
   toScene,
   toSceneUpdate
 } from '../db/mappers'
-import { findContentSources } from '../db/ContentSourceRepository'
+import {
+  findContentSources,
+  findSceneContentSourceIds
+} from '../db/ContentSourceRepository'
 import { User } from '../db/types/generated'
 import { createTempDisplayForScene } from '../db/DisplayRepository'
 import players from '../player/PlayerService'
@@ -86,6 +89,18 @@ router.get('/:id', async (req, res) => {
   } else {
     res.status(404).end()
   }
+})
+
+router.get('/:id/content-sources/filtered', async (req, res) => {
+  const filtersQuery = req.query.filters
+  if (filtersQuery == null) {
+    const sourceIds = await findSceneContentSourceIds(Number(req.params.id))
+    res.status(200).send(sourceIds)
+    return
+  }
+
+  // TODO add filtering
+  res.status(501).end()
 })
 
 router.post('/:id/clone', async (req, res, next) => {

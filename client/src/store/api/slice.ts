@@ -374,7 +374,25 @@ export const flipflipApi = createApi({
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
-    deleteScene: builder.mutation<void,number>({
+    getFilteredSceneContentSources: builder.query<
+      number[],
+      { id: number; filters: string[] }
+    >({
+      query: ({ id, filters }) => {
+        let filtersQuery =
+          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
+        if (filtersQuery !== '') {
+          filtersQuery = `?filters=${filtersQuery}`
+        }
+
+        return {
+          url: `api/scenes/${id}/content-sources/filtered${filtersQuery}`
+        }
+      },
+      providesTags: (_result, error) =>
+        error == null ? [{ type: 'ContentSource', id: 'FilteredList' }] : []
+    }),
+    deleteScene: builder.mutation<void, number>({
       query: (id) => ({
         url: `api/scenes/${id}`,
         method: 'DELETE'
@@ -384,8 +402,9 @@ export const flipflipApi = createApi({
         // TODO update cache instead of invalidating it
         dispatch(
           flipflipApi.util.invalidateTags([
-            'GroupedScenes', 
+            'GroupedScenes',
             'UngroupedScenes',
+            { type: 'ContentSource', id: 'FilteredList' },
             { type: 'Scene', id },
             { type: 'Scene', id: 'List' }
           ])
@@ -400,7 +419,11 @@ export const flipflipApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(
-          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes', {type: 'Scene', id: 'List'}])
+          flipflipApi.util.invalidateTags([
+            'GroupedScenes',
+            'UngroupedScenes',
+            { type: 'Scene', id: 'List' }
+          ])
         )
       }
     }),
@@ -411,9 +434,13 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
-        snackbar().showMessage({success: 'Clone successful!'})
+        snackbar().showMessage({ success: 'Clone successful!' })
         dispatch(
-          flipflipApi.util.invalidateTags(['GroupedScenes', 'UngroupedScenes', {type: 'Scene', id: 'List'}])
+          flipflipApi.util.invalidateTags([
+            'GroupedScenes',
+            'UngroupedScenes',
+            { type: 'Scene', id: 'List' }
+          ])
         )
       }
     }),
@@ -599,6 +626,24 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    deleteContentSource: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `api/content-sources/${id}`,
+        method: 'DELETE'
+      }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'ContentSourceBatchTagOptions',
+            'ContentSourceSearchOptions',
+            { type: 'ContentSource', id },
+            { type: 'ContentSource', id: 'List' },
+            { type: 'ContentSource', id: 'FilteredList' }
+          ])
+        )
+      }
+    }),
     sortContentSources: builder.mutation<void, ContentSortRequest>({
       query: (body) => ({
         url: `api/content-sources/sort`,
@@ -756,8 +801,8 @@ export const flipflipApi = createApi({
       query: (id) => `api/view-players/${id}/config`,
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled
-          if(!data.view.sync) {
+          const { data } = await queryFulfilled
+          if (!data.view.sync) {
             dispatch(loadImageViews(id))
           }
         } catch (err) {
@@ -1044,9 +1089,10 @@ export const flipflipApi = createApi({
     }),
     getFilteredCaptionScripts: builder.query<number[], string[]>({
       query: (filters) => {
-        let filtersQuery = encodeURIComponent(JSON.stringify(filters))
+        let filtersQuery =
+          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
         if (filtersQuery !== '') {
-          filtersQuery = '?filters=' + filtersQuery
+          filtersQuery = `?filters=${filtersQuery}`
         }
 
         return { url: `api/caption-scripts/filtered${filtersQuery}` }
@@ -1469,9 +1515,10 @@ export const flipflipApi = createApi({
     }),
     getFilteredAudios: builder.query<number[], string[]>({
       query: (filters) => {
-        let filtersQuery = encodeURIComponent(JSON.stringify(filters))
+        let filtersQuery =
+          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
         if (filtersQuery !== '') {
-          filtersQuery = '?filters=' + filtersQuery
+          filtersQuery = `?filters=${filtersQuery}`
         }
 
         return { url: `api/audios/filtered${filtersQuery}` }
@@ -1784,6 +1831,7 @@ export const {
   useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,
+  useGetFilteredSceneContentSourcesQuery,
   useDeleteSceneMutation,
   useCreateSceneMutation,
   useCloneSceneMutation,
@@ -1804,6 +1852,7 @@ export const {
   useUpdateClipMutation,
   useGetContentSourceQuery,
   useUpdateContentSourceMutation,
+  useDeleteContentSourceMutation,
   useSortContentSourcesMutation,
   useCreateDisplayMutation,
   useDeleteDisplayMutation,

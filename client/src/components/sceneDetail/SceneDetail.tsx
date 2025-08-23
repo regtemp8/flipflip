@@ -75,10 +75,7 @@ import AudioTextEffects from './AudioTextEffects'
 import PiwigoDialog from './PiwigoDialog'
 import { useAppSelector } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
-import {
-  selectSceneDetailFilters,
-  selectSceneDetailDisplaySources
-} from '../../store/sceneDetail/selectors'
+import { selectSceneDetailFilters } from '../../store/sceneDetail/selectors'
 import {
   useNavigate,
   useParams,
@@ -96,6 +93,7 @@ import {
 import {
   useCloneSceneMutation,
   useDeleteSceneMutation,
+  useGetFilteredSceneContentSourcesQuery,
   useGetSceneQuery,
   useGetTutorialsQuery,
   usePlaySceneMutation
@@ -457,9 +455,10 @@ function SceneDetail() {
 
   const regenerate = useGetSceneRegenerateQuery(sceneID)
   const filters = useAppSelector(selectSceneDetailFilters())
-  const displaySources = useAppSelector(
-    selectSceneDetailDisplaySources(sceneID)
-  )
+  const { data: displaySources } = useGetFilteredSceneContentSourcesQuery({
+    id: sceneID,
+    filters
+  })
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
   const [isEditingName, setIsEditingName] = useState<string>()
@@ -725,8 +724,8 @@ function SceneDetail() {
   }
 
   const onCloneScene = async () => {
-    const {data} = await cloneScene(sceneID)
-    if(data != null) {
+    const { data } = await cloneScene(sceneID)
+    if (data != null) {
       await navigate(`/scenes/${data.value}`)
     }
   }
@@ -1175,7 +1174,7 @@ function SceneDetail() {
                     <Box className={classes.fill}>
                       {scene != null ? (
                         <SourceList
-                          sources={displaySources}
+                          sources={displaySources ?? []}
                           useWeights={
                             scene?.weightFunction === WF.sources &&
                             scene?.useWeights

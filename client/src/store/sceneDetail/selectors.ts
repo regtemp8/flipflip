@@ -7,11 +7,6 @@ export const selectSceneDetailFilters = () => {
   return (state: RootState) => state.sceneDetail.filters
 }
 
-const empty: number[] = []
-export const selectSceneDetailDisplaySources = (_sceneID: number) => {
-  return (_state: RootState) => empty
-}
-
 // export const selectSceneDetailDisplaySources = (sceneID: number) => {
 //   return createSelector(
 //     [
