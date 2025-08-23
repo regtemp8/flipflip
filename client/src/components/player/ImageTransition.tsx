@@ -1,11 +1,7 @@
 import { PropsWithChildren, useCallback, useEffect, useRef } from 'react'
 import { animated, useSpring } from '@react-spring/web'
 import { makeStyles } from 'tss-react/mui'
-import {
-  CrossFadeData,
-  EasingParams,
-  SlideData
-} from 'flipflip-common'
+import { CrossFadeData, EasingParams, SlideData } from 'flipflip-common'
 import { getEaseFunction } from '../../utils'
 
 const useStyles = makeStyles()(() => {

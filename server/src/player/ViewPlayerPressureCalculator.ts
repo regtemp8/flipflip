@@ -32,11 +32,11 @@ export default class ViewPlayerPressureCalculator {
 
   private adjustPressure(change: number) {
     this.count += change
-    if(!this.adjust) {
+    if (!this.adjust) {
       return
     }
-    
-    if(this.low && this.count < this.minimumThreshold) {
+
+    if (this.low && this.count < this.minimumThreshold) {
       this.low = false
     } else if (!this.low && this.count > this.maximumThreshold) {
       this.low = true

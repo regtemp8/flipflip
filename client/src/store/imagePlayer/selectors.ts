@@ -43,9 +43,10 @@ export const selectPlayerProgress = () =>
     let current = 0
     Object.values(imagePlayer).forEach((player) => {
       total += player.loader.maxCanLoad
-      Object.values(player.readyToDisplay).forEach((ready) => current += ready.length)
+      Object.values(player.readyToDisplay).forEach(
+        (ready) => (current += ready.length)
+      )
     })
 
-    return {total, current}
-  }
-  )
+    return { total, current }
+  })

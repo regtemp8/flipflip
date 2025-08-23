@@ -297,7 +297,11 @@ export default class ViewPlayer {
 
     this.doneLoading = false
     this.current = this.next
-    this.next = await getNextViewPlayerItem(this.playlistPlayer, this.user, this.maxInMemory)
+    this.next = await getNextViewPlayerItem(
+      this.playlistPlayer,
+      this.user,
+      this.maxInMemory
+    )
     if (this.next != null) {
       this.startPreloading()
     }

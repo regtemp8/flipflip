@@ -76,7 +76,11 @@ export const imagePlayerSlice = createSlice({
     setImagePlayerReadyToDisplay: (
       state,
       action: PayloadAction<
-        ImagePlayerUpdate<{ item: DisplayItem; displayIndex?: number, done: boolean }>
+        ImagePlayerUpdate<{
+          item: DisplayItem
+          displayIndex?: number
+          done: boolean
+        }>
       >
     ) => {
       const { uuid, value } = action.payload
@@ -117,7 +121,7 @@ export const imagePlayerSlice = createSlice({
       imageViews[item.index].show = true
       loader.shownIndex = item.index
       const count = value + 1
-      state[uuid].displayOffset += count  
+      state[uuid].displayOffset += count
       readyToDisplay[currentSceneID] =
         readyToDisplay[currentSceneID].slice(count)
     },

@@ -162,14 +162,17 @@ export default class SourceScraper {
 
   public getSourceUrls(willScrape: boolean): string[] {
     const sourceUrls = Array.from(this.allURLs.keys())
-    if(willScrape && this.availableToScrape.length > 0) {
+    if (willScrape && this.availableToScrape.length > 0) {
       const scrapeUrl = this.availableToScrape.pop()
       sourceUrls.push(scrapeUrl as string)
     }
     return sourceUrls
   }
 
-  public async getScrapedUrls(canScrape: boolean, sourceUrl?: string): Promise<string[] | undefined> {
+  public async getScrapedUrls(
+    canScrape: boolean,
+    sourceUrl?: string
+  ): Promise<string[] | undefined> {
     if (canScrape) {
       let scrapeUrl = sourceUrl
       if (!this.queueEmpty && scrapeUrl == null) {
@@ -320,7 +323,7 @@ export default class SourceScraper {
   ) {
     const key = weight === WF.images ? WF.images : source.url
     let urls = this.allURLs.get(key)
-    if(urls == null) {
+    if (urls == null) {
       urls = data
     } else {
       urls.push(...data)

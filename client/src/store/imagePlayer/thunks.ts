@@ -52,11 +52,13 @@ export function startImagePlayers() {
           const advanceTimeout = window.requestAnimationFrame(
             advanceImagePlayerFn(id)
           )
-          dispatch(setImagePlayerAdvanceTimeout({ uuid: id, value: advanceTimeout }))
+          dispatch(
+            setImagePlayerAdvanceTimeout({ uuid: id, value: advanceTimeout })
+          )
         }
 
         const skipFrame = imageTimers().tick(uuid, timestamp)
-        if(skipFrame) {
+        if (skipFrame) {
           requestPlayerAdvance(uuid)
           return
         }
@@ -204,18 +206,25 @@ export function readyToDisplayImageView(
       sceneId: item.sceneID,
       duration: item.duration
     }
-    const {data} = await dispatch(
+    const { data } = await dispatch(
       flipflipApi.endpoints.sendViewPlayerEvent.initiate({ id: uuid, event })
     )
 
     const done = data?.value === true
     dispatch(
-      setImagePlayerReadyToDisplay({ uuid, value: { item, displayIndex, done } })
+      setImagePlayerReadyToDisplay({
+        uuid,
+        value: { item, displayIndex, done }
+      })
     )
 
     const state = getState()
-    const start = Object.values(state.imagePlayer).every((player) => !player.hasStarted && (player.loader.done || isReadyToDisplayFull(player)))
-    if(start) {
+    const start = Object.values(state.imagePlayer).every(
+      (player) =>
+        !player.hasStarted &&
+        (player.loader.done || isReadyToDisplayFull(player))
+    )
+    if (start) {
       dispatch(startImagePlayers())
     }
 
@@ -225,7 +234,9 @@ export function readyToDisplayImageView(
 
 function isReadyToDisplayFull(player: ImagePlayerState) {
   let totalReadyToDisplay = 0
-  Object.values(player.readyToDisplay).forEach((ready) => totalReadyToDisplay += ready.length)
+  Object.values(player.readyToDisplay).forEach(
+    (ready) => (totalReadyToDisplay += ready.length)
+  )
   return totalReadyToDisplay === player.loader.maxCanLoad
 }
 

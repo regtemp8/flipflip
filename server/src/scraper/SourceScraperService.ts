@@ -22,11 +22,7 @@ class SourceScraperService {
   }
 
   public getSourceUrls(sceneId: number, willScrape: boolean) {
-    return (
-      this.subscriptions
-        .get(sceneId)
-        ?.getSourceUrls(willScrape) ?? []
-    )
+    return this.subscriptions.get(sceneId)?.getSourceUrls(willScrape) ?? []
   }
 
   public async getScrapedUrls(

@@ -2,10 +2,7 @@ import { useRef, type PropsWithChildren, useMemo } from 'react'
 import { animated, useSpring } from '@react-spring/web'
 
 import { getEaseFunction } from '../../utils'
-import {
-  PanningData,
-  PanningLoopData
-} from 'flipflip-common'
+import { PanningData, PanningLoopData } from 'flipflip-common'
 import { IT } from 'flipflip-common'
 
 const toTranslate = (
