@@ -1,6 +1,6 @@
 import Logger from '../logging/Logger'
 
-const logger = Logger.create('QueuePressureCalculator')
+const logger = Logger.create('ViewPlayerPressureCalculator')
 export default class ViewPlayerPressureCalculator {
   private minimumThreshold: number
   private maximumThreshold: number
@@ -42,6 +42,6 @@ export default class ViewPlayerPressureCalculator {
       this.low = true
     }
 
-    logger.info('COUNT: ' + this.count + ' | CAN SCRAPE: ' + this.low)
+    logger.info('PRESSURE: ' + this.count + ' | CAN SCRAPE: ' + this.low)
   }
 }
