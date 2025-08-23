@@ -26,12 +26,11 @@ import {
   IconButton,
   Link,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
-  MenuItem,
   Tab,
   Tabs,
   type Theme,
@@ -65,6 +64,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate'
+import CasinoIcon from '@mui/icons-material/Casino'
 
 import { en, MO, PLT, SF, SPT } from 'flipflip-common'
 import VSpin from '../animations/VSpin'
@@ -78,6 +78,7 @@ import {
   useCreatePlaylistMutation,
   useCreateSceneMutation,
   useGetLatestVersionQuery,
+  useGetScenesQuery,
   useGetVersionQuery
 } from '../../store/api/slice'
 
@@ -226,15 +227,6 @@ const useStyles = makeStyles()((theme: Theme) => {
     deleteScene: {
       backgroundColor: theme.palette.error.main
     },
-    deleteButton: {
-      backgroundColor: theme.palette.error.main,
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed'
-    },
     addMenuButton: {
       backgroundColor: theme.palette.primary.dark,
       margin: 0,
@@ -261,10 +253,6 @@ const useStyles = makeStyles()((theme: Theme) => {
       bottom: 20,
       left: 'auto',
       position: 'fixed'
-    },
-    extraWindowRandomButton: {
-      right: 28,
-      bottom: 25
     },
     generateTooltip: {
       top: 'auto',
@@ -451,7 +439,6 @@ function ScenePicker() {
   const [createPlaylist] = useCreatePlaylistMutation()
   const [createDisplay] = useCreateDisplayMutation()
   const { data: version } = useGetVersionQuery()
-  const sceneCount = 0
   const generatorCount = 0
   const displayCount = 0
   const playlistCount = 0
@@ -459,7 +446,7 @@ function ScenePicker() {
   const audioLibraryCount = 1
   const scriptLibraryCount = 1
   const scenesToDelete = null
-  const allScenesCount = 0
+  const { data: scenes } = useGetScenesQuery()
   const importTitle = 'TODO import title'
   const canGenerate = false
 
@@ -504,6 +491,7 @@ function ScenePicker() {
   }
 
   const onAddGroup = () => {}
+  const onRandomScene = () => {}
 
   const onToggleNewMenu = () => {
     if (openMenu === MO.new) {
@@ -517,6 +505,7 @@ function ScenePicker() {
   const onCloseDialog = () => {}
   const sortScenes = (_sortBy: string, _asc: boolean) => {}
 
+  const sceneCount = scenes?.length ?? 0
   const openTab = getOpenTab(pathname)
   return (
     <div className={classes.root}>
@@ -805,7 +794,7 @@ function ScenePicker() {
 
       {scenesToDelete == null && (
         <>
-          {allScenesCount > 0 && (
+          {sceneCount > 0 && (
             <Tooltip disableInteractive title="Delete Scenes" placement="left">
               <Fab
                 className={cx(
@@ -927,7 +916,7 @@ function ScenePicker() {
             <AddIcon className={classes.icon} />
           </Fab>
 
-          {allScenesCount >= 2 && (
+          {sceneCount >= 2 && (
             <>
               <Fab
                 className={classes.sortMenuButton}
@@ -957,33 +946,37 @@ function ScenePicker() {
                 onClose={onCloseDialog}
               >
                 {[SF.alpha, SF.date, SF.count].map((sf) => (
-                  <MenuItem key={sf}>
+                  <ListItem
+                    key={sf}
+                    secondaryAction={
+                      <>
+                        <IconButton
+                          edge="end"
+                          onClick={() => {
+                            sortScenes(sf, true)
+                          }}
+                          size="large"
+                        >
+                          <ArrowUpwardIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          onClick={() => {
+                            sortScenes(sf, false)
+                          }}
+                          size="large"
+                        >
+                          <ArrowDownwardIcon />
+                        </IconButton>
+                      </>
+                    }
+                  >
                     <ListItemText primary={en.get(sf)} />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        edge="end"
-                        onClick={() => {
-                          sortScenes(sf, true)
-                        }}
-                        size="large"
-                      >
-                        <ArrowUpwardIcon />
-                      </IconButton>
-                      <IconButton
-                        edge="end"
-                        onClick={() => {
-                          sortScenes(sf, false)
-                        }}
-                        size="large"
-                      >
-                        <ArrowDownwardIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </MenuItem>
+                  </ListItem>
                 ))}
-                <MenuItem key={SF.random}>
-                  <ListItemText primary={en.get(SF.random)} />
-                  <ListItemSecondaryAction>
+                <ListItem
+                  key={SF.random}
+                  secondaryAction={
                     <IconButton
                       edge="end"
                       onClick={() => {
@@ -993,23 +986,22 @@ function ScenePicker() {
                     >
                       <ShuffleIcon />
                     </IconButton>
-                  </ListItemSecondaryAction>
-                </MenuItem>
+                  }
+                >
+                  <ListItemText primary={en.get(SF.random)} />
+                </ListItem>
               </Menu>
             </>
           )}
-          {/* <Tooltip disableInteractive title="Random Scene">
+          <Tooltip disableInteractive title="Random Scene">
             <Fab
-              className={cx(
-                classes.randomButton,
-                classes.extraWindowRandomButton
-              )}
+              className={classes.randomButton}
               onClick={onRandomScene}
               size="small"
             >
               <CasinoIcon className={classes.icon} />
             </Fab>
-          </Tooltip> */}
+          </Tooltip>
         </>
       )}
       <Dialog
