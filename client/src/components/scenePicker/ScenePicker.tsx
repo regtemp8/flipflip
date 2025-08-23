@@ -77,6 +77,7 @@ import {
   useCreateDisplayMutation,
   useCreatePlaylistMutation,
   useCreateSceneMutation,
+  useGetLatestVersionQuery,
   useGetVersionQuery
 } from '../../store/api/slice'
 
@@ -421,6 +422,26 @@ const getOpenTab = (pathname: string) => {
   return index === -1 ? 0 : index
 }
 
+function FlipFlipUpdateNotification() {
+  const { data } = useGetLatestVersionQuery()
+  const { classes } = useStyles()
+
+  return data != null ? (
+    <Tooltip disableInteractive title={`Download ${data.version}`}>
+      <IconButton
+        color="inherit"
+        className={classes.updateIcon}
+        onClick={() => window.open(data.url, '_blank')?.focus()}
+        size="large"
+      >
+        <Badge variant="dot" color="secondary">
+          <SystemUpdateIcon />
+        </Badge>
+      </IconButton>
+    </Tooltip>
+  ) : null
+}
+
 function ScenePicker() {
   const tutorial = ''
   const { classes } = useStyles()
@@ -443,13 +464,11 @@ function ScenePicker() {
   const canGenerate = false
 
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [newVersion, _setNewVersion] = useState('')
   const [menuAnchorEl, _setMenuAnchorEl] = useState<HTMLButtonElement>()
   const [openMenu, setOpenMenu] = useState<string>()
   const [createPlaylistType, setCreatePlaylistType] = useState<string>()
 
   const onToggleDrawer = () => setDrawerOpen(!drawerOpen)
-  const openGitRelease = () => {}
 
   const openLink = (url: string) => {
     window.open(url, '_blank')?.focus()
@@ -539,23 +558,10 @@ function ScenePicker() {
             noWrap
             className={classes.version}
           >
-            {version?.success != null ? `v${version.success}` : ''}
+            {version?.value != null ? `v${version.value}` : ''}
           </Typography>
           <div className={classes.fill} />
-          {newVersion !== '' && (
-            <Tooltip disableInteractive title={`Download ${newVersion}`}>
-              <IconButton
-                color="inherit"
-                className={classes.updateIcon}
-                onClick={openGitRelease}
-                size="large"
-              >
-                <Badge variant="dot" color="secondary">
-                  <SystemUpdateIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          )}
+          <FlipFlipUpdateNotification />
           {/* <SceneSearch placeholder={'Search ...'} /> */}
         </Toolbar>
       </AppBar>

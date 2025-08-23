@@ -39,7 +39,8 @@ import {
   ImageViewData,
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,
-  ViewerEvent
+  ViewerEvent,
+  LatestVersion
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -56,6 +57,7 @@ export const flipflipApi = createApi({
     'Theme',
     'Backup',
     'Version',
+    'LatestVersion',
     'GroupedScenes',
     'UngroupedScenes',
     'GroupedGenerators',
@@ -159,9 +161,13 @@ export const flipflipApi = createApi({
         dispatch(flipflipApi.util.resetApiState())
       }
     }),
-    getVersion: builder.query<Message, void>({
+    getVersion: builder.query<ValueResponse, void>({
       query: () => `api/version`,
       providesTags: ['Version']
+    }),
+    getLatestVersion: builder.query<LatestVersion, void>({
+      query: () => `api/version/latest`,
+      providesTags: ['LatestVersion']
     }),
     getSceneGroups: builder.query<SceneGroup[], void>({
       query: () => `api/scenes/grouped`,
@@ -1805,6 +1811,7 @@ export const {
   useRestoreBackupMutation,
   useResetDataMutation,
   useGetVersionQuery,
+  useGetLatestVersionQuery,
   useGetSceneGroupsQuery,
   useGetUngroupedScenesQuery,
   useGetGeneratorGroupsQuery,

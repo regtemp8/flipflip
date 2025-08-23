@@ -40,7 +40,7 @@ export interface ErrorCardProps {
 export default function ErrorCard(props: ErrorCardProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const versionResult = useGetVersionQuery()
+  const { data: version } = useGetVersionQuery()
   const backupsResult = useGetBackupsQuery()
   const [restoreBackup] = useRestoreBackupMutation()
   const [resetData] = useResetDataMutation()
@@ -60,17 +60,16 @@ export default function ErrorCard(props: ErrorCardProps) {
     if (_pathname.current !== location.pathname) {
       clearError()
     }
-  }, [location.pathname])
+  }, [location.pathname, clearError])
 
   const onSubmitIssue = () => {
-    const version = versionResult.data
     const componentStack = (props.info.componentStack ?? '')
       .trim()
       .replace(/\s*in (ForwardRef|div)/g, '')
     let title = props.error.name + ': ' + props.error.message
     const body =
       '[[Please describe the bug and how to reproduce it]]%0D%0A%0D%0A%0D%0AFlipFlip Version: ' +
-      version +
+      version?.value +
       '%0D%0A```%0D%0A' +
       props.error.name +
       ': ' +
