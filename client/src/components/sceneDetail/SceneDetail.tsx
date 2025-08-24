@@ -91,6 +91,7 @@ import {
   useGetSceneRegenerateQuery
 } from '../../store/api/selectors'
 import {
+  useAddSceneContentSourcesMutation,
   useCloneSceneMutation,
   useDeleteSceneMutation,
   useGetFilteredSceneContentSourcesQuery,
@@ -100,6 +101,7 @@ import {
 import { setSceneGeneratorMax } from '../../store/api/thunks'
 import snackbar from '../../data/Snackbar'
 import { setFullScreen } from '../../data/fullscreen'
+import FilePicker from '../common/FilePicker'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -445,6 +447,7 @@ function SceneDetail() {
   const [deleteScene] = useDeleteSceneMutation()
   const [cloneScene] = useCloneSceneMutation()
   const [playScene] = usePlaySceneMutation()
+  const [addContentSources] = useAddSceneContentSourcesMutation()
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
 
@@ -612,6 +615,8 @@ function SceneDetail() {
       // dispatch(addSource(AF.videoDir, id, ...args))
     } else if (addFunction === AF.url && e?.shiftKey) {
       setOpenMenu(MO.urlImport)
+    } else if (addFunction === AF.directory) {
+      setOpenMenu(MO.openLocal)
     } else {
       // dispatch(addSource(addFunction, id, ...args))
     }
@@ -1436,6 +1441,18 @@ function SceneDetail() {
             open={openMenu === MO.piwigo}
             onClose={onCloseDialog}
             onImportURL={onAddSource}
+          />
+          <FilePicker
+            open={openMenu === MO.openLocal}
+            type="dir"
+            path=''
+            multiple
+            onClose={async (chosenFiles?: string[]) => {
+              setOpenMenu(undefined)
+              if (chosenFiles != null) {
+                await addContentSources({id: sceneID, sources: chosenFiles})
+              }
+            }}
           />
 
           {(scene?.sources?.length ?? 0) >= 2 && (

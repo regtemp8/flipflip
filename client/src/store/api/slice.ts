@@ -510,6 +510,27 @@ export const flipflipApi = createApi({
         // await queryFulfilled.catch((reason) => {})
       }
     }),
+    addSceneContentSources: builder.mutation<void, {id: number, sources: string[]}>({
+      query: ({ id, sources }) => ({
+        url: `api/scenes/${id}/content-sources`,
+        method: 'POST',
+        body: sources
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled.then(({ meta }) => {
+          if (meta?.response?.ok) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'ContentSource', id: 'List' },
+                { type: 'ContentSource', id: 'FilteredList' }
+              ])
+            )
+          }
+        })
+        // TODO error handling needed?
+        // .catch((reason) => {})
+      }
+    }),
     addSceneScriptPlaylist: builder.mutation<void, Pick<Scene, 'id'>>({
       query: ({ id }) => ({
         url: `api/scenes/${id}/script-playlists`,
@@ -1850,6 +1871,7 @@ export const {
   useGetSceneHasBPMQuery,
   useUpdateSceneMutation,
   useGetSceneSettingsQuery,
+  useAddSceneContentSourcesMutation,
   useAddSceneScriptPlaylistMutation,
   useDeleteSceneScriptPlaylistMutation,
   useAddSceneAudioPlaylistMutation,

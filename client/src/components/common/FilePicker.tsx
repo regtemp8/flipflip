@@ -287,7 +287,7 @@ export default function FilePicker(props: FilePickerProps) {
 
   const renderFilePickerTopBar = () => {
     switch (mode) {
-      case FilePickerMode.PathInput:
+      case FilePickerMode.PathInput: {
         return (
           <PathTextField
             path={data?.path ?? ''}
@@ -298,7 +298,8 @@ export default function FilePicker(props: FilePickerProps) {
             }}
           />
         )
-      case FilePickerMode.PathNavigation:
+      }
+      case FilePickerMode.PathNavigation: {
         const path = data?.path ?? ''
         const crumbs = path.split('/')
         const last = crumbs.pop()
@@ -328,7 +329,8 @@ export default function FilePicker(props: FilePickerProps) {
             )}
           </Breadcrumbs>
         )
-      case FilePickerMode.Search:
+      }
+      case FilePickerMode.Search: {
         return (
           <InputBase
             inputRef={(ref) => ref?.focus()}
@@ -340,6 +342,7 @@ export default function FilePicker(props: FilePickerProps) {
             value={search ?? ''}
           />
         )
+      }
     }
   }
 
@@ -413,6 +416,7 @@ export default function FilePicker(props: FilePickerProps) {
   }
 
   const onChoose = () => {
+    const path = data?.path ?? ''
     const chosenFiles =
       props.type === 'dir' && selected.length === 0
         ? [path]

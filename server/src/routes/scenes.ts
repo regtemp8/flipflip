@@ -22,6 +22,7 @@ import {
   toSceneUpdate
 } from '../db/mappers'
 import {
+  createContentSources,
   findContentSources,
   findSceneContentSourceIds
 } from '../db/ContentSourceRepository'
@@ -88,6 +89,16 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(toScene(scene))
   } else {
     res.status(404).end()
+  }
+})
+
+router.post('/:id/content-sources', async (req, res, next) => {
+  try {
+    const userId = (req.user as User).id as number 
+    await createContentSources(req.body as string[], Number(req.params.id), userId)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
   }
 })
 

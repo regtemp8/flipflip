@@ -1,4 +1,4 @@
-import { Insertable, Kysely, sql, Updateable } from 'kysely'
+import { Insertable, Kysely, Updateable } from 'kysely'
 import { ContentSource, ContentSourceTag, DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
@@ -14,6 +14,121 @@ import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 
 export const IS_LIBRARY = 0
+export type ContentSourceInsert = Insertable<ContentSource>
+export async function createContentSources(
+  urls: string[],
+  sceneId: number,
+  userId: number
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const createdAt = new Date().getTime()
+
+      await trx
+        .updateTable('contentSource')
+        .set((eb) => ({ index: eb('index', '+', urls.length) }))
+        .execute()
+
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i]
+        const librarySource = await trx
+          .selectFrom('contentSource')
+          .select(['id', 'count', 'countComplete'])
+          .where('sceneId', '=', IS_LIBRARY)
+          .executeTakeFirst()
+
+        const id = await trx
+          .insertInto('contentSource')
+          .values({
+            url,
+            userId,
+            sceneId,
+            type: getSourceType(url),
+            offline: toNumber(false),
+            marked: toNumber(false),
+            lastCheck: createdAt,
+            count: librarySource?.count ?? 0,
+            countComplete: librarySource?.countComplete ?? toNumber(false),
+            weight: 1,
+            localDirOfSources: toNumber(false),
+            twitterIncludeRetweets: toNumber(false),
+            twitterIncludeReplies: toNumber(false),
+            createdAt,
+            index: i
+          })
+          .onConflict((oc) => oc.doNothing())
+          .returning('id')
+          .executeTakeFirst()
+          .then((result) => result?.id)
+
+        if (id == null || sceneId == IS_LIBRARY || librarySource?.id == null) {
+          continue
+        }
+
+        await trx
+          .insertInto('contentSourceTag')
+          .expression((eb) =>
+            eb
+              .selectFrom('contentSourceTag')
+              .select([
+                'tagId',
+                (eb) => eb.lit(userId).as('userId'),
+                (eb) => eb.lit(id).as('contentSourceId')
+              ])
+              .where('contentSourceId', '=', librarySource.id)
+          )
+          .execute()
+
+        const clips = await trx
+          .selectFrom('clip')
+          .select(['id', 'disabled', 'start', 'end', 'volume'])
+          .where('contentSourceId', '=', librarySource.id)
+          .execute()
+
+        for (const clip of clips) {
+          const { disabled, start, end, volume } = clip
+          const newClip = await trx
+            .insertInto('clip')
+            .values({
+              userId,
+              contentSourceId: id,
+              disabled,
+              start,
+              end,
+              volume
+            })
+            .returning('id')
+            .executeTakeFirst()
+
+          await trx
+            .insertInto('clipTag')
+            .expression((eb) =>
+              eb
+                .selectFrom('clipTag')
+                .select([
+                  'tagId',
+                  (eb) => eb.lit(userId).as('userId'),
+                  (eb) => eb.lit(newClip?.id as number).as('clipId')
+                ])
+                .where('clipId', '=', clip.id)
+            )
+            .execute()
+        }
+
+        await trx
+          .insertInto('contentSourceBlacklistItem')
+          .expression((eb) =>
+            eb
+              .selectFrom('contentSourceBlacklistItem')
+              .select(['url', (eb) => eb.lit(id).as('contentSourceId')])
+              .where('contentSourceId', '=', librarySource.id)
+          )
+          .execute()
+      }
+    })
+}
 
 export async function findSceneContentSourceIds(
   sceneId: number
