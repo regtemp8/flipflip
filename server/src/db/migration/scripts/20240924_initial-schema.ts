@@ -251,7 +251,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
       'sceneId',
       'url'
     ])
-    .addUniqueConstraint('UQ_contentSource_index', ['index'])
+    .addUniqueConstraint('UQ_contentSource_sceneId_index', ['sceneId', 'index'])
     .execute()
 }
 
