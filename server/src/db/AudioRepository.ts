@@ -640,19 +640,34 @@ export async function sortAudios({
         rows.sort(audioSortFunction(sortBy, sortOrder === 'asc'))
       }
 
-      const updateTable = playlistId == null ? 'audio' : 'audioPlaylistItem'
-      await trx
-        .updateTable(updateTable)
-        .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
-        .execute()
-
-      const updateColumn = playlistId == null ? 'id' : 'audioId'
-      for (let i = 0; i < rows.length; i++) {
+      if (playlistId == null) {
         await trx
-          .updateTable(updateTable)
-          .set({ index: i })
-          .where(updateColumn, '=', rows[i].id as number)
+          .updateTable('audio')
+          .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
           .execute()
+
+        for (let i = 0; i < rows.length; i++) {
+          await trx
+            .updateTable('audio')
+            .set({ index: i })
+            .where('id', '=', rows[i].id as number)
+            .execute()
+        }
+      } else {
+        await trx
+          .updateTable('audioPlaylistItem')
+          .set((eb) => ({ index: eb(`index`, '+', rows.length) }))
+          .where('playlistId', '=', playlistId)
+          .execute()
+
+        for (let i = 0; i < rows.length; i++) {
+          await trx
+            .updateTable('audioPlaylistItem')
+            .set({ index: i })
+            .where('audioId', '=', rows[i].id as number)
+            .where('playlistId', '=', playlistId)
+            .execute()
+        }
       }
     })
 }
