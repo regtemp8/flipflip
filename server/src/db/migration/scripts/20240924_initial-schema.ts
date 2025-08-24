@@ -7,7 +7,7 @@ const userTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create user table')
   return await trx.schema
     .createTable('user')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('username', 'text', (col) => col.unique().notNull())
     .addColumn('hashedPassword', 'blob', (col) => col.notNull())
     .addColumn('salt', 'blob', (col) => col.notNull())
@@ -20,7 +20,7 @@ const remoteSettingsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create remoteSettings table')
   return await trx.schema
     .createTable('remoteSettings')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('tumblrKey', 'text', (col) => col.notNull())
     .addColumn('tumblrSecret', 'text', (col) => col.notNull())
@@ -58,7 +58,7 @@ const cacheSettingsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create cacheSettings table')
   return await trx.schema
     .createTable('cacheSettings')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('enabled', 'boolean', (col) => col.notNull())
     .addColumn('directory', 'text', (col) => col.notNull())
@@ -76,7 +76,7 @@ const displaySettingsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create displaySettings table')
   return await trx.schema
     .createTable('displaySettings')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('fullScreen', 'boolean', (col) => col.notNull())
     .addColumn('clickToProgress', 'boolean', (col) => col.notNull())
@@ -102,7 +102,7 @@ const tagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create tag table')
   return await trx.schema
     .createTable('tag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('phraseString', 'text')
@@ -117,7 +117,7 @@ const ignoredTagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create ignoredTag table')
   return await trx.schema
     .createTable('ignoredTag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('displaySettingsId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
@@ -145,7 +145,7 @@ const generalSettingsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create generalSettings table')
   return await trx.schema
     .createTable('generalSettings')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('prioritizePerformance', 'boolean', (col) => col.notNull())
     .addColumn('confirmSceneDeletion', 'boolean', (col) => col.notNull())
@@ -178,7 +178,7 @@ const tutorialsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create tutorials table')
   return await trx.schema
     .createTable('tutorials')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('current', 'text') // from App.tutorial
     .addColumn('scenePicker', 'text')
@@ -200,7 +200,7 @@ const themeTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create theme table')
   return await trx.schema
     .createTable('theme')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('mode', 'text', (col) => col.notNull())
     .addColumn('primaryColor', 'text', (col) => col.notNull())
@@ -213,7 +213,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create contentSource table')
   return await trx.schema
     .createTable('contentSource') // library source
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('sceneId', 'integer', (col) => col.notNull())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
@@ -258,7 +258,7 @@ const contentSourceTagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create contentSourceTag table')
   return await trx.schema
     .createTable('contentSourceTag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('contentSourceId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
@@ -292,7 +292,7 @@ const clipTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create clip table')
   return await trx.schema
     .createTable('clip')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('contentSourceId', 'integer', (col) => col.notNull())
     .addColumn('disabled', 'boolean', (col) => col.notNull())
@@ -313,7 +313,7 @@ const clipTagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create clipTag table')
   return await trx.schema
     .createTable('clipTag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('clipId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
@@ -336,7 +336,7 @@ const contentSourceBlacklistItemTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create contentSourceBlacklistItem table')
   return await trx.schema
     .createTable('contentSourceBlacklistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('contentSourceId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
     .addForeignKeyConstraint(
@@ -352,7 +352,7 @@ const sceneTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create scene table')
   return await trx.schema
     .createTable('scene')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('sceneGroupId', 'integer')
     .addColumn('name', 'text', (col) => col.notNull())
@@ -565,7 +565,7 @@ const scenePlaylistTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create scenePlaylist table')
   return await trx.schema
     .createTable('scenePlaylist')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('sceneId', 'integer', (col) => col.notNull())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint(
@@ -587,7 +587,7 @@ const weightGroupTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create weightGroup table')
   return await trx.schema
     .createTable('weightGroup')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('sceneId', 'integer', (col) => col.notNull())
     .addColumn('ruleId', 'integer')
     .addColumn('percent', 'integer')
@@ -614,7 +614,7 @@ const sceneGroupTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create sceneGroup table')
   return await trx.schema
     .createTable('sceneGroup')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
@@ -628,7 +628,7 @@ const displayTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create display table')
   return await trx.schema
     .createTable('display')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('sceneGroupId', 'integer')
@@ -649,7 +649,7 @@ const displayViewTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create displayView table')
   return await trx.schema
     .createTable('displayView')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('displayId', 'integer', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('x', 'integer', (col) => col.notNull())
@@ -690,7 +690,7 @@ const audioPlaylistItemTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create audioPlaylistItem table')
   return await trx.schema
     .createTable('audioPlaylistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addColumn('audioId', 'integer', (col) => col.notNull())
@@ -713,7 +713,7 @@ const captionScriptPlaylistItemTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create captionScriptPlaylistItem table')
   return await trx.schema
     .createTable('captionScriptPlaylistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addColumn('captionScriptId', 'integer', (col) => col.notNull())
@@ -736,7 +736,7 @@ const displayPlaylistItemTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create displayPlaylistItem table')
   return await trx.schema
     .createTable('displayPlaylistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addColumn('duration', 'integer')
@@ -753,7 +753,7 @@ const displayPlaylistItemDisplayTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create displayPlaylistItemDisplay table')
   return await trx.schema
     .createTable('displayPlaylistItemDisplay')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('displayPlaylistItemId', 'integer', (col) => col.notNull())
     .addColumn('displayId', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint(
@@ -775,7 +775,7 @@ const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create scenePlaylistItem table')
   return await trx.schema
     .createTable('scenePlaylistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('playlistId', 'integer', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
     .addColumn('duration', 'integer', (col) => col.notNull())
@@ -793,7 +793,7 @@ const scenePlaylistItemSceneTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create scenePlaylistItemScene table')
   return await trx.schema
     .createTable('scenePlaylistItemScene')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('scenePlaylistItemId', 'integer', (col) => col.notNull())
     .addColumn('sceneId', 'integer')
     .addForeignKeyConstraint(
@@ -815,7 +815,7 @@ const playlistTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create playlist table')
   return await trx.schema
     .createTable('playlist')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('sceneGroupId', 'integer')
     .addColumn('name', 'text', (col) => col.notNull())
@@ -839,7 +839,7 @@ const audioTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create audio table')
   return await trx.schema
     .createTable('audio')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
@@ -875,7 +875,7 @@ const audioTagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create audioTag table')
   return await trx.schema
     .createTable('audioTag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('audioId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
@@ -901,7 +901,7 @@ const fontSettingsTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create fontSettings table')
   return await trx.schema
     .createTable('fontSettings')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('captionScriptId', 'integer', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
@@ -928,7 +928,7 @@ const captionScriptTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create captionScript table')
   return await trx.schema
     .createTable('captionScript')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('url', 'text', (col) => col.notNull())
     .addColumn('type', 'text', (col) => col.notNull())
@@ -954,7 +954,7 @@ const captionScriptTagTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create captionScriptTag table')
   return await trx.schema
     .createTable('captionScriptTag')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('userId', 'integer', (col) => col.notNull())
     .addColumn('captionScriptId', 'integer', (col) => col.notNull())
     .addColumn('tagId', 'integer', (col) => col.notNull())
@@ -988,7 +988,7 @@ const backupTable = async (trx: Kysely<DB>) => {
   logger.info('+ Create backup table')
   return await trx.schema
     .createTable('backup')
-    .addColumn('id', 'integer', (col) => col.primaryKey())
+    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
     .addColumn('fileName', 'text', (col) => col.notNull())
     .addColumn('createdAt', 'integer', (col) => col.notNull())
     .addColumn('interval', 'text', (col) => col.notNull())
