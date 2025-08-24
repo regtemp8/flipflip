@@ -251,6 +251,7 @@ const contentSourceTable = async (trx: Kysely<DB>) => {
       'sceneId',
       'url'
     ])
+    .addUniqueConstraint('UQ_contentSource_index', ['index'])
     .execute()
 }
 
@@ -683,6 +684,7 @@ const displayViewTable = async (trx: Kysely<DB>) => {
       'displayView',
       ['id']
     )
+    .addUniqueConstraint('UQ_displayView_index', ['index'])
     .execute()
 }
 
@@ -706,6 +708,7 @@ const audioPlaylistItemTable = async (trx: Kysely<DB>) => {
       'audio',
       ['id']
     )
+    .addUniqueConstraint('UQ_audioPlaylistItem_playlistId_index', ['playlistId', 'index'])
     .execute()
 }
 
@@ -729,6 +732,7 @@ const captionScriptPlaylistItemTable = async (trx: Kysely<DB>) => {
       'captionScript',
       ['id']
     )
+    .addUniqueConstraint('UQ_captionScriptPlaylistItem_playlistId_index', ['playlistId', 'index'])
     .execute()
 }
 
@@ -746,6 +750,7 @@ const displayPlaylistItemTable = async (trx: Kysely<DB>) => {
       'playlist',
       ['id']
     )
+    .addUniqueConstraint('UQ_displayPlaylistItem_playlistId_index', ['playlistId', 'index'])
     .execute()
 }
 
@@ -786,6 +791,7 @@ const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
       'playlist',
       ['id']
     )
+    .addUniqueConstraint('UQ_scenePlaylistItem_playlistId_index', ['playlistId', 'index'])
     .execute()
 }
 
@@ -868,6 +874,7 @@ const audioTable = async (trx: Kysely<DB>) => {
     .addColumn('index', 'integer', (col) => col.notNull())
     .addForeignKeyConstraint('FK_audio_user_userId', ['userId'], 'user', ['id'])
     .addUniqueConstraint('UQ_audio_url', ['url'])
+    .addUniqueConstraint('UQ_audio_index', ['index'])
     .execute()
 }
 
@@ -947,6 +954,7 @@ const captionScriptTable = async (trx: Kysely<DB>) => {
       ['id']
     )
     .addUniqueConstraint('UQ_captionScript_url', ['url'])
+    .addUniqueConstraint('UQ_captionScript_index', ['index'])
     .execute()
 }
 
