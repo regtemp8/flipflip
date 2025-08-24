@@ -40,7 +40,7 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
 
 import { MO, PLT } from 'flipflip-common'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 // import {
 //   selectAppSpecialMode
 // } from '../../store/app/selectors'
@@ -60,6 +60,8 @@ import {
 import { useNavigate, useParams } from 'react-router'
 import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
 import { setFullScreen } from '../../data/fullscreen'
+import { setPlaylistEditingName } from '../../store/playlist/slice'
+import { selectPlaylistEditingName } from '../../store/playlist/selectors'
 
 const drawerWidth = 240
 
@@ -185,24 +187,17 @@ function PlaylistSetup() {
 
   const dispatch = useAppDispatch()
   // TODO add playlist tutorials
-  const autoEdit = false // useAppSelector(selectAppSpecialMode()) === SP.autoEdit
   const [deletePlaylist] = useDeletePlaylistMutation()
   const [clonePlaylist] = useClonePlaylistMutation()
   const [playPlaylist] = usePlayPlaylistMutation()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
   const { data: items } = useGetPlaylistItemIdsQuery(playlistID)
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+  const editingName = useAppSelector(selectPlaylistEditingName())
 
-  const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string>()
   const [sceneID, setSceneID] = useState<number>(-1)
-
-  useEffect(() => {
-    if (autoEdit) {
-      setIsEditingName(playlist?.name)
-    }
-  }, [autoEdit, playlist?.name])
 
   const onPlayPlaylist = async () => {
     const { data } = await playPlaylist(playlistID)
@@ -217,17 +212,19 @@ function PlaylistSetup() {
   }
 
   const beginEditingName = () => {
-    setIsEditingName(playlist?.name)
+    if (playlist != null) {
+      dispatch(setPlaylistEditingName(playlist.name))
+    }
   }
 
   const endEditingName = (e: FormEvent) => {
     e.preventDefault()
-    dispatch(setPlaylistName(playlistID, isEditingName as string))
-    setIsEditingName(undefined)
+    dispatch(setPlaylistName(playlistID, editingName as string))
+    dispatch(setPlaylistEditingName(undefined))
   }
 
   const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsEditingName(e.currentTarget.value)
+    dispatch(setPlaylistEditingName(e.currentTarget.value))
   }
 
   const onCloseDialog = () => {
@@ -263,26 +260,22 @@ function PlaylistSetup() {
             </IconButton>
           </Tooltip>
 
-          {isEditingName != null && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
-                value={isEditingName}
+                value={editingName}
                 margin="none"
-                slotProps={{
-                  htmlInput: {
-                    className: classes.titleInput
-                  }
-                }}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
                 onChange={onChangeName}
               />
             </form>
           )}
-          {isEditingName == null && (
+          {editingName == null && (
             <>
               <div className={classes.fill} />
               <Typography
@@ -292,7 +285,7 @@ function PlaylistSetup() {
                 noWrap
                 className={cx(
                   classes.title,
-                  playlist?.name?.length === 0 && classes.noTitle
+                  playlist?.name.length === 0 && classes.noTitle
                 )}
                 onClick={beginEditingName}
               >

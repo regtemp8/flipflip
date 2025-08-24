@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Card,
@@ -20,7 +20,8 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-  Fab
+  Fab,
+  TextField
 } from '@mui/material'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -33,14 +34,15 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
+  selectDisplayEditingName,
   selectDisplaySelectedView,
   selectDisplayViewsListYOffset
 } from '../../store/display/selectors'
 import { setDisplayName } from '../../store/api/thunks'
-import BaseTextField from '../common/text/BaseTextField'
 import DisplayViewSettings from './DisplayViewSettings'
 import {
   setDisplayAddedView,
+  setDisplayEditingName,
   setDisplayViewsListYOffset
   // swapDisplayViews
 } from '../../store/display/slice'
@@ -106,6 +108,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
     textAlign: 'center',
     fontSize: theme.typography.h4.fontSize
   },
+  fill: {
+    flexGrow: 1
+  },
   noTitle: {
     width: '33%',
     height: theme.spacing(7)
@@ -158,11 +163,11 @@ function DisplaySetup() {
   const { data: display } = useGetDisplayQuery(displayID)
   const { data: visibleViewIDs } = useGetVisibleDisplayViewIdsQuery(displayID)
 
-  const [isEditingName, setIsEditingName] = useState(false)
   const [userExpandedSettings, setUserExpandedSettings] = useState<boolean>()
   const [openMenu, setOpenMenu] = useState<string>()
 
   const dispatch = useAppDispatch()
+  const editingName = useAppSelector(selectDisplayEditingName())
   const selectedView = useAppSelector(selectDisplaySelectedView())
   const selectedViewName = null
   const yOffset = useAppSelector(selectDisplayViewsListYOffset())
@@ -192,11 +197,19 @@ function DisplaySetup() {
   }, [savePosition])
 
   const beginEditingName = () => {
-    setIsEditingName(true)
+    if (display != null) {
+      dispatch(setDisplayEditingName(display.name))
+    }
   }
 
-  const endEditingName = () => {
-    setIsEditingName(false)
+  const endEditingName = (e: FormEvent) => {
+    e.preventDefault()
+    dispatch(setDisplayName(displayID, editingName as string))
+    dispatch(setDisplayEditingName(undefined))
+  }
+
+  const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setDisplayEditingName(e.currentTarget.value))
   }
 
   const goBack = () => {
@@ -333,34 +346,39 @@ function DisplaySetup() {
             </Tooltip>
           </div>
 
-          {isEditingName && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
-              <BaseTextField
+              <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
+                value={editingName}
                 margin="none"
-                inputProps={{ className: classes.titleInput }}
-                selector={() => useGetDisplayNameQuery(displayID)}
-                action={setDisplayName(displayID)}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
+                onChange={onChangeName}
               />
             </form>
           )}
-          {!isEditingName && (
-            <Typography
-              component="h1"
-              variant="h4"
-              noWrap
-              className={cx(
-                classes.title,
-                display?.name.length === 0 && classes.noTitle
-              )}
-              onClick={beginEditingName}
-            >
-              {display?.name}
-            </Typography>
+          {editingName == null && (
+            <>
+              <div className={classes.fill} />
+              <Typography
+                component="h1"
+                variant="h4"
+                color="inherit"
+                noWrap
+                className={cx(
+                  classes.title,
+                  display?.name.length === 0 && classes.noTitle
+                )}
+                onClick={beginEditingName}
+              >
+                {display?.name}
+              </Typography>
+              <div className={classes.fill} />
+            </>
           )}
 
           <div className={classes.headerRight}>

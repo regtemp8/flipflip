@@ -489,15 +489,27 @@ export const flipflipApi = createApi({
         method: 'PATCH',
         body: patch
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(flipflipApi.util.invalidateTags([{ type: 'Scene', id }]))
-          }
-        })
+      async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(() => {
+            if (name != null) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  'GroupedScenes',
+                  'UngroupedScenes',
+                  'SceneSelectOptions'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(flipflipApi.util.invalidateTags([{ type: 'Scene', id }]))
+            }
+          })
       }
     }),
     createScenePlaylist: builder.mutation<void, void>({
@@ -807,15 +819,28 @@ export const flipflipApi = createApi({
         method: 'PATCH',
         body: patch
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(flipflipApi.util.invalidateTags([{ type: 'Display', id }]))
-          }
-        })
+      async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(() => {
+            if (name != null) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  'GroupedDisplays',
+                  'UngroupedDisplays'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'Display', id }])
+              )
+            }
+          })
       }
     }),
     getPlayerViewPlayers: builder.query<string[], string>({
@@ -985,18 +1010,31 @@ export const flipflipApi = createApi({
         method: 'PATCH',
         body: patch
       }),
-
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          // TODO implement etags (412)
-          // TODO implement userId checks (403)
-          if (status === 412 || status === 403) {
-            dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
-            )
-          }
-        })
+      async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(() => {
+            if (name != null) {
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  'GroupedPlaylists',
+                  'UngroupedPlaylists',
+                  'PlaylistOptions',
+                  'SceneAudioPlaylists',
+                  'SceneScriptPlaylists'
+                ])
+              )
+            }
+          })
+          .catch((reason) => {
+            const status = reason.meta?.response?.status
+            // TODO implement etags (412)
+            // TODO implement userId checks (403)
+            if (status === 412 || status === 403) {
+              dispatch(
+                flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
+              )
+            }
+          })
       }
     }),
     clonePlaylist: builder.mutation<void, number>({

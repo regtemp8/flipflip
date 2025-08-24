@@ -7,6 +7,10 @@ export const selectSceneDetailFilters = () => {
   return (state: RootState) => state.sceneDetail.filters
 }
 
+export const selectSceneDetailEditingName = () => {
+  return (state: RootState) => state.sceneDetail.editingName
+}
+
 // export const selectSceneDetailDisplaySources = (sceneID: number) => {
 //   return createSelector(
 //     [

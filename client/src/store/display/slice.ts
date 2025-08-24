@@ -5,16 +5,25 @@ interface DisplayState {
   selectedView?: number
   displayViewsListYOffset: number
   addedView: boolean
+  autoEdit: boolean
+  editingName?: string
 }
 
 export const initialState: DisplayState = {
   displayViewsListYOffset: 0,
-  addedView: false
+  addedView: false,
+  autoEdit: false
 }
 export const displaySlice = createSlice({
   name: 'display',
   initialState,
   reducers: {
+    setDisplayEditingName: (
+      state,
+      action: PayloadAction<string | undefined>
+    ) => {
+      state.editingName = action.payload
+    },
     setDisplaySelectedView: (
       state,
       action: PayloadAction<{ viewID: number; yOffset?: number }>
@@ -34,8 +43,19 @@ export const displaySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
+      flipflipApi.endpoints.createDisplay.matchFulfilled,
+      (state) => {
+        state.autoEdit = true
+      }
+    )
+    builder.addMatcher(
       flipflipApi.endpoints.getDisplay.matchFulfilled,
       (state, action) => {
+        if (state.autoEdit) {
+          state.autoEdit = false
+          state.editingName = action.payload.name
+        }
+
         const views = action.payload.views
         if (views.length > 0) {
           const index = state.addedView ? views.length - 1 : 0
@@ -52,6 +72,7 @@ export const displaySlice = createSlice({
 })
 
 export const {
+  setDisplayEditingName,
   setDisplaySelectedView,
   setDisplayAddedView,
   setDisplayViewsListYOffset

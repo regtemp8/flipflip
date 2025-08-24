@@ -1,21 +1,19 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { flipflipApi } from '../api/slice'
 
-interface SceneDetailState {
-  filters: string[]
+interface PlaylistState {
   autoEdit: boolean
   editingName?: string
 }
 
-export const initialState: SceneDetailState = { filters: [], autoEdit: false }
-export const sceneDetailSlice = createSlice({
-  name: 'sceneDetail',
+export const initialState: PlaylistState = {
+  autoEdit: false
+}
+export const playlistSlice = createSlice({
+  name: 'playlist',
   initialState,
   reducers: {
-    setSceneDetailFilters: (state, action: PayloadAction<string[]>) => {
-      state.filters = action.payload
-    },
-    setSceneDetailEditingName: (
+    setPlaylistEditingName: (
       state,
       action: PayloadAction<string | undefined>
     ) => {
@@ -24,13 +22,13 @@ export const sceneDetailSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
-      flipflipApi.endpoints.createScene.matchFulfilled,
+      flipflipApi.endpoints.createPlaylist.matchFulfilled,
       (state) => {
         state.autoEdit = true
       }
     )
     builder.addMatcher(
-      flipflipApi.endpoints.getScene.matchFulfilled,
+      flipflipApi.endpoints.getPlaylist.matchFulfilled,
       (state, action) => {
         if (state.autoEdit) {
           state.autoEdit = false
@@ -41,7 +39,6 @@ export const sceneDetailSlice = createSlice({
   }
 })
 
-export const { setSceneDetailFilters, setSceneDetailEditingName } =
-  sceneDetailSlice.actions
+export const { setPlaylistEditingName } = playlistSlice.actions
 
-export default sceneDetailSlice.reducer
+export default playlistSlice.reducer

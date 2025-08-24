@@ -11,6 +11,7 @@ import audioLibrarySlice from './audioLibrary/slice'
 import audioOptionsSlice from './audioOptions/slice'
 import audioEditSlice from './audioEdit/slice'
 import imagePlayerSlice from './imagePlayer/slice'
+import playlistSlice from './playlist/slice'
 
 const store = configureStore({
   reducer: {
@@ -25,7 +26,8 @@ const store = configureStore({
     scenePicker: scenePickerSlice,
     scriptLibrary: scriptLibrarySlice,
     audioLibrary: audioLibrarySlice,
-    imagePlayer: imagePlayerSlice
+    imagePlayer: imagePlayerSlice,
+    playlist: playlistSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(flipflipApi.middleware)

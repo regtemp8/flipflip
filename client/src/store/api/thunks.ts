@@ -489,10 +489,8 @@ const updateDisplay = (update: Pick<Display, 'id'> & Partial<Display>) => {
   }
 }
 
-export const setDisplayName = (id: number) => {
-  return (name: string) => {
-    return updateDisplay({ id, name })
-  }
+export const setDisplayName = (id: number, name: string) => {
+  return updateDisplay({ id, name })
 }
 
 const updateLocalClip = (update: Pick<Clip, 'id'> & Partial<Clip>) => {
@@ -612,6 +610,10 @@ const updateScene = (update: Pick<Scene, 'id'> & Partial<Scene>) => {
     dispatch(updateLocalScene(update))
     updateRemoteScene(update, dispatch)
   }
+}
+
+export const setSceneName = (id: number, name: string) => {
+  return updateScene({ id, name })
 }
 
 export const setSceneGeneratorMax = (id: number) => {

@@ -73,9 +73,12 @@ import SourceIcon from '../library/SourceIcon'
 import URLDialog from './URLDialog'
 import AudioTextEffects from './AudioTextEffects'
 import PiwigoDialog from './PiwigoDialog'
-import { useAppSelector } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
-import { selectSceneDetailFilters } from '../../store/sceneDetail/selectors'
+import {
+  selectSceneDetailEditingName,
+  selectSceneDetailFilters
+} from '../../store/sceneDetail/selectors'
 import {
   useNavigate,
   useParams,
@@ -98,10 +101,11 @@ import {
   useGetSceneQuery,
   usePlaySceneMutation
 } from '../../store/api/slice'
-import { setSceneGeneratorMax } from '../../store/api/thunks'
+import { setSceneGeneratorMax, setSceneName } from '../../store/api/thunks'
 import snackbar from '../../data/Snackbar'
 import { setFullScreen } from '../../data/fullscreen'
 import FilePicker from '../common/FilePicker'
+import { setSceneDetailEditingName } from '../../store/sceneDetail/slice'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -443,11 +447,13 @@ function SceneDetail() {
   const { id } = useParams()
   const sceneID = Number(id)
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
 
   const [deleteScene] = useDeleteSceneMutation()
   const [cloneScene] = useCloneSceneMutation()
   const [playScene] = usePlaySceneMutation()
   const [addContentSources] = useAddSceneContentSourcesMutation()
+  const editingName = useAppSelector(selectSceneDetailEditingName())
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
 
@@ -462,7 +468,6 @@ function SceneDetail() {
   })
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
 
-  const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
@@ -492,12 +497,6 @@ function SceneDetail() {
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [])
-
-  // useEffect(() => {
-  //   if (autoEdit) {
-  //     setIsEditingName(scene?.name)
-  //   }
-  // }, [autoEdit, scene?.name])
 
   // const onUpdateFilters = (filters: string[]) =>
   //   dispatch(setSceneDetailFilters(filters))
@@ -687,17 +686,19 @@ function SceneDetail() {
   }
 
   const beginEditingName = () => {
-    setIsEditingName(scene?.name)
+    if (scene != null) {
+      dispatch(setSceneDetailEditingName(scene.name))
+    }
   }
 
   const endEditingName = (e: FormEvent) => {
     e.preventDefault()
-    // dispatch(setSceneName({ id: id, value: isEditingName as string }))
-    setIsEditingName(undefined)
+    dispatch(setSceneName(sceneID, editingName as string))
+    dispatch(setSceneDetailEditingName(undefined))
   }
 
   const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsEditingName(e.currentTarget.value)
+    dispatch(setSceneDetailEditingName(e.currentTarget.value))
   }
 
   const onDeleteScene = async () => {
@@ -766,14 +767,14 @@ function SceneDetail() {
             </IconButton>
           </Tooltip>
 
-          {isEditingName != null && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
-                value={isEditingName}
+                value={editingName}
                 margin="none"
                 slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
@@ -781,7 +782,7 @@ function SceneDetail() {
               />
             </form>
           )}
-          {isEditingName == null && (
+          {editingName == null && (
             <>
               <div className={classes.fill} />
               <Typography
@@ -1445,12 +1446,12 @@ function SceneDetail() {
           <FilePicker
             open={openMenu === MO.openLocal}
             type="dir"
-            path=''
+            path=""
             multiple
             onClose={async (chosenFiles?: string[]) => {
               setOpenMenu(undefined)
               if (chosenFiles != null) {
-                await addContentSources({id: sceneID, sources: chosenFiles})
+                await addContentSources({ id: sceneID, sources: chosenFiles })
               }
             }}
           />
