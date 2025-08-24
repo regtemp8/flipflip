@@ -3,8 +3,10 @@ import { AppDispatch, RootState } from '../store'
 import { flipflipApi } from './slice'
 import {
   Audio,
+  AudioPlaylistItem,
   CacheSettings,
   CaptionScript,
+  CaptionScriptPlaylistItem,
   Clip,
   ContentSource,
   Display,
@@ -17,6 +19,7 @@ import {
   Playlist,
   RemoteSettings,
   Scene,
+  ScenePlaylistItem,
   Tag,
   ThemeSettings
 } from 'flipflip-common'
@@ -313,6 +316,52 @@ const updatePlaylist = (update: Pick<Playlist, 'id'> & Partial<Playlist>) => {
 
 export const setPlaylistName = (id: number, name: string) => {
   return updatePlaylist({ id, name })
+}
+
+export const setPlaylistRepeat = (id: number, repeat: string) => {
+  return updatePlaylist({ id, repeat })
+}
+
+export const setPlaylistShuffle = (id: number, shuffle: boolean) => {
+  return updatePlaylist({ id, shuffle })
+}
+
+const updateLocalPlaylistItem = (
+  update: { playlistID: number; itemID: number } & Partial<
+    AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem
+  >
+) => {
+  const { playlistID, itemID } = update
+  return flipflipApi.util.updateQueryData(
+    'getPlaylistItem',
+    { playlistID, itemID },
+    (draft) => {
+      Object.assign(draft, update)
+    }
+  )
+}
+
+const updateRemotePlaylistItem = debounce(
+  (
+    update: { playlistID: number; itemID: number } & Partial<
+      AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem
+    >,
+    dispatch: AppDispatch
+  ) => {
+    dispatch(flipflipApi.endpoints.updatePlaylistItem.initiate(update))
+  },
+  250
+)
+
+export const updatePlaylistItem = (
+  update: { playlistID: number; itemID: number } & Partial<
+    AudioPlaylistItem | CaptionScriptPlaylistItem | ScenePlaylistItem
+  >
+) => {
+  return (dispatch: AppDispatch) => {
+    dispatch(updateLocalPlaylistItem(update))
+    updateRemotePlaylistItem(update, dispatch)
+  }
 }
 
 const updateLocalDisplayView = (

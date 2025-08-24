@@ -41,15 +41,19 @@ import SceneSelect from '../configGroups/SceneSelect'
 import {
   useGetPlaylistQuery,
   useGetScenesQuery,
-  useUpdatePlaylistMutation,
   useCreatePlaylistItemMutation,
   useGetPlaylistItemQuery,
   useDeletePlaylistItemMutation,
-  useGetPlaylistItemIdsQuery,
-  useUpdatePlaylistItemMutation
+  useGetPlaylistItemIdsQuery
 } from '../../store/api/slice'
 import MultiSceneSelect from '../configGroups/MultiSceneSelect'
 import { useNavigate } from 'react-router'
+import { useAppDispatch } from '../../store/hooks'
+import {
+  setPlaylistRepeat,
+  setPlaylistShuffle,
+  updatePlaylistItem
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   randomSceneDialog: {
@@ -102,8 +106,8 @@ interface ScenePlaylistItemEditDialogProps {
 
 function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   const { playlistID, item, open, onClose } = props
+  const dispatch = useAppDispatch()
   const [createPlaylistItem] = useCreatePlaylistItemMutation()
-  const [updatePlaylistItem] = useUpdatePlaylistItemMutation()
   const { data: allScenes } = useGetScenesQuery()
 
   const [unsavedSceneID, setUnsavedSceneID] = useState<number>()
@@ -158,14 +162,16 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
         playAfterAllImages: unsavedPlayAfterAllImages ?? false
       })
     } else {
-      await updatePlaylistItem({
-        playlistID,
-        itemID: item.id,
-        sceneID: unsavedSceneID,
-        randomScenes: unsavedRandomScenes,
-        duration: unsavedDuration,
-        playAfterAllImages: unsavedPlayAfterAllImages
-      })
+      dispatch(
+        updatePlaylistItem({
+          playlistID,
+          itemID: item.id,
+          sceneID: unsavedSceneID,
+          randomScenes: unsavedRandomScenes,
+          duration: unsavedDuration,
+          playAfterAllImages: unsavedPlayAfterAllImages
+        })
+      )
     }
 
     onClose()
@@ -343,36 +349,33 @@ export interface ScenePlaylistProps {
 
 function ScenePlaylist(props: ScenePlaylistProps) {
   const { playlistID } = props
+  const dispatch = useAppDispatch()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
   const { data: itemIDs } = useGetPlaylistItemIdsQuery(playlistID)
-  const [updatePlaylist] = useUpdatePlaylistMutation()
 
   const [editingItem, setEditingItem] = useState<ScenePlaylistItem>()
   const [editing, setEditing] = useState(false)
 
-  const toggleShuffle = async () => {
-    await updatePlaylist({ id: playlistID, shuffle: !playlist?.shuffle })
+  const toggleShuffle = () => {
+    dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
+  }
+
+  const changeRepeat = () => {
+    switch (playlist?.repeat) {
+      case RP.all:
+        dispatch(setPlaylistRepeat(playlistID, RP.one))
+        break
+      case RP.one:
+        dispatch(setPlaylistRepeat(playlistID, RP.none))
+        break
+      case RP.none:
+        dispatch(setPlaylistRepeat(playlistID, RP.all))
+        break
+    }
   }
 
   const addPlaylistItem = async () => {
     setEditing(true)
-  }
-
-  const changeRepeat = async () => {
-    let repeat
-    switch (playlist?.repeat) {
-      case RP.all:
-        repeat = RP.one
-        break
-      case RP.one:
-        repeat = RP.none
-        break
-      case RP.none:
-        repeat = RP.all
-        break
-    }
-
-    await updatePlaylist({ id: playlistID, repeat })
   }
 
   const onShowEditDialog = (item?: ScenePlaylistItem) => {

@@ -28,13 +28,10 @@ import { getTimestamp } from '../../utils'
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
-import {
-  useGetAudioQuery,
-  useGetPlaylistQuery,
-  useUpdatePlaylistMutation
-} from '../../store/api/slice'
+import { useGetAudioQuery, useGetPlaylistQuery } from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 import { editAudioOptions } from '../../store/audioOptions/thunks'
+import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   audioList: {
@@ -232,27 +229,23 @@ function AudioPlaylist(props: AudioPlaylistProps) {
   }
 
   const { data: playlist } = useGetPlaylistQuery(playlistID)
-  const [updatePlaylist] = useUpdatePlaylistMutation()
 
-  const toggleShuffle = async () => {
-    await updatePlaylist({ id: playlistID, shuffle: !playlist?.shuffle })
+  const toggleShuffle = () => {
+    dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
   }
 
-  const changeRepeat = async () => {
-    let repeat
+  const changeRepeat = () => {
     switch (playlist?.repeat) {
       case RP.all:
-        repeat = RP.one
+        dispatch(setPlaylistRepeat(playlistID, RP.one))
         break
       case RP.one:
-        repeat = RP.none
+        dispatch(setPlaylistRepeat(playlistID, RP.none))
         break
       case RP.none:
-        repeat = RP.all
+        dispatch(setPlaylistRepeat(playlistID, RP.all))
         break
     }
-
-    await updatePlaylist({ id: playlistID, repeat })
   }
 
   const removeTrack = (_index: number) => {

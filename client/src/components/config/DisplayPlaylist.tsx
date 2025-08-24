@@ -35,9 +35,10 @@ import MultiDisplaySelect from '../configGroups/MultiDisplaySelect'
 import {
   // useGetDisplayPlaylistItemQuery,
   // useGetDisplaysQuery,
-  useGetPlaylistQuery,
-  useUpdatePlaylistMutation
+  useGetPlaylistQuery
 } from '../../store/api/slice'
+import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import { useAppDispatch } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   randomDisplayDialog: {
@@ -308,28 +309,25 @@ export interface DisplayPlaylistProps {
 
 function DisplayPlaylist(props: DisplayPlaylistProps) {
   const { playlistID } = props
+  const dispatch = useAppDispatch()
   const { data: playlist } = useGetPlaylistQuery(playlistID)
-  const [updatePlaylist] = useUpdatePlaylistMutation()
 
-  const toggleShuffle = async () => {
-    await updatePlaylist({ id: playlistID, shuffle: !playlist?.shuffle })
+  const toggleShuffle = () => {
+    dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
   }
 
-  const changeRepeat = async () => {
-    let repeat
+  const changeRepeat = () => {
     switch (playlist?.repeat) {
       case RP.all:
-        repeat = RP.one
+        dispatch(setPlaylistRepeat(playlistID, RP.one))
         break
       case RP.one:
-        repeat = RP.none
+        dispatch(setPlaylistRepeat(playlistID, RP.none))
         break
       case RP.none:
-        repeat = RP.all
+        dispatch(setPlaylistRepeat(playlistID, RP.all))
         break
     }
-
-    await updatePlaylist({ id: playlistID, repeat })
   }
 
   const { classes } = useStyles()

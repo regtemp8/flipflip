@@ -510,7 +510,10 @@ export const flipflipApi = createApi({
         // await queryFulfilled.catch((reason) => {})
       }
     }),
-    addSceneContentSources: builder.mutation<void, {id: number, sources: string[]}>({
+    addSceneContentSources: builder.mutation<
+      void,
+      { id: number; sources: string[] }
+    >({
       query: ({ id, sources }) => ({
         url: `api/scenes/${id}/content-sources`,
         method: 'POST',
@@ -959,12 +962,18 @@ export const flipflipApi = createApi({
         { playlistID, itemID },
         { dispatch, queryFulfilled }
       ) {
-        await queryFulfilled
-        dispatch(
-          flipflipApi.util.invalidateTags([
-            { type: 'PlaylistItem', id: `${playlistID}-${itemID}` }
-          ])
-        )
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'PlaylistItem', id: `${playlistID}-${itemID}` }
+              ])
+            )
+          }
+        })
       }
     }),
     updatePlaylist: builder.mutation<
@@ -976,21 +985,18 @@ export const flipflipApi = createApi({
         method: 'PATCH',
         body: patch
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(flipflipApi.util.invalidateTags([{ type: 'Playlist', id }]))
 
-        // TODO update cache, only invalidate tag if error
-        // await queryFulfilled.catch((reason) => {
-        //   const status = reason.meta?.response?.status
-        //   // TODO implement etags (412)
-        //   // TODO implement userId checks (403)
-        //   if (status === 412 || status === 403) {
-        //     dispatch(
-        //       flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
-        //     )
-        //   }
-        // })
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
+            )
+          }
+        })
       }
     }),
     clonePlaylist: builder.mutation<void, number>({
@@ -1844,17 +1850,12 @@ export const {
   useGetPlaylistOptionsQuery,
   useGetTutorialsQuery,
   useGetThemeQuery,
-  useUpdateThemeMutation,
   useGetGeneralSettingsQuery,
-  useUpdateGeneralSettingsMutation,
   useGetRemoteSettingsQuery,
-  useUpdateRemoteSettingsMutation,
   useGetDisplaySettingsQuery,
-  useUpdateDisplaySettingsMutation,
   useGetCacheSizeQuery,
   useClearCacheMutation,
   useGetCacheSettingsQuery,
-  useUpdateCacheSettingsMutation,
   useResetTutorialsMutation,
   useResetSettingsMutation,
   useGetScenesQuery,
@@ -1869,7 +1870,6 @@ export const {
   useGetSceneAudioPlaylistsQuery,
   useGetSceneDisableWeightOptionsQuery,
   useGetSceneHasBPMQuery,
-  useUpdateSceneMutation,
   useGetSceneSettingsQuery,
   useAddSceneContentSourcesMutation,
   useAddSceneScriptPlaylistMutation,
@@ -1878,9 +1878,7 @@ export const {
   useDeleteSceneAudioPlaylistMutation,
   useGetTagQuery,
   useGetClipQuery,
-  useUpdateClipMutation,
   useGetContentSourceQuery,
-  useUpdateContentSourceMutation,
   useDeleteContentSourceMutation,
   useSortContentSourcesMutation,
   useCreateDisplayMutation,
@@ -1891,7 +1889,6 @@ export const {
   useGetDisplaysQuery,
   usePlayDisplayMutation,
   useGetDisplayQuery,
-  useUpdateDisplayMutation,
   useGetPlayerViewPlayersQuery,
   useStopPlayerMutation,
   useGetViewPlayerConfigQuery,
@@ -1905,8 +1902,6 @@ export const {
   usePlayPlaylistMutation,
   useCreatePlaylistMutation,
   useCreatePlaylistItemMutation,
-  useUpdatePlaylistItemMutation,
-  useUpdatePlaylistMutation,
   useClonePlaylistMutation,
   useDeletePlaylistMutation,
   useGetSceneSelectOptionsQuery,
@@ -1916,9 +1911,7 @@ export const {
   useDeletePlaylistItemMutation,
   useGetCaptionScriptQuery,
   useDeleteCaptionScriptsMutation,
-  useUpdateCaptionScriptMutation,
   useGetCaptionScriptFontSettingsQuery,
-  useUpdateCaptionScriptFontSettingsMutation,
   useCreateAudiosMutation,
   useGetAudiosQuery,
   useGetAudioAlbumsQuery,
@@ -1929,7 +1922,6 @@ export const {
   useLazyGetAudioMetadataQuery,
   useDeleteAudioMutation,
   useDeleteAudiosMutation,
-  useUpdateAudioMutation,
   useUploadAudioThumbMutation,
   useSortAudiosMutation,
   useMoveAudioMutation,
@@ -1943,7 +1935,6 @@ export const {
   useSortCaptionScriptsMutation,
   useMoveCaptionScriptMutation,
   useCreateTagMutation,
-  useUpdateTagMutation,
   useDeleteTagMutation,
   useSortTagsMutation,
   useMoveTagMutation,
