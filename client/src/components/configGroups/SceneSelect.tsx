@@ -60,7 +60,10 @@ function SceneSelect(props: SceneSelectProps) {
   return (
     <Autocomplete
       className={classes.select}
-      value={{value: props.value.toString(), label: options[props.value.toString()] ?? ''}}
+      value={{
+        value: props.value.toString(),
+        label: options[props.value.toString()] ?? ''
+      }}
       options={optionsList}
       renderInput={(params) => <TextField {...params} variant="standard" />}
       renderOption={(props, option) => {

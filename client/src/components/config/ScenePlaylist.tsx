@@ -164,14 +164,14 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
     } else {
       let sceneID = SCENE_NONE
       let randomScenes: number[] = []
-      if(unsavedSceneID === SCENE_RANDOM) {
+      if (unsavedSceneID === SCENE_RANDOM) {
         sceneID = SCENE_RANDOM
         randomScenes = unsavedRandomScenes ?? item.randomScenes
-      } else if(unsavedSceneID != null) {
+      } else if (unsavedSceneID != null) {
         sceneID = unsavedSceneID
       } else {
         sceneID = item.sceneID
-        if(item.sceneID === SCENE_RANDOM) {
+        if (item.sceneID === SCENE_RANDOM) {
           randomScenes = item.randomScenes
         }
       }
@@ -183,7 +183,8 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
           sceneID,
           randomScenes,
           duration: unsavedDuration ?? item.duration,
-          playAfterAllImages: unsavedPlayAfterAllImages ?? item.playAfterAllImages
+          playAfterAllImages:
+            unsavedPlayAfterAllImages ?? item.playAfterAllImages
         })
       )
     }
@@ -243,7 +244,9 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
             </Collapse>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 'grow' }}>
-            <Collapse in={currentSceneID !== SCENE_NONE && !currentPlayAfterAllImages}>
+            <Collapse
+              in={currentSceneID !== SCENE_NONE && !currentPlayAfterAllImages}
+            >
               <TextField
                 fullWidth
                 label="Play after"
@@ -305,9 +308,9 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
   const navigate = useNavigate()
   const [deletePlaylistItem] = useDeletePlaylistItemMutation()
   const { data: item } = useGetPlaylistItemQuery({ playlistID, itemID })
-    const { data: options } = useGetSceneSelectOptionsQuery({
-      includeExtra: true
-    })
+  const { data: options } = useGetSceneSelectOptionsQuery({
+    includeExtra: true
+  })
 
   const { sceneID } =
     item != null ? (item as ScenePlaylistItem) : { sceneID: SCENE_NONE }
@@ -354,7 +357,9 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
             </span>
           </Tooltip>
         </ListItemAvatar>
-        <ListItemText primary={options != null ? options[sceneID.toString()] : ''} />
+        <ListItemText
+          primary={options != null ? options[sceneID.toString()] : ''}
+        />
       </ListItem>
     </>
   )
