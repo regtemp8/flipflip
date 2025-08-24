@@ -684,7 +684,7 @@ const displayViewTable = async (trx: Kysely<DB>) => {
       'displayView',
       ['id']
     )
-    .addUniqueConstraint('UQ_displayView_index', ['index'])
+    .addUniqueConstraint('UQ_displayView_displayId_index', ['displayId', 'index'])
     .execute()
 }
 
