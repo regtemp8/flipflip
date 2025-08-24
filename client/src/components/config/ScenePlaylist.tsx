@@ -44,7 +44,8 @@ import {
   useCreatePlaylistItemMutation,
   useGetPlaylistItemQuery,
   useDeletePlaylistItemMutation,
-  useGetPlaylistItemIdsQuery
+  useGetPlaylistItemIdsQuery,
+  useGetSceneSelectOptionsQuery
 } from '../../store/api/slice'
 import MultiSceneSelect from '../configGroups/MultiSceneSelect'
 import { useNavigate } from 'react-router'
@@ -155,21 +156,34 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
         id: playlistID,
         type: PLT.scene,
         index: 0,
-        sceneName: '', // TODO remove or split up, only used for getting data
         sceneID: unsavedSceneID ?? SCENE_NONE,
         randomScenes: unsavedRandomScenes ?? [],
         duration: unsavedDuration ?? 0,
         playAfterAllImages: unsavedPlayAfterAllImages ?? false
       })
     } else {
+      let sceneID = SCENE_NONE
+      let randomScenes: number[] = []
+      if(unsavedSceneID === SCENE_RANDOM) {
+        sceneID = SCENE_RANDOM
+        randomScenes = unsavedRandomScenes ?? item.randomScenes
+      } else if(unsavedSceneID != null) {
+        sceneID = unsavedSceneID
+      } else {
+        sceneID = item.sceneID
+        if(item.sceneID === SCENE_RANDOM) {
+          randomScenes = item.randomScenes
+        }
+      }
+
       dispatch(
         updatePlaylistItem({
           playlistID,
           itemID: item.id,
-          sceneID: unsavedSceneID,
-          randomScenes: unsavedRandomScenes,
-          duration: unsavedDuration,
-          playAfterAllImages: unsavedPlayAfterAllImages
+          sceneID,
+          randomScenes,
+          duration: unsavedDuration ?? item.duration,
+          playAfterAllImages: unsavedPlayAfterAllImages ?? item.playAfterAllImages
         })
       )
     }
@@ -202,7 +216,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
             />
           </Grid2>
           <Grid2 size={12}>
-            <Collapse in={currentSceneID === -1}>
+            <Collapse in={currentSceneID === SCENE_RANDOM}>
               <Grid2 container spacing={1} alignItems="center">
                 <Grid2 size={12}>
                   <Typography className={classes.selectText} variant="caption">
@@ -229,7 +243,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
             </Collapse>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 'grow' }}>
-            <Collapse in={currentSceneID !== 0 && !currentPlayAfterAllImages}>
+            <Collapse in={currentSceneID !== SCENE_NONE && !currentPlayAfterAllImages}>
               <TextField
                 fullWidth
                 label="Play after"
@@ -253,7 +267,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
             </Collapse>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 'auto' }}>
-            <Collapse in={currentSceneID !== 0}>
+            <Collapse in={currentSceneID !== SCENE_NONE}>
               <FormControlLabel
                 control={
                   <Switch
@@ -290,18 +304,21 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
   const { playlistID, itemID } = props
   const navigate = useNavigate()
   const [deletePlaylistItem] = useDeletePlaylistItemMutation()
-  const { data } = useGetPlaylistItemQuery({ playlistID, itemID })
+  const { data: item } = useGetPlaylistItemQuery({ playlistID, itemID })
+    const { data: options } = useGetSceneSelectOptionsQuery({
+      includeExtra: true
+    })
 
-  const { sceneID, sceneName } =
-    data != null ? (data as ScenePlaylistItem) : { sceneID: 0, sceneName: '' }
+  const { sceneID } =
+    item != null ? (item as ScenePlaylistItem) : { sceneID: SCENE_NONE }
 
   const onOpenScene = () => {
     navigate(`/scenes/${sceneID}`)
   }
 
   const editItem = () => {
-    if (data != null) {
-      props.onEdit(data as ScenePlaylistItem)
+    if (item != null) {
+      props.onEdit(item as ScenePlaylistItem)
     }
   }
   const removeItem = async () => {
@@ -337,7 +354,7 @@ function ScenePlaylistRow(props: ScenePlaylistRowProps) {
             </span>
           </Tooltip>
         </ListItemAvatar>
-        <ListItemText primary={sceneName} />
+        <ListItemText primary={options != null ? options[sceneID.toString()] : ''} />
       </ListItem>
     </>
   )

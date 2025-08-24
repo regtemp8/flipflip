@@ -1673,8 +1673,7 @@ export function toAudioPlaylistItem(
 
 export function toScenePlaylistItem(
   item?: ScenePlaylistItemRow,
-  scenes?: number[],
-  sceneName?: string
+  scenes?: number[]
 ): ScenePlaylistItem | undefined {
   if (item == null) {
     return undefined
@@ -1688,8 +1687,7 @@ export function toScenePlaylistItem(
     index,
     type: PLT.scene,
     sceneID,
-    sceneName: sceneName as string,
-    randomScenes: scenes,
+    randomScenes: sceneID === SCENE_RANDOM ? scenes : [],
     duration,
     playAfterAllImages: toBoolean(playAfterAllImages)
   }

@@ -3,9 +3,9 @@ import {
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,
   PLT,
+  PlaylistItem,
   SG,
   ScenePlaylistItem,
-  SceneSelectOptionsRequest,
   SelectOption,
   ValueResponse
 } from 'flipflip-common'
@@ -54,8 +54,6 @@ import {
   updateCaptionScriptPlaylistItem,
   updateScenePlaylistItem
 } from '../db/PlaylistItemRepository'
-import { findSceneById } from '../db/SceneRepository'
-import Logger from '../logging/Logger'
 import players from '../player/PlayerService'
 import { createTempDisplayForPlaylist } from '../db/DisplayRepository'
 
@@ -180,7 +178,7 @@ router.get('/:id/items/:itemId', async (req, res) => {
   const id = Number(req.params.id)
   const itemId = Number(req.params.itemId)
 
-  let body: any
+  let body: PlaylistItem | undefined
   const playlist = await findPlaylistType(id)
   switch (playlist?.type) {
     case PLT.audio: {
@@ -192,17 +190,8 @@ router.get('/:id/items/:itemId', async (req, res) => {
       const item = await findScenePlaylistItem(id, itemId)
       const scenes =
         item != null ? await findScenePlaylistItemScenes(itemId) : undefined
-      let sceneName: string | undefined = undefined
-      if (scenes != null) {
-        if (scenes.length === 1) {
-          const scene = await findSceneById(scenes[0])
-          sceneName = scene?.name
-        } else {
-          sceneName = 'Random'
-        }
-      }
 
-      body = toScenePlaylistItem(item, scenes, sceneName)
+      body = toScenePlaylistItem(item, scenes)
       break
     }
     case PLT.script: {
