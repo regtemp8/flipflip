@@ -286,3 +286,69 @@ export async function deleteDisplay(id: number, userId: number) {
       await trx.deleteFrom('display').where('id', '=', id).execute()
     })
 }
+
+export async function cloneDisplay(id: number, userId: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const newDisplay = await trx
+        .insertInto('display')
+        .columns(['name', 'userId', 'sceneGroupId', 'temporary'])
+        .expression((eb) =>
+          eb
+            .selectFrom('display')
+            .select(['name', 'userId', 'sceneGroupId', 'temporary'])
+            .where('id', '=', id)
+            .where('userId', '=', userId)
+        )
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      const newDisplayId = newDisplay.id as number
+      await trx
+        .insertInto('displayView')
+        .columns([
+          'displayId',
+          'name',
+          'x',
+          'y',
+          'z',
+          'width',
+          'height',
+          'color',
+          'opacity',
+          'visible',
+          'playlistId',
+          'sync',
+          'syncWithView',
+          'mirrorSyncedView',
+          'index'
+        ])
+        .expression((eb) =>
+          eb
+            .selectFrom('displayView')
+            .select([
+              (eb) => eb.lit(newDisplayId).as('displayId'),
+              'name',
+              'x',
+              'y',
+              'z',
+              'width',
+              'height',
+              'color',
+              'opacity',
+              'visible',
+              'playlistId',
+              'sync',
+              'syncWithView',
+              'mirrorSyncedView',
+              'index'
+            ])
+            .where('displayId', '=', id)
+        )
+        .execute()
+
+        return newDisplayId
+    })
+}

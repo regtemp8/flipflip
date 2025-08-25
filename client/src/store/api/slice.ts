@@ -723,6 +723,22 @@ export const flipflipApi = createApi({
         )
       }
     }),
+    cloneDisplay: builder.mutation<ValueResponse, number>({
+      query: (id) => ({
+        url: `api/displays/${id}/clone`,
+        method: 'POST'
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'GroupedDisplays',
+            'UngroupedDisplays',
+            { type: 'Display', id: 'List' }
+          ])
+        )
+      }
+    }),
     deleteDisplay: builder.mutation<void, number>({
       query: (id) => ({
         url: `api/displays/${id}`,
@@ -1920,6 +1936,7 @@ export const {
   useDeleteContentSourceMutation,
   useSortContentSourcesMutation,
   useCreateDisplayMutation,
+  useCloneDisplayMutation,
   useDeleteDisplayMutation,
   useAddDisplayViewMutation,
   useCloneDisplayViewMutation,

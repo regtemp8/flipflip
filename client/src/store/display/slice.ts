@@ -49,6 +49,12 @@ export const displaySlice = createSlice({
       }
     )
     builder.addMatcher(
+      flipflipApi.endpoints.cloneDisplay.matchFulfilled,
+      (state) => {
+        state.autoEdit = true
+      }
+    )
+    builder.addMatcher(
       flipflipApi.endpoints.getDisplay.matchFulfilled,
       (state, action) => {
         if (state.autoEdit) {

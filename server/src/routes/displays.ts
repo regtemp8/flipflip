@@ -6,7 +6,8 @@ import {
   findDisplaysWithoutSceneGroup,
   updateDisplay,
   createDisplay,
-  deleteDisplay
+  deleteDisplay,
+  cloneDisplay
 } from '../db/DisplayRepository'
 import {
   toSceneGroups,
@@ -69,6 +70,16 @@ router.delete('/:id', async (req, res, next) => {
   try {
     await deleteDisplay(id, userId)
     res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/clone', async (req, res, next) => {
+  try {
+    const userId = (req.user as User).id as number
+    const newDisplayId = await cloneDisplay(Number(req.params.id), userId)
+    res.status(200).send({ value: newDisplayId })
   } catch (error) {
     next(error)
   }

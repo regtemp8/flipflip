@@ -59,6 +59,7 @@ import { MO } from 'flipflip-common'
 import { useNavigate, useParams } from 'react-router'
 import {
   useAddDisplayViewMutation,
+  useCloneDisplayMutation,
   useCloneDisplayViewMutation,
   useDeleteDisplayMutation,
   useDeleteDisplayViewMutation,
@@ -154,6 +155,7 @@ function DisplaySetup() {
   const navigate = useNavigate()
 
   const [playDisplay] = usePlayDisplayMutation()
+  const [cloneDisplay] = useCloneDisplayMutation()
   const [deleteDisplay] = useDeleteDisplayMutation()
   const [addDisplayView] = useAddDisplayViewMutation()
   const [cloneDisplayView] = useCloneDisplayViewMutation()
@@ -223,8 +225,11 @@ function DisplaySetup() {
     }
   }
 
-  const onCloneDisplay = () => {
-    // dispatch(cloneDisplay(displayID))
+  const onCloneDisplay = async () => {
+    const { data } = await cloneDisplay(displayID)
+    if (data != null) {
+      await navigate(`/displays/${data.value}`)
+    }
   }
 
   const onExportDisplay = () => {
