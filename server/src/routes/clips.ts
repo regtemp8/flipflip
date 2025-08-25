@@ -4,9 +4,9 @@ import { findClipById, updateClip } from '../db/ClipRepository'
 
 const router = express.Router()
 router.get('/:id', async (req, res) => {
-  const source = await findClipById(Number(req.params.id))
-  if (source != null) {
-    res.status(200).send(toClip(source))
+  const clip = await findClipById(Number(req.params.id))
+  if (clip != null) {
+    res.status(200).send(toClip(clip))
   } else {
     res.status(404).end()
   }

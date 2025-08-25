@@ -1,14 +1,14 @@
 import { Updateable } from 'kysely'
-import { Clip } from './types/entities'
+import { Clip } from './types/generated'
 import db from './database'
 
-export async function findClipById(id: number): Promise<Clip> {
+export async function findClipById(id: number) {
   return await db()
     .query()
     .selectFrom('clip')
     .selectAll()
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export async function findContentSourceClipIds(

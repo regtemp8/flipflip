@@ -206,6 +206,11 @@ export const loadVideo = async (
       for (const clipId of source.clips) {
         if (!source.disabledClips || !source.disabledClips.includes(clipId)) {
           const clip = await findClipById(clipId)
+          if(clip == null) {
+            logger.warn(`Failed to find clip (id: ${clipId})`)
+            continue
+          }
+
           let clipPath =
             url +
             ':::' +

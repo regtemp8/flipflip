@@ -120,5 +120,5 @@ export async function findBackupFileNameById(id: number) {
     .selectFrom('backup')
     .select(['fileName'])
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }

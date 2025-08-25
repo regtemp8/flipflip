@@ -60,13 +60,13 @@ export async function findPlaylistIds(): Promise<number[]> {
     .then((value) => value.map((v) => v.id as number))
 }
 
-export async function findPlaylistById(id: number): Promise<Playlist> {
+export async function findPlaylistById(id: number) {
   return await db()
     .query()
     .selectFrom('playlist')
     .selectAll()
     .where('id', '=', id)
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
 }
 
 export type PlaylistUpdate = Updateable<Playlist>

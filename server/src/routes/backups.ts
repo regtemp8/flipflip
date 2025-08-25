@@ -8,11 +8,8 @@ import {
 } from '../db/BackupRepository'
 import { toBackup, toBackupSettings } from '../db/mappers'
 import {
-  AutoCleanBackupsRequest,
-  CleanBackupsRequest,
-  DefaultCleanBackupsRequest
+  CleanBackupsRequest
 } from 'flipflip-common'
-import { BackupSettings } from '../db/types/BackupSettings'
 
 const router = express.Router()
 router.get('/', async (req, res) => {
@@ -30,9 +27,13 @@ router.post('/', async (req, res) => {
   res.status(200).send({ success: 'Backup success!' })
 })
 router.post('/:id/restore', async (req, res) => {
-  const { fileName } = await findBackupFileNameById(Number(req.params.id))
-  await db().restoreBackup(fileName)
-  res.status(200).send({ success: 'Restore success!' })
+  const backup = await findBackupFileNameById(Number(req.params.id))
+  if(backup != null) {
+    await db().restoreBackup(backup.fileName)
+    res.status(200).send({ success: 'Restore success!' })
+  } else {
+    res.status(404).send({ error: 'Backup not found.' })
+  }
 })
 router.post('/clean', async (req, res) => {
   const body = req.body as CleanBackupsRequest

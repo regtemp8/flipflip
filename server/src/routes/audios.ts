@@ -416,8 +416,8 @@ router.delete('/:id', async (req, res) => {
 router.get('/:id/metadata', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
-  const url = await findAudioUrlById(id, userId)
   try {
+    const url = await findAudioUrlById(id, userId)
     const metadata = await readAudioMetadata(url)
     if (metadata?.thumb != null) {
       metadata.thumb = toAudioThumb(metadata.thumb)
@@ -431,8 +431,8 @@ router.get('/:id/metadata', async (req, res, next) => {
 router.get('/:id/bpm', async (req, res, next) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
-  const url = await findAudioUrlById(id, userId)
   try {
+    const url = await findAudioUrlById(id, userId)
     const metadata = await readAudioMetadata(url)
     res.status(200).send({ id, bpm: metadata.bpm })
   } catch (error) {

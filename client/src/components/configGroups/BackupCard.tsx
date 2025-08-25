@@ -27,7 +27,7 @@ import RestoreIcon from '@mui/icons-material/Restore'
 import SaveIcon from '@mui/icons-material/Save'
 
 import { convertFromEpoch, formatBackup } from '../../utils'
-import { Backup, GeneralSettings, MO } from 'flipflip-common'
+import { Backup, GeneralSettings, Message, MO } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
 import {
   setConfigGeneralSettingsAutoBackup,
@@ -56,6 +56,7 @@ import {
   useRestoreBackupMutation
 } from '../../store/api/slice'
 import snackbar from '../../data/Snackbar'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   buttonGrid: {
@@ -138,9 +139,10 @@ function BackupCard() {
 
   const onFinishRestore = async () => {
     onCloseDialog()
-    const { data } = await restoreBackup((backup as Backup).id)
-    if (data != null) {
-      snackbar().showMessage(data)
+    const { data, error } = await restoreBackup((backup as Backup).id)
+    const message = data ?? (error as FetchBaseQueryError).data as Message
+    if (message != null) {
+      snackbar().showMessage(message)
     }
   }
 
