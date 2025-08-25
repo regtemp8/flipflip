@@ -8,7 +8,6 @@ import {
   Theme,
   Typography
 } from '@mui/material'
-import TvIcon from '@mui/icons-material/Tv'
 import MovieIcon from '@mui/icons-material/Movie'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DescriptionIcon from '@mui/icons-material/Description'
