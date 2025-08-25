@@ -969,6 +969,23 @@ export const flipflipApi = createApi({
         )
       }
     }),
+    clonePlaylist: builder.mutation<ValueResponse, number>({
+      query: (id) => ({
+        url: `api/playlists/${id}/clone`,
+        method: 'POST',
+      }),
+      async onQueryStarted(type, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        snackbar().showMessage({ success: 'Clone successful!' })
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'GroupedPlaylists',
+            'UngroupedPlaylists',
+            { type: 'PlaylistOptions', id: type }
+          ])
+        )
+      }
+    }),
     createPlaylistItem: builder.mutation<
       void,
       { id: number } & (
@@ -1052,16 +1069,6 @@ export const flipflipApi = createApi({
               )
             }
           })
-      }
-    }),
-    clonePlaylist: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `api/playlists/${id}/clone`,
-        method: 'POST'
-      }),
-      async onQueryStarted(_ /*{ queryFulfilled }*/) {
-        // TODO error handling needed?
-        // await queryFulfilled.catch((reason) => {})
       }
     }),
     deletePlaylist: builder.mutation<void, number>({
@@ -1957,8 +1964,8 @@ export const {
   useGetPlaylistQuery,
   usePlayPlaylistMutation,
   useCreatePlaylistMutation,
-  useCreatePlaylistItemMutation,
   useClonePlaylistMutation,
+  useCreatePlaylistItemMutation,
   useDeletePlaylistMutation,
   useGetSceneSelectOptionsQuery,
   useGetDisplaySelectOptionsQuery,

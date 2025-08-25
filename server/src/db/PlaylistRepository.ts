@@ -86,9 +86,120 @@ export async function deletePlaylist(id: number) {
     .execute()
 }
 
-export async function clonePlaylist(id: number) {
-  // TODO clone, also all child items
-  return null
+export async function clonePlaylist(id: number, userId: number) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const newPlaylist = await trx
+        .insertInto('playlist')
+        .columns([
+          'userId',
+          'sceneGroupId',
+          'name',
+          'type',
+          'shuffle',
+          'repeat',
+          'temporary'
+        ])
+        .expression((eb) =>
+          eb
+            .selectFrom('playlist')
+            .select([
+              'userId',
+              'sceneGroupId',
+              'name',
+              'type',
+              'shuffle',
+              'repeat',
+              'temporary'
+            ])
+            .where('id', '=', id)
+            .where('userId', '=', userId)
+        )
+        .returning(['id', 'type'])
+        .executeTakeFirstOrThrow()
+
+      const newPlaylistId = newPlaylist.id as number
+      switch (newPlaylist.type) {
+        case PLT.audio: {
+          await trx
+            .insertInto('audioPlaylistItem')
+            .columns(['playlistId', 'index', 'audioId'])
+            .expression((eb) =>
+              eb
+                .selectFrom('audioPlaylistItem')
+                .select([
+                  (eb) => eb.lit(newPlaylistId).as('playlistId'),
+                  'index',
+                  'audioId'
+                ])
+                .where('playlistId', '=', id)
+            )
+            .execute()
+          break
+        }
+        case PLT.script: {
+          await trx
+            .insertInto('captionScriptPlaylistItem')
+            .columns(['playlistId', 'index', 'captionScriptId'])
+            .expression((eb) =>
+              eb
+                .selectFrom('captionScriptPlaylistItem')
+                .select([
+                  (eb) => eb.lit(newPlaylistId).as('playlistId'),
+                  'index',
+                  'captionScriptId'
+                ])
+                .where('playlistId', '=', id)
+            )
+            .execute()
+          break
+        }
+        case PLT.scene: {
+          const items = await trx
+            .selectFrom('scenePlaylistItem')
+            .selectAll()
+            .where('playlistId', '=', id)
+            .execute()
+          for (const item of items) {
+            const { index, duration, playAfterAllImages } = item
+            const newScenePlaylistItem = await trx
+              .insertInto('scenePlaylistItem')
+              .values({
+                playlistId: newPlaylistId,
+                index,
+                duration,
+                playAfterAllImages
+              })
+              .returning('id')
+              .executeTakeFirst()
+
+            await trx
+              .insertInto('scenePlaylistItemScene')
+              .columns(['sceneId', 'scenePlaylistItemId'])
+              .expression((eb) =>
+                eb
+                  .selectFrom('scenePlaylistItemScene')
+                  .select([
+                    'sceneId',
+                    (eb) =>
+                      eb
+                        .lit(newScenePlaylistItem?.id as number)
+                        .as('scenePlaylistItemId')
+                  ])
+                  .where('scenePlaylistItemId', '=', item.id)
+              )
+              .execute()
+          }
+          break
+        }
+        default:
+          throw new Error(`Cloning playlist of type '${newPlaylist.type}' not supported`)
+      }
+
+      return newPlaylist.id
+    })
 }
 
 export async function findPlaylistByDisplayView(displayViewId: number) {

@@ -94,12 +94,13 @@ router.delete('/:id', async (req, res) => {
   res.status(status).end()
 })
 
-router.post('/:id/clone', async (req, res) => {
-  const playlist = await clonePlaylist(Number(req.params.id))
-  if (playlist != null) {
-    res.status(200).send(toPlaylist(playlist))
-  } else {
-    res.status(500).end()
+router.post('/:id/clone', async (req, res, next) => {
+  try {
+    const userId = (req.user as User).id as number
+    const newPlaylistId = await clonePlaylist(Number(req.params.id), userId)
+    res.status(200).send({ value: newPlaylistId })
+  } catch (error) {
+    next(error)
   }
 })
 

@@ -28,6 +28,12 @@ export const playlistSlice = createSlice({
       }
     )
     builder.addMatcher(
+      flipflipApi.endpoints.clonePlaylist.matchFulfilled,
+      (state) => {
+        state.autoEdit = true
+      }
+    )
+    builder.addMatcher(
       flipflipApi.endpoints.getPlaylist.matchFulfilled,
       (state, action) => {
         if (state.autoEdit) {

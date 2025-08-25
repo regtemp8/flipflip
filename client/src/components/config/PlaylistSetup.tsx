@@ -240,6 +240,13 @@ function PlaylistSetup() {
     setOpenMenu(undefined)
   }
 
+  const onClonePlaylist = async () => {
+    const { data } = await clonePlaylist(playlistID)
+    if (data != null) {
+      await navigate(`/playlists/${data.value}`)
+    }
+  }
+
   const { classes } = useStyles()
   const open = drawerOpen
   return (
@@ -345,9 +352,7 @@ function PlaylistSetup() {
             title={drawerOpen ? '' : 'Clone Playlist'}
           >
             <ListItemButton
-              onClick={async () => {
-                await clonePlaylist(playlistID)
-              }}
+              onClick={onClonePlaylist}
             >
               <ListItemIcon>
                 <FileCopyIcon />
