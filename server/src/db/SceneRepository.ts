@@ -1,7 +1,7 @@
 import db from './database'
 import { SceneGroupRow } from './types/SceneGroupRow'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
-import { Scene } from './types/generated'
+import { Scene } from './types/entities'
 import { toBoolean, toNumber } from './utils'
 import { PLT } from 'flipflip-common'
 import { Updateable, sql } from 'kysely'
@@ -1182,6 +1182,20 @@ export async function cloneScene(originalId: number, userId: number) {
           )
           .execute()
       }
+
+      await trx
+        .insertInto('scenePlaylist')
+        .columns(['sceneId', 'playlistId'])
+        .expression((eb) =>
+          eb
+            .selectFrom('scenePlaylist')
+            .select([
+              (eb) => eb.lit(newScene.id as number).as('sceneId'),
+              'playlistId'
+            ])
+            .where('sceneId', '=', originalId)
+        )
+        .execute()
 
       // TODO clone weightGroup table rows for generators
       return newScene.id as number
