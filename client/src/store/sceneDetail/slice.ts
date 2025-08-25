@@ -30,6 +30,12 @@ export const sceneDetailSlice = createSlice({
       }
     )
     builder.addMatcher(
+      flipflipApi.endpoints.cloneScene.matchFulfilled,
+      (state) => {
+        state.autoEdit = true
+      }
+    )
+    builder.addMatcher(
       flipflipApi.endpoints.getScene.matchFulfilled,
       (state, action) => {
         if (state.autoEdit) {

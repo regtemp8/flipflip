@@ -1048,8 +1048,7 @@ export async function cloneScene(originalId: number, userId: number) {
         .returning('id')
         .executeTakeFirstOrThrow()
 
-      const contentSources = await db()
-        .query()
+      const contentSources = await trx
         .selectFrom('contentSource')
         .select([
           'id',
@@ -1078,7 +1077,6 @@ export async function cloneScene(originalId: number, userId: number) {
 
       for (const contentSource of contentSources) {
         const {
-          id,
           url,
           type,
           offline,
@@ -1102,7 +1100,6 @@ export async function cloneScene(originalId: number, userId: number) {
         const newContentSource = await trx
           .insertInto('contentSource')
           .values({
-            id,
             userId,
             sceneId: newScene.id as number,
             url,
@@ -1135,7 +1132,11 @@ export async function cloneScene(originalId: number, userId: number) {
           .expression((eb) =>
             eb
               .selectFrom('contentSourceTag')
-              .select(['userId', 'tagId', (eb) => eb.lit(newContentSourceId).as('contentSourceId')])
+              .select([
+                'userId',
+                'tagId',
+                (eb) => eb.lit(newContentSourceId).as('contentSourceId')
+              ])
               .where('contentSourceId', '=', contentSourceId)
               .where('userId', '=', userId)
           )
@@ -1143,11 +1144,25 @@ export async function cloneScene(originalId: number, userId: number) {
 
         await trx
           .insertInto('clip')
-          .columns(['userId', 'contentSourceId', 'disabled', 'start', 'end', 'volume'])
+          .columns([
+            'userId',
+            'contentSourceId',
+            'disabled',
+            'start',
+            'end',
+            'volume'
+          ])
           .expression((eb) =>
             eb
               .selectFrom('clip')
-              .select(['userId', (eb) => eb.lit(newContentSourceId).as('contentSourceId'), 'disabled', 'start', 'end', 'volume'])
+              .select([
+                'userId',
+                (eb) => eb.lit(newContentSourceId).as('contentSourceId'),
+                'disabled',
+                'start',
+                'end',
+                'volume'
+              ])
               .where('contentSourceId', '=', contentSourceId)
               .where('userId', '=', userId)
           )
@@ -1159,7 +1174,10 @@ export async function cloneScene(originalId: number, userId: number) {
           .expression((eb) =>
             eb
               .selectFrom('contentSourceBlacklistItem')
-              .select([(eb) => eb.lit(newContentSourceId).as('contentSourceId'), 'url'])
+              .select([
+                (eb) => eb.lit(newContentSourceId).as('contentSourceId'),
+                'url'
+              ])
               .where('contentSourceId', '=', contentSourceId)
           )
           .execute()
