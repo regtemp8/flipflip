@@ -684,7 +684,10 @@ const displayViewTable = async (trx: Kysely<DB>) => {
       'displayView',
       ['id']
     )
-    .addUniqueConstraint('UQ_displayView_displayId_index', ['displayId', 'index'])
+    .addUniqueConstraint('UQ_displayView_displayId_index', [
+      'displayId',
+      'index'
+    ])
     .execute()
 }
 
@@ -708,7 +711,10 @@ const audioPlaylistItemTable = async (trx: Kysely<DB>) => {
       'audio',
       ['id']
     )
-    .addUniqueConstraint('UQ_audioPlaylistItem_playlistId_index', ['playlistId', 'index'])
+    .addUniqueConstraint('UQ_audioPlaylistItem_playlistId_index', [
+      'playlistId',
+      'index'
+    ])
     .execute()
 }
 
@@ -732,47 +738,10 @@ const captionScriptPlaylistItemTable = async (trx: Kysely<DB>) => {
       'captionScript',
       ['id']
     )
-    .addUniqueConstraint('UQ_captionScriptPlaylistItem_playlistId_index', ['playlistId', 'index'])
-    .execute()
-}
-
-const displayPlaylistItemTable = async (trx: Kysely<DB>) => {
-  logger.info('+ Create displayPlaylistItem table')
-  return await trx.schema
-    .createTable('displayPlaylistItem')
-    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
-    .addColumn('playlistId', 'integer', (col) => col.notNull())
-    .addColumn('index', 'integer', (col) => col.notNull())
-    .addColumn('duration', 'integer')
-    .addForeignKeyConstraint(
-      'FK_displayPlaylistItem_playlist_playlistId',
-      ['playlistId'],
-      'playlist',
-      ['id']
-    )
-    .addUniqueConstraint('UQ_displayPlaylistItem_playlistId_index', ['playlistId', 'index'])
-    .execute()
-}
-
-const displayPlaylistItemDisplayTable = async (trx: Kysely<DB>) => {
-  logger.info('+ Create displayPlaylistItemDisplay table')
-  return await trx.schema
-    .createTable('displayPlaylistItemDisplay')
-    .addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
-    .addColumn('displayPlaylistItemId', 'integer', (col) => col.notNull())
-    .addColumn('displayId', 'integer', (col) => col.notNull())
-    .addForeignKeyConstraint(
-      'FK_displayPlaylistItemDisplay_displayPlaylistItem_displayPlaylistItemId',
-      ['displayPlaylistItemId'],
-      'displayPlaylistItem',
-      ['id']
-    )
-    .addForeignKeyConstraint(
-      'FK_displayPlaylistItemScene_display_displayId',
-      ['displayId'],
-      'display',
-      ['id']
-    )
+    .addUniqueConstraint('UQ_captionScriptPlaylistItem_playlistId_index', [
+      'playlistId',
+      'index'
+    ])
     .execute()
 }
 
@@ -791,7 +760,10 @@ const scenePlaylistItemTable = async (trx: Kysely<DB>) => {
       'playlist',
       ['id']
     )
-    .addUniqueConstraint('UQ_scenePlaylistItem_playlistId_index', ['playlistId', 'index'])
+    .addUniqueConstraint('UQ_scenePlaylistItem_playlistId_index', [
+      'playlistId',
+      'index'
+    ])
     .execute()
 }
 
@@ -1035,8 +1007,6 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await playlistTable(trx)
     await audioPlaylistItemTable(trx)
     await captionScriptPlaylistItemTable(trx)
-    await displayPlaylistItemTable(trx)
-    await displayPlaylistItemDisplayTable(trx)
     await scenePlaylistItemTable(trx)
     await scenePlaylistItemSceneTable(trx)
     await displayTable(trx)
@@ -1073,12 +1043,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Drop scenePlaylistItem table')
     await trx.schema.dropTable('scenePlaylistItem').execute()
-
-    logger.info('- Drop displayPlaylistItemScene table')
-    await trx.schema.dropTable('displayPlaylistItemScene').execute()
-
-    logger.info('- Drop displayPlaylistItem table')
-    await trx.schema.dropTable('displayPlaylistItem').execute()
 
     logger.info('- Drop captionScriptPlaylistItem table')
     await trx.schema.dropTable('captionScriptPlaylistItem').execute()

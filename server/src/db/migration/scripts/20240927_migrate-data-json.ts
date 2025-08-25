@@ -1386,11 +1386,7 @@ const captionScriptInsert = async (
   }
 }
 
-type PlaylistType =
-  | typeof PLT.audio
-  | typeof PLT.display
-  | typeof PLT.scene
-  | typeof PLT.script
+type PlaylistType = typeof PLT.audio | typeof PLT.scene | typeof PLT.script
 
 interface PlaylistBase {
   name?: string

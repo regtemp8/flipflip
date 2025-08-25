@@ -349,6 +349,6 @@ export async function cloneDisplay(id: number, userId: number) {
         )
         .execute()
 
-        return newDisplayId
+      return newDisplayId
     })
 }

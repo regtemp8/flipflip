@@ -272,7 +272,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res, next) => {
   const { type } = req.body
-  if (![PLT.audio, PLT.display, PLT.scene, PLT.script].includes(type)) {
+  if (![PLT.audio, PLT.scene, PLT.script].includes(type)) {
     res.status(400).end()
   }
 

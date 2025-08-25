@@ -3,7 +3,6 @@ import BaseSelect from './BaseSelect'
 import { Box, IconButton, MenuItem, Theme, Tooltip } from '@mui/material'
 import { PLT } from 'flipflip-common'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
-import TvIcon from '@mui/icons-material/Tv'
 import MovieIcon from '@mui/icons-material/Movie'
 import DescriptionIcon from '@mui/icons-material/Description'
 import { makeStyles } from 'tss-react/mui'
@@ -16,7 +15,6 @@ import { useAppDispatch } from '../../store/hooks'
 
 const playlistTypeDisplayNames: Record<string, string> = {}
 playlistTypeDisplayNames[PLT.audio] = 'Audio'
-playlistTypeDisplayNames[PLT.display] = 'Display'
 playlistTypeDisplayNames[PLT.scene] = 'Scene'
 playlistTypeDisplayNames[PLT.script] = 'Script'
 
@@ -73,7 +71,6 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
             disabled={playlistID === 0}
           >
             {props.type === PLT.audio && <AudiotrackIcon />}
-            {props.type === PLT.display && <TvIcon />}
             {props.type === PLT.scene && <MovieIcon />}
             {props.type === PLT.script && <DescriptionIcon />}
           </IconButton>

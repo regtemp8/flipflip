@@ -9,7 +9,6 @@ export * from './lib/SystemConstants';
 export * from './lib/json/Backup';
 export * from './lib/json/AudioPlaylistItem';
 export * from './lib/json/CaptionScriptPlaylistItem';
-export * from './lib/json/DisplayPlaylistItem';
 export * from './lib/json/PlaylistItem';
 export * from './lib/json/ScenePlaylistItem';
 export * from './lib/json/Message';

@@ -1026,15 +1026,6 @@ function ScenePicker() {
               <ListItemText primary="Audio Playlist" />
             </ListItemButton>
             <ListItemButton
-              onClick={() => setCreatePlaylistType(PLT.display)}
-              selected={createPlaylistType === PLT.display}
-            >
-              <ListItemIcon>
-                <TvIcon />
-              </ListItemIcon>
-              <ListItemText primary="Display Playlist" />
-            </ListItemButton>
-            <ListItemButton
               onClick={() => setCreatePlaylistType(PLT.scene)}
               selected={createPlaylistType === PLT.scene}
             >

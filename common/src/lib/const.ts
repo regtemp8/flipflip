@@ -599,7 +599,6 @@ const MVF = {
 const PLT = {
   // playlist type
   audio: 'plt.audio',
-  display: 'plt.display',
   scene: 'plt.scene',
   script: 'plt.script',
 };

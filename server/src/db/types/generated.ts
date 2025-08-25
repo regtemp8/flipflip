@@ -3,6 +3,13 @@
  * Please do not edit it manually.
  */
 
+import type { ColumnType } from 'kysely'
+
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>
+
 export interface Audio {
   album: string | null
   artist: string | null
@@ -10,7 +17,7 @@ export interface Audio {
   comment: string | null
   createdAt: number
   duration: number | null
-  id: number | null
+  id: Generated<number | null>
   index: number
   marked: number
   name: string | null
@@ -35,14 +42,14 @@ export interface Audio {
 
 export interface AudioPlaylistItem {
   audioId: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   playlistId: number
 }
 
 export interface AudioTag {
   audioId: number
-  id: number | null
+  id: Generated<number | null>
   tagId: number
   userId: number
 }
@@ -50,7 +57,7 @@ export interface AudioTag {
 export interface Backup {
   createdAt: number
   fileName: string
-  id: number | null
+  id: Generated<number | null>
   interval: string
   intervalValue: number
   year: number
@@ -59,14 +66,14 @@ export interface Backup {
 export interface CacheSettings {
   directory: string
   enabled: number
-  id: number | null
+  id: Generated<number | null>
   maxSize: number
   userId: number
 }
 
 export interface CaptionScript {
   createdAt: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   marked: number
   nextSceneAtEnd: number
@@ -81,14 +88,14 @@ export interface CaptionScript {
 
 export interface CaptionScriptPlaylistItem {
   captionScriptId: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   playlistId: number
 }
 
 export interface CaptionScriptTag {
   captionScriptId: number
-  id: number | null
+  id: Generated<number | null>
   tagId: number
   userId: number
 }
@@ -97,7 +104,7 @@ export interface Clip {
   contentSourceId: number
   disabled: number
   end: number | null
-  id: number | null
+  id: Generated<number | null>
   start: number | null
   userId: number
   volume: number | null
@@ -105,7 +112,7 @@ export interface Clip {
 
 export interface ClipTag {
   clipId: number
-  id: number | null
+  id: Generated<number | null>
   tagId: number
   userId: number
 }
@@ -114,7 +121,7 @@ export interface ContentSource {
   count: number
   countComplete: number
   createdAt: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   lastCheck: number | null
   localDirOfSources: number
@@ -136,36 +143,23 @@ export interface ContentSource {
 
 export interface ContentSourceBlacklistItem {
   contentSourceId: number
-  id: number | null
+  id: Generated<number | null>
   url: string
 }
 
 export interface ContentSourceTag {
   contentSourceId: number
-  id: number | null
+  id: Generated<number | null>
   tagId: number
   userId: number
 }
 
 export interface Display {
-  id: number | null
+  id: Generated<number | null>
   name: string
   sceneGroupId: number | null
   temporary: number
   userId: number
-}
-
-export interface DisplayPlaylistItem {
-  duration: number | null
-  id: number | null
-  index: number
-  playlistId: number
-}
-
-export interface DisplayPlaylistItemDisplay {
-  displayId: number
-  displayPlaylistItemId: number
-  id: number | null
 }
 
 export interface DisplaySettings {
@@ -174,7 +168,7 @@ export interface DisplaySettings {
   clickToProgressWhilePlaying: number
   easingControls: number
   fullScreen: number
-  id: number | null
+  id: Generated<number | null>
   maxInHistory: number
   maxInMemory: number
   maxLoadingAtOnce: number
@@ -188,7 +182,7 @@ export interface DisplayView {
   color: string
   displayId: number
   height: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   mirrorSyncedView: string
   name: string
@@ -211,7 +205,7 @@ export interface FontSettings {
   color: string
   fontFamily: string
   fontSize: number
-  id: number | null
+  id: Generated<number | null>
   type: string
   userId: number
 }
@@ -227,7 +221,7 @@ export interface GeneralSettings {
   confirmBlacklist: number
   confirmFileDeletion: number
   confirmSceneDeletion: number
-  id: number | null
+  id: Generated<number | null>
   prioritizePerformance: number
   userId: number
   watermark: number
@@ -241,13 +235,13 @@ export interface GeneralSettings {
 
 export interface IgnoredTag {
   displaySettingsId: number
-  id: number | null
+  id: Generated<number | null>
   tagId: number
   userId: number
 }
 
 export interface Playlist {
-  id: number | null
+  id: Generated<number | null>
   name: string
   repeat: string
   sceneGroupId: number | null
@@ -262,7 +256,7 @@ export interface RemoteSettings {
   hydrusDomain: string
   hydrusPort: number
   hydrusProtocol: string
-  id: number | null
+  id: Generated<number | null>
   instagramPassword: string
   instagramUsername: string
   piwigoHost: string
@@ -353,7 +347,7 @@ export interface Scene {
   horizTransLevelMin: number
   horizTransRandom: number
   horizTransType: string
-  id: number | null
+  id: Generated<number | null>
   imageOrientation: string
   imageType: string
   imageTypeFilter: string
@@ -488,34 +482,34 @@ export interface Scene {
 }
 
 export interface SceneGroup {
-  id: number | null
+  id: Generated<number | null>
   name: string
   type: string
   userId: number
 }
 
 export interface ScenePlaylist {
-  id: number | null
+  id: Generated<number | null>
   playlistId: number
   sceneId: number
 }
 
 export interface ScenePlaylistItem {
   duration: number
-  id: number | null
+  id: Generated<number | null>
   index: number
   playAfterAllImages: number
   playlistId: number
 }
 
 export interface ScenePlaylistItemScene {
-  id: number | null
+  id: Generated<number | null>
   sceneId: number | null
   scenePlaylistItemId: number
 }
 
 export interface Tag {
-  id: number | null
+  id: Generated<number | null>
   index: number
   name: string
   phraseString: string | null
@@ -523,7 +517,7 @@ export interface Tag {
 }
 
 export interface Theme {
-  id: number | null
+  id: Generated<number | null>
   mode: string
   primaryColor: string
   secondaryColor: string
@@ -533,7 +527,7 @@ export interface Theme {
 export interface Tutorials {
   audios: string | null
   current: string | null
-  id: number | null
+  id: Generated<number | null>
   library: string | null
   player: string | null
   sceneDetail: string | null
@@ -547,7 +541,7 @@ export interface Tutorials {
 
 export interface User {
   hashedPassword: Buffer
-  id: number | null
+  id: Generated<number | null>
   salt: Buffer
   tokenExpiry: number | null
   tokenValue: string | null
@@ -556,7 +550,7 @@ export interface User {
 
 export interface WeightGroup {
   chosen: number | null
-  id: number | null
+  id: Generated<number | null>
   max: number | null
   percent: number | null
   ruleId: number | null
@@ -580,8 +574,6 @@ export interface DB {
   contentSourceBlacklistItem: ContentSourceBlacklistItem
   contentSourceTag: ContentSourceTag
   display: Display
-  displayPlaylistItem: DisplayPlaylistItem
-  displayPlaylistItemDisplay: DisplayPlaylistItemDisplay
   displaySettings: DisplaySettings
   displayView: DisplayView
   fontSettings: FontSettings

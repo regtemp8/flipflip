@@ -48,7 +48,6 @@ import { setPlaylistName } from '../../store/api/thunks'
 import AudioPlaylist from '../player/AudioPlaylist'
 import ScriptPlaylist from '../configGroups/ScriptPlaylist'
 import ScenePlaylist from './ScenePlaylist'
-import DisplayPlaylist from './DisplayPlaylist'
 import SceneSelect from '../configGroups/SceneSelect'
 import {
   useClonePlaylistMutation,
@@ -427,9 +426,6 @@ function PlaylistSetup() {
                       <CardContent>
                         {playlist?.type === PLT.audio && (
                           <AudioPlaylist playlistID={playlistID} />
-                        )}
-                        {playlist?.type === PLT.display && (
-                          <DisplayPlaylist playlistID={playlistID} />
                         )}
                         {playlist?.type === PLT.scene && (
                           <ScenePlaylist playlistID={playlistID} />

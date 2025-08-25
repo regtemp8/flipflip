@@ -55,7 +55,6 @@ function PlaylistCard(props: PlaylistCardProps) {
           <CardContent>
             <Stack alignItems="center" direction="row" gap={2}>
               {type === PLT.audio && <AudiotrackIcon />}
-              {type === PLT.display && <TvIcon />}
               {type === PLT.scene && <MovieIcon />}
               {type === PLT.script && <DescriptionIcon />}
               <Typography component="h2" variant="h6">
