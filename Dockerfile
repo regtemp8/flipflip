@@ -5,6 +5,8 @@ FROM node:22-alpine AS builder
 ARG SERVER_PORT
 ARG NODE_ENV
 
+RUN apk add python3 py3-setuptools build-base make
+
 RUN corepack enable
 RUN corepack prepare yarn@stable --activate
 

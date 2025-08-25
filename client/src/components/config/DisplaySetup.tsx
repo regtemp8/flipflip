@@ -67,7 +67,6 @@ import {
   usePlayDisplayMutation
 } from '../../store/api/slice'
 import {
-  useGetDisplayNameQuery,
   useGetDisplaySettingsFullScreenQuery
 } from '../../store/api/selectors'
 import { setFullScreen } from '../../data/fullscreen'
