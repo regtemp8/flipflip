@@ -730,6 +730,7 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
+        snackbar().showMessage({ success: 'Clone successful!' })
         dispatch(
           flipflipApi.util.invalidateTags([
             'GroupedDisplays',
