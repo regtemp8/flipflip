@@ -145,8 +145,9 @@ export const flipflipApi = createApi({
         }
       },
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        dispatch(flipflipApi.util.resetApiState())
+        await queryFulfilled.then(() => {
+          dispatch(flipflipApi.util.resetApiState())
+        })
       }
     }),
     resetData: builder.mutation<boolean, void>({
@@ -972,7 +973,7 @@ export const flipflipApi = createApi({
     clonePlaylist: builder.mutation<ValueResponse, number>({
       query: (id) => ({
         url: `api/playlists/${id}/clone`,
-        method: 'POST',
+        method: 'POST'
       }),
       async onQueryStarted(type, { dispatch, queryFulfilled }) {
         await queryFulfilled
