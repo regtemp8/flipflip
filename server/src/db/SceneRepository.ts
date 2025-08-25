@@ -638,7 +638,7 @@ export async function cloneScene(originalId: number, userId: number) {
     .query()
     .transaction()
     .execute(async (trx) => {
-      const newId = await trx
+      const newScene = await trx
         .insertInto('scene')
         .columns([
           'userId',
@@ -842,7 +842,7 @@ export async function cloneScene(originalId: number, userId: number) {
         .expression((eb) =>
           eb
             .selectFrom('scene')
-            .select((eb) => [
+            .select([
               'userId',
               'defaultScene',
               'name',
@@ -1048,11 +1048,11 @@ export async function cloneScene(originalId: number, userId: number) {
         .returning('id')
         .executeTakeFirstOrThrow()
 
-      await trx
-        .insertInto('contentSource')
-        .columns([
-          'sceneId',
-          'userId',
+      const contentSources = await db()
+        .query()
+        .selectFrom('contentSource')
+        .select([
+          'id',
           'url',
           'type',
           'offline',
@@ -1072,37 +1072,100 @@ export async function cloneScene(originalId: number, userId: number) {
           'createdAt',
           'index'
         ])
-        .expression((eb) =>
-          eb
-            .selectFrom('contentSource')
-            .select((eb) => [
-              eb.val(newId.id as number).as('sceneId'),
-              'userId',
-              'url',
-              'type',
-              'offline',
-              'marked',
-              'lastCheck',
-              'count',
-              'countComplete',
-              'weight',
-              'localDirOfSources',
-              'videoSubtitleFile',
-              'videoDuration',
-              'videoResolution',
-              'redditFunc',
-              'redditTime',
-              'twitterIncludeRetweets',
-              'twitterIncludeReplies',
-              'createdAt',
-              'index'
-            ])
-            .where('sceneId', '=', originalId)
-            .where('userId', '=', userId)
-        )
+        .where('sceneId', '=', originalId)
+        .where('userId', '=', userId)
         .execute()
 
-      // TODO clone weightGroup table rows
-      return newId.id as number
+      for (const contentSource of contentSources) {
+        const {
+          id,
+          url,
+          type,
+          offline,
+          marked,
+          lastCheck,
+          count,
+          countComplete,
+          weight,
+          localDirOfSources,
+          videoSubtitleFile,
+          videoDuration,
+          videoResolution,
+          redditFunc,
+          redditTime,
+          twitterIncludeReplies,
+          twitterIncludeRetweets,
+          createdAt,
+          index
+        } = contentSource
+
+        const newContentSource = await trx
+          .insertInto('contentSource')
+          .values({
+            id,
+            userId,
+            sceneId: newScene.id as number,
+            url,
+            type,
+            offline,
+            marked,
+            lastCheck,
+            count,
+            countComplete,
+            weight,
+            localDirOfSources,
+            videoSubtitleFile,
+            videoDuration,
+            videoResolution,
+            redditFunc,
+            redditTime,
+            twitterIncludeReplies,
+            twitterIncludeRetweets,
+            createdAt,
+            index
+          })
+          .returning('id')
+          .executeTakeFirst()
+
+        const contentSourceId = contentSource.id as number
+        const newContentSourceId = newContentSource?.id as number
+        await trx
+          .insertInto('contentSourceTag')
+          .columns(['userId', 'tagId', 'contentSourceId'])
+          .expression((eb) =>
+            eb
+              .selectFrom('contentSourceTag')
+              .select(['userId', 'tagId', (eb) => eb.lit(newContentSourceId).as('contentSourceId')])
+              .where('contentSourceId', '=', contentSourceId)
+              .where('userId', '=', userId)
+          )
+          .execute()
+
+        await trx
+          .insertInto('clip')
+          .columns(['userId', 'contentSourceId', 'disabled', 'start', 'end', 'volume'])
+          .expression((eb) =>
+            eb
+              .selectFrom('clip')
+              .select(['userId', (eb) => eb.lit(newContentSourceId).as('contentSourceId'), 'disabled', 'start', 'end', 'volume'])
+              .where('contentSourceId', '=', contentSourceId)
+              .where('userId', '=', userId)
+          )
+          .execute()
+
+        await trx
+          .insertInto('contentSourceBlacklistItem')
+          .columns(['contentSourceId', 'url'])
+          .expression((eb) =>
+            eb
+              .selectFrom('contentSourceBlacklistItem')
+              .select([(eb) => eb.lit(newContentSourceId).as('contentSourceId'), 'url'])
+              .where('contentSourceId', '=', contentSourceId)
+          )
+          .execute()
+      }
+
+      // TODO clone weightGroup table rows for generators
+      return newScene.id as number
     })
 }
