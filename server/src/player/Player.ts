@@ -1,6 +1,6 @@
 import { deleteTemporaryDisplay } from '../db/DisplayRepository'
 import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import viewPlayers from './ViewPlayerService'
 
 export default class Player {

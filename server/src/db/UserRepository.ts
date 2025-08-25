@@ -1,6 +1,6 @@
 import { Updateable } from 'kysely'
 import db from './database'
-import { User } from './types/generated'
+import { User } from './types/entities'
 
 export async function findUserById(id: number) {
   return await db()

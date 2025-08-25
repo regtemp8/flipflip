@@ -1,7 +1,7 @@
 import { getRandomColor, MVF } from 'flipflip-common'
 import db from './database'
 import { toNumber } from './utils'
-import { DisplayView } from './types/generated'
+import { DisplayView } from './types/entities'
 import { Updateable } from 'kysely'
 
 export async function findVisibleDisplayViewIds(displayId: number) {

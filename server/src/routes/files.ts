@@ -13,7 +13,7 @@ import { getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import proxy from './ProxyService'
 import fileRegistry from './FileRegistry'
 

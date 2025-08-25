@@ -1,7 +1,7 @@
 import express from 'express'
 import viewPlayers from '../player/ViewPlayerService'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { SCENE_NONE, ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
 import { findDisplayViewById } from '../db/DisplayViewRepository'
 import { toDisplayView } from '../db/mappers'

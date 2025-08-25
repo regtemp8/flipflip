@@ -1,5 +1,5 @@
 import { Updateable } from 'kysely'
-import { Clip } from './types/generated'
+import { Clip } from './types/entities'
 import db from './database'
 
 export async function findClipById(id: number): Promise<Clip> {

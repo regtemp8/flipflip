@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import ViewPlayer from './ViewPlayer'
-import { User, DisplayView as DisplayViewRow } from '../db/types/generated'
+import { User, DisplayView as DisplayViewRow } from '../db/types/entities'
 import { findDisplayViewById } from '../db/DisplayViewRepository'
 import { toBoolean } from '../db/utils'
 

@@ -2,9 +2,9 @@ import { DeleteResult, Insertable, Kysely, Updateable } from 'kysely'
 import {
   CaptionScript,
   CaptionScriptTag,
-  DB,
   FontSettings
-} from './types/generated'
+} from './types/entities'
+import {DB} from './types/generated'
 import db from './database'
 import {
   FontSettingsType,

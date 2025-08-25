@@ -55,7 +55,7 @@ import {
   ScenePlaylistItem as ScenePlaylistItemRow,
   AudioPlaylistItem as AudioPlaylistItemRow,
   CaptionScriptPlaylistItem as CaptionScriptPlaylistItemRow
-} from './types/generated'
+} from './types/entities'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
 import {

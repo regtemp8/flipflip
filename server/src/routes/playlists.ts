@@ -37,7 +37,7 @@ import {
   toCaptionScriptPlaylistItemInsert,
   toScenePlaylistItemInsert
 } from '../db/mappers'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import {
   createAudioPlaylistItem,
   createCaptionScriptPlaylistItem,

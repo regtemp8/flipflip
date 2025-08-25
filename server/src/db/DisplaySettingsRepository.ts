@@ -1,6 +1,6 @@
 import { Updateable } from 'kysely'
 import db from './database'
-import { DisplaySettings, User } from './types/generated'
+import { DisplaySettings, User } from './types/entities'
 
 export async function findDisplaySettings(
   user: User

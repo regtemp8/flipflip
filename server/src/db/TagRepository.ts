@@ -1,5 +1,6 @@
 import { DeleteResult, Insertable, Kysely, Updateable } from 'kysely'
-import { DB, Tag } from './types/generated'
+import { Tag } from './types/entities'
+import { DB } from './types/generated'
 import db from './database'
 import { MoveRequest, SF, SortRequest } from 'flipflip-common'
 

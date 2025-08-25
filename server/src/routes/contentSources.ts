@@ -24,7 +24,7 @@ import {
   sortContentSources,
   deleteContentSource
 } from '../db/ContentSourceRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { BatchTagRequest, ContentSortRequest } from 'flipflip-common'
 
 const router = express.Router()

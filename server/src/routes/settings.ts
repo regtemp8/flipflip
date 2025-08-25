@@ -19,7 +19,7 @@ import {
   findRemoteSettings,
   updateRemoteSettings
 } from '../db/RemoteSettingsRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import {
   toThemeSettings,
   toGeneralSettings,

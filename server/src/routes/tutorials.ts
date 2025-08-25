@@ -1,6 +1,6 @@
 import express from 'express'
 import { findTutorials } from '../db/TutorialsRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { toTutorials } from '../db/mappers'
 
 const router = express.Router()

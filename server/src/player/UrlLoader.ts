@@ -7,12 +7,12 @@ import {
   WF
 } from 'flipflip-common'
 import sourceScrapers from '../scraper/SourceScraperService'
-import { getRandomIndex, getRandomListItem } from '../utils'
+import { getRandomListItem } from '../utils'
 import {
   findContentSources,
   findContentSourceTagIds
 } from '../db/ContentSourceRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { toContentSource } from '../db/mappers'
 
 interface SourceState {

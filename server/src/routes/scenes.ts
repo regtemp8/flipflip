@@ -26,7 +26,7 @@ import {
   findContentSources,
   findSceneContentSourceIds
 } from '../db/ContentSourceRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { createTempDisplayForScene } from '../db/DisplayRepository'
 import players from '../player/PlayerService'
 
@@ -94,8 +94,12 @@ router.get('/:id', async (req, res) => {
 
 router.post('/:id/content-sources', async (req, res, next) => {
   try {
-    const userId = (req.user as User).id as number 
-    await createContentSources(req.body as string[], Number(req.params.id), userId)
+    const userId = (req.user as User).id as number
+    await createContentSources(
+      req.body as string[],
+      Number(req.params.id),
+      userId
+    )
     res.status(204).end()
   } catch (error) {
     next(error)

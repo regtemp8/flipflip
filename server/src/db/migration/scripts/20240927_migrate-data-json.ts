@@ -3,9 +3,11 @@ import crypto from 'crypto'
 import path from 'path'
 import { Kysely } from 'kysely'
 import {
-  DB,
   Tag as DBTag,
   DisplayView as DBDisplayView
+} from '../../types/entities'
+import {
+  DB
 } from '../../types/generated'
 import {
   AppStorage,

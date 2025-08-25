@@ -8,7 +8,8 @@ import {
   Migrator,
   FileMigrationProvider
 } from 'kysely'
-import { Backup, DB } from './types/generated'
+import { Backup } from './types/entities'
+import { DB } from './types/generated'
 import { getSaveDir, getBackupsDir } from '../utils'
 import Logger from '../logging/Logger'
 import { BackupSettings } from './types/BackupSettings'

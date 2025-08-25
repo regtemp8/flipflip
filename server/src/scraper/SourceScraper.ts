@@ -12,8 +12,7 @@ import {
   RemoteSettings,
   ScraperHelpers,
   PlayerCaptcha,
-  WF,
-  getFileName
+  WF
 } from 'flipflip-common'
 import {
   toCacheSettings,
@@ -22,7 +21,7 @@ import {
   toContentSource
 } from '../db/mappers'
 import { findSceneById } from '../db/SceneRepository'
-import { Scene as SceneRow, User } from '../db/types/generated'
+import { Scene as SceneRow, User } from '../db/types/entities'
 import {
   findContentSources,
   findContentSourceTagIds,

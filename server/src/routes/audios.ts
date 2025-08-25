@@ -31,22 +31,17 @@ import {
   deleteAllAudios,
   hasTag,
   isUntagged,
-  isArtistDefined,
-  hasArtist,
-  isAlbumDefined,
-  hasAlbum,
   findAudioAlbums,
   findAudioArtists
 } from '../db/AudioRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import {
   Audio,
   AudioSortRequest,
   BatchTagRequest,
   isAudio,
   Message,
-  MoveRequest,
-  SortRequest
+  MoveRequest
 } from 'flipflip-common'
 import { copyThumbFile, readAudioMetadata } from '../utils'
 import { toBoolean } from '../db/utils'

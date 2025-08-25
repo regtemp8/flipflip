@@ -2,7 +2,7 @@ import { randomizeList, RP } from 'flipflip-common'
 import { findSceneIds } from '../db/SceneRepository'
 import { getRandomListItem } from '../utils'
 import { findPlaylistByDisplayView } from '../db/PlaylistRepository'
-import { Playlist } from '../db/types/generated'
+import { Playlist } from '../db/types/entities'
 import { findScenePlaylistItemsByPlaylist } from '../db/PlaylistItemRepository'
 import { toBoolean } from '../db/utils'
 

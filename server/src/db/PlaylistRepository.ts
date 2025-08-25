@@ -2,7 +2,8 @@ import { PLT, RP } from 'flipflip-common'
 import db from './database'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { DB, Playlist } from './types/generated'
+import { Playlist } from './types/entities'
+import { DB } from './types/generated'
 import { Insertable, Kysely, Updateable } from 'kysely'
 import { toNumber } from './utils'
 
@@ -195,7 +196,9 @@ export async function clonePlaylist(id: number, userId: number) {
           break
         }
         default:
-          throw new Error(`Cloning playlist of type '${newPlaylist.type}' not supported`)
+          throw new Error(
+            `Cloning playlist of type '${newPlaylist.type}' not supported`
+          )
       }
 
       return newPlaylist.id

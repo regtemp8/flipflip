@@ -1,18 +1,11 @@
-import fs from 'fs'
-import path from 'path'
 import schedule from 'node-schedule'
 import { findBackupSettings } from './db/GeneralSettingsRepository'
 import moment from 'moment'
 import db from './db/database'
 import {
-  createBackup,
-  findMostRecentToKeep,
-  findByIntervalToKeep,
-  deleteByIdsToKeep
+  createBackup
 } from './db/BackupRepository'
-import { Backup } from './db/types/generated'
 import { BackupSettings } from './db/types/BackupSettings'
-import { getBackupsDir } from './utils'
 import Logger from './logging/Logger'
 
 const logger = Logger.create('SchedulerService')

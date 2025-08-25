@@ -12,7 +12,7 @@ import {
   moveTag
 } from '../db/TagRepository'
 import { MoveRequest, SortRequest, Tag } from 'flipflip-common'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 
 const router = express.Router()
 router.get('/', async (req, res) => {

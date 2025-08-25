@@ -6,7 +6,7 @@ import {
   CaptionScriptPlaylistItem,
   ScenePlaylistItem,
   ScenePlaylistItemScene
-} from './types/generated'
+} from './types/entities'
 import { findPlaylistType } from './PlaylistRepository'
 
 export type AudioPlaylistItemUpdate = Updateable<AudioPlaylistItem>

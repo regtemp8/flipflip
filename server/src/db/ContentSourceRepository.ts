@@ -1,5 +1,6 @@
 import { Insertable, Kysely, Updateable } from 'kysely'
-import { ContentSource, ContentSourceTag, DB } from './types/generated'
+import { ContentSource, ContentSourceTag } from './types/entities'
+import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'

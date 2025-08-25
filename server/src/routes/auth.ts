@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from 'express'
 import passport from 'passport'
 import passportCustom from 'passport-custom'
 import { findUserByUsername } from '../db/UserRepository'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {

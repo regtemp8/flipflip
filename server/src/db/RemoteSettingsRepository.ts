@@ -1,6 +1,6 @@
 import { Updateable } from 'kysely'
 import db from './database'
-import { RemoteSettings, User } from './types/generated'
+import { RemoteSettings, User } from './types/entities'
 
 export async function findRemoteSettings(user: User): Promise<RemoteSettings> {
   return await db()

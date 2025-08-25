@@ -1,6 +1,6 @@
 import { Updateable } from 'kysely'
 import db from './database'
-import { Theme, User } from './types/generated'
+import { Theme, User } from './types/entities'
 
 export async function findTheme(user: User): Promise<Theme> {
   return await db()

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import Player from './Player'
 import sourceScrapers from '../scraper/SourceScraperService'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import Logger from '../logging/Logger'
 
 const logger = Logger.create('PlayerService')

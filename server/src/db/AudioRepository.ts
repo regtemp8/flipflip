@@ -6,7 +6,8 @@ import {
   sql,
   Updateable
 } from 'kysely'
-import { Audio, AudioPlaylistItem, AudioTag, DB } from './types/generated'
+import { Audio, AudioPlaylistItem, AudioTag } from './types/entities'
+import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
 import { toNumber } from './utils'

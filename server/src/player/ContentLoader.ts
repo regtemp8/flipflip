@@ -7,10 +7,7 @@ import {
   isVideo,
   OF,
   OT,
-  SOF,
   ST,
-  WF,
-  ContentSource,
   Scene,
   HTF,
   VTF,
@@ -42,9 +39,7 @@ import {
 } from 'flipflip-common'
 import DurationCalculator from './DurationCalculator'
 import imageSize from 'image-size'
-import sourceScrapers from '../scraper/SourceScraperService'
 import {
-  flatten,
   getFfprobePath,
   getRandomBoolean,
   getRandomFloat,
@@ -56,18 +51,11 @@ import {
 import Logger from '../logging/Logger'
 import gifInfo from 'gif-info'
 import ffprobe from 'ffprobe'
-import { toContentSource, toScene } from '../db/mappers'
-import { findSceneById } from '../db/SceneRepository'
-import { Scene as SceneRow, User } from '../db/types/generated'
-import {
-  findContentSources,
-  findContentSourceTagIds
-} from '../db/ContentSourceRepository'
+import { User } from '../db/types/entities'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { toBoolean } from '../db/utils'
 import fileRegistry from '../routes/FileRegistry'
-import proxy, { ProxyRequest } from '../routes/ProxyService'
-import UrlLoader from './UrlLoader'
+import proxy from '../routes/ProxyService'
 
 function newContentData(
   url: string,
@@ -642,10 +630,11 @@ export default class ContentLoader {
           this.scene.videoTimingMin,
           this.scene.videoTimingMax
         )
-      case VO.atLeast:
+      case VO.atLeast: {
         const partDuration = end - start
         const loops = Math.ceil(this.scene.videoTimingConstant / partDuration)
         return partDuration * loops
+      }
       default:
         return 0
     }
@@ -662,9 +651,10 @@ export default class ContentLoader {
           this.scene.gifTimingMin,
           this.scene.gifTimingMax
         )
-      case GO.atLeast:
+      case GO.atLeast: {
         const loops = Math.ceil(this.scene.gifTimingConstant / duration)
         return duration * loops
+      }
       default:
         return 0
     }

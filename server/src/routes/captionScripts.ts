@@ -41,7 +41,7 @@ import {
   isText,
   Message
 } from 'flipflip-common'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 import { toBoolean } from '../db/utils'
 
 const router = express.Router()

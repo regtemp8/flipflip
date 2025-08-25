@@ -1,5 +1,5 @@
 import db from './database'
-import { Tutorials, User } from './types/generated'
+import { Tutorials, User } from './types/entities'
 
 export async function findTutorials(user: User): Promise<Tutorials> {
   return await db()

@@ -1,6 +1,6 @@
 import { Updateable } from 'kysely'
 import db from './database'
-import { GeneralSettings, User } from './types/generated'
+import { GeneralSettings, User } from './types/entities'
 import { BackupSettings } from './types/BackupSettings'
 import { toBoolean } from './utils'
 

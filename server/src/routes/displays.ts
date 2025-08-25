@@ -25,7 +25,7 @@ import {
   findDisplayViewSyncOptions,
   findDisplayViewById
 } from '../db/DisplayViewRepository'
-import { DisplayView, User } from '../db/types/generated'
+import { DisplayView, User } from '../db/types/entities'
 import players from '../player/PlayerService'
 import { toBoolean } from '../db/utils'
 

@@ -3,7 +3,7 @@ import { getRandomColor, MVF, PLT, RP } from 'flipflip-common'
 import db from './database'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
-import { Display } from './types/generated'
+import { Display } from './types/entities'
 import { toNumber } from './utils'
 
 export async function findDisplaysWithSceneGroup(): Promise<SceneGroupRow[]> {

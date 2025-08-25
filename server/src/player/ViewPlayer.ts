@@ -1,7 +1,7 @@
 import { ValueResponse, ImageViewData, ViewerEvent } from 'flipflip-common'
 import ScenePlaylistPlayer from './ScenePlaylistPlayer'
 import ContentLoader from './ContentLoader'
-import { User, Scene as SceneRow } from '../db/types/generated'
+import { User, Scene as SceneRow } from '../db/types/entities'
 import Logger from '../logging/Logger'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import UrlLoader from './UrlLoader'

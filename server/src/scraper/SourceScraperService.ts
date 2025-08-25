@@ -1,5 +1,5 @@
 import SourceScraper from './SourceScraper'
-import { User } from '../db/types/generated'
+import { User } from '../db/types/entities'
 
 class SourceScraperService {
   private static instance: SourceScraperService
