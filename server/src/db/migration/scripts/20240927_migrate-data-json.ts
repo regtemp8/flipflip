@@ -6,9 +6,7 @@ import {
   Tag as DBTag,
   DisplayView as DBDisplayView
 } from '../../types/entities'
-import {
-  DB
-} from '../../types/generated'
+import { DB } from '../../types/generated'
 import {
   AppStorage,
   initialAppStorage

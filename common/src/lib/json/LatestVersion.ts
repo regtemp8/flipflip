@@ -1,4 +1,4 @@
 export type LatestVersion = {
-    version: string
-    url: string
-}
+  version: string;
+  url: string;
+};

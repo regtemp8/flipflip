@@ -67,9 +67,7 @@ import {
   useGetVisibleDisplayViewIdsQuery,
   usePlayDisplayMutation
 } from '../../store/api/slice'
-import {
-  useGetDisplaySettingsFullScreenQuery
-} from '../../store/api/selectors'
+import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
 import { setFullScreen } from '../../data/fullscreen'
 
 const useStyles = makeStyles()((theme: Theme) => ({

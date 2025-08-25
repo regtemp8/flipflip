@@ -7,9 +7,7 @@ import {
   findBackupFileNameById
 } from '../db/BackupRepository'
 import { toBackup, toBackupSettings } from '../db/mappers'
-import {
-  CleanBackupsRequest
-} from 'flipflip-common'
+import { CleanBackupsRequest } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/', async (req, res) => {
@@ -28,7 +26,7 @@ router.post('/', async (req, res) => {
 })
 router.post('/:id/restore', async (req, res) => {
   const backup = await findBackupFileNameById(Number(req.params.id))
-  if(backup != null) {
+  if (backup != null) {
     await db().restoreBackup(backup.fileName)
     res.status(200).send({ success: 'Restore success!' })
   } else {

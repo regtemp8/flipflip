@@ -350,9 +350,7 @@ function PlaylistSetup() {
             disableInteractive
             title={drawerOpen ? '' : 'Clone Playlist'}
           >
-            <ListItemButton
-              onClick={onClonePlaylist}
-            >
+            <ListItemButton onClick={onClonePlaylist}>
               <ListItemIcon>
                 <FileCopyIcon />
               </ListItemIcon>

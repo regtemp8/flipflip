@@ -140,7 +140,7 @@ function BackupCard() {
   const onFinishRestore = async () => {
     onCloseDialog()
     const { data, error } = await restoreBackup((backup as Backup).id)
-    const message = data ?? (error as FetchBaseQueryError).data as Message
+    const message = data ?? ((error as FetchBaseQueryError).data as Message)
     if (message != null) {
       snackbar().showMessage(message)
     }

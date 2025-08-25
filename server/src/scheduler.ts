@@ -2,9 +2,7 @@ import schedule from 'node-schedule'
 import { findBackupSettings } from './db/GeneralSettingsRepository'
 import moment from 'moment'
 import db from './db/database'
-import {
-  createBackup
-} from './db/BackupRepository'
+import { createBackup } from './db/BackupRepository'
 import { BackupSettings } from './db/types/BackupSettings'
 import Logger from './logging/Logger'
 

@@ -1,4 +1,4 @@
-import { PlaylistItem } from "./PlaylistItem";
+import { PlaylistItem } from './PlaylistItem';
 
 export type AudioPlaylistItem = {
   audioID: number;
