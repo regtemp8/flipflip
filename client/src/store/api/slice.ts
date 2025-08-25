@@ -1878,6 +1878,15 @@ export const flipflipApi = createApi({
       query: (data) => ({
         url: `fs/pick/${data.path ?? ''}${data.type ? '?type=' + data.type : ''}`
       }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          if (status === 400) {
+            const message = (reason as any)?.error?.data as Message
+            snackbar().showMessage(message)
+          }
+        })
+      },
       providesTags: ['FilePicker']
     }),
     createDirectory: builder.mutation<void, { path: string }>({

@@ -26,11 +26,19 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     if (!cwd.startsWith('/')) {
       cwd = '/' + cwd
     }
-    if (fs.existsSync(cwd) && fs.statSync(cwd).isDirectory()) {
-      dir = cwd
+    if(!fs.existsSync(cwd)) {
+      res.status(400).send({error: `Path '${cwd}' doesn't exist`})
+      return
     }
+    if(!fs.statSync(cwd).isDirectory()) {
+      res.status(400).send({error: `Path '${cwd}' is not a directory`})
+      return
+    }
+
+    dir = cwd
   }
 
+  logger.info(`DIR: ${dir}`)
   dir = path.resolve(dir)
   let dirents: Dirent[]
   try {
@@ -60,6 +68,10 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
   } else if (type === 'img') {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || isImage(dirent.name, true)
+    )
+  } else if (type === 'video') {
+    dirents = dirents.filter(
+      (dirent) => dirent.isDirectory() || isVideo(dirent.name, true)
     )
   }
 
