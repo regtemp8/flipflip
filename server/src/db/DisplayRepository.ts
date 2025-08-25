@@ -1,9 +1,8 @@
-import { Updateable } from 'kysely'
 import { getRandomColor, MVF, PLT, RP } from 'flipflip-common'
 import db from './database'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
-import { Display } from './types/entities'
+import { Display, DisplayUpdate } from './types/entities'
 import { toNumber } from './utils'
 
 export async function findDisplaysWithSceneGroup(): Promise<SceneGroupRow[]> {
@@ -45,7 +44,6 @@ export async function findDisplayById(
     .executeTakeFirst()
 }
 
-export type DisplayUpdate = Updateable<Display>
 export async function updateDisplay(id: number, update: DisplayUpdate) {
   return await db()
     .query()

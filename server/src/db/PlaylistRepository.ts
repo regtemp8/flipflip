@@ -2,9 +2,9 @@ import { PLT, RP } from 'flipflip-common'
 import db from './database'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { Playlist } from './types/entities'
+import { PlaylistUpdate, PlaylistInsert } from './types/entities'
 import { DB } from './types/generated'
-import { Insertable, Kysely, Updateable } from 'kysely'
+import { Kysely } from 'kysely'
 import { toNumber } from './utils'
 
 export async function findPlaylistsWithSceneGroup(): Promise<
@@ -69,7 +69,6 @@ export async function findPlaylistById(id: number) {
     .executeTakeFirst()
 }
 
-export type PlaylistUpdate = Updateable<Playlist>
 export async function updatePlaylist(id: number, update: PlaylistUpdate) {
   return await db()
     .query()
@@ -225,7 +224,6 @@ export async function findPlaylistType(id: number, trx?: Kysely<DB>) {
     .executeTakeFirst()
 }
 
-type PlaylistInsert = Insertable<Playlist>
 export async function createPlaylist(type: string, userId: number) {
   const values: PlaylistInsert = {
     userId,

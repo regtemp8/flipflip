@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { RemoteSettings, User } from './types/entities'
+import { RemoteSettings, RemoteSettingsUpdate, User } from './types/entities'
 
 export async function findRemoteSettings(user: User): Promise<RemoteSettings> {
   return await db()
@@ -11,7 +10,6 @@ export async function findRemoteSettings(user: User): Promise<RemoteSettings> {
     .executeTakeFirstOrThrow()
 }
 
-export type RemoteSettingsUpdate = Updateable<RemoteSettings>
 export async function updateRemoteSettings(
   user: User,
   update: RemoteSettingsUpdate

@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { GeneralSettings, User } from './types/entities'
+import { GeneralSettings, GeneralSettingsUpdate, User } from './types/entities'
 import { BackupSettings } from './types/BackupSettings'
 import { toBoolean } from './utils'
 
@@ -50,7 +49,6 @@ export async function findGeneralSettings(
     .executeTakeFirstOrThrow()
 }
 
-export type GeneralSettingsUpdate = Updateable<GeneralSettings>
 export async function updateGeneralSettings(
   user: User,
   update: GeneralSettingsUpdate

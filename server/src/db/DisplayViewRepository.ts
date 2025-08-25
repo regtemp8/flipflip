@@ -1,8 +1,7 @@
 import { getRandomColor, MVF } from 'flipflip-common'
 import db from './database'
 import { toNumber } from './utils'
-import { DisplayView } from './types/entities'
-import { Updateable } from 'kysely'
+import { DisplayViewUpdate } from './types/entities'
 
 export async function findVisibleDisplayViewIds(displayId: number) {
   return await db()
@@ -217,7 +216,6 @@ export async function cloneDisplayView(
     })
 }
 
-export type DisplayViewUpdate = Updateable<DisplayView>
 export async function updateDisplayView(id: number, update: DisplayViewUpdate) {
   return await db()
     .query()

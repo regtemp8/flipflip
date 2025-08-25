@@ -1,12 +1,10 @@
+import { DeleteResult, Kysely, SelectExpression, sql } from 'kysely'
 import {
-  DeleteResult,
-  Insertable,
-  Kysely,
-  SelectExpression,
-  sql,
-  Updateable
-} from 'kysely'
-import { Audio, AudioPlaylistItem, AudioTag } from './types/entities'
+  Audio,
+  AudioPlaylistItem,
+  AudioTagInsert,
+  AudioUpdate
+} from './types/entities'
 import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
@@ -221,7 +219,6 @@ export async function createAudios(
     })
 }
 
-export type AudioUpdate = Updateable<Audio>
 export async function updateAudio(id: number, update: AudioUpdate) {
   if (update.url == null) {
     await db()
@@ -425,7 +422,6 @@ export async function findSearchOptions(
     .execute()
 }
 
-type AudioTagInsert = Insertable<AudioTag>
 export async function addAudioTags(
   userId: number,
   ids: number[],

@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { Theme, User } from './types/entities'
+import { Theme, ThemeUpdate, User } from './types/entities'
 
 export async function findTheme(user: User): Promise<Theme> {
   return await db()
@@ -11,7 +10,6 @@ export async function findTheme(user: User): Promise<Theme> {
     .executeTakeFirstOrThrow()
 }
 
-export type ThemeUpdate = Updateable<Theme>
 export async function updateTheme(user: User, update: ThemeUpdate) {
   return await db()
     .query()

@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { CacheSettings, User } from './types/entities'
+import { CacheSettings, CacheSettingsUpdate, User } from './types/entities'
 
 export async function findCacheSettings(user: User): Promise<CacheSettings> {
   return await db()
@@ -11,7 +10,6 @@ export async function findCacheSettings(user: User): Promise<CacheSettings> {
     .executeTakeFirstOrThrow()
 }
 
-export type CacheSettingsUpdate = Updateable<CacheSettings>
 export async function updateCacheSettings(
   user: User,
   update: CacheSettingsUpdate

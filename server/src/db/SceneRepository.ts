@@ -1,10 +1,10 @@
 import db from './database'
 import { SceneGroupRow } from './types/SceneGroupRow'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
-import { Scene } from './types/entities'
+import { Scene, SceneUpdate } from './types/entities'
 import { toBoolean, toNumber } from './utils'
 import { PLT } from 'flipflip-common'
-import { Updateable, sql } from 'kysely'
+import { sql } from 'kysely'
 
 export async function findScenesWithSceneGroup(): Promise<SceneGroupRow[]> {
   return await db()
@@ -525,7 +525,6 @@ export async function createScene(userId: number) {
     .executeTakeFirstOrThrow()
 }
 
-export type SceneUpdate = Updateable<Scene>
 export async function updateScene(id: number, update: SceneUpdate) {
   return await db()
     .query()

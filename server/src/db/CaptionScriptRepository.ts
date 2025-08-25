@@ -1,10 +1,13 @@
-import { DeleteResult, Insertable, Kysely, Updateable } from 'kysely'
+import { DeleteResult, Kysely } from 'kysely'
 import {
   CaptionScript,
-  CaptionScriptTag,
-  FontSettings
+  FontSettings,
+  FontSettingsInsert,
+  FontSettingsUpdate,
+  CaptionScriptTagInsert,
+  CaptionScriptUpdate
 } from './types/entities'
-import {DB} from './types/generated'
+import { DB } from './types/generated'
 import db from './database'
 import {
   FontSettingsType,
@@ -19,9 +22,6 @@ import { getFileName } from '../utils'
 import { SearchOption } from './types/SearchOption'
 import { findTagIdsByName } from './TagRepository'
 
-export type CaptionScriptInsert = Insertable<CaptionScript>
-export type FontSettingsInsert = Insertable<FontSettings>
-type CaptionScriptTagInsert = Insertable<CaptionScriptTag>
 export async function createCaptionScripts(urls: string[], userId: number) {
   return await db()
     .query()
@@ -171,7 +171,6 @@ export async function findCaptionScriptUrlById(
     .then((row) => row.url)
 }
 
-export type CaptionScriptUpdate = Updateable<CaptionScript>
 export async function updateCaptionScript(
   id: number,
   update: CaptionScriptUpdate
@@ -410,7 +409,6 @@ export async function findFontSettingsByType(
     .executeTakeFirst()
 }
 
-export type FontSettingsUpdate = Updateable<FontSettings>
 export async function updateFontSettings(
   id: number,
   type: FontSettingsType,

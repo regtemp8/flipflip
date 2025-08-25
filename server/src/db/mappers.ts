@@ -54,7 +54,29 @@ import {
   Backup as BackupRow,
   ScenePlaylistItem as ScenePlaylistItemRow,
   AudioPlaylistItem as AudioPlaylistItemRow,
-  CaptionScriptPlaylistItem as CaptionScriptPlaylistItemRow
+  CaptionScriptPlaylistItem as CaptionScriptPlaylistItemRow,
+  SceneUpdate,
+  ThemeUpdate,
+  GeneralSettingsUpdate,
+  RemoteSettingsUpdate,
+  DisplaySettingsUpdate,
+  CacheSettingsUpdate,
+  ContentSourceUpdate,
+  ClipUpdate,
+  TagUpdate,
+  DisplayUpdate,
+  PlaylistUpdate,
+  AudioUpdate,
+  CaptionScriptUpdate,
+  FontSettingsUpdate,
+  AudioPlaylistItemInsert,
+  AudioPlaylistItemUpdate,
+  CaptionScriptPlaylistItemInsert,
+  CaptionScriptPlaylistItemUpdate,
+  ScenePlaylistItemInsert,
+  ScenePlaylistItemSceneInsert,
+  ScenePlaylistItemUpdate,
+  DisplayViewUpdate
 } from './types/entities'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { SceneGroupRow } from './types/SceneGroupRow'
@@ -65,24 +87,8 @@ import {
   toStringArray,
   toTextOpt
 } from './utils'
-import { SceneUpdate } from './SceneRepository'
-import { ThemeUpdate } from './ThemeRepository'
-import { GeneralSettingsUpdate } from './GeneralSettingsRepository'
-import { RemoteSettingsUpdate } from './RemoteSettingsRepository'
-import { DisplaySettingsUpdate } from './DisplaySettingsRepository'
-import { CacheSettingsUpdate } from './CacheSettingsRepository'
-import { ContentSourceUpdate } from './ContentSourceRepository'
-import { ClipUpdate } from './ClipRepository'
-import { TagUpdate } from './TagRepository'
-import { DisplayUpdate } from './DisplayRepository'
-import { PlaylistUpdate } from './PlaylistRepository'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { AudioUpdate } from './AudioRepository'
-import {
-  CaptionScriptUpdate,
-  FontSettingsUpdate
-} from './CaptionScriptRepository'
 import {
   getBackupsDir,
   getCacheDir,
@@ -92,16 +98,6 @@ import {
 } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
-import {
-  AudioPlaylistItemInsert,
-  AudioPlaylistItemUpdate,
-  CaptionScriptPlaylistItemInsert,
-  CaptionScriptPlaylistItemUpdate,
-  ScenePlaylistItemInsert,
-  ScenePlaylistItemSceneInsert,
-  ScenePlaylistItemUpdate
-} from './PlaylistItemRepository'
-import { DisplayViewUpdate } from './DisplayViewRepository'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,

@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { User } from './types/entities'
+import { User, UserUpdate } from './types/entities'
 
 export async function findUserById(id: number) {
   return await db()
@@ -30,7 +29,6 @@ export async function findUserByTokenNotExpired(token: string) {
     .executeTakeFirst()
 }
 
-type UserUpdate = Updateable<User>
 export async function updateUser(user: User, update: UserUpdate) {
   return await db()
     .query()

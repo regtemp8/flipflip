@@ -1,5 +1,5 @@
-import { DeleteResult, Insertable, Kysely, Updateable } from 'kysely'
-import { Tag } from './types/entities'
+import { DeleteResult, Kysely } from 'kysely'
+import { Tag, TagUpdate, TagInsert } from './types/entities'
 import { DB } from './types/generated'
 import db from './database'
 import { MoveRequest, SF, SortRequest } from 'flipflip-common'
@@ -23,7 +23,6 @@ export async function findTagById(id: number): Promise<Tag | undefined> {
     .executeTakeFirst()
 }
 
-export type TagUpdate = Updateable<Tag>
 export async function updateTag(id: number, update: TagUpdate) {
   return await db()
     .query()
@@ -54,7 +53,6 @@ export async function moveTag(move: MoveRequest) {
     })
 }
 
-export type TagInsert = Insertable<Tag>
 export async function createTag(tag: TagInsert) {
   return await db()
     .query()

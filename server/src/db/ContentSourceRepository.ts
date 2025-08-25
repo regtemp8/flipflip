@@ -1,5 +1,9 @@
-import { Insertable, Kysely, Updateable } from 'kysely'
-import { ContentSource, ContentSourceTag } from './types/entities'
+import { Kysely } from 'kysely'
+import {
+  ContentSource,
+  ContentSourceUpdate,
+  ContentSourceTagInsert
+} from './types/entities'
 import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
@@ -15,7 +19,6 @@ import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 
 export const IS_LIBRARY = 0
-export type ContentSourceInsert = Insertable<ContentSource>
 export async function createContentSources(
   urls: string[],
   sceneId: number,
@@ -196,7 +199,6 @@ export async function findContentSources(
     .execute()
 }
 
-export type ContentSourceUpdate = Updateable<ContentSource>
 export async function updateContentSource(
   id: number,
   update: ContentSourceUpdate
@@ -347,7 +349,6 @@ export async function findOfflineCount(userId: number): Promise<number> {
     .then((value) => value.count)
 }
 
-type ContentSourceTagInsert = Insertable<ContentSourceTag>
 export async function addContentSourceTags(
   userId: number,
   ids: number[],

@@ -1,5 +1,4 @@
-import { Updateable } from 'kysely'
-import { Clip } from './types/generated'
+import { ClipUpdate } from './types/entities'
 import db from './database'
 
 export async function findClipById(id: number) {
@@ -25,7 +24,6 @@ export async function findContentSourceClipIds(
     .then((rows) => rows.map(({ id }) => id as number))
 }
 
-export type ClipUpdate = Updateable<Clip>
 export async function updateClip(id: number, update: ClipUpdate) {
   return await db()
     .query()

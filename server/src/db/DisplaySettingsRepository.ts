@@ -1,6 +1,5 @@
-import { Updateable } from 'kysely'
 import db from './database'
-import { DisplaySettings, User } from './types/entities'
+import { DisplaySettings, DisplaySettingsUpdate, User } from './types/entities'
 
 export async function findDisplaySettings(
   user: User
@@ -13,7 +12,6 @@ export async function findDisplaySettings(
     .executeTakeFirstOrThrow()
 }
 
-export type DisplaySettingsUpdate = Updateable<DisplaySettings>
 export async function updateDisplaySettings(
   user: User,
   update: DisplaySettingsUpdate

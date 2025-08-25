@@ -1,23 +1,15 @@
 import { PLT, SCENE_NONE } from 'flipflip-common'
 import db from './database'
-import { Insertable, Updateable } from 'kysely'
 import {
-  AudioPlaylistItem,
-  CaptionScriptPlaylistItem,
-  ScenePlaylistItem,
-  ScenePlaylistItemScene
+  AudioPlaylistItemUpdate,
+  AudioPlaylistItemInsert,
+  CaptionScriptPlaylistItemInsert,
+  ScenePlaylistItemInsert,
+  CaptionScriptPlaylistItemUpdate,
+  ScenePlaylistItemUpdate,
+  ScenePlaylistItemSceneInsert
 } from './types/entities'
 import { findPlaylistType } from './PlaylistRepository'
-
-export type AudioPlaylistItemUpdate = Updateable<AudioPlaylistItem>
-export type AudioPlaylistItemInsert = Insertable<AudioPlaylistItem>
-export type CaptionScriptPlaylistItemInsert =
-  Insertable<CaptionScriptPlaylistItem>
-export type ScenePlaylistItemInsert = Insertable<ScenePlaylistItem>
-export type CaptionScriptPlaylistItemUpdate =
-  Updateable<CaptionScriptPlaylistItem>
-export type ScenePlaylistItemUpdate = Updateable<ScenePlaylistItem>
-export type ScenePlaylistItemSceneInsert = Insertable<ScenePlaylistItemScene>
 
 export async function isAudioPlaylistItem(
   audioId: number,
