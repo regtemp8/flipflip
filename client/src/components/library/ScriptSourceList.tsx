@@ -21,10 +21,7 @@ import SceneSelect from '../configGroups/SceneSelect'
 import { SCENE_NONE, SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
-import {
-  deleteCaptionScript,
-  moveCaptionScript,
-} from '../../store/api/thunks'
+import { deleteCaptionScript, moveCaptionScript } from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryYOffset } from '../../store/scriptLibrary/selectors'

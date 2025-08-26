@@ -511,7 +511,6 @@ function SourceList(props: SourceListProps) {
   // }
 
   const [cachePath, setCachePath] = useState<string>()
-  const [isEditing, setIsEditing] = useState(-1)
   const [mouseX, setMouseX] = useState<any>()
   const [mouseY, setMouseY] = useState<any>()
   const [clipMenu, setClipMenu] = useState<number>()
@@ -548,13 +547,6 @@ function SourceList(props: SourceListProps) {
       savePosition()
     }
   }, [savePosition])
-
-  // TODO fix weird pattern
-  // useEffect(() => {
-  //   if (firstSourceURL === '') {
-  //     setIsEditing(props.sources[0])
-  //   }
-  // }, [props.sources, firstSourceURL])
 
   const onSortEnd = ({
     oldIndex,
@@ -637,16 +629,6 @@ function SourceList(props: SourceListProps) {
     // if (props.isLibrary) {
     //   dispatch(setLibrarySelected(newSelected))
     // }
-  }
-
-  const onStartEdit = (sourceID: number) => {
-    setIsEditing(sourceID)
-  }
-
-  const onEndEdit = (_newURL: string) => {
-    // const action = props.isLibrary ? setLibraryEditUrl : setSceneSourcesEditUrl
-    // dispatch(action(isEditing, newURL))
-    setIsEditing(-1)
   }
 
   const onClean = async (_sourceURL: string) => {

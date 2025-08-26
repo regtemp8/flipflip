@@ -1,4 +1,10 @@
-import { ChangeEvent, CSSProperties, FormEvent, Fragment, MouseEvent } from 'react'
+import {
+  ChangeEvent,
+  CSSProperties,
+  FormEvent,
+  Fragment,
+  MouseEvent
+} from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -39,8 +45,14 @@ import {
 import { getTimestamp } from '../../utils'
 import { selectSourceLibraryEditing } from '../../store/sourceLibrary/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { setSourceLibraryEditing, SourceEdit } from '../../store/sourceLibrary/slice'
-import { deleteContentSource, setContentSourceUrl } from '../../store/api/thunks'
+import {
+  setSourceLibraryEditing,
+  SourceEdit
+} from '../../store/sourceLibrary/slice'
+import {
+  deleteContentSource,
+  setContentSourceUrl
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -170,15 +182,15 @@ function SourceListItem(props: SourceListItemProps) {
   const editing = useAppSelector(selectSourceLibraryEditing())
 
   const beginEditingUrl = () => {
-    if (source != null) {      
-      const {id, url} = source
-      dispatch(setSourceLibraryEditing({id, url}))
+    if (source != null) {
+      const { id, url } = source
+      dispatch(setSourceLibraryEditing({ id, url }))
     }
   }
 
   const endEditingUrl = (e: FormEvent) => {
     e.preventDefault()
-    const {id, url} = editing as SourceEdit
+    const { id, url } = editing as SourceEdit
     if (url === '') {
       dispatch(deleteContentSource(id))
     } else {
@@ -189,7 +201,12 @@ function SourceListItem(props: SourceListItemProps) {
   }
 
   const onChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSourceLibraryEditing({id: editing?.id as number, url: e.currentTarget.value}))
+    dispatch(
+      setSourceLibraryEditing({
+        id: editing?.id as number,
+        url: e.currentTarget.value
+      })
+    )
   }
 
   const onSourceIconClick = async (/*e: MouseEvent<HTMLButtonElement>*/) => {
@@ -265,16 +282,18 @@ function SourceListItem(props: SourceListItemProps) {
   }
 
   const getClipsLabel = (source?: ContentSource) => {
-    if(source == null) {
+    if (source == null) {
       return '0'
     }
 
     const totalClipsCount = source.clips.length
-    if(totalClipsCount === 0 || source.disabledClips.length === 0) {
+    if (totalClipsCount === 0 || source.disabledClips.length === 0) {
       return totalClipsCount.toString()
     }
 
-    const enabledClipsCount = source.clips.filter((clipID) => !source?.disabledClips.includes(clipID)).length
+    const enabledClipsCount = source.clips.filter(
+      (clipID) => !source?.disabledClips.includes(clipID)
+    ).length
     return `${enabledClipsCount}/${totalClipsCount}`
   }
 

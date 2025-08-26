@@ -619,13 +619,13 @@ function SceneDetail() {
       setAddFunction(AF.videoDir)
     } else if (addFunction === AF.url && e?.shiftKey) {
       setOpenMenu(MO.urlImport)
-    } else if(addFunction === AF.url) {
+    } else if (addFunction === AF.url) {
       dispatch(setSourceLibraryAddHttpUrl(true))
-      await addContentSources({addFunction, sceneId: sceneID, urls: [""]})
+      await addContentSources({ addFunction, sceneId: sceneID, urls: [''] })
     } else if (addFunction === AF.directory || addFunction === AF.videos) {
       setOpenMenu(MO.openLocal)
       setAddFunction(addFunction)
-    } 
+    }
   }
 
   const onToggleDrawer = () => {
@@ -1460,7 +1460,11 @@ function SceneDetail() {
               setOpenMenu(undefined)
               setAddFunction(undefined)
               if (chosenFiles != null) {
-                await addContentSources({ addFunction: addFn, sceneId: sceneID, urls: chosenFiles })
+                await addContentSources({
+                  addFunction: addFn,
+                  sceneId: sceneID,
+                  urls: chosenFiles
+                })
               }
             }}
           />

@@ -74,7 +74,10 @@ import {
 } from '../../store/api/selectors'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryFilters } from '../../store/scriptLibrary/selectors'
-import { setScriptLibraryAddHttpUrl, setScriptLibraryFilters } from '../../store/scriptLibrary/slice'
+import {
+  setScriptLibraryAddHttpUrl,
+  setScriptLibraryFilters
+} from '../../store/scriptLibrary/slice'
 
 const drawerWidth = 240
 

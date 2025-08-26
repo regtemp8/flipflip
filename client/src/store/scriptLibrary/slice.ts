@@ -36,15 +36,12 @@ export const scriptLibrarySlice = createSlice({
     ) => {
       state.lastSelected = action.payload
     },
-    setScriptLibraryAddHttpUrl: (
-      state,
-      action: PayloadAction<boolean>
-    ) => {
+    setScriptLibraryAddHttpUrl: (state, action: PayloadAction<boolean>) => {
       state.addHttpUrl = action.payload
     },
     setScriptLibraryEditing: (
       state,
-      action: PayloadAction<ScriptEdit|undefined>
+      action: PayloadAction<ScriptEdit | undefined>
     ) => {
       state.editing = action.payload
     }
@@ -53,7 +50,7 @@ export const scriptLibrarySlice = createSlice({
     builder.addMatcher(
       flipflipApi.endpoints.getFilteredCaptionScripts.matchFulfilled,
       (state, action) => {
-        if(state.addHttpUrl) {
+        if (state.addHttpUrl) {
           state.editingId = action.payload[0]
         }
       }
@@ -61,9 +58,9 @@ export const scriptLibrarySlice = createSlice({
     builder.addMatcher(
       flipflipApi.endpoints.getCaptionScript.matchFulfilled,
       (state, action) => {
-        if(state.addHttpUrl && state.editingId === action.payload.id) {
-          const {id, url} = action.payload
-          state.editing = {id, url}
+        if (state.addHttpUrl && state.editingId === action.payload.id) {
+          const { id, url } = action.payload
+          state.editing = { id, url }
           state.addHttpUrl = false
           state.editingId = undefined
         }
@@ -77,7 +74,7 @@ export const {
   setScriptLibraryFilters,
   setScriptLibraryLastSelected,
   setScriptLibraryEditing,
-  setScriptLibraryAddHttpUrl,
+  setScriptLibraryAddHttpUrl
 } = scriptLibrarySlice.actions
 
 export default scriptLibrarySlice.reducer

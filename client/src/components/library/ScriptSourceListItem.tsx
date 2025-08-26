@@ -32,8 +32,15 @@ import { useNavigate } from 'react-router'
 import { selectSpecialMode } from '../../store/app/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
-import { selectScriptLibraryEditing, selectScriptLibraryIsLastSelected } from '../../store/scriptLibrary/selectors'
-import { ScriptEdit, setScriptLibraryEditing, setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
+import {
+  selectScriptLibraryEditing,
+  selectScriptLibraryIsLastSelected
+} from '../../store/scriptLibrary/selectors'
+import {
+  ScriptEdit,
+  setScriptLibraryEditing,
+  setScriptLibraryLastSelected
+} from '../../store/scriptLibrary/slice'
 import {
   deleteCaptionScript,
   updateCaptionScript
@@ -153,24 +160,16 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
 
   const editing = useAppSelector(selectScriptLibraryEditing())
 
-  const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (e.shiftKey && !e.ctrlKey) {
-      window.open(script?.fileUrl, '_blank')?.focus()
-    } else if (!e.shiftKey && !e.ctrlKey) {
-      props.onPlay(props.scriptID)
-    }
-  }
-
   const beginEditingUrl = () => {
-    if (script != null) {      
-      const {id, url} = script
-      dispatch(setScriptLibraryEditing({id, url}))
+    if (script != null) {
+      const { id, url } = script
+      dispatch(setScriptLibraryEditing({ id, url }))
     }
   }
 
   const endEditingUrl = (e: FormEvent) => {
     e.preventDefault()
-    const {id, url} = editing as ScriptEdit
+    const { id, url } = editing as ScriptEdit
     if (url === '') {
       dispatch(deleteCaptionScript(id))
     } else {
@@ -181,7 +180,20 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   }
 
   const onChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
-    dispatch(setScriptLibraryEditing({id: editing?.id as number, url: e.currentTarget.value}))
+    dispatch(
+      setScriptLibraryEditing({
+        id: editing?.id as number,
+        url: e.currentTarget.value
+      })
+    )
+  }
+
+  const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (e.shiftKey && !e.ctrlKey) {
+      window.open(script?.fileUrl, '_blank')?.focus()
+    } else if (!e.shiftKey && !e.ctrlKey) {
+      props.onPlay(props.scriptID)
+    }
   }
 
   const { classes } = useStyles()

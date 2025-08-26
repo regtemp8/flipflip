@@ -36,15 +36,12 @@ export const sourceLibrarySlice = createSlice({
     ) => {
       state.lastSelected = action.payload
     },
-    setSourceLibraryAddHttpUrl: (
-      state,
-      action: PayloadAction<boolean>
-    ) => {
+    setSourceLibraryAddHttpUrl: (state, action: PayloadAction<boolean>) => {
       state.addHttpUrl = action.payload
     },
     setSourceLibraryEditing: (
       state,
-      action: PayloadAction<SourceEdit|undefined>
+      action: PayloadAction<SourceEdit | undefined>
     ) => {
       state.editing = action.payload
     }
@@ -53,7 +50,7 @@ export const sourceLibrarySlice = createSlice({
     builder.addMatcher(
       flipflipApi.endpoints.getFilteredContentSources.matchFulfilled,
       (state, action) => {
-        if(state.addHttpUrl) {
+        if (state.addHttpUrl) {
           state.editingId = action.payload[0]
         }
       }
@@ -61,9 +58,9 @@ export const sourceLibrarySlice = createSlice({
     builder.addMatcher(
       flipflipApi.endpoints.getContentSource.matchFulfilled,
       (state, action) => {
-        if(state.addHttpUrl && state.editingId === action.payload.id) {
-          const {id, url} = action.payload
-          state.editing = {id, url}
+        if (state.addHttpUrl && state.editingId === action.payload.id) {
+          const { id, url } = action.payload
+          state.editing = { id, url }
           state.addHttpUrl = false
           state.editingId = undefined
         }
@@ -77,7 +74,7 @@ export const {
   setSourceLibraryFilters,
   setSourceLibraryLastSelected,
   setSourceLibraryEditing,
-  setSourceLibraryAddHttpUrl,
+  setSourceLibraryAddHttpUrl
 } = sourceLibrarySlice.actions
 
 export default sourceLibrarySlice.reducer
