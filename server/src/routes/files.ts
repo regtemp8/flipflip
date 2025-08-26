@@ -6,7 +6,8 @@ import {
   FilePickerItem,
   isAudio,
   isImage,
-  isVideo
+  isVideo,
+  isVideoPlaylist
 } from 'flipflip-common'
 import Logger from '../logging/Logger'
 import { getSaveDir, getThumbsDir } from '../utils'
@@ -26,19 +27,18 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     if (!cwd.startsWith('/')) {
       cwd = '/' + cwd
     }
-    if(!fs.existsSync(cwd)) {
-      res.status(400).send({error: `Path '${cwd}' doesn't exist`})
+    if (!fs.existsSync(cwd)) {
+      res.status(400).send({ error: `Path '${cwd}' doesn't exist` })
       return
     }
-    if(!fs.statSync(cwd).isDirectory()) {
-      res.status(400).send({error: `Path '${cwd}' is not a directory`})
+    if (!fs.statSync(cwd).isDirectory()) {
+      res.status(400).send({ error: `Path '${cwd}' is not a directory` })
       return
     }
 
     dir = cwd
   }
 
-  logger.info(`DIR: ${dir}`)
   dir = path.resolve(dir)
   let dirents: Dirent[]
   try {
@@ -71,7 +71,10 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     )
   } else if (type === 'video') {
     dirents = dirents.filter(
-      (dirent) => dirent.isDirectory() || isVideo(dirent.name, true)
+      (dirent) =>
+        dirent.isDirectory() ||
+        isVideo(dirent.name, true) ||
+        isVideoPlaylist(dirent.name, true)
     )
   }
 

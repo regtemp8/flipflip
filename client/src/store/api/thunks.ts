@@ -551,7 +551,7 @@ const updateContentSource = (
 }
 
 export const setContentSourceUrl = (id: number, url: string) => {
-    return updateContentSource({ id, url })
+  return updateContentSource({ id, url })
 }
 
 export const setContentSourceDirOfSources = (id: number) => {
@@ -604,7 +604,7 @@ const deleteLocalContentSource = (id: number) => {
     } of flipflipApi.util.selectInvalidatedBy(getState(), [
       { type: 'ContentSource', id: 'FilteredList' }
     ])) {
-      if (endpointName !== 'getFilteredSceneContentSources') continue
+      if (endpointName !== 'getFilteredContentSources') continue
       dispatch(
         flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
           draft.filter((v) => v !== id)

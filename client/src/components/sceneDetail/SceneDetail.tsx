@@ -94,10 +94,11 @@ import {
   useGetSceneRegenerateQuery
 } from '../../store/api/selectors'
 import {
-  useAddSceneContentSourcesMutation,
+  useAddContentSourcesMutation,
   useCloneSceneMutation,
+  useDeleteContentSourcesMutation,
   useDeleteSceneMutation,
-  useGetFilteredSceneContentSourcesQuery,
+  useGetFilteredContentSourcesQuery,
   useGetSceneQuery,
   usePlaySceneMutation
 } from '../../store/api/slice'
@@ -453,7 +454,8 @@ function SceneDetail() {
   const [deleteScene] = useDeleteSceneMutation()
   const [cloneScene] = useCloneSceneMutation()
   const [playScene] = usePlaySceneMutation()
-  const [addContentSources] = useAddSceneContentSourcesMutation()
+  const [addContentSources] = useAddContentSourcesMutation()
+  const [deleteContentSources] = useDeleteContentSourcesMutation()
   const editingName = useAppSelector(selectSceneDetailEditingName())
   const { data: scene } = useGetSceneQuery(sceneID)
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
@@ -463,8 +465,8 @@ function SceneDetail() {
 
   const regenerate = useGetSceneRegenerateQuery(sceneID)
   const filters = useAppSelector(selectSceneDetailFilters())
-  const { data: displaySources } = useGetFilteredSceneContentSourcesQuery({
-    id: sceneID,
+  const { data: displaySources } = useGetFilteredContentSourcesQuery({
+    sceneId: sceneID,
     filters
   })
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
@@ -472,6 +474,7 @@ function SceneDetail() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
+  const [addFunction, setAddFunction] = useState<string>()
   const [sceneEffects, setSceneEffects] = useState('')
   const [confirmCopy, _setConfirmCopy] = useState(false)
 
@@ -612,16 +615,17 @@ function SceneDetail() {
       // dispatch(doneTutorial(SDT.add2))
       // dispatch(addSource('tutorial', id))
     } else if (addFunction === AF.videos && e?.shiftKey) {
-      // dispatch(addSource(AF.videoDir, id, ...args))
+      setOpenMenu(MO.openLocal)
+      setAddFunction(AF.videoDir)
     } else if (addFunction === AF.url && e?.shiftKey) {
       setOpenMenu(MO.urlImport)
-    } else if (addFunction === AF.directory) {
-      setOpenMenu(MO.openLocal)
     } else if(addFunction === AF.url) {
       dispatch(setSourceLibraryAddHttpUrl(true))
-      await addContentSources({id: sceneID, sources: [""]})
-      // dispatch(addSource(addFunction, id, ...args))
-    }
+      await addContentSources({addFunction, sceneId: sceneID, urls: [""]})
+    } else if (addFunction === AF.directory || addFunction === AF.videos) {
+      setOpenMenu(MO.openLocal)
+      setAddFunction(addFunction)
+    } 
   }
 
   const onToggleDrawer = () => {
@@ -722,9 +726,9 @@ function SceneDetail() {
     setOpenMenu(MO.removeAllAlert)
   }
 
-  const onFinishRemoveAll = () => {
-    // dispatch(setSceneRemoveAllSources(id))
+  const onFinishRemoveAll = async () => {
     onCloseDialog()
+    await deleteContentSources(sceneID)
   }
 
   const onFinishRemoveVisible = () => {
@@ -1263,7 +1267,7 @@ function SceneDetail() {
 
       {openTab === 3 && (
         <>
-          {(scene?.sources?.length ?? 0) > 0 && (
+          {(displaySources?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
               title={
@@ -1448,13 +1452,15 @@ function SceneDetail() {
           />
           <FilePicker
             open={openMenu === MO.openLocal}
-            type="dir"
+            type={addFunction === AF.videos ? 'video' : 'dir'}
             path=""
             multiple
             onClose={async (chosenFiles?: string[]) => {
+              const addFn = addFunction as string
               setOpenMenu(undefined)
+              setAddFunction(undefined)
               if (chosenFiles != null) {
-                await addContentSources({ id: sceneID, sources: chosenFiles })
+                await addContentSources({ addFunction: addFn, sceneId: sceneID, urls: chosenFiles })
               }
             }}
           />

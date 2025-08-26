@@ -40,7 +40,8 @@ import {
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,
   ViewerEvent,
-  LatestVersion
+  LatestVersion,
+  AddContentSourceRequest
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -381,23 +382,40 @@ export const flipflipApi = createApi({
       providesTags: (scene) =>
         scene != null ? [{ type: 'Scene', id: scene.id }] : []
     }),
-    getFilteredSceneContentSources: builder.query<
+    getFilteredContentSources: builder.query<
       number[],
-      { id: number; filters: string[] }
+      { filters: string[]; sceneId?: number }
     >({
-      query: ({ id, filters }) => {
-        let filtersQuery =
-          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
-        if (filtersQuery !== '') {
-          filtersQuery = `?filters=${filtersQuery}`
+      query: ({ filters, sceneId }) => {
+        const queries: string[] = []
+        if (sceneId != null) {
+          queries.push(`scene=${sceneId}`)
+        }
+        if (filters.length > 0) {
+          queries.push(`filters=${encodeURIComponent(JSON.stringify(filters))}`)
         }
 
+        const query = queries.length > 0 ? '?' + queries.join('&') : ''
         return {
-          url: `api/scenes/${id}/content-sources/filtered${filtersQuery}`
+          url: `api/content-sources/filtered${query}`
         }
       },
       providesTags: (_result, error) =>
         error == null ? [{ type: 'ContentSource', id: 'FilteredList' }] : []
+    }),
+    deleteContentSources: builder.mutation<void, number | undefined>({
+      query: (sceneId) => {
+        const query = sceneId != null ? `?scene=${sceneId}` : ''
+        return {
+          url: `api/content-sources${query}`,
+          method: 'DELETE'
+        }
+      },
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(flipflipApi.util.invalidateTags(['ContentSource']))
+      }
     }),
     deleteScene: builder.mutation<void, number>({
       query: (id) => ({
@@ -523,18 +541,19 @@ export const flipflipApi = createApi({
         // await queryFulfilled.catch((reason) => {})
       }
     }),
-    addSceneContentSources: builder.mutation<
-      void,
-      { id: number; sources: string[] }
-    >({
-      query: ({ id, sources }) => ({
-        url: `api/scenes/${id}/content-sources`,
+    addContentSources: builder.mutation<void, AddContentSourceRequest>({
+      query: (body) => ({
+        url: `api/content-sources`,
         method: 'POST',
-        body: sources
+        body
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        await queryFulfilled.then(({ meta }) => {
+        await queryFulfilled.then(({ meta, data }) => {
           if (meta?.response?.ok) {
+            if (data != null) {
+              snackbar().showMessage(data)
+            }
+
             dispatch(
               flipflipApi.util.invalidateTags([
                 { type: 'ContentSource', id: 'List' },
@@ -1932,7 +1951,8 @@ export const {
   useResetSettingsMutation,
   useGetScenesQuery,
   useGetSceneQuery,
-  useGetFilteredSceneContentSourcesQuery,
+  useGetFilteredContentSourcesQuery,
+  useDeleteContentSourcesMutation,
   useDeleteSceneMutation,
   useCreateSceneMutation,
   useCloneSceneMutation,
@@ -1943,7 +1963,7 @@ export const {
   useGetSceneDisableWeightOptionsQuery,
   useGetSceneHasBPMQuery,
   useGetSceneSettingsQuery,
-  useAddSceneContentSourcesMutation,
+  useAddContentSourcesMutation,
   useAddSceneScriptPlaylistMutation,
   useDeleteSceneScriptPlaylistMutation,
   useAddSceneAudioPlaylistMutation,

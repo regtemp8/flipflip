@@ -51,7 +51,7 @@ export const sourceLibrarySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
-      flipflipApi.endpoints.getFilteredSceneContentSources.matchFulfilled,
+      flipflipApi.endpoints.getFilteredContentSources.matchFulfilled,
       (state, action) => {
         if(state.addHttpUrl) {
           state.editingId = action.payload[0]

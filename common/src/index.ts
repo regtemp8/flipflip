@@ -56,5 +56,6 @@ export * from './lib/json/EffectsData';
 export * from './lib/json/ImageViewData';
 export * from './lib/json/ViewerEvent';
 export * from './lib/json/LatestVersion';
+export * from './lib/json/AddContentSourceRequest';
 export * from './lib/scrape/ScraperHelpers';
 export * from './lib/scrape/PlayerCaptcha';

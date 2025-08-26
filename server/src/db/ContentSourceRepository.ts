@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { Kysely } from 'kysely'
 import {
   ContentSource,
@@ -11,19 +12,51 @@ import { toNumber } from './utils'
 import {
   getSourceType,
   randomizeList,
+  AF,
   SF,
   ContentSortRequest,
-  ST
+  ST,
+  AddContentSourceRequest,
+  isVideo,
+  isVideoPlaylist,
+  Message
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
+import recursiveReadDir from 'recursive-readdir'
+import Logger from '../logging/Logger'
 
 export const IS_LIBRARY = 0
+const logger = Logger.create('ContentSourceRepository')
+
 export async function createContentSources(
-  urls: string[],
-  sceneId: number,
+  request: AddContentSourceRequest,
   userId: number
-) {
+): Promise<number[]> {
+  let urls = request.urls
+  if (request.addFunction == AF.videoDir) {
+    const videoUrls: string[] = []
+    for (const videoDir of urls) {
+      let files: string[] = []
+      try {
+        files = await recursiveReadDir(videoDir)
+      } catch (error) {
+        logger.error(`Failed to read video files in '{path}' directory`, {
+          path: videoDir,
+          error
+        })
+      }
+      for (const file of files) {
+        if (isVideo(file, true) || isVideoPlaylist(file, true)) {
+          videoUrls.push(file)
+        }
+      }
+    }
+
+    urls = videoUrls
+  }
+
+  const sceneId = request.sceneId ?? IS_LIBRARY
   return await db()
     .query()
     .transaction()
@@ -35,13 +68,17 @@ export async function createContentSources(
         .set((eb) => ({ index: eb('index', '+', urls.length) }))
         .execute()
 
+      const ids: number[] = []
       for (let i = 0; i < urls.length; i++) {
         const url = urls[i]
-        const librarySource = await trx
-          .selectFrom('contentSource')
-          .select(['id', 'count', 'countComplete'])
-          .where('sceneId', '=', IS_LIBRARY)
-          .executeTakeFirst()
+        const librarySource =
+          sceneId !== IS_LIBRARY
+            ? await trx
+                .selectFrom('contentSource')
+                .select(['id', 'count', 'countComplete'])
+                .where('sceneId', '=', IS_LIBRARY)
+                .executeTakeFirst()
+            : undefined
 
         const id = await trx
           .insertInto('contentSource')
@@ -67,6 +104,9 @@ export async function createContentSources(
           .executeTakeFirst()
           .then((result) => result?.id)
 
+        if (id != null) {
+          ids.push(id)
+        }
         if (id == null || sceneId == IS_LIBRARY || librarySource?.id == null) {
           continue
         }
@@ -131,17 +171,18 @@ export async function createContentSources(
           )
           .execute()
       }
+      return ids
     })
 }
 
-export async function findSceneContentSourceIds(
-  sceneId: number
+export async function findContentSourceIds(
+  sceneId?: number
 ): Promise<number[]> {
   return await db()
     .query()
     .selectFrom('contentSource')
     .select('id')
-    .where('sceneId', '=', sceneId)
+    .where('sceneId', '=', sceneId ?? IS_LIBRARY)
     .orderBy('index asc')
     .execute()
     .then((value) => value.map((v) => v.id as number))
@@ -632,6 +673,40 @@ export async function deleteContentSource(id: number) {
         .updateTable('contentSource')
         .set((eb) => ({ index: eb('index', '-', 1) }))
         .where('index', '>', index)
+        .execute()
+
+      return result
+    })
+}
+
+export async function deleteContentSources(sceneId?: number) {
+  sceneId = sceneId ?? IS_LIBRARY
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const ids = await trx
+        .selectFrom('contentSource')
+        .select('id')
+        .where('sceneId', '=', sceneId)
+        .execute()
+        .then((value) => value.map(({ id }) => id as number))
+
+      await trx
+        .deleteFrom('contentSourceBlacklistItem')
+        .where('contentSourceId', 'in', ids)
+        .execute()
+
+      await trx.deleteFrom('clip').where('contentSourceId', 'in', ids).execute()
+
+      await trx
+        .deleteFrom('contentSourceTag')
+        .where('contentSourceId', 'in', ids)
+        .execute()
+
+      const result = await trx
+        .deleteFrom('contentSource')
+        .where('sceneId', '=', sceneId)
         .execute()
 
       return result

@@ -22,12 +22,61 @@ import {
   findContentSourceTagIds,
   findTotalCount,
   sortContentSources,
-  deleteContentSource
+  deleteContentSource,
+  findContentSourceIds,
+  createContentSources,
+  deleteContentSources
 } from '../db/ContentSourceRepository'
 import { User } from '../db/types/entities'
-import { BatchTagRequest, ContentSortRequest } from 'flipflip-common'
+import {
+  AddContentSourceRequest,
+  BatchTagRequest,
+  ContentSortRequest,
+  Message
+} from 'flipflip-common'
 
 const router = express.Router()
+
+router.post('/', async (req, res, next) => {
+  try {
+    const userId = (req.user as User).id as number
+    const ids = await createContentSources(
+      req.body as AddContentSourceRequest,
+      userId
+    )
+    if (ids.length === 0) {
+      const message: Message = { info: 'No new sources added' }
+      res.status(200).send(message)
+    } else {
+      res.status(204).end()
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/', async (req, res) => {
+  const sceneQuery = req.query.scene
+  const sceneId = sceneQuery != null ? Number(sceneQuery) : undefined
+  const result = await deleteContentSources(sceneId)
+  const status = result[0].numDeletedRows > 0n ? 204 : 500
+  res.status(status).end()
+})
+
+router.get('/filtered', async (req, res) => {
+  const sceneQuery = req.query.scene
+  const sceneId = sceneQuery != null ? Number(sceneQuery) : undefined
+  const filtersQuery = req.query.filters
+  if (filtersQuery == null) {
+    const sourceIds = await findContentSourceIds(sceneId)
+    res.status(200).send(sourceIds)
+    return
+  }
+
+  // TODO add filtering
+  res.status(501).end()
+})
+
 router.get('/batch-tag-options', async (req, res) => {
   const userId = (req.user as User).id as number
   const options = await findBatchTagOptions(userId)
