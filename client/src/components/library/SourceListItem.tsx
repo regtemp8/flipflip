@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, CSSProperties, FormEvent, Fragment, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -24,7 +24,7 @@ import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt'
 
-import { SDT, ST } from 'flipflip-common'
+import { ContentSource, SDT, ST } from 'flipflip-common'
 import SourceIcon from './SourceIcon'
 import { grey } from '@mui/material/colors'
 import TagChip from './TagChip'
@@ -37,6 +37,10 @@ import {
   useGetCachingEnabledQuery
 } from '../../store/api/selectors'
 import { getTimestamp } from '../../utils'
+import { selectSourceLibraryEditing } from '../../store/sourceLibrary/selectors'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { setSourceLibraryEditing, SourceEdit } from '../../store/sourceLibrary/slice'
+import { deleteContentSource, setContentSourceUrl } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -139,37 +143,54 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export interface SourceListItemProps {
   checked: boolean
   index: number
-  isEditing: number
   isLibrary: boolean
   isSelect: boolean
   source: number
   sources: number[]
-  style: any
+  style: CSSProperties
   useWeights?: boolean
   onClean: (sourceURL: string) => void
   onDelete: (sourceID: number) => void
   onEditBlacklist: (sourceID: number) => void
-  onEndEdit: (newURL: string) => void
   onOpenClipMenu: (sourceID: number, e: MouseEvent) => void
   onOpenWeightMenu: (sourceID: number, e: MouseEvent) => void
   onRemove: (sourceID: number) => void
   onSourceOptions: (sourceID: number) => void
-  onStartEdit: (sourceID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
   savePosition: () => void
 }
 
 function SourceListItem(props: SourceListItemProps) {
+  const dispatch = useAppDispatch()
   const { data: tutorial } = useGetTutorialsQuery()
   const { data: cachingEnabled } = useGetCachingEnabledQuery()
   const { data: _cachingDirectory } = useGetCachingDirectoryQuery()
   const { data: source } = useGetContentSourceQuery(props.source)
 
-  const [urlInput, setUrlInput] = useState<string>()
+  const editing = useAppSelector(selectSourceLibraryEditing())
 
-  useEffect(() => {
-    setUrlInput(source?.url)
-  }, [source?.url])
+  const beginEditingUrl = () => {
+    if (source != null) {      
+      const {id, url} = source
+      dispatch(setSourceLibraryEditing({id, url}))
+    }
+  }
+
+  const endEditingUrl = (e: FormEvent) => {
+    e.preventDefault()
+    const {id, url} = editing as SourceEdit
+    if (url === '') {
+      dispatch(deleteContentSource(id))
+    } else {
+      dispatch(setContentSourceUrl(id, url))
+    }
+
+    dispatch(setSourceLibraryEditing(undefined))
+  }
+
+  const onChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSourceLibraryEditing({id: editing?.id as number, url: e.currentTarget.value}))
+  }
 
   const onSourceIconClick = async (/*e: MouseEvent<HTMLButtonElement>*/) => {
     // const sourceURL = source?.url as string
@@ -243,16 +264,18 @@ function SourceListItem(props: SourceListItemProps) {
     // dispatch(blacklistFile(sourceURL, undefined))
   }
 
-  const onStartEdit = (sourceID: number) => {
-    props.onStartEdit(sourceID)
-  }
+  const getClipsLabel = (source?: ContentSource) => {
+    if(source == null) {
+      return '0'
+    }
 
-  const onEditSource = (e: ChangeEvent<HTMLInputElement>) => {
-    setUrlInput(e.target.value)
-  }
+    const totalClipsCount = source.clips.length
+    if(totalClipsCount === 0 || source.disabledClips.length === 0) {
+      return totalClipsCount.toString()
+    }
 
-  const onEndEdit = () => {
-    props.onEndEdit(urlInput as string)
+    const enabledClipsCount = source.clips.filter((clipID) => !source?.disabledClips.includes(clipID)).length
+    return `${enabledClipsCount}/${totalClipsCount}`
   }
 
   // const openDirectory = (cachePath: string) => {
@@ -281,7 +304,7 @@ function SourceListItem(props: SourceListItemProps) {
     >
       <ListItem
         secondaryAction={
-          props.isEditing !== props.source && (
+          editing?.id !== props.source && (
             <Box
               className={cx(
                 tutorial?.current === SDT.sourceButtons && classes.highlight
@@ -329,21 +352,11 @@ function SourceListItem(props: SourceListItemProps) {
                 />
               )}
               {!props.isLibrary &&
-                source?.clips &&
-                source?.clips.length > 0 &&
+                (source?.clips?.length ?? 0) > 0 &&
                 sourceType === ST.video && (
                   <Chip
                     className={classes.countChip}
-                    label={
-                      (source?.disabledClips
-                        ? source?.clips.filter(
-                            (clipID) => !source?.disabledClips.includes(clipID)
-                          )
-                        : source?.clips
-                      ).length +
-                      '/' +
-                      source?.clips.length
-                    }
+                    label={getClipsLabel(source)}
                     onClick={(e: MouseEvent) =>
                       props.onOpenClipMenu(props.source, e)
                     }
@@ -524,21 +537,21 @@ function SourceListItem(props: SourceListItemProps) {
         </ListItemAvatar>
 
         <ListItemText classes={{ primary: classes.root }}>
-          {props.isEditing === props.source && (
-            <form onSubmit={onEndEdit} className={classes.urlField}>
+          {editing?.id === props.source && (
+            <form onSubmit={endEditingUrl} className={classes.urlField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
-                value={urlInput}
+                value={editing.url}
                 margin="none"
                 className={classes.urlField}
-                onBlur={onEndEdit}
-                onChange={onEditSource}
+                onBlur={endEditingUrl}
+                onChange={onChangeUrl}
               />
             </form>
           )}
-          {props.isEditing !== props.source && (
+          {editing?.id !== props.source && (
             <>
               <Typography
                 noWrap
@@ -546,7 +559,7 @@ function SourceListItem(props: SourceListItemProps) {
                   classes.noUserSelect,
                   tutorial?.current === SDT.sourceTitle && classes.highlight
                 )}
-                onClick={() => onStartEdit(props.source)}
+                onClick={beginEditingUrl}
               >
                 {source?.url}
               </Typography>

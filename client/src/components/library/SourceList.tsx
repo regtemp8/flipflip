@@ -748,7 +748,6 @@ function SourceList(props: SourceListProps) {
             props.selected.includes(sourceID)
           }
           index={index}
-          isEditing={isEditing}
           isLibrary={props.isLibrary ?? false}
           isSelect={props.isSelect ?? false}
           source={sourceID}
@@ -758,12 +757,10 @@ function SourceList(props: SourceListProps) {
           onClean={onClean}
           onDelete={onDelete}
           onEditBlacklist={onEditBlacklist}
-          onEndEdit={onEndEdit}
           onOpenClipMenu={onOpenClipMenu}
           onOpenWeightMenu={onOpenWeightMenu}
           onRemove={onRemove}
           onSourceOptions={onSourceOptions}
-          onStartEdit={onStartEdit}
           onToggleSelect={onToggleSelect}
           savePosition={savePosition}
         />

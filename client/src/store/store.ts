@@ -7,6 +7,7 @@ import displaySlice from './display/slice'
 import captionScriptorSlice from './captionScriptor/slice'
 import appSlice from './app/slice'
 import scriptLibrarySlice from './scriptLibrary/slice'
+import sourceLibrarySlice from './sourceLibrary/slice'
 import audioLibrarySlice from './audioLibrary/slice'
 import audioOptionsSlice from './audioOptions/slice'
 import audioEditSlice from './audioEdit/slice'
@@ -27,7 +28,8 @@ const store = configureStore({
     scriptLibrary: scriptLibrarySlice,
     audioLibrary: audioLibrarySlice,
     imagePlayer: imagePlayerSlice,
-    playlist: playlistSlice
+    playlist: playlistSlice,
+    sourceLibrary: sourceLibrarySlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(flipflipApi.middleware)

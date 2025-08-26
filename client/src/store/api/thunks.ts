@@ -25,6 +25,7 @@ import {
 } from 'flipflip-common'
 import { setScriptLibraryLastSelected } from '../scriptLibrary/slice'
 import { setAudioLibraryLastSelected } from '../audioLibrary/slice'
+import { setSourceLibraryLastSelected } from '../sourceLibrary/slice'
 
 const updateLocalAudio = (update: Pick<Audio, 'id'> & Partial<Audio>) => {
   return flipflipApi.util.updateQueryData('getAudio', update.id, (draft) => {
@@ -150,7 +151,6 @@ const deleteLocalCaptionScript = (id: number) => {
     } of flipflipApi.util.selectInvalidatedBy(getState(), [
       { type: 'CaptionScript', id: 'List' }
     ])) {
-      // we only want to update `getPosts` here
       if (endpointName !== 'getCaptionScripts') continue
       dispatch(
         flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
@@ -550,6 +550,10 @@ const updateContentSource = (
   }
 }
 
+export const setContentSourceUrl = (id: number, url: string) => {
+    return updateContentSource({ id, url })
+}
+
 export const setContentSourceDirOfSources = (id: number) => {
   return (dirOfSources: boolean) => {
     return updateContentSource({ id, dirOfSources })
@@ -589,6 +593,57 @@ export const setContentSourceIncludeRetweets = (id: number) => {
 export const setContentSourceWeight = (id: number) => {
   return (weight: number) => {
     return updateContentSource({ id, weight })
+  }
+}
+
+const deleteLocalContentSource = (id: number) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    for (const {
+      endpointName,
+      originalArgs
+    } of flipflipApi.util.selectInvalidatedBy(getState(), [
+      { type: 'ContentSource', id: 'FilteredList' }
+    ])) {
+      if (endpointName !== 'getFilteredSceneContentSources') continue
+      dispatch(
+        flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+          draft.filter((v) => v !== id)
+        )
+      )
+    }
+    // TODO { type: 'ContentSource', id: 'List' } not used right now
+    // for (const {
+    //   endpointName,
+    //   originalArgs
+    // } of flipflipApi.util.selectInvalidatedBy(getState(), [
+    //   { type: 'ContentSource', id: 'List' }
+    // ])) {
+    //   if (endpointName !== 'getSceneContentSources') continue
+    //   dispatch(
+    //     flipflipApi.util.updateQueryData(endpointName, originalArgs, (draft) =>
+    //       draft.filter((v) => v !== id)
+    //     )
+    //   )
+    // }
+  }
+}
+
+const deleteRemoteContentSource = debounce(
+  (id: number, dispatch: AppDispatch) => {
+    dispatch(flipflipApi.endpoints.deleteContentSource.initiate(id))
+  },
+  250
+)
+
+export const deleteContentSource = (id: number) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState()
+    if (state.sourceLibrary.lastSelected === id) {
+      dispatch(setSourceLibraryLastSelected(undefined))
+    }
+
+    dispatch(deleteLocalContentSource(id))
+    deleteRemoteContentSource(id, dispatch)
   }
 }
 

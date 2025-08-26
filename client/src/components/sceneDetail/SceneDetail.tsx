@@ -106,6 +106,7 @@ import snackbar from '../../data/Snackbar'
 import { setFullScreen } from '../../data/fullscreen'
 import FilePicker from '../common/FilePicker'
 import { setSceneDetailEditingName } from '../../store/sceneDetail/slice'
+import { setSourceLibraryAddHttpUrl } from '../../store/sourceLibrary/slice'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -602,7 +603,7 @@ function SceneDetail() {
     setOpenMenu(MO.simpleRule)
   }
 
-  const onAddSource = (
+  const onAddSource = async (
     addFunction: string,
     e?: MouseEvent /*...args: any[]*/
   ) => {
@@ -616,7 +617,9 @@ function SceneDetail() {
       setOpenMenu(MO.urlImport)
     } else if (addFunction === AF.directory) {
       setOpenMenu(MO.openLocal)
-    } else {
+    } else if(addFunction === AF.url) {
+      dispatch(setSourceLibraryAddHttpUrl(true))
+      await addContentSources({id: sceneID, sources: [""]})
       // dispatch(addSource(addFunction, id, ...args))
     }
   }
