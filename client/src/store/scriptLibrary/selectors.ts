@@ -11,3 +11,7 @@ export const selectScriptLibraryFilters = () => {
 export const selectScriptLibraryIsLastSelected = (scriptID: number) => {
   return (state: RootState) => state.scriptLibrary.lastSelected === scriptID
 }
+
+export const selectScriptLibraryEditing = () => {
+  return (state: RootState) => state.scriptLibrary.editing
+}

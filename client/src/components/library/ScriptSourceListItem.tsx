@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, CSSProperties, FormEvent, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -32,8 +32,12 @@ import { useNavigate } from 'react-router'
 import { selectSpecialMode } from '../../store/app/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
-import { selectScriptLibraryIsLastSelected } from '../../store/scriptLibrary/selectors'
-import { setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
+import { selectScriptLibraryEditing, selectScriptLibraryIsLastSelected } from '../../store/scriptLibrary/selectors'
+import { ScriptEdit, setScriptLibraryEditing, setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
+import {
+  deleteCaptionScript,
+  updateCaptionScript
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -131,13 +135,10 @@ function ListItemTagChip(props: ListItemTagChip) {
 export interface ScriptSourceListItemProps {
   checked: boolean
   index: number
-  isEditing: number
   scriptID: number
-  style: any
-  onEndEdit: (newURL: string) => void
+  style: CSSProperties
   onPlay: (scriptID: number) => void
   onRemove: (scriptID: number) => void
-  onStartEdit: (scriptID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
@@ -150,13 +151,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   )
   const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
-  const [urlInput, setUrlInput] = useState<string>('')
-
-  useEffect(() => {
-    if (props.isEditing === props.scriptID) {
-      setUrlInput(script?.url ?? '')
-    }
-  }, [props.isEditing, props.scriptID, script?.url])
+  const editing = useAppSelector(selectScriptLibraryEditing())
 
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey && !e.ctrlKey) {
@@ -166,12 +161,27 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
     }
   }
 
-  const onEditSource = (e: ChangeEvent<HTMLInputElement>) => {
-    setUrlInput(e.target.value)
+  const beginEditingUrl = () => {
+    if (script != null) {      
+      const {id, url} = script
+      dispatch(setScriptLibraryEditing({id, url}))
+    }
   }
 
-  const onEndEdit = () => {
-    props.onEndEdit(urlInput)
+  const endEditingUrl = (e: FormEvent) => {
+    e.preventDefault()
+    const {id, url} = editing as ScriptEdit
+    if (url === '') {
+      dispatch(deleteCaptionScript(id))
+    } else {
+      dispatch(updateCaptionScript({ id, url }))
+    }
+
+    dispatch(setScriptLibraryEditing(undefined))
+  }
+
+  const onChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setScriptLibraryEditing({id: editing?.id as number, url: e.currentTarget.value}))
   }
 
   const { classes } = useStyles()
@@ -185,7 +195,7 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
     >
       <ListItem
         secondaryAction={
-          props.isEditing !== props.scriptID && (
+          editing?.id !== props.scriptID && (
             <>
               {!specialMode && (
                 <IconButton
@@ -283,26 +293,26 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
         </ListItemAvatar>
 
         <ListItemText classes={{ primary: classes.root }}>
-          {props.isEditing === props.scriptID && (
-            <form onSubmit={onEndEdit} className={classes.urlField}>
+          {editing?.id === props.scriptID && (
+            <form onSubmit={endEditingUrl} className={classes.urlField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
-                value={urlInput}
+                value={editing.url}
                 margin="none"
                 className={classes.urlField}
-                onBlur={onEndEdit}
-                onChange={onEditSource}
+                onBlur={endEditingUrl}
+                onChange={onChangeUrl}
               />
             </form>
           )}
-          {props.isEditing !== props.scriptID && (
+          {editing?.id !== props.scriptID && (
             <>
               <Typography
                 noWrap
                 className={classes.noUserSelect}
-                onClick={() => props.onStartEdit(props.scriptID)}
+                onClick={beginEditingUrl}
               >
                 {script?.url ?? ''}
               </Typography>

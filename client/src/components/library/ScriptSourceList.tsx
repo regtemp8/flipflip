@@ -18,13 +18,12 @@ import { makeStyles } from 'tss-react/mui'
 
 import ScriptSourceListItem from './ScriptSourceListItem'
 import SceneSelect from '../configGroups/SceneSelect'
-import { SP } from 'flipflip-common'
+import { SCENE_NONE, SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import {
   deleteCaptionScript,
   moveCaptionScript,
-  updateCaptionScript
 } from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
@@ -75,15 +74,13 @@ export interface ScriptSourceListProps {
   scripts: number[]
   filters: string[]
   sources: number[]
-  addHttpURL: boolean
   selected: number[]
   onUpdateSelected: (selected: number[]) => void
-  onEndAddHttpURL: () => void
 }
 
 function ScriptSourceList(props: ScriptSourceListProps) {
   const dispatch = useAppDispatch()
-  const [isEditing, setIsEditing] = useState(-1)
+
   const [beginPlay, setBeginPlay] = useState<number>()
   const [playWithScene, setPlayWithScene] = useState<number>()
 
@@ -112,12 +109,6 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       _lastChecked.current = undefined
     }
   }, [])
-
-  useEffect(() => {
-    if (props.addHttpURL) {
-      onStartEdit(props.sources[0])
-    }
-  }, [props.addHttpURL, props.sources])
 
   const onSortEnd = ({
     oldIndex,
@@ -182,26 +173,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     }
   }
 
-  const onStartEdit = (id: number) => {
-    setIsEditing(id)
-  }
-
-  const onEndEdit = async (url: string) => {
-    if (url === '') {
-      dispatch(deleteCaptionScript(isEditing))
-    } else {
-      dispatch(updateCaptionScript({ id: isEditing, url }))
-    }
-    if (props.addHttpURL) {
-      props.onEndAddHttpURL()
-    }
-
-    setIsEditing(-1)
-  }
-
   const onPlay = (scriptID: number) => {
     setBeginPlay(scriptID)
-    setPlayWithScene(0)
+    setPlayWithScene(SCENE_NONE)
   }
 
   const onClosePlayDialog = () => {
@@ -215,7 +189,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       // const scriptID = beginPlay as number
       // const sceneID = playWithScene as number
       // dispatch(playScript(scriptID, sceneID, sources))
-    } catch (e) {
+    } catch {
       snackbar().showMessage({
         error: 'The source ' + beginPlayURL + " isn't in your Library"
       })
@@ -268,13 +242,10 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             key={index}
             checked={isChecked(scriptID)}
             index={index}
-            isEditing={isEditing}
             scriptID={scriptID}
             style={value.style}
-            onEndEdit={onEndEdit}
             onPlay={onPlay}
             onRemove={onRemove}
-            onStartEdit={onStartEdit}
             onToggleSelect={onToggleSelect}
           />
         )
@@ -360,7 +331,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             <SceneSelect
               autoFocus
               menuIsOpen
-              value={playWithScene ?? 0}
+              value={playWithScene ?? SCENE_NONE}
               onChange={onChangeScene}
             />
           </DialogContent>
@@ -369,7 +340,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
               Cancel
             </Button>
             <Button
-              disabled={playWithScene == null || playWithScene === 0}
+              disabled={playWithScene == null || playWithScene === SCENE_NONE}
               onClick={onFinishPlay}
               color="primary"
             >

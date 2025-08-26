@@ -74,7 +74,7 @@ import {
 } from '../../store/api/selectors'
 import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import { selectScriptLibraryFilters } from '../../store/scriptLibrary/selectors'
-import { setScriptLibraryFilters } from '../../store/scriptLibrary/slice'
+import { setScriptLibraryAddHttpUrl, setScriptLibraryFilters } from '../../store/scriptLibrary/slice'
 
 const drawerWidth = 240
 
@@ -349,7 +349,6 @@ function ScriptLibrary() {
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
   const [selected, setSelected] = useState<number[]>([])
-  const [addHttpURL, setAddHttpURL] = useState(false)
   const selectedTagIDs = useAppSelector(
     selectScriptLibrarySelectedTagIDs(selected)
   )
@@ -407,8 +406,8 @@ function ScriptLibrary() {
   const onAddSource = async (type: string) => {
     switch (type) {
       case AF.url:
+        dispatch(setScriptLibraryAddHttpUrl(true))
         await createScripts([''])
-        setAddHttpURL(true)
         onCloseDialog()
         break
       case AF.script:
@@ -690,9 +689,7 @@ function ScriptLibrary() {
               scripts={scripts ?? []}
               filters={filters}
               sources={displaySources ?? []}
-              addHttpURL={addHttpURL}
               onUpdateSelected={onUpdateSelected}
-              onEndAddHttpURL={() => setAddHttpURL(false)}
             />
           </Container>
         </div>
