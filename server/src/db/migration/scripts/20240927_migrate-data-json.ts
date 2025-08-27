@@ -48,12 +48,13 @@ import { IS_LIBRARY } from '../../ContentSourceRepository'
 
 const logger = Logger.create('DB Migration - migrate-data-json')
 const getDataJsonPath = () => {
-  const saveDir = getElectronSaveDir()
+  const saveDir = process.env.FF3_DATA_DIR ?? getElectronSaveDir()
   return saveDir != null ? path.join(saveDir, 'data.json') : undefined
 }
 
 const getDataJsonPortablePath = () => {
-  return path.join(process.cwd(), 'data.json')
+  const saveDir = process.env.FF3_DATA_DIR ?? process.cwd()
+  return path.join(saveDir, 'data.json')
 }
 
 const readDataJsonFile = (): AppStorage | undefined => {

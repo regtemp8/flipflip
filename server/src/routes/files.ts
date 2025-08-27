@@ -2,6 +2,7 @@ import fs, { Dirent } from 'fs'
 import path from 'path'
 import express, { Request, Response } from 'express'
 import {
+  AF,
   FilePickerData,
   FilePickerItem,
   isAudio,
@@ -19,9 +20,19 @@ import proxy from './ProxyService'
 import fileRegistry from './FileRegistry'
 
 const logger = Logger.create('files')
+
+const typeDirs = new Map<string, string | undefined>([
+  [AF.script, process.env.FF_SCRIPT_DIR],
+  [AF.audios, process.env.FF_AUDIO_DIR],
+  [AF.directory, process.env.FF_CONTENT_DIR],
+  [AF.videos, process.env.FF_VIDEO_DIR],
+  [AF.videoDir, process.env.FF_VIDEO_DIR]
+])
+
 const router = express.Router()
 router.get('/pick/:cwd(*)?', async (req, res) => {
-  let dir = getSaveDir()
+  let dir: string
+  const type = req.query.type as string
   if (req.params.cwd) {
     let cwd = req.params.cwd
     if (!cwd.startsWith('/')) {
@@ -37,6 +48,8 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     }
 
     dir = cwd
+  } else {
+    dir = typeDirs.get(type) ?? getSaveDir()
   }
 
   dir = path.resolve(dir)
@@ -54,14 +67,13 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     return
   }
 
-  const type = req.query.type
-  if (type === 'dir') {
+  if (type === 'dir' || type === AF.directory || type === AF.videoDir) {
     dirents = dirents.filter((dirent) => dirent.isDirectory())
-  } else if (type === 'txt') {
+  } else if (type === AF.script) {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || dirent.name.endsWith('.txt')
     )
-  } else if (type === 'audio') {
+  } else if (type === AF.audios) {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || isAudio(dirent.name, true)
     )
@@ -69,7 +81,7 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     dirents = dirents.filter(
       (dirent) => dirent.isDirectory() || isImage(dirent.name, true)
     )
-  } else if (type === 'video') {
+  } else if (type === AF.videos) {
     dirents = dirents.filter(
       (dirent) =>
         dirent.isDirectory() ||

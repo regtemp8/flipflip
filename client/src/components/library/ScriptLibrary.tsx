@@ -1006,7 +1006,7 @@ function ScriptLibrary() {
       </Dialog>
       <FilePicker
         open={openMenu === MO.openLocal}
-        type="txt"
+        type={AF.script}
         multiple
         path=""
         onClose={onOpenLocalFiles}

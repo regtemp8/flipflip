@@ -1749,7 +1749,7 @@ function AudioLibrary() {
       )}
       <FilePicker
         open={openMenu === MO.openLocal}
-        type="audio"
+        type={AF.audios}
         multiple
         path=""
         onClose={onOpenLocalFiles}
