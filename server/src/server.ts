@@ -71,7 +71,7 @@ const getNetworkInterfaceURLs = (
       urls.push({ name: 'Local', url: `http://localhost:${port}` })
       urls.push(...getNetworkInterfaceURLs(port))
     } else {
-      urls.push({ name: 'Configured URL', url: `http://${host}:${port}` })
+      urls.push({ name: 'URL', url: `http://${host}:${port}` })
     }
 
     return urls
