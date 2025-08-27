@@ -5,9 +5,21 @@ services:
       context: .
     # pull_policy: build # force build
     environment:
-      FF_SAVE_DIR: /var/lib/flipflip
+      FF_PORT: 5050
+      FF_HOST: localhost
+      FF_SAVE_DIR: /opt/flipflip
+      FF3_DATA_DIR: /tmp/flipflip
+      FF_SCRIPT_DIR: /home/root/scripts
+      FF_AUDIO_DIR: /home/root/audio
+      FF_CONTENT_DIR: /home/root/content
+      FF_VIDEO_DIR: /home/root/video
     volumes:
-      - ./docker-data/flipflip:/var/lib/flipflip
+      - ./docker-data/flipflip:/opt/flipflip
+      - ./docker-data/data/flipflip:/tmp/flipflip
+      - ./docker-data/data/scripts:/home/root/scripts
+      - ./docker-data/data/audio:/home/root/audio
+      - ./docker-data/data/content:/home/root/content
+      - ./docker-data/data/video:/home/root/video   
     ports:
       - 5050:5050
 
