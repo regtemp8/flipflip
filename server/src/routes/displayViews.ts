@@ -4,14 +4,14 @@ import {
   updateDisplayView
 } from '../db/DisplayViewRepository'
 import { DisplayView } from 'flipflip-common'
-import { toDisplayViewUpdate } from '../db/mappers'
+import { toDisplayView, toDisplayViewUpdate } from '../db/mappers'
 
 const router = express.Router()
 router.get('/:id', async (req, res) => {
   const id = Number(req.params.id)
   const displayView = await findDisplayViewById(id)
   if (displayView != null) {
-    res.status(200).send(displayView)
+    res.status(200).send(toDisplayView(displayView))
   } else {
     res.status(404).end()
   }
