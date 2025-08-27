@@ -47,10 +47,11 @@ import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
 import { loadImageViews } from '../imagePlayer/thunks'
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.host}/`
 export const flipflipApi = createApi({
   reducerPath: 'flipflipApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://localhost:${import.meta.env.VITE_PORT}/`,
+    baseUrl,
     credentials: 'include'
   }),
   tagTypes: [

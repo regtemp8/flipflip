@@ -2,8 +2,6 @@
 set -e # exit on error (non-zero exit code)
 set -x # print commands
 
-export SERVER_PORT=5050
-export FF_PORT=5050
 export NODE_ENV=production
 
 echo 'Building common'

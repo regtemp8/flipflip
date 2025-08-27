@@ -1,6 +1,7 @@
 import fs from 'fs'
+import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
-import express, { NextFunction, Request, Response } from 'express'
+import express, { Request, Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import connect from 'connect-sqlite3'
@@ -32,7 +33,8 @@ import {
   getServerPort,
   getThumbsDir,
   getBinDir,
-  getFfprobePath
+  getFfprobePath,
+  getServerHost
 } from './utils'
 import scheduler from './scheduler'
 import Logger from './logging/Logger'
@@ -40,8 +42,40 @@ import proxy from './routes/proxy'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
 import { pipeline } from 'stream/promises'
 
+const host = getServerHost()
 const port = getServerPort()
 const logger = Logger.create('server')
+
+const getNetworkInterfaceURLs = (
+    port: number
+  ): Array<{ name: string; url: string }> => {
+    const urls: Array<{ name: string; url: string }> = []
+    const interfaces = os.networkInterfaces()
+    for (const name of Object.keys(interfaces)) {
+      const infos = interfaces[name] as NetworkInterfaceInfo[]
+      for (const info of infos) {
+        if (info.family === 'IPv4' && !info.internal) {
+          const url = `http://${info.address}:${port}`
+          urls.push({ name, url })
+        }
+      }
+    }
+
+    return urls
+  }
+
+  const getNetworkURLs = (host: string, port: number) => {
+    const urls: Array<{ name: string; url: string }> = []
+    const allNetworkInterfaces = host === '0.0.0.0'
+    if (allNetworkInterfaces) {
+      urls.push({ name: 'Local', url: `http://localhost:${port}` })
+      urls.push(...getNetworkInterfaceURLs(port))
+    } else {
+      urls.push({ name: 'Configured URL', url: `http://${host}:${port}` })
+    }
+
+    return urls
+  }
 
 const extractBinaries = async () => {
   if (process.pkg == null) {
@@ -127,8 +161,7 @@ void (async function () {
     (
       error: NodeJS.ErrnoException,
       req: Request,
-      res: Response,
-      next: NextFunction
+      res: Response
     ) => {
       logger.error(`Failed to process request ${req.url}`, { error })
       const codes = ['SQLITE_CONSTRAINT_UNIQUE']
@@ -138,8 +171,13 @@ void (async function () {
     }
   )
 
-  const server = app.listen(port, () => {
-    logger.info(`Server listening on port ${port}`)
+  const server = app.listen(port, host, () => {
+    const url = getNetworkURLs(host, port).map((url) => `${url.name}:\t${url.url}`).join('\n\t\t')
+    let template = '\n\n\tYou can now view FlipFlip in the browser.\n'
+    template += '\t+-----------------------------------------------------------------------------------------+\n'
+    template += '\t\t{url}\n'
+    template += '\t+-----------------------------------------------------------------------------------------+\n'
+    logger.info(template, { url })
   })
 
   const signals = ['SIGTERM', 'SIGINT']

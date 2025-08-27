@@ -1,8 +1,6 @@
-ARG SERVER_PORT="5050"
 ARG NODE_ENV="production"
 
 FROM node:22-alpine AS builder
-ARG SERVER_PORT
 ARG NODE_ENV
 
 RUN apk add python3 py3-setuptools build-base make
@@ -26,10 +24,8 @@ RUN yarn install --immutable
 RUN yarn prod
 
 FROM node:22-alpine
-ARG SERVER_PORT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
-ENV FF_PORT=$SERVER_PORT
 
 COPY --chown=node:node ./server/package.json /home/node/server/
 COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
@@ -41,5 +37,4 @@ RUN corepack enable
 RUN corepack prepare yarn@stable --activate
 RUN yarn workspaces focus --production
 
-EXPOSE ${SERVER_PORT}
 ENTRYPOINT ["yarn", "node", "./server.js"]
