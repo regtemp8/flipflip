@@ -175,7 +175,7 @@ function AlbumListItem(props: AlbumListItemProps) {
 export interface PiwigoDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, urls?: string[]) => void
 }
 
 function PiwigoDialog(props: PiwigoDialogProps) {

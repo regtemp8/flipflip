@@ -7,35 +7,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField,
-  type Theme
+  TextField
 } from '@mui/material'
 
-import { makeStyles } from 'tss-react/mui'
-
 import { AF } from 'flipflip-common'
-
-const useStyles = makeStyles()((theme: Theme) => ({
-  root: {
-    display: 'flex'
-  },
-  rootInput: {
-    marginLeft: theme.spacing(2),
-    flexGrow: 1
-  },
-  urlInput: {
-    minWidth: 550,
-    minHeight: 300,
-    whiteSpace: 'nowrap',
-    overflowX: 'hidden',
-    overflowY: 'auto !important' as any
-  }
-}))
 
 export interface URLDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, urls?: string[]) => void
 }
 
 function URLDialog(props: URLDialogProps) {
@@ -46,16 +26,18 @@ function URLDialog(props: URLDialogProps) {
   }
 
   const onImportURL = () => {
-    props.onImportURL(AF.list, undefined, importURLs)
+    const urls = importURLs.split('\n').map((url) => url.trim()).filter((url) => url.length > 0)
+    props.onImportURL(AF.list, undefined, urls)
     setImportURLs('')
     props.onClose()
   }
 
-  const { classes } = useStyles()
   return (
     <Dialog
       open={props.open}
       onClose={props.onClose}
+      maxWidth='md'
+      fullWidth
       aria-labelledby="url-import-title"
       aria-describedby="url-import-description"
     >
@@ -71,7 +53,7 @@ function URLDialog(props: URLDialogProps) {
           multiline
           margin="dense"
           value={importURLs}
-          slotProps={{ htmlInput: { className: classes.urlInput } }}
+          rows={10}
           onChange={onURLChange}
         />
       </DialogContent>

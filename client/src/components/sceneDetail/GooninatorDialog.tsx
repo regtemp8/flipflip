@@ -34,7 +34,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export interface GooninatorDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, urls?: string[]) => void
 }
 
 function GooninatorDialog(props: GooninatorDialogProps) {
@@ -59,7 +59,8 @@ function GooninatorDialog(props: GooninatorDialogProps) {
   }
 
   const onImportURL = () => {
-    props.onImportURL(importType, undefined, importURL, rootDir)
+    // TODO support gooninator import
+    //props.onImportURL(importType, undefined, importURL, rootDir)
     props.onClose()
   }
 
