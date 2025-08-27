@@ -10,6 +10,7 @@
 - Remove display playlist
 - Remove authentication
 - Remove SSL
+- Remove default Tumblr API keys
 
 #### v4.0.0-beta4 <small>(09/24/2024)</small>
 - Display playback

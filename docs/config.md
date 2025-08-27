@@ -62,8 +62,7 @@ Turning caching off will prevent FlipFlip from reading from or writing to the ca
 These settings control how remote sources are used. 
 
 ### Tumblr
-By default, Tumblr API keys are provided. However, if you are experiencing 429 responses from Tumblr, you may replace 
-these with your own API keys to improve performance. Instructions for getting your own API key are [here](tumblr_api.md). 
+To access Tumblr you need an API key. Instructions for getting your own API key are [here](tumblr_api.md). 
 
 In order to import your Tumblr Following, you must first activate FlipFlip with your account. You should only ever 
 have to do this once.
