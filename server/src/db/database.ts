@@ -156,7 +156,7 @@ export class DatabaseService {
   }
 
   private databaseFileName() {
-    return getSaveDir() + path.sep + 'flipflip.db'
+    return path.join(getSaveDir(), 'flipflip.db')
   }
 
   private backupFileName(fileName: string) {
