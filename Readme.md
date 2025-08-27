@@ -31,10 +31,10 @@
 
 ## Quick start
 
-Check out our [quick start](https://regtemp8.github.io/flipflip/#/quickstart) guide.
+Check out our [quick start](https://regtemp8.github.io/flipflip/#/v4/quickstart) guide.
 
 ## Contributing
 
 Create a new branch, make your changes, and open a pull request. The policy of the FlipFlip project is, 
-"patches are generally accepted." See the [developers](https://regtemp8.github.io/flipflip/#/developers) 
+"patches are generally accepted." See the [developers](https://regtemp8.github.io/flipflip/#/v4/developers) 
 documentation to get started.

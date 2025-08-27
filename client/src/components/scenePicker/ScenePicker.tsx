@@ -748,7 +748,7 @@ function ScenePicker() {
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'User Manual'}>
             <ListItemButton
-              onClick={() => openLink('https://regtemp8.github.io/flipflip/#/')}
+              onClick={() => openLink('https://regtemp8.github.io/flipflip/#/v4/')}
             >
               <ListItemIcon>
                 <HelpIcon />

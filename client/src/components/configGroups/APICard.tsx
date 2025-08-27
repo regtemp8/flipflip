@@ -780,7 +780,7 @@ function APICard() {
             <Link
               href="#"
               onClick={() => {
-                openLink('https://regtemp8.github.io/flipflip/#/tumblr_api')
+                openLink('https://regtemp8.github.io/flipflip/#/v4/tumblr_api')
               }}
               underline="hover"
             >
