@@ -1,11 +1,11 @@
 import { type MouseEvent, useState } from 'react'
-import { SketchPicker } from 'react-color'
+import { Color, HEXColor, SketchPicker } from 'react-color'
 
 import { Fab, Menu, type Theme, Tooltip } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 import type ReduxProps from '../common/ReduxProps'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   colorPickerButton: {
@@ -23,10 +23,10 @@ export interface ColorPickerMinimalProps extends ReduxProps<string> {
 
 function ColorPickerMinimal(props: ColorPickerMinimalProps) {
   const dispatch = useAppDispatch()
-  const currentColor = useAppSelector(props.selector)
+  const { data: currentColor } = props.selector()
 
-  const [pickerColor, setPickerColor] = useState<any>()
-  const [pickerAnchorEl, setPickerAnchorEl] = useState<any>()
+  const [pickerColor, setPickerColor] = useState<Color>()
+  const [pickerAnchorEl, setPickerAnchorEl] = useState<Element>()
 
   const onToggleColorPicker = (e: MouseEvent) => {
     if (pickerColor) {
@@ -39,13 +39,20 @@ function ColorPickerMinimal(props: ColorPickerMinimalProps) {
     }
   }
 
-  const onChangePickerColor = (color: any) => {
+  const onChangePickerColor = (color: Color) => {
     setPickerColor(color)
   }
 
-  const onChangeColor = (color: any) => {
-    const value = color?.hex ?? color
+  const onChangeColor = (color: Color) => {
+    const value = (color as HEXColor)?.hex ?? color
     dispatch(props.action(value))
+  }
+
+  const getStyleValue = (
+    pickerColor?: Color,
+    currentColor?: string
+  ): string => {
+    return (pickerColor as HEXColor)?.hex ?? pickerColor ?? currentColor
   }
 
   const { classes } = useStyles()
@@ -56,11 +63,7 @@ function ColorPickerMinimal(props: ColorPickerMinimalProps) {
         <Fab
           className={classes.colorPickerButton}
           style={{
-            backgroundColor: pickerColor
-              ? pickerColor.hex
-                ? pickerColor.hex
-                : pickerColor
-              : currentColor
+            backgroundColor: getStyleValue(pickerColor, currentColor)
           }}
           onClick={onToggleColorPicker}
           size="small"
@@ -96,11 +99,7 @@ function ColorPickerMinimal(props: ColorPickerMinimalProps) {
     <Fab
       className={classes.colorPickerButton}
       style={{
-        backgroundColor: pickerColor
-          ? pickerColor.hex
-            ? pickerColor.hex
-            : pickerColor
-          : currentColor
+        backgroundColor: getStyleValue(pickerColor, currentColor)
       }}
       size="small"
     >

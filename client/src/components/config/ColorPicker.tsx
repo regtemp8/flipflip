@@ -78,12 +78,12 @@ function ColorPicker(props: ColorPickerProps) {
     }
   }
 
-  const onChangePickerColor = (color: any) => {
+  const onChangePickerColor = (color: Color) => {
     setPickerColor(color)
   }
 
-  const onChangeColor = (color: any) => {
-    const value = color?.hex ?? color
+  const onChangeColor = (color: Color) => {
+    const value = (color as HEXColor)?.hex ?? color
     dispatch(props.action(value))
   }
 

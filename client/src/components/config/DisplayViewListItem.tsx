@@ -10,17 +10,17 @@ import {
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch } from '../../store/hooks'
-// import { useGetDisplayViewColorQuery } from '../../store/api/selectors'
 import {
-  // setDisplayViewColor,
+  setDisplayViewColor,
   setDisplayViewName,
   setDisplayViewVisible
 } from '../../store/api/thunks'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-// import ColorPickerMinimal from './ColorPickerMinimal'
 import { setDisplaySelectedView } from '../../store/display/slice'
 import { cx } from '@emotion/css'
 import { useGetDisplayViewQuery } from '../../store/api/slice'
+import ColorPickerMinimal from './ColorPickerMinimal'
+import { useGetDisplayViewColorQuery } from '../../store/api/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -187,10 +187,10 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
         >
           {view?.visible ? <Visibility /> : <VisibilityOff />}
         </IconButton>
-        {/* <ColorPickerMinimal
+        <ColorPickerMinimal
           selector={() => useGetDisplayViewColorQuery(viewID)}
           action={setDisplayViewColor(viewID)}
-        /> */}
+        />
         <ListItemText classes={{ primary: classes.root }} onClick={onItemClick}>
           {editingName != null ? (
             <form onSubmit={onEndEdit} className={classes.urlField}>
