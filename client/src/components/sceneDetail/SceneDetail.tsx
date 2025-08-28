@@ -626,8 +626,12 @@ function SceneDetail() {
     } else if (addFunction === AF.directory || addFunction === AF.videos) {
       setOpenMenu(MO.openLocal)
       setAddFunction(addFunction)
-    } else if(addFunction === AF.list) {
-      await addContentSources({ addFunction, sceneId: sceneID, urls: urls as string[] })
+    } else if (addFunction === AF.list) {
+      await addContentSources({
+        addFunction,
+        sceneId: sceneID,
+        urls: urls as string[]
+      })
     }
   }
 

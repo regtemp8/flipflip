@@ -26,7 +26,10 @@ function URLDialog(props: URLDialogProps) {
   }
 
   const onImportURL = () => {
-    const urls = importURLs.split('\n').map((url) => url.trim()).filter((url) => url.length > 0)
+    const urls = importURLs
+      .split('\n')
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0)
     props.onImportURL(AF.list, undefined, urls)
     setImportURLs('')
     props.onClose()
@@ -36,7 +39,7 @@ function URLDialog(props: URLDialogProps) {
     <Dialog
       open={props.open}
       onClose={props.onClose}
-      maxWidth='md'
+      maxWidth="md"
       fullWidth
       aria-labelledby="url-import-title"
       aria-describedby="url-import-description"
