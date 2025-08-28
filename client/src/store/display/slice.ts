@@ -7,6 +7,7 @@ interface DisplayState {
   addedView: boolean
   autoEdit: boolean
   editingName?: string
+  editingViewName?: string
 }
 
 export const initialState: DisplayState = {
@@ -23,6 +24,12 @@ export const displaySlice = createSlice({
       action: PayloadAction<string | undefined>
     ) => {
       state.editingName = action.payload
+    },
+    setDisplayEditingViewName: (
+      state,
+      action: PayloadAction<string | undefined>
+    ) => {
+      state.editingViewName = action.payload
     },
     setDisplaySelectedView: (
       state,
@@ -71,6 +78,16 @@ export const displaySlice = createSlice({
         }
 
         // TODO if addedView, then scroll to bottom (displayViewsListYOffset)
+        // TODO or add views to top instead of bottom
+      }
+    )
+    builder.addMatcher(
+      flipflipApi.endpoints.getDisplayView.matchFulfilled,
+      (state, action) => {
+        if (state.addedView && state.selectedView === action.payload.id) {
+          state.editingViewName = action.payload.name
+        }
+
         state.addedView = false
       }
     )
@@ -79,6 +96,7 @@ export const displaySlice = createSlice({
 
 export const {
   setDisplayEditingName,
+  setDisplayEditingViewName,
   setDisplaySelectedView,
   setDisplayAddedView,
   setDisplayViewsListYOffset

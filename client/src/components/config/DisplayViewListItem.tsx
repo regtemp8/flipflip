@@ -1,4 +1,4 @@
-import { CSSProperties, ChangeEvent, useState } from 'react'
+import { CSSProperties, ChangeEvent } from 'react'
 import {
   IconButton,
   ListItem,
@@ -9,18 +9,19 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
-import { useAppDispatch } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   setDisplayViewColor,
   setDisplayViewName,
   setDisplayViewVisible
 } from '../../store/api/thunks'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { setDisplaySelectedView } from '../../store/display/slice'
+import { setDisplayEditingViewName, setDisplaySelectedView } from '../../store/display/slice'
 import { cx } from '@emotion/css'
 import { useGetDisplayViewQuery } from '../../store/api/slice'
 import ColorPickerMinimal from './ColorPickerMinimal'
 import { useGetDisplayViewColorQuery } from '../../store/api/selectors'
+import { selectDisplayEditingViewName } from '../../store/display/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -141,10 +142,10 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
   const dispatch = useAppDispatch()
   const { data: view } = useGetDisplayViewQuery(viewID)
 
-  const [editingName, setEditingName] = useState<string>()
+  const editingName = useAppSelector(selectDisplayEditingViewName())
 
   const onStartEdit = () => {
-    setEditingName(view?.name)
+    dispatch(setDisplayEditingViewName(view?.name))
   }
 
   const onEndEdit = () => {
@@ -152,11 +153,11 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
     if (value) {
       dispatch(setDisplayViewName(viewID, value))
     }
-    setEditingName(undefined)
+    dispatch(setDisplayEditingViewName(undefined))
   }
 
   const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
-    setEditingName(event.currentTarget.value)
+    dispatch(setDisplayEditingViewName(event.currentTarget.value))
   }
 
   const toggleVisibility = () => {
@@ -192,12 +193,11 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
           action={setDisplayViewColor(viewID)}
         />
         <ListItemText classes={{ primary: classes.root }} onClick={onItemClick}>
-          {editingName != null ? (
+          {selected && editingName != null ? (
             <form onSubmit={onEndEdit} className={classes.urlField}>
               <TextField
                 variant="standard"
                 autoFocus
-                id="title"
                 margin="none"
                 value={editingName}
                 onChange={onChangeName}
