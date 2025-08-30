@@ -28,6 +28,8 @@ export class SchedulerService {
 
   private scheduleBackupJob(settings: BackupSettings) {
     if (!settings.autoBackup) {
+      logger.info(`+ Cancel auto backup job`)
+      schedule.cancelJob('Auto Backup')
       return
     }
 
