@@ -14,7 +14,7 @@ test('Auto Backup', async ({ page }) => {
     page.getByText('DaysEvery', { exact: true }).locator('input')
   ).toBeDisabled()
 
-  await page.getByLabel('Auto Backup', { exact: true }).check()
+  await page.getByLabel('Auto Backup', { exact: true }).click()
   await expect(page.getByLabel('Auto Backup', { exact: true })).toBeChecked()
   await expect(
     page.getByText('DaysEvery', { exact: true }).locator('input')
@@ -29,7 +29,7 @@ test('Auto Backup', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Backup', { exact: true }).uncheck()
+  await page.getByLabel('Auto Backup', { exact: true }).click()
   await expect(
     page.getByLabel('Auto Backup', { exact: true })
   ).not.toBeChecked()
@@ -40,7 +40,7 @@ test('Auto Backup', async ({ page }) => {
 })
 
 test('Auto Backup Every Days input', async ({ page }) => {
-  await page.getByLabel('Auto Backup', { exact: true }).check()
+  await page.getByLabel('Auto Backup', { exact: true }).click()
 
   const input = page.getByText('DaysEvery', { exact: true }).locator('input')
   await expect(input).toHaveAttribute('type', 'number')
@@ -70,7 +70,7 @@ test('Auto Backup Every Days input', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Backup', { exact: true }).uncheck()
+  await page.getByLabel('Auto Backup', { exact: true }).click()
   await responsePromise
 })
 
@@ -86,6 +86,7 @@ test('Auto Clean Backup', async ({ page }) => {
     page.getByText('MonthsKeep Last', { exact: true }).locator('input')
   ).toBeDisabled()
 
+  await page.getByLabel('Auto Clean', { exact: true }).scrollIntoViewIfNeeded()
   await page.getByLabel('Auto Clean', { exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: /^If enabled, backups/ })
@@ -96,7 +97,16 @@ test('Auto Clean Backup', async ({ page }) => {
     'If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period.'
   )
 
-  await page.getByLabel('Auto Clean', { exact: true }).check()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/settings/general' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.autoCleanBackup === true &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await expect(page.getByLabel('Auto Clean', { exact: true })).toBeChecked()
   await expect(
     page.getByText('DaysKeep Last', { exact: true }).locator('input')
@@ -108,7 +118,8 @@ test('Auto Clean Backup', async ({ page }) => {
     page.getByText('MonthsKeep Last', { exact: true }).locator('input')
   ).not.toBeDisabled()
 
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/settings/general' &&
@@ -117,7 +128,7 @@ test('Auto Clean Backup', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Clean', { exact: true }).uncheck()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await expect(page.getByLabel('Auto Clean', { exact: true })).not.toBeChecked()
   await expect(
     page.getByText('DaysKeep Last', { exact: true }).locator('input')
@@ -132,11 +143,12 @@ test('Auto Clean Backup', async ({ page }) => {
 })
 
 test('Auto Backup Days Keep Last input', async ({ page }) => {
-  await page.getByLabel('Auto Clean', { exact: true }).check()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
 
   const input = page
     .getByText('DaysKeep Last', { exact: true })
     .locator('input')
+  await expect(input).not.toBeDisabled()
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
@@ -164,16 +176,17 @@ test('Auto Backup Days Keep Last input', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Clean', { exact: true }).uncheck()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await responsePromise
 })
 
 test('Auto Backup Weeks Keep Last input', async ({ page }) => {
-  await page.getByLabel('Auto Clean', { exact: true }).check()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
 
   const input = page
     .getByText('WeeksKeep Last', { exact: true })
     .locator('input')
+  await expect(input).not.toBeDisabled()
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
@@ -201,16 +214,17 @@ test('Auto Backup Weeks Keep Last input', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Clean', { exact: true }).uncheck()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await responsePromise
 })
 
 test('Auto Backup Months Keep Last input', async ({ page }) => {
-  await page.getByLabel('Auto Clean', { exact: true }).check()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
 
   const input = page
     .getByText('MonthsKeep Last', { exact: true })
     .locator('input')
+  await expect(input).not.toBeDisabled()
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
@@ -238,7 +252,7 @@ test('Auto Backup Months Keep Last input', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Clean', { exact: true }).uncheck()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await responsePromise
 })
 
@@ -260,11 +274,11 @@ test('Restore Backup', async ({ page }) => {
     'Choose a backup to restore from:'
   )
   await page
-    .getByText('10/18/2024, 12:00:00 AM (200 KB)', { exact: true })
+    .getByText('10/18/2024, 12:00:00 AM (224 KB)', { exact: true })
     .click()
   await page
     .getByRole('option', {
-      name: '4/18/2024, 12:00:00 AM (200 KB)',
+      name: '4/18/2024, 12:00:00 AM (224 KB)',
       exact: true
     })
     .click()
@@ -282,7 +296,7 @@ test('Restore Backup', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Auto Backup', { exact: true }).check()
+  await page.getByLabel('Auto Backup', { exact: true }).click()
   await responsePromise
   await page
     .getByRole('button', { name: 'Restore Backup', exact: true })
@@ -291,7 +305,9 @@ test('Restore Backup', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'Restore', exact: true }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
-  await expect(page.getByRole('presentation')).toHaveText('Restore success!')
+  await expect(page.getByRole('alert')).toHaveText('Restore success!')
+  await page.getByRole('alert').getByRole('button').click()
+  await expect(page.getByRole('alert')).not.toBeVisible()
   await expect(
     page.getByLabel('Auto Backup', { exact: true })
   ).not.toBeChecked()
@@ -300,7 +316,7 @@ test('Restore Backup', async ({ page }) => {
 test('Clean Backups', async ({ page }) => {
   // test clean dialog elements with auto clean enabled
   await expect(page.getByRole('dialog')).not.toBeVisible()
-  await page.getByLabel('Auto Clean', { exact: true }).check()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await expect(page.getByLabel('Auto Clean', { exact: true })).toBeChecked()
   await page
     .getByText('DaysKeep Last', { exact: true })
@@ -332,25 +348,27 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
-  await expect(page.getByRole('presentation')).toHaveText('Clean success!')
+  await expect(page.getByRole('alert')).toHaveText('Clean success!')
+  await page.getByRole('alert').getByRole('button').click()
+  await expect(page.getByRole('alert')).not.toBeVisible()
   await expect(
     page.locator('div').filter({ hasText: 'Backups: 18' }).nth(1)
   ).toBeVisible()
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
       .nth(1)
   ).toBeVisible()
 
   // test clean dialog elements
-  await page.getByLabel('Auto Clean', { exact: true }).uncheck()
+  await page.getByLabel('Auto Clean', { exact: true }).click()
   await expect(page.getByLabel('Auto Clean', { exact: true })).not.toBeChecked()
 
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -376,7 +394,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -384,14 +402,16 @@ test('Clean Backups', async ({ page }) => {
   await page.getByRole('spinbutton', { name: 'Keep Last' }).fill('3')
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
-  await expect(page.getByRole('presentation')).toHaveText('Clean success!')
+  await expect(page.getByRole('alert')).toHaveText('Clean success!')
+  await page.getByRole('alert').getByRole('button').click()
+  await expect(page.getByRole('alert')).not.toBeVisible()
   await expect(
     page.locator('div').filter({ hasText: 'Backups: 3' }).nth(1)
   ).toBeVisible()
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (200 KB)' })
+      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
       .nth(1)
   ).toBeVisible()
 
@@ -433,7 +453,9 @@ test('Backup Data', async ({ page }) => {
   ).toBeVisible()
 
   await page.getByRole('button', { name: 'Backup Data', exact: true }).click()
-  await expect(page.getByRole('presentation')).toHaveText('Backup success!')
+  await expect(page.getByRole('alert')).toHaveText('Backup success!')
+  await page.getByRole('alert').getByRole('button').click()
+  await expect(page.getByRole('alert')).not.toBeVisible()
   await expect(
     page.locator('div').filter({ hasText: 'Backups: 1' }).nth(1)
   ).toBeVisible()
