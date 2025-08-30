@@ -730,14 +730,6 @@ function ScenePicker() {
         <Divider />
 
         <div>
-          <Tooltip disableInteractive title={drawerOpen ? '' : 'Account'}>
-            <ListItemButton onClick={() => navigate('/account')}>
-              <ListItemIcon>
-                <PersonIcon />
-              </ListItemIcon>
-              <ListItemText primary="Account" />
-            </ListItemButton>
-          </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Settings'}>
             <ListItemButton onClick={() => navigate('/settings')}>
               <ListItemIcon>
