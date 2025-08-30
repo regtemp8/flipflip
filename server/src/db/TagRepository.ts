@@ -38,11 +38,6 @@ export async function moveTag(move: MoveRequest) {
     .transaction()
     .execute(async (trx) => {
       const { ids } = move
-      await trx
-        .updateTable('tag')
-        .set((eb) => ({ index: eb('index', '+', ids.length) }))
-        .execute()
-
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('tag')
