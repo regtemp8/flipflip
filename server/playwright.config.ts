@@ -38,16 +38,14 @@ export default defineConfig({
       name: 'app-chromium',
       testMatch: /app\/.*\.spec\.ts/,
       use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'server/tests/data/session.json'
+        ...devices['Desktop Chrome']
       }
     },
     {
       name: 'app-firefox',
       testMatch: /app\/.*\.spec\.ts/,
       use: {
-        ...devices['Desktop Firefox'],
-        storageState: 'server/tests/data/session.json'
+        ...devices['Desktop Firefox']
       }
     }
 

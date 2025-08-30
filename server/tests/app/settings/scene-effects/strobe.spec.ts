@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { colors, changeSlider, testSliderValue } from '../../utils'
 
-test.use({ storageState: 'server/tests/data/session.json' })
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })

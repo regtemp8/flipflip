@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { test, expect } from '@playwright/test'
 
-test.use({ storageState: 'server/tests/data/session.json' })
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings')
 })
