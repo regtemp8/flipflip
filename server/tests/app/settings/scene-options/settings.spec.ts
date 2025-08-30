@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { changeSlider, testSliderValue } from '../../utils'
+import { WF } from 'flipflip-common'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-options')
@@ -15,12 +16,12 @@ test('Re-Generate on Playback', async ({ page }) => {
     'When enabled, this scene will be automatically regenerated with each playback'
   )
 
-  await page.getByLabel('Re-Generate on Playback', { exact: true }).uncheck()
+  await page.getByLabel('Re-Generate on Playback', { exact: true }).click()
   await expect(
     page.getByLabel('Re-Generate on Playback', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Re-Generate on Playback', { exact: true }).check()
+  await page.getByLabel('Re-Generate on Playback', { exact: true }).click()
   await expect(
     page.getByLabel('Re-Generate on Playback', { exact: true })
   ).toBeChecked()
@@ -127,12 +128,12 @@ test('Play Full Sources', async ({ page }) => {
     'Play all images in a source before proceeding to the next one'
   )
 
-  await page.getByLabel('Play Full Sources', { exact: true }).check()
+  await page.getByLabel('Play Full Sources', { exact: true }).click()
   await expect(
     page.getByLabel('Play Full Sources', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Play Full Sources', { exact: true }).uncheck()
+  await page.getByLabel('Play Full Sources', { exact: true }).click()
   await expect(
     page.getByLabel('Play Full Sources', { exact: true })
   ).not.toBeChecked()
@@ -484,13 +485,13 @@ test('Random Speed', async ({ page }) => {
   await expect(page.getByText('Video Speed Min:')).not.toBeVisible()
   await expect(page.getByText('Video Speed Max:')).not.toBeVisible()
 
-  await page.getByLabel('Random Speed', { exact: true }).check()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(page.getByLabel('Random Speed', { exact: true })).toBeChecked()
   await expect(page.getByText('Video Speed:')).not.toBeVisible()
   await expect(page.getByText('Video Speed Min:')).toBeVisible()
   await expect(page.getByText('Video Speed Max:')).toBeVisible()
 
-  await page.getByLabel('Random Speed', { exact: true }).uncheck()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(
     page.getByLabel('Random Speed', { exact: true })
   ).not.toBeChecked()
@@ -500,7 +501,7 @@ test('Random Speed', async ({ page }) => {
 })
 
 test('Video Speed Min', async ({ page }) => {
-  await page.getByLabel('Random Speed', { exact: true }).check()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(page.getByLabel('Random Speed', { exact: true })).toBeChecked()
 
   const container = page.locator(
@@ -552,7 +553,7 @@ test('Video Speed Min', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Random Speed', { exact: true }).uncheck()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(
     page.getByLabel('Random Speed', { exact: true })
   ).not.toBeChecked()
@@ -560,7 +561,7 @@ test('Video Speed Min', async ({ page }) => {
 })
 
 test('Video Speed Max', async ({ page }) => {
-  await page.getByLabel('Random Speed', { exact: true }).check()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(page.getByLabel('Random Speed', { exact: true })).toBeChecked()
 
   const container = page.locator(
@@ -612,7 +613,7 @@ test('Video Speed Max', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Random Speed', { exact: true }).uncheck()
+  await page.getByLabel('Random Speed', { exact: true }).click()
   await expect(
     page.getByLabel('Random Speed', { exact: true })
   ).not.toBeChecked()
@@ -673,12 +674,12 @@ test('Start at Random Time', async ({ page }) => {
     page.getByLabel('Start at Random Time', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Start at Random Time', { exact: true }).check()
+  await page.getByLabel('Start at Random Time', { exact: true }).click()
   await expect(
     page.getByLabel('Start at Random Time', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Start at Random Time', { exact: true }).uncheck()
+  await page.getByLabel('Start at Random Time', { exact: true }).click()
   await expect(
     page.getByLabel('Start at Random Time', { exact: true })
   ).not.toBeChecked()
@@ -689,17 +690,18 @@ test('Continue Videos', async ({ page }) => {
     page.getByLabel('Continue Videos', { exact: true })
   ).not.toBeChecked()
 
+  await page.getByLabel('Continue Videos', { exact: true }).scrollIntoViewIfNeeded()
   await page.getByLabel('Continue Videos', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toHaveText(
     'Each time a video is played, continue from where it left off. Default: Start from beginning'
   )
 
-  await page.getByLabel('Continue Videos', { exact: true }).check()
+  await page.getByLabel('Continue Videos', { exact: true }).click()
   await expect(
     page.getByLabel('Continue Videos', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Continue Videos', { exact: true }).uncheck()
+  await page.getByLabel('Continue Videos', { exact: true }).click()
   await expect(
     page.getByLabel('Continue Videos', { exact: true })
   ).not.toBeChecked()
@@ -708,19 +710,19 @@ test('Continue Videos', async ({ page }) => {
 test('Use Clips', async ({ page }) => {
   await expect(page.getByLabel('Use Clips', { exact: true })).toBeChecked()
 
-  await page.getByLabel('Use Clips', { exact: true }).uncheck()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('Skip First', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Skip Last', { exact: true })).toBeVisible()
 
-  await page.getByLabel('Use Clips', { exact: true }).check()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).toBeChecked()
   await expect(page.getByLabel('Skip First', { exact: true })).not.toBeVisible()
   await expect(page.getByLabel('Skip Last', { exact: true })).not.toBeVisible()
 })
 
 test('Skip First', async ({ page }) => {
-  await page.getByLabel('Use Clips', { exact: true }).uncheck()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).not.toBeChecked()
 
   await expect(page.getByLabel('Skip First', { exact: true })).toBeVisible()
@@ -746,13 +748,13 @@ test('Skip First', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Use Clips', { exact: true }).check()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).toBeChecked()
   await responsePromise
 })
 
 test('Skip Last', async ({ page }) => {
-  await page.getByLabel('Use Clips', { exact: true }).uncheck()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).not.toBeChecked()
 
   await expect(page.getByLabel('Skip Last', { exact: true })).toBeVisible()
@@ -778,7 +780,7 @@ test('Skip Last', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Use Clips', { exact: true }).check()
+  await page.getByLabel('Use Clips', { exact: true }).click()
   await expect(page.getByLabel('Use Clips', { exact: true })).toBeChecked()
   await responsePromise
 })
@@ -831,7 +833,7 @@ test('Weighting', async ({ page }) => {
     page.getByLabel('Play Full Sources', { exact: true })
   ).toBeVisible()
 
-  await page.getByLabel('By Image', { exact: true }).check()
+  await page.getByLabel('By Image', { exact: true }).click()
   await expect(page.getByLabel('By Source', { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('By Image', { exact: true })).toBeChecked()
   await expect(
@@ -847,7 +849,16 @@ test('Weighting', async ({ page }) => {
     page.getByLabel('Play Full Sources', { exact: true })
   ).not.toBeVisible()
 
-  await page.getByLabel('By Source', { exact: true }).check()
+    const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.weightFunction === WF.sources &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('By Source', { exact: true }).click()
   await expect(page.getByLabel('By Source', { exact: true })).toBeChecked()
   await expect(page.getByLabel('By Image', { exact: true })).not.toBeChecked()
   await expect(
@@ -862,6 +873,7 @@ test('Weighting', async ({ page }) => {
   await expect(
     page.getByLabel('Play Full Sources', { exact: true })
   ).toBeVisible()
+  await responsePromise
 })
 
 test('Source Ordering', async ({ page }) => {
@@ -879,17 +891,17 @@ test('Source Ordering', async ({ page }) => {
     page.getByLabel('Avoid Repeats', { exact: true }).first()
   ).not.toBeChecked()
 
-  await page.getByLabel('Avoid Repeats', { exact: true }).first().check()
+  await page.getByLabel('Avoid Repeats', { exact: true }).first().click()
   await expect(
     page.getByLabel('Avoid Repeats', { exact: true }).first()
   ).toBeChecked()
 
-  await page.getByLabel('Avoid Repeats', { exact: true }).first().uncheck()
+  await page.getByLabel('Avoid Repeats', { exact: true }).first().click()
   await expect(
     page.getByLabel('Avoid Repeats', { exact: true }).first()
   ).not.toBeChecked()
 
-  await page.getByLabel('Ordered', { exact: true }).first().check()
+  await page.getByLabel('Ordered', { exact: true }).first().click()
   await expect(
     page.getByLabel('Randomized', { exact: true }).first()
   ).not.toBeChecked()
@@ -900,7 +912,7 @@ test('Source Ordering', async ({ page }) => {
     page.getByLabel('Avoid Repeats', { exact: true }).first()
   ).not.toBeVisible()
 
-  await page.getByLabel('Randomized', { exact: true }).first().check()
+  await page.getByLabel('Randomized', { exact: true }).first().click()
   await expect(
     page.getByLabel('Randomized', { exact: true }).first()
   ).toBeChecked()
@@ -913,6 +925,8 @@ test('Source Ordering', async ({ page }) => {
 })
 
 test('Image Ordering', async ({ page }) => {
+  await page.getByLabel('By Image', { exact: true }).click()
+  await expect(page.getByLabel('By Image', { exact: true })).toBeChecked()
   await expect(
     page.getByLabel('Randomized', { exact: true }).nth(1)
   ).toBeChecked()
@@ -929,17 +943,17 @@ test('Image Ordering', async ({ page }) => {
     page.getByLabel('Avoid Repeats', { exact: true }).nth(1)
   ).not.toBeChecked()
 
-  await page.getByLabel('Avoid Repeats', { exact: true }).nth(1).check()
+  await page.getByLabel('Avoid Repeats', { exact: true }).nth(1).click()
   await expect(
     page.getByLabel('Avoid Repeats', { exact: true }).nth(1)
   ).toBeChecked()
 
-  await page.getByLabel('Avoid Repeats', { exact: true }).nth(1).uncheck()
+  await page.getByLabel('Avoid Repeats', { exact: true }).nth(1).click()
   await expect(
     page.getByLabel('Avoid Repeats', { exact: true }).nth(1)
   ).not.toBeChecked()
 
-  await page.getByLabel('Ordered', { exact: true }).nth(1).check()
+  await page.getByLabel('Ordered', { exact: true }).nth(1).click()
   await expect(
     page.getByLabel('Randomized', { exact: true }).nth(1)
   ).not.toBeChecked()
@@ -951,7 +965,7 @@ test('Image Ordering', async ({ page }) => {
     page.getByLabel('Avoid Repeats', { exact: true }).nth(1)
   ).not.toBeVisible()
 
-  await page.getByLabel('Strictly Ordered', { exact: true }).check()
+  await page.getByLabel('Strictly Ordered', { exact: true }).click()
   await expect(
     page.getByLabel('Randomized', { exact: true }).nth(1)
   ).not.toBeChecked()
@@ -965,7 +979,7 @@ test('Image Ordering', async ({ page }) => {
     page.getByLabel('Avoid Repeats', { exact: true }).nth(1)
   ).not.toBeVisible()
 
-  await page.getByLabel('Randomized', { exact: true }).nth(1).check()
+  await page.getByLabel('Randomized', { exact: true }).nth(1).click()
   await expect(
     page.getByLabel('Randomized', { exact: true }).nth(1)
   ).toBeChecked()

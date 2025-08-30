@@ -21,7 +21,7 @@ test('Back/Forth effect', async ({ page }) => {
     'Go back and forth between the last two images'
   )
 
-  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
   await expect(page.getByText('TimingConstant').nth(1)).toBeVisible()
   await expect(
@@ -37,7 +37,7 @@ test('Back/Forth effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
   await expect(page.getByText('TimingConstant').nth(1)).not.toBeVisible()
   await expect(
@@ -47,7 +47,7 @@ test('Back/Forth effect', async ({ page }) => {
 })
 
 test('Random back/forth timing', async ({ page }) => {
-  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
@@ -117,13 +117,13 @@ test('Random back/forth timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave back/forth timing', async ({ page }) => {
-  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
@@ -249,13 +249,13 @@ test('Wave back/forth timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM back/forth timing', async ({ page }) => {
-  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
@@ -331,13 +331,13 @@ test('Audio BPM back/forth timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant back/forth timing', async ({ page }) => {
-  await page.getByLabel('Back/Forth', { exact: true }).check()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
@@ -392,7 +392,7 @@ test('Constant back/forth timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Back/Forth', { exact: true }).uncheck()
+  await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
   await responsePromise
 })
