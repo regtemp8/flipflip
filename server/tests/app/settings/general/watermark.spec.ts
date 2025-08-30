@@ -15,7 +15,7 @@ test('Enable Watermark', async ({ page }) => {
     "When enabled, FlipFlip will display a watermark over each Scene. You may use the following variables:{scene_name} - Name of the current Scene{source_url} - URL of the current Source{source_name} - Name of the current Source{post_url} - URL of the current file's post{file_url} - URL of the current file{file_name} - Name of the current file{audio_url} - URL of the currently playing audio file{audio_name} - Name of the currently playing audio file{audio_title} - Title of the currently playing audio file{audio_artist} - Artist of the currently playing audio file{audio_album} - Album of the currently playing audio file"
   )
 
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -39,7 +39,7 @@ test('Enable Watermark', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -61,7 +61,7 @@ test('Enable Watermark', async ({ page }) => {
 })
 
 test('Show on Displays', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -77,12 +77,12 @@ test('Show on Displays', async ({ page }) => {
     })
   ).toBeVisible()
 
-  await page.getByLabel('Show on Displays', { exact: true }).check()
+  await page.getByLabel('Show on Displays', { exact: true }).click()
   await expect(
     page.getByLabel('Show on Displays', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Show on Displays', { exact: true }).uncheck()
+  await page.getByLabel('Show on Displays', { exact: true }).click()
   await expect(
     page.getByLabel('Show on Displays', { exact: true })
   ).not.toBeChecked()
@@ -96,7 +96,7 @@ test('Show on Displays', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -104,7 +104,7 @@ test('Show on Displays', async ({ page }) => {
 })
 
 test('Watermark Corner', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -137,7 +137,7 @@ test('Watermark Corner', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -145,7 +145,7 @@ test('Watermark Corner', async ({ page }) => {
 })
 
 test('Watermark Text', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -165,7 +165,7 @@ test('Watermark Text', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -173,7 +173,7 @@ test('Watermark Text', async ({ page }) => {
 })
 
 test('Watermark Font', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -225,7 +225,7 @@ test('Watermark Font', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -233,7 +233,7 @@ test('Watermark Font', async ({ page }) => {
 })
 
 test('Watermark Font Size', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -267,7 +267,7 @@ test('Watermark Font Size', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
@@ -275,7 +275,7 @@ test('Watermark Font Size', async ({ page }) => {
 })
 
 test('Watermark Color', async ({ page }) => {
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
@@ -342,7 +342,7 @@ test('Watermark Color', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Enable Watermark', { exact: true }).uncheck()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).not.toBeChecked()
