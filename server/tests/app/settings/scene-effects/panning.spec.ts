@@ -14,7 +14,7 @@ test('Panning effect', async ({ page }) => {
     page.getByRole('spinbutton', { name: 'For', exact: true })
   ).not.toBeVisible()
 
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
 
   await expect(page.getByText('None').nth(2)).toBeVisible()
@@ -33,7 +33,7 @@ test('Panning effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await expect(page.getByText('None').nth(2)).not.toBeVisible()
   await expect(page.getByText('None').nth(3)).not.toBeVisible()
@@ -43,7 +43,7 @@ test('Panning effect', async ({ page }) => {
 })
 
 test('Random panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -113,13 +113,13 @@ test('Random panning timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -245,13 +245,13 @@ test('Wave panning timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -327,13 +327,13 @@ test('Audio BPM panning timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -372,13 +372,13 @@ test('With scene panning timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant panning timing', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -433,13 +433,13 @@ test('Constant panning timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move horizontally setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -541,13 +541,13 @@ test('Panning move horizontally setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move horizontally use img width setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -577,7 +577,7 @@ test('Panning move horizontally use img width setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Use Img Width', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Use Img Width', exact: true })
   ).toBeChecked()
@@ -593,7 +593,7 @@ test('Panning move horizontally use img width setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Use Img Width', exact: true })
-    .uncheck()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Use Img Width', exact: true })
   ).not.toBeChecked()
@@ -618,13 +618,13 @@ test('Panning move horizontally use img width setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Randomize panning move horizontally setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -645,7 +645,7 @@ test('Randomize panning move horizontally setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -654,7 +654,7 @@ test('Randomize panning move horizontally setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .uncheck()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
@@ -672,13 +672,13 @@ test('Randomize panning move horizontally setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move horizontally slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -761,13 +761,13 @@ test('Panning move horizontally slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move horizontally min slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -780,7 +780,7 @@ test('Panning move horizontally min slider', async ({ page }) => {
     .click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -810,6 +810,13 @@ test('Panning move horizontally min slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
 
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
+
   await container.getByRole('combobox').first().click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
@@ -821,13 +828,13 @@ test('Panning move horizontally min slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move horizontally max slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator(
@@ -840,7 +847,7 @@ test('Panning move horizontally max slider', async ({ page }) => {
     .click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -870,6 +877,13 @@ test('Panning move horizontally max slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
 
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
+
   await container.getByRole('combobox').first().click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
@@ -881,13 +895,13 @@ test('Panning move horizontally max slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move vertically setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -983,13 +997,13 @@ test('Panning move vertically setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move vertically use img height setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -1015,7 +1029,7 @@ test('Panning move vertically use img height setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Use Img Height', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Use Img Height', exact: true })
   ).toBeChecked()
@@ -1031,7 +1045,7 @@ test('Panning move vertically use img height setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Use Img Height', exact: true })
-    .uncheck()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Use Img Height', exact: true })
   ).not.toBeChecked()
@@ -1056,13 +1070,13 @@ test('Panning move vertically use img height setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Randomize panning move vertically setting', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -1079,7 +1093,7 @@ test('Randomize panning move vertically setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -1088,7 +1102,7 @@ test('Randomize panning move vertically setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .uncheck()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
@@ -1106,13 +1120,13 @@ test('Randomize panning move vertically setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move vertically slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -1191,13 +1205,13 @@ test('Panning move vertically slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move vertically min slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -1206,7 +1220,7 @@ test('Panning move vertically min slider', async ({ page }) => {
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -1236,6 +1250,13 @@ test('Panning move vertically min slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
 
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
+
   await container.getByRole('combobox').first().click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
@@ -1247,13 +1268,13 @@ test('Panning move vertically min slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Panning move vertically max slider', async ({ page }) => {
-  await page.getByLabel('Panning', { exact: true }).check()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
@@ -1262,7 +1283,7 @@ test('Panning move vertically max slider', async ({ page }) => {
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -1292,6 +1313,13 @@ test('Panning move vertically max slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
 
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
+
   await container.getByRole('combobox').first().click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
@@ -1303,7 +1331,7 @@ test('Panning move vertically max slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Panning', { exact: true }).uncheck()
+  await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
   await responsePromise
 })

@@ -13,7 +13,7 @@ test('Cross-fade effect', async ({ page }) => {
   await expect(page.getByRole('combobox').nth(2)).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
 
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   await expect(
     page.getByLabel('Cross-Fade Audio', { exact: true })
@@ -25,11 +25,11 @@ test('Cross-fade effect', async ({ page }) => {
   await expect(page.getByRole('combobox').nth(2)).toHaveText('Constant')
   await expect(page.getByRole('spinbutton', { name: 'For' })).toBeVisible()
 
-  await page.getByLabel('Cross-Fade Audio', { exact: true }).check()
+  await page.getByLabel('Cross-Fade Audio', { exact: true }).click()
   await expect(
     page.getByLabel('Cross-Fade Audio', { exact: true })
   ).toBeChecked()
-  await page.getByLabel('Cross-Fade Audio', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade Audio', { exact: true }).click()
   await expect(
     page.getByLabel('Cross-Fade Audio', { exact: true })
   ).not.toBeChecked()
@@ -43,7 +43,7 @@ test('Cross-fade effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await expect(page.getByRole('combobox').nth(2)).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
@@ -51,7 +51,7 @@ test('Cross-fade effect', async ({ page }) => {
 })
 
 test('Random cross-fade timing', async ({ page }) => {
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -121,13 +121,13 @@ test('Random cross-fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave cross-fade timing', async ({ page }) => {
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -253,13 +253,13 @@ test('Wave cross-fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM cross-fade timing', async ({ page }) => {
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -335,13 +335,13 @@ test('Audio BPM cross-fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene cross-fade timing', async ({ page }) => {
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -380,13 +380,13 @@ test('With scene cross-fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant cross-fade timing', async ({ page }) => {
-  await page.getByLabel('Cross-Fade', { exact: true }).check()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -441,7 +441,7 @@ test('Constant cross-fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Cross-Fade', { exact: true }).uncheck()
+  await page.getByLabel('Cross-Fade', { exact: true }).click()
   await expect(page.getByLabel('Cross-Fade', { exact: true })).not.toBeChecked()
   await responsePromise
 })

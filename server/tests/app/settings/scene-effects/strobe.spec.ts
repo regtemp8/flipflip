@@ -20,7 +20,7 @@ test('Strobe effect', async ({ page }) => {
     page.getByRole('spinbutton', { name: 'For', exact: true })
   ).not.toBeVisible()
 
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeVisible()
   await expect(page.getByText('Color TypeSolid Color')).toBeVisible()
@@ -44,7 +44,7 @@ test('Strobe effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeVisible()
   await expect(page.getByText('Color TypeSolid Color')).not.toBeVisible()
@@ -62,12 +62,12 @@ test('Strobe effect', async ({ page }) => {
 })
 
 test('Add strobe delay', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
   await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   await expect(page.getByText('Delay TimingConstant')).toBeVisible()
 
@@ -80,7 +80,7 @@ test('Add strobe delay', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
   await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
   await responsePromise
@@ -94,13 +94,13 @@ test('Add strobe delay', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Random strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -170,13 +170,13 @@ test('Random strobe timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -302,13 +302,13 @@ test('Wave strobe timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -384,13 +384,13 @@ test('Audio BPM strobe timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -429,13 +429,13 @@ test('With scene strobe timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant strobe timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -490,15 +490,15 @@ test('Constant strobe timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Random strobe delay timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
@@ -559,9 +559,19 @@ test('Random strobe delay timing', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiSlider-root')
   ).not.toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobePulse === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -570,15 +580,15 @@ test('Random strobe delay timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave strobe delay timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
@@ -695,9 +705,19 @@ test('Wave strobe delay timing', async ({ page }) => {
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100')
   expect(await testSliderValue(thumb, slider, 1)).toBe(true)
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobePulse === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -706,15 +726,15 @@ test('Wave strobe delay timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM strobe delay timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
@@ -781,9 +801,19 @@ test('Audio BPM strobe delay timing', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiTypography-caption')
   ).toHaveText('BPM Multiplier 10x')
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobePulse === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -792,15 +822,15 @@ test('Audio BPM strobe delay timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene strobe delay timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
@@ -830,9 +860,19 @@ test('With scene strobe delay timing', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiSlider-root')
   ).not.toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobePulse === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -841,15 +881,15 @@ test('With scene strobe delay timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant strobe delay timing', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByLabel('Add Delay', { exact: true }).check()
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
@@ -895,9 +935,19 @@ test('Constant strobe delay timing', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiSlider-root')
   ).not.toBeVisible()
 
-  await page.getByLabel('Add Delay', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.strobePulse === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -906,13 +956,13 @@ test('Constant strobe delay timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Strobe layer', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
 
   await expect(page.getByText('Strobe LayerAbove All')).toBeVisible()
@@ -964,13 +1014,13 @@ test('Strobe layer', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Strobe color type', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
 
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
@@ -1007,13 +1057,13 @@ test('Strobe color type', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Strobe solid color', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await page.getByRole('combobox').nth(2).click()
   await page.getByRole('option', { name: 'Solid Color', exact: true }).click()
@@ -1076,13 +1126,13 @@ test('Strobe solid color', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Strobe set of colors', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await page.getByRole('combobox').nth(2).click()
   await page.getByRole('option', { name: 'Set of Colors', exact: true }).click()
@@ -1149,13 +1199,13 @@ test('Strobe set of colors', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Strobe opacity', async ({ page }) => {
-  await page.getByLabel('Strobe', { exact: true }).check()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await page.getByRole('combobox').nth(3).click()
   await page.getByRole('option', { name: 'Behind All', exact: true }).click()
@@ -1233,7 +1283,7 @@ test('Strobe opacity', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Strobe', { exact: true }).uncheck()
+  await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).not.toBeChecked()
   await responsePromise
 })

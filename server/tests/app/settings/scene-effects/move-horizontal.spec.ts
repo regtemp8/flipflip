@@ -101,7 +101,7 @@ test('Randomize move horizontally setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -110,7 +110,7 @@ test('Randomize move horizontally setting', async ({ page }) => {
 
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .uncheck()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
@@ -220,7 +220,7 @@ test('Move horizontally min slider', async ({ page }) => {
   await page.getByRole('option', { name: 'Left', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -250,6 +250,13 @@ test('Move horizontally min slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
 
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
+
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
@@ -272,7 +279,7 @@ test('Move horizontally max slider', async ({ page }) => {
   await page.getByRole('option', { name: 'Left', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
-    .check()
+    .click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).toBeChecked()
@@ -301,6 +308,13 @@ test('Move horizontally max slider', async ({ page }) => {
   await changeSlider(page, thumb, slider, 0.99)
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('99%')
+
+  await container
+    .getByRole('checkbox', { name: 'Randomize', exact: true })
+    .click()
+  await expect(
+    container.getByRole('checkbox', { name: 'Randomize', exact: true })
+  ).not.toBeChecked()
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()

@@ -15,10 +15,10 @@ test('Enable zoom/move timing', async ({ page }) => {
   await expect(page.getByText('None').first()).toBeVisible()
   await expect(page.getByText('None').nth(1)).toBeVisible()
 
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(container).toBeVisible()
 
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(container).not.toBeVisible()
 
   await page.getByText('None').first().click()
@@ -65,7 +65,7 @@ test('Enable zoom/move timing', async ({ page }) => {
 })
 
 test('Random zoom/move timing', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -135,13 +135,13 @@ test('Random zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave zoom/move timing', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -268,13 +268,13 @@ test('Wave zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM zoom/move timing', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -350,13 +350,13 @@ test('Audio BPM zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene zoom/move timing', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -395,13 +395,13 @@ test('With scene zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant zoom/move timing', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -456,7 +456,7 @@ test('Constant zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })

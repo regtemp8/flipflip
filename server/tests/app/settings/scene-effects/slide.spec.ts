@@ -14,7 +14,7 @@ test('Slide effect', async ({ page }) => {
     page.getByRole('spinbutton', { name: 'For', exact: true })
   ).not.toBeVisible()
 
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   await expect(page.getByText('DirectionLeft')).toBeVisible()
   await expect(page.getByText('Distance: 100%100%')).toBeVisible()
@@ -32,7 +32,7 @@ test('Slide effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await expect(page.getByText('DirectionLeft')).not.toBeVisible()
   await expect(page.getByText('Distance: 100%100%')).not.toBeVisible()
@@ -44,7 +44,7 @@ test('Slide effect', async ({ page }) => {
 })
 
 test('Random slide timing', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -114,13 +114,13 @@ test('Random slide timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Wave slide timing', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -246,13 +246,13 @@ test('Wave slide timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Audio BPM slide timing', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -328,13 +328,13 @@ test('Audio BPM slide timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('With scene slide timing', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -373,13 +373,13 @@ test('With scene slide timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Constant slide timing', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -434,13 +434,13 @@ test('Constant slide timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Slide direction', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
 
   await page.getByRole('combobox').nth(2).click()
@@ -480,13 +480,13 @@ test('Slide direction', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Slide distance', async ({ page }) => {
-  await page.getByLabel('Slide', { exact: true }).check()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
 
   const container = await page
@@ -540,7 +540,7 @@ test('Slide distance', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Slide', { exact: true }).uncheck()
+  await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
   await responsePromise
 })

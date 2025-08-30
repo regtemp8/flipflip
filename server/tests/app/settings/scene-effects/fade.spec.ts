@@ -12,7 +12,7 @@ test('Fade effect', async ({ page }) => {
   await expect(page.getByRole('combobox').nth(2)).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
 
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   await expect(page.getByRole('combobox').nth(2)).toBeVisible()
   await expect(page.getByRole('combobox').nth(2)).toHaveText('Constant')
@@ -27,7 +27,7 @@ test('Fade effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
@@ -37,7 +37,7 @@ test('Fade effect', async ({ page }) => {
 })
 
 test('Random fade timing', async ({ page }) => {
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -107,7 +107,7 @@ test('Random fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
@@ -115,7 +115,7 @@ test('Random fade timing', async ({ page }) => {
 })
 
 test('Wave fade timing', async ({ page }) => {
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -241,7 +241,7 @@ test('Wave fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
@@ -249,7 +249,7 @@ test('Wave fade timing', async ({ page }) => {
 })
 
 test('Audio BPM fade timing', async ({ page }) => {
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -325,7 +325,7 @@ test('Audio BPM fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
@@ -333,7 +333,7 @@ test('Audio BPM fade timing', async ({ page }) => {
 })
 
 test('With scene fade timing', async ({ page }) => {
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -372,7 +372,7 @@ test('With scene fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
@@ -380,7 +380,7 @@ test('With scene fade timing', async ({ page }) => {
 })
 
 test('Constant fade timing', async ({ page }) => {
-  await page.getByLabel('Fade In/Out', { exact: true }).check()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
   const container = page.locator(
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
@@ -435,7 +435,7 @@ test('Constant fade timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Fade In/Out', { exact: true }).uncheck()
+  await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()

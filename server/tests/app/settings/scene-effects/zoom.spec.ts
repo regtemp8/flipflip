@@ -13,7 +13,7 @@ test('Zoom effect', async ({ page }) => {
   await expect(page.getByText(/^Zoom Start:/)).not.toBeVisible()
   await expect(page.getByText(/^Zoom End:/)).not.toBeVisible()
 
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
   await expect(page.getByText('Randomize Zoom', { exact: true })).toBeVisible()
   await expect(page.getByText(/^Zoom Start:/)).toBeVisible()
@@ -28,7 +28,7 @@ test('Zoom effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await expect(
     page.getByText('Randomize Zoom', { exact: true })
@@ -39,7 +39,7 @@ test('Zoom effect', async ({ page }) => {
 })
 
 test('Zoom start slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
 
   await expect(page.getByText('Zoom Start: 1x', { exact: true })).toBeVisible()
@@ -85,13 +85,13 @@ test('Zoom start slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Zoom end slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
 
   await expect(page.getByText('Zoom End: 2x', { exact: true })).toBeVisible()
@@ -133,13 +133,13 @@ test('Zoom end slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Randomize zoom effect', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
 
   await expect(page.getByText('Randomize Zoom', { exact: true })).toBeVisible()
@@ -147,7 +147,7 @@ test('Randomize zoom effect', async ({ page }) => {
     page.getByText('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByText('Randomize Zoom', { exact: true }).check()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
   await expect(page.getByText(/^Zoom Start:/)).not.toBeVisible()
   await expect(page.getByText(/^Zoom End:/)).not.toBeVisible()
@@ -156,7 +156,7 @@ test('Randomize zoom effect', async ({ page }) => {
   await expect(page.getByText(/^Zoom End Min:/)).toBeVisible()
   await expect(page.getByText(/^Zoom End Max:/)).toBeVisible()
 
-  await page.getByText('Randomize Zoom', { exact: true }).uncheck()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(
     page.getByLabel('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
@@ -176,15 +176,15 @@ test('Randomize zoom effect', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Zoom start min slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  await page.getByText('Randomize Zoom', { exact: true }).check()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
   const container = page.locator('main .MuiCollapse-entered div:nth-child(1)')
@@ -226,11 +226,21 @@ test('Zoom start min slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('4.9x')
 
-  await page.getByText('Randomize Zoom', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.zoomRandom === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(
     page.getByLabel('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -239,15 +249,15 @@ test('Zoom start min slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Zoom start max slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  await page.getByText('Randomize Zoom', { exact: true }).check()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
   const container = page.locator('main .MuiCollapse-entered div:nth-child(2)')
@@ -289,11 +299,21 @@ test('Zoom start max slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('4.9x')
 
-  await page.getByText('Randomize Zoom', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.zoomRandom === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(
     page.getByLabel('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -302,15 +322,15 @@ test('Zoom start max slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Zoom end min slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  await page.getByText('Randomize Zoom', { exact: true }).check()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
   const container = page.locator('main .MuiCollapse-entered div:nth-child(3)')
@@ -352,11 +372,21 @@ test('Zoom end min slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('4.9x')
 
-  await page.getByText('Randomize Zoom', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.zoomRandom === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(
     page.getByLabel('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -365,15 +395,15 @@ test('Zoom end min slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
 
 test('Zoom end max slider', async ({ page }) => {
-  await page.getByLabel('Zoom', { exact: true }).check()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).toBeChecked()
-  await page.getByText('Randomize Zoom', { exact: true }).check()
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(page.getByLabel('Randomize Zoom', { exact: true })).toBeChecked()
 
   const container = page.locator('main .MuiCollapse-entered div:nth-child(4)')
@@ -415,11 +445,21 @@ test('Zoom end max slider', async ({ page }) => {
   await thumb.hover()
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('4.9x')
 
-  await page.getByText('Randomize Zoom', { exact: true }).uncheck()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.zoomRandom === false &&
+      res.status() === 204
+    )
+  })
+  await page.getByText('Randomize Zoom', { exact: true }).click()
   await expect(
     page.getByLabel('Randomize Zoom', { exact: true })
   ).not.toBeChecked()
-  const responsePromise = page.waitForResponse((res) => {
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&
@@ -428,7 +468,7 @@ test('Zoom end max slider', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByLabel('Zoom', { exact: true }).uncheck()
+  await page.getByLabel('Zoom', { exact: true }).click()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
   await responsePromise
 })
