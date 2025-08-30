@@ -1,6 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 
-test.beforeAll(async ({ page }) => {
+let page: Page
+test.beforeAll(async ({ browser }) => {
+  page = await browser.newPage()
   await page.goto('/audio-library')
   await page.getByTestId('AddIcon').click()
   await page.getByLabel('Local Audio').click()
@@ -16,7 +18,7 @@ test.beforeAll(async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
 })
 
-test.afterAll(async ({ page }) => {
+test.afterAll(async () => {
   await page.goto('/audio-library')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -30,19 +32,20 @@ test.afterAll(async ({ page }) => {
   await page.getByTestId('DeleteIcon').nth(0).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(0)
   await responsePromise
+  await page.close()
 })
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async () => {
   await page.goto('/audio-library')
 })
 
-test('Audio edit cancel', async ({ page }) => {
+test('Audio edit cancel', async () => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
   await expect(item.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
   await expect(item.getByText('Smile').nth(0)).toBeVisible()
   await expect(item.getByText('Aftertune, Ultimate Mix')).toBeVisible()
@@ -61,7 +64,7 @@ test('Audio edit cancel', async ({ page }) => {
   await expect(dialog.getByLabel('Comment')).toHaveValue('')
   await expect(dialog.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
 
   await dialog.getByLabel('Name').fill('Name')
@@ -76,7 +79,7 @@ test('Audio edit cancel', async ({ page }) => {
 
   await expect(item.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
   await expect(item.getByText('Smile').nth(0)).toBeVisible()
   await expect(item.getByText('Aftertune, Ultimate Mix')).toBeVisible()
@@ -92,23 +95,23 @@ test('Audio edit cancel', async ({ page }) => {
   await expect(dialog.getByLabel('Comment')).toHaveValue('')
   await expect(dialog.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
 })
 
-test('Audio edit cover art', async ({ page }) => {
+test('Audio edit cover art', async () => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
   await expect(item.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
 
   await item.getByTestId('EditIcon').click()
   await expect(dialog.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
   await dialog.getByTestId('DeleteIcon').click()
   await expect(dialog.getByTestId('AudiotrackIcon')).toBeVisible()
@@ -137,7 +140,7 @@ test('Audio edit cover art', async ({ page }) => {
   )
 })
 
-test('Audio edit inputs', async ({ page }) => {
+test('Audio edit inputs', async () => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
@@ -168,7 +171,7 @@ test('Audio edit inputs', async ({ page }) => {
   await expect(dialog.getByLabel('Comment')).toHaveValue('Comment')
 })
 
-test('Audio edit use suggestions', async ({ page }) => {
+test('Audio edit use suggestions', async () => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
@@ -179,7 +182,7 @@ test('Audio edit use suggestions', async ({ page }) => {
 
   await expect(dialog.getByAltText('Smile')).toHaveAttribute(
     'src',
-    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpeg'
+    'http://localhost:5050/fs/file/audio-thumb/7c6c8f0ffaba70bd41f8ba3678b726b9ff936e09b3fcba0ba993a28cae996f55.jpg'
   )
   await expect(dialog.getByLabel('Name')).toHaveValue('Smile')
   await expect(dialog.getByLabel('Artist')).toHaveValue(
@@ -190,6 +193,6 @@ test('Audio edit use suggestions', async ({ page }) => {
   await expect(dialog.getByLabel('Comment')).toHaveValue('Comment')
 })
 
-test.fixme('Audio batch edit', async ({ page }) => {
+test.fixme('Audio batch edit', async () => {
   // TODO test batch edit
 })
