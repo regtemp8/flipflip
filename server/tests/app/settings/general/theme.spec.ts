@@ -15,7 +15,7 @@ test('Dark Mode setting', async ({ page }) => {
     page.locator('main .MuiContainer-root .MuiPaper-root').first()
   ).toHaveCSS('background-color', 'rgb(255, 255, 255)')
 
-  await page.getByLabel('Dark Mode', { exact: true }).check()
+  await page.getByLabel('Dark Mode', { exact: true }).click()
   await expect(page.getByLabel('Dark Mode', { exact: true })).toBeChecked()
   await expect(page.locator('.MuiDrawer-root > .MuiPaper-root')).toHaveCSS(
     'background-color',
@@ -25,7 +25,7 @@ test('Dark Mode setting', async ({ page }) => {
     page.locator('main .MuiContainer-root .MuiPaper-root').first()
   ).toHaveCSS('background-color', 'rgb(18, 18, 18)')
 
-  await page.getByLabel('Dark Mode', { exact: true }).uncheck()
+  await page.getByLabel('Dark Mode', { exact: true }).click()
   await expect(page.getByLabel('Dark Mode', { exact: true })).not.toBeChecked()
   await expect(page.locator('.MuiDrawer-root > .MuiPaper-root')).toHaveCSS(
     'background-color',
@@ -139,7 +139,7 @@ test.describe('Secondary color theme setting', () => {
     await expect(
       page
         .locator('div')
-        .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(200 KB\)$/ })
+        .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(224 KB\)$/ })
         .nth(1)
     ).toHaveCSS('color', `rgb(${pink.rgb})`)
   })
@@ -175,7 +175,7 @@ test.describe('Secondary color theme setting', () => {
       await expect(
         page
           .locator('div')
-          .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(200 KB\)$/ })
+          .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(224 KB\)$/ })
           .nth(1)
       ).toHaveCSS('color', `rgb(${color.rgb})`)
     }
