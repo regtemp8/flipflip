@@ -37,10 +37,10 @@ test('Settings navigation', async ({ page }) => {
 test('Fullscreen setting', async ({ page }) => {
   await expect(page.getByLabel('Fullscreen', { exact: true })).not.toBeChecked()
 
-  await page.getByLabel('Fullscreen', { exact: true }).check()
+  await page.getByLabel('Fullscreen', { exact: true }).click()
   await expect(page.getByLabel('Fullscreen', { exact: true })).toBeChecked()
 
-  await page.getByLabel('Fullscreen', { exact: true }).uncheck()
+  await page.getByLabel('Fullscreen', { exact: true }).click()
   await expect(page.getByLabel('Fullscreen', { exact: true })).not.toBeChecked()
 })
 
@@ -55,12 +55,12 @@ test('Start Immediately setting', async ({ page }) => {
     'If enabled, the player will start as soon as first image loads. If disabled, the player will load the first set of images from all sources before starting.'
   )
 
-  await page.getByLabel('Start Immediately', { exact: true }).check()
+  await page.getByLabel('Start Immediately', { exact: true }).click()
   await expect(
     page.getByLabel('Start Immediately', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Start Immediately', { exact: true }).uncheck()
+  await page.getByLabel('Start Immediately', { exact: true }).click()
   await expect(
     page.getByLabel('Start Immediately', { exact: true })
   ).not.toBeChecked()
@@ -78,13 +78,13 @@ test('Click to Progress setting', async ({ page }) => {
     'If enabled, clicking the currently playing image will advance to the next image.'
   )
 
-  await page.getByLabel('Click to Progress', { exact: true }).uncheck()
+  await page.getByLabel('Click to Progress', { exact: true }).click()
   await expect(
     page.getByLabel('Click to Progress', { exact: true })
   ).not.toBeChecked()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeHidden()
 
-  await page.getByLabel('Click to Progress', { exact: true }).check()
+  await page.getByLabel('Click to Progress', { exact: true }).click()
   await expect(
     page.getByLabel('Click to Progress', { exact: true })
   ).toBeChecked()
@@ -92,7 +92,7 @@ test('Click to Progress setting', async ({ page }) => {
 })
 
 test('While Playing setting', async ({ page }) => {
-  await page.getByLabel('Click to Progress', { exact: true }).check()
+  await page.getByLabel('Click to Progress', { exact: true }).click()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeVisible()
   await expect(
     page.getByLabel('While Playing', { exact: true })
@@ -108,10 +108,10 @@ test('While Playing setting', async ({ page }) => {
     'If enabled, clicking will advance even during Scene playback. If disabled, clicking will only advance while Scene playback is paused.'
   )
 
-  await page.getByLabel('While Playing', { exact: true }).check()
+  await page.getByLabel('While Playing', { exact: true }).click()
   await expect(page.getByLabel('While Playing', { exact: true })).toBeChecked()
 
-  await page.getByLabel('While Playing', { exact: true }).uncheck()
+  await page.getByLabel('While Playing', { exact: true }).click()
   await expect(
     page.getByLabel('While Playing', { exact: true })
   ).not.toBeChecked()
@@ -128,12 +128,12 @@ test('Show Adv Easing Controls setting', async ({ page }) => {
     "If enabled, additional controls for controlling 'easing' will be available in the Effect section."
   )
 
-  await page.getByLabel('Show Adv Easing Controls', { exact: true }).check()
+  await page.getByLabel('Show Adv Easing Controls', { exact: true }).click()
   await expect(
     page.getByLabel('Show Adv Easing Controls', { exact: true })
   ).toBeChecked()
 
-  await page.getByLabel('Show Adv Easing Controls', { exact: true }).uncheck()
+  await page.getByLabel('Show Adv Easing Controls', { exact: true }).click()
   await expect(
     page.getByLabel('Show Adv Easing Controls', { exact: true })
   ).not.toBeChecked()
@@ -142,7 +142,7 @@ test('Show Adv Easing Controls setting', async ({ page }) => {
 test('Show Audio Info setting', async ({ page }) => {
   await expect(
     page.getByLabel('Show Audio Info', { exact: true })
-  ).not.toBeChecked()
+  ).toBeChecked()
 
   await page.getByLabel('Show Audio Info', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
@@ -150,15 +150,15 @@ test('Show Audio Info setting', async ({ page }) => {
     'If enabled, track information will appear during playback whenever a new audio track starts.'
   )
 
-  await page.getByLabel('Show Audio Info', { exact: true }).check()
-  await expect(
-    page.getByLabel('Show Audio Info', { exact: true })
-  ).toBeChecked()
-
-  await page.getByLabel('Show Audio Info', { exact: true }).uncheck()
+  await page.getByLabel('Show Audio Info', { exact: true }).click()
   await expect(
     page.getByLabel('Show Audio Info', { exact: true })
   ).not.toBeChecked()
+
+  await page.getByLabel('Show Audio Info', { exact: true }).click()
+  await expect(
+    page.getByLabel('Show Audio Info', { exact: true })
+  ).toBeChecked()
 })
 
 test('Prioritize Performance setting', async ({ page }) => {
@@ -172,12 +172,12 @@ test('Prioritize Performance setting', async ({ page }) => {
     'Prioritizing performance will smooth image effects, but may dramatically increase load times.Prioritizing loading will decrease load times, but may result in jittery effects during playback'
   )
 
-  await page.getByLabel('Prioritize Performance', { exact: true }).uncheck()
+  await page.getByLabel('Prioritize Performance', { exact: true }).click()
   await expect(
     page.getByLabel('Prioritize Loading', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Prioritize Loading', { exact: true }).check()
+  await page.getByLabel('Prioritize Loading', { exact: true }).click()
   await expect(
     page.getByLabel('Prioritize Performance', { exact: true })
   ).toBeChecked()
@@ -194,12 +194,12 @@ test('Confirm Scene Deletion setting', async ({ page }) => {
     'If disabled, no prompt will appear to confirm Scene deletion'
   )
 
-  await page.getByLabel('Confirm Scene Deletion', { exact: true }).uncheck()
+  await page.getByLabel('Confirm Scene Deletion', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm Scene Deletion', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Confirm Scene Deletion', { exact: true }).check()
+  await page.getByLabel('Confirm Scene Deletion', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm Scene Deletion', { exact: true })
   ).toBeChecked()
@@ -216,12 +216,12 @@ test('Confirm Blacklist setting', async ({ page }) => {
     'If disabled, no prompt will appear to confirm blacklisting a file'
   )
 
-  await page.getByLabel('Confirm Blacklist', { exact: true }).uncheck()
+  await page.getByLabel('Confirm Blacklist', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm Blacklist', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Confirm Blacklist', { exact: true }).check()
+  await page.getByLabel('Confirm Blacklist', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm Blacklist', { exact: true })
   ).toBeChecked()
@@ -238,12 +238,12 @@ test('Confirm File Deletion setting', async ({ page }) => {
     'If disabled, no prompt will appear to confirm File deletion'
   )
 
-  await page.getByLabel('Confirm File Deletion', { exact: true }).uncheck()
+  await page.getByLabel('Confirm File Deletion', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm File Deletion', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Confirm File Deletion', { exact: true }).check()
+  await page.getByLabel('Confirm File Deletion', { exact: true }).click()
   await expect(
     page.getByLabel('Confirm File Deletion', { exact: true })
   ).toBeChecked()
@@ -420,7 +420,7 @@ test('Restore Defaults', async ({ page }) => {
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
 
-  await page.getByLabel('Enable Watermark', { exact: true }).check()
+  await page.getByLabel('Enable Watermark', { exact: true }).click()
   await page.getByLabel('Restore Defaults').click()
   await page.getByRole('button', { name: 'OK' }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
