@@ -10,11 +10,21 @@ test('Add display', async ({ page }) => {
     .click()
   
   await expect(page).toHaveURL('/displays/1')
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/displays/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.name === 'My display' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#title')).toBeFocused()
   await expect(page.locator('#title')).toHaveValue('New display')
   await page.locator('#title').fill('My display')
   await page.locator('#title').press('Enter')
   await expect(page.getByRole('heading')).toHaveText('My display')
+  await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-3').click()

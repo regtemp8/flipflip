@@ -5,11 +5,21 @@ test('Add scene', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await page.getByRole('button', { name: 'Add Scene', exact: true }).click();
   await expect(page).toHaveURL('/scenes/2')
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/2' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.name === 'My scene' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#title')).toBeFocused()
   await expect(page.locator('#title')).toHaveValue('New scene')
   await page.locator('#title').fill('My scene')
   await page.locator('#title').press('Enter')
   await expect(page.getByRole('heading')).toHaveText('My scene')
+  await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-0').click();

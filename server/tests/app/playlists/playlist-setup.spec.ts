@@ -46,11 +46,21 @@ test('Add audio playlist', async ({ page }) => {
   ).not.toBeDisabled()
   await page.getByRole('button', { name: 'Create', exact: true }).click()
   await expect(page).toHaveURL('/playlists/1')
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/playlists/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.name === 'Song playlist' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#title')).toBeFocused()
   await expect(page.locator('#title')).toHaveValue('New playlist')
   await page.locator('#title').fill('Song playlist')
   await page.locator('#title').press('Enter')
   await expect(page.getByRole('heading')).toHaveText('Song playlist')
+  await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-4').click()
@@ -363,11 +373,21 @@ test('Add script playlist', async ({ page }) => {
   ).not.toBeDisabled()
   await page.getByRole('button', { name: 'Create', exact: true }).click()
   await expect(page).toHaveURL('/playlists/3')
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/playlists/3' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.name === 'Script playlist' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#title')).toBeFocused()
   await expect(page.locator('#title')).toHaveValue('New playlist')
   await page.locator('#title').fill('Script playlist')
   await page.locator('#title').press('Enter')
   await expect(page.getByRole('heading')).toHaveText('Script playlist')
+  await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-4').click()
@@ -680,11 +700,21 @@ test('Add scene playlist', async ({ page }) => {
   ).not.toBeDisabled()
   await page.getByRole('button', { name: 'Create', exact: true }).click()
   await expect(page).toHaveURL('/playlists/5')
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/playlists/5' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.name === 'Scene playlist' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#title')).toBeFocused()
   await expect(page.locator('#title')).toHaveValue('New playlist')
   await page.locator('#title').fill('Scene playlist')
   await page.locator('#title').press('Enter')
   await expect(page.getByRole('heading')).toHaveText('Scene playlist')
+  await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-4').click()
