@@ -416,7 +416,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -428,7 +428,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
       request.method() === 'PATCH' &&
       res.status() === 404
     )
@@ -450,6 +450,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
       exact: true
     })
   ).toBeVisible()
+  await responsePromise
 })
 
 test('Invalid Local Caption Script Path', async ({ page }) => {
@@ -502,7 +503,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -514,7 +515,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/4' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -533,7 +534,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -545,7 +546,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -564,7 +565,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -576,7 +577,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -1960,7 +1961,7 @@ test('Batch Tag Single Caption Script', async ({ page }) => {
       .nth(0)
       .locator('.MuiChip-root > .MuiChip-label')
   ).toHaveCount(0)
-  await page.getByRole('checkbox').nth(0).uncheck()
+  await page.getByRole('checkbox').nth(0).click()
 })
 
 test('Add Same Remote Caption Script', async ({ page }) => {
@@ -1970,7 +1971,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
       hasText: 'https://pastebin.com/raw/ZNJ5A40S'
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('combobox').click()
   await page
@@ -2093,7 +2094,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
       hasText: 'https://pastebin.com/raw/ZNJ5A40S'
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('button', { name: '- Remove', exact: true }).click()
 })
@@ -2178,9 +2179,9 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   test.slow()
   // Add tags
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(0).check()
-  await page.getByRole('checkbox').nth(1).check()
-  await page.getByRole('checkbox').nth(2).check()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(2).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2321,9 +2322,9 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
       .nth(1)
   ).toHaveText('car')
 
-  await page.getByRole('checkbox').nth(0).uncheck()
-  await page.getByRole('checkbox').nth(1).uncheck()
-  await page.getByRole('checkbox').nth(3).check()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(3).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2513,7 +2514,7 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   ).toHaveText('pets')
 
   // Overwrite tags
-  await page.getByRole('checkbox').nth(1).check()
+  await page.getByRole('checkbox').nth(1).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2609,9 +2610,9 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   ).toHaveText('car')
 
   // Add with overlapping tags
-  await page.getByRole('checkbox').nth(0).check()
-  await page.getByRole('checkbox').nth(1).uncheck()
-  await page.getByRole('checkbox').nth(3).uncheck()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(3).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2814,8 +2815,8 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   ).toHaveText('car')
 
   // Remove tag
-  await page.getByRole('checkbox').nth(1).check()
-  await page.getByRole('checkbox').nth(2).uncheck()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(2).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('combobox').click()
   await expect(
@@ -3397,7 +3398,7 @@ test('Search Caption Scripts', async ({ page }) => {
       )
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByPlaceholder('Tag These Sources').click()
   await page.getByRole('option', { name: 'car (0)' }).click()
@@ -3416,7 +3417,7 @@ test('Search Caption Scripts', async ({ page }) => {
       )
     })
     .getByRole('checkbox')
-    .uncheck()
+    .click()
   await page
     .locator('#sortable-list li')
     .filter({
@@ -3430,7 +3431,7 @@ test('Search Caption Scripts', async ({ page }) => {
       )
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByPlaceholder('Tag These Sources').click()
   await page.getByRole('option', { name: 'pets (0)' }).click()

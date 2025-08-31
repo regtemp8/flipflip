@@ -1,6 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 
-test.beforeAll(async ({ page }) => {
+let page: Page
+test.beforeAll(async ({ browser }) => {
+  page = await browser.newPage()
   await page.goto('/audio-library')
   await page.getByTestId('AddIcon').click()
   await page.getByLabel('Local Audio').click()
@@ -16,7 +18,7 @@ test.beforeAll(async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
 })
 
-test.afterAll(async ({ page }) => {
+test.afterAll(async () => {
   await page.goto('/audio-library')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -30,13 +32,14 @@ test.afterAll(async ({ page }) => {
   await page.getByTestId('DeleteIcon').nth(0).click()
   await expect(page.locator('#sortable-list li')).toHaveCount(0)
   await responsePromise
+  await page.close()
 })
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async () => {
   await page.goto('/audio-library')
 })
 
-test('Play audio', async ({ page }) => {
+test('Play audio', async () => {
   // play audio
   // check tooltip
   // pause audio
@@ -48,17 +51,17 @@ test('Play audio', async ({ page }) => {
   // seek by clicking
 })
 
-test('Audio volume', async ({ page }) => {
+test('Audio volume', async () => {
   // slider test
 })
 
-test('Audio BPM', async ({ page }) => {
+test('Audio BPM', async () => {
   // input test
   // detect BPM
   // use BPM metadata
 })
 
-test('Audio URL', async ({ page }) => {
+test('Audio URL', async () => {
   /*
     update url:
       empty url:
@@ -78,22 +81,22 @@ test('Audio URL', async ({ page }) => {
   // can play audio again
 })
 
-test('Audio Speed', async ({ page }) => {
+test('Audio Speed', async () => {
   // slider test
   // set slider to max
   // hit play
   // set timeout for a second and check that position has increased by at least 4
 })
 
-test('Audio Stop at End', async ({ page }) => {
+test('Audio Stop at End', async () => {
   // check Stop at End hides Next Scene at End and Tick
 })
 
-test('Audio Next Scene at End', async ({ page }) => {
+test('Audio Next Scene at End', async () => {
   // check Next Scene at End hides Stop at End and Tick
 })
 
-test('Audio Tick', async ({ page }) => {
+test('Audio Tick', async () => {
   // check Tick hides Stop at End and Next Scene at End
   // and shows timing options
   // timing tests
@@ -107,13 +110,13 @@ test('Audio Tick', async ({ page }) => {
   // with scene: has no effect on playback
 })
 
-test('Audio Options Cancel', async ({ page }) => {
+test('Audio Options Cancel', async () => {
   // make changes
   // click cancel
   // verify no changes were made
 })
 
-test('Audio Options Save', async ({ page }) => {
+test('Audio Options Save', async () => {
   // make changes
   // click cancel
   // verify the changes were saved

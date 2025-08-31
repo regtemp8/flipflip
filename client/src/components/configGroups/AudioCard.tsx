@@ -70,7 +70,7 @@ function AudioCard(props: AudioCardProps) {
         </Grid2>
         <Grid2>
           <Collapse in={audioEnabled && !props.startPlaying}>
-            <Tooltip disableInteractive title={'Add Playlist'}>
+            <Tooltip disableInteractive title="Add Playlist">
               <Fab
                 className={classes.addButton}
                 onClick={onAddPlaylist}

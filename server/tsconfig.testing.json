@@ -2,7 +2,7 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "./bin"
+    "outDir": "./tests/bin"
   },
   "exclude": []
 }

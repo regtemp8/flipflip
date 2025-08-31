@@ -238,14 +238,14 @@ function PlaylistSetup() {
 
   const onFinishDeletePlaylist = async () => {
     onCloseDialog()
-    const {id, type} = playlist as Playlist
-    await deletePlaylist({id, type})
+    const { id, type } = playlist as Playlist
+    await deletePlaylist({ id, type })
     goBack()
   }
 
   const onClonePlaylist = async () => {
-    const {id, type} = playlist as Playlist
-    const { data } = await clonePlaylist({id, type})
+    const { id, type } = playlist as Playlist
+    const { data } = await clonePlaylist({ id, type })
     if (data != null) {
       await navigate(`/playlists/${data.value}`)
     }
@@ -399,7 +399,8 @@ function PlaylistSetup() {
             <DialogContent>
               <DialogContentText id="delete-description">
                 Are you sure you want to delete {playlist?.name}? It will be
-                automatically removed from all {playlist?.type === PLT.scene ? 'displays' : 'scenes'}.
+                automatically removed from all{' '}
+                {playlist?.type === PLT.scene ? 'displays' : 'scenes'}.
               </DialogContentText>
             </DialogContent>
             <DialogActions>

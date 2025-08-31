@@ -105,4 +105,5 @@ coverage
 */playwright/.cache/
 
 server/tests/data/
+server/tests/bin/
 docker-data

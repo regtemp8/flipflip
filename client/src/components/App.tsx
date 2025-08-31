@@ -37,116 +37,37 @@ const App = () => {
   return (
     <Provider store={store}>
       <CacheProvider value={createCache({ key: 'css' })}>
-        <AppThemeProvider>
-          <ErrorBoundary>
-            <SnackbarProvider
-              maxSnack={MAX_SNACKS}
-              autoHideDuration={AUTO_HIDE_DURATION}
-              action={CloseSnackBarAction}
-            >
-              <CssBaseline />
-              <AudioOptions />
-              <Routes>
-                <Route
-                  path="/settings/*"
-                  element={
-                    <PrivateRoute>
-                      <ConfigForm />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/scenes/:id/*"
-                  element={
-                    <PrivateRoute>
-                      <SceneDetail />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/displays/:id/*"
-                  element={
-                    <PrivateRoute>
-                      <DisplaySetup />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/playlists/:id/*"
-                  element={
-                    <PrivateRoute>
-                      <PlaylistSetup />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/content-library"
-                  element={
-                    <PrivateRoute>
-                      <Library />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/audio-library/*"
-                  element={
-                    <PrivateRoute>
-                      <AudioLibrary />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/script-library"
-                  element={
-                    <PrivateRoute>
-                      <ScriptLibrary />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/scripts/:id/options"
-                  element={
-                    <PrivateRoute>
-                      <ScriptOptions />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/tags"
-                  element={
-                    <PrivateRoute>
-                      <TagManager />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/scriptor/:id?"
-                  element={
-                    <PrivateRoute>
-                      <CaptionScriptor />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/player/:id"
-                  element={
-                    <PrivateRoute>
-                      <DisplayManager />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/*"
-                  element={
-                    <PrivateRoute>
-                      <ScenePicker />
-                    </PrivateRoute>
-                  }
-                />
-              </Routes>
-            </SnackbarProvider>
-          </ErrorBoundary>
-        </AppThemeProvider>
+        <PrivateRoute>
+          <AppThemeProvider>
+            <ErrorBoundary>
+              <SnackbarProvider
+                maxSnack={MAX_SNACKS}
+                autoHideDuration={AUTO_HIDE_DURATION}
+                action={CloseSnackBarAction}
+              >
+                <CssBaseline />
+                <AudioOptions />
+                <Routes>
+                  <Route path="/settings/*" element={<ConfigForm />} />
+                  <Route path="/scenes/:id/*" element={<SceneDetail />} />
+                  <Route path="/displays/:id/*" element={<DisplaySetup />} />
+                  <Route path="/playlists/:id/*" element={<PlaylistSetup />} />
+                  <Route path="/content-library" element={<Library />} />
+                  <Route path="/audio-library/*" element={<AudioLibrary />} />
+                  <Route path="/script-library" element={<ScriptLibrary />} />
+                  <Route
+                    path="/scripts/:id/options"
+                    element={<ScriptOptions />}
+                  />
+                  <Route path="/tags" element={<TagManager />} />
+                  <Route path="/scriptor/:id?" element={<CaptionScriptor />} />
+                  <Route path="/player/:id" element={<DisplayManager />} />
+                  <Route path="/*" element={<ScenePicker />} />
+                </Routes>
+              </SnackbarProvider>
+            </ErrorBoundary>
+          </AppThemeProvider>
+        </PrivateRoute>
       </CacheProvider>
     </Provider>
   )

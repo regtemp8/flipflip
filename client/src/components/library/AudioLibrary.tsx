@@ -1318,7 +1318,7 @@ function AudioLibrary() {
             </Tooltip>
           )}
           {specialMode === SP.select && (
-            <Tooltip disableInteractive title={'Import'} placement="top-end">
+            <Tooltip disableInteractive title="Import" placement="top-end">
               <Badge
                 classes={{
                   badge: classes.importBadge

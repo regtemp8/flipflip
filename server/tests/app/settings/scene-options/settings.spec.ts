@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { changeSlider, testSliderValue } from '../../utils'
-import { WF } from 'flipflip-common'
+import { IF, WF } from 'flipflip-common'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-options')
@@ -100,6 +100,15 @@ test('Image Filter', async ({ page }) => {
     page.locator('input[aria-labelledby="video-volume-slider"]')
   ).not.toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.imageTypeFilter === IF.any &&
+      res.status() === 204
+    )
+  })
   await page.getByRole('combobox').nth(3).click()
   await page.getByRole('option', { name: 'All files', exact: true }).click()
   await expect(page.getByText('Image FilterAll files')).toBeVisible()
@@ -116,6 +125,7 @@ test('Image Filter', async ({ page }) => {
   await expect(
     page.locator('input[aria-labelledby="video-volume-slider"]')
   ).toBeVisible()
+  await responsePromise
 })
 
 test('Play Full Sources', async ({ page }) => {
@@ -690,7 +700,9 @@ test('Continue Videos', async ({ page }) => {
     page.getByLabel('Continue Videos', { exact: true })
   ).not.toBeChecked()
 
-  await page.getByLabel('Continue Videos', { exact: true }).scrollIntoViewIfNeeded()
+  await page
+    .getByLabel('Continue Videos', { exact: true })
+    .scrollIntoViewIfNeeded()
   await page.getByLabel('Continue Videos', { exact: true }).hover()
   await expect(page.getByRole('tooltip')).toHaveText(
     'Each time a video is played, continue from where it left off. Default: Start from beginning'
@@ -849,7 +861,7 @@ test('Weighting', async ({ page }) => {
     page.getByLabel('Play Full Sources', { exact: true })
   ).not.toBeVisible()
 
-    const responsePromise = page.waitForResponse((res) => {
+  const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
       new URL(request.url()).pathname === '/api/scenes/1' &&

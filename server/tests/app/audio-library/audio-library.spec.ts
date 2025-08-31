@@ -1,4 +1,3 @@
-import path from 'path'
 import { test, expect } from '@playwright/test'
 import { dragListItem } from '../utils'
 
@@ -499,7 +498,7 @@ test('Add Remote Audio', async ({ page }) => {
   await page.getByText('Import').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(4)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -530,7 +529,7 @@ test('Add Remote Audio', async ({ page }) => {
   ).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(4)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -557,10 +556,10 @@ test('Add Remote Audio', async ({ page }) => {
   await page.getByText('Import').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -587,13 +586,13 @@ test('Add Remote Audio', async ({ page }) => {
   await page.getByText('Import').click()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -620,19 +619,19 @@ test('Shift + Click Remote Audio', async ({ page, context }) => {
     .click()
   await page.keyboard.up('Shift')
   const newPage = await pagePromise
-  await expect(newPage).toHaveURL('http://localhost:5050/fs/file/audio/6')
+  await expect(newPage).toHaveURL('http://localhost:5050/fs/file/audio/9')
   await newPage.close()
 })
 
 test('Sort By URL', async ({ page, context }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -662,13 +661,13 @@ test('Sort By URL', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(0)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Sea2:09MBBSea'
@@ -699,13 +698,13 @@ test('Sort By URL', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
 })
 
@@ -720,13 +719,13 @@ test('Sort By Name', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -747,10 +746,10 @@ test('Sort By Name', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(1)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -762,7 +761,7 @@ test('Sort By Name', async ({ page, context }) => {
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -775,7 +774,7 @@ test('Sort By Name', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(1)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -787,16 +786,16 @@ test('Sort By Name', async ({ page, context }) => {
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 })
 
 test('Sort By Artist', async ({ page, context }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -808,10 +807,10 @@ test('Sort By Artist', async ({ page, context }) => {
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -832,13 +831,13 @@ test('Sort By Artist', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(2)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Sea2:09MBBSea'
@@ -869,13 +868,13 @@ test('Sort By Artist', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 })
 
@@ -890,13 +889,13 @@ test('Sort By Album', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -917,7 +916,7 @@ test('Sort By Album', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(3)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -929,10 +928,10 @@ test('Sort By Album', async ({ page, context }) => {
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -945,7 +944,7 @@ test('Sort By Album', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(3)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -957,16 +956,16 @@ test('Sort By Album', async ({ page, context }) => {
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 })
 
 test('Sort By Date', async ({ page, context }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -978,10 +977,10 @@ test('Sort By Date', async ({ page, context }) => {
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -1002,13 +1001,13 @@ test('Sort By Date', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(4)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -1039,13 +1038,13 @@ test('Sort By Date', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
 })
 
@@ -1060,13 +1059,13 @@ test('Sort By Duration', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -1087,13 +1086,13 @@ test('Sort By Duration', async ({ page, context }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(5)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
     'Sea2:09MBBSea'
@@ -1124,13 +1123,13 @@ test('Sort By Duration', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
 })
 
@@ -1145,13 +1144,13 @@ test('Sort By Play Count', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -1181,13 +1180,13 @@ test('Sort By Play Count', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   await expect(page.getByTestId('SortIcon')).toBeVisible()
@@ -1209,13 +1208,13 @@ test('Sort By Play Count', async ({ page, context }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 })
 
@@ -1231,13 +1230,13 @@ test('Move Audio Down', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
 
   const responsePromise = page.waitForResponse((res) => {
@@ -1265,13 +1264,13 @@ test('Move Audio Down', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -1287,13 +1286,13 @@ test('Move Audio Up', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -1318,7 +1317,7 @@ test('Move Audio Up', async ({ page }) => {
   }
   await dragListItem(page, start, end)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -1327,10 +1326,10 @@ test('Move Audio Up', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -1390,14 +1389,16 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
 
   await page.getByRole('checkbox').nth(0).click()
@@ -1431,18 +1432,18 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   ).not.toBeChecked()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .getByRole('checkbox')
   ).toBeChecked()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .getByRole('checkbox')
   ).toBeChecked()
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .getByRole('checkbox')
   ).toBeChecked()
@@ -1457,14 +1458,16 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
 
   await page.getByTestId('SelectAllIcon').click()
@@ -1496,24 +1499,24 @@ test('Batch Tag Select All With Filter', async ({ page }) => {
   ).not.toBeChecked()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .getByRole('checkbox')
   ).toBeChecked()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .getByRole('checkbox')
   ).toBeChecked()
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .getByRole('checkbox')
   ).toBeChecked()
 })
 
-test('Batch Tag Single Caption Script', async ({ page }) => {
+test('Batch Tag Single Audio', async ({ page }) => {
   test.slow()
   await page.getByLabel('Manage Tags').click()
   await expect(page).toHaveURL('/tags')
@@ -2225,10 +2228,10 @@ test('Add Same Remote Audio', async ({ page }) => {
   await page.getByLabel('Batch Tag').click()
   await page
     .locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('combobox').click()
   await page
@@ -2250,7 +2253,7 @@ test('Add Same Remote Audio', async ({ page }) => {
   await expect(page.getByRole('checkbox')).not.toBeVisible()
   await page
     .locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
     .nth(0)
     .getByTestId('AudiotrackIcon')
@@ -2284,7 +2287,7 @@ test('Add Same Remote Audio', async ({ page }) => {
   ).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -2293,10 +2296,10 @@ test('Add Same Remote Audio', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -2304,7 +2307,7 @@ test('Add Same Remote Audio', async ({ page }) => {
 
   await page
     .locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
     .nth(0)
     .getByTestId('AudiotrackIcon')
@@ -2322,10 +2325,10 @@ test('Add Same Remote Audio', async ({ page }) => {
   await page.getByLabel('Batch Tag').click()
   await page
     .locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('button', { name: '- Remove', exact: true }).click()
 })
@@ -2333,7 +2336,7 @@ test('Add Same Remote Audio', async ({ page }) => {
 test('Randomize Order', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    'Take You Home Tonight3:33Vibe Tracks'
+    '32Take You Home Tonight3:33Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
@@ -2342,10 +2345,10 @@ test('Randomize Order', async ({ page }) => {
     'Sea2:09MBBSea'
   )
   await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
-    'Foundation3:41Vibe Tracks'
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
-    'Sugar3:50Vibe Tracks'
+    '32Sugar3:50Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(5)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
@@ -2365,7 +2368,7 @@ test('Randomize Order', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
@@ -2377,10 +2380,12 @@ test('Randomize Order', async ({ page }) => {
     page.locator('#sortable-list li', { hasText: 'Sea2:09MBBSea' })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
@@ -2389,13 +2394,13 @@ test('Randomize Order', async ({ page }) => {
   ).toBeVisible()
 })
 
-test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
+test('Batch Tag Multiple Audios', async ({ page }) => {
   test.slow()
   // Add tags
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(0).check()
-  await page.getByRole('checkbox').nth(1).check()
-  await page.getByRole('checkbox').nth(2).check()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(2).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2510,8 +2515,8 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
   ).toHaveText('car')
 
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(2).check()
-  await page.getByRole('checkbox').nth(3).check()
+  await page.getByRole('checkbox').nth(2).click()
+  await page.getByRole('checkbox').nth(3).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2661,9 +2666,9 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
 
   // Overwrite tags
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(1).check()
-  await page.getByRole('checkbox').nth(2).check()
-  await page.getByRole('checkbox').nth(3).check()
+  await page.getByRole('checkbox').nth(1).click()
+  await page.getByRole('checkbox').nth(2).click()
+  await page.getByRole('checkbox').nth(3).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2735,8 +2740,8 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
 
   // Add with overlapping tags
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(0).check()
-  await page.getByRole('checkbox').nth(2).check()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(2).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await expect(
     page.getByRole('presentation').locator('.MuiChip-root > .MuiChip-label')
@@ -2903,8 +2908,8 @@ test('Batch Tag Multiple Caption Scripts', async ({ page }) => {
 
   // Remove tag
   await page.getByLabel('Batch Tag').click()
-  await page.getByRole('checkbox').nth(0).check()
-  await page.getByRole('checkbox').nth(1).check()
+  await page.getByRole('checkbox').nth(0).click()
+  await page.getByRole('checkbox').nth(1).click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByRole('combobox').click()
   await expect(
@@ -3093,14 +3098,14 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
@@ -3118,22 +3123,22 @@ test('Mark Audios', async ({ page }) => {
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
@@ -3148,21 +3153,21 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
@@ -3192,32 +3197,32 @@ test('Mark Audios', async ({ page }) => {
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
@@ -3239,14 +3244,14 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
@@ -3264,22 +3269,22 @@ test('Mark Audios', async ({ page }) => {
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
@@ -3296,35 +3301,35 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
 
@@ -3332,52 +3337,52 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
 
@@ -3386,21 +3391,21 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
@@ -3418,32 +3423,32 @@ test('Mark Audios', async ({ page }) => {
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).toHaveCSS('background-color', 'rgb(233, 30, 99)')
   await expect(
@@ -3458,14 +3463,14 @@ test('Mark Audios', async ({ page }) => {
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
       .locator('#sortable-list li', {
-        hasText: 'Take You Home Tonight3:33Vibe Tracks'
+        hasText: '32Take You Home Tonight3:33Vibe Tracks'
       })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
@@ -3483,22 +3488,22 @@ test('Mark Audios', async ({ page }) => {
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Foundation3:41Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiListItemAvatar-root button')
   ).toHaveCSS('background-color', 'rgb(63, 81, 181)')
   await expect(
     page
-      .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+      .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
       .locator('.MuiBadge-anchorOriginTopLeft')
   ).not.toBeVisible()
   await expect(
@@ -3551,14 +3556,16 @@ test('Search Audios', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
 
   // negative url filter (starts with -')
@@ -3581,14 +3588,16 @@ test('Search Audios', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
 
@@ -3618,17 +3627,23 @@ test('Search Audios', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
 
   // regex expression
+  await page.getByLabel('Clear').click()
+  await page.getByRole('combobox').fill('"Smile (Ultimate Mix)"')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#sortable-list li')).toHaveCount(0)
   await page.getByLabel('Clear').click()
   await page
     .locator('#sortable-list li', {
@@ -3645,9 +3660,7 @@ test('Search Audios', async ({ page }) => {
     })
   ).toBeVisible()
   await page.getByRole('combobox').fill('"Smile (Ultimate Mix)"')
-  await expect(page.locator('#sortable-list li')).toHaveCount(0)
-  await page.getByLabel('Clear').click()
-  await page.getByRole('combobox').fill('"Smile (Ultimate Mix)"')
+  await page.keyboard.press('Enter')
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
   await expect(
     page.locator('#sortable-list li', {
@@ -3698,24 +3711,24 @@ test('Search Audios', async ({ page }) => {
   // setup: add tags
   await page.getByLabel('Batch Tag').click()
   await page
-    .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByPlaceholder('Tag These Sources').click()
   await page.getByRole('option', { name: 'car (0)' }).click()
   await page.getByRole('combobox').click()
   await page.getByRole('button', { name: '+ Add' }).click()
   await page
-    .locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    .locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
     .getByRole('checkbox')
-    .uncheck()
+    .click()
   await page
     .locator('#sortable-list li', {
       hasText: 'Smile2:04Aftertune, Ultimate MixSmile'
     })
     .getByRole('checkbox')
-    .check()
+    .click()
   await page.locator('.MuiBadge-root').getByTestId('LocalOfferIcon').click()
   await page.getByPlaceholder('Tag These Sources').click()
   await page.getByRole('option', { name: 'pets (0)' }).click()
@@ -3729,11 +3742,13 @@ test('Search Audios', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(4)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
@@ -3750,7 +3765,7 @@ test('Search Audios', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(page.locator('#sortable-list li')).toHaveCount(1)
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
 
   // type negative tag filter (starts with -[)
@@ -3759,15 +3774,17 @@ test('Search Audios', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(page.locator('#sortable-list li')).toHaveCount(5)
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
@@ -3801,11 +3818,13 @@ test('Search Audios', async ({ page }) => {
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
@@ -3822,11 +3841,13 @@ test('Search Audios', async ({ page }) => {
   await expect(page.locator('#sortable-list li')).toHaveCount(2)
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
 
   // remove a filter by clicking X of chip
@@ -3836,15 +3857,17 @@ test('Search Audios', async ({ page }) => {
     .click()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
 
   // filter stays applied when navigating to another page
@@ -3874,15 +3897,17 @@ test('Search Audios', async ({ page }) => {
     page.locator('#sortable-list li', { hasText: 'Sea2:09MBBSea' })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Sugar3:50Vibe Tracks' })
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
   ).toBeVisible()
   await expect(
     page.locator('#sortable-list li', {
-      hasText: 'Take You Home Tonight3:33Vibe Tracks'
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
     })
   ).toBeVisible()
   await expect(
-    page.locator('#sortable-list li', { hasText: 'Foundation3:41Vibe Tracks' })
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
   ).toBeVisible()
 })
 
@@ -4017,9 +4042,9 @@ test('Search Audios', async ({ page }) => {
 //   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
 //   await expect(page.getByRole('button', { name: '-Vibe' })).not.toBeVisible()
 //   await expect(page.locator('#sortable-list li')).toHaveCount(13)
-//   await expect(page.locator('#sortable-list li', {hasText: 'Take You Home Tonight3:33Vibe Tracks'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: 'Foundation3:41Vibe Tracks'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: 'Sugar3:50Vibe Tracks'})).toHaveCount(11)
+//   await expect(page.locator('#sortable-list li', {hasText: '32Take You Home Tonight3:33Vibe Tracks'})).toBeVisible()
+//   await expect(page.locator('#sortable-list li', {hasText: '32Foundation3:41Vibe Tracks'})).toBeVisible()
+//   await expect(page.locator('#sortable-list li', {hasText: '32Sugar3:50Vibe Tracks'})).toHaveCount(11)
 //   await responsePromise
 // })
 

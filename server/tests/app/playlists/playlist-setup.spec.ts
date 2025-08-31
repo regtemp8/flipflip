@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import {RP} from 'flipflip-common'
+import { RP } from 'flipflip-common'
 
 test('Add audio playlist', async ({ page }) => {
   await page.goto('/')
@@ -73,21 +73,21 @@ test('Shuffle audio playlist', async ({ page }) => {
   await page.goto('/playlists/1')
   await expect(page).toHaveURL('/playlists/1')
 
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
 
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (On)', exact: true })
   ).toBeVisible()
@@ -101,13 +101,12 @@ test('Shuffle audio playlist', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
@@ -120,42 +119,39 @@ test('Repeat audio playlist', async ({ page }) => {
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).not.toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).toBeVisible()
-  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (One)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (Off)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).click()
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -168,10 +164,11 @@ test('Repeat audio playlist', async ({ page }) => {
   })
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
@@ -218,8 +215,12 @@ test('Clone audio playlist', async ({ page }) => {
   await expect(page).toHaveURL('/playlists/1')
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Song playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Song clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Song clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/2')
 })
@@ -227,8 +228,12 @@ test('Clone audio playlist', async ({ page }) => {
 test('Delete cloned audio playlist', async ({ page }) => {
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Song playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Song clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Song clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/2')
 
@@ -272,8 +277,12 @@ test('Delete cloned audio playlist', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'OK', exact: true }).click()
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Song playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Song clone', exact: true })).not.toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Song clone', exact: true })
+  ).not.toBeVisible()
 
   // TODO add playlist to scene, delete playlist, then check if playlist is also deleted in scene
 })
@@ -392,7 +401,9 @@ test('Add script playlist', async ({ page }) => {
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-4').click()
   await expect(page).toHaveURL('/playlists')
-  await page.getByRole('button', { name: 'Script playlist', exact: true }).click()
+  await page
+    .getByRole('button', { name: 'Script playlist', exact: true })
+    .click()
   await expect(page).toHaveURL('/playlists/3')
 })
 
@@ -400,21 +411,21 @@ test('Shuffle script playlist', async ({ page }) => {
   await page.goto('/playlists/3')
   await expect(page).toHaveURL('/playlists/3')
 
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
 
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (On)', exact: true })
   ).toBeVisible()
@@ -428,13 +439,12 @@ test('Shuffle script playlist', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
@@ -447,42 +457,39 @@ test('Repeat script playlist', async ({ page }) => {
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).not.toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).toBeVisible()
-  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (One)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (Off)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).click()
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -495,10 +502,11 @@ test('Repeat script playlist', async ({ page }) => {
   })
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
@@ -545,8 +553,12 @@ test('Clone script playlist', async ({ page }) => {
   await expect(page).toHaveURL('/playlists/3')
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Script playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Script clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Script clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/4')
 })
@@ -554,8 +566,12 @@ test('Clone script playlist', async ({ page }) => {
 test('Delete cloned script playlist', async ({ page }) => {
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Script playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Script clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Script clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/4')
 
@@ -599,8 +615,12 @@ test('Delete cloned script playlist', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'OK', exact: true }).click()
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Script playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Script clone', exact: true })).not.toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Script clone', exact: true })
+  ).not.toBeVisible()
 
   // TODO add playlist to scene, delete playlist, then check if playlist is also deleted in scene
 })
@@ -719,7 +739,9 @@ test('Add scene playlist', async ({ page }) => {
   await expect(page).toHaveURL('/')
   await page.locator('#vertical-tab-4').click()
   await expect(page).toHaveURL('/playlists')
-  await page.getByRole('button', { name: 'Scene playlist', exact: true }).click()
+  await page
+    .getByRole('button', { name: 'Scene playlist', exact: true })
+    .click()
   await expect(page).toHaveURL('/playlists/5')
 })
 
@@ -727,21 +749,21 @@ test('Shuffle scene playlist', async ({ page }) => {
   await page.goto('/playlists/5')
   await expect(page).toHaveURL('/playlists/5')
 
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
 
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (On)', exact: true })
   ).toBeVisible()
@@ -755,13 +777,12 @@ test('Shuffle scene playlist', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page
-    .getByRole('button', { name: 'Shuffle (On)', exact: true })
-    .click()
-  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Shuffle (Off)', exact: true })
-    .hover()
+  await page.getByRole('button', { name: 'Shuffle (On)', exact: true }).click()
+  await expect(page.getByTestId('ShuffleIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Shuffle (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Shuffle (Off)', exact: true })
   ).toBeVisible()
@@ -774,42 +795,39 @@ test('Repeat scene playlist', async ({ page }) => {
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).not.toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).toBeVisible()
-  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatOneIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (One)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (One)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (One)', exact: true }).click()
 
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgba(0, 0, 0, 0.54)')
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgba(0, 0, 0, 0.54)'
+  )
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (Off)', exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Repeat (Off)', exact: true })
-    .click()
+  await page.getByRole('button', { name: 'Repeat (Off)', exact: true }).click()
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -822,10 +840,11 @@ test('Repeat scene playlist', async ({ page }) => {
   })
   await expect(page.getByTestId('RepeatIcon')).toBeVisible()
   await expect(page.getByTestId('RepeatOneIcon')).not.toBeVisible()
-  await expect(page.getByTestId('RepeatIcon')).toHaveCSS('color', 'rgb(63, 81, 181)')
-  await page
-    .getByRole('button', { name: 'Repeat (All)', exact: true })
-    .hover()
+  await expect(page.getByTestId('RepeatIcon')).toHaveCSS(
+    'color',
+    'rgb(63, 81, 181)'
+  )
+  await page.getByRole('button', { name: 'Repeat (All)', exact: true }).hover()
   await expect(
     page.getByRole('tooltip', { name: 'Repeat (All)', exact: true })
   ).toBeVisible()
@@ -872,8 +891,12 @@ test('Clone scene playlist', async ({ page }) => {
   await expect(page).toHaveURL('/playlists/5')
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Scene playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Scene clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Scene clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/6')
 })
@@ -881,8 +904,12 @@ test('Clone scene playlist', async ({ page }) => {
 test('Delete cloned scene playlist', async ({ page }) => {
   await page.goto('/playlists')
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Scene playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Scene clone', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene clone', exact: true })
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Scene clone', exact: true }).click()
   await expect(page).toHaveURL('/playlists/6')
 
@@ -926,8 +953,12 @@ test('Delete cloned scene playlist', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'OK', exact: true }).click()
   await expect(page).toHaveURL('/playlists')
-  await expect(page.getByRole('button', { name: 'Scene playlist', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Scene clone', exact: true })).not.toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene playlist', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Scene clone', exact: true })
+  ).not.toBeVisible()
 
   // TODO add playlist to scene, delete playlist, then check if playlist is also deleted in scene
 })

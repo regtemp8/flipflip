@@ -26,7 +26,10 @@ import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import { useNavigate } from 'react-router'
 import { useAppDispatch } from '../../store/hooks'
-import { useGetPlaylistItemIdsQuery, useGetPlaylistQuery } from '../../store/api/slice'
+import {
+  useGetPlaylistItemIdsQuery,
+  useGetPlaylistQuery
+} from '../../store/api/slice'
 import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -230,7 +233,9 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
               title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
             >
               <IconButton onClick={toggleShuffle} size="large">
-                <ShuffleIcon color={playlist?.shuffle ? 'primary' : undefined} />
+                <ShuffleIcon
+                  color={playlist?.shuffle ? 'primary' : undefined}
+                />
               </IconButton>
             </Tooltip>
             <Tooltip
@@ -246,7 +251,9 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
             >
               <IconButton onClick={changeRepeat} size="large">
                 {playlist?.repeat === RP.none && <RepeatIcon />}
-                {playlist?.repeat === RP.all && <RepeatIcon color={'primary'} />}
+                {playlist?.repeat === RP.all && (
+                  <RepeatIcon color={'primary'} />
+                )}
                 {playlist?.repeat === RP.one && (
                   <RepeatOneIcon color={'primary'} />
                 )}

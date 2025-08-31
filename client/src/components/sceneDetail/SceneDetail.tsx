@@ -724,8 +724,8 @@ function SceneDetail() {
   }
 
   const onFinishDeleteScene = async () => {
-    await deleteScene(sceneID)
     setOpenMenu(undefined)
+    await deleteScene(sceneID)
     goBack()
   }
 

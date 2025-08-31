@@ -28,7 +28,7 @@ export class SchedulerService {
 
   private scheduleBackupJob(settings: BackupSettings) {
     if (!settings.autoBackup) {
-      logger.info(`+ Cancel auto backup job`)
+      logger.info(`+ Cancel auto create backup job`)
       schedule.cancelJob('Auto Backup')
       return
     }
@@ -38,7 +38,7 @@ export class SchedulerService {
     logger.info(`+ Schedule auto backup job (cron: ${cron})`)
     schedule.scheduleJob('Auto Backup', cron, async () => {
       const now = moment()
-      logger.info(`+ Run auto backup job: ${now.toISOString()}`)
+      logger.info(`+ Run auto create backup job: ${now.toISOString()}`)
       const fileName = `flipflip-${now.unix()}.db`
       await db().createBackup(fileName)
       await createBackup(fileName, now)
@@ -47,6 +47,8 @@ export class SchedulerService {
 
   private scheduleCleanJob(settings: BackupSettings) {
     if (!settings.autoCleanBackup) {
+      logger.info(`+ Cancel auto clean backup job`)
+      schedule.cancelJob('Clean Backups')
       return
     }
 
@@ -54,7 +56,7 @@ export class SchedulerService {
     const cron = `${m.minute()} ${m.hour()} */${settings.autoBackupDays} * *`
     logger.info(`+ Schedule clean backups job (cron: ${cron})`)
     schedule.scheduleJob('Clean Backups', cron, async () => {
-      logger.info(`+ Run auto backup job: ${moment().toISOString()}`)
+      logger.info(`+ Run auto clean backup job: ${moment().toISOString()}`)
       await db().cleanBackups(settings)
     })
   }

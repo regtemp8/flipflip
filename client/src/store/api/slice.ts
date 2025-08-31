@@ -46,6 +46,7 @@ import {
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
 import { loadImageViews } from '../imagePlayer/thunks'
+import { updateLocalDisplayView } from './thunks'
 
 const baseUrl =
   import.meta.env.VITE_API_BASE_URL ||
@@ -150,7 +151,10 @@ export const flipflipApi = createApi({
       },
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled.then(() => {
-          dispatch(flipflipApi.util.resetApiState())
+          window.setTimeout(
+            () => dispatch(flipflipApi.util.resetApiState()),
+            500
+          )
         })
       }
     }),
@@ -937,7 +941,7 @@ export const flipflipApi = createApi({
         view != null ? [{ type: 'DisplayView', id: view.id }] : []
     }),
     updateDisplayView: builder.mutation<
-      void,
+      Partial<DisplayView>,
       Pick<DisplayView, 'id'> & Partial<DisplayView>
     >({
       query: ({ id, ...patch }) => ({
@@ -947,6 +951,9 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         await queryFulfilled
+          .then(({ data }) => {
+            dispatch(updateLocalDisplayView({ id, error: data.error }))
+          })
           .catch((reason) => {
             const status = reason.meta?.response?.status
             // TODO implement etags (412)
@@ -969,8 +976,8 @@ export const flipflipApi = createApi({
     }),
     getPlaylist: builder.query<Playlist, number>({
       query: (id) => `api/playlists/${id}`,
-      providesTags: (view) =>
-        view != null ? [{ type: 'Playlist', id: view.id }] : []
+      providesTags: (playlist) =>
+        playlist != null ? [{ type: 'Playlist', id: playlist.id }] : []
     }),
     playPlaylist: builder.mutation<ValueResponse, number>({
       query: (id) => ({ url: `api/playlists/${id}/play`, method: 'POST' })
@@ -992,12 +999,15 @@ export const flipflipApi = createApi({
         )
       }
     }),
-    clonePlaylist: builder.mutation<ValueResponse, number>({
-      query: (id) => ({
+    clonePlaylist: builder.mutation<
+      ValueResponse,
+      { id: number; type: string }
+    >({
+      query: ({ id }) => ({
         url: `api/playlists/${id}/clone`,
         method: 'POST'
       }),
-      async onQueryStarted(type, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ type }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         snackbar().showMessage({ success: 'Clone successful!' })
         dispatch(
@@ -1094,14 +1104,23 @@ export const flipflipApi = createApi({
           })
       }
     }),
-    deletePlaylist: builder.mutation<void, number>({
-      query: (id) => ({
+    deletePlaylist: builder.mutation<void, { id: number; type: string }>({
+      query: ({ id }) => ({
         url: `api/playlists/${id}`,
         method: 'DELETE'
       }),
-      async onQueryStarted(_ /*{ queryFulfilled }*/) {
-        // TODO error handling needed?
-        // await queryFulfilled.catch((reason) => {})
+      async onQueryStarted({ id, type }, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        // TODO update cache instead of invalidating it
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'GroupedPlaylists',
+            'UngroupedPlaylists',
+            { type: 'Playlist', id },
+            { type: 'PlaylistItemIds', id },
+            { type: 'PlaylistOptions', id: type }
+          ])
+        )
       }
     }),
     getSceneSelectOptions: builder.query<
