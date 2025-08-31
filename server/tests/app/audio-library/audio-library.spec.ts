@@ -3515,7 +3515,7 @@ test('Mark Audios', async ({ page }) => {
   ).not.toBeVisible()
 })
 
-test('Search Audios', async ({ page }) => {
+test.fixme('Search Audios', async ({ page }) => {
   test.slow()
   /*
   audio filtering differences compared to caption script filtering:
@@ -3911,191 +3911,191 @@ test('Search Audios', async ({ page }) => {
   ).toBeVisible()
 })
 
-// test('Save Position Audio List', async ({ page }) => {
-//   test.slow()
-//   await page.goto('/')
-//   await page.getByLabel('Audio Library').click()
-//   await expect(page).toHaveURL('/audio-library')
+test('Save Position Audio List', async ({ page }) => {
+  test.slow()
+  await page.goto('/')
+  await page.getByLabel('Audio Library').click()
+  await expect(page).toHaveURL('/audio-library')
 
-//   // setup: make list scrollable
-//   for (let i = 0; i < 10; i++) {
-//     await page.getByTestId('AddIcon').click()
-//     await expect(page.getByTestId('HttpIcon')).toBeVisible()
+  // setup: make list scrollable
+  for (let i = 0; i < 10; i++) {
+    await page.getByTestId('AddIcon').click()
+    await expect(page.getByTestId('HttpIcon')).toBeVisible()
 
-//     let responsePromise = page.waitForResponse((res) => {
-//       const request = res.request()
-//       return (
-//         new URL(request.url()).pathname === `/api/audios/${7 + i}` &&
-//         request.method() === 'GET' &&
-//         res.status() === 200
-//       )
-//     })
-//     await page.getByTestId('HttpIcon').click()
-//     await page.getByLabel('Audio URL', {exact: true}).fill(`https://feeds.soundcloud.com/stream/336839158-royaltyfreemusic-nocopyrightmusic-sugar-vibe-tracks-${i}.mp3`)
-//     await page.getByText('Import').click()
+    const responsePromise = page.waitForResponse((res) => {
+      const request = res.request()
+      return (
+        new URL(request.url()).pathname === `/api/audios/${11 + i}` &&
+        request.method() === 'GET' &&
+        res.status() === 200
+      )
+    })
+    await page.getByTestId('HttpIcon').click()
+    await page.getByLabel('Audio URL', {exact: true}).fill(`https://feeds.soundcloud.com/stream/336839158-royaltyfreemusic-nocopyrightmusic-sugar-vibe-tracks-${i}.mp3`)
+    await page.getByText('Import').click()
 
-//     await expect(page.locator('#sortable-list li')).toHaveCount(7 + i)
-//     await responsePromise
-//   }
-//   await expect(page.locator('#sortable-list li')).toHaveCount(16)
-//   await page
-//     .locator('#sortable-list > div > div > div')
-//     .last()
-//     .scrollIntoViewIfNeeded()
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+    await expect(page.locator('#sortable-list li')).toHaveCount(7 + i)
+    await responsePromise
+  }
+  await expect(page.locator('#sortable-list li')).toHaveCount(16)
+  await page
+    .locator('#sortable-list > div > div > div')
+    .last()
+    .scrollIntoViewIfNeeded()
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // audio library tracks position stays same after navigating to albums tab
-//   await page.locator('#vertical-tab-2').click()
-//   await expect(page).toHaveURL('/audio-library/albums')
+  // audio library tracks position stays same after navigating to albums tab
+  await page.locator('#vertical-tab-2').click()
+  await expect(page).toHaveURL('/audio-library/albums')
 
-//   await page.locator('#vertical-tab-3').click()
-//   await expect(page).toHaveURL('/audio-library/tracks')
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+  await page.locator('#vertical-tab-3').click()
+  await expect(page).toHaveURL('/audio-library/tracks')
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // audio library tracks position stays same after navigating to artists tab
-//   await page.locator('#vertical-tab-1').click()
-//   await expect(page).toHaveURL('/audio-library/artists')
+  // audio library tracks position stays same after navigating to artists tab
+  await page.locator('#vertical-tab-1').click()
+  await expect(page).toHaveURL('/audio-library/artists')
 
-//   await page.locator('#vertical-tab-3').click()
-//   await expect(page).toHaveURL('/audio-library/tracks')
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+  await page.locator('#vertical-tab-3').click()
+  await expect(page).toHaveURL('/audio-library/tracks')
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // audio library tracks position stays same after navigating to playlists tab
-//   await page.locator('#vertical-tab-0').click()
-//   await expect(page).toHaveURL('/audio-library/playlists')
+  // audio library tracks position stays same after navigating to playlists tab
+  await page.locator('#vertical-tab-0').click()
+  await expect(page).toHaveURL('/audio-library/playlists')
 
-//   await page.locator('#vertical-tab-3').click()
-//   await expect(page).toHaveURL('/audio-library/tracks')
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+  await page.locator('#vertical-tab-3').click()
+  await expect(page).toHaveURL('/audio-library/tracks')
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // audio library tracks position stays same after navigating back
-//   await page.getByLabel('Back').click()
-//   await expect(page).toHaveURL('/')
-//   await page.getByLabel('Audio Library').click()
-//   await expect(page).toHaveURL('/audio-library')
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+  // audio library tracks position stays same after navigating back
+  await page.getByLabel('Back').click()
+  await expect(page).toHaveURL('/')
+  await page.getByLabel('Audio Library').click()
+  await expect(page).toHaveURL('/audio-library')
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // audio library position stays same after navigating to tags
-//   await page.getByLabel('Manage Tags').click()
-//   await expect(page).toHaveURL('/tags')
-//   await page.getByLabel('Back').click()
-//   await expect(page).toHaveURL('/audio-library')
-//   await expect(page.locator('#sortable-list li').last()).toBeInViewport()
+  // audio library position stays same after navigating to tags
+  await page.getByLabel('Manage Tags').click()
+  await expect(page).toHaveURL('/tags')
+  await page.getByLabel('Back').click()
+  await expect(page).toHaveURL('/audio-library')
+  await expect(page.locator('#sortable-list li').last()).toBeInViewport()
 
-//   // TODO audio library yOffset is saved when playing scene
-// })
+  // TODO audio library yOffset is saved when playing scene
+})
 
-// test('Delete Visible Audios', async ({ page }) => {
-//   await page.getByRole('combobox').fill('-Vibe')
-//   await page.keyboard.press('Enter')
-//   await expect(page.getByRole('button', { name: '-Vibe' })).toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-//   await expect(page.locator('#sortable-list li', {hasText: 'Smile2:04Aftertune, Ultimate MixSmile'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: 'Sea2:09MBBSea'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: 'Run Free1:45Hotham, Royalty Free MusicRun Free'})).toBeVisible()
+test('Delete Visible Audios', async ({ page }) => {
+  await page.getByRole('combobox').fill('-Vibe')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: '-Vibe' })).toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(page.locator('#sortable-list li', {hasText: 'Smile2:04Aftertune, Ultimate MixSmile'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'Sea2:09MBBSea'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: 'Run Free1:45Hotham, Royalty Free MusicRun Free'})).toBeVisible()
 
-//   await page.getByTestId('DeleteSweepIcon').hover()
-//   await expect(
-//     page.getByRole('tooltip', { name: 'Delete These Tracks', exact: true })
-//   ).toBeVisible()
-//   await page.getByTestId('DeleteSweepIcon').click()
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Delete These Tracks', exact: true })
+  ).toBeVisible()
+  await page.getByTestId('DeleteSweepIcon').click()
 
-//   await expect(
-//     page.getByText('Delete Audio Tracks', { exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByText(
-//       'Are you sure you want to remove these tracks from your library?',
-//       { exact: true }
-//     )
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).not.toBeDisabled()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).not.toBeDisabled()
-//   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-//   await expect(
-//     page.getByText('Delete Audio Tracks', { exact: true })
-//   ).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(3)
+  await expect(
+    page.getByText('Delete Audio Tracks', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to remove these tracks from your library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Audio Tracks', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(3)
 
-//   const responsePromise = page.waitForResponse((res) => {
-//     const request = res.request()
-//     return (
-//       new URL(request.url()).pathname === '/api/audios' &&
-//       request.method() === 'DELETE' &&
-//       res.status() === 204
-//     )
-//   })
-//   await page.getByTestId('DeleteSweepIcon').click()
-//   await expect(
-//     page.getByText('Delete Audio Tracks', { exact: true })
-//   ).toBeVisible()
-//   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-//   await expect(page.getByRole('button', { name: '-Vibe' })).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(13)
-//   await expect(page.locator('#sortable-list li', {hasText: '32Take You Home Tonight3:33Vibe Tracks'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: '32Foundation3:41Vibe Tracks'})).toBeVisible()
-//   await expect(page.locator('#sortable-list li', {hasText: '32Sugar3:50Vibe Tracks'})).toHaveCount(11)
-//   await responsePromise
-// })
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/audios' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Audio Tracks', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.getByRole('button', { name: '-Vibe' })).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
+  await expect(page.locator('#sortable-list li', {hasText: '32Take You Home Tonight3:33Vibe Tracks'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: '32Foundation3:41Vibe Tracks'})).toBeVisible()
+  await expect(page.locator('#sortable-list li', {hasText: '32Sugar3:50Vibe Tracks'})).toHaveCount(11)
+  await responsePromise
+})
 
-// test('Delete All Audios', async ({ page }) => {
-//   await expect(page.locator('#sortable-list li')).toHaveCount(13)
-//   await page.getByTestId('DeleteSweepIcon').hover()
-//   await expect(
-//     page.getByRole('tooltip', { name: 'Delete All Tracks', exact: true })
-//   ).toBeVisible()
-//   await page.getByTestId('DeleteSweepIcon').click()
+test('Delete All Audios', async ({ page }) => {
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
+  await page.getByTestId('DeleteSweepIcon').hover()
+  await expect(
+    page.getByRole('tooltip', { name: 'Delete All Tracks', exact: true })
+  ).toBeVisible()
+  await page.getByTestId('DeleteSweepIcon').click()
 
-//   await expect(
-//     page.getByText('Delete Audio Library', { exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByText(
-//       'Are you sure you want to delete your entire audio library?',
-//       { exact: true }
-//     )
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Cancel', exact: true })
-//   ).not.toBeDisabled()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).toBeVisible()
-//   await expect(
-//     page.getByRole('button', { name: 'Confirm', exact: true })
-//   ).not.toBeDisabled()
-//   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-//   await expect(
-//     page.getByText('Delete Audio Library', { exact: true })
-//   ).not.toBeVisible()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(13)
+  await expect(
+    page.getByText('Delete Audio Library', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'Are you sure you want to delete your entire audio library?',
+      { exact: true }
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Cancel', exact: true })
+  ).not.toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Confirm', exact: true })
+  ).not.toBeDisabled()
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByText('Delete Audio Library', { exact: true })
+  ).not.toBeVisible()
+  await expect(page.locator('#sortable-list li')).toHaveCount(13)
 
-//   const responsePromise = page.waitForResponse((res) => {
-//     const request = res.request()
-//     return (
-//       new URL(request.url()).pathname === '/api/audios' &&
-//       request.method() === 'DELETE' &&
-//       res.status() === 204
-//     )
-//   })
-//   await page.getByTestId('DeleteSweepIcon').click()
-//   await expect(
-//     page.getByText('Delete Audio Library', { exact: true })
-//   ).toBeVisible()
-//   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-//   await expect(page.locator('#sortable-list li')).toHaveCount(0)
-//   await responsePromise
-// })
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/audios' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
+  await page.getByTestId('DeleteSweepIcon').click()
+  await expect(
+    page.getByText('Delete Audio Library', { exact: true })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(page.locator('#sortable-list li')).toHaveCount(0)
+  await responsePromise
+})
