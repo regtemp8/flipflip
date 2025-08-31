@@ -11,8 +11,7 @@ yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/script-library/script-library.spec.ts
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/script-library/script-options.spec.ts
 
-# yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/backup.spec.ts
-
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/backup.spec.ts
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/caching.spec.ts
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/settings.spec.ts
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/theme.spec.ts
