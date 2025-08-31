@@ -416,7 +416,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -428,7 +428,7 @@ test('Add Same Local Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/5' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
       request.method() === 'PATCH' &&
       res.status() === 404
     )
@@ -503,7 +503,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -515,7 +515,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -534,7 +534,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -546,7 +546,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/7' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -565,7 +565,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/9' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -577,7 +577,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/8' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/9' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
@@ -985,6 +985,14 @@ test('Move Caption Script Up', async ({ page }) => {
 })
 
 test('Empty URL Deletes Caption Script', async ({ page }) => {
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/9' &&
+      request.method() === 'DELETE' &&
+      res.status() === 204
+    )
+  })
   await expect(page.locator('#sortable-list li')).toHaveCount(6)
   await page
     .locator('#sortable-list li p', {
@@ -1040,6 +1048,7 @@ test('Empty URL Deletes Caption Script', async ({ page }) => {
       )
     })
   ).toBeVisible()
+  await responsePromise
 })
 
 test('Batch Tag Select With Shift', async ({ page }) => {
@@ -2019,7 +2028,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/10' &&
       request.method() === 'GET' &&
       res.status() === 200
     )
@@ -2031,7 +2040,7 @@ test('Add Same Remote Caption Script', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/6' &&
+      new URL(request.url()).pathname === '/api/caption-scripts/10' &&
       request.method() === 'PATCH' &&
       res.status() === 404
     )
@@ -3727,7 +3736,7 @@ test('Save Position Caption Script List', async ({ page }) => {
     let responsePromise = page.waitForResponse((res) => {
       const request = res.request()
       return (
-        new URL(request.url()).pathname === `/api/caption-scripts/${6 + i}` &&
+        new URL(request.url()).pathname === `/api/caption-scripts/${11 + i}` &&
         request.method() === 'GET' &&
         res.status() === 200
       )
@@ -3739,7 +3748,7 @@ test('Save Position Caption Script List', async ({ page }) => {
     responsePromise = page.waitForResponse((res) => {
       const request = res.request()
       return (
-        new URL(request.url()).pathname === `/api/caption-scripts/${6 + i}` &&
+        new URL(request.url()).pathname === `/api/caption-scripts/${11 + i}` &&
         request.method() === 'PATCH' &&
         res.status() === 204
       )
