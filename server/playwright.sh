@@ -36,4 +36,8 @@ yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium
 
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/tags/tag-manager.spec.ts
 
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/scenes/scene-detail.spec.ts
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/displays/display-setup.spec.ts
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/playlists/playlist-setup.spec.ts
+
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/scene-picker.spec.ts
