@@ -47,35 +47,35 @@ const port = getServerPort()
 const logger = Logger.create('server')
 
 const getNetworkInterfaceURLs = (
-    port: number
-  ): Array<{ name: string; url: string }> => {
-    const urls: Array<{ name: string; url: string }> = []
-    const interfaces = os.networkInterfaces()
-    for (const name of Object.keys(interfaces)) {
-      const infos = interfaces[name] as NetworkInterfaceInfo[]
-      for (const info of infos) {
-        if (info.family === 'IPv4' && !info.internal) {
-          const url = `http://${info.address}:${port}`
-          urls.push({ name, url })
-        }
+  port: number
+): Array<{ name: string; url: string }> => {
+  const urls: Array<{ name: string; url: string }> = []
+  const interfaces = os.networkInterfaces()
+  for (const name of Object.keys(interfaces)) {
+    const infos = interfaces[name] as NetworkInterfaceInfo[]
+    for (const info of infos) {
+      if (info.family === 'IPv4' && !info.internal) {
+        const url = `http://${info.address}:${port}`
+        urls.push({ name, url })
       }
     }
-
-    return urls
   }
 
-  const getNetworkURLs = (host: string, port: number) => {
-    const urls: Array<{ name: string; url: string }> = []
-    const allNetworkInterfaces = host === '0.0.0.0'
-    if (allNetworkInterfaces) {
-      urls.push({ name: 'Local', url: `http://localhost:${port}` })
-      urls.push(...getNetworkInterfaceURLs(port))
-    } else {
-      urls.push({ name: 'URL', url: `http://${host}:${port}` })
-    }
+  return urls
+}
 
-    return urls
+const getNetworkURLs = (host: string, port: number) => {
+  const urls: Array<{ name: string; url: string }> = []
+  const allNetworkInterfaces = host === '0.0.0.0'
+  if (allNetworkInterfaces) {
+    urls.push({ name: 'Local', url: `http://localhost:${port}` })
+    urls.push(...getNetworkInterfaceURLs(port))
+  } else {
+    urls.push({ name: 'URL', url: `http://${host}:${port}` })
   }
+
+  return urls
+}
 
 const extractBinaries = async () => {
   if (process.pkg == null) {
@@ -134,7 +134,9 @@ void (async function () {
   )
   app.use(passport.authenticate('session'))
   app.use(auth)
-  app.use(express.static(path.join(__dirname, 'public')))
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'public')))
+  }
   app.use('/api/version', version)
   app.use('/api/tutorials', tutorials)
   app.use('/api/scenes', scenes)
@@ -155,28 +157,29 @@ void (async function () {
   app.use('/fs', files)
   app.use('/proxy', proxy)
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
-  })
-  app.use(
-    (
-      error: NodeJS.ErrnoException,
-      req: Request,
-      res: Response
-    ) => {
-      logger.error(`Failed to process request ${req.url}`, { error })
-      const codes = ['SQLITE_CONSTRAINT_UNIQUE']
-      const status =
-        error.code != null && codes.includes(error.code) ? 400 : 500
-      res.status(status).end()
+    if (process.env.NODE_ENV === 'production') {
+      res.sendFile(path.join(__dirname, 'public', 'index.html'))
+    } else {
+      res.status(200).send('Hello World!')
     }
-  )
+  })
+  app.use((error: NodeJS.ErrnoException, req: Request, res: Response) => {
+    logger.error(`Failed to process request ${req.url}`, { error })
+    const codes = ['SQLITE_CONSTRAINT_UNIQUE']
+    const status = error.code != null && codes.includes(error.code) ? 400 : 500
+    res.status(status).end()
+  })
 
   const server = app.listen(port, host, () => {
-    const url = getNetworkURLs(host, port).map((url) => `${url.name}:\t${url.url}`).join('\n\t\t')
+    const url = getNetworkURLs(host, port)
+      .map((url) => `${url.name}:\t${url.url}`)
+      .join('\n\t\t')
     let template = '\n\n\tYou can now view FlipFlip in the browser.\n'
-    template += '\t+-----------------------------------------------------------------------------------------+\n'
+    template +=
+      '\t+-----------------------------------------------------------------------------------------+\n'
     template += '\t\t{url}\n'
-    template += '\t+-----------------------------------------------------------------------------------------+\n'
+    template +=
+      '\t+-----------------------------------------------------------------------------------------+\n'
     logger.info(template, { url })
   })
 
