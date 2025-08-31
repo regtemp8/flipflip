@@ -328,7 +328,7 @@ test('Add Single Local Audio', async ({ page }) => {
   ).not.toBeVisible()
 })
 
-test.fixme('Click Local Audio Source Icon', async ({ page }) => {
+test.fixme('Click Local Audio Source Icon', async () => {
   // TODO click play -> navigates to player
 })
 
@@ -623,7 +623,7 @@ test('Shift + Click Remote Audio', async ({ page, context }) => {
   await newPage.close()
 })
 
-test('Sort By URL', async ({ page, context }) => {
+test('Sort By URL', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     '32Foundation3:41Vibe Tracks'
   )
@@ -708,7 +708,7 @@ test('Sort By URL', async ({ page, context }) => {
   )
 })
 
-test('Sort By Name', async ({ page, context }) => {
+test('Sort By Name', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
@@ -793,7 +793,7 @@ test('Sort By Name', async ({ page, context }) => {
   )
 })
 
-test('Sort By Artist', async ({ page, context }) => {
+test('Sort By Artist', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     '32Foundation3:41Vibe Tracks'
   )
@@ -878,7 +878,7 @@ test('Sort By Artist', async ({ page, context }) => {
   )
 })
 
-test('Sort By Album', async ({ page, context }) => {
+test('Sort By Album', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
@@ -963,7 +963,7 @@ test('Sort By Album', async ({ page, context }) => {
   )
 })
 
-test('Sort By Date', async ({ page, context }) => {
+test('Sort By Date', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     '32Foundation3:41Vibe Tracks'
   )
@@ -1048,7 +1048,7 @@ test('Sort By Date', async ({ page, context }) => {
   )
 })
 
-test('Sort By Duration', async ({ page, context }) => {
+test('Sort By Duration', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
@@ -1133,7 +1133,7 @@ test('Sort By Duration', async ({ page, context }) => {
   )
 })
 
-test('Sort By Play Count', async ({ page, context }) => {
+test('Sort By Play Count', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
   )
