@@ -1,7 +1,32 @@
 import { getRandomColor, MVF } from 'flipflip-common'
 import db from './database'
-import { toNumber } from './utils'
+import { toBoolean, toNumber } from './utils'
 import { DisplayViewUpdate } from './types/entities'
+
+export async function findValidDisplayViewIds(displayId: number) {
+  const displayViews = await db()
+    .query()
+    .selectFrom('displayView')
+    .select(['id', 'sync', 'syncWithView'])
+    .where('displayId', '=', displayId)
+    .where('visible', '=', toNumber(true))
+    .where('error', 'is', null)
+    .orderBy('index asc')
+    .execute()
+
+  const ids = displayViews
+    .filter(({ sync }) => toBoolean(sync) === false)
+    .map(({ id }) => id as number)
+  const syncedIds = displayViews
+    .filter(
+      ({ sync, syncWithView }) =>
+        toBoolean(sync) === true &&
+        syncWithView != null &&
+        ids.includes(syncWithView)
+    )
+    .map(({ id }) => id as number)
+  return ids.concat(syncedIds)
+}
 
 export async function findVisibleDisplayViewIds(displayId: number) {
   return await db()
@@ -84,7 +109,8 @@ export async function addDisplayView(displayId: number, userId: number) {
           visible: toNumber(true),
           sync: toNumber(false),
           mirrorSyncedView: MVF.none,
-          index
+          index,
+          error: 'No playlist selected'
         })
         .execute()
     })
@@ -171,7 +197,8 @@ export async function cloneDisplayView(
         playlistId,
         sync,
         syncWithView,
-        mirrorSyncedView
+        mirrorSyncedView,
+        error
       } = await trx
         .selectFrom('displayView')
         .selectAll()
@@ -210,7 +237,8 @@ export async function cloneDisplayView(
           sync,
           syncWithView,
           mirrorSyncedView,
-          index
+          index,
+          error
         })
         .execute()
     })
@@ -219,10 +247,35 @@ export async function cloneDisplayView(
 export async function updateDisplayView(id: number, update: DisplayViewUpdate) {
   return await db()
     .query()
-    .updateTable('displayView')
-    .set(update)
-    .where('id', '=', id)
-    .execute()
+    .transaction()
+    .execute(async (trx) => {
+      const row = await trx
+        .updateTable('displayView')
+        .set(update)
+        .where('id', '=', id)
+        .returning(['playlistId', 'sync', 'syncWithView'])
+        .executeTakeFirst()
+
+      if (row == null) {
+        return
+      }
+
+      let error: string | null = null
+      const sync = toBoolean(row.sync)
+      if (sync && row.syncWithView == null) {
+        error = 'No synced view selected'
+      } else if (!sync && row.playlistId == null) {
+        error = 'No playlist selected'
+      }
+
+      await trx
+        .updateTable('displayView')
+        .set({ error })
+        .where('id', '=', id)
+        .execute()
+
+      return error
+    })
 }
 
 export async function findDisplayViewSyncOptions(

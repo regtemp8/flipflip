@@ -23,11 +23,10 @@ import {
   deleteDisplayView,
   cloneDisplayView,
   findDisplayViewSyncOptions,
-  findDisplayViewById
+  findValidDisplayViewIds
 } from '../db/DisplayViewRepository'
-import { DisplayView, User } from '../db/types/entities'
+import { User } from '../db/types/entities'
 import players from '../player/PlayerService'
-import { toBoolean } from '../db/utils'
 
 const router = express.Router()
 
@@ -163,30 +162,17 @@ router.get('/:id/display-view-sync-options', async (req, res) => {
 
 router.post('/:id/play', async (req, res) => {
   const id = Number(req.params.id)
-  const viewIds = await findVisibleDisplayViewIds(id)
+  const viewIds = await findValidDisplayViewIds(id)
   if (viewIds.length === 0) {
     res
       .status(400)
-      .send({ error: 'No visible display views. Nothing to display' })
+      .send({ error: 'No valid display views. Nothing to display' })
     return
   }
 
-  let canPlay = true
-  for (const { id } of viewIds) {
-    const view = (await findDisplayViewById(id as number)) as DisplayView
-    if (toBoolean(view.sync) === false && view.playlistId == null) {
-      canPlay = false
-      break
-    }
-  }
-
-  if (canPlay) {
-    const playerId = players().start(id, req.user as User)
-    const body: ValueResponse = { value: playerId }
-    res.status(200).send(body)
-  } else {
-    res.status(400).send({ error: 'Not all display views have a playlist' })
-  }
+  const playerId = players().start(id, viewIds, req.user as User)
+  const body: ValueResponse = { value: playerId }
+  res.status(200).send(body)
 })
 
 export default router

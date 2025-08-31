@@ -5,7 +5,8 @@ import {
   ListItemText,
   Typography,
   type Theme,
-  TextField
+  TextField,
+  Tooltip
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
@@ -15,13 +16,21 @@ import {
   setDisplayViewName,
   setDisplayViewVisible
 } from '../../store/api/thunks'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { setDisplayEditingViewName, setDisplaySelectedView } from '../../store/display/slice'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import PlayDisabledIcon from '@mui/icons-material/PlayDisabled'
+import {
+  setDisplayEditingViewName,
+  setDisplaySelectedView
+} from '../../store/display/slice'
 import { cx } from '@emotion/css'
 import { useGetDisplayViewQuery } from '../../store/api/slice'
 import ColorPickerMinimal from './ColorPickerMinimal'
 import { useGetDisplayViewColorQuery } from '../../store/api/selectors'
-import { selectDisplayEditingViewName } from '../../store/display/selectors'
+import {
+  selectDisplayEditingViewName,
+  selectDisplayViewError
+} from '../../store/display/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -143,6 +152,7 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
   const { data: view } = useGetDisplayViewQuery(viewID)
 
   const editingName = useAppSelector(selectDisplayEditingViewName())
+  const error = useAppSelector(selectDisplayViewError(viewID))
 
   const onStartEdit = () => {
     dispatch(setDisplayEditingViewName(view?.name))
@@ -186,7 +196,7 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
           onClick={toggleVisibility}
           className={selected ? classes.selectedText : undefined}
         >
-          {view?.visible ? <Visibility /> : <VisibilityOff />}
+          {view?.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
         </IconButton>
         <ColorPickerMinimal
           selector={() => useGetDisplayViewColorQuery(viewID)}
@@ -215,11 +225,16 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
           ) : (
             <Typography
               noWrap
-              className={classes.noUserSelect}
+              className={cx(classes.urlField, classes.noUserSelect)}
               onClick={onStartEdit}
             >
               {view?.name}
             </Typography>
+          )}
+          {error != null && (
+            <Tooltip title={error} placement="bottom-end">
+              <PlayDisabledIcon color="error" />
+            </Tooltip>
           )}
         </ListItemText>
       </ListItem>

@@ -1,5 +1,4 @@
 import { deleteTemporaryDisplay } from '../db/DisplayRepository'
-import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
 import { User } from '../db/types/entities'
 import viewPlayers from './ViewPlayerService'
 
@@ -11,10 +10,9 @@ export default class Player {
     this.viewPlayerRefs = []
   }
 
-  public async start(displayId: number, user: User) {
+  public async start(displayId: number, viewIds: number[], user: User) {
     this.displayId = displayId
-    const viewIds = await findVisibleDisplayViewIds(displayId)
-    for (const { id } of viewIds) {
+    for (const id of viewIds) {
       const ref = await viewPlayers().start(id as number, user)
       this.viewPlayerRefs.push(ref)
     }

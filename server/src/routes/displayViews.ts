@@ -21,8 +21,8 @@ router.patch('/:id', async (req, res, next) => {
   const id = Number(req.params.id)
   const body = req.body as Partial<DisplayView>
   try {
-    await updateDisplayView(id, toDisplayViewUpdate(body))
-    res.status(204).end()
+    const error = await updateDisplayView(id, toDisplayViewUpdate(body))
+    res.status(200).send({ error })
   } catch (error) {
     next(error)
   }

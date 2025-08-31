@@ -664,6 +664,7 @@ const displayViewTable = async (trx: Kysely<DB>) => {
     .addColumn('syncWithView', 'integer')
     .addColumn('mirrorSyncedView', 'text', (col) => col.notNull())
     .addColumn('index', 'integer', (col) => col.notNull())
+    .addColumn('error', 'text')
     .addForeignKeyConstraint(
       'FK_displayView_display_displayId',
       ['displayId'],

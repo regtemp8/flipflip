@@ -35,7 +35,9 @@ import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
   selectDisplayEditingName,
+  selectDisplayPlayDisabled,
   selectDisplaySelectedView,
+  selectDisplaySelectedViewName,
   selectDisplayViewsListYOffset
 } from '../../store/display/selectors'
 import { setDisplayName } from '../../store/api/thunks'
@@ -64,7 +66,6 @@ import {
   useDeleteDisplayMutation,
   useDeleteDisplayViewMutation,
   useGetDisplayQuery,
-  useGetVisibleDisplayViewIdsQuery,
   usePlayDisplayMutation
 } from '../../store/api/slice'
 import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
@@ -160,7 +161,6 @@ function DisplaySetup() {
   const [deleteDisplayView] = useDeleteDisplayViewMutation()
   const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
   const { data: display } = useGetDisplayQuery(displayID)
-  const { data: visibleViewIDs } = useGetVisibleDisplayViewIdsQuery(displayID)
 
   const [userExpandedSettings, setUserExpandedSettings] = useState<boolean>()
   const [openMenu, setOpenMenu] = useState<string>()
@@ -168,8 +168,9 @@ function DisplaySetup() {
   const dispatch = useAppDispatch()
   const editingName = useAppSelector(selectDisplayEditingName())
   const selectedView = useAppSelector(selectDisplaySelectedView())
-  const selectedViewName = null
+  const selectedViewName = useAppSelector(selectDisplaySelectedViewName())
   const yOffset = useAppSelector(selectDisplayViewsListYOffset())
+  const playDisabled = useAppSelector(selectDisplayPlayDisabled(displayID))
 
   const getScrollTop = useCallback(() => {
     let scrollTop: number | undefined = undefined
@@ -385,7 +386,7 @@ function DisplaySetup() {
 
           <div className={classes.headerRight}>
             <Fab
-              disabled={(visibleViewIDs?.length ?? 0) === 0}
+              disabled={playDisabled}
               color="secondary"
               aria-label="Play"
               onClick={onPlayDisplay}

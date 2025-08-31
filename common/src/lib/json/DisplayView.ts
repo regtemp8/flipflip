@@ -13,4 +13,5 @@ export type DisplayView = {
   sync: boolean;
   syncWithView?: number;
   mirrorSyncedView: string;
+  error?: string;
 };

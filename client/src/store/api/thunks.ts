@@ -364,7 +364,7 @@ export const updatePlaylistItem = (
   }
 }
 
-const updateLocalDisplayView = (
+export const updateLocalDisplayView = (
   update: Pick<DisplayView, 'id'> & Partial<DisplayView>
 ) => {
   return flipflipApi.util.updateQueryData(

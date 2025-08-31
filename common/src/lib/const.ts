@@ -605,6 +605,7 @@ const PLT = {
 
 const SCENE_RANDOM = -1;
 const SCENE_NONE = 0;
+const PLAYLIST_NONE = 0;
 
 export {
   AF,
@@ -658,4 +659,5 @@ export {
   PLT,
   SCENE_NONE,
   SCENE_RANDOM,
+  PLAYLIST_NONE
 };

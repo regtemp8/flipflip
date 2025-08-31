@@ -181,6 +181,7 @@ export interface DisplaySettings {
 export interface DisplayView {
   color: string
   displayId: number
+  error: string | null
   height: number
   id: Generated<number | null>
   index: number

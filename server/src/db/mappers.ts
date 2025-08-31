@@ -32,7 +32,8 @@ import {
   CaptionScriptPlaylistItem,
   AudioPlaylistItem,
   SCENE_RANDOM,
-  SCENE_NONE
+  SCENE_NONE,
+  PLAYLIST_NONE
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -1225,7 +1226,8 @@ export function toDisplayView(row: DisplayViewRow): DisplayView {
     width,
     x,
     y,
-    z
+    z,
+    error
   } = row
 
   return {
@@ -1239,10 +1241,11 @@ export function toDisplayView(row: DisplayViewRow): DisplayView {
     color,
     opacity,
     visible: toBoolean(visible),
-    playlistID: playlistId ?? undefined,
+    playlistID: playlistId ?? PLAYLIST_NONE,
     sync: toBoolean(sync),
     syncWithView: syncWithView ?? undefined,
-    mirrorSyncedView
+    mirrorSyncedView,
+    error: error ?? undefined
   }
 }
 
@@ -1814,13 +1817,14 @@ export function toDisplayViewUpdate(
     z
   } = body
 
+  const playlistId = playlistID !== PLAYLIST_NONE ? playlistID : null
   return {
     color,
     height,
     mirrorSyncedView,
     name,
     opacity,
-    playlistId: playlistID,
+    playlistId,
     sync: toNumberOpt(sync),
     syncWithView,
     visible: toNumberOpt(visible),

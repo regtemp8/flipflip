@@ -22,11 +22,11 @@ class PlayerService {
     return PlayerService.instance
   }
 
-  public start(displayId: number, user: User): string {
+  public start(displayId: number, viewIds: number[], user: User): string {
     logger.info('Starting player for display (id: {id})', { id: displayId })
     const id = randomUUID()
     const player = new Player()
-    player.start(displayId, user)
+    player.start(displayId, viewIds, user)
     this.players.set(id, player)
     logger.info('Started player (id: {id})', { id })
     return id

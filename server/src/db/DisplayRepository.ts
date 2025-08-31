@@ -256,7 +256,8 @@ export async function createDisplay(userId: number) {
           visible: toNumber(true),
           sync: toNumber(false),
           mirrorSyncedView: MVF.none,
-          index: 0
+          index: 0,
+          error: 'No playlist selected'
         })
         .execute()
 
@@ -321,7 +322,8 @@ export async function cloneDisplay(id: number, userId: number) {
           'sync',
           'syncWithView',
           'mirrorSyncedView',
-          'index'
+          'index',
+          'error'
         ])
         .expression((eb) =>
           eb
@@ -341,7 +343,8 @@ export async function cloneDisplay(id: number, userId: number) {
               'sync',
               'syncWithView',
               'mirrorSyncedView',
-              'index'
+              'index',
+              'error'
             ])
             .where('displayId', '=', id)
         )

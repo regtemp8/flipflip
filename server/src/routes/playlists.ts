@@ -56,6 +56,7 @@ import {
 } from '../db/PlaylistItemRepository'
 import players from '../player/PlayerService'
 import { createTempDisplayForPlaylist } from '../db/DisplayRepository'
+import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -110,7 +111,10 @@ router.post('/:id/play', async (req, res) => {
   const playlist = await findPlaylistType(playlistId)
   if (playlist?.type === PLT.scene) {
     const id = await createTempDisplayForPlaylist(playlistId, userId)
-    const playerId = players().start(id, req.user as User)
+    const viewIds = (await findVisibleDisplayViewIds(id)).map(
+      ({ id }) => id as number
+    )
+    const playerId = players().start(id, viewIds, req.user as User)
     const body: ValueResponse = { value: playerId }
     res.status(200).send(body)
   } else {

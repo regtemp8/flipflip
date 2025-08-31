@@ -25,6 +25,7 @@ import { findContentSources } from '../db/ContentSourceRepository'
 import { User } from '../db/types/entities'
 import { createTempDisplayForScene } from '../db/DisplayRepository'
 import players from '../player/PlayerService'
+import { findVisibleDisplayViewIds } from '../db/DisplayViewRepository'
 
 const router = express.Router()
 router.get('/grouped', async (req, res) => {
@@ -181,7 +182,10 @@ router.post('/:id/play', async (req, res) => {
   const sceneId = Number(req.params.id)
   const userId = (req.user as User).id as number
   const id = await createTempDisplayForScene(sceneId, userId)
-  const playerId = players().start(id, req.user as User)
+  const viewIds = (await findVisibleDisplayViewIds(id)).map(
+    ({ id }) => id as number
+  )
+  const playerId = players().start(id, viewIds, req.user as User)
   const body: ValueResponse = { value: playerId }
   res.status(200).send(body)
 })
