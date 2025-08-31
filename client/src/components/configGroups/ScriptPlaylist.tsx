@@ -22,10 +22,12 @@ import RepeatIcon from '@mui/icons-material/Repeat'
 import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 
-import { Playlist, PLT, RP } from 'flipflip-common'
+import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import { useNavigate } from 'react-router'
-// import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
+import { useGetPlaylistItemIdsQuery, useGetPlaylistQuery } from '../../store/api/slice'
+import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
@@ -165,26 +167,29 @@ export interface ScriptPlaylistProps {
 
 function ScriptPlaylist(props: ScriptPlaylistProps) {
   const { playlistID } = props
-  // const dispatch = useAppDispatch()
-  // const playlist = useAppSelector(selectPlaylist(playlistID))
-  const playlist: Playlist = {
-    id: 1,
-    name: 'playlist',
-    type: PLT.script,
-    items: [],
-    shuffle: false,
-    repeat: RP.none
-  }
+  const dispatch = useAppDispatch()
+  const { data: playlist } = useGetPlaylistQuery(playlistID)
+  const { data: itemIDs } = useGetPlaylistItemIdsQuery(playlistID)
 
   const sceneID = 0
   // const [sceneID, setSceneID] = useState<number>(0)
 
   const toggleShuffle = () => {
-    // dispatch(setPlaylistToggleShuffle(playlistID))
+    dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
   }
 
   const changeRepeat = () => {
-    // dispatch(setPlaylistChangeRepeat(playlistID))
+    switch (playlist?.repeat) {
+      case RP.all:
+        dispatch(setPlaylistRepeat(playlistID, RP.one))
+        break
+      case RP.one:
+        dispatch(setPlaylistRepeat(playlistID, RP.none))
+        break
+      case RP.none:
+        dispatch(setPlaylistRepeat(playlistID, RP.all))
+        break
+    }
   }
 
   const { classes } = useStyles()
@@ -207,14 +212,14 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
             // )
           }}
         >
-          {playlist.items.map((id, index) => (
+          {itemIDs?.map((id, index) => (
             <ScriptPlaylistItem
+              key={index}
               playlistID={playlistID}
               scriptID={id}
-              key={index}
               index={index}
               sceneID={sceneID}
-              scripts={playlist.items}
+              scripts={itemIDs ?? []}
             />
           ))}
         </Sortable>
@@ -222,27 +227,27 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
           <div className={classes.left}>
             <Tooltip
               disableInteractive
-              title={'Shuffle ' + (playlist.shuffle ? '(On)' : '(Off)')}
+              title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
             >
               <IconButton onClick={toggleShuffle} size="large">
-                <ShuffleIcon color={playlist.shuffle ? 'primary' : undefined} />
+                <ShuffleIcon color={playlist?.shuffle ? 'primary' : undefined} />
               </IconButton>
             </Tooltip>
             <Tooltip
               disableInteractive
               title={
                 'Repeat ' +
-                (playlist.repeat === RP.none
+                (playlist?.repeat === RP.none
                   ? '(Off)'
-                  : playlist.repeat === RP.all
+                  : playlist?.repeat === RP.all
                     ? '(All)'
                     : '(One)')
               }
             >
               <IconButton onClick={changeRepeat} size="large">
-                {playlist.repeat === RP.none && <RepeatIcon />}
-                {playlist.repeat === RP.all && <RepeatIcon color={'primary'} />}
-                {playlist.repeat === RP.one && (
+                {playlist?.repeat === RP.none && <RepeatIcon />}
+                {playlist?.repeat === RP.all && <RepeatIcon color={'primary'} />}
+                {playlist?.repeat === RP.one && (
                   <RepeatOneIcon color={'primary'} />
                 )}
               </IconButton>

@@ -39,7 +39,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
 
-import { MO, PLT } from 'flipflip-common'
+import { MO, Playlist, PLT } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 // import {
 //   selectAppSpecialMode
@@ -198,6 +198,8 @@ function PlaylistSetup() {
   const [openMenu, setOpenMenu] = useState<string>()
   const [sceneID, setSceneID] = useState<number>(-1)
 
+  const goBack = () => navigate(-1)
+
   const onPlayPlaylist = async () => {
     const { data } = await playPlaylist(playlistID)
     if (data != null) {
@@ -235,12 +237,15 @@ function PlaylistSetup() {
   }
 
   const onFinishDeletePlaylist = async () => {
-    await deletePlaylist(playlistID)
-    setOpenMenu(undefined)
+    onCloseDialog()
+    const {id, type} = playlist as Playlist
+    await deletePlaylist({id, type})
+    goBack()
   }
 
   const onClonePlaylist = async () => {
-    const { data } = await clonePlaylist(playlistID)
+    const {id, type} = playlist as Playlist
+    const { data } = await clonePlaylist({id, type})
     if (data != null) {
       await navigate(`/playlists/${data.value}`)
     }
@@ -257,9 +262,7 @@ function PlaylistSetup() {
               edge="start"
               color="inherit"
               aria-label="Back"
-              onClick={() => {
-                navigate(-1)
-              }}
+              onClick={goBack}
               size="large"
             >
               <ArrowBackIcon />
@@ -396,7 +399,7 @@ function PlaylistSetup() {
             <DialogContent>
               <DialogContentText id="delete-description">
                 Are you sure you want to delete {playlist?.name}? It will be
-                automatically removed from all scenes/displays.
+                automatically removed from all {playlist?.type === PLT.scene ? 'displays' : 'scenes'}.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
