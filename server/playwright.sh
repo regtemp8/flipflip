@@ -2,9 +2,9 @@
 set -e
 set -x
 
-# yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/audio-library/audio-edit.spec.ts
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/audio-library/audio-edit.spec.ts
 # yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/audio-library/audio-library.spec.ts
-# yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/audio-library/audio-options.spec.ts
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/audio-library/audio-options.spec.ts
 
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/content-library/content-library.spec.ts
 

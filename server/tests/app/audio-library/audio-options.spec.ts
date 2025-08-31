@@ -39,7 +39,7 @@ test.beforeEach(async () => {
   await page.goto('/audio-library')
 })
 
-test('Play audio', async () => {
+test.fixme('Play audio', async () => {
   // play audio
   // check tooltip
   // pause audio
@@ -51,17 +51,17 @@ test('Play audio', async () => {
   // seek by clicking
 })
 
-test('Audio volume', async () => {
+test.fixme('Audio volume', async () => {
   // slider test
 })
 
-test('Audio BPM', async () => {
+test.fixme('Audio BPM', async () => {
   // input test
   // detect BPM
   // use BPM metadata
 })
 
-test('Audio URL', async () => {
+test.fixme('Audio URL', async () => {
   /*
     update url:
       empty url:
@@ -81,22 +81,22 @@ test('Audio URL', async () => {
   // can play audio again
 })
 
-test('Audio Speed', async () => {
+test.fixme('Audio Speed', async () => {
   // slider test
   // set slider to max
   // hit play
   // set timeout for a second and check that position has increased by at least 4
 })
 
-test('Audio Stop at End', async () => {
+test.fixme('Audio Stop at End', async () => {
   // check Stop at End hides Next Scene at End and Tick
 })
 
-test('Audio Next Scene at End', async () => {
+test.fixme('Audio Next Scene at End', async () => {
   // check Next Scene at End hides Stop at End and Tick
 })
 
-test('Audio Tick', async () => {
+test.fixme('Audio Tick', async () => {
   // check Tick hides Stop at End and Next Scene at End
   // and shows timing options
   // timing tests
@@ -110,13 +110,13 @@ test('Audio Tick', async () => {
   // with scene: has no effect on playback
 })
 
-test('Audio Options Cancel', async () => {
+test.fixme('Audio Options Cancel', async () => {
   // make changes
   // click cancel
   // verify no changes were made
 })
 
-test('Audio Options Save', async () => {
+test.fixme('Audio Options Save', async () => {
   // make changes
   // click cancel
   // verify the changes were saved
