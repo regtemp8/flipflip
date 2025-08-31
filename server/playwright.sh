@@ -9,7 +9,7 @@ set -x
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/content-library/content-library.spec.ts
 
 yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/script-library/script-library.spec.ts
-# yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/script-library/script-options.spec.ts
+yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/script-library/script-options.spec.ts
 
 # yarn playwright test --headed --workers=1 --reporter=line --project=app-chromium tests/app/settings/general/backup.spec.ts
 

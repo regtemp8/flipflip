@@ -61,7 +61,7 @@ test('Title', async () => {
   ).toBeVisible()
 })
 
-test.fixme('Stop at End', async () => {
+test('Stop at End', async () => {
   const label = 'Stop at End'
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(
@@ -74,14 +74,24 @@ test.fixme('Stop at End', async () => {
     page.getByLabel('Next Scene at End', { exact: true })
   ).not.toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.stopAtEnd === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel(label, { exact: true }).click()
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(
     page.getByLabel('Next Scene at End', { exact: true })
   ).toBeVisible()
+  await responsePromise
 })
 
-test.fixme('Next Scene at End', async () => {
+test('Next Scene at End', async () => {
   const label = 'Next Scene at End'
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('Stop at End', { exact: true })).toBeVisible()
@@ -92,20 +102,40 @@ test.fixme('Next Scene at End', async () => {
     page.getByLabel('Stop at End', { exact: true })
   ).not.toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.nextSceneAtEnd === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel(label, { exact: true }).click()
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('Stop at End', { exact: true })).toBeVisible()
+  await responsePromise
 })
 
-test.fixme('Sync Timestamp with Audio', async () => {
+test('Sync Timestamp with Audio', async () => {
   const label = 'Sync Timestamp with Audio'
   await expect(page.getByLabel(label, { exact: true })).toBeChecked()
 
   await page.getByLabel(label, { exact: true }).click()
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.syncWithAudio === true &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel(label, { exact: true }).click()
   await expect(page.getByLabel(label, { exact: true })).toBeChecked()
+  await responsePromise
 })
 
 test('Script Opacity', async () => {
@@ -352,20 +382,45 @@ test('Blink Font Size', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('20')
 
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('0')
   await input.blur()
   await expect(input).toHaveValue('1')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('1234567890')
   await input.blur()
   await expect(input).toHaveValue('1234567890')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('-1')
   await input.blur()
   await expect(input).toHaveValue('1')
+  await responsePromise
 })
 
 test('Caption Font Size', async () => {
@@ -374,20 +429,45 @@ test('Caption Font Size', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('8')
 
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('0')
   await input.blur()
   await expect(input).toHaveValue('1')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('1234567890')
   await input.blur()
   await expect(input).toHaveValue('1234567890')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('-1')
   await input.blur()
   await expect(input).toHaveValue('1')
+  await responsePromise
 })
 
 test('Big Caption Font Size', async () => {
@@ -396,20 +476,45 @@ test('Big Caption Font Size', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('12')
 
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('0')
   await input.blur()
   await expect(input).toHaveValue('1')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('1234567890')
   await input.blur()
   await expect(input).toHaveValue('1234567890')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('-1')
   await input.blur()
   await expect(input).toHaveValue('1')
+  await responsePromise
 })
 
 test('Count Font Size', async () => {
@@ -418,20 +523,45 @@ test('Count Font Size', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('20')
 
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('0')
   await input.blur()
   await expect(input).toHaveValue('1')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('1234567890')
   await input.blur()
   await expect(input).toHaveValue('1234567890')
-
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      res.status() === 204
+    )
+  })
   await input.click()
   await input.fill('-1')
   await input.blur()
   await expect(input).toHaveValue('1')
+  await responsePromise
 })
 
 test('Blink Font Color', async () => {
@@ -707,6 +837,15 @@ test('Blink Border', async () => {
   ).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true }).nth(1)).toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(0).click()
   await expect(
     page.getByLabel('Border', { exact: true }).nth(0)
@@ -720,6 +859,7 @@ test('Blink Border', async () => {
   await expect(
     page.getByLabel('Color', { exact: true }).nth(1)
   ).not.toBeVisible()
+  await responsePromise
 })
 
 test('Caption Border', async () => {
@@ -747,6 +887,15 @@ test('Caption Border', async () => {
   ).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true }).nth(3)).toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(1).click()
   await expect(
     page.getByLabel('Border', { exact: true }).nth(1)
@@ -760,9 +909,10 @@ test('Caption Border', async () => {
   await expect(
     page.getByLabel('Color', { exact: true }).nth(3)
   ).not.toBeVisible()
+  await responsePromise
 })
 
-test.fixme('Big Caption Border', async () => {
+test('Big Caption Border', async () => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(2)
   ).not.toBeChecked()
@@ -787,6 +937,15 @@ test.fixme('Big Caption Border', async () => {
   ).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true }).nth(5)).toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(2).click()
   await expect(
     page.getByLabel('Border', { exact: true }).nth(2)
@@ -800,9 +959,10 @@ test.fixme('Big Caption Border', async () => {
   await expect(
     page.getByLabel('Color', { exact: true }).nth(5)
   ).not.toBeVisible()
+  await responsePromise
 })
 
-test.fixme('Count Border', async () => {
+test('Count Border', async () => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(3)
   ).not.toBeChecked()
@@ -827,6 +987,15 @@ test.fixme('Count Border', async () => {
   ).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true }).nth(7)).toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(3).click()
   await expect(
     page.getByLabel('Border', { exact: true }).nth(3)
@@ -840,9 +1009,10 @@ test.fixme('Count Border', async () => {
   await expect(
     page.getByLabel('Color', { exact: true }).nth(7)
   ).not.toBeVisible()
+  await responsePromise
 })
 
-test.fixme('Blink Border Width', async () => {
+test('Blink Border Width', async () => {
   await page.getByLabel('Border', { exact: true }).nth(0).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(0)).toBeVisible()
 
@@ -866,10 +1036,20 @@ test.fixme('Blink Border Width', async () => {
   await input.blur()
   await expect(input).toHaveValue('1')
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(0).click()
+  await responsePromise
 })
 
-test.fixme('Caption Border Width', async () => {
+test('Caption Border Width', async () => {
   await page.getByLabel('Border', { exact: true }).nth(1).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(1)).toBeVisible()
 
@@ -893,10 +1073,20 @@ test.fixme('Caption Border Width', async () => {
   await input.blur()
   await expect(input).toHaveValue('1')
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(1).click()
+  await responsePromise
 })
 
-test.fixme('Big Caption Border Width', async () => {
+test('Big Caption Border Width', async () => {
   await page.getByLabel('Border', { exact: true }).nth(2).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(2)).toBeVisible()
 
@@ -920,10 +1110,20 @@ test.fixme('Big Caption Border Width', async () => {
   await input.blur()
   await expect(input).toHaveValue('1')
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(2).click()
+  await responsePromise
 })
 
-test.fixme('Count Border Width', async () => {
+test('Count Border Width', async () => {
   await page.getByLabel('Border', { exact: true }).nth(3).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(3)).toBeVisible()
 
@@ -947,10 +1147,20 @@ test.fixme('Count Border Width', async () => {
   await input.blur()
   await expect(input).toHaveValue('1')
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(3).click()
+  await responsePromise
 })
 
-test.fixme('Blink Border Color', async () => {
+test('Blink Border Color', async () => {
   await page.getByLabel('Border', { exact: true }).nth(0).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(1)).toHaveCSS(
     'background-color',
@@ -1011,10 +1221,21 @@ test.fixme('Blink Border Color', async () => {
   await expect(page.getByLabel('Color', { exact: true }).nth(1)).toHaveValue(
     '#fff000'
   )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(0).click()
+  await responsePromise
 })
 
-test.fixme('Caption Border Color', async () => {
+test('Caption Border Color', async () => {
   await page.getByLabel('Border', { exact: true }).nth(1).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(3)).toHaveCSS(
     'background-color',
@@ -1075,10 +1296,21 @@ test.fixme('Caption Border Color', async () => {
   await expect(page.getByLabel('Color', { exact: true }).nth(3)).toHaveValue(
     '#fff000'
   )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(1).click()
+  await responsePromise
 })
 
-test.fixme('Big Caption Border Color', async () => {
+test('Big Caption Border Color', async () => {
   await page.getByLabel('Border', { exact: true }).nth(2).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(5)).toHaveCSS(
     'background-color',
@@ -1139,10 +1371,21 @@ test.fixme('Big Caption Border Color', async () => {
   await expect(page.getByLabel('Color', { exact: true }).nth(5)).toHaveValue(
     '#fff000'
   )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(2).click()
+  await responsePromise
 })
 
-test.fixme('Count Border Color', async () => {
+test('Count Border Color', async () => {
   await page.getByLabel('Border', { exact: true }).nth(3).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(7)).toHaveCSS(
     'background-color',
@@ -1203,5 +1446,16 @@ test.fixme('Count Border Color', async () => {
   await expect(page.getByLabel('Color', { exact: true }).nth(7)).toHaveValue(
     '#fff000'
   )
+
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.border === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Border', { exact: true }).nth(3).click()
+  await responsePromise
 })
