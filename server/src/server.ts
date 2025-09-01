@@ -162,12 +162,12 @@ void (async function () {
   app.use('/proxy', proxy)
   app.get('*', (req, res) => {
     if (
-      process.env.NODE_ENV !== 'development' &&
-      process.env.NODE_ENV !== 'testing'
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'testing'
     ) {
-      res.sendFile(path.join(__dirname, 'public', 'index.html'))
-    } else {
       res.status(200).send('Hello World!')
+    } else {
+      res.sendFile(path.join(__dirname, 'public', 'index.html'))
     }
   })
   app.use((error: NodeJS.ErrnoException, req: Request, res: Response) => {
