@@ -82,11 +82,9 @@
     "scripts": "bin/**/*.js",
     "assets": [
       "bin/public/**/*",
-      "node_modules/@ffprobe-installer/linux-x64/*",
+      "node_modules/@ffprobe-installer/**/ffprobe*",
+      "node_modules/@ffprobe-installer/**/package.json",
       "node_modules/better-sqlite3/build/Release/better_sqlite3.node"
-    ],
-    "targets": [
-      "node22-linux-x64"
     ],
     "outputPath": "dist"
   },

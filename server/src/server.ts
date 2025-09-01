@@ -82,12 +82,13 @@ const extractBinaries = async () => {
     return
   }
 
-  if (!fs.existsSync(getFfprobePath())) {
-    const file = fs.createWriteStream(getFfprobePath())
+  const ffprobePath = getFfprobePath()
+  if (!fs.existsSync(ffprobePath)) {
+    const file = fs.createWriteStream(ffprobePath)
     await pipeline(fs.createReadStream(ffprobeInstaller.path), file)
 
-    fs.chmodSync(getFfprobePath(), 0o755)
-    logger.info('+ ffprobe copied to {path}', { path: getFfprobePath() })
+    fs.chmodSync(ffprobePath, 0o755)
+    logger.info('+ ffprobe copied to {path}', { path: ffprobePath })
   }
 }
 
@@ -134,7 +135,10 @@ void (async function () {
   )
   app.use(passport.authenticate('session'))
   app.use(auth)
-  if (process.env.NODE_ENV === 'production') {
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    process.env.NODE_ENV !== 'testing'
+  ) {
     app.use(express.static(path.join(__dirname, 'public')))
   }
   app.use('/api/version', version)
@@ -157,7 +161,10 @@ void (async function () {
   app.use('/fs', files)
   app.use('/proxy', proxy)
   app.get('*', (req, res) => {
-    if (process.env.NODE_ENV === 'production') {
+    if (
+      process.env.NODE_ENV !== 'development' &&
+      process.env.NODE_ENV !== 'testing'
+    ) {
       res.sendFile(path.join(__dirname, 'public', 'index.html'))
     } else {
       res.status(200).send('Hello World!')

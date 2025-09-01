@@ -26,6 +26,6 @@ yarn prod
 
 echo 'Creating package'
 mv ../client/dist bin/public/
-yarn pkg .
+yarn pkg -t node22-linux-x64 .
 
 cd ..
