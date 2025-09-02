@@ -55,11 +55,12 @@ jobs:
             { os: "macos-14", platform: "macos", arch: "arm64" }, 
             { os: "windows-2022", platform: "win", arch: "x64" }
           ]
-    env:
-      EXTENSION: ${{ matrix.target.os == 'windows-2022' && '.exe' || '' }}
     steps:
-    - name: Install setuptools
-      if: ${{matrix.target.platform == 'macos'}}
+    - name: macos-13 dependencies fix
+      if: ${{ matrix.target.os == 'macos-13' }}
+      run: sudo -H pip install setuptools
+    - name: macos-14 dependencies fix
+      if: ${{ matrix.target.os == 'macos-14' }}
       run: brew install python-setuptools
     - uses: actions/checkout@v4
     - name: Set up Node.js
@@ -106,6 +107,7 @@ jobs:
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        EXTENSION: ${{ matrix.target.platform == 'win' && '.exe' || '' }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ./server/dist/server${{ env.EXTENSION }}
