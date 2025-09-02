@@ -12,18 +12,9 @@ on:
           - ubuntu-latest
           - windows-latest
           - macos-latest
-      arch:
-        description: 'True to print to STDOUT'
-        required: true
-        default: 'ubuntu-latest'
-        type: choice
-        options:
-          - x64
-          - arm64
 
 jobs:
   build:
-    if: ${{ inputs.os != 'windows.latest' || inputs.arch != 'arm64'}}
     runs-on: ${{ inputs.os }}
     env:
       PLATFORM: ${{ inputs.os == 'ubuntu-latest' && 'linux' || (inputs.os == 'windows-latest' && 'win' || 'macos') }}
@@ -66,10 +57,10 @@ jobs:
       working-directory: ./server
       run: yarn install --immutable
     - name: Install FFProbe
+      if: false # use when supporting arm64
       uses: actions/github-script@v7
       env:
         OS: ${{ inputs.os }}
-        ARCH: ${{ inputs.arch }}
       with:
         script: |
           const fs = require('fs')
@@ -107,10 +98,4 @@ jobs:
       run: mv ./client/dist ./server/bin/public/
     - name: Create package
       working-directory: ./server
-      run: yarn pkg -t node22-${{ env.PLATFORM }}-${{ inputs.arch }} .
-    - name: Show ffprobe output
-      working-directory: ./server
-      run: ls ./node_modules/@ffprobe-installer
-    - name: Show build output
-      working-directory: ./server
-      run: ls ./dist
+      run: yarn pkg -t node22-${{ env.PLATFORM }}-x64 .
