@@ -55,7 +55,7 @@ jobs:
       EXTENSION: ${{ matrix.os == 'windows-latest' && '.exe' || '' }}
     steps:
     - name: Install setuptools
-      if: ${{inputs.os == 'macos-latest'}}
+      if: ${{matrix.os == 'macos-latest'}}
       run: brew install python-setuptools
     - uses: actions/checkout@v4
     - name: Set up Node.js
