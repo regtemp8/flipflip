@@ -104,14 +104,10 @@ jobs:
       run: mv ./client/dist ./server/bin/public/
     - name: Create package
       working-directory: ./server
-      run: yarn pkg -t node22-${{ env.PLATFORM }}-${{ inputs.arch }} --compress Brotli .
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./server/dist/server${{ env.EXTENSION }}
-        asset_name: FlipFlip-${{ env.PLATFORM_NAME }}-${{ inputs.arch }}-${{ steps.get-package-version.outputs.version }}${{ env.EXTENSION }}
-        asset_content_type: application/zip
+      run: yarn pkg -t node22-${{ env.PLATFORM }}-${{ inputs.arch }} .
+    - name: Show ffprobe output
+      working-directory: ./server
+      run: ls -al ./node_modules/@ffprobe-installer
+    - name: Show build output
+      working-directory: ./server
+      run: ls -al ./dist
