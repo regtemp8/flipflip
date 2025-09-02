@@ -50,7 +50,6 @@ jobs:
       working-directory: ./server
       run: yarn install --immutable
     - name: Install FFProbe
-      working-directory: ./server
       uses: actions/github-script@v7
       env:
         OS: ${{ matrix.os }}
@@ -74,7 +73,7 @@ jobs:
           targets['macos-latest'] = 'darwin'
           const target = `${targets[process.env.OS]}-${process.env.ARCH}`
 
-          const ffprobePath = path.resolve('./node_modules', '@ffprobe-installer', target)
+          const ffprobePath = path.resolve('./server', 'node_modules', '@ffprobe-installer', target)
           if(!fs.existsSync(ffprobePath)) {
             await fs.promises.mkdir(ffprobePath)
             const executable = process.env.OS == 'windows-latest' ? 'ffprobe.exe' : 'ffprobe'
