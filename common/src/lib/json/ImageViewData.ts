@@ -1,7 +1,7 @@
 import { ContentData } from './ContentData';
+import { EffectsData } from './EffectsData';
 import { TransformData } from './TransformData';
 import { ViewData } from './ViewData';
-import { EffectsData } from './EffectsData';
 
 export type ImageViewData = {
   data: ContentData;
