@@ -75,7 +75,7 @@ function toContentSourceUrl(url: string): ContentSource {
 
 export default class SourceScraper {
   private static readonly pool = new StaticPool({
-    size: os.cpus().length - 2, // TODO make thread pool size configurable?
+    size: Math.max(1, os.cpus().length - 2),
     task: path.join(__dirname, 'Scrapers.js')
   })
 
