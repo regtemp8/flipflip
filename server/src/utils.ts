@@ -97,18 +97,20 @@ export function getFileName(url: string, extension = true): string {
 export function getFileGroup(url: string): string {
   let sep
   switch (getSourceType(url)) {
-    case ST.tumblr:
+    case ST.tumblr: {
       let tumblrID = url.replace(/https?:\/\//, '')
       tumblrID = tumblrID.replace(/\.tumblr\.com\/?/, '')
       return tumblrID
-    case ST.reddit:
+    }
+    case ST.reddit: {
       let redditID = url
       if (redditID.endsWith('/'))
         redditID = redditID.slice(0, url.lastIndexOf('/'))
       if (redditID.endsWith('/saved')) redditID = redditID.replace('/saved', '')
       redditID = redditID.substring(redditID.lastIndexOf('/') + 1)
       return redditID
-    case ST.redgifs:
+    }
+    case ST.redgifs: {
       let redgifID = ''
       if (url.includes('/browse?')) {
         const redgifRegex =
@@ -121,14 +123,16 @@ export function getFileGroup(url: string): string {
         }
       }
       return redgifID
-    case ST.imagefap:
+    }
+    case ST.imagefap: {
       let imagefapID = url.replace(/https?:\/\/www.imagefap.com\//, '')
       imagefapID = imagefapID.replace(/pictures\//, '')
       imagefapID = imagefapID.replace(/organizer\//, '')
       imagefapID = imagefapID.replace(/video\.php\?vid=/, '')
       imagefapID = imagefapID.split('/')[0]
       return imagefapID
-    case ST.sexcom:
+    }
+    case ST.sexcom: {
       let sexcomID = url.replace(/https?:\/\/www.sex.com\//, '')
       sexcomID = sexcomID.replace(/user\//, '')
       sexcomID = sexcomID.split('?')[0]
@@ -136,11 +140,13 @@ export function getFileGroup(url: string): string {
         sexcomID = sexcomID.substring(0, sexcomID.length - 1)
       }
       return sexcomID
-    case ST.imgur:
+    }
+    case ST.imgur: {
       let imgurID = url.replace(/https?:\/\/imgur.com\//, '')
       imgurID = imgurID.replace(/a\//, '')
       return imgurID
-    case ST.twitter:
+    }
+    case ST.twitter: {
       let twitterID = url.replace(/https?:\/\/twitter.com\//, '')
       if (twitterID.includes('?')) {
         twitterID = twitterID.substring(0, twitterID.indexOf('?'))
@@ -149,21 +155,25 @@ export function getFileGroup(url: string): string {
         twitterID = twitterID.substring(0, twitterID.length - 1)
       }
       return twitterID
-    case ST.deviantart:
+    }
+    case ST.deviantart: {
       let authorID = url.replace(/https?:\/\/www.deviantart.com\//, '')
       if (authorID.includes('/')) {
         authorID = authorID.substring(0, authorID.indexOf('/'))
       }
       return authorID
-    case ST.instagram:
+    }
+    case ST.instagram: {
       let instagramID = url.replace(/https?:\/\/www.instagram.com\//, '')
       if (instagramID.includes('/')) {
         instagramID = instagramID.substring(0, instagramID.indexOf('/'))
       }
       return instagramID
-    case ST.e621:
+    }
+    case ST.e621: {
       const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g
-      const hostE621 = hostRegexE621.exec(url)![1]
+      const regexResult = hostRegexE621.exec(url)
+      const hostE621 = regexResult != null ? regexResult[1] : ''
       let E621ID = ''
       if (url.includes('/pools/')) {
         E621ID = 'pool' + url.substring(url.lastIndexOf('/'))
@@ -178,7 +188,8 @@ export function getFileGroup(url: string): string {
         }
       }
       return hostE621 + '/' + decodeURIComponent(E621ID)
-    case ST.luscious:
+    }
+    case ST.luscious: {
       let albumID = url.replace(
         /^https?:\/\/(www\.|members\.)?luscious\.net\/(albums|users)\//,
         ''
@@ -187,11 +198,13 @@ export function getFileGroup(url: string): string {
         albumID = albumID.substring(0, albumID.indexOf('/'))
       }
       return albumID
+    }
     case ST.danbooru:
     case ST.gelbooru1:
-    case ST.gelbooru2:
+    case ST.gelbooru2: {
       const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g
-      const host = hostRegex.exec(url)![1]
+      const regexResult = hostRegex.exec(url)
+      const host = regexResult != null ? regexResult[1] : ''
       let danbooruID = ''
       if (url.includes('/pools/')) {
         danbooruID = 'pools/' + url.substring(url.lastIndexOf('/'))
@@ -218,27 +231,31 @@ export function getFileGroup(url: string): string {
         }
       }
       return host + '/' + decodeURIComponent(danbooruID)
-    case ST.ehentai:
-      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^\/]*)/g
+    }
+    case ST.ehentai: {
+      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^/]*)/g
       const gallery = galleryRegex.exec(url)
-      return gallery![1]
-    case ST.list:
+      return gallery != null ? gallery[1] : ''
+    }
+    case ST.list: {
       if (/^https?:\/\//g.exec(url) != null) {
         sep = '/'
       } else {
         sep = path.sep
       }
       return url.substring(url.lastIndexOf(sep) + 1).replace('.txt', '')
-    case ST.local:
+    }
+    case ST.local: {
       if (url.endsWith(path.sep)) {
         url = url.substring(0, url.length - 1)
         return url.substring(url.lastIndexOf(path.sep) + 1)
       } else {
         return url.substring(url.lastIndexOf(path.sep) + 1)
       }
+    }
     case ST.video:
     case ST.playlist:
-    case ST.nimja:
+    case ST.nimja: {
       if (/^https?:\/\//g.exec(url) != null) {
         sep = '/'
       } else {
@@ -246,12 +263,14 @@ export function getFileGroup(url: string): string {
       }
       const name = url.substring(0, url.lastIndexOf(sep))
       return name.substring(name.lastIndexOf(sep) + 1)
-    case ST.bdsmlr:
+    }
+    case ST.bdsmlr: {
       let bdsmlrID = url.replace(/https?:\/\//, '')
       bdsmlrID = bdsmlrID.replace(/\/rss/, '')
       bdsmlrID = bdsmlrID.replace(/\.bdsmlr\.com\/?/, '')
       return bdsmlrID
-    case ST.hydrus:
+    }
+    case ST.hydrus: {
       const tagsRegex = /tags=([^&]*)&?.*$/.exec(url)
       if (tagsRegex == null) return 'hydrus'
       let tags = tagsRegex[1]
@@ -261,7 +280,8 @@ export function getFileGroup(url: string): string {
       tags = tags.substring(1, tags.length - 1)
       tags = tags.replace(/"/g, '')
       return tags
-    case ST.piwigo:
+    }
+    case ST.piwigo: {
       const catRegex = /cat_id\[]=(\d*)/.exec(url)
       if (catRegex != null) return catRegex[1]
 
@@ -269,8 +289,10 @@ export function getFileGroup(url: string): string {
       if (tagRegex != null) return tagRegex[1]
 
       return 'piwigo'
-    default:
+    }
+    default: {
       return ''
+    }
   }
 }
 
@@ -351,7 +373,7 @@ export async function copyThumbFile(thumb: string) {
   return thumbPath
 }
 
-export function getRandomIndex(list: any[]) {
+export function getRandomIndex(list: unknown[]) {
   return Math.floor(Math.random() * list.length)
 }
 
@@ -368,27 +390,16 @@ export function getRandomBoolean() {
   return Math.random() < 0.5
 }
 
-export function getRandomListItem(list: any[], count: number = 1) {
-  if (count <= 0) {
-  } else if (count === 1) {
-    return list[getRandomIndex(list)]
-  } else {
-    const newList = []
-    for (let c = 0; c < count && list.length > 0; c++) {
-      newList.push(list.splice(getRandomIndex(list), 1)[0])
-    }
-    return newList
-  }
+export function getRandomListItem<T>(list: Array<T>) {
+  return list[getRandomIndex(list)]
 }
 
-export function flatten(array: any[]) {
-  let values
-  try {
-    values = values = [].concat.apply([], array)
-  } catch (e) {
-    values = (array as any).flat(1)
+export function getRandomListItems<T>(list: Array<T>, count: number) {
+  const newList = []
+  for (let c = 0; c < count && list.length > 0; c++) {
+    newList.push(list.splice(getRandomIndex(list), 1)[0])
   }
-  return values
+  return newList
 }
 
 export function filterRequestsToJustPlayable(

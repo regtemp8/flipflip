@@ -599,7 +599,7 @@ test('Add Remote Caption Script', async ({ page }) => {
   await responsePromise
 })
 
-test.fixme('Click Remote Script', async ({ page }) => {
+test.fixme('Click Remote Script', async () => {
   // TODO play remote script
 })
 

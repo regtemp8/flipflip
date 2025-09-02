@@ -1498,7 +1498,7 @@ export function toBackupSettings(request: CleanBackupsRequest): BackupSettings {
   let autoCleanBackupWeeks = 0
   let cleanRetain = 0
 
-  if (request.hasOwnProperty('cleanRetain')) {
+  if (Object.hasOwn(request, 'cleanRetain')) {
     const defaultRequest = request as DefaultCleanBackupsRequest
     cleanRetain = defaultRequest.cleanRetain
   } else {
@@ -1631,7 +1631,7 @@ export function toImagePlayerData(
     itemsById[id].push(itemRow)
   })
 
-  const items = Object.entries(itemsById).map(([key, value]) => {
+  const items = Object.values(itemsById).map((value) => {
     const duration = value[0].duration as number
     let scenes = value
       .filter((sceneId) => sceneId != null)

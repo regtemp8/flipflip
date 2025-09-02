@@ -1,5 +1,3 @@
-import { ST, isAudio, isVideo, isVideoPlaylist } from 'flipflip-common'
-
 export const toNumber = (value?: boolean) => (value === true ? 1 : 0)
 export const toNumberOpt = (value?: boolean | string) => {
   if (value == null) {
@@ -17,7 +15,7 @@ export const toBoolean = (value?: number) => value === 1
 export const toStringArray = (value?: string) =>
   value != null ? (JSON.parse(value) as string[]) : []
 
-export const toText = (value: any) => JSON.stringify(value)
+export const toText = (value: unknown) => JSON.stringify(value)
 
-export const toTextOpt = (value?: any) =>
+export const toTextOpt = (value?: unknown) =>
   value != null ? JSON.stringify(value) : undefined

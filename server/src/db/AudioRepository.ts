@@ -21,6 +21,7 @@ import {
   AudioArtist
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
+import { SortValue } from './types/SortValue'
 
 export async function findAudios(): Promise<Audio[]> {
   return await db()
@@ -675,13 +676,14 @@ function audioSortFunction(
 ): (a: Partial<Audio>, b: Partial<Audio>) => number {
   return (a, b) => {
     let secondary = null
-    let aValue: any, bValue: any
+    let aValue: SortValue, bValue: SortValue
     switch (algorithm) {
-      case ASF.url:
-        aValue = a.url
-        bValue = b.url
+      case ASF.url: {
+        aValue = a.url as string
+        bValue = b.url as string
         break
-      case ASF.name:
+      }
+      case ASF.name: {
         const reA = /^(A\s|a\s|The\s|the\s)/g
         aValue = (a.name ?? '').replace(reA, '')
         bValue = (b.name ?? '').replace(reA, '')
@@ -695,39 +697,47 @@ function audioSortFunction(
         bValue = ''
         secondary = ASF.url
         break
-      case ASF.artist:
-        aValue = a.artist
-        bValue = b.artist
+      }
+      case ASF.artist: {
+        aValue = a.artist ?? ''
+        bValue = b.artist ?? ''
         secondary = ASF.album
         break
-      case ASF.album:
-        aValue = a.album
-        bValue = b.album
+      }
+      case ASF.album: {
+        aValue = a.album ?? ''
+        bValue = b.album ?? ''
         secondary = ASF.trackNum
         break
-      case ASF.date:
-        aValue = a.createdAt
-        bValue = b.createdAt
+      }
+      case ASF.date: {
+        aValue = a.createdAt as number
+        bValue = b.createdAt as number
         secondary = ASF.url
         break
-      case ASF.trackNum:
-        aValue = parseInt(a.trackNum as any)
-        bValue = parseInt(b.trackNum as any)
+      }
+      case ASF.trackNum: {
+        aValue = a.trackNum ?? 0
+        bValue = b.trackNum ?? 0
         secondary = ASF.name
         break
-      case ASF.duration:
-        aValue = a.duration
-        bValue = b.duration
+      }
+      case ASF.duration: {
+        aValue = a.duration ?? 0
+        bValue = b.duration ?? 0
         secondary = ASF.url
         break
-      case ASF.playedCount:
-        aValue = a.playedCount
-        bValue = b.playedCount
+      }
+      case ASF.playedCount: {
+        aValue = a.playedCount as number
+        bValue = b.playedCount as number
         secondary = ASF.artist
         break
-      default:
+      }
+      default: {
         aValue = ''
         bValue = ''
+      }
     }
     if (aValue < bValue) {
       return ascending ? -1 : 1

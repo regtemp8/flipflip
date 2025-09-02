@@ -119,7 +119,7 @@ export default class SourceScraper {
           }
         } catch (e) {
           sources.push(toContentSource(row, tags, clips))
-          logger.error('Failed to read local directory', e)
+          logger.error('Failed to read local directory', e as object)
         }
       } else {
         sources.push(toContentSource(row, tags, clips))

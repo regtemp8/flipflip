@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { Kysely } from 'kysely'
 import {
   ContentSource,
@@ -18,13 +17,13 @@ import {
   ST,
   AddContentSourceRequest,
   isVideo,
-  isVideoPlaylist,
-  Message
+  isVideoPlaylist
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 import recursiveReadDir from 'recursive-readdir'
 import Logger from '../logging/Logger'
+import { SortValue } from './types/SortValue'
 
 export const IS_LIBRARY = 0
 const logger = Logger.create('ContentSourceRepository')
@@ -568,7 +567,7 @@ function sortFunction(
   secondary?: string
 ): (a: SortRow, b: SortRow) => number {
   return (a, b) => {
-    let aValue: any, bValue: any
+    let aValue: SortValue, bValue: SortValue
     switch (algorithm) {
       case SF.alpha:
         aValue = getName(a)
@@ -579,8 +578,8 @@ function sortFunction(
         bValue = b.url
         break
       case SF.date:
-        aValue = a.id
-        bValue = b.id
+        aValue = a.id as number
+        bValue = b.id as number
         break
       case SF.count:
         aValue = getCount(a)

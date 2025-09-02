@@ -38,7 +38,7 @@ import {
   ViewVideoData
 } from 'flipflip-common'
 import DurationCalculator from './DurationCalculator'
-import imageSize from 'image-size'
+import { imageSize } from 'image-size'
 import {
   getFfprobePath,
   getRandomBoolean,
@@ -723,7 +723,7 @@ export default class ContentLoader {
       case SC.colorRand:
         return getRandomColor()
       default:
-        return undefined
+        throw new Error(`Unsupported strobe color: ${this.scene.strobeColorType}`)
     }
   }
 
@@ -874,7 +874,7 @@ export default class ContentLoader {
     }
 
     let fadeIn = true
-    let loops: FadeInOutLoopData[] = []
+    const loops: FadeInOutLoopData[] = []
     let totalDuration = this.calcTotalDuration(timeToNextFrame, bpm)
     while (totalDuration > 0) {
       const duration = this.fadeInOutDuration.calc(timeToNextFrame, bpm, 10) / 2
@@ -914,7 +914,7 @@ export default class ContentLoader {
       prevPanVertTransType = this.getVertTransType(start.translateY.amount)
     }
 
-    let loops: PanningLoopData[] = []
+    const loops: PanningLoopData[] = []
     let totalDuration = this.calcTotalDuration(timeToNextFrame, bpm)
     while (totalDuration > 0) {
       const translateX = this.getPanningTranslateX(data, prevPanHorizTransType)

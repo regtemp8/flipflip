@@ -109,7 +109,7 @@ router.delete('/:id', async (req, res, next) => {
       return
     }
 
-    const result = await deleteScene(Number(req.params.id), userId)
+    const result = await deleteScene(Number(req.params.id))
     const status = result[0].numDeletedRows > 0n ? 204 : 500
     res.status(status).end()
   } catch (error) {

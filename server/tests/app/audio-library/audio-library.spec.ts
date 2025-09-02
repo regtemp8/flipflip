@@ -609,7 +609,7 @@ test('Add Remote Audio', async ({ page }) => {
   )
 })
 
-test.fixme('Click Remote Audio Source Icon', async ({ page }) => {
+test.fixme('Click Remote Audio Source Icon', async () => {
   // TODO play remote audio
 })
 

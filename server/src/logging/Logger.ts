@@ -7,15 +7,15 @@ export default class Logger {
     this.className = className
   }
 
-  public info(message: string, meta?: any) {
+  public info(message: string, meta?: object) {
     logger.info(message, { ...meta, className: this.className })
   }
 
-  public warn(message: string, meta?: any) {
+  public warn(message: string, meta?: object) {
     logger.warn(message, { ...meta, className: this.className })
   }
 
-  public error(message: string, meta?: any) {
+  public error(message: string, meta?: object) {
     logger.error(message, { ...meta, className: this.className })
   }
 

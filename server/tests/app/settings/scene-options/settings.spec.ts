@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { changeSlider, testSliderValue } from '../../utils'
+import { changeSlider } from '../../utils'
 import { IF, WF } from 'flipflip-common'
 
 test.beforeEach(async ({ page }) => {

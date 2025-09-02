@@ -10,7 +10,6 @@ import {
   isImageOrVideo,
   isVideo,
   IF,
-  WF,
   getFileName,
   urlToPath,
   ST,
@@ -121,10 +120,10 @@ export const loadLocalDirectory = async (
         },
         resolve
       )
-    } catch (e: any) {
+    } catch (e: unknown) {
       pm(
         {
-          error: e.message,
+          error: (e as Error).message,
           helpers,
           source,
           timeout: 0
@@ -606,10 +605,10 @@ export const loadTumblr: WorkerFunction = async (
           resolve
         )
       }
-    } catch (err: any) {
+    } catch (e: unknown) {
       let systemMessage
       if (
-        err.message.includes('429 Limit Exceeded') &&
+        (e as Error).message.includes('429 Limit Exceeded') &&
         !tumblr429Alerted &&
         helpers.next === 0
       ) {
@@ -621,7 +620,7 @@ export const loadTumblr: WorkerFunction = async (
       }
       pm(
         {
-          error: err.message,
+          error: (e as Error).message,
           systemMessage,
           helpers,
           source,
@@ -1335,7 +1334,6 @@ export const loadImageFap: WorkerFunction = (
             resolve
           )
         } else {
-          let images = Array<string>()
           let captcha
           if (html.includes('Enter the captcha')) {
             helpers.count = source.count
@@ -1422,7 +1420,7 @@ export const loadImageFap: WorkerFunction = (
                 }
               }
 
-              let data = videoLink
+              const data = videoLink
                 ? filterPathsToJustPlayable(filter, [videoLink], false)
                 : []
               if (data.length > 0) {
@@ -1669,10 +1667,10 @@ export const loadImgur: WorkerFunction = async (
       },
       resolve
     )
-  } catch (err: any) {
+  } catch (err) {
     pm(
       {
-        error: err.message,
+        error: (err as Error).message,
         helpers,
         source,
         timeout
@@ -1782,7 +1780,8 @@ export const loadE621: WorkerFunction = (
   const timeout = 8000
   const url = source.url
   const hostRegex = /^(https?:\/\/[^/]*)\//g
-  const thisHost = hostRegex.exec(url)![1]
+  const regexResult = hostRegex.exec(url)
+  const thisHost = regexResult != null ? regexResult[1] : ''
   let suffix = ''
   if (url.includes('/pools/')) {
     suffix = '/pools.json?search[id]=' + url.substring(url.lastIndexOf('/') + 1)
@@ -2000,7 +1999,8 @@ export const loadDanbooru: WorkerFunction = (
   const timeout = 8000
   const url = source.url
   const hostRegex = /^(https?:\/\/[^/]*)\//g
-  const thisHost = hostRegex.exec(url)![1]
+  const regexResult = hostRegex.exec(url)
+  const thisHost = regexResult != null ? regexResult[1] : ''
   let suffix = ''
   if (url.includes('/pools/')) {
     suffix = '/pools/' + url.substring(url.lastIndexOf('/') + 1) + '.json'
@@ -2204,7 +2204,8 @@ export const loadGelbooru1: WorkerFunction = (
   const timeout = 8000
   const url = source.url
   const hostRegex = /^(https?:\/\/[^/]*)\//g
-  const thisHost = hostRegex.exec(url)![1]
+  const regexResult = hostRegex.exec(url)
+  const thisHost = regexResult != null ? regexResult[1] : ''
   const controller = new AbortController()
   const timeoutID = setTimeout(() => controller.abort(), 5000)
   fetch(url + '&pid=' + (helpers.next as number) * 10, {
@@ -2351,7 +2352,8 @@ export const loadGelbooru2: WorkerFunction = (
   const timeout = 8000
   const url = source.url
   const hostRegex = /^(https?:\/\/[^/]*)\//g
-  const thisHost = hostRegex.exec(url)![1]
+  const regexResult = hostRegex.exec(url)
+  const thisHost = regexResult != null ? regexResult[1] : ''
   let suffix =
     '/index.php?page=dapi&s=post&q=index&limit=20&json=1&pid=' +
     ((helpers.next as number) + 1)

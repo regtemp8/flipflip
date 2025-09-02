@@ -13,7 +13,7 @@ export class Imgur {
   }
 
   async getAlbumImages(albumName: string): Promise<string[]> {
-    throw new Error('Imgur getAlbumImages not implemented')
+    throw new Error(`Imgur getAlbumImages '${albumName}' not implemented`)
     // const response = await this.client.getAlbum(albumName)
     // return response.data.images.map((i: ImageData) => i.link)
   }

@@ -589,7 +589,7 @@ export async function isSceneCreator(id: number, userId: number) {
     .executeTakeFirst()
 }
 
-export async function deleteScene(id: number, userId: number) {
+export async function deleteScene(id: number) {
   return await db()
     .query()
     .transaction()

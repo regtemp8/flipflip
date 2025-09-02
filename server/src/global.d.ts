@@ -1,7 +1,7 @@
 declare global {
   declare namespace NodeJS {
     export interface Process {
-      pkg?: any
+      pkg?: unknown
     }
   }
 }

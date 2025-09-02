@@ -137,7 +137,7 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
 
     // Get the urls from the source
-    let collection = await sourceScrapers().getScrapedUrls(
+    const collection = await sourceScrapers().getScrapedUrls(
       this.scene.id,
       canScrape,
       source
@@ -227,7 +227,7 @@ class ImageWeightedUrlLoader extends UrlLoader {
     const { orderFunction, forceAll } = this.scene
 
     // Get all urls
-    let collection = await sourceScrapers().getScrapedUrls(
+    const collection = await sourceScrapers().getScrapedUrls(
       this.scene.id,
       canScrape
     )
