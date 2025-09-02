@@ -723,7 +723,9 @@ export default class ContentLoader {
       case SC.colorRand:
         return getRandomColor()
       default:
-        throw new Error(`Unsupported strobe color: ${this.scene.strobeColorType}`)
+        throw new Error(
+          `Unsupported strobe color: ${this.scene.strobeColorType}`
+        )
     }
   }
 

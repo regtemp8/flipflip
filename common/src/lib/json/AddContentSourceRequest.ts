@@ -1,5 +1,5 @@
 export type AddContentSourceRequest = {
-    addFunction: string
-    urls: string[]
-    sceneId?: number
-}
+  addFunction: string;
+  urls: string[];
+  sceneId?: number;
+};
