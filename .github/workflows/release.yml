@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [published, edited]
+    types: [published]
 
 jobs:
   docker:
@@ -48,14 +48,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
-          os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+          os: ["ubuntu-22.04", "macos-13-large", "windows-2022"]
     env:
-      PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win' || 'macos') }}
-      PLATFORM_NAME: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'windows' || 'macos') }}
-      EXTENSION: ${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+      PLATFORM: ${{ matrix.os == 'ubuntu-22.04' && 'linux' || (matrix.os == 'windows-2022' && 'win' || 'macos') }}
+      PLATFORM_NAME: ${{ matrix.os == 'ubuntu-22.04' && 'linux' || (matrix.os == 'windows-2022' && 'windows' || 'macos') }}
+      EXTENSION: ${{ matrix.os == 'windows-2022' && '.exe' || '' }}
     steps:
     - name: Install setuptools
-      if: ${{matrix.os == 'macos-latest'}}
+      if: ${{matrix.os == 'macos-13-large'}}
       run: brew install python-setuptools
     - uses: actions/checkout@v4
     - name: Set up Node.js
@@ -108,15 +108,15 @@ jobs:
           };
 
           const targets = {}
-          targets['ubuntu-latest'] = 'linux'
-          targets['windows-latest'] = 'win32'
-          targets['macos-latest'] = 'darwin'
+          targets['ubuntu-22.04'] = 'linux'
+          targets['windows-2022'] = 'win32'
+          targets['macos-13-large'] = 'darwin'
           const target = `${targets[process.env.OS]}-${process.env.ARCH}`
 
           const ffprobePath = path.resolve('./server', 'node_modules', '@ffprobe-installer', target)
           if(!fs.existsSync(ffprobePath)) {
             await fs.promises.mkdir(ffprobePath)
-            const executable = process.env.OS == 'windows-latest' ? 'ffprobe.exe' : 'ffprobe'
+            const executable = process.env.OS == 'windows-2022' ? 'ffprobe.exe' : 'ffprobe'
             const files = ['package.json', executable]
             for (const file of files) {
               const url = `https://github.com/SavageCore/node-ffprobe-installer/raw/refs/tags/v2.1.2/platforms/${target}/${file}`
