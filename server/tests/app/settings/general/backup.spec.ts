@@ -46,19 +46,16 @@ test('Auto Backup Every Days input', async ({ page }) => {
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -75,6 +72,9 @@ test('Auto Backup Every Days input', async ({ page }) => {
 })
 
 test('Auto Clean Backup', async ({ page }) => {
+  await page
+    .getByRole('button', { name: 'Restore Backup', exact: true })
+    .scrollIntoViewIfNeeded()
   await expect(page.getByLabel('Auto Clean', { exact: true })).not.toBeChecked()
   await expect(
     page.getByText('DaysKeep Last', { exact: true }).locator('input')
@@ -86,16 +86,13 @@ test('Auto Clean Backup', async ({ page }) => {
     page.getByText('MonthsKeep Last', { exact: true }).locator('input')
   ).toBeDisabled()
 
-  await page.getByLabel('Auto Clean', { exact: true }).scrollIntoViewIfNeeded()
   await page.getByLabel('Auto Clean', { exact: true }).hover()
   await expect(
-    page.getByRole('tooltip', { name: /^If enabled, backups/ })
+    page.getByRole('tooltip', {
+      name: 'If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period.',
+      exact: true
+    })
   ).toBeVisible()
-  await expect(
-    page.getByRole('tooltip', { name: /^If enabled, backups/ })
-  ).toHaveText(
-    'If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period.'
-  )
 
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -152,19 +149,16 @@ test('Auto Backup Days Keep Last input', async ({ page }) => {
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -190,19 +184,16 @@ test('Auto Backup Weeks Keep Last input', async ({ page }) => {
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -228,19 +219,16 @@ test('Auto Backup Months Keep Last input', async ({ page }) => {
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {

@@ -318,9 +318,9 @@ test('Audio BPM strobe timing', async ({ page }) => {
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
-  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
-    'Missing audio with BPM'
-  )
+  await expect(
+    page.getByRole('tooltip', { name: 'Missing audio with BPM', exact: true })
+  ).toBeVisible()
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
@@ -744,9 +744,9 @@ test('Audio BPM strobe delay timing', async ({ page }) => {
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
-  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
-    'Missing audio with BPM'
-  )
+  await expect(
+    page.getByRole('tooltip', { name: 'Missing audio with BPM', exact: true })
+  ).toBeVisible()
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()
@@ -1106,7 +1106,9 @@ test('Strobe solid color', async ({ page }) => {
   }
 
   await page.getByLabel('Pick Color').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color').click()
   await page.getByLabel('hex').fill('FFF000')
@@ -1140,7 +1142,9 @@ test('Strobe set of colors', async ({ page }) => {
   await expect(page.locator('#color-1')).not.toBeVisible()
 
   await page.getByLabel('Add Color', { exact: true }).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Add Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Add Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Add Color', { exact: true }).click()
   await expect(page.locator('#color-0')).toHaveCSS(
@@ -1185,7 +1189,9 @@ test('Strobe set of colors', async ({ page }) => {
   await page.locator('.MuiBackdrop-root').click()
 
   await page.getByLabel('Clear Colors', { exact: true }).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Clear Colors')
+  await expect(
+    page.getByRole('tooltip', { name: 'Clear Colors', exact: true })
+  ).toBeVisible()
   await page.getByLabel('Clear Colors', { exact: true }).click()
   await expect(page.locator('#color-0')).not.toBeVisible()
   await expect(page.locator('#color-1')).not.toBeVisible()

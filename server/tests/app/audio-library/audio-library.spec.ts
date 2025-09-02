@@ -158,7 +158,9 @@ test('Add Single Local Audio', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('AudiotrackIcon').nth(1)).toBeVisible()
   await page.getByTestId('AudiotrackIcon').nth(1).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Local Audio')
+  await expect(
+    page.getByRole('tooltip', { name: 'Local Audio', exact: true })
+  ).toBeVisible()
   await page.getByTestId('AudiotrackIcon').nth(1).click()
   await expect(page.getByRole('button', { name: /^audio/ })).toBeVisible()
   await page.getByRole('button', { name: /^audio/ }).dblclick()
@@ -439,7 +441,9 @@ test('Add Remote Audio', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
   await page.getByTestId('HttpIcon').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('URL')
+  await expect(
+    page.getByRole('tooltip', { name: 'URL', exact: true })
+  ).toBeVisible()
   await expect(page.getByText('Add Audio URL')).not.toBeVisible()
   await expect(
     page.getByText('Enter the URL of the audio file:')
@@ -3931,7 +3935,11 @@ test('Save Position Audio List', async ({ page }) => {
       )
     })
     await page.getByTestId('HttpIcon').click()
-    await page.getByLabel('Audio URL', {exact: true}).fill(`https://feeds.soundcloud.com/stream/336839158-royaltyfreemusic-nocopyrightmusic-sugar-vibe-tracks-${i}.mp3`)
+    await page
+      .getByLabel('Audio URL', { exact: true })
+      .fill(
+        `https://feeds.soundcloud.com/stream/336839158-royaltyfreemusic-nocopyrightmusic-sugar-vibe-tracks-${i}.mp3`
+      )
     await page.getByText('Import').click()
 
     await expect(page.locator('#sortable-list li')).toHaveCount(7 + i)
@@ -3990,9 +3998,19 @@ test('Delete Visible Audios', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(page.getByRole('button', { name: '-Vibe' })).toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(3)
-  await expect(page.locator('#sortable-list li', {hasText: 'Smile2:04Aftertune, Ultimate MixSmile'})).toBeVisible()
-  await expect(page.locator('#sortable-list li', {hasText: 'Sea2:09MBBSea'})).toBeVisible()
-  await expect(page.locator('#sortable-list li', {hasText: 'Run Free1:45Hotham, Royalty Free MusicRun Free'})).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: 'Smile2:04Aftertune, Ultimate MixSmile'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', { hasText: 'Sea2:09MBBSea' })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: 'Run Free1:45Hotham, Royalty Free MusicRun Free'
+    })
+  ).toBeVisible()
 
   await page.getByTestId('DeleteSweepIcon').hover()
   await expect(
@@ -4042,9 +4060,19 @@ test('Delete Visible Audios', async ({ page }) => {
   await page.getByRole('button', { name: 'Confirm', exact: true }).click()
   await expect(page.getByRole('button', { name: '-Vibe' })).not.toBeVisible()
   await expect(page.locator('#sortable-list li')).toHaveCount(13)
-  await expect(page.locator('#sortable-list li', {hasText: '32Take You Home Tonight3:33Vibe Tracks'})).toBeVisible()
-  await expect(page.locator('#sortable-list li', {hasText: '32Foundation3:41Vibe Tracks'})).toBeVisible()
-  await expect(page.locator('#sortable-list li', {hasText: '32Sugar3:50Vibe Tracks'})).toHaveCount(11)
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: '32Take You Home Tonight3:33Vibe Tracks'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', {
+      hasText: '32Foundation3:41Vibe Tracks'
+    })
+  ).toBeVisible()
+  await expect(
+    page.locator('#sortable-list li', { hasText: '32Sugar3:50Vibe Tracks' })
+  ).toHaveCount(11)
   await responsePromise
 })
 

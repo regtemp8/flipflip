@@ -385,40 +385,40 @@ test('Blink Font Size', async () => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
 })
@@ -432,40 +432,40 @@ test('Caption Font Size', async () => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
 })
@@ -479,40 +479,40 @@ test('Big Caption Font Size', async () => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
 })
@@ -526,40 +526,40 @@ test('Count Font Size', async () => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
   await responsePromise
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       res.status() === 204
     )
   })
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
   await responsePromise
 })
@@ -604,7 +604,9 @@ test('Blink Font Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(0).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(0).click()
   await page.getByLabel('hex').nth(0).fill('FFF000')
@@ -666,7 +668,9 @@ test('Caption Font Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(2).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(2).click()
   await page.getByLabel('hex').nth(2).fill('FFF000')
@@ -728,7 +732,9 @@ test('Big Caption Font Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(4).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(4).click()
   await page.getByLabel('hex').nth(4).fill('FFF000')
@@ -790,7 +796,9 @@ test('Count Font Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(6).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(6).click()
   await page.getByLabel('hex').nth(6).fill('FFF000')
@@ -840,7 +848,8 @@ test('Blink Border', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -890,7 +899,8 @@ test('Caption Border', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -940,7 +950,8 @@ test('Big Caption Border', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -990,7 +1001,8 @@ test('Count Border', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1021,25 +1033,23 @@ test('Blink Border Width', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('5')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1058,25 +1068,23 @@ test('Caption Border Width', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('3')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1095,25 +1103,23 @@ test('Big Caption Border Width', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('4')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1132,25 +1138,23 @@ test('Count Border Width', async () => {
   await expect(input).toHaveAttribute('min', '1')
   await expect(input).toHaveValue('5')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1201,7 +1205,9 @@ test('Blink Border Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(1).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(1).click()
   await page.getByLabel('hex').nth(1).fill('FFF000')
@@ -1225,7 +1231,8 @@ test('Blink Border Color', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/blink' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/blink' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1276,7 +1283,9 @@ test('Caption Border Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(3).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(3).click()
   await page.getByLabel('hex').nth(3).fill('FFF000')
@@ -1300,7 +1309,8 @@ test('Caption Border Color', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/caption' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/caption' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1351,7 +1361,9 @@ test('Big Caption Border Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(5).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(5).click()
   await page.getByLabel('hex').nth(5).fill('FFF000')
@@ -1375,7 +1387,8 @@ test('Big Caption Border Color', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/captionBig' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/captionBig' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204
@@ -1426,7 +1439,9 @@ test('Count Border Color', async () => {
   }
 
   await page.getByLabel('Pick Color', { exact: true }).nth(7).hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(
+    page.getByRole('tooltip', { name: 'Pick Color', exact: true })
+  ).toBeVisible()
 
   await page.getByLabel('Pick Color', { exact: true }).nth(7).click()
   await page.getByLabel('hex').nth(7).fill('FFF000')
@@ -1450,7 +1465,8 @@ test('Count Border Color', async () => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1/font-settings/count' &&
+      new URL(request.url()).pathname ===
+        '/api/caption-scripts/1/font-settings/count' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.border === false &&
       res.status() === 204

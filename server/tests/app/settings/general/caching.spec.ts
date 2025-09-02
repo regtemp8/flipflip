@@ -110,7 +110,6 @@ test('Caching Directory', async ({ page }) => {
   await page.getByLabel('Caching Directory', { exact: true }).click()
   await page.getByRole('button', { name: 'data', exact: true }).click()
   await page.getByTestId('CreateNewFolderIcon').click()
-  await page.getByRole('textbox').click()
   await page.getByRole('textbox').fill('cache')
   await page.getByRole('button', { name: 'Create', exact: true }).click()
   await expect(page.getByRole('button', { name: /^cache/ })).toBeVisible()
@@ -244,23 +243,20 @@ test('Max Cache Size', async ({ page }) => {
     })
   ).toBeVisible()
 
-  await page.getByLabel('Max Cache Size', { exact: true }).click()
   await page.getByLabel('Max Cache Size', { exact: true }).fill('0')
-  await page.getByLabel('Max Cache Size', { exact: true }).blur()
+  await page.getByLabel('Max Cache Size', { exact: true }).press('Enter')
   await await expect(
     page.getByLabel('Max Cache Size', { exact: true })
   ).toHaveValue('0')
 
-  await page.getByLabel('Max Cache Size', { exact: true }).click()
   await page.getByLabel('Max Cache Size', { exact: true }).fill('1234567890')
-  await page.getByLabel('Max Cache Size', { exact: true }).blur()
+  await page.getByLabel('Max Cache Size', { exact: true }).press('Enter')
   await await expect(
     page.getByLabel('Max Cache Size', { exact: true })
   ).toHaveValue('1234567890')
 
-  await page.getByLabel('Max Cache Size', { exact: true }).click()
   await page.getByLabel('Max Cache Size', { exact: true }).fill('-1')
-  await page.getByLabel('Max Cache Size', { exact: true }).blur()
+  await page.getByLabel('Max Cache Size', { exact: true }).press('Enter')
   await await expect(
     page.getByLabel('Max Cache Size', { exact: true })
   ).toHaveValue('0')

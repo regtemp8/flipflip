@@ -389,7 +389,9 @@ test('Move Tag', async ({ page }) => {
 test('Remove All Tags', async ({ page }) => {
   await expect(page.getByTestId('DeleteSweepIcon')).toBeVisible()
   await page.getByTestId('DeleteSweepIcon').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Remove All Tags')
+  await expect(
+    page.getByRole('tooltip', { name: 'Remove All Tags', exact: true })
+  ).toBeVisible()
 
   await expect(
     page.getByRole('button', { name: 'car', exact: true })

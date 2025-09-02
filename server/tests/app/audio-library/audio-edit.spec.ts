@@ -161,7 +161,9 @@ test('Audio edit inputs', async () => {
     item.locator('.MuiBadge-badge.MuiBadge-colorPrimary')
   ).toHaveText('42')
   await item.getByRole('img').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Comment')
+  await expect(
+    page.getByRole('tooltip', { name: 'Comment', exact: true })
+  ).toBeVisible()
 
   await item.getByTestId('EditIcon').click()
   await expect(dialog.getByLabel('Name')).toHaveValue('Name')

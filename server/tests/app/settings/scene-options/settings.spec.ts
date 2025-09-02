@@ -12,9 +12,12 @@ test('Re-Generate on Playback', async ({ page }) => {
   ).toBeChecked()
 
   await page.getByLabel('Re-Generate on Playback', { exact: true }).hover()
-  await expect(page.getByRole('tooltip')).toHaveText(
-    'When enabled, this scene will be automatically regenerated with each playback'
-  )
+  await expect(
+    page.getByRole('tooltip', {
+      name: 'When enabled, this scene will be automatically regenerated with each playback',
+      exact: true
+    })
+  ).toBeVisible()
 
   await page.getByLabel('Re-Generate on Playback', { exact: true }).click()
   await expect(
@@ -134,9 +137,12 @@ test('Play Full Sources', async ({ page }) => {
   ).not.toBeChecked()
 
   await page.getByLabel('Play Full Sources', { exact: true }).hover()
-  await expect(page.getByRole('tooltip')).toHaveText(
-    'Play all images in a source before proceeding to the next one'
-  )
+  await expect(
+    page.getByRole('tooltip', {
+      name: 'Play all images in a source before proceeding to the next one',
+      exact: true
+    })
+  ).toBeVisible()
 
   await page.getByLabel('Play Full Sources', { exact: true }).click()
   await expect(
@@ -704,9 +710,12 @@ test('Continue Videos', async ({ page }) => {
     .getByLabel('Continue Videos', { exact: true })
     .scrollIntoViewIfNeeded()
   await page.getByLabel('Continue Videos', { exact: true }).hover()
-  await expect(page.getByRole('tooltip')).toHaveText(
-    'Each time a video is played, continue from where it left off. Default: Start from beginning'
-  )
+  await expect(
+    page.getByRole('tooltip', {
+      name: 'Each time a video is played, continue from where it left off. Default: Start from beginning',
+      exact: true
+    })
+  ).toBeVisible()
 
   await page.getByLabel('Continue Videos', { exact: true }).click()
   await expect(

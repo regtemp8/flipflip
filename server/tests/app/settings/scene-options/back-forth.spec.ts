@@ -17,9 +17,12 @@ test('Back/Forth effect', async ({ page }) => {
   ).not.toBeVisible()
 
   await page.getByLabel('Back/Forth', { exact: true }).hover()
-  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
-    'Go back and forth between the last two images'
-  )
+  await expect(
+    page.getByRole('tooltip', {
+      name: 'Go back and forth between the last two images',
+      exact: true
+    })
+  ).toBeVisible()
 
   await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
@@ -265,9 +268,9 @@ test('Audio BPM back/forth timing', async ({ page }) => {
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
-  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
-    'Missing audio with BPM'
-  )
+  await expect(
+    page.getByRole('tooltip', { name: 'Missing audio with BPM', exact: true })
+  ).toBeVisible()
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()

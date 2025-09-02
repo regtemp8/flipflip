@@ -259,9 +259,9 @@ test('Audio BPM fade timing', async ({ page }) => {
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
-  await expect(page.getByRole('tooltip', { exact: true })).toHaveText(
-    'Missing audio with BPM'
-  )
+  await expect(
+    page.getByRole('tooltip', { name: 'Missing audio with BPM', exact: true })
+  ).toBeVisible()
 
   const slider = container.locator('.MuiCollapse-entered .MuiSlider-root')
   await expect(slider).toBeVisible()

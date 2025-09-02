@@ -110,7 +110,9 @@ test('Add Single Local Caption Script', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('DescriptionIcon')).toBeVisible()
   await page.getByTestId('DescriptionIcon').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Local Script')
+  await expect(
+    page.getByRole('tooltip', { name: 'Local Script', exact: true })
+  ).toBeVisible()
   await page.getByTestId('DescriptionIcon').click()
   await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
   await page.getByRole('button', { name: /^scripts/ }).dblclick()
@@ -498,7 +500,9 @@ test('Add Remote Caption Script', async ({ page }) => {
   await page.getByTestId('AddIcon').click()
   await expect(page.getByTestId('HttpIcon')).toBeVisible()
   await page.getByTestId('HttpIcon').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('URL')
+  await expect(
+    page.getByRole('tooltip', { name: 'URL', exact: true })
+  ).toBeVisible()
 
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()

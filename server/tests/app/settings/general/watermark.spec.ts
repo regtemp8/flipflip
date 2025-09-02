@@ -243,19 +243,16 @@ test('Watermark Font Size', async ({ page }) => {
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
 
-  await input.click()
   await input.fill('0')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
-  await input.click()
   await input.fill('1234567890')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1234567890')
 
-  await input.click()
   await input.fill('-1')
-  await input.blur()
+  await input.press('Enter')
   await expect(input).toHaveValue('1')
 
   const responsePromise = page.waitForResponse((res) => {
@@ -320,7 +317,7 @@ test('Watermark Color', async ({ page }) => {
   }
 
   await page.getByLabel('Pick Color').hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Pick Color')
+  await expect(page.getByRole('tooltip', { name: 'Pick Color' })).toBeVisible()
 
   await page.getByLabel('Pick Color').click()
   await page.getByLabel('hex').fill('FFF000')
