@@ -75,7 +75,7 @@ export function getRandomColor() {
   return color;
 }
 
-export function randomizeList(list: unknown[]) {
+export function randomizeList<T>(list: T[]) {
   let currentIndex = list.length,
     temporaryValue,
     randomIndex;
