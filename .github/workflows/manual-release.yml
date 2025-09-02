@@ -107,7 +107,7 @@ jobs:
       run: yarn pkg -t node22-${{ env.PLATFORM }}-${{ inputs.arch }} .
     - name: Show ffprobe output
       working-directory: ./server
-      run: ls -al ./node_modules/@ffprobe-installer
+      run: ls ./node_modules/@ffprobe-installer
     - name: Show build output
       working-directory: ./server
-      run: ls -al ./dist
+      run: ls ./dist
