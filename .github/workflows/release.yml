@@ -54,6 +54,9 @@ jobs:
       PLATFORM_NAME: ${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'windows' || 'macos') }}
       EXTENSION: ${{ matrix.os == 'windows-latest' && '.exe' || '' }}
     steps:
+    - name: Install setuptools
+      if: ${{inputs.os == 'macos-latest'}}
+      run: brew install python-setuptools
     - uses: actions/checkout@v4
     - name: Set up Node.js
       uses: actions/setup-node@v4
