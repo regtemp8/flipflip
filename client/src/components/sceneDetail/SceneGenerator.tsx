@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -12,12 +12,11 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid,
+  Grid2,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
   Radio,
@@ -37,15 +36,11 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
-import { en, SDGT, TT } from 'flipflip-common'
-import { arrayMove } from '../../data/utils'
-import type WeightGroup from '../../store/scene/WeightGroup'
-import LibrarySearch from '../library/LibrarySearch'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppLibrary, selectAppTutorial } from '../../store/app/selectors'
-import { doneTutorial } from '../../store/app/thunks'
-import { selectSceneGeneratorWeights } from '../../store/scene/selectors'
-import { setSceneGeneratorWeights } from '../../store/scene/slice'
+import { en, SDGT, TT, WeightGroup } from 'flipflip-common'
+import {
+  useGetSceneWeightGroupsQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   listElement: {
@@ -135,12 +130,9 @@ export interface SceneGeneratorProps {
 }
 
 function SceneGenerator(props: SceneGeneratorProps) {
-  const dispatch = useAppDispatch()
-  const tutorial = useAppSelector(selectAppTutorial())
-  const library = useAppSelector(selectAppLibrary())
-  const generatorWeights = useAppSelector(
-    selectSceneGeneratorWeights(props.sceneID)
-  )
+  const { data: tutorial } = useGetTutorialsQuery()
+  // const library = useAppSelector(selectAppLibrary())
+  const { data: generatorWeights } = useGetSceneWeightGroupsQuery(props.sceneID)
 
   const [isWeighingIndex, setIsWeighingIndex] = useState(-1)
   const [isEditingIndex, setIsEditingIndex] = useState(-1)
@@ -218,26 +210,26 @@ function SceneGenerator(props: SceneGeneratorProps) {
     }
   }
 
-  const onAddRule = (filters: string[]) => {
-    const weights = generatorWeights as WeightGroup[]
-    const wg = weights[isEditingIndex]
-    for (const search of filters) {
-      const rules = wg.rules as WeightGroup[]
-      if (
-        search.length > 0 &&
-        rules.find((wg) => wg.search === search) == null
-      ) {
-        const newWG: WeightGroup = {
-          percent: 0,
-          type: TT.weight,
-          search
-        }
+  // const onAddRule = (filters: string[]) => {
+  //   const weights = generatorWeights as WeightGroup[]
+  //   const wg = weights[isEditingIndex]
+  //   for (const search of filters) {
+  //     const rules = wg.rules as WeightGroup[]
+  //     if (
+  //       search.length > 0 &&
+  //       rules.find((wg) => wg.search === search) == null
+  //     ) {
+  //       const newWG: WeightGroup = {
+  //         percent: 0,
+  //         type: TT.weight,
+  //         search
+  //       }
 
-        wg.rules = rules.concat([newWG])
-      }
-    }
-    changeGeneratorWeights(weights)
-  }
+  //       wg.rules = rules.concat([newWG])
+  //     }
+  //   }
+  //   changeGeneratorWeights(weights)
+  // }
 
   const onClickAddRule = (e: MouseEvent) => {
     setMenuAnchorEl(e.currentTarget)
@@ -321,7 +313,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
 
   const onWeighGroup = (index: number, e: MouseEvent) => {
     if (tutorial === SDGT.edit1) {
-      dispatch(doneTutorial(SDGT.edit1))
+      // dispatch(doneTutorial(SDGT.edit1))
     }
     setIsWeighingIndex(index)
     setMenuAnchorEl(e.currentTarget)
@@ -376,23 +368,23 @@ function SceneGenerator(props: SceneGeneratorProps) {
     }
     if (tutorial === SDGT.edit2) {
       if (weights.find((wg) => wg.type !== TT.all) == null) {
-        dispatch(doneTutorial(SDGT.edit2))
+        // dispatch(doneTutorial(SDGT.edit2))
         onCloseDialog()
       }
     }
     changeGeneratorWeights(weights)
   }
 
-  const onMoveRight = (index: number) => {
-    const weights = generatorWeights as WeightGroup[]
-    arrayMove(weights, index, index + 1)
-    dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
+  const onMoveRight = (_index: number) => {
+    // const weights = generatorWeights as WeightGroup[]
+    // arrayMove(weights, index, index + 1)
+    // dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
   }
 
-  const onMoveLeft = (index: number) => {
-    const weights = generatorWeights as WeightGroup[]
-    arrayMove(weights, index, index - 1)
-    dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
+  const onMoveLeft = (_index: number) => {
+    // const weights = generatorWeights as WeightGroup[]
+    // arrayMove(weights, index, index - 1)
+    // dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
   }
 
   const changeGeneratorWeights = (weights: WeightGroup[]) => {
@@ -401,7 +393,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
       wg.chosen = undefined
     }
 
-    dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
+    // dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
   }
 
   const { classes } = useStyles()
@@ -414,23 +406,19 @@ function SceneGenerator(props: SceneGeneratorProps) {
     grid[w % 4].push(weights[w])
   }
   return (
-    <Grid container spacing={1}>
+    <Grid2 container spacing={1}>
       {grid.map((c, x) => (
-        <Grid
+        <Grid2
           key={x}
-          item
-          xs={12}
-          sm={6}
-          md={4}
-          lg={3}
+          size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
           className={cx(
             (tutorial === SDGT.edit1 || tutorial === SDGT.edit2) &&
               classes.backdropTop
           )}
         >
-          <Grid container spacing={1}>
+          <Grid2 container spacing={1}>
             {c.map((wg: WeightGroup, y) => (
-              <Grid key={y} xs={12} item>
+              <Grid2 key={y} size={12}>
                 <Card>
                   <CardHeader
                     classes={{ action: classes.noAlignSelf }}
@@ -482,7 +470,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                       </IconButton>
                     }
                     action={
-                      <React.Fragment>
+                      <>
                         {wg.chosen && (
                           <Chip
                             label={wg.chosen + '/' + wg.max}
@@ -523,19 +511,19 @@ function SceneGenerator(props: SceneGeneratorProps) {
                         >
                           <DeleteIcon color="error" />
                         </IconButton>
-                      </React.Fragment>
+                      </>
                     }
                     title={getRuleName(wg)}
                   />
                   {wg.rules && (
-                    <React.Fragment>
+                    <>
                       <Divider />
                       <CardContent className={classes.listElement}>
                         <List>
                           {wg.rules.map((wg, i) => (
                             <ListItem key={i}>
                               <ListItemIcon>
-                                <React.Fragment>
+                                <>
                                   {wg.type === TT.weight && (
                                     <Avatar>{wg.percent}</Avatar>
                                   )}
@@ -554,7 +542,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                                       <AdjustIcon />
                                     </Avatar>
                                   )}
-                                </React.Fragment>
+                                </>
                               </ListItemIcon>
                               <ListItemText
                                 primary={getSearchText(wg.search as string)}
@@ -563,13 +551,13 @@ function SceneGenerator(props: SceneGeneratorProps) {
                           ))}
                         </List>
                       </CardContent>
-                    </React.Fragment>
+                    </>
                   )}
                 </Card>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       ))}
       <Menu
         id="edit-menu"
@@ -615,7 +603,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                 (weights[isWeighingIndex].percent as number)
               }
               defaultValue={weights[isWeighingIndex].percent}
-              onChangeCommitted={(e, value) =>
+              onChangeCommitted={(_, value) =>
                 onGroupSliderChange(isWeighingIndex, 'percent', value)
               }
               valueLabelDisplay={'auto'}
@@ -676,7 +664,15 @@ function SceneGenerator(props: SceneGeneratorProps) {
               </div>
               <List disablePadding>
                 {weights[isEditingIndex].rules!.map((wg, i) => (
-                  <ListItem key={i} disableGutters>
+                  <ListItem
+                    key={i}
+                    disableGutters
+                    secondaryAction={
+                      <IconButton size="small" onClick={() => onDeleteRule(i)}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    }
+                  >
                     <ListItemIcon>
                       <IconButton
                         className={classes.cardAvatarButton}
@@ -708,11 +704,6 @@ function SceneGenerator(props: SceneGeneratorProps) {
                     <ListItemText
                       primary={getSearchText(wg.search as string)}
                     />
-                    <ListItemSecondaryAction>
-                      <IconButton size="small" onClick={() => onDeleteRule(i)}>
-                        <DeleteIcon color="error" />
-                      </IconButton>
-                    </ListItemSecondaryAction>
                   </ListItem>
                 ))}
               </List>
@@ -732,7 +723,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
                 open={addRule}
                 onClose={onCloseAddRule}
               >
-                {addRule && (
+                {/* {addRule && (
                   <LibrarySearch
                     displaySources={library}
                     filters={weights[isEditingIndex]
@@ -743,19 +734,18 @@ function SceneGenerator(props: SceneGeneratorProps) {
                     autoFocus
                     isLibrary
                     isCreatable
-                    fullWidth
                     onlyUsed
                     menuIsOpen
                     controlShouldRenderValue={false}
                     onUpdateFilters={onAddRule}
                   />
-                )}
+                )} */}
               </Menu>
             </div>
           )}
         </DialogContent>
       </Dialog>
-    </Grid>
+    </Grid2>
   )
 }
 

@@ -1,6 +1,5 @@
 # Configuring your own Tumblr API keys
-Due to high traffic, Tumblr throttles FlipFlip's use. A number of keys have been provided, but we recommend configuring 
-your own for seamless use. 
+This is how you configure your own Tumblr API key seamlessly:
 
 1. Login to Tumblr
 1. Go to https://www.tumblr.com/oauth/apps

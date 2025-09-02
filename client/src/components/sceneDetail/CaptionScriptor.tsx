@@ -1,10 +1,4 @@
-import React, {
-  MouseEvent,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
+import { MouseEvent, useEffect, useState, useRef, useCallback } from 'react'
 import wretch from 'wretch'
 import { cx } from '@emotion/css'
 
@@ -20,7 +14,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  Grid,
+  Grid2,
   IconButton,
   Link,
   Menu,
@@ -46,8 +40,8 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import SaveIcon from '@mui/icons-material/Save'
 
 import { CST, MO, RP } from 'flipflip-common'
-import captionProgramDefaults from '../../data/utils'
-import Player from '../player/Player'
+import { captionProgramDefaults } from '../../utils'
+// import Player from '../player/Player'
 import SceneSelect from '../configGroups/SceneSelect'
 import CaptionProgram from '../player/CaptionProgram'
 import ChildCallbackHack from '../player/ChildCallbackHack'
@@ -62,36 +56,23 @@ import CodeMirror, {
   tupleSetters
 } from './CodeMirror'
 import BaseSlider from '../common/slider/BaseSlider'
-import { selectAppTutorial } from '../../store/app/selectors'
-import { addScriptSingle } from '../../store/app/slice'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { setRouteGoBack, addToScriptsIfNotExists } from '../../store/app/thunks'
-import { setCaptionScriptOpacity } from '../../store/captionScript/actions'
+import { useNavigate /*, useParams*/ } from 'react-router'
 import {
-  setCaptionScriptScript,
-  setCaptionScriptURL
-} from '../../store/captionScript/slice'
+  useGetCaptionScriptQuery,
+  // useGetSceneQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
+import { useAppSelector } from '../../store/hooks'
 import {
-  selectCaptionScriptUrl,
-  selectCaptionScriptScript,
-  selectCaptionScriptOpacity
-} from '../../store/captionScript/selectors'
-import {
-  onCaptionScriptorChangeScene,
-  onCaptionScriptorNewScript,
-  onCaptionScriptorOpenScript
-} from '../../store/captionScriptor/thunks'
-import {
-  selectCaptionScriptorCaptionScriptID,
   selectCaptionScriptorSceneID,
-  selectCaptionScriptorSceneScripts
+  selectCaptionScriptorSceneScripts,
+  selectCaptionScriptorCaptionScriptID
 } from '../../store/captionScriptor/selectors'
-import { selectSceneAudioEnabled } from '../../store/scene/selectors'
-import flipflip from '../../FlipFlipService'
-import { RootState } from '../../store/store'
+import { useGetCaptionScriptOpacityQuery } from '../../store/api/selectors'
+import { setCaptionScriptOpacity } from '../../store/api/thunks'
 
-require('codemirror/lib/codemirror.css')
-require('codemirror/theme/material.css')
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/material.css'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -262,20 +243,17 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function CaptionScriptor() {
-  const dispatch = useAppDispatch()
-  const tutorial = useAppSelector(selectAppTutorial())
+  // const { id } = useParams() // TODO use this as captionscript id, if not null
+  const navigate = useNavigate()
+  const { data: tutorial } = useGetTutorialsQuery()
   const sceneID = useAppSelector(selectCaptionScriptorSceneID())
   const sceneScripts = useAppSelector(selectCaptionScriptorSceneScripts())
   const captionScriptID = useAppSelector(selectCaptionScriptorCaptionScriptID())
   const loadFromSceneError = false
 
-  const audioEnabledSelector =
-    sceneID !== 0
-      ? selectSceneAudioEnabled(sceneID)
-      : (state: RootState) => false
-  const audioEnabled = useAppSelector(audioEnabledSelector)
-  const url = useAppSelector(selectCaptionScriptUrl(captionScriptID))
-  const script = useAppSelector(selectCaptionScriptScript(captionScriptID))
+  // const { data: scene } = useGetSceneQuery(sceneID)
+  // const audioEnabled = scene?.audioEnabled === true
+  const { data: script } = useGetCaptionScriptQuery(captionScriptID)
 
   const [selectScript, setSelectScript] = useState('')
   const [error, setError] = useState<string>()
@@ -312,12 +290,16 @@ function CaptionScriptor() {
   }, [fullscreen, onFullscreen])
 
   useEffect(() => {
-    if (script) {
-      _codeMirrorOverwriteHack.current.args = [script]
+    if (script == null) {
+      return
+    }
+
+    if (script.script) {
+      _codeMirrorOverwriteHack.current.args = [script.script]
       _codeMirrorOverwriteHack.current.fire()
       setScriptChanged(false)
     } else {
-      wretch(url)
+      wretch(script.url)
         .get()
         .text((data) => {
           _codeMirrorOverwriteHack.current.args = [data]
@@ -325,9 +307,9 @@ function CaptionScriptor() {
           setScriptChanged(false)
         })
     }
-  }, [script, url])
+  }, [script])
 
-  const onPlaying = (position: number, duration: number) => {
+  const onPlaying = (position: number) => {
     _currentTimestamp.current = position
   }
 
@@ -348,7 +330,7 @@ function CaptionScriptor() {
   const onConfirmNew = () => {
     onCloseDialog()
     setError(undefined)
-    dispatch(onCaptionScriptorNewScript())
+    // dispatch(onCaptionScriptorNewScript())
   }
 
   const onOpenMenu = (e: MouseEvent) => {
@@ -367,9 +349,9 @@ function CaptionScriptor() {
 
   const onConfirmOpen = async () => {
     onCloseDialog()
-    const url = await flipflip().api.openTextFile()
-    if (!url) return
-    dispatch(onCaptionScriptorOpenScript(url))
+    // const url = await flipflip().api.openTextFile()
+    // if (!url) return
+    // dispatch(onCaptionScriptorOpenScript(url))
   }
 
   const onOpenFromLibrary = () => {
@@ -383,7 +365,7 @@ function CaptionScriptor() {
 
   const onConfirmOpenFromLibrary = () => {
     onCloseDialog()
-    dispatch(addScriptSingle())
+    // dispatch(addScriptSingle())
   }
 
   const onSaveThen = async (then?: () => void) => {
@@ -400,34 +382,36 @@ function CaptionScriptor() {
 
   const onSave = async () => {
     onCloseDialog()
-    if (!url) {
-      await onSaveAs()
+    if (!script?.url) {
+      return await onSaveAs()
     } else {
-      if (!url.startsWith('http')) {
-        await flipflip().api.writeFile(url, script as string)
-        setScriptChanged(false)
-        return true
-      } else {
-        return false
-      }
+      // if (!url.startsWith('http')) {
+      //   await flipflip().api.writeFile(url, script as string)
+      //   setScriptChanged(false)
+      //   return true
+      // } else {
+      //   return false
+      // }
+      return false
     }
   }
 
   const onSaveAs = async () => {
     onCloseDialog()
-    const filePath = await flipflip().api.saveTextFile(
-      url as string,
-      script as string
-    )
-    if (filePath) {
-      dispatch(setCaptionScriptURL({ id: captionScriptID, value: filePath }))
-    }
+    // const filePath = await flipflip().api.saveTextFile(
+    //   url as string,
+    //   script as string
+    // )
+    // if (filePath) {
+    //   dispatch(setCaptionScriptURL({ id: captionScriptID, value: filePath }))
+    // }
+    return false
   }
 
   const onSaveToLibrary = () => {
     onCloseDialog()
     onSave()
-    dispatch(addToScriptsIfNotExists(captionScriptID))
+    // dispatch(addToScriptsIfNotExists(captionScriptID))
   }
 
   const onLoadFromScene = () => {
@@ -452,7 +436,7 @@ function CaptionScriptor() {
   }
 
   const onConfirmLoadFromScene = () => {
-    dispatch(onCaptionScriptorOpenScript(selectScript))
+    // dispatch(onCaptionScriptorOpenScript(selectScript))
     onCloseDialog()
   }
 
@@ -460,15 +444,15 @@ function CaptionScriptor() {
     setError(e)
   }
 
-  const onUpdateScript = (script: string, changed = false) => {
+  const onUpdateScript = (_script: string, changed = false) => {
     setError(undefined)
     setScriptChanged(changed ? true : scriptChanged)
-    dispatch(setCaptionScriptScript({ id: captionScriptID, value: script }))
+    // dispatch(setCaptionScriptScript({ id: captionScriptID, value: script }))
   }
 
-  const onGutterClick = (editor: any, clickedLine: number) => {
+  const onGutterClick = (_editor: any, clickedLine: number) => {
     let lineNum = clickedLine - 1
-    const text = script as string
+    const text = script?.script as string
     const lines = text.split('\n')
     for (let l = 0; l < clickedLine; l++) {
       const line = lines[l]
@@ -493,7 +477,7 @@ function CaptionScriptor() {
     } else if (scriptChanged) {
       setOpenMenu(MO.error)
     } else {
-      dispatch(setRouteGoBack())
+      navigate(-1)
     }
   }
 
@@ -622,7 +606,7 @@ function CaptionScriptor() {
       case MO.error:
         menuName = 'Back'
         menuThen = () => {
-          dispatch(setRouteGoBack())
+          navigate(-1)
         }
         break
       case MO.new:
@@ -648,7 +632,7 @@ function CaptionScriptor() {
 
   const { classes } = useStyles()
   const { menuName, menuThen } = getMenu()
-  const getTimestamp = () => _currentTimestamp.current
+  // const getTimestamp = () => _currentTimestamp.current
 
   return (
     <div className={classes.root}>
@@ -676,7 +660,7 @@ function CaptionScriptor() {
             noWrap
             className={classes.title}
           >
-            {url || 'Caption Scriptor'}
+            {script?.url ?? 'Caption Scriptor'}
           </Typography>
 
           <Tooltip
@@ -723,12 +707,12 @@ function CaptionScriptor() {
                   </Typography>
                 </div>
               )}
-              {error == null && script && script.length > 0 && (
+              {error == null && (script?.script?.length ?? 0) > 0 && (
                 <div className={classes.statusMessage}>
                   <CheckCircleOutlineIcon className={classes.okIcon} />
                 </div>
               )}
-              {(!script || script.length === 0) && (
+              {(script?.script?.length ?? 0) === 0 && (
                 <div className={classes.statusMessage}>
                   <Typography
                     component="div"
@@ -741,7 +725,7 @@ function CaptionScriptor() {
               )}
               <CodeMirror
                 className={
-                  tutorial === CST.code
+                  tutorial?.current === CST.code
                     ? classes.backdropTopHighlight
                     : classes.codeMirrorWrapper
                 }
@@ -754,14 +738,14 @@ function CaptionScriptor() {
             <div className={cx(classes.menuGrid, fullscreen && classes.hidden)}>
               <Card className={classes.menuCard}>
                 <CardContent className={classes.menuCardContent}>
-                  <Grid container spacing={2}>
-                    <Grid
-                      item
-                      xs={12}
+                  <Grid2 container spacing={2}>
+                    <Grid2
+                      size={12}
                       className={cx(
                         classes.menuGridButtons,
-                        tutorial === CST.menu && classes.backdropTopHighlight,
-                        tutorial === CST.menu && classes.disable
+                        tutorial?.current === CST.menu &&
+                          classes.backdropTopHighlight,
+                        tutorial?.current === CST.menu && classes.disable
                       )}
                     >
                       <Tooltip disableInteractive title="New">
@@ -819,14 +803,18 @@ function CaptionScriptor() {
                         <MenuItem
                           disabled={
                             !scriptChanged ||
-                            (url != null && url.startsWith('http'))
+                            (script?.url != null &&
+                              script.url.startsWith('http'))
                           }
                           onClick={onSave}
                         >
                           Save
                         </MenuItem>
                         <MenuItem onClick={onSaveAs}>Save As</MenuItem>
-                        <MenuItem disabled={!url} onClick={onSaveToLibrary}>
+                        <MenuItem
+                          disabled={!script?.url}
+                          onClick={onSaveToLibrary}
+                        >
                           Save To Library
                         </MenuItem>
                       </Menu>
@@ -856,23 +844,22 @@ function CaptionScriptor() {
                           </IconButton>
                         </span>
                       </Tooltip>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
                         classes.noPaddingTop,
-                        tutorial === CST.menu && classes.backdropTop
+                        tutorial?.current === CST.menu && classes.backdropTop
                       )}
                     >
                       <Divider variant={'fullWidth'} />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.menu && classes.backdropTopHighlight,
-                        tutorial === CST.menu && classes.disable
+                        tutorial?.current === CST.menu &&
+                          classes.backdropTopHighlight,
+                        tutorial?.current === CST.menu && classes.disable
                       )}
                     >
                       {sceneID === 0 && (
@@ -886,30 +873,31 @@ function CaptionScriptor() {
                       )}
                       <SceneSelect
                         value={sceneID}
-                        onChange={(sceneID: number) => {
-                          dispatch(
-                            onCaptionScriptorChangeScene(
-                              sceneID,
-                              captionScriptID
-                            )
-                          )
-                        }}
+                        onChange={
+                          (/*sceneID: number*/) => {
+                            // dispatch(
+                            //   onCaptionScriptorChangeScene(
+                            //     sceneID,
+                            //     captionScriptID
+                            //   )
+                            // )
+                          }
+                        }
                       />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.actions &&
+                        tutorial?.current === CST.actions &&
                           classes.backdropTopHighlight,
-                        tutorial === CST.actions && classes.disable
+                        tutorial?.current === CST.actions && classes.disable
                       )}
                     >
-                      <Grid container spacing={1}>
-                        <Grid item xs={12}>
+                      <Grid2 container spacing={1}>
+                        <Grid2 size={12}>
                           <Typography variant={'h5'}>Actions</Typography>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -924,8 +912,8 @@ function CaptionScriptor() {
                               blink
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -940,8 +928,8 @@ function CaptionScriptor() {
                               cap
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -956,8 +944,8 @@ function CaptionScriptor() {
                               bigcap
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -972,8 +960,8 @@ function CaptionScriptor() {
                               count
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={'Wait <MILLISECONDS> ms'}
@@ -986,8 +974,8 @@ function CaptionScriptor() {
                               wait
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={'Advance to the next image'}
@@ -1000,8 +988,8 @@ function CaptionScriptor() {
                               advance
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={'Play audio <ALIAS> at volume <VOLUME>'}
@@ -1014,32 +1002,30 @@ function CaptionScriptor() {
                               playAudio
                             </Button>
                           </Tooltip>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                        </Grid2>
+                      </Grid2>
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.actions && classes.backdropTop
+                        tutorial?.current === CST.actions && classes.backdropTop
                       )}
                     >
                       <Divider variant={'fullWidth'} />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.actions &&
+                        tutorial?.current === CST.actions &&
                           classes.backdropTopHighlight,
-                        tutorial === CST.actions && classes.disable
+                        tutorial?.current === CST.actions && classes.disable
                       )}
                     >
-                      <Grid container spacing={1}>
-                        <Grid item xs={12}>
+                      <Grid2 container spacing={1}>
+                        <Grid2 size={12}>
                           <Typography variant={'h5'}>Setters</Typography>
-                        </Grid>
-                        <Grid item xs={12}>
+                        </Grid2>
+                        <Grid2 size={12}>
                           <Select
                             variant="standard"
                             fullWidth
@@ -1099,32 +1085,30 @@ function CaptionScriptor() {
                               </MenuItem>
                             ))}
                           </Select>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                        </Grid2>
+                      </Grid2>
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.actions && classes.backdropTop
+                        tutorial?.current === CST.actions && classes.backdropTop
                       )}
                     >
                       <Divider variant={'fullWidth'} />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
+                    </Grid2>
+                    <Grid2
+                      size={12}
                       className={cx(
-                        tutorial === CST.actions &&
+                        tutorial?.current === CST.actions &&
                           classes.backdropTopHighlight,
-                        tutorial === CST.actions && classes.disable
+                        tutorial?.current === CST.actions && classes.disable
                       )}
                     >
-                      <Grid container spacing={1}>
-                        <Grid item xs={12}>
+                      <Grid2 container spacing={1}>
+                        <Grid2 size={12}>
                           <Typography variant={'h5'}>Special</Typography>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -1139,8 +1123,8 @@ function CaptionScriptor() {
                               storeAudio
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -1155,8 +1139,8 @@ function CaptionScriptor() {
                               storePhrase
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -1171,8 +1155,8 @@ function CaptionScriptor() {
                               $RANDOM_PHRASE
                             </Button>
                           </Tooltip>
-                        </Grid>
-                        <Grid item>
+                        </Grid2>
+                        <Grid2>
                           <Tooltip
                             disableInteractive
                             title={
@@ -1187,13 +1171,13 @@ function CaptionScriptor() {
                               $TAG_PHRASE
                             </Button>
                           </Tooltip>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
+                        </Grid2>
+                      </Grid2>
+                    </Grid2>
+                    <Grid2 size={12}>
                       <Divider variant={'fullWidth'} />
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Grid2>
+                    <Grid2 size={12}>
                       <Typography variant="body2" color="inherit">
                         See{' '}
                         <Link
@@ -1209,8 +1193,8 @@ function CaptionScriptor() {
                         </Link>{' '}
                         for help.
                       </Typography>
-                    </Grid>
-                  </Grid>
+                    </Grid2>
+                  </Grid2>
                   <div className={classes.fill} />
                   {sceneID !== 0 && !fullscreen && (
                     <AudioCard
@@ -1224,7 +1208,9 @@ function CaptionScriptor() {
                   <BaseSlider
                     min={0}
                     max={100}
-                    selector={selectCaptionScriptOpacity(captionScriptID)}
+                    selector={() =>
+                      useGetCaptionScriptOpacityQuery(captionScriptID)
+                    }
                     action={setCaptionScriptOpacity(captionScriptID)}
                     labelledBy="opacity-slider"
                     label={{ text: 'Script Opacity:', appendValue: true }}
@@ -1236,10 +1222,11 @@ function CaptionScriptor() {
             <div
               className={cx(
                 classes.playerGrid,
-                tutorial === CST.player && classes.backdropTopHighlight
+                tutorial?.current === CST.player && classes.backdropTopHighlight
               )}
             >
-              {sceneID !== 0 && (
+              {/* TODO scene preview 
+                {sceneID !== 0 && (
                 <Player
                   uuid="caption-scriptor"
                   captionScale={fullscreen ? 1 : 0.3753}
@@ -1251,11 +1238,11 @@ function CaptionScriptor() {
                       : getTimestamp
                   }
                 />
-              )}
+              )} */}
               {error != null && (
                 <ErrorOutlineIcon className={classes.errorIcon} color="error" />
               )}
-              {sceneID !== 0 && script && script.length > 0 && (
+              {sceneID !== 0 && (script?.script?.length ?? 0) > 0 && (
                 <div className={cx(!fullscreen && classes.relative)}>
                   <CaptionProgram
                     sceneID={sceneID}
@@ -1274,12 +1261,12 @@ function CaptionScriptor() {
               className={cx(
                 classes.fontGrid,
                 fullscreen && classes.hidden,
-                tutorial === CST.fonts && classes.backdropTopHighlight
+                tutorial?.current === CST.fonts && classes.backdropTopHighlight
               )}
             >
               <Card className={classes.fontCard}>
                 <CardContent>
-                  <Grid item xs={12}>
+                  <Grid2 size={12}>
                     <FontOptions
                       name={'Blink'}
                       captionScriptID={captionScriptID}
@@ -1303,7 +1290,7 @@ function CaptionScriptor() {
                       captionScriptID={captionScriptID}
                       type="count"
                     />
-                  </Grid>
+                  </Grid2>
                 </CardContent>
               </Card>
             </div>

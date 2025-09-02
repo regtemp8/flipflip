@@ -1,6 +1,6 @@
 import { cx } from '@emotion/css'
 
-import { Card, CardContent, Grid, type Theme } from '@mui/material'
+import { Card, CardContent, Grid2, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
@@ -11,8 +11,7 @@ import StrobeCard from '../configGroups/StrobeCard'
 import ZoomMoveCard from '../configGroups/ZoomMoveCard'
 import FadeIOCard from '../configGroups/FadeIOCard'
 import PanningCard from '../configGroups/PanningCard'
-import { useAppSelector } from '../../store/hooks'
-import { selectAppTutorial } from '../../store/app/selectors'
+import { useGetTutorialsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   backdropTop: {
@@ -29,38 +28,32 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface SceneEffectsProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function SceneEffects(props: SceneEffectsProps) {
-  const tutorial = useAppSelector(selectAppTutorial())
-  const tutorialZoom =
-    tutorial === SDT.zoom1 ||
-    tutorial === SDT.zoom2 ||
-    tutorial === SDT.zoom3 ||
-    tutorial === SDT.zoom4
+  const { data: tutorial } = useGetTutorialsQuery()
+  // const tutorialZoom =
+  //   tutorial === SDT.zoom1 ||
+  //   tutorial === SDT.zoom2 ||
+  //   tutorial === SDT.zoom3 ||
+  //   tutorial === SDT.zoom4
   const tutorialFade = tutorial === SDT.fade1 || tutorial === SDT.fade2
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2}>
-      <Grid
-        item
-        xs={12}
-        md={6}
-        lg={4}
-        className={cx(tutorialZoom && classes.backdropTop)}
+    <Grid2 container spacing={2}>
+      <Grid2
+        size={{ xs: 12, md: 6, lg: 4 }}
+        className={cx(tutorialFade && classes.backdropTop)}
       >
         <Card>
           <CardContent>
             <ZoomMoveCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        md={6}
-        lg={4}
+      </Grid2>
+      <Grid2
+        size={{ xs: 12, md: 6, lg: 4 }}
         className={cx(tutorialFade && classes.backdropTop)}
       >
         <Card>
@@ -68,36 +61,36 @@ function SceneEffects(props: SceneEffectsProps) {
             <CrossFadeCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
         <Card>
           <CardContent>
             <SlideCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
         <Card>
           <CardContent>
             <StrobeCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
         <Card>
           <CardContent>
             <FadeIOCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
         <Card>
           <CardContent>
             <PanningCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

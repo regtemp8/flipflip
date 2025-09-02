@@ -1,17 +1,10 @@
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, TextField, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
 
-import { useAppSelector } from '../../store/hooks'
-import { selectSceneSelectOptions } from '../../store/scene/selectors'
 import { SyntheticEvent } from 'react'
+import { useGetSceneSelectOptionsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -35,26 +28,30 @@ export interface SceneSelectProps {
   onChange: (sceneID: number) => void
 }
 
+type SceneSelectOption = {
+  value: string
+  label: string
+}
+
 function SceneSelect(props: SceneSelectProps) {
-  const options = useAppSelector(
-    selectSceneSelectOptions(
-      props.onlyExtra,
-      props.includeExtra,
-      props.includeRandom
-    )
-  )
-  const optionsList = Object.keys(options).map((key) => {
+  const { onlyExtra, includeExtra, includeRandom } = props
+  const { data } = useGetSceneSelectOptionsQuery({
+    onlyExtra,
+    includeExtra,
+    includeRandom
+  })
+  const options = data ?? {}
+
+  const optionsList: SceneSelectOption[] = Object.keys(options).map((key) => {
     return { value: key, label: options[key] }
   })
 
   const onChange = (
-    event: SyntheticEvent<Element, Event>,
-    option: unknown,
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<unknown>
+    _event: SyntheticEvent<Element, Event>,
+    option: unknown
   ) => {
     if (option != null) {
-      const { value } = option as { value: string; label: string }
+      const { value } = option as SceneSelectOption
       props.onChange(Number(value))
     }
   }
@@ -63,14 +60,17 @@ function SceneSelect(props: SceneSelectProps) {
   return (
     <Autocomplete
       className={classes.select}
-      value={options[props.value.toString()]}
+      value={{
+        value: props.value.toString(),
+        label: options[props.value.toString()] ?? ''
+      }}
       options={optionsList}
       renderInput={(params) => <TextField {...params} variant="standard" />}
-      renderOption={(props, option, { selected }) => {
+      renderOption={(props, option) => {
         const { ...optionProps } = props
-        const { value, label } = option as { value: string; label: string }
+        const { value, label } = option as SceneSelectOption
         return (
-          <li key={value} {...optionProps}>
+          <li {...optionProps} key={value}>
             {label}
           </li>
         )

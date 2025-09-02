@@ -1,5 +1,5 @@
 import {
-  Grid,
+  Grid2,
   InputAdornment,
   type Theme,
   Tooltip,
@@ -11,23 +11,22 @@ import LibrarySearch from '../library/LibrarySearch'
 import { makeStyles } from 'tss-react/mui'
 import BaseTextField from '../common/text/BaseTextField'
 import {
-  setConfigDisplaySettingsIgnoredTags,
+  // setConfigDisplaySettingsIgnoredTags,
   setConfigDisplaySettingsMinImageSize,
   setConfigDisplaySettingsMinVideoSize,
   setConfigDisplaySettingsMaxInHistory,
   setConfigDisplaySettingsMaxInMemory,
   setConfigDisplaySettingsMaxLoadingAtOnce
-} from '../../store/app/slice'
+} from '../../store/api/thunks'
 import {
-  selectAppConfigDisplaySettingsIgnoredTags,
-  selectAppConfigDisplaySettingsMinImageSize,
-  selectAppConfigDisplaySettingsMinVideoSize,
-  selectAppConfigDisplaySettingsMaxInHistory,
-  selectAppConfigDisplaySettingsMaxInMemory,
-  selectAppConfigDisplaySettingsMaxLoadingAtOnce,
-  selectAppLibrary
-} from '../../store/app/selectors'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+  // useGetDisplaySettingsIgnoredTags,
+  useGetDisplaySettingsMinImageSizeQuery,
+  useGetDisplaySettingsMinVideoSizeQuery,
+  useGetDisplaySettingsMaxInHistoryQuery,
+  useGetDisplaySettingsMaxInMemoryQuery,
+  useGetDisplaySettingsMaxLoadingAtOnceQuery
+  // selectAppLibrary
+} from '../../store/api/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   grey: {
@@ -36,26 +35,28 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function PlayerNumCard() {
-  const dispatch = useAppDispatch()
-  const library = useAppSelector(selectAppLibrary())
-  const ignoredTags = useAppSelector(
-    selectAppConfigDisplaySettingsIgnoredTags()
-  )
+  // TODO make ignored tags work
+  // const dispatch = useAppDispatch()
+  // const library = useAppSelector(selectAppLibrary())
+  // const ignoredTags = useAppSelector(
+  //   useGetDisplaySettingsIgnoredTags()
+  // )
 
-  const onSelectTags = (selectedTags: string[]) => {
-    dispatch(setConfigDisplaySettingsIgnoredTags(selectedTags))
+  const ignoredTags: string[] = []
+  const onSelectTags = (_selectedTags: string[]) => {
+    // dispatch(setConfigDisplaySettingsIgnoredTags(selectedTags))
   }
 
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12}>
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2 size={12}>
         <BaseTextField
           variant="standard"
           label="Min Image Size"
           margin="dense"
           tooltip="Images under this size (width or height) will be skipped"
-          selector={selectAppConfigDisplaySettingsMinImageSize()}
+          selector={useGetDisplaySettingsMinImageSizeQuery}
           action={setConfigDisplaySettingsMinImageSize}
           InputProps={{
             endAdornment: <InputAdornment position="end">px</InputAdornment>
@@ -65,14 +66,14 @@ function PlayerNumCard() {
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseTextField
           variant="standard"
           label="Min Video Size"
           margin="dense"
           tooltip="Videos under this size (width or height) will be skipped"
-          selector={selectAppConfigDisplaySettingsMinVideoSize()}
+          selector={useGetDisplaySettingsMinVideoSizeQuery}
           action={setConfigDisplaySettingsMinVideoSize}
           InputProps={{
             endAdornment: <InputAdornment position="end">px</InputAdornment>
@@ -82,50 +83,50 @@ function PlayerNumCard() {
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseTextField
           variant="standard"
           label="Max in History"
           margin="dense"
           tooltip="The maximum number of images/videos to keep in player history. Reduce this number to reduce memory usage and improve performance."
-          selector={selectAppConfigDisplaySettingsMaxInHistory()}
+          selector={useGetDisplaySettingsMaxInHistoryQuery}
           action={setConfigDisplaySettingsMaxInHistory}
           inputProps={{
             min: 0,
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseTextField
           variant="standard"
           label="Max in Memory"
           margin="dense"
           tooltip="The maximum number of images/videos to queue up for rendering. Reduce this number to reduce memory usage and improve performance."
-          selector={selectAppConfigDisplaySettingsMaxInMemory()}
+          selector={useGetDisplaySettingsMaxInMemoryQuery}
           action={setConfigDisplaySettingsMaxInMemory}
           inputProps={{
             min: 0,
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseTextField
           variant="standard"
           label="Max Loading at Once"
           margin="dense"
           tooltip="The maximum number of simultaneous images/videos loading. Increase this number to load sources faster. Reduce this number to improve display performance."
-          selector={selectAppConfigDisplaySettingsMaxLoadingAtOnce()}
+          selector={useGetDisplaySettingsMaxLoadingAtOnceQuery}
           action={setConfigDisplaySettingsMaxLoadingAtOnce}
           inputProps={{
             min: 0,
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Tooltip
           disableInteractive
           placement={'top'}
@@ -136,22 +137,17 @@ function PlayerNumCard() {
               Ignored Tags/Types
             </Typography>
             <LibrarySearch
-              displaySources={library}
               filters={ignoredTags}
-              isLibrary
-              isClearable
-              onlyTagsAndTypes
               showCheckboxes
-              withBrackets
               placeholder={'Search ...'}
-              hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
               inputVariant="standard"
+              options={[]}
             />
           </div>
         </Tooltip>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

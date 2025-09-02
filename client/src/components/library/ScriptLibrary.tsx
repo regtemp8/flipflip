@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useEffect, useState, useCallback } from 'react'
+import { type MouseEvent, useEffect, useState, useCallback } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -21,10 +21,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
-  MenuItem,
   type Theme,
   Toolbar,
   Tooltip,
@@ -51,42 +49,35 @@ import SortIcon from '@mui/icons-material/Sort'
 
 import LibrarySearch from './LibrarySearch'
 import ScriptSourceList from './ScriptSourceList'
-import { en, AF, MO, SF, SP, SLT } from 'flipflip-common'
+import { en, AF, MO, SF, SP, SLT, BatchTagOperation } from 'flipflip-common'
+import { useNavigate } from 'react-router'
+import {
+  useBatchTagCaptionScriptsMutation,
+  useCreateCaptionScriptsMutation,
+  useDeleteCaptionScriptsMutation,
+  useGetCaptionScriptBatchTagOptionsQuery,
+  useGetCaptionScriptSearchOptionsQuery,
+  useGetCaptionScriptsQuery,
+  useGetFilteredCaptionScriptsQuery,
+  useGetTagsCountQuery,
+  useGetTutorialsQuery,
+  useMarkCaptionScriptsMutation,
+  useSortCaptionScriptsMutation
+} from '../../store/api/slice'
+import FilePicker from '../common/FilePicker'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { selectSpecialMode } from '../../store/app/selectors'
+import { setSpecialMode } from '../../store/app/slice'
 import {
-  selectAppTutorial,
-  selectAppSpecialMode,
-  selectAppScriptSelected,
-  selectAppTagsCount,
-  selectAppScripts,
-  selectAppScriptFilters,
-  selectAppFilteredScripts,
-  selectAppScriptSelectedTagNames
-} from '../../store/app/selectors'
+  selectScriptLibrarySelectedTagIDs,
+  selectLibrarySelectedTagNames
+} from '../../store/api/selectors'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
+import { selectScriptLibraryFilters } from '../../store/scriptLibrary/selectors'
 import {
-  setScriptFilters,
-  setScriptSelected,
-  batchTag,
-  manageTags,
-  setScriptsRemove,
-  setScriptsRemoveAll
-} from '../../store/app/slice'
-import {
-  setRouteGoBack,
-  sortScripts,
-  setScriptsAddAtStart,
-  setScriptsAddAllAtStart,
-  doneTutorial,
-  importScriptFromLibrary,
-  importSingleScriptFromLibrary
-} from '../../store/app/thunks'
-import {
-  setCaptionScriptsTags,
-  setCaptionScriptsAddTags,
-  setCaptionScriptsRemoveTags,
-  setCaptionScriptsToggleMarked
-} from '../../store/captionScript/thunks'
-import flipflip from '../../FlipFlipService'
+  setScriptLibraryAddHttpUrl,
+  setScriptLibraryFilters
+} from '../../store/scriptLibrary/slice'
 
 const drawerWidth = 240
 
@@ -122,17 +113,14 @@ const useStyles = makeStyles()((theme: Theme) => ({
     textAlign: 'center',
     flexGrow: 1
   },
-  headerBar: {
-    display: 'flex',
-    alignItems: 'center',
-    whiteSpace: 'nowrap',
-    flexWrap: 'nowrap'
-  },
   headerLeft: {
-    flexBasis: '20%'
+    flexBasis: '20%',
+    flexGrow: 1
   },
   headerRight: {
+    maxWidth: '33%',
     flexBasis: '20%',
+    flexGrow: 1,
     justifyContent: 'flex-end',
     display: 'flex'
   },
@@ -346,45 +334,57 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function ScriptLibrary() {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const tutorial = useAppSelector(selectAppTutorial())
-  const scripts = useAppSelector(selectAppScripts())
-  const specialMode = useAppSelector(selectAppSpecialMode())
-  const filters = useAppSelector(selectAppScriptFilters())
-  const displaySources = useAppSelector(selectAppFilteredScripts())
-  const selected = useAppSelector(selectAppScriptSelected())
-  const tagsCount = useAppSelector(selectAppTagsCount())
-  const selectedTagNames = useAppSelector(selectAppScriptSelectedTagNames())
+  const [createScripts] = useCreateCaptionScriptsMutation()
+  const [sortScripts] = useSortCaptionScriptsMutation()
+  const [deleteCaptionScripts] = useDeleteCaptionScriptsMutation()
+  const [batchTagCaptionScripts] = useBatchTagCaptionScriptsMutation()
+  const [markCaptionScripts] = useMarkCaptionScriptsMutation()
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: scripts } = useGetCaptionScriptsQuery()
+  const { data: tagsCount } = useGetTagsCountQuery()
+  const { data: tagOptions } = useGetCaptionScriptBatchTagOptionsQuery()
+  const { data: searchOptions } = useGetCaptionScriptSearchOptionsQuery()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
+  const [selected, setSelected] = useState<number[]>([])
+  const selectedTagIDs = useAppSelector(
+    selectScriptLibrarySelectedTagIDs(selected)
+  )
+  const selectedTagNames = useAppSelector(
+    selectLibrarySelectedTagNames(selectedTagIDs)
+  )
+  const specialMode = useAppSelector(selectSpecialMode())
+  const filters = useAppSelector(selectScriptLibraryFilters())
+  const { data: displaySources } = useGetFilteredCaptionScriptsQuery(filters)
 
   const goBack = useCallback(() => {
     if (specialMode === SP.batchTag) {
-      dispatch(setScriptSelected([]))
+      setSelected([])
       setSelectedTags([])
-      dispatch(batchTag())
     } else {
-      dispatch(setRouteGoBack())
+      dispatch(saveScriptLibraryYOffset())
+      navigate(-1)
     }
+
+    dispatch(setSpecialMode(undefined))
   }, [dispatch, specialMode])
 
-  const toggleMarked = useCallback(() => {
-    dispatch(setCaptionScriptsToggleMarked(displaySources))
-  }, [dispatch, displaySources])
-
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = async (e: KeyboardEvent) => {
       if (
         !e.shiftKey &&
         !e.ctrlKey &&
         e.altKey &&
-        (e.key === 'm' || e.key === 'µ')
+        (e.key === 'm' || e.key === 'µ') &&
+        displaySources != null
       ) {
-        toggleMarked()
-      } else if (e.key === 'Escape' && specialMode != null) {
+        await markCaptionScripts(displaySources)
+      } else if (e.key === 'Escape' && specialMode) {
         goBack()
       }
     }
@@ -393,40 +393,30 @@ function ScriptLibrary() {
     return () => {
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [goBack, specialMode, toggleMarked])
+  }, [goBack, specialMode, markCaptionScripts, displaySources])
 
   useEffect(() => {
-    if (tutorial === SLT.final && drawerOpen) {
+    if (tutorial?.current === SLT.final && drawerOpen) {
       setDrawerOpen(false)
     }
-  }, [tutorial, drawerOpen])
+  }, [tutorial?.current, drawerOpen])
 
   const onBatchTag = () => {
+    dispatch(setSpecialMode(SP.batchTag))
     onCloseDialog()
-    dispatch(batchTag())
   }
 
-  const onUpdateFilters = (filters: string[]) => {
-    dispatch(setScriptFilters(filters))
-  }
-
-  const onAddSource = async (type: string, e: MouseEvent) => {
-    onCloseDialog()
+  const onAddSource = async (type: string) => {
     switch (type) {
       case AF.url:
-        dispatch(setScriptsAddAtStart())
+        dispatch(setScriptLibraryAddHttpUrl(true))
+        await createScripts([''])
+        onCloseDialog()
         break
       case AF.script:
-        const scriptSources = await flipflip().api.loadScriptSources(e.shiftKey)
-        if (scriptSources) {
-          await addScriptSources(scriptSources)
-        }
+        setOpenMenu(MO.openLocal)
         break
     }
-  }
-
-  const addScriptSources = async (newSources: string[]) => {
-    dispatch(setScriptsAddAllAtStart(newSources))
   }
 
   const onToggleBatchTagModal = () => {
@@ -444,9 +434,9 @@ function ScriptLibrary() {
   }
 
   const onToggleDrawer = () => {
-    if (tutorial === SLT.sidebar1) {
-      dispatch(doneTutorial(SLT.sidebar1))
-    }
+    // if (tutorial?.current === SLT.sidebar1) {
+    //   dispatch(doneTutorial(SLT.sidebar1))
+    // }
     setDrawerOpen(!drawerOpen)
   }
 
@@ -469,56 +459,67 @@ function ScriptLibrary() {
     setOpenMenu(MO.removeAllAlert)
   }
 
-  const onFinishRemoveAll = () => {
-    dispatch(setScriptsRemoveAll())
+  const onFinishRemoveAll = async () => {
+    await deleteCaptionScripts(undefined)
     onCloseDialog()
   }
 
-  const onFinishRemoveVisible = () => {
-    dispatch(setScriptsRemove(displaySources))
+  const onFinishRemoveVisible = async () => {
+    await deleteCaptionScripts(displaySources)
     onCloseDialog()
-    dispatch(setScriptFilters([]))
+    dispatch(setScriptLibraryFilters([]))
   }
 
   const onImportFromLibrary = () => {
-    dispatch(importScriptFromLibrary(selected))
+    // dispatch(importScriptFromLibrary(selected))
   }
   const onImportSingleFromLibrary = () => {
-    dispatch(importSingleScriptFromLibrary(selected))
+    // dispatch(importSingleScriptFromLibrary(selected))
   }
 
   const onUpdateSelected = (selected: number[]) => {
-    dispatch(setScriptSelected(selected))
+    setSelected(selected)
   }
 
   const onSelectAll = () => {
-    const newSelected = new Set([...selected, ...displaySources])
-    dispatch(setScriptSelected([...newSelected]))
+    setSelected(displaySources ?? [])
   }
 
   const onSelectNone = () => {
-    const newSelected = selected.filter((id) => !displaySources.includes(id))
-    dispatch(setScriptSelected(newSelected))
+    setSelected([])
   }
 
-  const batchTagOverwrite = () => {
-    dispatch(setCaptionScriptsTags(selected, selectedTags))
+  const batchTagOverwrite = async () => {
+    await batchTag('overwrite')
     onCloseDialog()
   }
 
-  const batchTagAdd = () => {
-    dispatch(setCaptionScriptsAddTags(selected, selectedTags))
+  const batchTagAdd = async () => {
+    await batchTag('add')
     onCloseDialog()
   }
 
-  const batchTagRemove = () => {
-    dispatch(setCaptionScriptsRemoveTags(selected, selectedTags))
+  const batchTagRemove = async () => {
+    await batchTag('remove')
     onCloseDialog()
+  }
+
+  const batchTag = async (operation: BatchTagOperation) =>
+    await batchTagCaptionScripts({
+      operation,
+      ids: selected,
+      tags: selectedTags
+    })
+
+  const onOpenLocalFiles = async (chosenFiles?: string[]) => {
+    onCloseDialog()
+    if (chosenFiles != null) {
+      await createScripts(chosenFiles)
+    }
   }
 
   const { classes } = useStyles()
   const open = drawerOpen
-
   return (
     <div className={classes.root}>
       <AppBar
@@ -526,10 +527,11 @@ function ScriptLibrary() {
         position="absolute"
         className={cx(
           classes.appBar,
-          tutorial === SLT.toolbar && cx(classes.backdropTop, classes.disable)
+          tutorial?.current === SLT.toolbar &&
+            cx(classes.backdropTop, classes.disable)
         )}
       >
-        <Toolbar className={classes.headerBar}>
+        <Toolbar>
           <div className={classes.headerLeft}>
             <Tooltip
               disableInteractive
@@ -567,13 +569,13 @@ function ScriptLibrary() {
             <div
               className={cx(
                 classes.searchBar,
-                tutorial === SLT.toolbar && classes.highlight
+                tutorial?.current === SLT.toolbar && classes.highlight
               )}
             >
-              {scripts.length > 0 && (
+              {(scripts?.length ?? 0) > 0 && (
                 <Chip
                   className={classes.searchCount}
-                  label={scripts.length}
+                  label={scripts?.length}
                   size="medium"
                   variant="outlined"
                 />
@@ -581,19 +583,19 @@ function ScriptLibrary() {
               {filters.length > 0 && (
                 <Chip
                   className={classes.displayCount}
-                  label={displaySources.length}
+                  label={displaySources?.length ?? 0}
                   size="medium"
                 />
               )}
               <LibrarySearch
-                displaySources={displaySources}
+                appBar
                 filters={filters}
+                options={searchOptions ?? []}
                 placeholder={'Search ...'}
-                isScript
                 isCreatable
-                onlyUsed
-                noTypes
-                onUpdateFilters={onUpdateFilters}
+                onUpdateFilters={(filters) =>
+                  dispatch(setScriptLibraryFilters(filters))
+                }
               />
             </div>
           </div>
@@ -603,15 +605,19 @@ function ScriptLibrary() {
       <Drawer
         className={cx(
           classes.drawer,
-          (tutorial === SLT.sidebar1 ||
-            tutorial === SLT.sidebar2 ||
+          (tutorial?.current === SLT.sidebar1 ||
+            tutorial?.current === SLT.sidebar2 ||
             drawerOpen) &&
             classes.backdropTop,
-          tutorial === SLT.sidebar2 && classes.highlight
+          tutorial?.current === SLT.sidebar2 && classes.highlight
         )}
         variant="permanent"
         classes={{
-          paper: cx(classes.drawerPaper, !open && classes.drawerPaperClose)
+          paper: cx(
+            classes.drawerPaper,
+            !specialMode && !open && classes.drawerPaperClose,
+            specialMode && classes.drawerPaperHidden
+          )
         }}
         open={drawerOpen}
       >
@@ -623,7 +629,9 @@ function ScriptLibrary() {
 
         <ListItem className={classes.drawerButton}>
           <IconButton
-            className={cx(tutorial === SLT.sidebar1 && classes.highlight)}
+            className={cx(
+              tutorial?.current === SLT.sidebar1 && classes.highlight
+            )}
             onClick={onToggleDrawer}
             size="large"
           >
@@ -633,14 +641,19 @@ function ScriptLibrary() {
 
         <Divider />
 
-        <div className={cx(tutorial != null && classes.disable)}>
+        <div className={cx(tutorial?.current != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
-            <ListItemButton onClick={() => dispatch(manageTags())}>
+            <ListItemButton
+              onClick={() => {
+                dispatch(saveScriptLibraryYOffset())
+                navigate('/tags')
+              }}
+            >
               <ListItemIcon>
                 <LocalOfferIcon />
               </ListItemIcon>
               <ListItemText primary="Manage Tags" />
-              {tagsCount > 0 && (
+              {(tagsCount ?? 0) > 0 && (
                 <Chip
                   className={cx(classes.chip, !open && classes.chipClose)}
                   label={tagsCount}
@@ -665,18 +678,20 @@ function ScriptLibrary() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <div className={cx(classes.root, classes.fill)}>
-          <div className={classes.drawerSpacer} />
+          {!specialMode && <div className={classes.drawerSpacer} />}
           <Container
             maxWidth={false}
             className={cx(
               classes.container,
-              displaySources.length > 0 && classes.containerNotEmpty
+              (displaySources?.length ?? 0) > 0 && classes.containerNotEmpty
             )}
           >
             <ScriptSourceList
               selected={selected}
               showHelp={!specialMode && filters.length === 0}
-              sources={displaySources}
+              scripts={scripts ?? []}
+              filters={filters}
+              sources={displaySources ?? []}
               onUpdateSelected={onUpdateSelected}
             />
           </Container>
@@ -686,11 +701,11 @@ function ScriptLibrary() {
       <Backdrop
         className={classes.backdrop}
         onClick={onCloseDialog}
-        open={tutorial == null && (openMenu === MO.new || drawerOpen)}
+        open={tutorial?.current == null && (openMenu === MO.new || drawerOpen)}
       />
 
       {specialMode && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Clear" placement="top-end">
             <Fab
               className={classes.selectNoneButton}
@@ -745,18 +760,18 @@ function ScriptLibrary() {
               </Fab>
             </Badge>
           </Tooltip>
-        </React.Fragment>
+        </>
       )}
 
       {!specialMode && (
-        <React.Fragment>
-          {scripts.length > 0 && (
+        <>
+          {(scripts?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
               title={
                 filters.length === 0
-                  ? 'Delete All Sources'
-                  : 'Delete These Sources'
+                  ? 'Delete All Scripts'
+                  : 'Delete These Scripts'
               }
               placement="left"
             >
@@ -776,14 +791,14 @@ function ScriptLibrary() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Delete Caption Script Library
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you really wanna delete your entire caption
-                    script library...? ಠ_ಠ
+                    Are you sure you want to delete your entire caption script
+                    library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -791,18 +806,20 @@ function ScriptLibrary() {
                     Cancel
                   </Button>
                   <Button onClick={onFinishRemoveAll} color="primary">
-                    Yea... I'm sure
+                    Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
-                <DialogTitle id="remove-all-title">Delete Sources</DialogTitle>
+              <>
+                <DialogTitle id="remove-all-title">
+                  Delete Caption Scripts
+                </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
-                    Are you sure you want to remove these sources from your
-                    caption script library?
+                    Are you sure you want to remove these caption scripts from
+                    your library?
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -813,7 +830,7 @@ function ScriptLibrary() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           <Tooltip
@@ -830,7 +847,7 @@ function ScriptLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.script, e)}
+              onClick={() => onAddSource(AF.script)}
               size="small"
             >
               <DescriptionIcon className={classes.icon} />
@@ -850,7 +867,7 @@ function ScriptLibrary() {
                 filters.length > 0 && classes.hidden
               )}
               disabled={filters.length > 0}
-              onClick={(e: MouseEvent) => onAddSource(AF.url, e)}
+              onClick={() => onAddSource(AF.url)}
               size="small"
             >
               <HttpIcon className={classes.icon} />
@@ -867,11 +884,11 @@ function ScriptLibrary() {
           >
             <AddIcon className={classes.icon} />
           </Fab>
-        </React.Fragment>
+        </>
       )}
 
       <Fab
-        disabled={scripts.length < 2}
+        disabled={(scripts?.length ?? 0) < 2}
         className={classes.sortMenuButton}
         aria-haspopup="true"
         aria-controls="sort-menu"
@@ -899,46 +916,51 @@ function ScriptLibrary() {
         onClose={onCloseDialog}
       >
         {[SF.alpha, SF.alphaFull, SF.date].map((sf) => (
-          <MenuItem key={sf}>
+          <ListItem
+            key={sf}
+            secondaryAction={
+              <>
+                <IconButton
+                  edge="end"
+                  onClick={async () => {
+                    await sortScripts({ sortBy: sf, sortOrder: 'asc' })
+                  }}
+                  size="large"
+                >
+                  <ArrowUpwardIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  onClick={async () => {
+                    await sortScripts({ sortBy: sf, sortOrder: 'desc' })
+                  }}
+                  size="large"
+                >
+                  <ArrowDownwardIcon />
+                </IconButton>
+              </>
+            }
+          >
             <ListItemText primary={en.get(sf)} />
-            <ListItemSecondaryAction>
-              <IconButton
-                edge="end"
-                onClick={() => {
-                  dispatch(sortScripts(sf, true))
-                }}
-                size="large"
-              >
-                <ArrowUpwardIcon />
-              </IconButton>
-              <IconButton
-                edge="end"
-                onClick={() => {
-                  dispatch(sortScripts(sf, false))
-                }}
-                size="large"
-              >
-                <ArrowDownwardIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </MenuItem>
+          </ListItem>
         ))}
-        <MenuItem key={SF.random}>
-          <ListItemText primary={en.get(SF.random)} />
-          <ListItemSecondaryAction>
+        <ListItem
+          key={SF.random}
+          secondaryAction={
             <IconButton
               edge="end"
-              onClick={() => {
-                dispatch(sortScripts(SF.random, true))
+              onClick={async () => {
+                await sortScripts({ sortBy: SF.random, sortOrder: 'asc' })
               }}
               size="large"
             >
               <ShuffleIcon />
             </IconButton>
-          </ListItemSecondaryAction>
-        </MenuItem>
+          }
+        >
+          <ListItemText primary={en.get(SF.random)} />
+        </ListItem>
       </Menu>
-
       <Dialog
         classes={{ paper: classes.noScroll }}
         open={openMenu === MO.batchTag}
@@ -953,17 +975,12 @@ function ScriptLibrary() {
           </DialogContentText>
           {openMenu === MO.batchTag && (
             <LibrarySearch
-              displaySources={scripts}
               filters={selectedTags}
               placeholder={'Tag These Sources'}
-              isScript
-              isClearable
-              onlyTags
               showCheckboxes
-              hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
-              fullWidth
               inputVariant="standard"
+              options={tagOptions ?? []}
             />
           )}
         </DialogContent>
@@ -987,6 +1004,13 @@ function ScriptLibrary() {
           </Button>
         </DialogActions>
       </Dialog>
+      <FilePicker
+        open={openMenu === MO.openLocal}
+        type={AF.script}
+        multiple
+        path=""
+        onClose={onOpenLocalFiles}
+      />
     </div>
   )
 }

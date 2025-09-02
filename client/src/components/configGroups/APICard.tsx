@@ -1,4 +1,4 @@
-import React, { useState, useRef, type ChangeEvent } from 'react'
+import { useState, useRef, type ChangeEvent } from 'react'
 import { cx } from '@emotion/css'
 import { v4 as uuidv4 } from 'uuid'
 import wretch from 'wretch'
@@ -6,7 +6,6 @@ import FormUrlAddon from 'wretch/addons/formUrl'
 import AbortAddon from 'wretch/addons/abort'
 
 import {
-  Alert,
   Avatar,
   Button,
   Collapse,
@@ -17,17 +16,12 @@ import {
   DialogTitle,
   Fab,
   FormControl,
-  FormControlLabel,
-  Grid,
+  Grid2,
   InputLabel,
   Link,
   MenuItem,
-  Radio,
-  RadioGroup,
   Select,
   SelectChangeEvent,
-  Slide,
-  Snackbar,
   TextField,
   type Theme,
   Tooltip,
@@ -36,8 +30,7 @@ import {
 
 import { makeStyles } from 'tss-react/mui'
 
-import flipflip from '../../FlipFlipService'
-import { en, IG, MO, SS, ST } from 'flipflip-common'
+import { en, IG, MO, ST } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import BaseSwitch from '../common/BaseSwitch'
 import {
@@ -60,36 +53,19 @@ import {
   setConfigRemoteSettingsPiwigoHost,
   setConfigRemoteSettingsPiwigoUsername,
   setConfigRemoteSettingsPiwigoPassword
-} from '../../store/app/slice'
+} from '../../store/api/thunks'
 import {
-  selectAppConfigRemoteSettingsSilenceTumblrAlert,
-  selectAppConfigRemoteSettingsTumblrAuthorized,
-  selectAppConfigRemoteSettingsTumblrKeys,
-  selectAppConfigRemoteSettingsTumblrKey,
-  selectAppConfigRemoteSettingsTumblrSecrets,
-  selectAppConfigRemoteSettingsTumblrSecret,
-  // selectAppConfigRemoteSettingsRedditAuthorized,
-  selectAppConfigRemoteSettingsRedditClientID,
-  selectAppConfigRemoteSettingsRedditUserAgent,
-  selectAppConfigRemoteSettingsRedditDeviceID,
-  // selectAppConfigRemoteSettingsTwitterAuthorized,
-  selectAppConfigRemoteSettingsTwitterConsumerKey,
-  selectAppConfigRemoteSettingsTwitterConsumerSecret,
-  selectAppConfigRemoteSettingsInstagramConfigured,
-  selectAppConfigRemoteSettingsInstagramUsername,
-  selectAppConfigRemoteSettingsInstagramPassword,
-  selectAppConfigRemoteSettingsHydrusConfigured,
-  selectAppConfigRemoteSettingsHydrusProtocol,
-  selectAppConfigRemoteSettingsHydrusDomain,
-  selectAppConfigRemoteSettingsHydrusPort,
-  selectAppConfigRemoteSettingsHydrusAPIKey,
-  selectAppConfigRemoteSettingsPiwigoConfigured,
-  selectAppConfigRemoteSettingsPiwigoProtocol,
-  selectAppConfigRemoteSettingsPiwigoHost,
-  selectAppConfigRemoteSettingsPiwigoUsername,
-  selectAppConfigRemoteSettingsPiwigoPassword
-} from '../../store/app/selectors'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+  useGetRemoteSettingsSilenceTumblrAlertQuery,
+  useGetRemoteSettingsTumblrAuthorizedQuery,
+  // useGetRemoteSettingsRedditAuthorizedQuery,
+  // useGetRemoteSettingsTwitterAuthorizedQuery,
+  useGetRemoteSettingsInstagramConfiguredQuery,
+  useGetRemoteSettingsHydrusConfiguredQuery,
+  useGetRemoteSettingsPiwigoConfiguredQuery
+} from '../../store/api/selectors'
+import { useAppDispatch } from '../../store/hooks'
+import { useGetRemoteSettingsQuery } from '../../store/api/slice'
+import snackbar from '../../data/Snackbar'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -126,85 +102,18 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-function TransitionUp(props: any) {
-  return <Slide {...props} direction="up" />
-}
-
 function APICard() {
   const dispatch = useAppDispatch()
-  const tumblrAuthorized = useAppSelector(
-    selectAppConfigRemoteSettingsTumblrAuthorized()
-  )
-  const tumblrKeys = useAppSelector(selectAppConfigRemoteSettingsTumblrKeys())
-  const tumblrKey = useAppSelector(selectAppConfigRemoteSettingsTumblrKey())
-  const tumblrSecrets = useAppSelector(
-    selectAppConfigRemoteSettingsTumblrSecrets()
-  )
-  const tumblrSecret = useAppSelector(
-    selectAppConfigRemoteSettingsTumblrSecret()
-  )
-  // const redditAuthorized = useAppSelector(
-  //   selectAppConfigRemoteSettingsRedditAuthorized()
-  // )
-  const redditClientID = useAppSelector(
-    selectAppConfigRemoteSettingsRedditClientID()
-  )
-  const redditUserAgent = useAppSelector(
-    selectAppConfigRemoteSettingsRedditUserAgent()
-  )
-  const redditDeviceID = useAppSelector(
-    selectAppConfigRemoteSettingsRedditDeviceID()
-  )
-  // const twitterAuthorized = useAppSelector(
-  //   selectAppConfigRemoteSettingsTwitterAuthorized()
-  // )
-  const twitterConsumerKey = useAppSelector(
-    selectAppConfigRemoteSettingsTwitterConsumerKey()
-  )
-  const twitterConsumerSecret = useAppSelector(
-    selectAppConfigRemoteSettingsTwitterConsumerSecret()
-  )
-  const instagramConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsInstagramConfigured()
-  )
-  const instagramUsername = useAppSelector(
-    selectAppConfigRemoteSettingsInstagramUsername()
-  )
-  const instagramPassword = useAppSelector(
-    selectAppConfigRemoteSettingsInstagramPassword()
-  )
-  const hydrusConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsHydrusConfigured()
-  )
-  const hydrusProtocol = useAppSelector(
-    selectAppConfigRemoteSettingsHydrusProtocol()
-  )
-  const hydrusDomain = useAppSelector(
-    selectAppConfigRemoteSettingsHydrusDomain()
-  )
-  const hydrusPort = useAppSelector(selectAppConfigRemoteSettingsHydrusPort())
-  const hydrusAPIKey = useAppSelector(
-    selectAppConfigRemoteSettingsHydrusAPIKey()
-  )
-  const piwigoConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoConfigured()
-  )
-  const piwigoProtocol = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoProtocol()
-  )
-  const piwigoHost = useAppSelector(selectAppConfigRemoteSettingsPiwigoHost())
-  const piwigoUsername = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoUsername()
-  )
-  const piwigoPassword = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoPassword()
-  )
+  const { data: remoteSettings } = useGetRemoteSettingsQuery()
+
+  const { data: tumblrAuthorized } = useGetRemoteSettingsTumblrAuthorizedQuery()
+  const { data: instagramConfigured } =
+    useGetRemoteSettingsInstagramConfiguredQuery()
+  const { data: hydrusConfigured } = useGetRemoteSettingsHydrusConfiguredQuery()
+  const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
 
   const [openMenu, setOpenMenu] = useState<string>()
   const [menuType, setMenuType] = useState<string>()
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [snackbar, setSnackbar] = useState<string>()
-  const [snackbarSeverity, setSnackbarSeverity] = useState<string>()
   const [instagramMode, setInstagramMode] = useState<string>()
   const [input1, setInput1] = useState('')
   const [input2, setInput2] = useState('')
@@ -214,15 +123,11 @@ function APICard() {
   const _tfa = useRef<any>()
 
   const showError = (error: string) => {
-    setSnackbarOpen(true)
-    setSnackbar('Error: ' + error)
-    setSnackbarSeverity(SS.error)
+    snackbar().showMessage({ error })
   }
 
-  const showSuccess = (message: string) => {
-    setSnackbarOpen(true)
-    setSnackbar(message)
-    setSnackbarSeverity(SS.success)
+  const showSuccess = (success: string) => {
+    snackbar().showMessage({ success })
   }
 
   const onClearTumblr = () => {
@@ -296,8 +201,8 @@ function APICard() {
   const onAuthTumblr = () => {
     setOpenMenu(MO.new)
     setMenuType(ST.tumblr)
-    setInput1(tumblrKey)
-    setInput2(tumblrSecret)
+    setInput1(remoteSettings?.tumblrKey ?? '')
+    setInput2(remoteSettings?.tumblrSecret ?? '')
   }
 
   const onContinueAuthTumblr = () => {
@@ -305,22 +210,6 @@ function APICard() {
     dispatch(setConfigRemoteSettingsTumblrSecret(input2))
     setOpenMenu(MO.signIn)
     setMenuType(ST.tumblr)
-  }
-
-  const onTumblrKeyInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value)
-    if (value === 0) {
-      dispatch(setConfigRemoteSettingsTumblrKey(''))
-      dispatch(setConfigRemoteSettingsTumblrSecret(''))
-      setInput1('')
-      setInput2('')
-    } else {
-      const indexOf = value - 1
-      dispatch(setConfigRemoteSettingsTumblrKey(tumblrKeys[indexOf]))
-      dispatch(setConfigRemoteSettingsTumblrSecret(tumblrSecrets[indexOf]))
-      setInput1(tumblrKeys[indexOf])
-      setInput2(tumblrSecrets[indexOf])
-    }
   }
 
   // const onAuthReddit = () => {
@@ -336,26 +225,26 @@ function APICard() {
   const onAuthInstagram = () => {
     setOpenMenu(MO.signIn)
     setMenuType(ST.instagram)
-    setInput1(instagramUsername)
-    setInput2(instagramPassword)
+    setInput1(remoteSettings?.instagramUsername ?? '')
+    setInput2(remoteSettings?.instagramPassword ?? '')
   }
 
   const onAuthHydrus = () => {
     setOpenMenu(MO.signIn)
     setMenuType(ST.hydrus)
-    setInput1(hydrusProtocol)
-    setInput2(hydrusDomain)
-    setInput3(hydrusPort)
-    setInput4(hydrusAPIKey)
+    setInput1(remoteSettings?.hydrusProtocol ?? '')
+    setInput2(remoteSettings?.hydrusDomain ?? '')
+    setInput3(remoteSettings?.hydrusPort ?? '')
+    setInput4(remoteSettings?.hydrusAPIKey ?? '')
   }
 
   const onAuthPiwigo = () => {
     setOpenMenu(MO.signIn)
     setMenuType(ST.piwigo)
-    setInput1(piwigoProtocol)
-    setInput2(piwigoHost)
-    setInput3(piwigoUsername)
-    setInput4(piwigoPassword)
+    setInput1(remoteSettings?.piwigoProtocol ?? '')
+    setInput2(remoteSettings?.piwigoHost ?? '')
+    setInput3(remoteSettings?.piwigoUsername ?? '')
+    setInput4(remoteSettings?.piwigoPassword ?? '')
   }
 
   const onCloseDialog = () => {
@@ -370,10 +259,6 @@ function APICard() {
 
   const openLink = (url: string) => {
     window.open(url, '_blank')?.focus()
-  }
-
-  const onCloseSnack = () => {
-    setSnackbarOpen(false)
   }
 
   const onSelectInput1 = (e: SelectChangeEvent) => {
@@ -399,20 +284,21 @@ function APICard() {
   const onFinishAuthTumblr = async () => {
     onCloseDialog()
     // Tumblr endpoints
-    const authorizeUrl = 'https://www.tumblr.com/oauth/authorize'
-    const requestTokenUrl = 'https://www.tumblr.com/oauth/request_token'
-    const accessTokenUrl = 'https://www.tumblr.com/oauth/access_token'
+    // const authorizeUrl = 'https://www.tumblr.com/oauth/authorize'
+    // const requestTokenUrl = 'https://www.tumblr.com/oauth/request_token'
+    // const accessTokenUrl = 'https://www.tumblr.com/oauth/access_token'
 
     // Tumblr oauth
-    let data: any | undefined
+    // TODO re-implement Tumblr oauth flow
+    const data: any | undefined = undefined
     try {
-      data = await flipflip().api.tumblrOAuth(
-        requestTokenUrl,
-        accessTokenUrl,
-        tumblrKey,
-        tumblrSecret,
-        authorizeUrl
-      )
+      // data = await flipflip().api.tumblrOAuth(
+      //   requestTokenUrl,
+      //   accessTokenUrl,
+      //   tumblrKey,
+      //   tumblrSecret,
+      //   authorizeUrl
+      // )
     } catch (err: any) {
       // TODO is error ever thrown? need other error handling logic?
       console.error(err.statusCode + ' - ' + err.data)
@@ -428,12 +314,12 @@ function APICard() {
 
   const onFinishAuthReddit = async () => {
     onCloseDialog()
-    const deviceID = redditDeviceID === '' ? uuidv4() : redditDeviceID
+    const deviceID = remoteSettings?.redditDeviceID ?? uuidv4()
 
     // Make initial request and open authorization form in browser
     wretch(
       'https://www.reddit.com/api/v1/authorize?client_id=' +
-        redditClientID +
+        remoteSettings?.redditClientID +
         '&response_type=code&state=' +
         deviceID +
         '&redirect_uri=http://localhost:65010&duration=permanent&scope=read,mysubreddits,history'
@@ -447,13 +333,14 @@ function APICard() {
         showError(e.message)
       })
 
-    let data: any | undefined
+    const data: any | undefined = undefined
+    // TODO re-implement Reddit oauth flow
     try {
-      data = await flipflip().api.redditOAuth(
-        deviceID,
-        redditUserAgent,
-        redditClientID
-      )
+      // data = await flipflip().api.redditOAuth(
+      //   deviceID,
+      //   redditUserAgent,
+      //   redditClientID
+      // )
     } catch (err: any) {
       // TODO is error ever thrown? need other error handling logic?
       console.error(err)
@@ -472,20 +359,21 @@ function APICard() {
     onCloseDialog()
 
     // Twitter endpoints
-    const authorizeUrl = 'https://api.twitter.com/oauth/authorize'
-    const requestTokenUrl = 'https://api.twitter.com/oauth/request_token'
-    const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
+    // const authorizeUrl = 'https://api.twitter.com/oauth/authorize'
+    // const requestTokenUrl = 'https://api.twitter.com/oauth/request_token'
+    // const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
 
     // Twitter OAuth
-    let data: any | undefined
+    const data: any | undefined = undefined
     try {
-      data = await flipflip().api.twitterOAuth(
-        requestTokenUrl,
-        accessTokenUrl,
-        twitterConsumerKey,
-        twitterConsumerSecret,
-        authorizeUrl
-      )
+      // TODO re-implement twitter oauth flow
+      // data = await flipflip().api.twitterOAuth(
+      //   requestTokenUrl,
+      //   accessTokenUrl,
+      //   twitterConsumerKey,
+      //   twitterConsumerSecret,
+      //   authorizeUrl
+      // )
     } catch (err: any) {
       // TODO is error ever thrown? need other error handling logic?
       const message = err.statusCode + ' - ' + err.data
@@ -503,7 +391,8 @@ function APICard() {
 
   const onFinishAuthInstagram = async () => {
     try {
-      await flipflip().api.igLogin(input1, input2)
+      // TODO re-implement Instagram login flow
+      // await flipflip().api.igLogin(input1, input2)
       dispatch(setConfigRemoteSettingsInstagramUsername(input1))
       dispatch(setConfigRemoteSettingsInstagramPassword(input2))
       showSuccess('Instagram is activated')
@@ -514,7 +403,7 @@ function APICard() {
         setInstagramMode(IG.tfa)
         _tfa.current = e.response.body.two_factor_info.two_factor_identifier
       } else if (e.name === 'IgCheckpointError') {
-        await flipflip().api.igChallenge()
+        // await flipflip().api.igChallenge()
         setInstagramMode(IG.checkpoint)
       } else {
         onCloseDialog()
@@ -526,11 +415,11 @@ function APICard() {
 
   const onTFAInstagram = async () => {
     try {
-      await flipflip().api.igTwoFactorLogin(
-        _tfa.current,
-        instagramUsername,
-        input3
-      )
+      // await flipflip().api.igTwoFactorLogin(
+      //   _tfa.current,
+      //   instagramUsername,
+      //   input3
+      // )
       dispatch(setConfigRemoteSettingsInstagramUsername(input1))
       dispatch(setConfigRemoteSettingsInstagramPassword(input2))
       showSuccess('Instagram is activated')
@@ -547,7 +436,7 @@ function APICard() {
 
   const onCheckpointInstagram = async () => {
     try {
-      await flipflip().api.igSendSecurityCode(input3)
+      // await flipflip().api.igSendSecurityCode(input3)
       dispatch(setConfigRemoteSettingsInstagramUsername(input1))
       dispatch(setConfigRemoteSettingsInstagramPassword(input2))
       showSuccess('Instagram is activated')
@@ -671,13 +560,13 @@ function APICard() {
   const menuTypeSignOut = getMenuTypeSignOut()
 
   return (
-    <React.Fragment>
+    <>
       <Typography align="center" className={classes.title}>
         API Sign In
       </Typography>
 
-      <Grid container spacing={2} alignItems="center" justifyContent="center">
-        <Grid item>
+      <Grid2 container spacing={2} alignItems="center" justifyContent="center">
+        <Grid2>
           <Tooltip
             disableInteractive
             title={
@@ -698,8 +587,8 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.tumblr} />
             </Fab>
           </Tooltip>
-        </Grid>
-        {/* <Grid item>
+        </Grid2>
+        {/* <Grid2>
           <Tooltip disableInteractive title={redditAuthorized ? "Authorized: Click to Sign Out of Reddit" : "Unauthorized: Click to Authorize Reddit"}  placement="top-end">
             <Fab
               className={cx(classes.fab, redditAuthorized ? classes.authorized : classes.noAuth)}
@@ -708,8 +597,8 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.reddit}/>
             </Fab>
           </Tooltip>
-        </Grid> */}
-        {/* <Grid item>
+        </Grid2> */}
+        {/* <Grid2>
           <Tooltip disableInteractive title={twitterAuthorized ? "Authorized: Click to Sign Out of Twitter" : "Unauthorized: Click to Authorize Twitter"}  placement="top-end">
             <Fab
               className={cx(classes.fab, twitterAuthorized ? classes.authorized : classes.noAuth)}
@@ -718,8 +607,8 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.twitter}/>
             </Fab>
           </Tooltip>
-        </Grid> */}
-        <Grid item>
+        </Grid2> */}
+        <Grid2>
           <Tooltip
             disableInteractive
             title={
@@ -740,8 +629,8 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.instagram} />
             </Fab>
           </Tooltip>
-        </Grid>
-        <Grid item>
+        </Grid2>
+        <Grid2>
           <Tooltip
             disableInteractive
             title={
@@ -762,8 +651,8 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.hydrus} />
             </Fab>
           </Tooltip>
-        </Grid>
-        <Grid item>
+        </Grid2>
+        <Grid2>
           <Tooltip
             disableInteractive
             title={
@@ -784,16 +673,16 @@ function APICard() {
               <SourceIcon className={classes.icon} type={ST.piwigo} />
             </Fab>
           </Tooltip>
-        </Grid>
-        <Grid item xs={12} className={classes.center}>
+        </Grid2>
+        <Grid2 size={12} className={classes.center}>
           <BaseSwitch
             label="Silence Tumblr Throttle Alert"
             disabled={!tumblrAuthorized}
-            selector={selectAppConfigRemoteSettingsSilenceTumblrAlert()}
+            selector={useGetRemoteSettingsSilenceTumblrAlertQuery}
             action={setConfigRemoteSettingsSilenceTumblrAlert}
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
       <Dialog
         open={openMenu === MO.signOut}
@@ -804,7 +693,7 @@ function APICard() {
         <DialogTitle id="sign-out-title">
           {menuTypeText} Sign Out
           <Avatar className={classes.iconAvatar}>
-            <SourceIcon className={classes.icon} type={menuType} />
+            <SourceIcon className={classes.icon} type={menuType as string} />
           </Avatar>
         </DialogTitle>
         <DialogContent>
@@ -877,8 +766,7 @@ function APICard() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="tumblr-description">
-            FlipFlip provides a few public keys for use, but we recommend
-            registering and using your own on{' '}
+            Register and use your own public key on{' '}
             <Link
               href="#"
               onClick={() => {
@@ -892,7 +780,7 @@ function APICard() {
             <Link
               href="#"
               onClick={() => {
-                openLink('https://regtemp8.github.io/flipflip/#/tumblr_api')
+                openLink('https://regtemp8.github.io/flipflip/#/v4/tumblr_api')
               }}
               underline="hover"
             >
@@ -901,22 +789,6 @@ function APICard() {
             for complete instructions.
           </DialogContentText>
           <div className={classes.root}>
-            <div>
-              <DialogContentText>Choose a key:</DialogContentText>
-              <RadioGroup
-                value={tumblrKeys.indexOf(tumblrKey) + 1}
-                onChange={onTumblrKeyInput}
-              >
-                {[''].concat(Object.values(tumblrKeys)).map((tk, i) => (
-                  <FormControlLabel
-                    key={i}
-                    value={i}
-                    control={<Radio />}
-                    label={i === 0 ? 'Use Your Key' : 'Public Key ' + i}
-                  />
-                ))}
-              </RadioGroup>
-            </div>
             <div className={classes.tumblrFields}>
               <TextField
                 variant="standard"
@@ -1270,19 +1142,7 @@ function APICard() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        autoHideDuration={20000}
-        onClose={onCloseSnack}
-        TransitionComponent={TransitionUp}
-      >
-        <Alert onClose={onCloseSnack} severity={snackbarSeverity as any}>
-          {snackbar}
-        </Alert>
-      </Snackbar>
-    </React.Fragment>
+    </>
   )
 }
 

@@ -1,38 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import wretch from 'wretch'
-import Sound from 'react-sound'
 
-import captionProgramDefaults, {
+import {
+  captionProgramDefaults,
   CancelablePromise,
   getMsTimestampValue,
   getRandomListItem,
   getTimingFromString,
   htmlEntities
-} from '../../data/utils'
-import { RP, TF } from 'flipflip-common'
+} from '../../utils'
+import { FontSettings, RP, TF } from 'flipflip-common'
 import type ChildCallbackHack from './ChildCallbackHack'
 import { Box, CircularProgress } from '@mui/material'
-import { setRouteGoBack } from '../../store/app/thunks'
-import { nextScene } from '../../store/scene/thunks'
-import { selectCurrentImageTags } from '../../store/librarySource/selectors'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  selectCaptionScriptUrl,
-  selectCaptionScriptScript,
-  selectCaptionScriptStopAtEnd,
-  selectCaptionScriptNextSceneAtEnd,
-  selectCaptionScriptSyncWithAudio,
-  selectCaptionScriptFontSettingsBlink,
-  selectCaptionScriptFontSettingsCaption,
-  selectCaptionScriptFontSettingsCaptionBig,
-  selectCaptionScriptFontSettingsCount,
-  selectCaptionScriptOpacity
-} from '../../store/captionScript/selectors'
-import { selectAudioBPM } from '../../store/audio/selectors'
-import flipflip from '../../FlipFlipService'
-import { RootState } from '../../store/store'
+import { useAppDispatch } from '../../store/hooks'
 import { HTMLContentElement } from './HTMLContentElement'
 import DurationCalculator from '../../data/DurationCalculator'
+import { useNavigate } from 'react-router'
+import {
+  useGetCaptionScriptFontSettingsQuery,
+  useGetCaptionScriptQuery
+} from '../../store/api/slice'
+import { useGetAudioBPMQuery } from '../../store/api/selectors'
 
 const splitFirstWord = function (s: string) {
   const firstSpaceIndex = s.indexOf(' ')
@@ -72,44 +60,30 @@ export interface CaptionProgramProps {
 
 export default function CaptionProgram(props: CaptionProgramProps) {
   const timeToNextFrame = props.timeToNextFrame ?? 0
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const currentImageTags = useAppSelector(
+  const currentImageTags: string[] = [] /*useAppSelector(
     selectCurrentImageTags(props.currentImage)
-  )
-  const url = useAppSelector(selectCaptionScriptUrl(props.captionScriptID))
-  const script = useAppSelector(
-    selectCaptionScriptScript(props.captionScriptID)
-  )
-  const stopAtEnd = useAppSelector(
-    selectCaptionScriptStopAtEnd(props.captionScriptID)
-  )
-  const nextSceneAtEnd = useAppSelector(
-    selectCaptionScriptNextSceneAtEnd(props.captionScriptID)
-  )
-  const syncWithAudio = useAppSelector(
-    selectCaptionScriptSyncWithAudio(props.captionScriptID)
-  )
-  const fsBlink = useAppSelector(
-    selectCaptionScriptFontSettingsBlink(props.captionScriptID)
-  )
-  const fsCaption = useAppSelector(
-    selectCaptionScriptFontSettingsCaption(props.captionScriptID)
-  )
-  const fsCaptionBig = useAppSelector(
-    selectCaptionScriptFontSettingsCaptionBig(props.captionScriptID)
-  )
-  const fsCount = useAppSelector(
-    selectCaptionScriptFontSettingsCount(props.captionScriptID)
-  )
-  const opacity = useAppSelector(
-    selectCaptionScriptOpacity(props.captionScriptID)
-  )
+  )*/
 
-  const bpmSelector =
-    props.currentAudio != null
-      ? selectAudioBPM(props.currentAudio)
-      : (state: RootState) => 0
-  const bpm = useAppSelector(bpmSelector)
+  const { data: script } = useGetCaptionScriptQuery(props.captionScriptID)
+  const { data: fsBlink } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'blink'
+  })
+  const { data: fsCaption } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'caption'
+  })
+  const { data: fsCaptionBig } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'captionBig'
+  })
+  const { data: fsCount } = useGetCaptionScriptFontSettingsQuery({
+    id: props.captionScriptID,
+    type: 'count'
+  })
+  const { data: bpm } = useGetAudioBPMQuery(props.currentAudio ?? -1)
 
   const [state, setState] = useState({
     ...captionProgramDefaults,
@@ -221,10 +195,11 @@ export default function CaptionProgram(props: CaptionProgramProps) {
                   bpm
                 )
             const waitFn = commands.wait(delay)
+            const fs = fsCaption as FontSettings
             const element = _el.current as HTMLDivElement
-            element.style.color = fsCaption.color
-            element.style.fontSize = fsCaption.fontSize * props.scale + 'vmin'
-            element.style.fontFamily = fsCaption.fontFamily
+            element.style.color = fs.color
+            element.style.fontSize = fs.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fs.fontFamily
             element.style.display = 'table-cell'
             element.style.textAlign = 'center'
             element.style.verticalAlign = 'bottom'
@@ -245,9 +220,9 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               element.style.paddingRight = xPos * -1 + 'vmin'
             }
             // _el.current.style.transition = 'opacity 0.5s ease-in-out';
-            if (fsCaption.border) {
+            if (fs.border) {
               element.style.webkitTextStroke =
-                fsCaption.borderpx * props.scale + 'px ' + fsCaption.borderColor
+                fs.borderpx * props.scale + 'px ' + fs.borderColor
             } else {
               element.style.webkitTextStroke = 'unset'
             }
@@ -304,11 +279,11 @@ export default function CaptionProgram(props: CaptionProgramProps) {
                   bpm
                 )
             const waitFn = commands.wait(delay)
+            const fs = fsCaptionBig as FontSettings
             const element = _el.current as HTMLDivElement
-            element.style.color = fsCaptionBig.color
-            element.style.fontSize =
-              fsCaptionBig.fontSize * props.scale + 'vmin'
-            element.style.fontFamily = fsCaptionBig.fontFamily
+            element.style.color = fs.color
+            element.style.fontSize = fs.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fs.fontFamily
             element.style.display = 'table-cell'
             element.style.textAlign = 'center'
             element.style.verticalAlign = 'middle'
@@ -329,11 +304,9 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               element.style.paddingRight = xPos * -1 + 'vmin'
             }
             element.style.transition = 'opacity 0.1s ease-out'
-            if (fsCaptionBig.border) {
+            if (fs.border) {
               element.style.webkitTextStroke =
-                fsCaptionBig.borderpx * props.scale +
-                'px ' +
-                fsCaptionBig.borderColor
+                fs.borderpx * props.scale + 'px ' + fs.borderColor
             } else {
               element.style.webkitTextStroke = 'unset'
             }
@@ -437,10 +410,11 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               })
             }
 
+            const fs = fsBlink as FontSettings
             const element = _el.current as HTMLDivElement
-            element.style.color = fsBlink.color
-            element.style.fontSize = fsBlink.fontSize * props.scale + 'vmin'
-            element.style.fontFamily = fsBlink.fontFamily
+            element.style.color = fs.color
+            element.style.fontSize = fs.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fs.fontFamily
             element.style.display = 'table-cell'
             element.style.textAlign = 'center'
             element.style.verticalAlign = 'middle'
@@ -461,9 +435,9 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               element.style.paddingRight = xPos * -1 + 'vmin'
             }
             element.style.transition = 'opacity 0.1s ease-out'
-            if (fsBlink.border) {
+            if (fs.border) {
               element.style.webkitTextStroke =
-                fsBlink.borderpx * props.scale + 'px ' + fsBlink.borderColor
+                fs.borderpx * props.scale + 'px ' + fs.borderColor
             } else {
               element.style.webkitTextStroke = 'unset'
             }
@@ -507,7 +481,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
                 countProgress: true,
                 countCurrent: origStart - offset,
                 countTotal: Math.max(origStart, origEnd) - offset,
-                countColor: fsCount.color
+                countColor: (fsCount as FontSettings).color
               })
             } else if (state.countProgress) {
               setState({ ...state, countProgress: false })
@@ -610,10 +584,11 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               })
             }
 
+            const fs = fsCount as FontSettings
             const element = _el.current as HTMLDivElement
-            element.style.color = fsCount.color
-            element.style.fontSize = fsCount.fontSize * props.scale + 'vmin'
-            element.style.fontFamily = fsCount.fontFamily
+            element.style.color = fs.color
+            element.style.fontSize = fs.fontSize * props.scale + 'vmin'
+            element.style.fontFamily = fs.fontFamily
             element.style.display = 'table-cell'
             element.style.textAlign = 'center'
             element.style.verticalAlign = 'middle'
@@ -634,9 +609,9 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               element.style.paddingRight = xPos * -1 + 'vmin'
             }
             element.style.transition = 'opacity 0.1s ease-out'
-            if (fsCount.border) {
+            if (fs.border) {
               element.style.webkitTextStroke =
-                fsCount.borderpx * props.scale + 'px ' + fsCount.borderColor
+                fs.borderpx * props.scale + 'px ' + fs.borderColor
             } else {
               element.style.webkitTextStroke = 'unset'
             }
@@ -991,30 +966,30 @@ export default function CaptionProgram(props: CaptionProgramProps) {
     }),
     [
       bpm,
-      fsBlink.border,
-      fsBlink.borderColor,
-      fsBlink.borderpx,
-      fsBlink.color,
-      fsBlink.fontFamily,
-      fsBlink.fontSize,
-      fsCaption.border,
-      fsCaption.borderColor,
-      fsCaption.borderpx,
-      fsCaption.color,
-      fsCaption.fontFamily,
-      fsCaption.fontSize,
-      fsCaptionBig.border,
-      fsCaptionBig.borderColor,
-      fsCaptionBig.borderpx,
-      fsCaptionBig.color,
-      fsCaptionBig.fontFamily,
-      fsCaptionBig.fontSize,
-      fsCount.border,
-      fsCount.borderColor,
-      fsCount.borderpx,
-      fsCount.color,
-      fsCount.fontFamily,
-      fsCount.fontSize,
+      fsBlink?.border,
+      fsBlink?.borderColor,
+      fsBlink?.borderpx,
+      fsBlink?.color,
+      fsBlink?.fontFamily,
+      fsBlink?.fontSize,
+      fsCaption?.border,
+      fsCaption?.borderColor,
+      fsCaption?.borderpx,
+      fsCaption?.color,
+      fsCaption?.fontFamily,
+      fsCaption?.fontSize,
+      fsCaptionBig?.border,
+      fsCaptionBig?.borderColor,
+      fsCaptionBig?.borderpx,
+      fsCaptionBig?.color,
+      fsCaptionBig?.fontFamily,
+      fsCaptionBig?.fontSize,
+      fsCount?.border,
+      fsCount?.borderColor,
+      fsCount?.borderpx,
+      fsCount?.color,
+      fsCount?.fontFamily,
+      fsCount?.fontSize,
       getPhrase,
       props.scale,
       state,
@@ -1080,13 +1055,13 @@ export default function CaptionProgram(props: CaptionProgramProps) {
         fn(() => {
           const newCounter = index
           if (newCounter >= state.timestamps.length - 1) {
-            if (stopAtEnd) {
-              dispatch(setRouteGoBack())
+            if (script?.stopAtEnd) {
+              navigate(-1)
               return
             }
-            if (nextSceneAtEnd) {
+            if (script?.nextSceneAtEnd) {
               // TODO how is this going to work with scene playlists?
-              dispatch(nextScene(props.sceneID))
+              // dispatch(nextScene(props.sceneID))
               return
             }
             if (
@@ -1104,7 +1079,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
       return index
     }
 
-    if (props.getCurrentTimestamp && syncWithAudio) {
+    if (props.getCurrentTimestamp && script?.syncWithAudio) {
       const passed = props.getCurrentTimestamp()
       if (
         _lastTimestamp.current == null ||
@@ -1151,20 +1126,27 @@ export default function CaptionProgram(props: CaptionProgramProps) {
       }
       _timestampTimeout.current = window.setTimeout(timestampLoop, 100)
     }
-  }, [dispatch, nextSceneAtEnd, props, state, stopAtEnd, syncWithAudio])
+  }, [
+    dispatch,
+    script?.nextSceneAtEnd,
+    props,
+    state,
+    script?.stopAtEnd,
+    script?.syncWithAudio
+  ])
 
   const captionLoop = useCallback(() => {
     if (state.program[state.programCounter]) {
       state.program[state.programCounter](() => {
         let newCounter = state.programCounter + 1
         if (newCounter >= state.program.length) {
-          if (stopAtEnd) {
-            dispatch(setRouteGoBack())
+          if (script?.stopAtEnd) {
+            navigate(-1)
             return
           }
-          if (nextSceneAtEnd) {
+          if (script?.nextSceneAtEnd) {
             // TODO how is this going to work with scene playlists?
-            dispatch(nextScene(props.sceneID))
+            // dispatch(nextScene(props.sceneID))
             if (!props.persist) return
           }
           if (
@@ -1185,18 +1167,18 @@ export default function CaptionProgram(props: CaptionProgramProps) {
         captionLoop()
       })
     }
-  }, [dispatch, nextSceneAtEnd, props, state, stopAtEnd])
+  }, [dispatch, script?.nextSceneAtEnd, props, state, script?.stopAtEnd])
 
   const start = useCallback(() => {
-    _runningPromise.current = new CancelablePromise((resolve, reject) => {
-      if (script != null) {
-        resolve({ data: [script] })
+    _runningPromise.current = new CancelablePromise((resolve) => {
+      if (script?.script != null) {
+        resolve({ data: [script?.script] })
       } else {
-        wretch(url)
+        wretch(script?.url)
           .get()
-          .error(503, (error) => {
+          .error(503, () => {
             console.warn(
-              'Unable to access ' + url + ' - Service is unavailable'
+              'Unable to access ' + script?.url + ' - Service is unavailable'
             )
           })
           .text((data) => {
@@ -1461,8 +1443,8 @@ export default function CaptionProgram(props: CaptionProgramProps) {
               alias = audioSplit[1]
             }
             if (
-              !file.startsWith('http') &&
-              !(await flipflip().api.pathExists(file))
+              !file.startsWith('http') /*&&
+              !(await flipflip().api.pathExists(file))*/ // TODO how is this going to work? move to server?
             ) {
               error =
                 'Error: {' +
@@ -1800,7 +1782,16 @@ export default function CaptionProgram(props: CaptionProgramProps) {
         }
       }
     })
-  }, [advance, captionLoop, commands, props, script, state, timestampLoop, url])
+  }, [
+    advance,
+    captionLoop,
+    commands,
+    props,
+    script,
+    state,
+    timestampLoop,
+    script?.url
+  ])
 
   useEffect(() => {
     start()
@@ -1894,7 +1885,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
     }
   }
   return (
-    <React.Fragment>
+    <>
       <div
         style={{
           zIndex: 6,
@@ -1908,23 +1899,20 @@ export default function CaptionProgram(props: CaptionProgramProps) {
           bottom: 0,
           left: 0,
           overflow: 'hidden',
-          opacity: opacity / 100
+          opacity: script != null ? script.opacity / 100 : 1
         }}
       >
         <Box component="div" ref={_el} />
       </div>
       {state.audios.map((a) => {
         return (
-          <Sound
+          // TODO set volume
+          // TODO test if this works, replacement for react-sound
+          <audio
             key={a.alias}
-            url={a.file}
-            playStatus={
-              a.playing
-                ? (Sound as any).status.PLAYING
-                : (Sound as any).status.PAUSED
-            }
-            volume={a.volume}
-            onFinishedPlaying={() => {
+            src={a.file}
+            autoPlay={a.playing}
+            onEnded={() => {
               const newAudios = Array.from(state.audios)
               const audio = newAudios.find((au) => a.alias === au.alias)
               if (audio) {
@@ -1951,7 +1939,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
             bottom: 0,
             left: 0,
             overflow: 'hidden',
-            opacity: opacity / 100
+            opacity: script != null ? script.opacity / 100 : 1
           }}
         >
           {state.countChild === 0 && (
@@ -1980,7 +1968,7 @@ export default function CaptionProgram(props: CaptionProgramProps) {
           )}
         </div>
       )}
-    </React.Fragment>
+    </>
   )
 }
 

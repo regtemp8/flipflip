@@ -1,7 +1,6 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
-import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, MenuItem, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
@@ -9,11 +8,6 @@ import { en, STF } from 'flipflip-common'
 import TimingCard from '../common/TimingCard'
 import EasingCard from '../common/EasingCard'
 import BaseSelect from '../common/BaseSelect'
-import {
-  selectAppTutorial,
-  selectAppConfigDisplaySettingsEasingControls,
-  selectAppLastRouteIsPlayer
-} from '../../store/app/selectors'
 import {
   setSceneSlide,
   setSceneSlideTF,
@@ -29,27 +23,31 @@ import {
   setSceneSlidePer,
   setSceneSlideType,
   setSceneSlideDistance
-} from '../../store/scene/actions'
+} from '../../store/api/thunks'
 import {
-  selectSceneHasBPM,
-  selectSceneSlide,
-  selectSceneSlideTF,
-  selectSceneSlideDuration,
-  selectSceneSlideDurationMin,
-  selectSceneSlideDurationMax,
-  selectSceneSlideSinRate,
-  selectSceneSlideBPMMulti,
-  selectSceneSlideEase,
-  selectSceneSlideExp,
-  selectSceneSlideOv,
-  selectSceneSlideAmp,
-  selectSceneSlidePer,
-  selectSceneSlideType,
-  selectSceneSlideDistance
-} from '../../store/scene/selectors'
-import { useAppSelector } from '../../store/hooks'
+  useGetSceneSlideQuery,
+  useGetSceneSlideTFQuery,
+  useGetSceneSlideDurationQuery,
+  useGetSceneSlideDurationMinQuery,
+  useGetSceneSlideDurationMaxQuery,
+  useGetSceneSlideSinRateQuery,
+  useGetSceneSlideBPMMultiQuery,
+  useGetSceneSlideEaseQuery,
+  useGetSceneSlideExpQuery,
+  useGetSceneSlideOvQuery,
+  useGetSceneSlideAmpQuery,
+  useGetSceneSlidePerQuery,
+  useGetSceneSlideTypeQuery,
+  useGetSceneSlideDistanceQuery,
+  useGetDisplaySettingsEasingControlsQuery
+} from '../../store/api/selectors'
+import {
+  useGetSceneHasBPMQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -81,45 +79,46 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface SlideCardProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function SlideCard(props: SlideCardProps) {
   const { classes } = useStyles()
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const slide = useAppSelector(selectSceneSlide(props.sceneID))
-  const tutorial = useAppSelector(selectAppTutorial())
-  const easingControls = useAppSelector(
-    selectAppConfigDisplaySettingsEasingControls()
-  )
+  const sidebar = useIsPlayerRoute()
+  const { data: slide } = useGetSceneSlideQuery(props.sceneID)
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: easingControls } = useGetDisplaySettingsEasingControlsQuery()
 
   return (
-    <Grid
+    <Grid2
       container
       spacing={slide ? 2 : 0}
       alignItems="center"
-      className={cx(tutorial != null && classes.disable)}
+      className={cx(tutorial?.current != null && classes.disable)}
     >
-      <Grid item xs={12}>
+      <Grid2 size={12}>
         <BaseSwitch
           label="Slide"
-          selector={selectSceneSlide(props.sceneID)}
+          selector={() => useGetSceneSlideQuery(props.sceneID)}
           action={setSceneSlide(props.sceneID)}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={slide} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={slide} className={classes.fullWidth}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={sidebar ? 12 : 4} style={{ paddingTop: 10 }}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2
+              size={{ xs: 12, sm: sidebar ? 12 : 4 }}
+              style={{ paddingTop: 10 }}
+            >
               <BaseSelect
                 label="Direction"
                 controlClassName={classes.fullWidth}
-                selector={selectSceneSlideType(props.sceneID)}
+                selector={() => useGetSceneSlideTypeQuery(props.sceneID)}
                 action={setSceneSlideType(props.sceneID)}
               >
                 {Object.values(STF).map((tf) => (
@@ -128,92 +127,92 @@ function SlideCard(props: SlideCardProps) {
                   </MenuItem>
                 ))}
               </BaseSelect>
-            </Grid>
-            <Grid item xs={12} sm={sidebar ? 12 : 8}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 8 }}>
               <BaseSlider
                 min={1}
                 max={100}
                 format={{ type: 'percent' }}
                 label={{ text: 'Distance:', appendValue: true }}
                 labelledBy="slide-distance-slider"
-                selector={selectSceneSlideDistance(props.sceneID)}
+                selector={() => useGetSceneSlideDistanceQuery(props.sceneID)}
                 action={setSceneSlideDistance(props.sceneID)}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
           <TimingCard
             sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
-              selector: selectSceneSlideTF(props.sceneID),
+              selector: () => useGetSceneSlideTFQuery(props.sceneID),
               action: setSceneSlideTF(props.sceneID)
             }}
             duration={{
-              selector: selectSceneSlideDuration(props.sceneID),
+              selector: () => useGetSceneSlideDurationQuery(props.sceneID),
               action: setSceneSlideDuration(props.sceneID)
             }}
             durationMin={{
-              selector: selectSceneSlideDurationMin(props.sceneID),
+              selector: () => useGetSceneSlideDurationMinQuery(props.sceneID),
               action: setSceneSlideDurationMin(props.sceneID)
             }}
             durationMax={{
-              selector: selectSceneSlideDurationMax(props.sceneID),
+              selector: () => useGetSceneSlideDurationMaxQuery(props.sceneID),
               action: setSceneSlideDurationMax(props.sceneID)
             }}
             wave={{
-              selector: selectSceneSlideSinRate(props.sceneID),
+              selector: () => useGetSceneSlideSinRateQuery(props.sceneID),
               action: setSceneSlideSinRate(props.sceneID),
               labelledBy: 'slide-sin-rate-slider'
             }}
             bpm={{
-              selector: selectSceneSlideBPMMulti(props.sceneID),
+              selector: () => useGetSceneSlideBPMMultiQuery(props.sceneID),
               action: setSceneSlideBPMMulti(props.sceneID),
               labelledBy: 'slide-bpm-multi-slider'
             }}
           />
         </Collapse>
-      </Grid>
+      </Grid2>
       {easingControls && (
-        <React.Fragment>
-          <Grid item xs={12}>
+        <>
+          <Grid2 size={12}>
             <Collapse in={slide} className={classes.fullWidth}>
               <Divider />
             </Collapse>
-          </Grid>
-          <Grid item xs={12}>
+          </Grid2>
+          <Grid2 size={12}>
             <Collapse in={slide} className={classes.fullWidth}>
               <EasingCard
                 sidebar={sidebar}
                 easing={{
-                  selector: selectSceneSlideEase(props.sceneID),
+                  selector: () => useGetSceneSlideEaseQuery(props.sceneID),
                   action: setSceneSlideEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectSceneSlideExp(props.sceneID),
+                  selector: () => useGetSceneSlideExpQuery(props.sceneID),
                   action: setSceneSlideExp(props.sceneID),
                   labelledBy: 'slide-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectSceneSlideOv(props.sceneID),
+                  selector: () => useGetSceneSlideOvQuery(props.sceneID),
                   action: setSceneSlideOv(props.sceneID),
                   labelledBy: 'slide-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectSceneSlideAmp(props.sceneID),
+                  selector: () => useGetSceneSlideAmpQuery(props.sceneID),
                   action: setSceneSlideAmp(props.sceneID),
                   labelledBy: 'slide-amp-slider'
                 }}
                 period={{
-                  selector: selectSceneSlidePer(props.sceneID),
+                  selector: () => useGetSceneSlidePerQuery(props.sceneID),
                   action: setSceneSlidePer(props.sceneID),
                   labelledBy: 'slide-per-slider'
                 }}
               />
             </Collapse>
-          </Grid>
-        </React.Fragment>
+          </Grid2>
+        </>
       )}
-    </Grid>
+    </Grid2>
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import { ChangeEvent, CSSProperties, FormEvent, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -7,13 +7,14 @@ import {
   IconButton,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
   ListItemText,
   Radio,
   TextField,
   type Theme,
   Tooltip,
-  Typography
+  Typography,
+  useTheme,
+  useMediaQuery
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -25,16 +26,25 @@ import SourceIcon from './SourceIcon'
 import { grey } from '@mui/material/colors'
 import { SP } from 'flipflip-common'
 import EditIcon from '@mui/icons-material/Edit'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppSpecialMode } from '../../store/app/selectors'
-import { openScriptInScriptor } from '../../store/app/thunks'
 import TagChip from './TagChip'
+import { useGetCaptionScriptQuery } from '../../store/api/slice'
+import { useNavigate } from 'react-router'
+import { selectSpecialMode } from '../../store/app/selectors'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
 import {
-  selectCaptionScriptUrl,
-  selectCaptionScriptMarked,
-  selectCaptionScriptTags
-} from '../../store/captionScript/selectors'
-import flipflip from '../../FlipFlipService'
+  selectScriptLibraryEditing,
+  selectScriptLibraryIsLastSelected
+} from '../../store/scriptLibrary/selectors'
+import {
+  ScriptEdit,
+  setScriptLibraryEditing,
+  setScriptLibraryLastSelected
+} from '../../store/scriptLibrary/slice'
+import {
+  deleteCaptionScript,
+  updateCaptionScript
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -92,82 +102,98 @@ const useStyles = makeStyles()((theme: Theme) => ({
   actionButton: {
     marginLeft: theme.spacing(1)
   },
-  fullTag: {
-    [theme.breakpoints.down('md')]: {
-      display: 'none'
-    }
-  },
-  simpleTag: {
-    [theme.breakpoints.up('md')]: {
-      display: 'none'
-    },
-    [theme.breakpoints.down('sm')]: {
-      display: 'none'
-    }
-  },
   urlField: {
     width: '100%',
     margin: 0
   },
   noUserSelect: {
     userSelect: 'none'
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
+
+interface ListItemTagChip {
+  tagID: number
+}
+
+function ListItemTagChip(props: ListItemTagChip) {
+  const { tagID } = props
+  const theme = useTheme()
+  const isFullTag = useMediaQuery(theme.breakpoints.up('md'))
+  const isSimpleTag = useMediaQuery(theme.breakpoints.up('sm'))
+  const { classes } = useStyles()
+
+  if (isFullTag || isSimpleTag) {
+    return (
+      <TagChip
+        tagID={tagID}
+        className={cx(classes.noUserSelect, classes.actionButton)}
+        outlined
+        simpleTag={!isFullTag}
+      />
+    )
+  } else {
+    return null
+  }
+}
 
 export interface ScriptSourceListItemProps {
   checked: boolean
   index: number
-  isEditing: number
-  lastSelected: boolean
   scriptID: number
-  style: any
-  onDelete: (scriptID: number) => void
-  onEndEdit: (newURL: string) => void
+  style: CSSProperties
   onPlay: (scriptID: number) => void
   onRemove: (scriptID: number) => void
-  onSourceOptions: (scriptID: number) => void
-  onStartEdit: (scriptID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>) => void
-  savePosition: () => void
 }
 
 function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   const dispatch = useAppDispatch()
-  const specialMode = useAppSelector(selectAppSpecialMode())
-  const url = useAppSelector(selectCaptionScriptUrl(props.scriptID))
-  const marked = useAppSelector(selectCaptionScriptMarked(props.scriptID))
-  const tags = useAppSelector(selectCaptionScriptTags(props.scriptID))
+  const navigate = useNavigate()
+  const specialMode = useAppSelector(selectSpecialMode())
+  const lastSelected = useAppSelector(
+    selectScriptLibraryIsLastSelected(props.scriptID)
+  )
+  const { data: script } = useGetCaptionScriptQuery(props.scriptID)
 
-  const [urlInput, setUrlInput] = useState<string>()
+  const editing = useAppSelector(selectScriptLibraryEditing())
 
-  useEffect(() => {
-    setUrlInput(url)
-  }, [url])
-
-  const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
-    const sourceURL = url as string
-    if (e.shiftKey && e.ctrlKey && e.altKey) {
-      props.onDelete(props.scriptID)
-    } else if (e.shiftKey && !e.ctrlKey) {
-      openExternalURL(sourceURL)
-    } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip().api.showItemInFolder(sourceURL)
-    } else if (!e.shiftKey && !e.ctrlKey) {
-      props.savePosition()
-      props.onPlay(props.scriptID)
+  const beginEditingUrl = () => {
+    if (script != null) {
+      const { id, url } = script
+      dispatch(setScriptLibraryEditing({ id, url }))
     }
   }
 
-  const onEditSource = (e: ChangeEvent<HTMLInputElement>) => {
-    setUrlInput(e.target.value)
+  const endEditingUrl = (e: FormEvent) => {
+    e.preventDefault()
+    const { id, url } = editing as ScriptEdit
+    if (url === '') {
+      dispatch(deleteCaptionScript(id))
+    } else {
+      dispatch(updateCaptionScript({ id, url }))
+    }
+
+    dispatch(setScriptLibraryEditing(undefined))
   }
 
-  const onEndEdit = () => {
-    props.onEndEdit(urlInput as string)
+  const onChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(
+      setScriptLibraryEditing({
+        id: editing?.id as number,
+        url: e.currentTarget.value
+      })
+    )
   }
 
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
+  const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (e.shiftKey && !e.ctrlKey) {
+      window.open(script?.fileUrl, '_blank')?.focus()
+    } else if (!e.shiftKey && !e.ctrlKey) {
+      props.onPlay(props.scriptID)
+    }
   }
 
   const { classes } = useStyles()
@@ -176,10 +202,59 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
       style={props.style}
       className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
-        props.lastSelected && classes.lastSelected
+        lastSelected && classes.lastSelected
       )}
     >
-      <ListItem>
+      <ListItem
+        secondaryAction={
+          editing?.id !== props.scriptID && (
+            <>
+              {!specialMode && (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    dispatch(saveScriptLibraryYOffset())
+                    dispatch(setScriptLibraryLastSelected(props.scriptID))
+                    navigate(`/scriptor/${props.scriptID}`)
+                  }}
+                  className={classes.actionButton}
+                  edge="end"
+                  size="small"
+                  aria-label="edit"
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  dispatch(saveScriptLibraryYOffset())
+                  dispatch(setScriptLibraryLastSelected(props.scriptID))
+                  navigate(`/scripts/${props.scriptID}/options`)
+                }}
+                className={classes.actionButton}
+                edge="end"
+                size="small"
+                aria-label="options"
+              >
+                <BuildIcon />
+              </IconButton>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  props.onRemove(props.scriptID)
+                }}
+                className={cx(classes.deleteButton, classes.actionButton)}
+                edge="end"
+                size="small"
+                aria-label="delete"
+              >
+                <DeleteIcon className={classes.deleteIcon} color="inherit" />
+              </IconButton>
+            </>
+          )
+        }
+      >
         {(specialMode === SP.batchTag || specialMode === SP.select) && (
           <Checkbox
             value={props.scriptID}
@@ -198,26 +273,31 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
           <Tooltip
             disableInteractive
             title={
-              <div>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                Library Tagging
-                <br />
-                Shift+Click: Open Source
-                <br />
-                &nbsp;&nbsp;Ctrl+Click: Reveal File
-              </div>
+              <table>
+                <tr>
+                  <td className={classes.textRight}>Click:</td>
+                  <td>Play Script</td>
+                </tr>
+                <tr>
+                  <td className={classes.textRight}>Shift+Click:</td>
+                  <td>Open Script</td>
+                </tr>
+              </table>
             }
           >
             <Fab
               size="small"
               onClick={onSourceIconClick}
-              className={cx(classes.avatar, marked && classes.markedSource)}
+              className={cx(
+                classes.avatar,
+                script?.marked && classes.markedSource
+              )}
             >
               <SourceIcon
-                url={url}
+                type={script?.type ?? ''}
                 className={cx(
                   classes.sourceIcon,
-                  marked && classes.sourceMarkedIcon
+                  script?.marked && classes.sourceMarkedIcon
                 )}
               />
             </Fab>
@@ -225,92 +305,35 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
         </ListItemAvatar>
 
         <ListItemText classes={{ primary: classes.root }}>
-          {props.isEditing === props.scriptID && (
-            <form onSubmit={onEndEdit} className={classes.urlField}>
+          {editing?.id === props.scriptID && (
+            <form onSubmit={endEditingUrl} className={classes.urlField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
-                value={urlInput}
+                value={editing.url}
                 margin="none"
                 className={classes.urlField}
-                onBlur={onEndEdit}
-                onChange={onEditSource}
+                onBlur={endEditingUrl}
+                onChange={onChangeUrl}
               />
             </form>
           )}
-          {props.isEditing !== props.scriptID && (
-            <React.Fragment>
+          {editing?.id !== props.scriptID && (
+            <>
               <Typography
                 noWrap
                 className={classes.noUserSelect}
-                onClick={() => props.onStartEdit(props.scriptID)}
+                onClick={beginEditingUrl}
               >
-                {url}
+                {script?.url ?? ''}
               </Typography>
-              {tags &&
-                tags.map((tagID) => (
-                  <React.Fragment key={tagID}>
-                    <TagChip
-                      tagID={tagID}
-                      className={cx(
-                        classes.noUserSelect,
-                        classes.actionButton,
-                        classes.fullTag
-                      )}
-                      outlined
-                    />
-                    <TagChip
-                      tagID={tagID}
-                      className={cx(
-                        classes.noUserSelect,
-                        classes.actionButton,
-                        classes.simpleTag
-                      )}
-                      outlined
-                      simpleTag
-                    />
-                  </React.Fragment>
-                ))}
-            </React.Fragment>
+              {script?.tags?.map((tagID) => (
+                <ListItemTagChip key={tagID} tagID={tagID} />
+              ))}
+            </>
           )}
         </ListItemText>
-
-        {props.isEditing !== props.scriptID && (
-          <ListItemSecondaryAction>
-            {!specialMode && (
-              <IconButton
-                onClick={() => {
-                  dispatch(openScriptInScriptor(props.scriptID))
-                }}
-                className={classes.actionButton}
-                edge="end"
-                size="small"
-                aria-label="edit"
-              >
-                <EditIcon />
-              </IconButton>
-            )}
-            <IconButton
-              onClick={() => props.onSourceOptions(props.scriptID)}
-              className={classes.actionButton}
-              edge="end"
-              size="small"
-              aria-label="options"
-            >
-              <BuildIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => props.onRemove(props.scriptID)}
-              className={cx(classes.deleteButton, classes.actionButton)}
-              edge="end"
-              size="small"
-              aria-label="delete"
-            >
-              <DeleteIcon className={classes.deleteIcon} color="inherit" />
-            </IconButton>
-          </ListItemSecondaryAction>
-        )}
       </ListItem>
     </div>
   )

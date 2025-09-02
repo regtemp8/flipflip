@@ -1,18 +1,12 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
-import { Collapse, Divider, Grid, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import { en, HTF, VTF } from 'flipflip-common'
 import TimingCard from '../common/TimingCard'
 import EasingCard from '../common/EasingCard'
-import {
-  selectAppTutorial,
-  selectAppConfigDisplaySettingsEasingControls,
-  selectAppLastRouteIsPlayer
-} from '../../store/app/selectors'
 import {
   setScenePanning,
   setScenePanTF,
@@ -43,42 +37,46 @@ import {
   setScenePanVertTransLevel,
   setScenePanVertTransLevelMin,
   setScenePanVertTransLevelMax
-} from '../../store/scene/actions'
+} from '../../store/api/thunks'
 import {
-  selectSceneHasBPM,
-  selectScenePanning,
-  selectScenePanTF,
-  selectScenePanDuration,
-  selectScenePanDurationMin,
-  selectScenePanDurationMax,
-  selectScenePanSinRate,
-  selectScenePanBPMMulti,
-  selectScenePanStartEase,
-  selectScenePanStartExp,
-  selectScenePanStartOv,
-  selectScenePanStartAmp,
-  selectScenePanStartPer,
-  selectScenePanEndEase,
-  selectScenePanEndExp,
-  selectScenePanEndOv,
-  selectScenePanEndAmp,
-  selectScenePanEndPer,
-  selectScenePanHorizTransType,
-  selectScenePanHorizTransRandom,
-  selectScenePanHorizTransImg,
-  selectScenePanHorizTransLevel,
-  selectScenePanHorizTransLevelMin,
-  selectScenePanHorizTransLevelMax,
-  selectScenePanVertTransType,
-  selectScenePanVertTransRandom,
-  selectScenePanVertTransImg,
-  selectScenePanVertTransLevel,
-  selectScenePanVertTransLevelMin,
-  selectScenePanVertTransLevelMax
-} from '../../store/scene/selectors'
+  useGetScenePanningQuery,
+  useGetScenePanTFQuery,
+  useGetScenePanDurationQuery,
+  useGetScenePanDurationMinQuery,
+  useGetScenePanDurationMaxQuery,
+  useGetScenePanSinRateQuery,
+  useGetScenePanBPMMultiQuery,
+  useGetScenePanStartEaseQuery,
+  useGetScenePanStartExpQuery,
+  useGetScenePanStartOvQuery,
+  useGetScenePanStartAmpQuery,
+  useGetScenePanStartPerQuery,
+  useGetScenePanEndEaseQuery,
+  useGetScenePanEndExpQuery,
+  useGetScenePanEndOvQuery,
+  useGetScenePanEndAmpQuery,
+  useGetScenePanEndPerQuery,
+  useGetScenePanHorizTransTypeQuery,
+  useGetScenePanHorizTransRandomQuery,
+  useGetScenePanHorizTransImgQuery,
+  useGetScenePanHorizTransLevelQuery,
+  useGetScenePanHorizTransLevelMinQuery,
+  useGetScenePanHorizTransLevelMaxQuery,
+  useGetScenePanVertTransTypeQuery,
+  useGetScenePanVertTransRandomQuery,
+  useGetScenePanVertTransImgQuery,
+  useGetScenePanVertTransLevelQuery,
+  useGetScenePanVertTransLevelMinQuery,
+  useGetScenePanVertTransLevelMaxQuery,
+  useGetDisplaySettingsEasingControlsQuery
+} from '../../store/api/selectors'
+import {
+  useGetSceneHasBPMQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import MoveCard from '../common/MoveCard'
 import BaseSwitch from '../common/BaseSwitch'
-import { useAppSelector } from '../../store/hooks'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -113,43 +111,41 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface PanningCardProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function PanningCard(props: PanningCardProps) {
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const panning = useAppSelector(selectScenePanning(props.sceneID))
-  const tutorial = useAppSelector(selectAppTutorial())
-  const easingControls = useAppSelector(
-    selectAppConfigDisplaySettingsEasingControls()
-  )
+  const sidebar = useIsPlayerRoute()
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: easingControls } = useGetDisplaySettingsEasingControlsQuery()
+  const { data: panning } = useGetScenePanningQuery(props.sceneID)
 
   const { classes } = useStyles()
   return (
-    <Grid
+    <Grid2
       container
       spacing={panning ? 2 : 0}
       alignItems="center"
-      className={cx(tutorial != null && classes.disable)}
+      className={cx(tutorial?.current != null && classes.disable)}
     >
-      <Grid item xs={12}>
+      <Grid2 size={12}>
         <BaseSwitch
           label="Panning"
-          selector={selectScenePanning(props.sceneID)}
+          selector={() => useGetScenePanningQuery(props.sceneID)}
           action={setScenePanning(props.sceneID)}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={panning} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <MoveCard
           sidebar={sidebar}
-          enabled={panning}
+          enabled={panning === true}
           values={HTF}
-          valueMapper={(value: any) => {
+          valueMapper={(value: string) => {
             switch (value) {
               case HTF.left:
                 return `${en.get(value)} then ${en.get(HTF.right)}`
@@ -158,47 +154,49 @@ function PanningCard(props: PanningCardProps) {
               case HTF.random:
                 return 'Random'
               default:
-                return en.get(value)
+                return en.get(value) as string
             }
           }}
           label="Move Horizontally"
           type={{
-            selector: selectScenePanHorizTransType(props.sceneID),
+            selector: () => useGetScenePanHorizTransTypeQuery(props.sceneID),
             action: setScenePanHorizTransType(props.sceneID)
           }}
           random={{
-            selector: selectScenePanHorizTransRandom(props.sceneID),
+            selector: () => useGetScenePanHorizTransRandomQuery(props.sceneID),
             action: setScenePanHorizTransRandom(props.sceneID)
           }}
           imageWidth={{
-            selector: selectScenePanHorizTransImg(props.sceneID),
+            selector: () => useGetScenePanHorizTransImgQuery(props.sceneID),
             action: setScenePanHorizTransImg(props.sceneID)
           }}
           level={{
-            selector: selectScenePanHorizTransLevel(props.sceneID),
+            selector: () => useGetScenePanHorizTransLevelQuery(props.sceneID),
             action: setScenePanHorizTransLevel(props.sceneID)
           }}
           levelMin={{
-            selector: selectScenePanHorizTransLevelMin(props.sceneID),
+            selector: () =>
+              useGetScenePanHorizTransLevelMinQuery(props.sceneID),
             action: setScenePanHorizTransLevelMin(props.sceneID)
           }}
           levelMax={{
-            selector: selectScenePanHorizTransLevelMax(props.sceneID),
+            selector: () =>
+              useGetScenePanHorizTransLevelMaxQuery(props.sceneID),
             action: setScenePanHorizTransLevelMax(props.sceneID)
           }}
         />
-      </Grid>
-      <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
+      </Grid2>
+      <Grid2 size={12} className={cx(!panning && classes.noPadding)}>
         <Collapse in={panning} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <MoveCard
           sidebar={sidebar}
-          enabled={panning}
+          enabled={panning === true}
           values={VTF}
-          valueMapper={(value: any) => {
+          valueMapper={(value: string) => {
             switch (value) {
               case VTF.up:
                 return `${en.get(value)} then ${en.get(VTF.down)}`
@@ -207,108 +205,108 @@ function PanningCard(props: PanningCardProps) {
               case VTF.random:
                 return 'Random'
               default:
-                return en.get(value)
+                return en.get(value) as string
             }
           }}
           label="Move Vertically"
           type={{
-            selector: selectScenePanVertTransType(props.sceneID),
+            selector: () => useGetScenePanVertTransTypeQuery(props.sceneID),
             action: setScenePanVertTransType(props.sceneID)
           }}
           random={{
-            selector: selectScenePanVertTransRandom(props.sceneID),
+            selector: () => useGetScenePanVertTransRandomQuery(props.sceneID),
             action: setScenePanVertTransRandom(props.sceneID)
           }}
           imageHeight={{
-            selector: selectScenePanVertTransImg(props.sceneID),
+            selector: () => useGetScenePanVertTransImgQuery(props.sceneID),
             action: setScenePanVertTransImg(props.sceneID)
           }}
           level={{
-            selector: selectScenePanVertTransLevel(props.sceneID),
+            selector: () => useGetScenePanVertTransLevelQuery(props.sceneID),
             action: setScenePanVertTransLevel(props.sceneID)
           }}
           levelMin={{
-            selector: selectScenePanVertTransLevelMin(props.sceneID),
+            selector: () => useGetScenePanVertTransLevelMinQuery(props.sceneID),
             action: setScenePanVertTransLevelMin(props.sceneID)
           }}
           levelMax={{
-            selector: selectScenePanVertTransLevelMax(props.sceneID),
+            selector: () => useGetScenePanVertTransLevelMaxQuery(props.sceneID),
             action: setScenePanVertTransLevelMax(props.sceneID)
           }}
         />
-      </Grid>
-      <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
+      </Grid2>
+      <Grid2 size={12} className={cx(!panning && classes.noPadding)}>
         <Collapse in={panning} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={panning} className={classes.fullWidth}>
           <TimingCard
             sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
-              selector: selectScenePanTF(props.sceneID),
+              selector: () => useGetScenePanTFQuery(props.sceneID),
               action: setScenePanTF(props.sceneID)
             }}
             duration={{
-              selector: selectScenePanDuration(props.sceneID),
+              selector: () => useGetScenePanDurationQuery(props.sceneID),
               action: setScenePanDuration(props.sceneID)
             }}
             durationMin={{
-              selector: selectScenePanDurationMin(props.sceneID),
+              selector: () => useGetScenePanDurationMinQuery(props.sceneID),
               action: setScenePanDurationMin(props.sceneID)
             }}
             durationMax={{
-              selector: selectScenePanDurationMax(props.sceneID),
+              selector: () => useGetScenePanDurationMaxQuery(props.sceneID),
               action: setScenePanDurationMax(props.sceneID)
             }}
             wave={{
-              selector: selectScenePanSinRate(props.sceneID),
+              selector: () => useGetScenePanSinRateQuery(props.sceneID),
               action: setScenePanSinRate(props.sceneID),
               labelledBy: 'pan-sin-rate-slider'
             }}
             bpm={{
-              selector: selectScenePanBPMMulti(props.sceneID),
+              selector: () => useGetScenePanBPMMultiQuery(props.sceneID),
               action: setScenePanBPMMulti(props.sceneID),
               labelledBy: 'pan-bpm-multi-slider'
             }}
           />
         </Collapse>
-      </Grid>
+      </Grid2>
       {easingControls && (
-        <React.Fragment>
-          <Grid item xs={12} className={cx(!panning && classes.noPadding)}>
+        <>
+          <Grid2 size={12} className={cx(!panning && classes.noPadding)}>
             <Collapse in={panning} className={classes.fullWidth}>
               <Divider />
             </Collapse>
-          </Grid>
-          <Grid item xs={12}>
+          </Grid2>
+          <Grid2 size={12}>
             <Collapse in={panning} className={classes.fullWidth}>
               <EasingCard
                 label="Start Easing"
                 sidebar={sidebar}
                 easing={{
-                  selector: selectScenePanStartEase(props.sceneID),
+                  selector: () => useGetScenePanStartEaseQuery(props.sceneID),
                   action: setScenePanStartEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectScenePanStartExp(props.sceneID),
+                  selector: () => useGetScenePanStartExpQuery(props.sceneID),
                   action: setScenePanStartExp(props.sceneID),
                   labelledBy: 'pan-start-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectScenePanStartOv(props.sceneID),
+                  selector: () => useGetScenePanStartOvQuery(props.sceneID),
                   action: setScenePanStartOv(props.sceneID),
                   labelledBy: 'pan-start-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectScenePanStartAmp(props.sceneID),
+                  selector: () => useGetScenePanStartAmpQuery(props.sceneID),
                   action: setScenePanStartAmp(props.sceneID),
                   labelledBy: 'pan-start-amp-slider'
                 }}
                 period={{
-                  selector: selectScenePanStartPer(props.sceneID),
+                  selector: () => useGetScenePanStartPerQuery(props.sceneID),
                   action: setScenePanStartPer(props.sceneID),
                   labelledBy: 'pan-start-per-slider'
                 }}
@@ -317,35 +315,35 @@ function PanningCard(props: PanningCardProps) {
                 label="End Easing"
                 sidebar={sidebar}
                 easing={{
-                  selector: selectScenePanEndEase(props.sceneID),
+                  selector: () => useGetScenePanEndEaseQuery(props.sceneID),
                   action: setScenePanEndEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectScenePanEndExp(props.sceneID),
+                  selector: () => useGetScenePanEndExpQuery(props.sceneID),
                   action: setScenePanEndExp(props.sceneID),
                   labelledBy: 'pan-end-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectScenePanEndOv(props.sceneID),
+                  selector: () => useGetScenePanEndOvQuery(props.sceneID),
                   action: setScenePanEndOv(props.sceneID),
                   labelledBy: 'pan-end-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectScenePanEndAmp(props.sceneID),
+                  selector: () => useGetScenePanEndAmpQuery(props.sceneID),
                   action: setScenePanEndAmp(props.sceneID),
                   labelledBy: 'pan-end-amp-slider'
                 }}
                 period={{
-                  selector: selectScenePanEndPer(props.sceneID),
+                  selector: () => useGetScenePanEndPerQuery(props.sceneID),
                   action: setScenePanEndPer(props.sceneID),
                   labelledBy: 'pan-end-per-slider'
                 }}
               />
             </Collapse>
-          </Grid>
-        </React.Fragment>
+          </Grid2>
+        </>
       )}
-    </Grid>
+    </Grid2>
   )
 }
 

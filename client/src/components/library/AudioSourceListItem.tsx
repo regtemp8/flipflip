@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent } from 'react'
+import { ChangeEvent, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -9,7 +9,6 @@ import {
   IconButton,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
   ListItemText,
   type Theme,
   Tooltip,
@@ -22,25 +21,17 @@ import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 
-import { getTimestamp } from '../../data/utils'
+import { getTimestamp } from '../../utils'
 import { grey } from '@mui/material/colors'
 import SourceIcon from './SourceIcon'
-import { useAppSelector } from '../../store/hooks'
 import TagChip from './TagChip'
-import flipflip from '../../FlipFlipService'
-import {
-  selectAudioAlbum,
-  selectAudioArtist,
-  selectAudioComment,
-  selectAudioDuration,
-  selectAudioMarked,
-  selectAudioName,
-  selectAudioTags,
-  selectAudioThumb,
-  selectAudioTrackNum,
-  selectAudioUrl,
-  selectAudioPlayedCount
-} from '../../store/audio/selectors'
+import { useGetAudioQuery } from '../../store/api/slice'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { editAudioOptions } from '../../store/audioOptions/thunks'
+import { editAudioEdit } from '../../store/audioEdit/thunks'
+import { selectAudioLibraryIsLastSelected } from '../../store/audioLibrary/selectors'
+import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
+import { saveAudioLibraryYOffset } from '../../store/audioLibrary/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -179,6 +170,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
   },
   preLine: {
     whiteSpace: 'pre-line'
+  },
+  textRight: {
+    textAlign: 'right'
   }
 }))
 
@@ -186,47 +180,29 @@ export interface AudioSourceListItemProps {
   checked: boolean
   index: number
   isSelect: boolean
-  lastSelected: boolean
   audioID: number
   audios: number[]
   style: any
   onClickAlbum: (album: string) => void
   onClickArtist: (artist: string) => void
   onDelete: (audioID: number) => void
-  onEditSource: (audioID: number) => void
   onRemove: (audioID: number) => void
-  onSourceOptions: (audioID: number) => void
   onToggleSelect: (e: ChangeEvent<HTMLInputElement>, checked: boolean) => void
-  savePosition: () => void
 }
 
 function AudioSourceListItem(props: AudioSourceListItemProps) {
-  // const dispatch = useAppDispatch()
-  const url = useAppSelector(selectAudioUrl(props.audioID))
-  const marked = useAppSelector(selectAudioMarked(props.audioID))
-  const trackNum = useAppSelector(selectAudioTrackNum(props.audioID))
-  const comment = useAppSelector(selectAudioComment(props.audioID))
-  const tags = useAppSelector(selectAudioTags(props.audioID))
-  const thumb = useAppSelector(selectAudioThumb(props.audioID))
-  const name = useAppSelector(selectAudioName(props.audioID))
-  const duration = useAppSelector(selectAudioDuration(props.audioID))
-  const album = useAppSelector(selectAudioAlbum(props.audioID))
-  const artist = useAppSelector(selectAudioArtist(props.audioID))
-  const playedCount = useAppSelector(selectAudioPlayedCount(props.audioID))
+  const dispatch = useAppDispatch()
+  const lastSelected = useAppSelector(
+    selectAudioLibraryIsLastSelected(props.audioID)
+  )
+  const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
-    const sourceURL = url as string
-    if (e.shiftKey && e.ctrlKey && e.altKey) {
-      props.onDelete(props.audioID)
-    } else if (e.shiftKey && !e.ctrlKey) {
-      flipflip()
-        .api.getFileUrl(sourceURL)
-        .then((fileURL) => window.open(fileURL, '_blank')?.focus())
-    } else if (!e.shiftKey && e.ctrlKey) {
-      flipflip().api.showItemInFolder(sourceURL)
+    if (e.shiftKey && !e.ctrlKey) {
+      window.open(audio?.fileUrl, '_blank')?.focus()
     } else if (!e.shiftKey && !e.ctrlKey) {
+      dispatch(saveAudioLibraryYOffset())
       // TODO get playAudio to work
-      // props.savePosition()
       // try {
       //   dispatch(playAudio(props.audioID, props.audios))
       // } catch (e) {
@@ -237,16 +213,70 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
     }
   }
 
+  const onSourceOptions = (audioID: number) => {
+    dispatch(editAudioOptions(audioID))
+    dispatch(setAudioLibraryLastSelected(audioID))
+  }
+
+  const onEditSource = (audioID: number) => {
+    dispatch(editAudioEdit([audioID]))
+    dispatch(setAudioLibraryLastSelected(audioID))
+  }
+
   const { classes } = useStyles()
   return (
     <div
       style={props.style}
       className={cx(
         props.index % 2 === 0 ? classes.evenChild : classes.oddChild,
-        props.lastSelected && classes.lastSelected
+        lastSelected && classes.lastSelected
       )}
     >
-      <ListItem classes={{ root: classes.listItem }}>
+      <ListItem
+        classes={{ root: classes.listItem }}
+        secondaryAction={
+          props.audioID && (
+            <>
+              {(audio?.playedCount ?? 0) > 0 && (
+                <Chip label={audio?.playedCount} color="primary" size="small" />
+              )}
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditSource(props.audioID)
+                }}
+                className={classes.actionButton}
+                edge="end"
+                size="small"
+                aria-label="edit"
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSourceOptions(props.audioID)
+                }}
+                className={classes.actionButton}
+                edge="end"
+                size="small"
+                aria-label="options"
+              >
+                <BuildIcon />
+              </IconButton>
+              <IconButton
+                onClick={() => props.onRemove(props.audioID)}
+                className={cx(classes.deleteButton, classes.actionButton)}
+                edge="end"
+                size="small"
+                aria-label="delete"
+              >
+                <DeleteIcon className={classes.deleteIcon} color="inherit" />
+              </IconButton>
+            </>
+          )
+        }
+      >
         {props.isSelect && (
           <Checkbox
             value={props.audioID}
@@ -257,70 +287,71 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
         <Badge
           anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
           variant={'dot'}
-          invisible={!marked}
+          invisible={!audio?.marked}
           overlap="rectangular"
           color="secondary"
         >
           <ListItemAvatar className={classes.listAvatar}>
             <Badge
-              invisible={!trackNum}
+              invisible={!audio?.trackNum}
               max={999}
               overlap="rectangular"
               color="primary"
-              badgeContent={trackNum}
+              badgeContent={audio?.trackNum}
             >
               <Tooltip
                 disableInteractive
-                placement={comment ? 'right' : 'bottom'}
-                classes={comment ? { tooltip: classes.bigTooltip } : undefined}
-                arrow={!!comment || tags.length > 0}
+                placement={audio?.comment ? 'right' : 'bottom'}
+                classes={
+                  audio?.comment ? { tooltip: classes.bigTooltip } : undefined
+                }
+                arrow={!!audio?.comment || (audio?.tags.length ?? 0) > 0}
                 title={
-                  comment || tags.length > 0 ? (
+                  audio?.comment || (audio?.tags.length ?? 0) > 0 ? (
                     <div className={classes.preLine}>
-                      {comment}
-                      {comment && tags.length > 0 && <br />}
+                      {audio?.comment}
+                      {audio?.comment && audio?.tags.length > 0 && <br />}
                       <div className={classes.tagChips}>
-                        {tags &&
-                          tags.map((tagID: number) => (
-                            <React.Fragment key={tagID}>
-                              <TagChip tagID={tagID} />
-                            </React.Fragment>
-                          ))}
+                        {audio?.tags?.map((tagID: number) => (
+                          <TagChip key={tagID} tagID={tagID} />
+                        ))}
                       </div>
                     </div>
                   ) : (
-                    <div>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
-                      Play Audio
-                      <br />
-                      Shift+Click: Open Source
-                      <br />
-                      &nbsp;&nbsp;Ctrl+Click: Reveal File
-                    </div>
+                    <table>
+                      <tr>
+                        <td className={classes.textRight}>Click:</td>
+                        <td>Play Audio</td>
+                      </tr>
+                      <tr>
+                        <td className={classes.textRight}>Shift+Click:</td>
+                        <td>Open Source</td>
+                      </tr>
+                    </table>
                   )
                 }
               >
                 <div onClick={onSourceIconClick} className={classes.trackThumb}>
-                  {thumb != null && (
+                  {audio?.thumb != null && (
                     <img
                       className={classes.thumbImage}
-                      src={thumb}
-                      alt={name}
+                      src={audio?.thumb}
+                      alt={audio?.name}
                     />
                   )}
-                  {thumb == null && (
+                  {audio?.thumb == null && (
                     <Fab
                       size="small"
                       className={cx(
                         classes.avatar,
-                        marked && classes.markedSource
+                        audio?.marked && classes.markedSource
                       )}
                     >
                       <SourceIcon
-                        url={url}
+                        type={audio?.type ?? ''}
                         className={cx(
                           classes.sourceIcon,
-                          marked && classes.sourceMarkedIcon
+                          audio?.marked && classes.sourceMarkedIcon
                         )}
                       />
                     </Fab>
@@ -333,65 +364,36 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
 
         <ListItemText classes={{ primary: classes.root }}>
           <Typography noWrap className={classes.trackName}>
-            {name}
+            {audio?.name ?? ''}
           </Typography>
           <Typography className={classes.trackDuration}>
-            {getTimestamp(duration as number)}
+            {audio?.duration != null ? getTimestamp(audio.duration) : ''}
           </Typography>
-          {artist && (
-            <div
-              className={classes.artistContainer}
-              onClick={() => props.onClickArtist(artist)}
-            >
-              <Typography noWrap className={classes.trackArtist}>
-                {artist}
-              </Typography>
-            </div>
-          )}
-          {album && (
-            <div
-              className={classes.albumContainer}
-              onClick={() => props.onClickAlbum(album)}
-            >
-              <Typography className={classes.trackAlbum}>{album}</Typography>
-            </div>
-          )}
+          <div
+            className={classes.artistContainer}
+            onClick={
+              audio?.artist != null
+                ? () => props.onClickArtist(audio.artist as string)
+                : undefined
+            }
+          >
+            <Typography noWrap className={classes.trackArtist}>
+              {audio?.artist ?? ''}
+            </Typography>
+          </div>
+          <div
+            className={classes.albumContainer}
+            onClick={
+              audio?.album != null
+                ? () => props.onClickAlbum(audio.album as string)
+                : undefined
+            }
+          >
+            <Typography className={classes.trackAlbum}>
+              {audio?.album ?? ''}
+            </Typography>
+          </div>
         </ListItemText>
-
-        {props.audioID && (
-          <ListItemSecondaryAction>
-            {playedCount > 0 && (
-              <Chip label={playedCount} color="primary" size="small" />
-            )}
-            <IconButton
-              onClick={() => props.onEditSource(props.audioID)}
-              className={classes.actionButton}
-              edge="end"
-              size="small"
-              aria-label="edit"
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => props.onSourceOptions(props.audioID)}
-              className={classes.actionButton}
-              edge="end"
-              size="small"
-              aria-label="options"
-            >
-              <BuildIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => props.onRemove(props.audioID)}
-              className={cx(classes.deleteButton, classes.actionButton)}
-              edge="end"
-              size="small"
-              aria-label="delete"
-            >
-              <DeleteIcon className={classes.deleteIcon} color="inherit" />
-            </IconButton>
-          </ListItemSecondaryAction>
-        )}
       </ListItem>
     </div>
   )

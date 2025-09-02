@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useState,
   type MouseEvent,
@@ -30,11 +30,9 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
   Menu,
-  MenuItem,
   SvgIcon,
   TextField,
   type Theme,
@@ -67,7 +65,6 @@ import SelectAllIcon from '@mui/icons-material/SelectAll'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 
-import flipflip from '../../FlipFlipService'
 import { en, AF, LT, MO, PR, SF, SP, ST } from 'flipflip-common'
 import BatchClipDialog from './BatchClipDialog'
 import LibrarySearch from './LibrarySearch'
@@ -77,57 +74,22 @@ import GooninatorDialog from '../sceneDetail/GooninatorDialog'
 import PiwigoDialog from '../sceneDetail/PiwigoDialog'
 import URLDialog from '../sceneDetail/URLDialog'
 import {
-  setProgressMode,
-  setLibraryFilters,
-  setLibrarySelected,
-  systemMessage,
-  batchClip,
-  batchTag,
-  manageTags,
-  setLibraryRemove,
-  setLibraryRemoveAll
-} from '../../store/app/slice'
+  useGetContentSourceBatchTagOptionsQuery,
+  useGetContentSourceSearchOptionsQuery,
+  useGetTutorialsQuery,
+  useSortContentSourcesMutation
+} from '../../store/api/slice'
+import {
+  useGetRemoteSettingsRedditAuthorizedQuery,
+  useGetRemoteSettingsTwitterAuthorizedQuery,
+  useGetRemoteSettingsTumblrAuthorizedQuery,
+  useGetRemoteSettingsInstagramConfiguredQuery,
+  useGetRemoteSettingsPiwigoConfiguredQuery
+} from '../../store/api/selectors'
+import { useNavigate } from 'react-router'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  selectAppConfigRemoteSettingsTumblrAuthorized,
-  selectAppConfigRemoteSettingsRedditAuthorized,
-  selectAppConfigRemoteSettingsTwitterAuthorized,
-  selectAppConfigRemoteSettingsInstagramConfigured,
-  selectAppConfigRemoteSettingsPiwigoConfigured,
-  selectAppTutorial,
-  selectAppLibrary,
-  selectAppTags,
-  selectAppSpecialMode,
-  selectAppProgressCurrent,
-  selectAppProgressMode,
-  selectAppProgressTotal,
-  selectAppLibraryFilters,
-  selectAppLibrarySelected,
-  selectAppFilteredSources,
-  selectAppLibrarySelectedTagNames
-} from '../../store/app/selectors'
-import {
-  setRouteGoBack,
-  importFromLibrary,
-  setLibraryRemoveVisible,
-  markOffline,
-  importInstagram,
-  // importReddit,
-  importTumblr,
-  // importTwitter,
-  updateVideoMetadata,
-  doneTutorial,
-  sortSources
-} from '../../store/app/thunks'
-import {
-  setLibrarySourcesToggleMarked,
-  setLibrarySourcesTags,
-  setLibrarySourcesAddTags,
-  setLibrarySourcesRemoveTags,
-  doLibraryMove,
-  doLibraryDeleteAll
-} from '../../store/librarySource/thunks'
-import { addSource } from '../../store/scene/thunks'
+import { selectSpecialMode } from '../../store/app/selectors'
+import snackbar from '../../data/Snackbar'
 
 const drawerWidth = 240
 
@@ -393,33 +355,30 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 function Library() {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const tutorial = useAppSelector(selectAppTutorial())
-  const library = useAppSelector(selectAppLibrary())
-  const tags = useAppSelector(selectAppTags())
-  const specialMode = useAppSelector(selectAppSpecialMode())
-  const tumblrAuthorized = useAppSelector(
-    selectAppConfigRemoteSettingsTumblrAuthorized()
-  )
-  const redditAuthorized = useAppSelector(
-    selectAppConfigRemoteSettingsRedditAuthorized()
-  )
-  const twitterAuthorized = useAppSelector(
-    selectAppConfigRemoteSettingsTwitterAuthorized()
-  )
-  const instagramConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsInstagramConfigured()
-  )
-  const piwigoConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoConfigured()
-  )
-  const progressCurrent = useAppSelector(selectAppProgressCurrent())
-  const progressMode = useAppSelector(selectAppProgressMode())
-  const progressTotal = useAppSelector(selectAppProgressTotal())
-  const filters = useAppSelector(selectAppLibraryFilters())
-  const selected = useAppSelector(selectAppLibrarySelected())
-  const displaySources = useAppSelector(selectAppFilteredSources())
-  const selectedTagNames = useAppSelector(selectAppLibrarySelectedTagNames())
+  const { data: tutorial } = useGetTutorialsQuery()
+  const library: number[] = []
+  const tags: number[] = []
+  const specialMode = useAppSelector(selectSpecialMode())
+
+  const [sortContentSources] = useSortContentSourcesMutation()
+  const { data: tumblrAuthorized } = useGetRemoteSettingsTumblrAuthorizedQuery()
+  const { data: redditAuthorized } = useGetRemoteSettingsRedditAuthorizedQuery()
+  const { data: twitterAuthorized } =
+    useGetRemoteSettingsTwitterAuthorizedQuery()
+  const { data: instagramConfigured } =
+    useGetRemoteSettingsInstagramConfiguredQuery()
+  const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
+  const { data: tagOptions } = useGetContentSourceBatchTagOptionsQuery()
+  const { data: searchOptions } = useGetContentSourceSearchOptionsQuery()
+
+  const progressCurrent = 0
+  const progressMode = ''
+  const progressTotal = 100
+  const filters: string[] = []
+  const selected: number[] = []
+  const displaySources: number[] = []
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -428,9 +387,14 @@ function Library() {
   const [moveDialog, setMoveDialog] = useState(false)
   const [importFile, setImportFile] = useState('')
 
-  const toggleMarked = useCallback(() => {
-    dispatch(setLibrarySourcesToggleMarked(displaySources))
-  }, [dispatch, displaySources])
+  const toggleMarked = useCallback(
+    () => {
+      // dispatch(setLibrarySourcesToggleMarked(displaySources))
+    },
+    [
+      /*dispatch, displaySources*/
+    ]
+  )
 
   useEffect(() => {
     // Use alt+P to access import modal
@@ -461,7 +425,7 @@ function Library() {
       ) {
         moveOffline()
       } else if (e.key === 'Escape' && specialMode != null) {
-        dispatch(setRouteGoBack())
+        navigate(-1)
       }
     }
 
@@ -486,7 +450,7 @@ function Library() {
   }
 
   const onFinishMove = async () => {
-    dispatch(doLibraryMove())
+    // dispatch(doLibraryMove())
     onCloseMoveDialog()
   }
 
@@ -496,12 +460,12 @@ function Library() {
 
   const onBatchClip = () => {
     onCloseDialog()
-    dispatch(batchClip())
+    // dispatch(batchClip())
   }
 
   const onBatchTag = () => {
     onCloseDialog()
-    dispatch(batchTag())
+    // dispatch(batchTag())
   }
 
   const onFindMerges = () => {
@@ -510,27 +474,31 @@ function Library() {
 
   const goBack = () => {
     if (specialMode === SP.batchTag) {
-      dispatch(setLibrarySelected([]))
-      setSelectedTags([])
-      dispatch(batchTag())
+      // dispatch(setLibrarySelected([]))
+      // setSelectedTags([])
+      // dispatch(batchTag())
     } else if (specialMode === SP.batchClip) {
-      dispatch(setLibrarySelected([]))
-      dispatch(batchClip())
+      // dispatch(setLibrarySelected([]))
+      // dispatch(batchClip())
     } else {
-      dispatch(setRouteGoBack())
+      navigate(-1)
     }
   }
 
-  const onUpdateFilters = (filters: string[]) =>
-    dispatch(setLibraryFilters(filters))
+  const onUpdateFilters = (_filters: string[]) => {
+    // dispatch(setLibraryFilters(filters))
+  }
 
-  const onAddSource = (addFunction: string, e?: MouseEvent, ...args: any[]) => {
+  const onAddSource = (
+    addFunction: string,
+    e?: MouseEvent /*, ...args: any[]*/
+  ) => {
     onCloseDialog()
     if (addFunction === AF.videos && e?.shiftKey) {
       addFunction = AF.videoDir
     }
 
-    dispatch(addSource(addFunction, undefined, ...args))
+    // dispatch(addSource(addFunction, undefined, ...args))
   }
 
   const onToggleBatchClipModal = () => {
@@ -539,13 +507,13 @@ function Library() {
   }
 
   const onToggleBatchTagModal = () => {
-    if (openMenu === MO.batchTag) {
-      setOpenMenu(undefined)
-      setSelectedTags([])
-    } else {
-      setOpenMenu(MO.batchTag)
-      setSelectedTags(selectedTagNames)
-    }
+    // if (openMenu === MO.batchTag) {
+    //   setOpenMenu(undefined)
+    //   setSelectedTags([])
+    // } else {
+    //   setOpenMenu(MO.batchTag)
+    //   setSelectedTags(selectedTagNames)
+    // }
   }
 
   const onSelectTags = (selectedTags: string[]) => {
@@ -553,9 +521,9 @@ function Library() {
   }
 
   const onToggleDrawer = () => {
-    if (tutorial === LT.sidebar1) {
-      dispatch(doneTutorial(LT.sidebar1))
-    }
+    // if (tutorial === LT.sidebar1) {
+    //   dispatch(doneTutorial(LT.sidebar1))
+    // }
     setDrawerOpen(!drawerOpen)
   }
 
@@ -584,33 +552,33 @@ function Library() {
   }
 
   const onFinishRemoveAll = () => {
-    dispatch(setLibraryRemoveAll())
+    // dispatch(setLibraryRemoveAll())
     onCloseDialog()
   }
 
   const onFinishRemoveVisible = () => {
-    dispatch(setLibraryRemove(displaySources))
-    onCloseDialog()
-    dispatch(setLibraryFilters([]))
+    // dispatch(setLibraryRemove(displaySources))
+    // onCloseDialog()
+    // dispatch(setLibraryFilters([]))
   }
 
   const onFinishDeleteAll = async () => {
-    dispatch(doLibraryDeleteAll())
+    // dispatch(doLibraryDeleteAll())
     onCloseDialog()
   }
 
   const onFinishDeleteVisible = () => {
-    dispatch(setLibraryRemoveVisible(displaySources))
+    // dispatch(setLibraryRemoveVisible(displaySources))
 
     onCloseDialog()
-    dispatch(setLibraryFilters([]))
+    // dispatch(setLibraryFilters([]))
   }
 
   const onOpenImportFile = async () => {
-    const filePath = await flipflip().api.openJsonFile()
-    if (filePath) {
-      setImportFile(filePath)
-    }
+    // const filePath = await flipflip().api.openJsonFile()
+    // if (filePath) {
+    //   setImportFile(filePath)
+    // }
   }
 
   const onChangeImportFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -630,12 +598,12 @@ function Library() {
             // TODO import as subset of AppStorage
             // dispatch(importLibrary(json))
             onCloseDialog()
-          } catch (e) {
-            dispatch(systemMessage('This is not a valid JSON file'))
+          } catch {
+            snackbar().showMessage({ error: 'This is not a valid JSON file' })
           }
         })
-        .catch((e) => {
-          dispatch(systemMessage('Error accessing URL'))
+        .catch(() => {
+          snackbar().showMessage({ error: 'Error accessing URL' })
         })
     } else {
       // const text = await flipflip().api.readTextFile(importFile)
@@ -646,31 +614,31 @@ function Library() {
   }
 
   const onImportFromLibrary = () => {
-    dispatch(importFromLibrary(selected))
+    // dispatch(importFromLibrary(selected))
   }
 
   const onSelectAll = () => {
-    const newSelected = new Set([...selected, ...displaySources])
-    dispatch(setLibrarySelected([...newSelected]))
+    // const newSelected = new Set([...selected, ...displaySources])
+    // dispatch(setLibrarySelected([...newSelected]))
   }
 
   const onSelectNone = () => {
-    const newSelected = selected.filter((id) => !displaySources.includes(id))
-    dispatch(setLibrarySelected(newSelected))
+    // const newSelected = selected.filter((id) => !displaySources.includes(id))
+    // dispatch(setLibrarySelected(newSelected))
   }
 
   const batchTagOverwrite = () => {
-    dispatch(setLibrarySourcesTags(selected, selectedTags))
+    // dispatch(setLibrarySourcesTags(selected, selectedTags))
     onCloseDialog()
   }
 
   const batchTagAdd = () => {
-    dispatch(setLibrarySourcesAddTags(selected, selectedTags))
+    // dispatch(setLibrarySourcesAddTags(selected, selectedTags))
     onCloseDialog()
   }
 
   const batchTagRemove = () => {
-    dispatch(setLibrarySourcesRemoveTags(selected, selectedTags))
+    // dispatch(setLibrarySourcesRemoveTags(selected, selectedTags))
     onCloseDialog()
   }
 
@@ -775,12 +743,11 @@ function Library() {
                 />
               )}
               <LibrarySearch
-                displaySources={displaySources}
+                appBar
+                options={searchOptions ?? []}
                 filters={filters}
                 placeholder={'Search ...'}
-                isLibrary
                 isCreatable
-                onlyUsed
                 onUpdateFilters={onUpdateFilters}
               />
             </div>
@@ -827,7 +794,7 @@ function Library() {
 
         <div className={cx(tutorial != null && classes.disable)}>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Manage Tags'}>
-            <ListItemButton onClick={() => dispatch(manageTags())}>
+            <ListItemButton onClick={() => navigate('/tags')}>
               <ListItemIcon>
                 <LocalOfferIcon />
               </ListItemIcon>
@@ -885,7 +852,7 @@ function Library() {
         </div>
 
         {remoteAuthorized && (
-          <React.Fragment>
+          <>
             <Divider />
 
             <div className={cx(tutorial != null && classes.disable)}>
@@ -900,7 +867,7 @@ function Library() {
                   <ListItemButton
                     disabled={progressMode != null}
                     onClick={async () => {
-                      await dispatch(importTumblr())
+                      //await dispatch(importTumblr())
                     }}
                   >
                     <ListItemIcon>
@@ -938,7 +905,7 @@ function Library() {
                   <ListItemButton
                     disabled={progressMode != null}
                     onClick={() => {
-                      dispatch(importInstagram())
+                      //dispatch(importInstagram())
                     }}
                   >
                     <ListItemIcon>
@@ -949,7 +916,7 @@ function Library() {
                 </Tooltip>
               )}
             </div>
-          </React.Fragment>
+          </>
         )}
 
         <Divider />
@@ -962,7 +929,7 @@ function Library() {
             <ListItemButton
               disabled={progressMode != null}
               onClick={() => {
-                dispatch(markOffline())
+                //dispatch(markOffline())
               }}
             >
               <ListItemIcon>
@@ -978,7 +945,7 @@ function Library() {
             <ListItemButton
               disabled={progressMode != null}
               onClick={() => {
-                dispatch(updateVideoMetadata())
+                //dispatch(updateVideoMetadata())
               }}
             >
               <ListItemIcon>
@@ -990,7 +957,7 @@ function Library() {
         </div>
 
         {progressMode != null && (
-          <React.Fragment>
+          <>
             <Divider />
 
             <div>
@@ -999,7 +966,7 @@ function Library() {
                 title={drawerOpen ? '' : cancelProgressMessage}
               >
                 <ListItemButton
-                  onClick={() => dispatch(setProgressMode(PR.cancel))}
+                  onClick={() => {} /*dispatch(setProgressMode(PR.cancel))*/}
                 >
                   <ListItemIcon>
                     <CancelIcon color="error" />
@@ -1025,7 +992,7 @@ function Library() {
                   />
                 )}
             </div>
-          </React.Fragment>
+          </>
         )}
 
         <div className={classes.fill} />
@@ -1090,7 +1057,7 @@ function Library() {
       />
 
       {specialMode && (
-        <React.Fragment>
+        <>
           <Tooltip disableInteractive title="Clear" placement="top-end">
             <Fab
               className={classes.selectNoneButton}
@@ -1165,11 +1132,11 @@ function Library() {
               </Fab>
             </Badge>
           </Tooltip>
-        </React.Fragment>
+        </>
       )}
 
       {!specialMode && (
-        <React.Fragment>
+        <>
           {library.length > 0 && (
             <Tooltip
               disableInteractive
@@ -1207,16 +1174,18 @@ function Library() {
                 placeholder="Paste URL Here"
                 margin="dense"
                 value={importFile}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip disableInteractive title="Open File">
-                        <IconButton onClick={onOpenImportFile} size="large">
-                          <FolderIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  )
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip disableInteractive title="Open File">
+                          <IconButton onClick={onOpenImportFile} size="large">
+                            <FolderIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
                 }}
                 onChange={onChangeImportFile}
               />
@@ -1239,7 +1208,7 @@ function Library() {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Delete Library</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1255,10 +1224,10 @@ function Library() {
                     Yea... I'm sure
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Delete Sources</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1274,7 +1243,7 @@ function Library() {
                     Confirm
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           <Dialog
@@ -1284,7 +1253,7 @@ function Library() {
             aria-describedby="delete-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="delete-all-title">
                   PERMANENTLY Delete Library
                 </DialogTitle>
@@ -1305,10 +1274,10 @@ function Library() {
                     PERMANENTLY DELETE FROM DISK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="delete-all-title">
                   PERMANENTLY Delete Sources
                 </DialogTitle>
@@ -1329,7 +1298,7 @@ function Library() {
                     PERMANENTLY DELETE FROM DISK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           {piwigoConfigured && (
@@ -1431,7 +1400,7 @@ function Library() {
           >
             <AddIcon className={classes.icon} />
           </Fab>
-        </React.Fragment>
+        </>
       )}
 
       <PiwigoDialog
@@ -1471,44 +1440,56 @@ function Library() {
         {Object.values(SF)
           .filter((sf) => sf !== SF.random)
           .map((sf) => (
-            <MenuItem key={sf}>
+            <ListItem
+              key={sf}
+              secondaryAction={
+                <>
+                  <IconButton
+                    edge="end"
+                    onClick={async () => {
+                      await sortContentSources({ sortBy: sf, sortOrder: 'asc' })
+                    }}
+                    size="large"
+                  >
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    onClick={async () => {
+                      await sortContentSources({
+                        sortBy: sf,
+                        sortOrder: 'desc'
+                      })
+                    }}
+                    size="large"
+                  >
+                    <ArrowDownwardIcon />
+                  </IconButton>
+                </>
+              }
+            >
               <ListItemText primary={en.get(sf)} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  onClick={() => {
-                    dispatch(sortSources(sf, true))
-                  }}
-                  size="large"
-                >
-                  <ArrowUpwardIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  onClick={() => {
-                    dispatch(sortSources(sf, false))
-                  }}
-                  size="large"
-                >
-                  <ArrowDownwardIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </MenuItem>
+            </ListItem>
           ))}
-        <MenuItem key={SF.random}>
-          <ListItemText primary={en.get(SF.random)} />
-          <ListItemSecondaryAction>
+        <ListItem
+          key={SF.random}
+          secondaryAction={
             <IconButton
               edge="end"
-              onClick={() => {
-                dispatch(sortSources(SF.random, true))
+              onClick={async () => {
+                await sortContentSources({
+                  sortBy: SF.random,
+                  sortOrder: 'asc'
+                })
               }}
               size="large"
             >
               <ShuffleIcon />
             </IconButton>
-          </ListItemSecondaryAction>
-        </MenuItem>
+          }
+        >
+          <ListItemText primary={en.get(SF.random)} />
+        </ListItem>
       </Menu>
 
       <GooninatorDialog
@@ -1535,16 +1516,11 @@ function Library() {
           </DialogContentText>
           {openMenu === MO.batchTag && (
             <LibrarySearch
-              displaySources={library}
               filters={selectedTags}
+              options={tagOptions ?? []}
               placeholder={'Tag These Sources'}
-              isLibrary
-              isClearable
-              onlyTags
               showCheckboxes
-              fullWidth
               inputVariant="standard"
-              hideSelectedOptions={false}
               onUpdateFilters={onSelectTags}
             />
           )}

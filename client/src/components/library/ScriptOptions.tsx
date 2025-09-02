@@ -1,18 +1,18 @@
 import {
-  Button,
+  AppBar,
+  Card,
+  CardContent,
   Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  Divider,
-  Grid,
+  Grid2,
+  IconButton,
   type Theme,
+  Toolbar,
+  Tooltip,
   Typography
 } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 import { makeStyles } from 'tss-react/mui'
-
-import { green, red } from '@mui/material/colors'
 
 import FontOptions from './FontOptions'
 import BaseSwitch from '../common/BaseSwitch'
@@ -21,169 +21,210 @@ import {
   setCaptionScriptNextSceneAtEnd,
   setCaptionScriptSyncWithAudio,
   setCaptionScriptOpacity
-} from '../../store/captionScript/actions'
-import { setCaptionScript } from '../../store/captionScript/slice'
+} from '../../store/api/thunks'
 import {
-  selectCaptionScript,
-  selectCaptionScriptStopAtEnd,
-  selectCaptionScriptNextSceneAtEnd,
-  selectCaptionScriptSyncWithAudio,
-  selectCaptionScriptOpacity
-} from '../../store/captionScript/selectors'
+  useGetCaptionScriptStopAtEndQuery,
+  useGetCaptionScriptNextSceneAtEndQuery,
+  useGetCaptionScriptSyncWithAudioQuery,
+  useGetCaptionScriptOpacityQuery
+} from '../../store/api/selectors'
 import BaseSlider from '../common/slider/BaseSlider'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useGetCaptionScriptQuery } from '../../store/api/slice'
+import { useNavigate, useParams } from 'react-router'
+import { cx } from '@emotion/css'
 
 const useStyles = makeStyles()((theme: Theme) => ({
-  bpmProgress: {
-    position: 'absolute',
-    right: 67
+  root: {
+    display: 'flex'
   },
-  tagProgress: {
-    position: 'absolute',
-    right: 20
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1
   },
-  success: {
-    backgroundColor: green[500],
-    '&:hover': {
-      backgroundColor: green[700]
-    }
+  appBarSpacer: {
+    backgroundColor: theme.palette.primary.main,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    minHeight: 64
   },
-  failure: {
-    backgroundColor: red[500],
-    '&:hover': {
-      backgroundColor: red[700]
-    }
+  backButton: {
+    float: 'left'
   },
-  actions: {
-    marginRight: theme.spacing(3)
+  title: {
+    textAlign: 'center',
+    flexGrow: 1
   },
-  fullWidth: {
-    width: '100%'
+  headerBar: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap'
   },
-  noPadding: {
-    padding: '0 !important'
+  headerLeft: {
+    flexBasis: '3%'
   },
-  endInput: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: 0
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    flexDirection: 'column',
+    height: '100vh',
+    backgroundColor: theme.palette.background.default
   },
-  percentInput: {
-    minWidth: theme.spacing(11)
-  },
-  toggleFont: {
-    marginLeft: 'auto'
-  },
-  fontDivider: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2)
-  },
-  fontProgress: {
-    position: 'absolute'
+  fill: {
+    padding: theme.spacing(2)
   }
 }))
 
-export interface ScriptOptionsProps {
-  scriptID: number
-  onDone: () => void
-}
+function ScriptOptions() {
+  const navigate = useNavigate()
+  const params = useParams()
+  const id = Number(params.id)
+  const { data: script } = useGetCaptionScriptQuery(id)
 
-function ScriptOptions(props: ScriptOptionsProps) {
-  const dispatch = useAppDispatch()
-  const originalScript = useAppSelector(
-    selectCaptionScript(props.scriptID),
-    () => true
-  )
-  const stopAtEnd = useAppSelector(selectCaptionScriptStopAtEnd(props.scriptID))
-  const nextSceneAtEnd = useAppSelector(
-    selectCaptionScriptNextSceneAtEnd(props.scriptID)
-  )
-
-  const onCancel = () => {
-    dispatch(setCaptionScript(originalScript))
-    props.onDone()
+  const goBack = () => {
+    navigate(-1)
   }
 
   const { classes } = useStyles()
   return (
-    <Dialog open={true} onClose={onCancel} aria-describedby="edit-description">
-      <DialogContent>
-        <Typography variant="h6">Edit script options</Typography>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item>
-                <Collapse in={!nextSceneAtEnd}>
-                  <BaseSwitch
-                    label="Stop at End"
-                    size="small"
-                    selector={selectCaptionScriptStopAtEnd(props.scriptID)}
-                    action={setCaptionScriptStopAtEnd(props.scriptID)}
+    <div className={classes.root}>
+      <AppBar enableColorOnDark position="absolute" className={classes.appBar}>
+        <Toolbar className={classes.headerBar}>
+          <div className={classes.headerLeft}>
+            <Tooltip disableInteractive title="Back" placement="right-end">
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="Back"
+                className={classes.backButton}
+                onClick={goBack}
+                size="large"
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+
+          <Typography
+            component="h1"
+            variant="h4"
+            color="inherit"
+            noWrap
+            className={classes.title}
+          >
+            {script?.url ?? ''}
+          </Typography>
+          <div className={classes.headerLeft} />
+        </Toolbar>
+      </AppBar>
+
+      <main className={classes.content}>
+        <div className={classes.appBarSpacer} />
+
+        <div className={cx(classes.root, classes.fill)}>
+          <Grid2 container spacing={2}>
+            <Grid2
+              size={{ xs: 12, md: 6, lg: 4 }}
+              offset={{ xs: 0, md: 3, lg: 0 }}
+            >
+              <Card>
+                <CardContent>
+                  <Grid2 container spacing={2} alignItems="center">
+                    <Grid2>
+                      <Collapse in={!script?.nextSceneAtEnd}>
+                        <BaseSwitch
+                          label="Stop at End"
+                          size="small"
+                          selector={() => useGetCaptionScriptStopAtEndQuery(id)}
+                          action={setCaptionScriptStopAtEnd(id)}
+                        />
+                      </Collapse>
+                      <Collapse in={!script?.stopAtEnd}>
+                        <BaseSwitch
+                          label="Next Scene at End"
+                          size="small"
+                          selector={() =>
+                            useGetCaptionScriptNextSceneAtEndQuery(id)
+                          }
+                          action={setCaptionScriptNextSceneAtEnd(id)}
+                        />
+                      </Collapse>
+                      <BaseSwitch
+                        label="Sync Timestamp with Audio"
+                        size="small"
+                        selector={() =>
+                          useGetCaptionScriptSyncWithAudioQuery(id)
+                        }
+                        action={setCaptionScriptSyncWithAudio(id)}
+                      />
+                    </Grid2>
+                    <Grid2 size={12}>
+                      <BaseSlider
+                        min={0}
+                        max={100}
+                        selector={() => useGetCaptionScriptOpacityQuery(id)}
+                        action={setCaptionScriptOpacity(id)}
+                        labelledBy="opacity-slider"
+                        label={{ text: 'Script Opacity:', appendValue: true }}
+                        format={{ type: 'percent' }}
+                      />
+                    </Grid2>
+                  </Grid2>
+                </CardContent>
+              </Card>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+              <Card>
+                <CardContent>
+                  <FontOptions
+                    name={'Blink'}
+                    captionScriptID={id}
+                    type="blink"
                   />
-                </Collapse>
-                <Collapse in={!stopAtEnd}>
-                  <BaseSwitch
-                    label="Next Scene at End"
-                    size="small"
-                    selector={selectCaptionScriptNextSceneAtEnd(props.scriptID)}
-                    action={setCaptionScriptNextSceneAtEnd(props.scriptID)}
+                </CardContent>
+              </Card>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+              <Card>
+                <CardContent>
+                  <FontOptions
+                    name={'Caption'}
+                    captionScriptID={id}
+                    type="caption"
                   />
-                </Collapse>
-                <BaseSwitch
-                  label="Sync Timestamp with Audio"
-                  size="small"
-                  selector={selectCaptionScriptSyncWithAudio(props.scriptID)}
-                  action={setCaptionScriptSyncWithAudio(props.scriptID)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <BaseSlider
-              min={0}
-              max={100}
-              selector={selectCaptionScriptOpacity(props.scriptID)}
-              action={setCaptionScriptOpacity(props.scriptID)}
-              labelledBy="opacity-slider"
-              label={{ text: 'Script Opacity:', appendValue: true }}
-              format={{ type: 'percent' }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FontOptions
-              name={'Blink'}
-              captionScriptID={props.scriptID}
-              type="blink"
-            />
-            <Divider className={classes.fontDivider} />
-            <FontOptions
-              name={'Caption'}
-              captionScriptID={props.scriptID}
-              type="caption"
-            />
-            <Divider className={classes.fontDivider} />
-            <FontOptions
-              name={'Big Caption'}
-              captionScriptID={props.scriptID}
-              type="captionBig"
-            />
-            <Divider className={classes.fontDivider} />
-            <FontOptions
-              name={'Count'}
-              captionScriptID={props.scriptID}
-              type="count"
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions className={classes.actions}>
-        <Button onClick={onCancel} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={props.onDone} color="primary">
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+                </CardContent>
+              </Card>
+            </Grid2>
+            <Grid2
+              size={{ xs: 12, md: 6, lg: 4 }}
+              offset={{ xs: 0, md: 0, lg: 4 }}
+            >
+              <Card>
+                <CardContent>
+                  <FontOptions
+                    name={'Big Caption'}
+                    captionScriptID={id}
+                    type="captionBig"
+                  />
+                </CardContent>
+              </Card>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+              <Card>
+                <CardContent>
+                  <FontOptions
+                    name={'Count'}
+                    captionScriptID={id}
+                    type="count"
+                  />
+                </CardContent>
+              </Card>
+            </Grid2>
+          </Grid2>
+        </div>
+      </main>
+    </div>
   )
 }
 

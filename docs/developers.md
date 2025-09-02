@@ -1,18 +1,24 @@
 # Developers
 
-FlipFlip is an Electron app written in TypeScript and React.
+FlipFlip is a client server app written in TypeScript.
+It uses NodeJS, Express and SQLite in the backend and React, Redux and Material UI in the frontend.
 
 ## Setup
 
 You will need to download and install the following tools:
 
 * [Git](https://git-scm.com/downloads)
-* [Yarn](https://classic.yarnpkg.com/en/docs/install)
-* [NodeJS](https://nodejs.org/en/download/)
+* [NodeJS 22](https://nodejs.org/en/download/)
 
 Then, in a Bash shell, run the following:
 ```sh
+# enable yarn
+corepack enable
+corepack prepare yarn@stable --activate
+
+# get flipflip
 git clone https://github.com/regtemp8/flipflip.git
+git checkout v4.0.0
 cd flipflip
 
 # terminal 1:
@@ -21,14 +27,6 @@ yarn install
 yarn build:module
 yarn build:main
 
-cd ../login
-yarn install
-yarn build
-
-cd ../server-details
-yarn install
-yarn build
-
 cd ../server
 yarn install
 yarn dev
@@ -36,7 +34,7 @@ yarn dev
 # terminal 2:
 cd client
 yarn install
-yarn start
+yarn dev
 
 # app is now running, and it reloads any time client changes.
 ```
@@ -67,6 +65,4 @@ on the project to make changes as you wish. :-)
 
 * Try to keep the code repository and the application itself G-rated.
 * Code needs to work on both Mac and Windows.
-* The project is run on ["open open source"](http://openopensource.org)
-  principles.
  

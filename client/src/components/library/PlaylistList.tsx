@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
   Card,
   CardContent,
   CardMedia,
-  Grid,
+  Grid2,
   type Theme,
   Typography
 } from '@mui/material'
@@ -13,8 +13,6 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
-import { useAppSelector } from '../../store/hooks'
-import { selectPlaylistThumbs } from '../../store/playlist/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -59,7 +57,7 @@ export interface PlaylistListProps {
 }
 
 function PlaylistList(props: PlaylistListProps) {
-  const playlistThumbs = useAppSelector(selectPlaylistThumbs())
+  const playlistThumbs: Record<string, string[]> = {} //useAppSelector(selectPlaylistThumbs())
   const [hover, setHover] = useState<any>()
 
   const onMouseEnter = (album: string) => {
@@ -73,7 +71,7 @@ function PlaylistList(props: PlaylistListProps) {
   const { classes } = useStyles()
   if (Object.keys(playlistThumbs).length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -103,12 +101,12 @@ function PlaylistList(props: PlaylistListProps) {
             Create playlists by clicking "Add to Playlist" in the sidebar
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
-    <Grid container spacing={2}>
+    <Grid2 container spacing={2}>
       {Object.keys(playlistThumbs).map((p) => {
         const thumbs = playlistThumbs[p].map((thumb) =>
           thumb.replace(/\\/g, '/')
@@ -120,31 +118,27 @@ function PlaylistList(props: PlaylistListProps) {
           thumbs[1] = ''
         }
         return (
-          <Grid
+          <Grid2
             key={p}
-            item
-            xs={6}
-            sm={4}
-            md={3}
-            lg={2}
+            size={{ xs: 6, sm: 4, md: 3, lg: 2 }}
             className={classes.pointer}
             onClick={() => props.onClickPlaylist(p)}
             onMouseEnter={() => onMouseEnter(p)}
             onMouseLeave={onMouseLeave}
           >
             <Card classes={{ root: classes.root }}>
-              <Grid container>
+              <Grid2 container>
                 {thumbs.map((t, index) => (
-                  <Grid item xs={thumbs.length === 1 ? 12 : 6} key={index}>
+                  <Grid2 size={thumbs.length === 1 ? 12 : 6} key={index}>
                     {t && <CardMedia className={classes.media} image={t} />}
-                  </Grid>
+                  </Grid2>
                 ))}
                 {thumbs.length === 0 && (
-                  <Grid item xs={12}>
+                  <Grid2 size={12}>
                     <AudiotrackIcon className={classes.mediaIcon} />
-                  </Grid>
+                  </Grid2>
                 )}
-              </Grid>
+              </Grid2>
               <CardContent classes={{ root: classes.cardContent }}>
                 <Typography
                   className={cx(hover === p && classes.underlineTitle)}
@@ -155,10 +149,10 @@ function PlaylistList(props: PlaylistListProps) {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Grid2>
         )
       })}
-    </Grid>
+    </Grid2>
   )
 }
 

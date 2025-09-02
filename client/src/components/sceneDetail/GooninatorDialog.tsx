@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
+import { type ChangeEvent, type MouseEvent, useState } from 'react'
 
 import {
   Button,
@@ -20,7 +20,6 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 import { GT } from 'flipflip-common'
-import flipflip from '../../FlipFlipService'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -35,13 +34,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export interface GooninatorDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, urls?: string[]) => void
 }
 
 function GooninatorDialog(props: GooninatorDialogProps) {
   const [importType, setImportType] = useState(GT.tumblr)
   const [importURL, setImportURL] = useState('')
-  const [rootDir, setRootDir] = useState('')
+  const [rootDir, _setRootDir] = useState('')
 
   const onTypeChange = (e: SelectChangeEvent<string>) => {
     setImportType(e.target.value)
@@ -54,13 +53,14 @@ function GooninatorDialog(props: GooninatorDialogProps) {
   }
 
   const onRootChange = async () => {
-    let result = await flipflip().api.openDirectory()
-    if (!result || !result.length) return
-    setRootDir(result[0])
+    // let result = await flipflip().api.openDirectory()
+    // if (!result || !result.length) return
+    // setRootDir(result[0])
   }
 
   const onImportURL = () => {
-    props.onImportURL(importType, undefined, importURL, rootDir)
+    // TODO support gooninator import
+    //props.onImportURL(importType, undefined, importURL, rootDir)
     props.onClose()
   }
 
@@ -104,7 +104,7 @@ function GooninatorDialog(props: GooninatorDialogProps) {
               fullWidth
               label="Parent Directory"
               value={rootDir}
-              InputProps={{ readOnly: true }}
+              slotProps={{ input: { readOnly: true } }}
               onClick={onRootChange}
             />
           </Collapse>

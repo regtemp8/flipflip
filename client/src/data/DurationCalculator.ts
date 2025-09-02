@@ -1,5 +1,5 @@
 import { TF } from 'flipflip-common'
-import type TimingSettings from '../store/scene/TimingSettings'
+import type TimingSettings from './TimingSettings'
 
 export default class DurationCalculator {
   private sinStep: number

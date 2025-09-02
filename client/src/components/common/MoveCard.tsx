@@ -1,21 +1,14 @@
 import { cx } from '@emotion/css'
-import { Grid, Collapse, MenuItem, type Theme } from '@mui/material'
+import { Grid2, Collapse, MenuItem, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import type ReduxProps from './ReduxProps'
-import { useAppSelector } from '../../store/hooks'
 import BaseSlider from './slider/BaseSlider'
 import BaseSelect from './BaseSelect'
 import BaseSwitch from './BaseSwitch'
-import { RootState } from '../../store/store'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
     width: '100%'
-  },
-  paddingLeft: {
-    [theme.breakpoints.up('sm')]: {
-      paddingLeft: theme.spacing(1)
-    }
   },
   endInput: {
     paddingLeft: theme.spacing(1),
@@ -32,8 +25,8 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export interface MoveCardProps {
   sidebar: boolean
   enabled: boolean
-  values: any
-  valueMapper: (value: any) => string
+  values: Record<string, string>
+  valueMapper: (value: string) => string
   label: string
   type: ReduxProps<string>
   random: ReduxProps<boolean>
@@ -45,26 +38,25 @@ export interface MoveCardProps {
 }
 
 function MoveCard(props: MoveCardProps) {
-  const type = useAppSelector(props.type.selector)
-  const random = useAppSelector(props.random.selector)
-  const imageWidthSelector: (state: RootState) => boolean =
-    props.imageWidth?.selector ?? ((state) => false)
-  const imageWidth = useAppSelector(imageWidthSelector)
-  const imageHeightSelector: (state: RootState) => boolean =
-    props.imageHeight?.selector ?? ((state) => false)
-  const imageHeight = useAppSelector(imageHeightSelector)
+  const { data: type } = props.type.selector()
+  const { data: random } = props.random.selector()
+  const { data: imageWidth } = props.imageWidth?.selector() ?? { data: false }
+  const { data: imageHeight } = props.imageHeight?.selector() ?? { data: false }
+
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid
-        item
-        xs={12}
-        sm={!props.sidebar && type !== props.values.none ? 5 : 12}
+    <Grid2
+      container
+      spacing={props.enabled && type !== props.values.none ? 2 : 0}
+      alignItems="center"
+    >
+      <Grid2
+        size={{
+          xs: 12,
+          sm: !props.sidebar && type !== props.values.none ? 5 : 12
+        }}
       >
-        <Collapse
-          in={props.enabled}
-          className={cx(classes.fullWidth, classes.paddingLeft)}
-        >
+        <Collapse in={props.enabled} className={classes.fullWidth}>
           <BaseSelect
             label={props.label}
             selector={props.type.selector}
@@ -80,11 +72,12 @@ function MoveCard(props: MoveCardProps) {
             })}
           </BaseSelect>
         </Collapse>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sm={!props.sidebar && type !== props.values.none ? 7 : 12}
+      </Grid2>
+      <Grid2
+        size={{
+          xs: 12,
+          sm: !props.sidebar && type !== props.values.none ? 7 : 12
+        }}
         className={cx(
           (!props.enabled || type === props.values.none) && classes.noPadding
         )}
@@ -92,11 +85,11 @@ function MoveCard(props: MoveCardProps) {
         <Collapse
           in={
             props.enabled &&
-            !imageWidth &&
-            !imageHeight &&
+            imageWidth === false &&
+            imageHeight === false &&
             type !== props.values.none
           }
-          className={cx(classes.fullWidth, classes.paddingLeft)}
+          className={classes.fullWidth}
         >
           <BaseSwitch
             label="Randomize"
@@ -108,7 +101,7 @@ function MoveCard(props: MoveCardProps) {
         {props.imageWidth != null ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
-            className={cx(classes.fullWidth, classes.paddingLeft)}
+            className={classes.fullWidth}
           >
             <BaseSwitch
               label="Use Img Width"
@@ -121,7 +114,7 @@ function MoveCard(props: MoveCardProps) {
         {props.imageHeight != null ? (
           <Collapse
             in={props.enabled && type !== props.values.none}
-            className={cx(classes.fullWidth, classes.paddingLeft)}
+            className={classes.fullWidth}
           >
             <BaseSwitch
               label="Use Img Height"
@@ -131,10 +124,9 @@ function MoveCard(props: MoveCardProps) {
             />
           </Collapse>
         ) : null}
-      </Grid>
-      <Grid
-        item
-        xs={12}
+      </Grid2>
+      <Grid2
+        size={12}
         className={cx(
           (!props.enabled || type === props.values.none) && classes.noPadding
         )}
@@ -142,10 +134,10 @@ function MoveCard(props: MoveCardProps) {
         <Collapse
           in={
             props.enabled &&
-            !imageWidth &&
-            !imageHeight &&
+            imageWidth === false &&
+            imageHeight === false &&
             type !== props.values.none &&
-            !random
+            random === false
           }
           className={classes.fullWidth}
         >
@@ -167,15 +159,15 @@ function MoveCard(props: MoveCardProps) {
         <Collapse
           in={
             props.enabled &&
-            !imageWidth &&
-            !imageHeight &&
+            imageWidth === false &&
+            imageHeight === false &&
             type !== props.values.none &&
-            random
+            random === true
           }
           className={classes.fullWidth}
         >
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
               <BaseSlider
                 selector={props.levelMin.selector}
                 action={props.levelMin.action}
@@ -190,8 +182,8 @@ function MoveCard(props: MoveCardProps) {
                   appendValue: true
                 }}
               />
-            </Grid>
-            <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
               <BaseSlider
                 selector={props.levelMax.selector}
                 action={props.levelMax.action}
@@ -206,11 +198,11 @@ function MoveCard(props: MoveCardProps) {
                   appendValue: true
                 }}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Collapse>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

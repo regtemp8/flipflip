@@ -7,7 +7,7 @@ import MovieIcon from '@mui/icons-material/Movie'
 import RedditIcon from '@mui/icons-material/Reddit'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import TwitterIcon from '@mui/icons-material/Twitter'
-import { getSourceType, ST } from 'flipflip-common'
+import { ST } from 'flipflip-common'
 
 function RedGifsIcon(props: any) {
   return (
@@ -264,20 +264,12 @@ function LusciousIcon(props: any) {
 }
 
 export interface SourceIconProps {
-  url?: string
-  type?: string
+  type: string
   className?: string
 }
 
 export default function SourceIcon(props: SourceIconProps) {
-  let type = ''
-  if (props.url) {
-    type = getSourceType(props.url)
-  } else if (props.type) {
-    type = props.type
-  }
-
-  switch (type) {
+  switch (props.type) {
     case ST.audio:
       return <AudiotrackIcon className={props.className} />
     case ST.local:

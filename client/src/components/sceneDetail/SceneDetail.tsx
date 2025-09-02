@@ -1,14 +1,7 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  MouseEvent,
-  useEffect,
-  useState
-} from 'react'
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
-  Alert,
   AppBar,
   Backdrop,
   Badge,
@@ -28,12 +21,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
-  MenuItem,
-  Slide,
-  Snackbar,
   SvgIcon,
   Tab,
   Tabs,
@@ -41,7 +30,8 @@ import {
   type Theme,
   Toolbar,
   Tooltip,
-  Typography
+  Typography,
+  LinearProgress
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -63,7 +53,6 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import FilterListOffIcon from '@mui/icons-material/FilterListOff'
 import FolderIcon from '@mui/icons-material/Folder'
 import HttpIcon from '@mui/icons-material/Http'
-import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
 import MenuIcon from '@mui/icons-material/Menu'
 import MovieIcon from '@mui/icons-material/Movie'
@@ -71,93 +60,56 @@ import PhotoFilterIcon from '@mui/icons-material/PhotoFilter'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
 import RestoreIcon from '@mui/icons-material/Restore'
-import SaveIcon from '@mui/icons-material/Save'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import SortIcon from '@mui/icons-material/Sort'
 
-import {
-  en,
-  AF,
-  MO,
-  SDGT,
-  SDT,
-  SF,
-  SP,
-  SS,
-  ST,
-  TT,
-  WF,
-  WeightGroup
-} from 'flipflip-common'
+import { en, AF, MO, SDGT, SDT, SF, ST, WF } from 'flipflip-common'
 import SceneEffects from './SceneEffects'
 import SceneGenerator from './SceneGenerator'
 import SceneOptions from './SceneOptions'
 import GooninatorDialog from './GooninatorDialog'
-import LibrarySearch from '../library/LibrarySearch'
 import SourceList from '../library/SourceList'
 import SourceIcon from '../library/SourceIcon'
 import URLDialog from './URLDialog'
 import AudioTextEffects from './AudioTextEffects'
 import PiwigoDialog from './PiwigoDialog'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  doneTutorial,
-  setRouteGoBack,
-  sortSources
-} from '../../store/app/thunks'
-import {
-  generateScenes,
-  addSource,
-  deleteScene,
-  cloneScene,
-  resetScene,
-  saveAsScene,
-  applyEffectsToScene
-} from '../../store/scene/thunks'
-import { playScene } from '../../store/player/thunks'
-import {
-  selectAppConfigRemoteSettingsPiwigoConfigured,
-  selectAppLibrary,
-  selectAppTutorial,
-  selectAppSpecialMode,
-  selectAppConfigGeneralSettingsConfirmSceneDeletion,
-  selectAppConfigDisplaySettingsFullScreen
-} from '../../store/app/selectors'
-import { setSceneGeneratorMax } from '../../store/scene/actions'
-import {
-  setSceneOverrideIgnore,
-  setSceneAddGeneratorWeight,
-  setSceneUseWeights,
-  setSceneOpenTab,
-  setSceneName,
-  setSceneRemoveAllSources,
-  setSceneRemoveSources,
-  setSceneGeneratorWeights
-} from '../../store/scene/slice'
-import {
-  selectSceneWeightFunction,
-  selectSceneGeneratorWeights,
-  selectSceneRegenerate,
-  selectSceneOpenTab,
-  selectSceneName,
-  selectSceneSources,
-  selectSceneUseWeights,
-  selectSceneOverrideIgnore,
-  selectSceneGeneratorMax,
-  selectSceneGeneratorWeightsValid,
-  selectSceneEffectsBase64
-} from '../../store/scene/selectors'
 import BaseTextField from '../common/text/BaseTextField'
-import { setSceneDetailFilters } from '../../store/sceneDetail/slice'
 import {
-  selectSceneDetailFilters,
-  selectSceneDetailDisplaySources
+  selectSceneDetailEditingName,
+  selectSceneDetailFilters
 } from '../../store/sceneDetail/selectors'
-import flipflip from '../../FlipFlipService'
-import { setFullScreen } from '../../data/actions'
+import {
+  useNavigate,
+  useParams,
+  Link as RouterLink,
+  Route,
+  Routes
+} from 'react-router'
+import {
+  useGetDisplaySettingsFullScreenQuery,
+  useGetGeneralSettingsConfirmSceneDeletionQuery,
+  useGetRemoteSettingsPiwigoConfiguredQuery,
+  useGetSceneGeneratorMaxQuery,
+  useGetSceneRegenerateQuery
+} from '../../store/api/selectors'
+import {
+  useAddContentSourcesMutation,
+  useCloneSceneMutation,
+  useDeleteContentSourcesMutation,
+  useDeleteSceneMutation,
+  useGetFilteredContentSourcesQuery,
+  useGetSceneQuery,
+  usePlaySceneMutation
+} from '../../store/api/slice'
+import { setSceneGeneratorMax, setSceneName } from '../../store/api/thunks'
+import snackbar from '../../data/Snackbar'
+import { setFullScreen } from '../../data/fullscreen'
+import FilePicker from '../common/FilePicker'
+import { setSceneDetailEditingName } from '../../store/sceneDetail/slice'
+import { setSourceLibraryAddHttpUrl } from '../../store/sourceLibrary/slice'
 
 const drawerWidth = 240
-
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
     display: 'flex'
@@ -453,7 +405,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     width: '100%'
   },
   backdropTop: {
-    zIndex: `${theme.zIndex.modal + 1} !important` as any
+    zIndex: `${theme.zIndex.modal + 1} !important`
   },
   highlight: {
     borderWidth: 2,
@@ -477,62 +429,56 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-function TransitionUp(props: any) {
-  return <Slide {...props} direction="up" />
+const tabRoutes = [
+  '/options',
+  '/effects',
+  '/audio-text',
+  '/sources',
+  '/generator'
+]
+const getOpenTab = (pathname: string) => {
+  const index = tabRoutes.findIndex((tab) => {
+    const lastSlash = pathname.lastIndexOf('/')
+    return tab === pathname.substring(lastSlash)
+  })
+
+  return pathname.startsWith('/scenes') && index === -1 ? 0 : index
 }
 
-export interface SceneDetailProps {
-  sceneID: number
-}
-
-function SceneDetail(props: SceneDetailProps) {
+function SceneDetail() {
+  const { id } = useParams()
+  const sceneID = Number(id)
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const tutorial = useAppSelector(selectAppTutorial())
-  const piwigoConfigured = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoConfigured()
-  )
-  const confirmSceneDeletion = useAppSelector(
-    selectAppConfigGeneralSettingsConfirmSceneDeletion()
-  )
-  const library = useAppSelector(selectAppLibrary())
-  const openTab = useAppSelector(selectSceneOpenTab(props.sceneID))
-  const name = useAppSelector(selectSceneName(props.sceneID))
-  const sources = useAppSelector(selectSceneSources(props.sceneID))
-  const weightFunction = useAppSelector(
-    selectSceneWeightFunction(props.sceneID)
-  )
-  const useWeights = useAppSelector(selectSceneUseWeights(props.sceneID))
-  const overrideIgnore = useAppSelector(
-    selectSceneOverrideIgnore(props.sceneID)
-  )
-  const generatorWeights = useAppSelector(
-    selectSceneGeneratorWeights(props.sceneID)
-  )
-  const generatorWeightsValid = useAppSelector(
-    selectSceneGeneratorWeightsValid(props.sceneID)
-  )
-  const regenerate = useAppSelector(selectSceneRegenerate(props.sceneID))
-  const generatorMax = useAppSelector(selectSceneGeneratorMax(props.sceneID))
-  const autoEdit = useAppSelector(selectAppSpecialMode()) === SP.autoEdit
-  const sceneEffectsBase64 = useAppSelector(
-    selectSceneEffectsBase64(props.sceneID)
-  )
-  const specialMode = useAppSelector(selectAppSpecialMode())
-  const filters = useAppSelector(selectSceneDetailFilters())
-  const displaySources = useAppSelector(
-    selectSceneDetailDisplaySources(props.sceneID)
-  )
-  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
 
-  const [isEditingName, setIsEditingName] = useState<string>()
+  const [deleteScene] = useDeleteSceneMutation()
+  const [cloneScene] = useCloneSceneMutation()
+  const [playScene] = usePlaySceneMutation()
+  const [addContentSources] = useAddContentSourcesMutation()
+  const [deleteContentSources] = useDeleteContentSourcesMutation()
+  const editingName = useAppSelector(selectSceneDetailEditingName())
+  const { data: scene } = useGetSceneQuery(sceneID)
+  const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
+
+  const { data: confirmSceneDeletion } =
+    useGetGeneralSettingsConfirmSceneDeletionQuery()
+
+  const regenerate = useGetSceneRegenerateQuery(sceneID)
+  const filters = useAppSelector(selectSceneDetailFilters())
+  const { data: displaySources } = useGetFilteredContentSourcesQuery({
+    sceneId: sceneID,
+    filters
+  })
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [openMenu, setOpenMenu] = useState<string>()
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [snackbar, setSnackbar] = useState<string>()
-  const [snackbarSeverity, setSnackbarSeverity] = useState<string>()
+  const [addFunction, setAddFunction] = useState<string>()
   const [sceneEffects, setSceneEffects] = useState('')
-  const [confirmCopy, setConfirmCopy] = useState(false)
+  const [confirmCopy, _setConfirmCopy] = useState(false)
+
+  const tutorial = ''
 
   useEffect(() => {
     // Use alt+P to access import modal
@@ -556,113 +502,103 @@ function SceneDetail(props: SceneDetailProps) {
     }
   }, [])
 
-  useEffect(() => {
-    if (autoEdit) {
-      setIsEditingName(name)
-    }
-  }, [autoEdit, name])
-
-  const onUpdateFilters = (filters: string[]) =>
-    dispatch(setSceneDetailFilters(filters))
-
-  const onCloseSnackbar = () => {
-    setSnackbarOpen(false)
-  }
+  // const onUpdateFilters = (filters: string[]) =>
+  //   dispatch(setSceneDetailFilters(filters))
 
   const onOpenMaxMenu = (e: MouseEvent) => {
     setMenuAnchorEl(e.currentTarget)
     setOpenMenu(MO.max)
   }
 
-  const onPlayScene = () => {
-    if (tutorial === SDT.play) {
-      dispatch(doneTutorial(SDT.play))
-    }
+  const onPlayScene = async () => {
+    // if (tutorial === SDT.play) {
+    //   dispatch(doneTutorial(SDT.play))
+    // }
 
-    // Regenerate scene(s) before playback
-    dispatch(generateScenes(props.sceneID))
-    dispatch(playScene(props.sceneID))
-    setFullScreen(fullScreen)
+    const { data } = await playScene(sceneID)
+    if (data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.value}`)
+    }
   }
 
   const onToggleOverrideIgnore = () => {
-    dispatch(
-      setSceneOverrideIgnore({ id: props.sceneID, value: !overrideIgnore })
-    )
+    // dispatch(setSceneOverrideIgnore({ id: id, value: !scene?.overrideIgnore }))
   }
 
   const getRemainingPercent = (): number => {
-    let remaining = 100
-    const weights = generatorWeights as WeightGroup[]
-    for (const wg of weights) {
-      if (wg.type === TT.weight) {
-        remaining = remaining - (wg.percent as number)
-      }
-    }
+    const remaining = 100
+    // const weights = generatorWeights as WeightGroup[]
+    // for (const wg of weights) {
+    //   if (wg.type === TT.weight) {
+    //     remaining = remaining - (wg.percent as number)
+    //   }
+    // }
     return remaining
   }
 
   const onGenerate = () => {
-    dispatch(generateScenes(props.sceneID, false, true))
+    // dispatch(generateScenes(id, false, true))
     generateCallback()
   }
 
   const generateCallback = () => {
-    if (sources.length === 0) {
-      setSnackbarOpen(true)
-      setSnackbar('Sorry, no sources were found for these rules')
-      setSnackbarSeverity(SS.warning)
-      if (tutorial === SDGT.generate) {
-        dispatch(doneTutorial(SDGT.generateError))
-      }
+    if (scene?.sources.length === 0) {
+      snackbar().showMessage({
+        warning: 'Sorry, no sources were found for these rules'
+      })
+
+      // if (tutorial === SDGT.generate) {
+      //   dispatch(doneTutorial(SDGT.generateError))
+      // }
     } else {
-      setSnackbarOpen(true)
-      setSnackbar('Generated scene with ' + sources.length + ' sources')
-      setSnackbarSeverity(SS.success)
-      if (tutorial === SDGT.generate) {
-        dispatch(doneTutorial(SDGT.generate))
-      }
+      snackbar().showMessage({
+        success: 'Generated scene with ' + scene?.sources.length + ' sources'
+      })
+      // if (tutorial === SDGT.generate) {
+      //   dispatch(doneTutorial(SDGT.generate))
+      // }
     }
   }
 
   const onAddAdvRule = () => {
-    dispatch(
-      setSceneAddGeneratorWeight({
-        id: props.sceneID,
-        value: {
-          percent: 0,
-          type: TT.weight,
-          rules: []
-        }
-      })
-    )
+    // dispatch(
+    //   setSceneAddGeneratorWeight({
+    //     id: id,
+    //     value: {
+    //       percent: 0,
+    //       type: TT.weight,
+    //       rules: []
+    //     }
+    //   })
+    // )
   }
 
-  const onAddRule = (filters: string[]) => {
-    if (tutorial === SDGT.buttons) {
-      dispatch(doneTutorial(SDGT.buttons))
-      onCloseDialog()
-    }
+  // const onAddRule = (filters: string[]) => {
+  //   if (tutorial === SDGT.buttons) {
+  //     dispatch(doneTutorial(SDGT.buttons))
+  //     onCloseDialog()
+  //   }
 
-    const weights = generatorWeights as WeightGroup[]
-    for (const search of filters) {
-      if (
-        search.length > 0 &&
-        weights.find((wg) => wg.search === search) == null
-      ) {
-        weights.push({
-          percent: 0,
-          type: TT.weight,
-          search
-        })
-      }
-    }
+  //   const weights = generatorWeights as WeightGroup[]
+  //   for (const search of filters) {
+  //     if (
+  //       search.length > 0 &&
+  //       weights.find((wg) => wg.search === search) == null
+  //     ) {
+  //       weights.push({
+  //         percent: 0,
+  //         type: TT.weight,
+  //         search
+  //       })
+  //     }
+  //   }
 
-    dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: weights }))
-  }
+  //   dispatch(setSceneGeneratorWeights({ id: id, value: weights }))
+  // }
 
   const onFinishRemoveAllRules = () => {
-    dispatch(setSceneGeneratorWeights({ id: props.sceneID, value: [] }))
+    // dispatch(setSceneGeneratorWeights({ id: id, value: [] }))
   }
 
   const onOpenTagMenu = (e: MouseEvent) => {
@@ -670,17 +606,32 @@ function SceneDetail(props: SceneDetailProps) {
     setOpenMenu(MO.simpleRule)
   }
 
-  const onAddSource = (addFunction: string, e?: MouseEvent, ...args: any[]) => {
+  const onAddSource = async (
+    addFunction: string,
+    e?: MouseEvent,
+    urls?: string[]
+  ) => {
     onCloseDialog()
     if (tutorial === SDT.add2) {
-      dispatch(doneTutorial(SDT.add2))
-      dispatch(addSource('tutorial', props.sceneID))
+      // dispatch(doneTutorial(SDT.add2))
+      // dispatch(addSource('tutorial', id))
     } else if (addFunction === AF.videos && e?.shiftKey) {
-      dispatch(addSource(AF.videoDir, props.sceneID, ...args))
+      setOpenMenu(MO.openLocal)
+      setAddFunction(AF.videoDir)
     } else if (addFunction === AF.url && e?.shiftKey) {
       setOpenMenu(MO.urlImport)
-    } else {
-      dispatch(addSource(addFunction, props.sceneID, ...args))
+    } else if (addFunction === AF.url) {
+      dispatch(setSourceLibraryAddHttpUrl(true))
+      await addContentSources({ addFunction, sceneId: sceneID, urls: [''] })
+    } else if (addFunction === AF.directory || addFunction === AF.videos) {
+      setOpenMenu(MO.openLocal)
+      setAddFunction(addFunction)
+    } else if (addFunction === AF.list) {
+      await addContentSources({
+        addFunction,
+        sceneId: sceneID,
+        urls: urls as string[]
+      })
     }
   }
 
@@ -690,7 +641,7 @@ function SceneDetail(props: SceneDetailProps) {
 
   const onToggleNewMenu = () => {
     if (tutorial === SDT.add1) {
-      dispatch(doneTutorial(SDT.add1))
+      // dispatch(doneTutorial(SDT.add1))
     }
     setOpenMenu(openMenu === MO.new ? undefined : MO.new)
   }
@@ -701,7 +652,7 @@ function SceneDetail(props: SceneDetailProps) {
   }
 
   const onToggleWeight = () => {
-    dispatch(setSceneUseWeights({ id: props.sceneID, value: !useWeights }))
+    // dispatch(setSceneUseWeights({ id: id, value: !useWeights }))
   }
 
   const onOpenPiwigoMenu = () => {
@@ -709,16 +660,16 @@ function SceneDetail(props: SceneDetailProps) {
   }
 
   const onOpenSceneEffectsMenu = () => {
-    setOpenMenu(MO.effects)
-    setSceneEffects(sceneEffectsBase64)
+    // setOpenMenu(MO.effects)
+    // setSceneEffects(sceneEffectsBase64)
   }
 
   const onCopySceneEffects = () => {
-    flipflip().clipboard.copyTextToClipboard(sceneEffects)
-    setConfirmCopy(true)
-    setTimeout(() => {
-      setConfirmCopy(false)
-    }, 1000)
+    // flipflip().clipboard.copyTextToClipboard(sceneEffects)
+    // setConfirmCopy(true)
+    // setTimeout(() => {
+    //   setConfirmCopy(false)
+    // }, 1000)
   }
 
   const onChangeSceneEffects = (e: ChangeEvent<HTMLInputElement>) => {
@@ -726,7 +677,7 @@ function SceneDetail(props: SceneDetailProps) {
   }
 
   const onApplySceneEffects = () => {
-    dispatch(applyEffectsToScene(props.sceneID, sceneEffects))
+    // dispatch(applyEffectsToScene(id, sceneEffects))
     onCloseDialog()
   }
 
@@ -737,64 +688,75 @@ function SceneDetail(props: SceneDetailProps) {
     setSceneEffects('')
   }
 
-  const onChangeTab = (e: any, newTab: number) => {
+  const onChangeTab = () => {
     if (tutorial === SDT.options1) {
-      dispatch(doneTutorial(SDT.options1))
+      // dispatch(doneTutorial(SDT.options1))
       setDrawerOpen(false)
     }
     if (tutorial === SDT.effects1) {
-      dispatch(doneTutorial(SDT.effects1))
+      // dispatch(doneTutorial(SDT.effects1))
       setDrawerOpen(false)
     }
-    dispatch(setSceneOpenTab({ id: props.sceneID, value: newTab }))
   }
 
   const beginEditingName = () => {
-    setIsEditingName(name)
+    if (scene != null) {
+      dispatch(setSceneDetailEditingName(scene.name))
+    }
   }
 
   const endEditingName = (e: FormEvent) => {
     e.preventDefault()
-    dispatch(
-      setSceneName({ id: props.sceneID, value: isEditingName as string })
-    )
-    setIsEditingName(undefined)
+    dispatch(setSceneName(sceneID, editingName as string))
+    dispatch(setSceneDetailEditingName(undefined))
   }
 
   const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsEditingName(e.currentTarget.value)
+    dispatch(setSceneDetailEditingName(e.currentTarget.value))
   }
 
-  const onDeleteScene = () => {
+  const onDeleteScene = async () => {
     if (confirmSceneDeletion) {
       setOpenMenu(MO.deleteAlert)
     } else {
-      dispatch(deleteScene(props.sceneID))
+      await onFinishDeleteScene()
     }
   }
 
-  const onFinishDeleteScene = () => {
-    dispatch(deleteScene(props.sceneID))
+  const onFinishDeleteScene = async () => {
+    setOpenMenu(undefined)
+    await deleteScene(sceneID)
+    goBack()
   }
 
   const onRemoveAll = () => {
     setOpenMenu(MO.removeAllAlert)
   }
 
-  const onFinishRemoveAll = () => {
-    dispatch(setSceneRemoveAllSources(props.sceneID))
+  const onFinishRemoveAll = async () => {
     onCloseDialog()
+    await deleteContentSources(sceneID)
   }
 
   const onFinishRemoveVisible = () => {
-    dispatch(
-      setSceneRemoveSources({ id: props.sceneID, value: displaySources })
-    )
+    // dispatch(setSceneRemoveSources({ id: id, value: displaySources }))
     onCloseDialog()
   }
 
+  const onCloneScene = async () => {
+    const { data } = await cloneScene(sceneID)
+    if (data != null) {
+      await navigate(`/scenes/${data.value}`)
+    }
+  }
+
+  const goBack = () => navigate(-1)
+
   const { classes } = useStyles()
   const open = drawerOpen
+  const specialMode = '' // TODO fix this
+  const generatorWeightsValid = true // TODO fix this
+  const openTab = getOpenTab(location.pathname)
   return (
     <div className={classes.root}>
       <AppBar
@@ -812,32 +774,30 @@ function SceneDetail(props: SceneDetailProps) {
               edge="start"
               color="inherit"
               aria-label="Back"
-              onClick={() => {
-                dispatch(setRouteGoBack())
-              }}
+              onClick={goBack}
               size="large"
             >
               <ArrowBackIcon />
             </IconButton>
           </Tooltip>
 
-          {isEditingName != null && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
-                value={isEditingName}
+                value={editingName}
                 margin="none"
-                inputProps={{ className: classes.titleInput }}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
                 onChange={onChangeName}
               />
             </form>
           )}
-          {isEditingName == null && (
-            <React.Fragment>
+          {editingName == null && (
+            <>
               <div className={classes.fill} />
               <Typography
                 component="h1"
@@ -846,20 +806,21 @@ function SceneDetail(props: SceneDetailProps) {
                 noWrap
                 className={cx(
                   classes.title,
-                  name.length === 0 && classes.noTitle,
+                  scene?.name.length === 0 && classes.noTitle,
                   tutorial === SDT.title && classes.highlight
                 )}
                 onClick={beginEditingName}
               >
-                {name}
+                {scene?.name}
               </Typography>
               <div className={classes.fill} />
-            </React.Fragment>
+            </>
           )}
 
           {openTab === 3 && (
             <div className={classes.librarySearch}>
-              <LibrarySearch
+              {/* <LibrarySearch
+                appBar
                 displaySources={displaySources}
                 filters={filters}
                 placeholder={'Search ...'}
@@ -867,7 +828,7 @@ function SceneDetail(props: SceneDetailProps) {
                 isCreatable
                 onlyUsed
                 onUpdateFilters={onUpdateFilters}
-              />
+              /> */}
             </div>
           )}
 
@@ -877,7 +838,8 @@ function SceneDetail(props: SceneDetailProps) {
               tutorial === SDT.play && classes.highlight
             )}
             disabled={
-              sources.length === 0 && (!regenerate || !generatorWeightsValid)
+              scene?.sources.length === 0 &&
+              (!regenerate || !generatorWeightsValid)
             }
             color="secondary"
             aria-label="Play"
@@ -936,6 +898,13 @@ function SceneDetail(props: SceneDetailProps) {
                 tutorial === SDT.options1 && classes.highlight,
                 tutorial === SDT.effects1 && classes.disable
               )}
+              component={(props) => (
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[0]}`}
+                />
+              )}
             />
             <Tab
               id="vertical-tab-1"
@@ -948,6 +917,13 @@ function SceneDetail(props: SceneDetailProps) {
                 !open && classes.tabClose,
                 tutorial === SDT.options1 && classes.disable,
                 tutorial === SDT.effects1 && classes.highlight
+              )}
+              component={(props) => (
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[1]}`}
+                />
               )}
             />
             <Tab
@@ -963,12 +939,19 @@ function SceneDetail(props: SceneDetailProps) {
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
+              component={(props) => (
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[2]}`}
+                />
+              )}
             />
             <Tab
               id="vertical-tab-3"
               aria-controls="vertical-tabpanel-3"
               icon={<CollectionsIcon />}
-              label={open ? `Sources (${sources.length})` : ''}
+              label={open ? `Sources (${scene?.sources.length})` : ''}
               className={cx(
                 classes.tab,
                 classes.sourcesTab,
@@ -976,8 +959,15 @@ function SceneDetail(props: SceneDetailProps) {
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
               )}
+              component={(props) => (
+                <RouterLink
+                  {...props}
+                  replace
+                  to={`/scenes/${id}${tabRoutes[3]}`}
+                />
+              )}
             />
-            {generatorWeights && (
+            {/* {generatorWeights && (
               <Tab
                 id="vertical-tab-4"
                 aria-controls="vertical-tabpanel-4"
@@ -988,17 +978,20 @@ function SceneDetail(props: SceneDetailProps) {
                   classes.generateTab,
                   !open && classes.tabClose
                 )}
+                component={(props) => (
+                  <RouterLink {...props} replace to={tabRoutes[4]} />
+                )}
               />
-            )}
+            )} */}
           </Tabs>
         </div>
         <div className={classes.fill} />
 
         <div>
-          {generatorWeights && (
+          {/* {generatorWeights && (
             <ListItemButton
               onClick={() => {
-                dispatch(saveAsScene(props.sceneID))
+                dispatch(saveAsScene(id))
               }}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
@@ -1010,19 +1003,18 @@ function SceneDetail(props: SceneDetailProps) {
               </ListItemIcon>
               <ListItemText primary="Save as Scene" />
             </ListItemButton>
-          )}
+          )} */}
           <Tooltip
             disableInteractive
             title={
               drawerOpen
                 ? ''
-                : `Clone ${generatorWeights ? 'Generator' : 'Scene'}`
+                : // : `Clone ${generatorWeights ? 'Generator' : 'Scene'}`
+                  `Clone Scene`
             }
           >
             <ListItemButton
-              onClick={() => {
-                dispatch(cloneScene(props.sceneID))
-              }}
+              onClick={onCloneScene}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
                   classes.disable
@@ -1032,7 +1024,8 @@ function SceneDetail(props: SceneDetailProps) {
                 <FileCopyIcon />
               </ListItemIcon>
               <ListItemText
-                primary={`Clone ${generatorWeights ? 'Generator' : 'Scene'}`}
+                // primary={`Clone ${generatorWeights ? 'Generator' : 'Scene'}`}
+                primary={`Clone Scene`}
               />
             </ListItemButton>
           </Tooltip>
@@ -1040,8 +1033,7 @@ function SceneDetail(props: SceneDetailProps) {
             disableInteractive
             title={drawerOpen ? '' : 'Scene Effects Import/Export'}
           >
-            <ListItem
-              button
+            <ListItemButton
               onClick={onOpenSceneEffectsMenu}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
@@ -1057,13 +1049,13 @@ function SceneDetail(props: SceneDetailProps) {
                 </SvgIcon>
               </ListItemIcon>
               <ListItemText primary="Export Scene Effects" />
-            </ListItem>
+            </ListItemButton>
           </Tooltip>
           <Tooltip disableInteractive title={drawerOpen ? '' : 'Export Scene'}>
             <ListItemButton
               onClick={() => {
                 // TODO export subset of AppStorage
-                // dispatch(exportScene(props.sceneID))
+                // dispatch(exportScene(id))
               }}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
@@ -1082,7 +1074,7 @@ function SceneDetail(props: SceneDetailProps) {
           >
             <ListItemButton
               onClick={() => {
-                dispatch(resetScene(props.sceneID))
+                // dispatch(resetScene(id))
               }}
               className={cx(
                 (tutorial === SDT.options1 || tutorial === SDT.effects1) &&
@@ -1116,11 +1108,11 @@ function SceneDetail(props: SceneDetailProps) {
             aria-labelledby="delete-title"
             aria-describedby="delete-description"
           >
-            <DialogTitle id="Delete-title">Delete '{name}'</DialogTitle>
+            <DialogTitle id="Delete-title">Delete '{scene?.name}'</DialogTitle>
             <DialogContent>
               <DialogContentText id="delete-description">
-                Are you sure you want to delete {name}? It will be automatically
-                removed from all playlists.
+                Are you sure you want to delete {scene?.name}? It will be
+                automatically removed from all playlists.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -1138,67 +1130,105 @@ function SceneDetail(props: SceneDetailProps) {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth={false} className={classes.container}>
-          {openTab === 0 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <SceneOptions sceneID={props.sceneID} />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 1 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <SceneEffects sceneID={props.sceneID} />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 2 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <AudioTextEffects sceneID={props.sceneID} />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 3 && (
-            <Typography
-              className={cx(openTab === 3 && classes.sourcesSection)}
-              component="div"
-            >
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box className={classes.fill}>
-                  <SourceList
-                    sources={displaySources}
-                    useWeights={weightFunction === WF.sources && useWeights}
-                    showHelp={!specialMode && filters.length === 0}
-                  />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {generatorWeights && openTab === 4 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={1} className={classes.fill}>
-                  <SceneGenerator sceneID={props.sceneID} />
-                </Box>
-              </div>
-            </Typography>
-          )}
+          <Routes>
+            <Route
+              path="*"
+              element={
+                <Typography component="div">
+                  <div className={classes.tabPanel}>
+                    <div className={classes.drawerSpacer} />
+                    <Box p={2} className={classes.fill}>
+                      {scene != null ? (
+                        <SceneOptions sceneID={scene.id} />
+                      ) : (
+                        <LinearProgress />
+                      )}
+                    </Box>
+                  </div>
+                </Typography>
+              }
+            />
+            <Route
+              path="/effects"
+              element={
+                <Typography component="div">
+                  <div className={classes.tabPanel}>
+                    <div className={classes.drawerSpacer} />
+                    <Box p={2} className={classes.fill}>
+                      {scene != null ? (
+                        <SceneEffects sceneID={scene.id} />
+                      ) : (
+                        <LinearProgress />
+                      )}
+                    </Box>
+                  </div>
+                </Typography>
+              }
+            />
+            <Route
+              path="/audio-text"
+              element={
+                <Typography component="div">
+                  <div className={classes.tabPanel}>
+                    <div className={classes.drawerSpacer} />
+                    <Box p={2} className={classes.fill}>
+                      {scene != null ? (
+                        <AudioTextEffects sceneID={scene.id} />
+                      ) : (
+                        <LinearProgress />
+                      )}
+                    </Box>
+                  </div>
+                </Typography>
+              }
+            />
+            <Route
+              path="/sources"
+              element={
+                <Typography
+                  className={cx(openTab === 3 && classes.sourcesSection)}
+                  component="div"
+                >
+                  <div className={classes.tabPanel}>
+                    <div className={classes.drawerSpacer} />
+                    <Box className={classes.fill}>
+                      {scene != null ? (
+                        <SourceList
+                          sources={displaySources ?? []}
+                          useWeights={
+                            scene?.weightFunction === WF.sources &&
+                            scene?.useWeights
+                          }
+                          showHelp={!specialMode && filters.length === 0}
+                        />
+                      ) : (
+                        <LinearProgress />
+                      )}
+                    </Box>
+                  </div>
+                </Typography>
+              }
+            />
+            <Route
+              path="/generator"
+              element={
+                <Typography component="div">
+                  <div className={classes.tabPanel}>
+                    <div className={classes.drawerSpacer} />
+                    <Box p={1} className={classes.fill}>
+                      {scene != null ? (
+                        scene.generatorWeights ? (
+                          <SceneGenerator sceneID={scene.id} />
+                        ) : null
+                      ) : (
+                        <LinearProgress />
+                      )}
+                    </Box>
+                  </div>
+                </Typography>
+              }
+            />
+          </Routes>
         </Container>
       </main>
 
@@ -1227,7 +1257,7 @@ function SceneDetail(props: SceneDetailProps) {
             id="phrase"
             value={sceneEffects}
             margin="dense"
-            inputProps={{ className: classes.phraseInput }}
+            slotProps={{ htmlInput: { className: classes.phraseInput } }}
             onChange={onChangeSceneEffects}
           />
         </DialogContent>
@@ -1243,8 +1273,8 @@ function SceneDetail(props: SceneDetailProps) {
       </Dialog>
 
       {openTab === 3 && (
-        <React.Fragment>
-          {sources.length > 0 && (
+        <>
+          {(displaySources?.length ?? 0) > 0 && (
             <Tooltip
               disableInteractive
               title={
@@ -1277,7 +1307,7 @@ function SceneDetail(props: SceneDetailProps) {
             aria-describedby="remove-all-description"
           >
             {filters.length === 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">
                   Remove All Sources
                 </DialogTitle>
@@ -1294,10 +1324,10 @@ function SceneDetail(props: SceneDetailProps) {
                     OK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
             {filters.length > 0 && (
-              <React.Fragment>
+              <>
                 <DialogTitle id="remove-all-title">Remove Sources</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="remove-all-description">
@@ -1313,7 +1343,7 @@ function SceneDetail(props: SceneDetailProps) {
                     OK
                   </Button>
                 </DialogActions>
-              </React.Fragment>
+              </>
             )}
           </Dialog>
           {piwigoConfigured && (
@@ -1427,10 +1457,28 @@ function SceneDetail(props: SceneDetailProps) {
             onClose={onCloseDialog}
             onImportURL={onAddSource}
           />
+          <FilePicker
+            open={openMenu === MO.openLocal}
+            type={addFunction ?? ''}
+            path=""
+            multiple
+            onClose={async (chosenFiles?: string[]) => {
+              const addFn = addFunction as string
+              setOpenMenu(undefined)
+              setAddFunction(undefined)
+              if (chosenFiles != null) {
+                await addContentSources({
+                  addFunction: addFn,
+                  sceneId: sceneID,
+                  urls: chosenFiles
+                })
+              }
+            }}
+          />
 
-          {sources.length >= 2 && (
-            <React.Fragment>
-              {weightFunction === WF.sources && (
+          {(scene?.sources?.length ?? 0) >= 2 && (
+            <>
+              {scene?.weightFunction === WF.sources && (
                 <Fab
                   className={classes.weightButton}
                   onClick={onToggleWeight}
@@ -1482,54 +1530,60 @@ function SceneDetail(props: SceneDetailProps) {
                 {Object.values(SF)
                   .filter((sf) => sf !== SF.random)
                   .map((sf) => (
-                    <MenuItem key={sf}>
+                    <ListItem
+                      key={sf}
+                      secondaryAction={
+                        <>
+                          <IconButton
+                            edge="end"
+                            onClick={() => {
+                              // dispatch(sortSources(sf, true, id))
+                            }}
+                            size="large"
+                          >
+                            <ArrowUpwardIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            onClick={() => {
+                              // dispatch(sortSources(sf, false, id))
+                            }}
+                            size="large"
+                          >
+                            <ArrowDownwardIcon />
+                          </IconButton>
+                        </>
+                      }
+                    >
                       <ListItemText primary={en.get(sf)} />
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          edge="end"
-                          onClick={() => {
-                            dispatch(sortSources(sf, true, props.sceneID))
-                          }}
-                          size="large"
-                        >
-                          <ArrowUpwardIcon />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          onClick={() => {
-                            dispatch(sortSources(sf, false, props.sceneID))
-                          }}
-                          size="large"
-                        >
-                          <ArrowDownwardIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </MenuItem>
+                    </ListItem>
                   ))}
-                <MenuItem key={SF.random}>
-                  <ListItemText primary={en.get(SF.random)} />
-                  <ListItemSecondaryAction>
+                <ListItem
+                  key={SF.random}
+                  secondaryAction={
                     <IconButton
                       edge="end"
                       onClick={() => {
-                        dispatch(sortSources(SF.random, true, props.sceneID))
+                        // dispatch(sortSources(SF.random, true, id))
                       }}
                       size="large"
                     >
                       <ShuffleIcon />
                     </IconButton>
-                  </ListItemSecondaryAction>
-                </MenuItem>
+                  }
+                >
+                  <ListItemText primary={en.get(SF.random)} />
+                </ListItem>
               </Menu>
-            </React.Fragment>
+            </>
           )}
-        </React.Fragment>
+        </>
       )}
 
       {openTab === 4 && (
-        <React.Fragment>
-          {generatorWeights != null && generatorWeights.length > 0 && (
-            <React.Fragment>
+        <>
+          {(scene?.generatorWeights?.length ?? 0) > 0 && (
+            <>
               <Tooltip
                 disableInteractive
                 title="Remove All Rules"
@@ -1564,12 +1618,12 @@ function SceneDetail(props: SceneDetailProps) {
                   </Button>
                 </DialogActions>
               </Dialog>
-            </React.Fragment>
+            </>
           )}
           <Tooltip
             disableInteractive
             title={
-              overrideIgnore
+              scene?.overrideIgnore
                 ? 'Overriding globally ignored tags/types'
                 : 'Respecting globally ignored tags/types'
             }
@@ -1578,14 +1632,18 @@ function SceneDetail(props: SceneDetailProps) {
             <Fab
               className={cx(
                 classes.overrideIgnoreWGButton,
-                overrideIgnore && classes.overrideOn,
-                !overrideIgnore && classes.overrideOff
+                scene?.overrideIgnore && classes.overrideOn,
+                !scene?.overrideIgnore && classes.overrideOff
               )}
               onClick={onToggleOverrideIgnore}
               size="medium"
             >
-              {overrideIgnore && <FilterListOffIcon className={classes.icon} />}
-              {!overrideIgnore && <FilterListIcon className={classes.icon} />}
+              {scene?.overrideIgnore && (
+                <FilterListOffIcon className={classes.icon} />
+              )}
+              {!scene?.overrideIgnore && (
+                <FilterListIcon className={classes.icon} />
+              )}
             </Fab>
           </Tooltip>
           <Tooltip disableInteractive title="Max" placement="top">
@@ -1598,7 +1656,7 @@ function SceneDetail(props: SceneDetailProps) {
               onClick={onOpenMaxMenu}
               size="medium"
             >
-              {generatorMax}
+              {scene?.generatorMax}
             </Fab>
           </Tooltip>
           <Menu
@@ -1622,8 +1680,8 @@ function SceneDetail(props: SceneDetailProps) {
               variant="standard"
               label="Max"
               margin="dense"
-              selector={selectSceneGeneratorMax(props.sceneID)}
-              action={setSceneGeneratorMax(props.sceneID)}
+              selector={() => useGetSceneGeneratorMaxQuery(sceneID)}
+              action={setSceneGeneratorMax(sceneID)}
               inputProps={{
                 min: 1,
                 type: 'number'
@@ -1670,7 +1728,7 @@ function SceneDetail(props: SceneDetailProps) {
                   cx(classes.backdropTop, classes.disable),
                 tutorial === SDGT.generate && classes.backdropTop
               )}
-              style={!generatorWeightsValid ? { pointerEvents: 'none' } : {}}
+              style={generatorWeightsValid ? { pointerEvents: 'none' } : {}}
             >
               <Fab
                 disabled={!generatorWeightsValid}
@@ -1719,7 +1777,7 @@ function SceneDetail(props: SceneDetailProps) {
             open={openMenu === MO.simpleRule}
             onClose={onCloseDialog}
           >
-            {openMenu === MO.simpleRule && (
+            {/* {openMenu === MO.simpleRule && (
               <LibrarySearch
                 displaySources={library}
                 filters={(generatorWeights as WeightGroup[])
@@ -1730,27 +1788,15 @@ function SceneDetail(props: SceneDetailProps) {
                 autoFocus
                 isLibrary
                 isCreatable
-                fullWidth
                 onlyUsed
                 menuIsOpen
                 controlShouldRenderValue={false}
                 onUpdateFilters={onAddRule}
               />
-            )}
+            )} */}
           </Menu>
-        </React.Fragment>
+        </>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        autoHideDuration={5000}
-        onClose={onCloseSnackbar}
-        TransitionComponent={TransitionUp}
-      >
-        <Alert onClose={onCloseSnackbar} severity={snackbarSeverity as any}>
-          {snackbar}
-        </Alert>
-      </Snackbar>
     </div>
   )
 }

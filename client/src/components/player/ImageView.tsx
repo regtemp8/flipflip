@@ -6,16 +6,17 @@ import React, {
   useEffect,
   SyntheticEvent
 } from 'react'
-import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import { BT, IT, SL } from 'flipflip-common'
 import {
+  BT,
+  IT,
+  SL,
   ContentData,
   EffectsData,
   StrobeData,
   TransformData,
   ViewData
-} from '../../store/player/ContentPreloadService'
+} from 'flipflip-common'
 import { cx } from '@emotion/css'
 import Strobe from './Strobe'
 import ZoomMove from './ZoomMove'
@@ -85,7 +86,7 @@ const enableStobeTopOrBottom = (strobe: StrobeData) => {
   return strobe.layer === SL.top || strobe.layer === SL.bottom
 }
 
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     rotate: {
       position: 'absolute',
@@ -393,7 +394,7 @@ function ImageView(props: ImageViewProps) {
         iframe.contentWindow != null &&
         iframe.contentWindow.location.href === data.url
       const document = loaded
-        ? iframe.contentDocument ?? iframe.contentWindow?.document
+        ? (iframe.contentDocument ?? iframe.contentWindow?.document)
         : undefined
       if (document != null && document.readyState === 'complete') {
         const copyright = document.getElementsByClassName('copyright')

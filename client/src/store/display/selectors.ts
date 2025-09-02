@@ -1,107 +1,73 @@
 import { createSelector } from '@reduxjs/toolkit'
-import Display from './Display'
+import { flipflipApi } from '../api/slice'
 import { RootState } from '../store'
-import { getAppDisplays } from '../app/selectors'
-import { getEntry } from '../EntryState'
-import { getDisplayViewEntries } from '../displayView/selectors'
 
-export const getDisplayEntries = (state: RootState): Record<number, Display> =>
-  state.display.entries
+export const selectDisplayEditingName = () => (state: RootState) =>
+  state.display.editingName
+export const selectDisplayEditingViewName = () => (state: RootState) =>
+  state.display.editingViewName
+export const selectDisplaySelectedView = () => (state: RootState) =>
+  state.display.selectedView
+export const selectDisplayViewsListYOffset = () => (state: RootState) =>
+  state.display.displayViewsListYOffset
 
-export const selectDisplays = () => {
-  return createSelector([getAppDisplays, getDisplayEntries], (ids, entries) =>
-    ids.map((id) => entries[id] as Display)
-  )
+export const selectDisplaySelectedViewName = () => (state: RootState) => {
+  let name: string | undefined = undefined
+  const id = state.display.selectedView
+  if (id != null) {
+    const displayView = selectDisplayView(id)(state)
+    name = displayView?.name
+  }
+
+  return name
 }
 
-export const selectDisplay = (id: number) => {
-  return (state: RootState) => getEntry(state.display, id)
+const selectDisplayViewResult = (id: number) =>
+  flipflipApi.endpoints.getDisplayView.select(id)
+
+const selectDisplayView = (id: number) => {
+  return createSelector(selectDisplayViewResult(id), (result) => result?.data)
 }
 
-export const selectDisplayViews = (id: number) => {
-  return (state: RootState) => getEntry(state.display, id).views
-}
-
-export const selectDisplayName = (id: number) => {
-  return (state: RootState) => getEntry(state.display, id).name ?? ''
-}
-
-export const selectDisplaySelectedView = (id: number) => {
-  return (state: RootState) => getEntry(state.display, id).selectedView
-}
-
-export const selectDisplaySelectedViewName = (id: number) => {
+const SYNCED_VIEW_DISABLED_ERROR = 'Synced view is disabled'
+const SYNCED_VIEW_HIDDEN_ERROR = 'Synced view is hidden'
+export const selectDisplayViewError = (id: number) => {
   return (state: RootState) => {
-    const viewID = getEntry(state.display, id).selectedView
-    return viewID != null ? getEntry(state.displayView, viewID).name : undefined
+    let error: string | undefined = undefined
+    const displayView = selectDisplayView(id)(state)
+    if (displayView?.error != null) {
+      error = displayView.error
+    } else if (
+      displayView?.sync === true &&
+      displayView?.syncWithView != null
+    ) {
+      const syncedDisplayView = selectDisplayView(displayView.syncWithView)(
+        state
+      )
+      if (syncedDisplayView?.error != null) {
+        error = SYNCED_VIEW_DISABLED_ERROR
+      } else if (syncedDisplayView?.visible === false) {
+        error = SYNCED_VIEW_HIDDEN_ERROR
+      }
+    }
+
+    return error
   }
 }
 
-export const selectDisplayViewsListYOffset = (id: number) => {
-  return (state: RootState) =>
-    getEntry(state.display, id).displayViewsListYOffset
+const selectDisplayResult = (id: number) =>
+  flipflipApi.endpoints.getDisplay.select(id)
+const selectDisplay = (id: number) => {
+  return createSelector(selectDisplayResult(id), (result) => result?.data)
 }
 
-export const selectDisplayVisibleViews = (id: number) => {
-  return createSelector(
-    [selectDisplayViews(id), (state: RootState) => state.displayView.entries],
-    (viewIDs, entries) => {
-      return viewIDs.filter((id) => entries[id].visible)
-    }
-  )
-}
-
-export const selectDisplayViewSyncOptions = (id: number) => {
-  return createSelector(
-    [selectDisplay(id), getDisplayViewEntries],
-    (display, viewEntries) => {
-      const { selectedView, views } = display
-      const optionKeys = views.filter((id) => id !== selectedView)
-      const options: Record<string, string> = {}
-      options['0'] = 'None'
-      for (const key of optionKeys) {
-        const { sync, name } = viewEntries[key]
-        if (!sync) {
-          options[key.toString()] = name
-        }
-      }
-      return options
-    }
-  )
-}
-
-export const selectDisplaySelectOptions = (
-  onlyExtra?: boolean,
-  includeExtra?: boolean
-) => {
-  return createSelector(
-    [(state) => onlyExtra, (state) => includeExtra, selectDisplays()],
-    (onlyExtra, includeExtra, displays) => {
-      const options: Record<string, string> = {}
-      displays.forEach((s) => (options[s.id.toString()] = s.name))
-
-      if (includeExtra === true) {
-        options['0'] = 'None'
-        options['-1'] = 'Random'
-      } else if (onlyExtra === true) {
-        options['-1'] = '~~EMPTY~~'
-      } else {
-        options['0'] = 'None'
-      }
-
-      return options
-    }
-  )
-}
-
-export const selectMultiDisplaySelectOptions = () => {
-  return createSelector(
-    [selectDisplays()],
-    (displays: Display[]): Record<string, string> => {
-      const options: Record<string, string> = {}
-      displays.forEach((s) => (options[s.id.toString()] = s.name))
-
-      return options
-    }
-  )
+export const selectDisplayPlayDisabled = (id: number) => {
+  return (state: RootState) => {
+    const display = selectDisplay(id)(state)
+    const views = display?.views ?? []
+    return views
+      .filter((view) => selectDisplayView(view)(state)?.visible === true)
+      .map((view) => selectDisplayViewError(view)(state))
+      .every((error) => error != null)
+  }
 }

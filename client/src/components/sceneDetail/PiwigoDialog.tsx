@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { MouseEvent, useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import wretch from 'wretch'
 import AbortAddon from 'wretch/addons/abort'
 import FormUrlAddon from 'wretch/addons/formUrl'
@@ -41,14 +41,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
 import { en, AF, PW, PWS } from 'flipflip-common'
-import { arrayMove } from '../../data/utils'
-import { useAppSelector } from '../../store/hooks'
-import {
-  selectAppConfigRemoteSettingsPiwigoHost,
-  selectAppConfigRemoteSettingsPiwigoPassword,
-  selectAppConfigRemoteSettingsPiwigoProtocol,
-  selectAppConfigRemoteSettingsPiwigoUsername
-} from '../../store/app/selectors'
+import { useGetRemoteSettingsQuery } from '../../store/api/slice'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   list: {},
@@ -137,7 +131,7 @@ function AlbumListItem(props: AlbumListItemProps) {
   const isSelected = selectedAlbums.includes(album.id)
 
   return (
-    <React.Fragment>
+    <>
       <ListItemButton
         key={album.id}
         selected={isSelected}
@@ -174,27 +168,18 @@ function AlbumListItem(props: AlbumListItemProps) {
           ))}
         </List>
       )}
-    </React.Fragment>
+    </>
   )
 }
 
 export interface PiwigoDialogProps {
   open: boolean
   onClose: () => void
-  onImportURL: (type: string, e?: MouseEvent, ...args: any[]) => void
+  onImportURL: (type: string, e?: MouseEvent, urls?: string[]) => void
 }
 
 function PiwigoDialog(props: PiwigoDialogProps) {
-  const piwigoPassword = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoPassword()
-  )
-  const piwigoUsername = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoUsername()
-  )
-  const piwigoHost = useAppSelector(selectAppConfigRemoteSettingsPiwigoHost())
-  const piwigoProtocol = useAppSelector(
-    selectAppConfigRemoteSettingsPiwigoProtocol()
-  )
+  const { data } = useGetRemoteSettingsQuery()
 
   const [listType, setListType] = useState(PW.apiTypeCategory)
   const [albums, setAlbums] = useState<Album[]>([])
@@ -242,8 +227,8 @@ function PiwigoDialog(props: PiwigoDialogProps) {
       .addon(FormUrlAddon)
       .formUrl({
         method: 'pwg.session.login',
-        username: piwigoUsername,
-        password: piwigoPassword
+        username: data?.piwigoUsername,
+        password: data?.piwigoPassword
       })
       .post()
       .setTimeout(5000)
@@ -268,7 +253,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
           //
         }
       })
-      .catch((e) => {
+      .catch((_e) => {
         //
       })
   }
@@ -306,12 +291,12 @@ function PiwigoDialog(props: PiwigoDialogProps) {
             //
           }
         })
-        .catch((e) => {
+        .catch((_e) => {
           //
         })
     }
 
-    if (!loggedIn && !!piwigoUsername) {
+    if (!loggedIn && !!data?.piwigoUsername) {
       login().then(getAlbums)
     } else {
       getAlbums()
@@ -347,19 +332,19 @@ function PiwigoDialog(props: PiwigoDialogProps) {
             //
           }
         })
-        .catch((e) => {
+        .catch((_e) => {
           //
         })
     }
 
-    if (!loggedIn && !!piwigoUsername) {
+    if (!loggedIn && !!data?.piwigoUsername) {
       login().then(getTags)
     } else {
       getTags()
     }
   }
 
-  const createAPICall = (e: MouseEvent) => {
+  const createAPICall = () => {
     let url = `${makeURL()}&method=${listType}`
 
     if (listType === PW.apiTypeCategory) {
@@ -390,7 +375,9 @@ function PiwigoDialog(props: PiwigoDialogProps) {
   }
 
   const makeURL = () => {
-    return piwigoProtocol + '://' + piwigoHost + '/ws.php?format=json'
+    return (
+      data?.piwigoProtocol + '://' + data?.piwigoHost + '/ws.php?format=json'
+    )
   }
 
   const addSelectedAlbum = (albumID: number) => {
@@ -475,13 +462,16 @@ function PiwigoDialog(props: PiwigoDialogProps) {
           >
             <MenuItem value={PW.apiTypeCategory}>Album Media</MenuItem>
             <MenuItem value={PW.apiTypeTag}>Tagged Media</MenuItem>
-            <MenuItem disabled={!piwigoUsername} value={PW.apiTypeFavorites}>
+            <MenuItem
+              disabled={!data?.piwigoUsername}
+              value={PW.apiTypeFavorites}
+            >
               Your Favorites
             </MenuItem>
           </Select>
         </FormControl>
         {listType === PW.apiTypeCategory && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -517,10 +507,10 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               }
               label="Recursive"
             />
-          </React.Fragment>
+          </>
         )}
         {listType === PW.apiTypeTag && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -557,10 +547,10 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               }
               label="Must Match All Tags"
             />
-          </React.Fragment>
+          </>
         )}
         <Divider orientation="horizontal" flexItem />
-        <React.Fragment>
+        <>
           <Typography
             component="h2"
             variant="h6"
@@ -586,7 +576,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               animation: 150,
               easing: 'cubic-bezier(1, 0, 0, 1)'
             }}
-            onChange={(order: any, sortable: any, evt: any) => {
+            onChange={(_order: any, _sortable: any, evt: any) => {
               const newSortOrder = Array.from(sortOrder)
               arrayMove(newSortOrder, evt.oldIndex, evt.newIndex)
               setSortOrder(newSortOrder)
@@ -630,9 +620,9 @@ function PiwigoDialog(props: PiwigoDialogProps) {
               </Card>
             ))}
           </Sortable>
-        </React.Fragment>
+        </>
         {(listType === PW.apiTypeTag || listType === PW.apiTypeCategory) && (
-          <React.Fragment>
+          <>
             <Typography
               component="h2"
               variant="h6"
@@ -653,7 +643,7 @@ function PiwigoDialog(props: PiwigoDialogProps) {
                 <Rating name="pwg-image-max" precision={0.5} />
               </Container>
             </Container>
-          </React.Fragment>
+          </>
         )}
       </DialogContent>
       <DialogActions>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Card,
@@ -19,7 +19,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
+  Button,
+  Fab,
+  TextField
 } from '@mui/material'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -31,28 +33,20 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { setRouteGoBack } from '../../store/app/thunks'
 import {
-  selectDisplayName,
-  selectDisplayViews,
-  selectDisplaySelectedViewName,
+  selectDisplayEditingName,
+  selectDisplayPlayDisabled,
   selectDisplaySelectedView,
+  selectDisplaySelectedViewName,
   selectDisplayViewsListYOffset
 } from '../../store/display/selectors'
-import { selectAppConfigDisplaySettingsFullScreen } from '../../store/app/selectors'
-import { setDisplayName } from '../../store/display/actions'
-import {
-  addDisplayView,
-  cloneDisplay,
-  cloneDisplayView,
-  removeDisplay,
-  removeDisplayView
-} from '../../store/display/thunks'
-import BaseTextField from '../common/text/BaseTextField'
+import { setDisplayName } from '../../store/api/thunks'
 import DisplayViewSettings from './DisplayViewSettings'
 import {
-  setDisplayViewsListYOffset,
-  swapDisplayViews
+  setDisplayAddedView,
+  setDisplayEditingName,
+  setDisplayViewsListYOffset
+  // swapDisplayViews
 } from '../../store/display/slice'
 import DisplayViewListItem from './DisplayViewListItem'
 import ExpandLess from '@mui/icons-material/ExpandLess'
@@ -64,8 +58,18 @@ import {
   Publish
 } from '@mui/icons-material'
 import { MO } from 'flipflip-common'
-import { playDisplay } from '../../store/player/thunks'
-import { setFullScreen } from '../../data/actions'
+import { useNavigate, useParams } from 'react-router'
+import {
+  useAddDisplayViewMutation,
+  useCloneDisplayMutation,
+  useCloneDisplayViewMutation,
+  useDeleteDisplayMutation,
+  useDeleteDisplayViewMutation,
+  useGetDisplayQuery,
+  usePlayDisplayMutation
+} from '../../store/api/slice'
+import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
+import { setFullScreen } from '../../data/fullscreen'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -102,6 +106,9 @@ const useStyles = makeStyles()((theme: Theme) => ({
     color: theme.palette.primary.contrastText,
     textAlign: 'center',
     fontSize: theme.typography.h4.fontSize
+  },
+  fill: {
+    flexGrow: 1
   },
   noTitle: {
     width: '33%',
@@ -141,26 +148,29 @@ interface SortableVirtualListProps {
   width: number
 }
 
-export interface DisplaySetupProps {
-  displayID: number
-}
+function DisplaySetup() {
+  const { id } = useParams()
+  const displayID = Number(id)
+  const navigate = useNavigate()
 
-function DisplaySetup(props: DisplaySetupProps) {
-  const [isEditingName, setIsEditingName] = useState(false)
+  const [playDisplay] = usePlayDisplayMutation()
+  const [cloneDisplay] = useCloneDisplayMutation()
+  const [deleteDisplay] = useDeleteDisplayMutation()
+  const [addDisplayView] = useAddDisplayViewMutation()
+  const [cloneDisplayView] = useCloneDisplayViewMutation()
+  const [deleteDisplayView] = useDeleteDisplayViewMutation()
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+  const { data: display } = useGetDisplayQuery(displayID)
+
   const [userExpandedSettings, setUserExpandedSettings] = useState<boolean>()
   const [openMenu, setOpenMenu] = useState<string>()
 
   const dispatch = useAppDispatch()
-  const name = useAppSelector(selectDisplayName(props.displayID))
-  const views = useAppSelector(selectDisplayViews(props.displayID))
-  const selectedView = useAppSelector(
-    selectDisplaySelectedView(props.displayID)
-  )
-  const selectedViewName = useAppSelector(
-    selectDisplaySelectedViewName(props.displayID)
-  )
-  const yOffset = useAppSelector(selectDisplayViewsListYOffset(props.displayID))
-  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
+  const editingName = useAppSelector(selectDisplayEditingName())
+  const selectedView = useAppSelector(selectDisplaySelectedView())
+  const selectedViewName = useAppSelector(selectDisplaySelectedViewName())
+  const yOffset = useAppSelector(selectDisplayViewsListYOffset())
+  const playDisabled = useAppSelector(selectDisplayPlayDisabled(displayID))
 
   const getScrollTop = useCallback(() => {
     let scrollTop: number | undefined = undefined
@@ -176,11 +186,9 @@ function DisplaySetup(props: DisplaySetupProps) {
   const savePosition = useCallback(() => {
     const scrollTop = getScrollTop()
     if (scrollTop != null) {
-      dispatch(
-        setDisplayViewsListYOffset({ id: props.displayID, value: scrollTop })
-      )
+      dispatch(setDisplayViewsListYOffset(scrollTop))
     }
-  }, [dispatch, getScrollTop, props.displayID])
+  }, [dispatch, getScrollTop, displayID])
 
   useEffect(() => {
     return () => {
@@ -189,29 +197,43 @@ function DisplaySetup(props: DisplaySetupProps) {
   }, [savePosition])
 
   const beginEditingName = () => {
-    setIsEditingName(true)
+    if (display != null) {
+      dispatch(setDisplayEditingName(display.name))
+    }
   }
 
-  const endEditingName = () => {
-    setIsEditingName(false)
+  const endEditingName = (e: FormEvent) => {
+    e.preventDefault()
+    dispatch(setDisplayName(displayID, editingName as string))
+    dispatch(setDisplayEditingName(undefined))
+  }
+
+  const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(setDisplayEditingName(e.currentTarget.value))
   }
 
   const goBack = () => {
-    dispatch(setRouteGoBack())
+    navigate(-1)
   }
 
-  const onPlayDisplay = () => {
-    dispatch(playDisplay(props.displayID))
-    setFullScreen(fullScreen)
+  const onPlayDisplay = async () => {
+    const { data } = await playDisplay(displayID)
+    if (data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.value}`)
+    }
   }
 
-  const onCloneDisplay = () => {
-    dispatch(cloneDisplay(props.displayID))
+  const onCloneDisplay = async () => {
+    const { data } = await cloneDisplay(displayID)
+    if (data != null) {
+      await navigate(`/displays/${data.value}`)
+    }
   }
 
   const onExportDisplay = () => {
     // TODO export subset of AppStorage
-    // dispatch(exportDisplay(props.displayID))
+    // dispatch(exportDisplay(displayID))
   }
 
   const onDeleteDisplay = () => {
@@ -222,21 +244,24 @@ function DisplaySetup(props: DisplaySetupProps) {
     setOpenMenu(undefined)
   }
 
-  const onFinishDeleteDisplay = () => {
+  const onFinishDeleteDisplay = async () => {
     setOpenMenu(undefined)
-    dispatch(removeDisplay(props.displayID))
+    await deleteDisplay(displayID)
+    goBack()
   }
 
-  const onAddView = () => {
-    dispatch(addDisplayView(props.displayID))
+  const onAddView = async () => {
+    dispatch(setDisplayAddedView(true))
+    await addDisplayView(displayID)
   }
 
-  const onCloneView = () => {
-    dispatch(cloneDisplayView(props.displayID, selectedView as number))
+  const onCloneView = async () => {
+    dispatch(setDisplayAddedView(true))
+    await cloneDisplayView({ displayID, viewID: selectedView as number })
   }
 
-  const onDeleteView = () => {
-    dispatch(removeDisplayView(props.displayID, selectedView as number))
+  const onDeleteView = async () => {
+    await deleteDisplayView({ displayID, viewID: selectedView as number })
   }
 
   const toggleSettingsExpand = () => {
@@ -253,12 +278,13 @@ function DisplaySetup(props: DisplaySetupProps) {
     newIndex: number
   }) => {
     const yOffset = getScrollTop()
-    dispatch(
-      swapDisplayViews({
-        id: props.displayID,
-        value: { oldIndex, newIndex, yOffset }
-      })
-    )
+    console.log('sortEnd', oldIndex, newIndex, yOffset)
+    // dispatch(
+    //   swapDisplayViews({
+    //     id: displayID,
+    //     value: { oldIndex, newIndex, yOffset }
+    //   })
+    // )
   }
 
   const VirtualList = (props: any) => {
@@ -290,7 +316,7 @@ function DisplaySetup(props: DisplaySetupProps) {
         <DisplayViewListItem
           index={index}
           viewID={viewID}
-          displayID={props.displayID}
+          displayID={displayID}
           selected={viewID === selectedView}
           style={value.style}
           getScrollTop={getScrollTop}
@@ -323,46 +349,50 @@ function DisplaySetup(props: DisplaySetupProps) {
             </Tooltip>
           </div>
 
-          {isEditingName && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
-              <BaseTextField
+              <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
+                value={editingName}
                 margin="none"
-                inputProps={{ className: classes.titleInput }}
-                selector={selectDisplayName(props.displayID)}
-                action={setDisplayName(props.displayID)}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
+                onChange={onChangeName}
               />
             </form>
           )}
-          {!isEditingName && (
-            <Typography
-              component="h1"
-              variant="h4"
-              noWrap
-              className={cx(
-                classes.title,
-                name.length === 0 && classes.noTitle
-              )}
-              onClick={beginEditingName}
-            >
-              {name}
-            </Typography>
+          {editingName == null && (
+            <>
+              <div className={classes.fill} />
+              <Typography
+                component="h1"
+                variant="h4"
+                color="inherit"
+                noWrap
+                className={cx(
+                  classes.title,
+                  display?.name.length === 0 && classes.noTitle
+                )}
+                onClick={beginEditingName}
+              >
+                {display?.name}
+              </Typography>
+              <div className={classes.fill} />
+            </>
           )}
 
           <div className={classes.headerRight}>
-            <IconButton
-              edge="end"
-              color="inherit"
+            <Fab
+              disabled={playDisabled}
+              color="secondary"
               aria-label="Play"
               onClick={onPlayDisplay}
-              size="large"
             >
               <PlayCircleOutlineIcon fontSize="large" />
-            </IconButton>
+            </Fab>
           </div>
         </Toolbar>
       </AppBar>
@@ -387,7 +417,7 @@ function DisplaySetup(props: DisplaySetupProps) {
             }}
           >
             <DisplaySetupPreview
-              displayID={props.displayID}
+              displayID={displayID}
               selectedView={selectedView}
             />
           </Box>
@@ -433,7 +463,7 @@ function DisplaySetup(props: DisplaySetupProps) {
               }
               action={
                 <IconButton onClick={toggleSettingsExpand}>
-                  {userExpandedSettings ?? selectedView != null ? (
+                  {(userExpandedSettings ?? selectedView != null) ? (
                     <ExpandMoreIcon />
                   ) : (
                     <ExpandLess />
@@ -447,7 +477,7 @@ function DisplaySetup(props: DisplaySetupProps) {
               >
                 {selectedView && (
                   <DisplayViewSettings
-                    displayID={props.displayID}
+                    displayID={displayID}
                     viewID={selectedView}
                   />
                 )}
@@ -467,7 +497,7 @@ function DisplaySetup(props: DisplaySetupProps) {
                       distance={5}
                       onSortEnd={onSortEnd}
                       yOffset={yOffset}
-                      views={views}
+                      views={display?.views ?? []}
                       height={height}
                       width={width}
                     />
@@ -516,10 +546,10 @@ function DisplaySetup(props: DisplaySetupProps) {
           aria-labelledby="delete-title"
           aria-describedby="delete-description"
         >
-          <DialogTitle id="Delete-title">Delete '{name}'</DialogTitle>
+          <DialogTitle id="Delete-title">Delete '{display?.name}'</DialogTitle>
           <DialogContent>
             <DialogContentText id="delete-description">
-              Are you sure you want to delete {name}?
+              Are you sure you want to delete {display?.name}?
             </DialogContentText>
           </DialogContent>
           <DialogActions>

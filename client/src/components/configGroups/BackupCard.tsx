@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
-  Alert,
   Button,
   Chip,
   Dialog,
@@ -11,14 +10,12 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  Grid,
+  Grid2,
   InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
-  Slide,
-  Snackbar,
   type Theme,
   Tooltip
 } from '@mui/material'
@@ -29,10 +26,9 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import RestoreIcon from '@mui/icons-material/Restore'
 import SaveIcon from '@mui/icons-material/Save'
 
-import { convertFromEpoch } from '../../data/utils'
-import { MO, SS } from 'flipflip-common'
+import { convertFromEpoch, formatBackup } from '../../utils'
+import { Backup, GeneralSettings, Message, MO } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
-import { selectConstants } from '../../store/constants/selectors'
 import {
   setConfigGeneralSettingsAutoBackup,
   setConfigGeneralSettingsAutoCleanBackup,
@@ -41,23 +37,26 @@ import {
   setConfigGeneralSettingsAutoCleanBackupWeeks,
   setConfigGeneralSettingsAutoCleanBackupMonths,
   setConfigGeneralSettingsCleanRetain
-} from '../../store/app/slice'
+} from '../../store/api/thunks'
 import {
-  selectAppConfigGeneralSettingsAutoBackup,
-  selectAppConfigGeneralSettingsAutoCleanBackup,
-  selectAppConfigGeneralSettingsAutoBackupDays,
-  selectAppConfigGeneralSettingsAutoCleanBackupDays,
-  selectAppConfigGeneralSettingsAutoCleanBackupWeeks,
-  selectAppConfigGeneralSettingsAutoCleanBackupMonths,
-  selectAppConfigGeneralSettingsCleanRetain
-} from '../../store/app/selectors'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  cleanBackups,
-  restoreAppStorageFromBackup
-} from '../../store/app/thunks'
+  useGetGeneralSettingsAutoBackupQuery,
+  useGetGeneralSettingsAutoCleanBackupQuery,
+  useGetGeneralSettingsAutoBackupDaysQuery,
+  useGetGeneralSettingsAutoCleanBackupDaysQuery,
+  useGetGeneralSettingsAutoCleanBackupWeeksQuery,
+  useGetGeneralSettingsAutoCleanBackupMonthsQuery,
+  useGetGeneralSettingsCleanRetainQuery
+} from '../../store/api/selectors'
 import BaseTextField from '../common/text/BaseTextField'
-import flipflip from '../../FlipFlipService'
+import {
+  useCleanBackupsMutation,
+  useCreateBackupMutation,
+  useGetBackupsQuery,
+  useGetGeneralSettingsQuery,
+  useRestoreBackupMutation
+} from '../../store/api/slice'
+import snackbar from '../../data/Snackbar'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   buttonGrid: {
@@ -90,145 +89,93 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-function TransitionUp(props: any) {
-  return <Slide {...props} direction="up" />
-}
-
 function BackupCard() {
-  const dispatch = useAppDispatch()
-  const { saveDir, pathSep } = useAppSelector(selectConstants())
-  const autoBackup = useAppSelector(selectAppConfigGeneralSettingsAutoBackup())
-  const autoCleanBackup = useAppSelector(
-    selectAppConfigGeneralSettingsAutoCleanBackup()
-  )
-  const autoCleanBackupDays = useAppSelector(
-    selectAppConfigGeneralSettingsAutoCleanBackupDays()
-  )
-  const autoCleanBackupWeeks = useAppSelector(
-    selectAppConfigGeneralSettingsAutoCleanBackupWeeks()
-  )
-  const autoCleanBackupMonths = useAppSelector(
-    selectAppConfigGeneralSettingsAutoCleanBackupMonths()
-  )
-  const cleanRetain = useAppSelector(
-    selectAppConfigGeneralSettingsCleanRetain()
-  )
+  const [createBackup] = useCreateBackupMutation()
+  const [restoreBackup] = useRestoreBackupMutation()
+  const [cleanBackups] = useCleanBackupsMutation()
+  const { data: backups } = useGetBackupsQuery()
+  const { data: generalSettings } = useGetGeneralSettingsQuery()
 
-  const [backups, setBackups] = useState<Array<{ url: string; size: number }>>(
-    []
-  )
-  const [backup, setBackup] = useState<{ url: string; size: number }>()
+  const [backup, setBackup] = useState<Backup>()
   const [openMenu, setOpenMenu] = useState<string>()
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [snackbar, setSnackbar] = useState<string>()
-  const [snackbarSeverity, setSnackbarSeverity] = useState<string>()
-
-  useEffect(() => {
-    refreshBackups()
-  }, [])
-
-  const refreshBackups = () => {
-    flipflip()
-      .api.getBackups()
-      .then((backups) => {
-        setBackups(backups)
-      })
-  }
 
   const onChangeBackup = (e: SelectChangeEvent) => {
-    setBackup(backups.find((b) => b.url === e.target.value))
+    setBackup(backups?.find((b) => b.id === Number(e.target.value)))
   }
 
   const onBackup = async () => {
-    try {
-      await flipflip().api.backupAppStorage()
-      setSnackbarOpen(true)
-      setSnackbar('Backup success!')
-      setSnackbarSeverity(SS.success)
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      setSnackbarOpen(true)
-      setSnackbar('Error: ' + e)
-      setSnackbarSeverity(SS.error)
+    const { data } = await createBackup()
+    if (data != null) {
+      snackbar().showMessage(data)
     }
-    refreshBackups()
   }
 
   const onClean = () => {
-    setBackup(backups[0])
     setOpenMenu(MO.deleteAlert)
   }
 
   const onFinishClean = async () => {
     onCloseDialog()
-    try {
-      dispatch(cleanBackups())
-      setSnackbarOpen(true)
-      setSnackbar('Backup success!')
-      setSnackbarSeverity(SS.success)
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      setSnackbarOpen(true)
-      setSnackbar('Error: ' + e)
-      setSnackbarSeverity(SS.error)
+    const {
+      cleanRetain,
+      autoCleanBackup,
+      autoCleanBackupDays,
+      autoCleanBackupWeeks,
+      autoCleanBackupMonths
+    } = generalSettings as GeneralSettings
+    const request = autoCleanBackup
+      ? { autoCleanBackupDays, autoCleanBackupWeeks, autoCleanBackupMonths }
+      : { cleanRetain }
+    const { data } = await cleanBackups(request)
+    if (data != null) {
+      snackbar().showMessage(data)
     }
-    refreshBackups()
   }
 
   const onRestore = () => {
-    setBackup(backups[0])
+    setBackup((backups as Backup[])[0])
     setOpenMenu(MO.restore)
   }
 
-  const onFinishRestore = () => {
+  const onFinishRestore = async () => {
     onCloseDialog()
-    try {
-      dispatch(restoreAppStorageFromBackup(saveDir + pathSep + backup?.url))
-      setSnackbarOpen(true)
-      setSnackbar('Restore success!')
-      setSnackbarSeverity(SS.success)
-    } catch (e) {
-      // TODO is error ever thrown? need other error handling logic?
-      console.error(e)
-      setSnackbarOpen(true)
-      setSnackbar('Error: ' + e)
-      setSnackbarSeverity(SS.error)
+    const { data, error } = await restoreBackup((backup as Backup).id)
+    const message = data ?? ((error as FetchBaseQueryError).data as Message)
+    if (message != null) {
+      snackbar().showMessage(message)
     }
   }
 
   const onCloseDialog = () => {
     setOpenMenu(undefined)
-    setSnackbarOpen(false)
   }
 
   const { classes } = useStyles()
   const hasBackup = backups && backups.length > 0
   return (
-    <React.Fragment>
-      <Grid
+    <>
+      <Grid2
         container
         spacing={2}
         alignItems="center"
         justifyContent="center"
         className={classes.chipGrid}
       >
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <BaseSwitch
             label="Auto Backup"
-            selector={selectAppConfigGeneralSettingsAutoBackup()}
+            selector={useGetGeneralSettingsAutoBackupQuery}
             action={setConfigGeneralSettingsAutoBackup}
           />
-        </Grid>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <BaseTextField
             className={classes.backupDays}
-            disabled={!autoBackup}
+            disabled={!generalSettings?.autoBackup}
             variant="outlined"
             label="Every"
             margin="dense"
-            selector={selectAppConfigGeneralSettingsAutoBackupDays()}
+            selector={useGetGeneralSettingsAutoBackupDaysQuery}
             action={setConfigGeneralSettingsAutoBackupDays}
             InputProps={{
               endAdornment: <InputAdornment position="end">Days</InputAdornment>
@@ -238,9 +185,9 @@ function BackupCard() {
               type: 'number'
             }}
           />
-        </Grid>
-      </Grid>
-      <Grid
+        </Grid2>
+      </Grid2>
+      <Grid2
         container
         spacing={2}
         alignItems="center"
@@ -249,25 +196,24 @@ function BackupCard() {
       >
         <Tooltip
           disableInteractive
-          title="If enabled, backups will be automatically cleaned up. This algorithm will keep 1 backup for
-          each of the configured periods."
+          title="If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period."
         >
-          <Grid item xs={'auto'} className={classes.buttonGrid}>
+          <Grid2 size={'auto'} className={classes.buttonGrid}>
             <BaseSwitch
               label="Auto Clean"
-              selector={selectAppConfigGeneralSettingsAutoCleanBackup()}
+              selector={useGetGeneralSettingsAutoCleanBackupQuery}
               action={setConfigGeneralSettingsAutoCleanBackup}
             />
-          </Grid>
+          </Grid2>
         </Tooltip>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <BaseTextField
             className={classes.backupDays}
-            disabled={!autoCleanBackup}
+            disabled={!generalSettings?.autoCleanBackup}
             variant="outlined"
             label="Keep Last"
             margin="dense"
-            selector={selectAppConfigGeneralSettingsAutoCleanBackupDays()}
+            selector={useGetGeneralSettingsAutoCleanBackupDaysQuery}
             action={setConfigGeneralSettingsAutoCleanBackupDays}
             InputProps={{
               endAdornment: <InputAdornment position="end">Days</InputAdornment>
@@ -277,15 +223,15 @@ function BackupCard() {
               type: 'number'
             }}
           />
-        </Grid>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <BaseTextField
             className={classes.backupDays}
-            disabled={!autoCleanBackup}
+            disabled={!generalSettings?.autoCleanBackup}
             variant="outlined"
             label="Keep Last"
             margin="dense"
-            selector={selectAppConfigGeneralSettingsAutoCleanBackupWeeks()}
+            selector={useGetGeneralSettingsAutoCleanBackupWeeksQuery}
             action={setConfigGeneralSettingsAutoCleanBackupWeeks}
             InputProps={{
               endAdornment: (
@@ -297,15 +243,15 @@ function BackupCard() {
               type: 'number'
             }}
           />
-        </Grid>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <BaseTextField
             className={classes.backupDays}
-            disabled={!autoCleanBackup}
+            disabled={!generalSettings?.autoCleanBackup}
             variant="outlined"
             label="Keep Last"
             margin="dense"
-            selector={selectAppConfigGeneralSettingsAutoCleanBackupMonths()}
+            selector={useGetGeneralSettingsAutoCleanBackupMonthsQuery}
             action={setConfigGeneralSettingsAutoCleanBackupMonths}
             InputProps={{
               endAdornment: (
@@ -317,10 +263,10 @@ function BackupCard() {
               type: 'number'
             }}
           />
-        </Grid>
-      </Grid>
-      <Grid container spacing={2} alignItems="center" justifyContent="center">
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+      </Grid2>
+      <Grid2 container spacing={2} alignItems="center" justifyContent="center">
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <Button
             variant="contained"
             color="primary"
@@ -330,8 +276,8 @@ function BackupCard() {
           >
             Backup Data
           </Button>
-        </Grid>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <Button
             variant="contained"
             color="secondary"
@@ -342,66 +288,51 @@ function BackupCard() {
           >
             Restore Backup
           </Button>
-        </Grid>
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        </Grid2>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <Button
             variant="contained"
             color="inherit"
             size="large"
-            disabled={backups.length <= 1}
+            disabled={backups == null || backups.length <= 1}
             onClick={onClean}
             startIcon={<DeleteIcon />}
           >
             Clean Backups
           </Button>
-        </Grid>
-      </Grid>
-      <Grid
+        </Grid2>
+      </Grid2>
+      <Grid2
         container
         spacing={2}
         alignItems="center"
         justifyContent="center"
         className={classes.chipGrid}
       >
-        <Grid item xs={'auto'} className={classes.buttonGrid}>
+        <Grid2 size={'auto'} className={classes.buttonGrid}>
           <Chip
             label={`Backups: ${hasBackup ? backups.length : '--'}`}
             color="primary"
             variant="outlined"
           />
-        </Grid>
-        <Grid
-          item
-          xs={'auto'}
-          className={cx(classes.buttonGrid, classes.hideXS)}
-        >
+        </Grid2>
+        <Grid2 size={'auto'} className={cx(classes.buttonGrid, classes.hideXS)}>
+          <Chip
+            label={`Latest: ${hasBackup ? formatBackup(backups[0]) : '--'}`}
+            color="secondary"
+            variant="outlined"
+          />
+        </Grid2>
+        <Grid2 size={'auto'} className={cx(classes.buttonGrid, classes.showXS)}>
           <Chip
             label={`Latest: ${
-              hasBackup
-                ? convertFromEpoch(backups[0].url) +
-                  ' (' +
-                  Math.round(backups[0].size / 1000) +
-                  ' KB)'
-                : '--'
+              hasBackup ? convertFromEpoch(backups[0].createdAt) : '--'
             }`}
             color="secondary"
             variant="outlined"
           />
-        </Grid>
-        <Grid
-          item
-          xs={'auto'}
-          className={cx(classes.buttonGrid, classes.showXS)}
-        >
-          <Chip
-            label={`Latest: ${
-              hasBackup ? convertFromEpoch(backups[0].url) : '--'
-            }`}
-            color="secondary"
-            variant="outlined"
-          />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
       <Dialog
         open={openMenu === MO.deleteAlert}
         onClose={onCloseDialog}
@@ -410,26 +341,28 @@ function BackupCard() {
       >
         <DialogTitle id="remove-all-title">Clean backups</DialogTitle>
         <DialogContent>
-          {autoCleanBackup && (
+          {generalSettings?.autoCleanBackup && (
             <DialogContentText id="remove-all-description">
               You are about to clean your backups. Backups will be retained
-              according to your Auto Clean configuration. A record will be kept
-              for each of the last: {autoCleanBackupDays} Days,{' '}
-              {autoCleanBackupWeeks} Weeks, {autoCleanBackupMonths} Months.
+              according to your Auto Clean configuration. The last{' '}
+              {generalSettings?.autoCleanBackupDays} daily, last{' '}
+              {generalSettings?.autoCleanBackupWeeks} weekly and last{' '}
+              {generalSettings?.autoCleanBackupMonths} monthly backups will be
+              kept.
             </DialogContentText>
           )}
-          {!autoCleanBackup && (
-            <React.Fragment>
+          {!generalSettings?.autoCleanBackup && (
+            <>
               <DialogContentText id="remove-all-description">
                 You are about to clean your backups. How many of the most recent
                 backups would you like to retain?
               </DialogContentText>
-              {cleanRetain != null && (
+              {generalSettings?.cleanRetain != null && (
                 <BaseTextField
                   variant="outlined"
                   label="Keep Last"
                   margin="dense"
-                  selector={selectAppConfigGeneralSettingsCleanRetain()}
+                  selector={useGetGeneralSettingsCleanRetainQuery}
                   action={setConfigGeneralSettingsCleanRetain}
                   inputProps={{
                     min: 1,
@@ -437,7 +370,7 @@ function BackupCard() {
                   }}
                 />
               )}
-            </React.Fragment>
+            </>
           )}
         </DialogContent>
         <DialogActions>
@@ -465,7 +398,7 @@ function BackupCard() {
               <InputLabel>Backups</InputLabel>
               <Select
                 variant="standard"
-                value={backup.url}
+                value={backup.id.toString()}
                 MenuProps={{
                   PaperProps: {
                     style: {
@@ -475,9 +408,9 @@ function BackupCard() {
                 }}
                 onChange={onChangeBackup}
               >
-                {backups.map((b) => (
-                  <MenuItem value={b.url} key={b.url}>
-                    {convertFromEpoch(b.url)} ({Math.round(b.size / 1000)} KB)
+                {backups?.map((b) => (
+                  <MenuItem value={b.id} key={b.id}>
+                    {formatBackup(b)}
                   </MenuItem>
                 ))}
               </Select>
@@ -493,18 +426,7 @@ function BackupCard() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar
-        open={snackbarOpen}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        autoHideDuration={5000}
-        onClose={onCloseDialog}
-        TransitionComponent={TransitionUp}
-      >
-        <Alert onClose={onCloseDialog} severity={snackbarSeverity as any}>
-          {snackbar}
-        </Alert>
-      </Snackbar>
-    </React.Fragment>
+    </>
   )
 }
 

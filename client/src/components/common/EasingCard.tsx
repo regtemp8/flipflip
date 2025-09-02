@@ -1,13 +1,12 @@
-import { Grid, MenuItem, Collapse, type Theme } from '@mui/material'
+import { Grid2, MenuItem, Collapse } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { en, EA } from 'flipflip-common'
 import BaseSlider from './slider/BaseSlider'
 import type CommonSliderProps from './slider/CommonSliderProps'
 import type ReduxProps from './ReduxProps'
-import { useAppSelector } from '../../store/hooks'
 import BaseSelect from './BaseSelect'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   fullWidth: {
     width: '100%'
   }
@@ -25,11 +24,11 @@ export interface EasingCardProps {
 
 function EasingCard(props: EasingCardProps) {
   const { classes } = useStyles()
-  const easing = useAppSelector(props.easing.selector)
+  const { data: easing } = props.easing.selector()
 
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
         <BaseSelect
           label={props.label ?? 'Easing'}
           controlClassName={classes.fullWidth}
@@ -42,8 +41,8 @@ function EasingCard(props: EasingCardProps) {
             </MenuItem>
           ))}
         </BaseSelect>
-      </Grid>
-      <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
         <Collapse
           in={
             easing === EA.polyIn ||
@@ -80,8 +79,8 @@ function EasingCard(props: EasingCardProps) {
             label={{ text: 'Overshoot:', appendValue: true }}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
         <Collapse
           in={
             easing === EA.elasticIn ||
@@ -100,8 +99,8 @@ function EasingCard(props: EasingCardProps) {
             label={{ text: 'Amplitude:', appendValue: true }}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
         <Collapse
           in={
             easing === EA.elasticIn ||
@@ -120,8 +119,8 @@ function EasingCard(props: EasingCardProps) {
             label={{ text: 'Period:', appendValue: true }}
           />
         </Collapse>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

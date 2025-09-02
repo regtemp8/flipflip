@@ -1,6 +1,7 @@
 import { Box, type Theme } from '@mui/material'
-import { selectDisplayView } from '../../store/displayView/selectors'
+import { useGetDisplayViewQuery } from '../../store/api/slice'
 import { useAppSelector } from '../../store/hooks'
+import { selectDisplayViewError } from '../../store/display/selectors'
 
 export interface DisplayViewBoxProps {
   viewID: number
@@ -9,7 +10,9 @@ export interface DisplayViewBoxProps {
 
 function DisplayViewBox(props: DisplayViewBoxProps) {
   const { viewID, selected } = props
-  const view = useAppSelector(selectDisplayView(viewID))
+  const { data: view } = useGetDisplayViewQuery(viewID)
+  const error = useAppSelector(selectDisplayViewError(viewID))
+  const filter = error != null ? 'grayscale(100%)' : undefined
   return (
     <Box
       border={(theme: Theme) =>
@@ -19,13 +22,14 @@ function DisplayViewBox(props: DisplayViewBoxProps) {
       }
       sx={{
         position: 'absolute',
-        background: view.color,
-        top: `${view.y}%`,
-        left: `${view.x}%`,
-        width: `${view.width}%`,
-        height: `${view.height}%`,
-        opacity: view.opacity / 100,
-        zIndex: view.z
+        background: view?.color,
+        top: `${view?.y}%`,
+        left: `${view?.x}%`,
+        width: `${view?.width}%`,
+        height: `${view?.height}%`,
+        opacity: (view?.opacity ?? 0) / 100,
+        zIndex: view?.z,
+        filter
       }}
     ></Box>
   )

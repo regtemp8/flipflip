@@ -1,22 +1,15 @@
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  Checkbox,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, Checkbox, TextField } from '@mui/material'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
 
-import { useAppSelector } from '../../store/hooks'
-import { selectMultiDisplaySelectOptions } from '../../store/display/selectors'
+import { useGetDisplaySelectOptionsQuery } from '../../store/api/slice'
 import { SyntheticEvent } from 'react'
+import { SelectOption } from 'flipflip-common'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   select: {
     color: grey[900]
   }
@@ -28,19 +21,21 @@ interface MultiDisplaySelectProps {
 }
 
 function MultiDisplaySelect(props: MultiDisplaySelectProps) {
-  const options = useAppSelector(selectMultiDisplaySelectOptions())
+  const { data } = useGetDisplaySelectOptionsQuery({
+    onlyExtra: false,
+    includeExtra: false
+  })
+  const options = data ?? {}
   const optionsList = Object.keys(options).map((key) => {
     return { value: key, label: options[key] }
   })
 
   const onChange = (
-    event: SyntheticEvent<Element, Event>,
-    options: unknown[],
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<unknown>
+    _event: SyntheticEvent<Element, Event>,
+    options: unknown[]
   ) => {
     const values = options.map((option) => {
-      const { value } = option as { value: string; label: string }
+      const { value } = option as SelectOption
       return Number(value)
     })
 
@@ -69,9 +64,9 @@ function MultiDisplaySelect(props: MultiDisplaySelectProps) {
       )}
       renderOption={(props, option, { selected }) => {
         const { ...optionProps } = props
-        const { value, label } = option as { value: number; label: string }
+        const { value, label } = option as SelectOption
         return (
-          <li key={value} {...optionProps}>
+          <li {...optionProps} key={value}>
             <Checkbox
               icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
               checkedIcon={<CheckBoxIcon fontSize="small" />}

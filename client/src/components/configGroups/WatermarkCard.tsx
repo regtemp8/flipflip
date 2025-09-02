@@ -1,10 +1,9 @@
 import {
   Collapse,
   Divider,
-  Grid,
+  Grid2,
   InputAdornment,
-  MenuItem,
-  type Theme
+  MenuItem
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -12,7 +11,6 @@ import { makeStyles } from 'tss-react/mui'
 import { en, WC } from 'flipflip-common'
 import ColorPicker from '../config/ColorPicker'
 import BaseSelect from '../common/BaseSelect'
-import { useAppSelector } from '../../store/hooks'
 import {
   setConfigGeneralSettingsWatermark,
   setConfigGeneralSettingsWatermarkDisplay,
@@ -21,35 +19,35 @@ import {
   setConfigGeneralSettingsWatermarkColor,
   setConfigGeneralSettingsWatermarkText,
   setConfigGeneralSettingsWatermarkFontSize
-} from '../../store/app/slice'
+} from '../../store/api/thunks'
 import {
-  selectAppConfigGeneralSettingsWatermark,
-  selectAppConfigGeneralSettingsWatermarkDisplay,
-  selectAppConfigGeneralSettingsWatermarkCorner,
-  selectAppConfigGeneralSettingsWatermarkFontFamily,
-  selectAppConfigGeneralSettingsWatermarkColor,
-  selectAppConfigGeneralSettingsWatermarkText,
-  selectAppConfigGeneralSettingsWatermarkFontSize
-} from '../../store/app/selectors'
+  useGetGeneralSettingsWatermarkQuery,
+  useGetGeneralSettingsWatermarkDisplayQuery,
+  useGetGeneralSettingsWatermarkCornerQuery,
+  useGetGeneralSettingsWatermarkFontFamilyQuery,
+  useGetGeneralSettingsWatermarkColorQuery,
+  useGetGeneralSettingsWatermarkTextQuery,
+  useGetGeneralSettingsWatermarkFontSizeQuery
+} from '../../store/api/selectors'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseTextField from '../common/text/BaseTextField'
-import FontFamilySelect from '../common/FontFamilySelect'
+import FontFamilySelect from '../common/fontPicker/FontFamilySelect'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   fullWidth: {
     width: '100%'
   }
 }))
 
 function WatermarkCard() {
-  const watermark = useAppSelector(selectAppConfigGeneralSettingsWatermark())
+  const { data: watermark } = useGetGeneralSettingsWatermarkQuery()
 
   const { classes } = useStyles()
   return (
-    <Grid container spacing={watermark ? 2 : 0} alignItems="center">
-      <Grid item xs={12}>
-        <Grid container alignItems="center">
-          <Grid item xs={12} sm={6}>
+    <Grid2 container spacing={watermark ? 2 : 0} alignItems="center">
+      <Grid2 size={12}>
+        <Grid2 container alignItems="center">
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <BaseSwitch
               label="Enable Watermark"
               tooltip={
@@ -81,35 +79,35 @@ function WatermarkCard() {
                   {'{audio_album}'} - Album of the currently playing audio file
                 </div>
               }
-              selector={selectAppConfigGeneralSettingsWatermark()}
+              selector={useGetGeneralSettingsWatermarkQuery}
               action={setConfigGeneralSettingsWatermark}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             {watermark && (
               <BaseSwitch
                 label="Show on Displays"
                 tooltip="When enabled, watermark will show on each Scene in a Display"
-                selector={selectAppConfigGeneralSettingsWatermarkDisplay()}
+                selector={useGetGeneralSettingsWatermarkDisplayQuery}
                 action={setConfigGeneralSettingsWatermarkDisplay}
               />
             )}
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={watermark} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={watermark} className={classes.fullWidth}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={12}>
               <BaseSelect
                 label="Watermark Corner"
                 controlClassName={classes.fullWidth}
-                selector={selectAppConfigGeneralSettingsWatermarkCorner()}
+                selector={useGetGeneralSettingsWatermarkCornerQuery}
                 action={setConfigGeneralSettingsWatermarkCorner}
               >
                 {Object.values(WC).map((wc) => (
@@ -118,38 +116,38 @@ function WatermarkCard() {
                   </MenuItem>
                 ))}
               </BaseSelect>
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={12}>
               <BaseTextField
                 variant="standard"
                 fullWidth
                 multiline
                 label="Watermark Text"
-                selector={selectAppConfigGeneralSettingsWatermarkText()}
+                selector={useGetGeneralSettingsWatermarkTextQuery}
                 action={setConfigGeneralSettingsWatermarkText}
                 margin="dense"
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={watermark} className={classes.fullWidth}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={9}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={9}>
               <FontFamilySelect
+                id="watermark-font"
                 label="Font"
-                controlClassName={classes.fullWidth}
-                selector={selectAppConfigGeneralSettingsWatermarkFontFamily()}
+                selector={useGetGeneralSettingsWatermarkFontFamilyQuery}
                 action={setConfigGeneralSettingsWatermarkFontFamily}
               />
-            </Grid>
-            <Grid item xs={3}>
+            </Grid2>
+            <Grid2 size={3}>
               <BaseTextField
                 variant="standard"
                 label="Size"
                 margin="dense"
-                selector={selectAppConfigGeneralSettingsWatermarkFontSize()}
+                selector={useGetGeneralSettingsWatermarkFontSizeQuery}
                 action={setConfigGeneralSettingsWatermarkFontSize}
                 InputProps={{
                   endAdornment: (
@@ -161,17 +159,18 @@ function WatermarkCard() {
                   type: 'number'
                 }}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={12}>
               <ColorPicker
-                selector={selectAppConfigGeneralSettingsWatermarkColor()}
+                type="watermark"
+                selector={useGetGeneralSettingsWatermarkColorQuery}
                 action={setConfigGeneralSettingsWatermarkColor}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Collapse>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

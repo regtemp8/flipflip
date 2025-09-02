@@ -1,37 +1,25 @@
-import React from 'react'
-
 import {
   Collapse,
   Divider,
   Fab,
-  Grid,
+  Grid2,
   IconButton,
-  Theme,
   Tooltip
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
-import { PLT } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
-import { selectAppLastRouteIsPlayer } from '../../store/app/selectors'
-import {
-  setSceneTextEnabled,
-  setSceneScriptPlaylist
-} from '../../store/scene/actions'
-import {
-  setSceneAddScriptPlaylist,
-  setSceneRemoveScriptPlaylist
-} from '../../store/scene/slice'
-import {
-  selectSceneTextEnabled,
-  selectSceneScriptPlaylists
-} from '../../store/scene/selectors'
-import { createSceneScriptPlaylist } from '../../store/scene/thunks'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import PlaylistSelect from '../common/PlaylistSelect'
 import { makeStyles } from 'tss-react/mui'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
+import { useGetSceneTextEnabledQuery } from '../../store/api/selectors'
+import {
+  useAddSceneScriptPlaylistMutation,
+  useDeleteSceneScriptPlaylistMutation,
+  useGetSceneScriptPlaylistsQuery
+} from '../../store/api/slice'
+import { setSceneTextEnabled } from '../../store/api/thunks'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   addButton: {
     boxShadow: 'none'
   }
@@ -42,61 +30,53 @@ export interface TextCardProps {
 }
 
 function TextCard(props: TextCardProps) {
-  const dispatch = useAppDispatch()
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const textEnabled = useAppSelector(selectSceneTextEnabled(props.sceneID))
-  const scriptPlaylists = useAppSelector(
-    selectSceneScriptPlaylists(props.sceneID)
+  const sidebar = useIsPlayerRoute()
+  const [addSceneScriptPlaylist] = useAddSceneScriptPlaylistMutation()
+  const [deleteSceneScriptPlaylist] = useDeleteSceneScriptPlaylistMutation()
+  const { data: textEnabled } = useGetSceneTextEnabledQuery(props.sceneID)
+  const { data: scriptPlaylists } = useGetSceneScriptPlaylistsQuery(
+    props.sceneID
   )
 
   const onAddPlaylist = () => {
-    dispatch(
-      setSceneAddScriptPlaylist({
-        id: props.sceneID,
-        value: 0
-      })
-    )
+    addSceneScriptPlaylist({ id: props.sceneID })
   }
 
-  const onDeletePlaylist = (index: number) => {
-    dispatch(
-      setSceneRemoveScriptPlaylist({
-        id: props.sceneID,
-        value: index
-      })
-    )
+  const onDeletePlaylist = (_index: number) => {
+    const { sceneID } = props
+    deleteSceneScriptPlaylist({ sceneID, playlistID: -1 })
   }
 
   const { classes } = useStyles()
   if (sidebar) {
     return (
-      <Grid container alignItems="center">
-        <Grid item xs={12}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs>
+      <Grid2 container alignItems="center">
+        <Grid2 size={12}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size="grow">
               <BaseSwitch
                 label="Text Overlay"
-                selector={selectSceneTextEnabled(props.sceneID)}
+                selector={() => useGetSceneTextEnabledQuery(props.sceneID)}
                 action={setSceneTextEnabled(props.sceneID)}
               />
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+      </Grid2>
     )
   }
 
   return (
     <>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs>
+      <Grid2 container spacing={2} alignItems="center">
+        <Grid2 size="grow">
           <BaseSwitch
             label="Text Overlay"
-            selector={selectSceneTextEnabled(props.sceneID)}
+            selector={() => useGetSceneTextEnabledQuery(props.sceneID)}
             action={setSceneTextEnabled(props.sceneID)}
           />
-        </Grid>
-        <Grid item>
+        </Grid2>
+        <Grid2>
           <Collapse in={textEnabled}>
             <Tooltip disableInteractive title={'Add Playlist'}>
               <Fab
@@ -108,34 +88,33 @@ function TextCard(props: TextCardProps) {
               </Fab>
             </Tooltip>
           </Collapse>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
       <Collapse in={textEnabled}>
-        <Grid container spacing={1} sx={{ mt: 2 }}>
-          {scriptPlaylists.map((playlist, i) => (
+        <Grid2 container spacing={1} sx={{ mt: 2 }}>
+          {scriptPlaylists?.map((_playlist, i) => (
             <>
-              <Grid item xs>
-                <PlaylistSelect
+              <Grid2 size="grow">
+                {/* <PlaylistSelect
                   type={PLT.script}
-                  selector={() => playlist.toString()}
+                  selector={() => ({ data: playlist })}
                   action={setSceneScriptPlaylist(props.sceneID, i)}
-                  create={createSceneScriptPlaylist(props.sceneID, i)}
                   hideLabel
-                />
-              </Grid>
-              <Grid item>
+                /> */}
+              </Grid2>
+              <Grid2>
                 <IconButton onClick={() => onDeletePlaylist(i)}>
                   <DeleteIcon color="error" />
                 </IconButton>
-              </Grid>
+              </Grid2>
               {i !== scriptPlaylists.length - 1 && (
-                <Grid item xs={12}>
+                <Grid2 size={12}>
                   <Divider />
-                </Grid>
+                </Grid2>
               )}
             </>
           ))}
-        </Grid>
+        </Grid2>
       </Collapse>
     </>
   )

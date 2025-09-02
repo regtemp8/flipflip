@@ -1,5 +1,5 @@
 /// <reference path="../../react-sortablejs.d.ts" />
-import React, { ChangeEvent, MouseEvent, useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import Sortable from 'react-sortablejs'
 
@@ -17,15 +17,14 @@ import {
   DialogTitle,
   Fab,
   IconButton,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
-  MenuItem,
   TextField,
   type Theme,
   Toolbar,
   Tooltip,
-  Typography
+  Typography,
+  ListItem
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -39,18 +38,19 @@ import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
 import SortIcon from '@mui/icons-material/Sort'
 
 import { en, MO, SF } from 'flipflip-common'
-import { arrayMove } from '../../data/utils'
-import Jiggle from '../../animations/Jiggle'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import Jiggle from '../animations/Jiggle'
 import {
-  removeAllTags,
-  setRouteGoBack,
-  sortTags,
-  saveTag
-} from '../../store/app/thunks'
-import { newTag } from '../../store/tag/Tag'
-import { selectAppTags } from '../../store/app/selectors'
-import { selectTagName, selectTagNextID } from '../../store/tag/selectors'
+  useCreateTagMutation,
+  useDeleteTagMutation,
+  useDeleteTagsMutation,
+  useGetTagQuery,
+  useGetTagsQuery,
+  useSortTagsMutation
+} from '../../store/api/slice'
+import { useNavigate } from 'react-router'
+import { useAppDispatch } from '../../store/hooks'
+import { moveTag, updateTag } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -125,10 +125,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
     backgroundColor: theme.palette.error.main,
     margin: 0,
     top: 'auto',
-    right: 130,
+    right: 80,
     bottom: 20,
     left: 'auto',
     position: 'fixed'
+  },
+  removeAllWithSortButton: {
+    right: 130
   },
   icon: {
     color: theme.palette.primary.contrastText
@@ -145,6 +148,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
+const ADD_TAG_ID = -2
 interface TagEditDialogProps {
   tagID: number
   onClose: () => void
@@ -152,10 +156,23 @@ interface TagEditDialogProps {
 
 function TagEditDialog(props: TagEditDialogProps) {
   const dispatch = useAppDispatch()
-  const tagNextID = useAppSelector(selectTagNextID())
-
+  const { data: tag } = useGetTagQuery(props.tagID)
+  const [createTag] = useCreateTagMutation()
+  const [deleteTag] = useDeleteTagMutation()
   const [tagName, setTagName] = useState('')
   const [tagPhrase, setTagPhrase] = useState('')
+
+  useEffect(() => {
+    if (props.tagID >= 0) {
+      setTagName(tag?.name ?? '')
+      setTagPhrase(tag?.phraseString ?? '')
+    }
+  }, [props.tagID])
+
+  useEffect(() => {
+    setTagName(tag?.name ?? '')
+    setTagPhrase(tag?.phraseString ?? '')
+  }, [tag])
 
   const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setTagName(e.currentTarget.value)
@@ -165,29 +182,26 @@ function TagEditDialog(props: TagEditDialogProps) {
     setTagPhrase(e.currentTarget.value)
   }
 
-  const onRemoveTag = () => {
-    setTagName('')
-    setTagPhrase('')
-    props.onClose()
+  const onRemoveTag = async () => {
+    await deleteTag({ id: props.tagID })
+    onCloseEditDialog()
   }
 
-  const onFinishEdit = () => {
-    dispatch(
-      saveTag(
-        newTag({ id: props.tagID, name: tagName, phraseString: tagPhrase })
+  const onFinishEdit = async () => {
+    if (props.tagID === ADD_TAG_ID) {
+      await createTag({ name: tagName, phraseString: tagPhrase })
+    } else {
+      dispatch(
+        updateTag({ id: props.tagID, name: tagName, phraseString: tagPhrase })
       )
-    )
-    setTagName('')
-    setTagPhrase('')
-    props.onClose()
+    }
+    onCloseEditDialog()
   }
 
   const onCloseEditDialog = () => {
-    if (props.tagID === tagNextID && tagName === '') {
-      onRemoveTag()
-    } else {
-      props.onClose()
-    }
+    setTagName('')
+    setTagPhrase('')
+    props.onClose()
   }
 
   const { classes } = useStyles()
@@ -197,7 +211,9 @@ function TagEditDialog(props: TagEditDialogProps) {
       onClose={onCloseEditDialog}
       aria-labelledby="edit-title"
     >
-      <DialogTitle id="edit-title">Edit Tag</DialogTitle>
+      <DialogTitle id="edit-title">
+        {props.tagID === ADD_TAG_ID ? 'Add' : 'Edit'} Tag
+      </DialogTitle>
       <DialogContent>
         <TextField
           variant="standard"
@@ -218,18 +234,22 @@ function TagEditDialog(props: TagEditDialogProps) {
           id="phrase"
           value={tagPhrase}
           margin="dense"
-          inputProps={{ className: classes.phraseInput }}
+          slotProps={{
+            htmlInput: { className: classes.phraseInput }
+          }}
           onChange={onChangePhrase}
         />
       </DialogContent>
       <DialogActions>
-        <IconButton
-          onClick={onRemoveTag}
-          style={{ marginRight: 'auto' }}
-          size="large"
-        >
-          <DeleteIcon color="error" />
-        </IconButton>
+        {props.tagID > 0 && (
+          <IconButton
+            onClick={onRemoveTag}
+            style={{ marginRight: 'auto' }}
+            size="large"
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        )}
         <Button onClick={onCloseEditDialog} color="secondary">
           Cancel
         </Button>
@@ -247,16 +267,16 @@ interface TagCardProps {
 }
 
 function TagCard(props: TagCardProps) {
-  const name = useAppSelector(selectTagName(props.tagID)) || ''
+  const { data: tag } = useGetTagQuery(props.tagID)
 
   const { classes } = useStyles()
   return (
-    <Jiggle key={props.tagID + name} bounce>
+    <Jiggle key={props.tagID} bounce>
       <Card className={classes.tag}>
         <CardActionArea onClick={() => props.onEdit(props.tagID)}>
           <CardContent>
             <Typography component="h2" variant="h6">
-              {name}
+              {tag?.name}
             </Typography>
           </CardContent>
         </CardActionArea>
@@ -267,14 +287,16 @@ function TagCard(props: TagCardProps) {
 
 function TagManager() {
   const dispatch = useAppDispatch()
-  const tagNextID = useAppSelector(selectTagNextID())
-  const tags = useAppSelector(selectAppTags())
+  const navigate = useNavigate()
+  const [deleteTags] = useDeleteTagsMutation()
+  const [sortTags] = useSortTagsMutation()
+  const { data: tags } = useGetTagsQuery()
   const [openMenu, setOpenMenu] = useState<string>()
   const [menuAnchorEl, setMenuAnchorEl] = useState<any>()
   const [isEditing, setIsEditing] = useState(-1)
 
   const goBack = () => {
-    dispatch(setRouteGoBack())
+    navigate(-1)
   }
 
   const onCloseDialog = () => {
@@ -284,7 +306,7 @@ function TagManager() {
   }
 
   const onAddTag = () => {
-    setIsEditing(tagNextID)
+    setIsEditing(ADD_TAG_ID)
   }
 
   const onEditTag = (tagID: number) => {
@@ -300,8 +322,8 @@ function TagManager() {
     setOpenMenu(MO.sort)
   }
 
-  const onFinishRemoveAll = () => {
-    dispatch(removeAllTags())
+  const onFinishRemoveAll = async () => {
+    await deleteTags()
     onCloseDialog()
   }
 
@@ -350,11 +372,16 @@ function TagManager() {
                 animation: 150,
                 easing: 'cubic-bezier(1, 0, 0, 1)'
               }}
-              onChange={(order: any, sortable: any, evt: any) => {
-                arrayMove(tags, evt.oldIndex, evt.newIndex)
+              onChange={async (_order: any, _sortable: any, evt: any) => {
+                const newTags = arrayMove(
+                  tags as number[],
+                  evt.oldIndex,
+                  evt.newIndex
+                )
+                dispatch(moveTag(newTags))
               }}
             >
-              {tags.map((tagID) => (
+              {tags?.map((tagID) => (
                 <TagCard tagID={tagID} onEdit={onEditTag} />
               ))}
             </Sortable>
@@ -363,11 +390,14 @@ function TagManager() {
         <TagEditDialog tagID={isEditing} onClose={onCloseDialog} />
       </main>
 
-      {tags.length > 0 && (
-        <React.Fragment>
+      {(tags?.length ?? 0) > 0 && (
+        <>
           <Tooltip disableInteractive title="Remove All Tags">
             <Fab
-              className={classes.removeAllButton}
+              className={cx(
+                classes.removeAllButton,
+                (tags?.length ?? 0) >= 2 && classes.removeAllWithSortButton
+              )}
               onClick={onRemoveAll}
               size="small"
             >
@@ -383,8 +413,8 @@ function TagManager() {
             <DialogTitle id="remove-all-title">Delete Tags</DialogTitle>
             <DialogContent>
               <DialogContentText id="remove-all-description">
-                Are you sure you want to remove all Tags? This will untag all
-                sources as well.
+                Are you sure you want to remove all tags? This will untag all
+                sources, clips, audios and caption scripts as well.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -396,11 +426,11 @@ function TagManager() {
               </Button>
             </DialogActions>
           </Dialog>
-        </React.Fragment>
+        </>
       )}
 
-      {tags.length >= 2 && (
-        <React.Fragment>
+      {(tags?.length ?? 0) >= 2 && (
+        <>
           <Fab
             className={classes.sortMenuButton}
             aria-haspopup="true"
@@ -429,32 +459,36 @@ function TagManager() {
             onClose={onCloseDialog}
           >
             {[SF.alpha, SF.date].map((sf) => (
-              <MenuItem key={sf}>
+              <ListItem
+                key={sf}
+                secondaryAction={
+                  <>
+                    <IconButton
+                      edge="end"
+                      onClick={async () => {
+                        await sortTags({ sortBy: sf, sortOrder: 'asc' })
+                      }}
+                      size="large"
+                    >
+                      <ArrowUpwardIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      onClick={async () => {
+                        await sortTags({ sortBy: sf, sortOrder: 'desc' })
+                      }}
+                      size="large"
+                    >
+                      <ArrowDownwardIcon />
+                    </IconButton>
+                  </>
+                }
+              >
                 <ListItemText primary={en.get(sf)} />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    onClick={() => {
-                      dispatch(sortTags(sf, true))
-                    }}
-                    size="large"
-                  >
-                    <ArrowUpwardIcon />
-                  </IconButton>
-                  <IconButton
-                    edge="end"
-                    onClick={() => {
-                      dispatch(sortTags(sf, false))
-                    }}
-                    size="large"
-                  >
-                    <ArrowDownwardIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </MenuItem>
+              </ListItem>
             ))}
           </Menu>
-        </React.Fragment>
+        </>
       )}
 
       <Fab className={classes.addMenuButton} onClick={onAddTag} size="large">

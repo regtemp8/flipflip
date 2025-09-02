@@ -1,11 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  ChangeEvent,
-  useCallback
-} from 'react'
-import { SortableContainer, SortableElement } from 'react-sortable-hoc'
+import { useEffect, useState, useRef, ChangeEvent } from 'react'
+import {
+  arrayMove,
+  SortableContainer,
+  SortableElement
+} from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
 
@@ -22,22 +20,11 @@ import {
 
 import { makeStyles } from 'tss-react/mui'
 
-import type Audio from '../../store/audio/Audio'
 import AudioSourceListItem from './AudioSourceListItem'
-import AudioEdit from './AudioEdit'
-import AudioOptions from './AudioOptions'
-import { setAudioYOffset, removeAudios } from '../../store/app/slice'
-import { selectUndefined } from '../../store/app/selectors'
-import { updateAudio } from '../../store/audio/slice'
-import { setPlaylistsSwapPlaylist, swapAudios } from '../../store/app/thunks'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppAudioYOffset } from '../../store/app/selectors'
-import { selectAudio, selectAudioUrl } from '../../store/audio/selectors'
-import flipflip from '../../FlipFlipService'
-import {
-  setPlaylistRemoveAudio,
-  setPlaylistsRemoveAudio
-} from '../../store/playlist/thunks'
+import { setAudioLibraryLastSelected } from '../../store/audioLibrary/slice'
+import { deleteAudio, moveAudio } from '../../store/api/thunks'
+import { selectAudioLibraryYOffset } from '../../store/audioLibrary/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -50,10 +37,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
   backdropTop: {
     zIndex: theme.zIndex.modal + 1
   },
-  arrow: {
+  arrowWrapper: {
     position: 'absolute',
+    overflow: 'hidden',
     bottom: 20,
-    right: 35,
+    right: 35
+  },
+  arrow: {
     fontSize: 220,
     transform: 'rotateY(0deg) rotate(45deg)'
   },
@@ -77,6 +67,8 @@ export interface AudioSourceListProps {
   selected: number[]
   showHelp: boolean
   audios: number[]
+  filters: string[]
+  sources: number[]
   playlist?: string
   onClickAlbum: (album: string) => void
   onClickArtist: (artist: string) => void
@@ -84,22 +76,14 @@ export interface AudioSourceListProps {
 }
 
 function AudioSourceList(props: AudioSourceListProps) {
-  const [sourceOptions, setSourceOptions] = useState<number>()
-  const [deleteDialog, setDeleteDialog] = useState<number>()
-  const [sourceEditID, setSourceEditID] = useState<number>()
-  const [lastSelected, setLastSelected] = useState<number>()
-
   const dispatch = useAppDispatch()
-  const yOffset = useAppSelector(selectAppAudioYOffset())
-  const deleteDialogSelector =
-    deleteDialog != null ? selectAudioUrl(deleteDialog) : selectUndefined
-  const deleteDialogURL = useAppSelector(deleteDialogSelector)
-  const sourceEditSelector =
-    sourceEditID != null ? selectAudio(sourceEditID) : selectUndefined
-  const sourceEdit = useAppSelector(sourceEditSelector)
+  const [deleteDialog, setDeleteDialog] = useState<number>()
 
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
+
+  const yOffset = useAppSelector(selectAudioLibraryYOffset())
+  const deleteDialogURL = ''
 
   const onSortEnd = ({
     oldIndex,
@@ -108,27 +92,16 @@ function AudioSourceList(props: AudioSourceListProps) {
     oldIndex: number
     newIndex: number
   }) => {
-    if (props.playlist) {
-      const oldSourceId = props.audios[oldIndex]
-      const newSourceId = props.audios[newIndex]
-      dispatch(
-        setPlaylistsSwapPlaylist(props.playlist, oldSourceId, newSourceId)
-      )
-    } else {
-      const oldSourceURL = props.audios[oldIndex]
-      const newSourceURL = props.audios[newIndex]
-      dispatch(swapAudios(oldSourceURL, newSourceURL))
-    }
+    const oldID = props.sources[oldIndex]
+    const newID = props.sources[newIndex]
+    const newSources = arrayMove(props.sources, oldIndex, newIndex)
+    const newAudios = arrayMove(
+      props.audios,
+      props.audios.indexOf(oldID),
+      props.audios.indexOf(newID)
+    )
+    dispatch(moveAudio(newAudios, props.filters, newSources))
   }
-
-  const savePosition = useCallback(() => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setAudioYOffset(scrollTop))
-    }
-  }, [dispatch])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -149,9 +122,8 @@ function AudioSourceList(props: AudioSourceListProps) {
       window.removeEventListener('keyup', onKeyUp)
       _shiftDown.current = undefined
       _lastChecked.current = undefined
-      savePosition()
     }
-  }, [savePosition])
+  }, [])
 
   const onDelete = (audioID: number) => {
     setDeleteDialog(audioID)
@@ -162,19 +134,18 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const onFinishDelete = async () => {
-    await flipflip().api.unlink(deleteDialogURL as string)
-    onRemove(deleteDialog as number)
-    onCloseDeleteDialog()
+    // await flipflip().api.unlink(deleteDialogURL as string)
+    // onRemove(deleteDialog as number)
+    // onCloseDeleteDialog()
   }
 
   const onRemove = (audioID: number) => {
     if (props.playlist) {
-      dispatch(setPlaylistRemoveAudio(props.playlist, audioID))
-    } else {
-      props.onUpdateSelected(props.selected.filter((id) => id !== audioID))
-      dispatch(removeAudios([audioID]))
-      dispatch(setPlaylistsRemoveAudio(audioID))
+      return // TODO add playlist delete
     }
+
+    props.onUpdateSelected(props.selected.filter((id) => id !== audioID))
+    dispatch(deleteAudio(audioID))
   }
 
   const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -187,11 +158,11 @@ function AudioSourceList(props: AudioSourceListProps) {
     } else {
       if (
         _lastChecked.current &&
-        props.audios.includes(_lastChecked.current) &&
+        props.sources.includes(_lastChecked.current) &&
         _shiftDown.current
       ) {
         let start = false
-        for (const id of props.audios) {
+        for (const id of props.sources) {
           if (start && (id === audioID || id === _lastChecked.current)) {
             break
           }
@@ -210,32 +181,7 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const clearLastSelected = () => {
-    if (!sourceEditID && !sourceOptions) {
-      setLastSelected(undefined)
-    }
-  }
-
-  const onEditSource = (audioID: number) => {
-    setSourceEditID(audioID)
-    setLastSelected(audioID)
-  }
-
-  const onCloseSourceEditDialog = () => {
-    setSourceEditID(undefined)
-  }
-
-  const onSourceOptions = (audioID: number) => {
-    setSourceOptions(audioID)
-    setLastSelected(audioID)
-  }
-
-  const onSourceOptionsDone = () => {
-    setSourceOptions(undefined)
-  }
-
-  const onFinishSourceEdit = (newAudio: Audio) => {
-    dispatch(updateAudio(newAudio))
-    onCloseSourceEditDialog()
+    dispatch(setAudioLibraryLastSelected(undefined))
   }
 
   const SortableVirtualList =
@@ -252,7 +198,7 @@ function AudioSourceList(props: AudioSourceListProps) {
         itemSize={56}
         itemCount={audios.length}
         itemData={audios}
-        itemKey={(index: number, data: any) => index}
+        itemKey={(index: number) => index}
         overscanCount={10}
       >
         {Row}
@@ -270,18 +216,14 @@ function AudioSourceList(props: AudioSourceListProps) {
           checked={props.isSelect ? props.selected.includes(audioID) : false}
           index={index}
           isSelect={props.isSelect}
-          lastSelected={audioID === lastSelected}
           audioID={audioID}
           audios={value.data}
           style={value.style}
           onClickAlbum={props.onClickAlbum}
           onClickArtist={props.onClickArtist}
           onDelete={onDelete}
-          onEditSource={onEditSource}
           onRemove={onRemove}
-          onSourceOptions={onSourceOptions}
           onToggleSelect={onToggleSelect}
-          savePosition={savePosition}
         />
       )
     }
@@ -293,9 +235,9 @@ function AudioSourceList(props: AudioSourceListProps) {
   }
 
   const { classes } = useStyles()
-  if (props.audios.length === 0) {
+  if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -315,7 +257,7 @@ function AudioSourceList(props: AudioSourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -325,15 +267,17 @@ function AudioSourceList(props: AudioSourceListProps) {
             >
               Add new tracks
             </Typography>
-            <div className={classes.arrow}>→</div>
-          </React.Fragment>
+            <div className={classes.arrowWrapper}>
+              <div className={classes.arrow}>→</div>
+            </div>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List id="sortable-list" disablePadding onClick={clearLastSelected}>
@@ -342,9 +286,9 @@ function AudioSourceList(props: AudioSourceListProps) {
                 document.getElementById('sortable-list') as HTMLElement
               }
               distance={5}
-              height={height - 1}
+              height={height}
               width={width}
-              audios={props.audios}
+              audios={props.sources}
               yOffset={yOffset}
               onSortEnd={onSortEnd}
             />
@@ -372,20 +316,7 @@ function AudioSourceList(props: AudioSourceListProps) {
           </DialogActions>
         </Dialog>
       )}
-      {sourceOptions != null && (
-        <AudioOptions audioID={sourceOptions} onDone={onSourceOptionsDone} />
-      )}
-      {sourceEdit != null && (
-        <AudioEdit
-          audio={sourceEdit}
-          cachePath={props.cachePath}
-          title={'Edit song info'}
-          allowSuggestion
-          onCancel={onCloseSourceEditDialog}
-          onFinishEdit={onFinishSourceEdit}
-        />
-      )}
-    </React.Fragment>
+    </>
   )
 }
 

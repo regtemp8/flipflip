@@ -1,17 +1,12 @@
-import {
-  Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  TextField,
-  type Theme
-} from '@mui/material'
+import { Autocomplete, TextField, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
 
-import { useAppSelector } from '../../store/hooks'
-import { selectDisplaySelectOptions } from '../../store/display/selectors'
+import { useGetDisplaySelectOptionsQuery } from '../../store/api/slice'
+
 import { SyntheticEvent } from 'react'
+import { SelectOption } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -35,21 +30,19 @@ export interface DisplaySelectProps {
 }
 
 function DisplaySelect(props: DisplaySelectProps) {
-  const options = useAppSelector(
-    selectDisplaySelectOptions(props.onlyExtra, props.includeExtra)
-  )
+  const { onlyExtra, includeExtra } = props
+  const { data } = useGetDisplaySelectOptionsQuery({ onlyExtra, includeExtra })
+  const options = data ?? {}
   const optionsList = Object.keys(options).map((key) => {
     return { value: key, label: options[key] }
   })
 
   const onChange = (
-    event: SyntheticEvent<Element, Event>,
-    option: unknown,
-    reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<unknown>
+    _event: SyntheticEvent<Element, Event>,
+    option: unknown
   ) => {
     if (option != null) {
-      const { value } = option as { value: string; label: string }
+      const { value } = option as SelectOption
       props.onChange(Number(value))
     }
   }

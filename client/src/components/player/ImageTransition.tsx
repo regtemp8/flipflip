@@ -1,15 +1,10 @@
 import { PropsWithChildren, useCallback, useEffect, useRef } from 'react'
 import { animated, useSpring } from '@react-spring/web'
-import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import {
-  CrossFadeData,
-  EasingParams,
-  SlideData
-} from '../../store/player/ContentPreloadService'
-import { getEaseFunction } from '../../data/utils'
+import { CrossFadeData, EasingParams, SlideData } from 'flipflip-common'
+import { getEaseFunction } from '../../utils'
 
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     container: {
       position: 'absolute',

@@ -1,17 +1,10 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
-import { Collapse, Divider, Grid, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import TimingCard from '../common/TimingCard'
-import { useAppSelector } from '../../store/hooks'
-import {
-  selectAppTutorial,
-  selectAppConfigDisplaySettingsEasingControls,
-  selectAppLastRouteIsPlayer
-} from '../../store/app/selectors'
 import {
   setSceneFadeInOut,
   setSceneFadeIOTF,
@@ -30,29 +23,34 @@ import {
   setSceneFadeIOEndPer,
   setSceneFadeIOStartEase,
   setSceneFadeIOEndEase
-} from '../../store/scene/actions'
+} from '../../store/api/thunks'
 import {
-  selectSceneHasBPM,
-  selectSceneFadeInOut,
-  selectSceneFadeIOStartAmp,
-  selectSceneFadeIOStartExp,
-  selectSceneFadeIOStartOv,
-  selectSceneFadeIOStartPer,
-  selectSceneFadeIOEndAmp,
-  selectSceneFadeIOEndExp,
-  selectSceneFadeIOEndOv,
-  selectSceneFadeIOEndPer,
-  selectSceneFadeIOBPMMulti,
-  selectSceneFadeIODuration,
-  selectSceneFadeIODurationMax,
-  selectSceneFadeIODurationMin,
-  selectSceneFadeIOSinRate,
-  selectSceneFadeIOTF,
-  selectSceneFadeIOStartEase,
-  selectSceneFadeIOEndEase
-} from '../../store/scene/selectors'
+  useGetSceneFadeInOutQuery,
+  useGetSceneFadeIOStartAmpQuery,
+  useGetSceneFadeIOStartExpQuery,
+  useGetSceneFadeIOStartOvQuery,
+  useGetSceneFadeIOStartPerQuery,
+  useGetSceneFadeIOEndAmpQuery,
+  useGetSceneFadeIOEndExpQuery,
+  useGetSceneFadeIOEndOvQuery,
+  useGetSceneFadeIOEndPerQuery,
+  useGetSceneFadeIOBPMMultiQuery,
+  useGetSceneFadeIODurationQuery,
+  useGetSceneFadeIODurationMaxQuery,
+  useGetSceneFadeIODurationMinQuery,
+  useGetSceneFadeIOSinRateQuery,
+  useGetSceneFadeIOTFQuery,
+  useGetSceneFadeIOStartEaseQuery,
+  useGetSceneFadeIOEndEaseQuery,
+  useGetDisplaySettingsEasingControlsQuery
+} from '../../store/api/selectors'
+import {
+  useGetSceneHasBPMQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import EasingCard from '../common/EasingCard'
 import BaseSwitch from '../common/BaseSwitch'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -84,104 +82,103 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface FadeIOCardProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function FadeIOCard(props: FadeIOCardProps) {
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const fadeInOut = useAppSelector(selectSceneFadeInOut(props.sceneID))
-  const tutorial = useAppSelector(selectAppTutorial())
-  const easingControls = useAppSelector(
-    selectAppConfigDisplaySettingsEasingControls()
-  )
+  const sidebar = useIsPlayerRoute()
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: easingControls } = useGetDisplaySettingsEasingControlsQuery()
+  const { data: fadeInOut } = useGetSceneFadeInOutQuery(props.sceneID)
 
   const { classes } = useStyles()
   return (
-    <Grid
+    <Grid2
       container
       spacing={fadeInOut ? 2 : 0}
       alignItems="center"
-      className={cx(tutorial != null && classes.disable)}
+      className={cx(tutorial?.current != null && classes.disable)}
     >
-      <Grid item xs={12}>
+      <Grid2 size={12}>
         <BaseSwitch
           label="Fade In/Out"
-          selector={selectSceneFadeInOut(props.sceneID)}
+          selector={() => useGetSceneFadeInOutQuery(props.sceneID)}
           action={setSceneFadeInOut(props.sceneID)}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={fadeInOut} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={fadeInOut} className={classes.fullWidth}>
           <TimingCard
             sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
-              selector: selectSceneFadeIOTF(props.sceneID),
+              selector: () => useGetSceneFadeIOTFQuery(props.sceneID),
               action: setSceneFadeIOTF(props.sceneID)
             }}
             duration={{
-              selector: selectSceneFadeIODuration(props.sceneID),
+              selector: () => useGetSceneFadeIODurationQuery(props.sceneID),
               action: setSceneFadeIODuration(props.sceneID)
             }}
             durationMin={{
-              selector: selectSceneFadeIODurationMin(props.sceneID),
+              selector: () => useGetSceneFadeIODurationMinQuery(props.sceneID),
               action: setSceneFadeIODurationMin(props.sceneID)
             }}
             durationMax={{
-              selector: selectSceneFadeIODurationMax(props.sceneID),
+              selector: () => useGetSceneFadeIODurationMaxQuery(props.sceneID),
               action: setSceneFadeIODurationMax(props.sceneID)
             }}
             wave={{
-              selector: selectSceneFadeIOSinRate(props.sceneID),
+              selector: () => useGetSceneFadeIOSinRateQuery(props.sceneID),
               action: setSceneFadeIOSinRate(props.sceneID),
               labelledBy: 'fadeio-sin-rate-slider'
             }}
             bpm={{
-              selector: selectSceneFadeIOBPMMulti(props.sceneID),
+              selector: () => useGetSceneFadeIOBPMMultiQuery(props.sceneID),
               action: setSceneFadeIOBPMMulti(props.sceneID),
               labelledBy: 'fadeio-bpm-multi-slider'
             }}
           />
         </Collapse>
-      </Grid>
+      </Grid2>
       {easingControls && (
-        <React.Fragment>
-          <Grid item xs={12}>
+        <>
+          <Grid2 size={12}>
             <Collapse in={fadeInOut} className={classes.fullWidth}>
               <Divider />
             </Collapse>
-          </Grid>
-          <Grid item xs={12}>
+          </Grid2>
+          <Grid2 size={12}>
             <Collapse in={fadeInOut} className={classes.fullWidth}>
               <EasingCard
                 label="Start Easing"
                 sidebar={sidebar}
                 easing={{
-                  selector: selectSceneFadeIOStartEase(props.sceneID),
+                  selector: () =>
+                    useGetSceneFadeIOStartEaseQuery(props.sceneID),
                   action: setSceneFadeIOStartEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectSceneFadeIOStartExp(props.sceneID),
+                  selector: () => useGetSceneFadeIOStartExpQuery(props.sceneID),
                   action: setSceneFadeIOStartExp(props.sceneID),
                   labelledBy: 'fadeio-start-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectSceneFadeIOStartOv(props.sceneID),
+                  selector: () => useGetSceneFadeIOStartOvQuery(props.sceneID),
                   action: setSceneFadeIOStartOv(props.sceneID),
                   labelledBy: 'fadeio-start-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectSceneFadeIOStartAmp(props.sceneID),
+                  selector: () => useGetSceneFadeIOStartAmpQuery(props.sceneID),
                   action: setSceneFadeIOStartAmp(props.sceneID),
                   labelledBy: 'fadeio-start-amp-slider'
                 }}
                 period={{
-                  selector: selectSceneFadeIOStartPer(props.sceneID),
+                  selector: () => useGetSceneFadeIOStartPerQuery(props.sceneID),
                   action: setSceneFadeIOStartPer(props.sceneID),
                   labelledBy: 'fadeio-start-per-slider'
                 }}
@@ -190,35 +187,35 @@ function FadeIOCard(props: FadeIOCardProps) {
                 label="End Easing"
                 sidebar={sidebar}
                 easing={{
-                  selector: selectSceneFadeIOEndEase(props.sceneID),
+                  selector: () => useGetSceneFadeIOEndEaseQuery(props.sceneID),
                   action: setSceneFadeIOEndEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectSceneFadeIOEndExp(props.sceneID),
+                  selector: () => useGetSceneFadeIOEndExpQuery(props.sceneID),
                   action: setSceneFadeIOEndExp(props.sceneID),
                   labelledBy: 'fadeio-end-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectSceneFadeIOEndOv(props.sceneID),
+                  selector: () => useGetSceneFadeIOEndOvQuery(props.sceneID),
                   action: setSceneFadeIOEndOv(props.sceneID),
                   labelledBy: 'fadeio-end-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectSceneFadeIOEndAmp(props.sceneID),
+                  selector: () => useGetSceneFadeIOEndAmpQuery(props.sceneID),
                   action: setSceneFadeIOEndAmp(props.sceneID),
                   labelledBy: 'fadeio-end-amp-slider'
                 }}
                 period={{
-                  selector: selectSceneFadeIOEndPer(props.sceneID),
+                  selector: () => useGetSceneFadeIOEndPerQuery(props.sceneID),
                   action: setSceneFadeIOEndPer(props.sceneID),
                   labelledBy: 'fadeio-end-per-slider'
                 }}
               />
             </Collapse>
-          </Grid>
-        </React.Fragment>
+          </Grid2>
+        </>
       )}
-    </Grid>
+    </Grid2>
   )
 }
 

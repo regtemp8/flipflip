@@ -1,13 +1,11 @@
-import { Collapse, Grid, InputAdornment, type Theme } from '@mui/material'
+import { Collapse, Grid2, InputAdornment } from '@mui/material'
 
-import { makeStyles } from 'tss-react/mui'
-
-import { type FontSettingsType } from '../../store/captionScript/FontSettings'
+import { type FontSettingsType } from 'flipflip-common'
 import ColorPicker from '../config/ColorPicker'
 
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSwitch from '../common/BaseSwitch'
-import FontFamilySelect from '../common/FontFamilySelect'
+import FontFamilySelect from '../common/fontPicker/FontFamilySelect'
 import {
   setCaptionScriptFontSettingsBorder,
   setCaptionScriptFontSettingsColor,
@@ -15,36 +13,15 @@ import {
   setCaptionScriptFontSettingsFontFamily,
   setCaptionScriptFontSettingsFontSize,
   setCaptionScriptFontSettingsBorderPx
-} from '../../store/captionScript/actions'
+} from '../../store/api/thunks'
 import {
-  selectCaptionScriptFontSettingsBorder,
-  selectCaptionScriptFontSettingsColor,
-  selectCaptionScriptFontSettingsBorderColor,
-  selectCaptionScriptFontSettingsFontFamily,
-  selectCaptionScriptFontSettingsFontSize,
-  selectCaptionScriptFontSettingsBorderPx
-} from '../../store/captionScript/selectors'
-import { useAppSelector } from '../../store/hooks'
-
-const useStyles = makeStyles()((theme: Theme) => ({
-  fullWidth: {
-    width: '100%'
-  },
-  noPadding: {
-    padding: '0 !important'
-  },
-  endInput: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: 0
-  },
-  fontDivider: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2)
-  },
-  fontProgress: {
-    position: 'absolute'
-  }
-}))
+  useGetCaptionScriptFontSettingsBorderQuery,
+  useGetCaptionScriptFontSettingsColorQuery,
+  useGetCaptionScriptFontSettingsBorderColorQuery,
+  useGetCaptionScriptFontSettingsFontFamilyQuery,
+  useGetCaptionScriptFontSettingsFontSizeQuery,
+  useGetCaptionScriptFontSettingsBorderPxQuery
+} from '../../store/api/selectors'
 
 export interface FontOptionsProps {
   name: string
@@ -53,36 +30,40 @@ export interface FontOptionsProps {
 }
 
 function FontOptions(props: FontOptionsProps) {
-  const { classes } = useStyles()
-  const border = useAppSelector(
-    selectCaptionScriptFontSettingsBorder(props.captionScriptID, props.type)
+  const { data: border } = useGetCaptionScriptFontSettingsBorderQuery(
+    props.captionScriptID,
+    props.type
   )
 
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={9}>
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2 size={9}>
         <FontFamilySelect
+          id={`${props.type.toLowerCase()}-font`}
           label={`${props.name} Font`}
-          controlClassName={classes.fullWidth}
-          selector={selectCaptionScriptFontSettingsFontFamily(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsFontFamilyQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsFontFamily(
             props.captionScriptID,
             props.type
           )}
         />
-      </Grid>
-      <Grid item xs={3}>
+      </Grid2>
+      <Grid2 size={3}>
         <BaseTextField
           variant="standard"
           label="Size"
           margin="dense"
-          selector={selectCaptionScriptFontSettingsFontSize(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsFontSizeQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsFontSize(
             props.captionScriptID,
             props.type
@@ -95,43 +76,50 @@ function FontOptions(props: FontOptionsProps) {
             type: 'number'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <ColorPicker
-          selector={selectCaptionScriptFontSettingsColor(
-            props.captionScriptID,
-            props.type
-          )}
+          type={props.type.toLowerCase()}
+          selector={() =>
+            useGetCaptionScriptFontSettingsColorQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsColor(
             props.captionScriptID,
             props.type
           )}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSwitch
           label="Border"
           size="small"
-          selector={selectCaptionScriptFontSettingsBorder(
-            props.captionScriptID,
-            props.type
-          )}
+          selector={() =>
+            useGetCaptionScriptFontSettingsBorderQuery(
+              props.captionScriptID,
+              props.type
+            )
+          }
           action={setCaptionScriptFontSettingsBorder(
             props.captionScriptID,
             props.type
           )}
         />
-      </Grid>
-      <Grid item xs={3}>
+      </Grid2>
+      <Grid2 size={3}>
         <Collapse in={border}>
           <BaseTextField
             variant="standard"
             label="Width"
             margin="dense"
-            selector={selectCaptionScriptFontSettingsBorderPx(
-              props.captionScriptID,
-              props.type
-            )}
+            selector={() =>
+              useGetCaptionScriptFontSettingsBorderPxQuery(
+                props.captionScriptID,
+                props.type
+              )
+            }
             action={setCaptionScriptFontSettingsBorderPx(
               props.captionScriptID,
               props.type
@@ -145,22 +133,25 @@ function FontOptions(props: FontOptionsProps) {
             }}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={9}>
+      </Grid2>
+      <Grid2 size={9}>
         <Collapse in={border}>
           <ColorPicker
-            selector={selectCaptionScriptFontSettingsBorderColor(
-              props.captionScriptID,
-              props.type
-            )}
+            type={`${props.type.toLowerCase()}-border`}
+            selector={() =>
+              useGetCaptionScriptFontSettingsBorderColorQuery(
+                props.captionScriptID,
+                props.type
+              )
+            }
             action={setCaptionScriptFontSettingsBorderColor(
               props.captionScriptID,
               props.type
             )}
           />
         </Collapse>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

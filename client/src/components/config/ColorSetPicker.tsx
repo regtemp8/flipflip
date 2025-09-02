@@ -1,15 +1,22 @@
-import React, { useState, type MouseEvent } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 import { SketchPicker } from 'react-color'
 
-import { Fab, Grid, IconButton, Menu, type Theme, Tooltip } from '@mui/material'
+import {
+  Fab,
+  Grid2,
+  IconButton,
+  Menu,
+  type Theme,
+  Tooltip
+} from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import type ReduxProps from '../common/ReduxProps'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   colorGrid: {
@@ -40,12 +47,13 @@ export interface ColorSetPickerProps extends ReduxProps<string[]> {}
 
 function ColorSetPicker(props: ColorSetPickerProps) {
   const dispatch = useAppDispatch()
-  const currentColors = useAppSelector(props.selector)
+  const { data } = props.selector()
 
   const [pickerIndex, setPickerIndex] = useState<number>()
   const [pickerColor, setPickerColor] = useState<string>()
   const [pickerAnchorEl, setPickerAnchorEl] = useState<any>()
 
+  const currentColors = data ?? []
   const onOpenColorPicker = (e: MouseEvent) => {
     const target = e.currentTarget as HTMLElement
     let color, index
@@ -87,14 +95,15 @@ function ColorSetPicker(props: ColorSetPickerProps) {
 
   const { classes } = useStyles()
   return (
-    <Grid container>
-      <Grid item className={classes.colorGrid}>
+    <Grid2 container>
+      <Grid2 className={classes.colorGrid}>
         <Tooltip disableInteractive title="Add Color">
           <Fab
             id="add-color"
             className={classes.colorButton}
             style={pickerIndex != null ? { backgroundColor: pickerColor } : {}}
             onClick={onOpenColorPicker}
+            disabled={data == null}
             size="medium"
           >
             {pickerIndex == null && <AddIcon />}
@@ -124,11 +133,11 @@ function ColorSetPicker(props: ColorSetPickerProps) {
             onChange={onChangeColor}
           />
         </Menu>
-      </Grid>
-      <Grid item xs>
-        <Grid container alignItems="center">
+      </Grid2>
+      <Grid2 size="grow">
+        <Grid2 container alignItems="center">
           {currentColors.map((c, index) => (
-            <Grid key={c + index} item>
+            <Grid2 key={c + index}>
               <Fab
                 id={'color-' + index}
                 className={cx(
@@ -142,18 +151,18 @@ function ColorSetPicker(props: ColorSetPickerProps) {
               >
                 <div />
               </Fab>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
-      </Grid>
-      <Grid item>
+        </Grid2>
+      </Grid2>
+      <Grid2>
         <Tooltip disableInteractive title="Clear Colors">
           <IconButton onClick={onClearColors} size="large">
             <DeleteIcon color="error" />
           </IconButton>
         </Tooltip>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

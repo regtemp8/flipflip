@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { cx } from '@emotion/css'
 
 import {
@@ -25,7 +25,7 @@ import {
   Tooltip,
   Typography,
   Box,
-  Grid,
+  Grid2,
   Card,
   CardContent
 } from '@mui/material'
@@ -39,32 +39,28 @@ import MenuIcon from '@mui/icons-material/Menu'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
 
-import { MO, PLT, SP } from 'flipflip-common'
+import { MO, Playlist, PLT } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { removePlaylist, setRouteGoBack } from '../../store/app/thunks'
-import {
-  selectAppConfigDisplaySettingsFullScreen,
-  selectAppSpecialMode
-} from '../../store/app/selectors'
-import {
-  selectPlaylistIsEmpty,
-  selectPlaylistName,
-  selectPlaylistType
-} from '../../store/playlist/selectors'
-import { setPlaylistName } from '../../store/playlist/slice'
-import { clonePlaylist } from '../../store/playlist/thunks'
+// import {
+//   selectAppSpecialMode
+// } from '../../store/app/selectors'
+import { setPlaylistName } from '../../store/api/thunks'
 import AudioPlaylist from '../player/AudioPlaylist'
 import ScriptPlaylist from '../configGroups/ScriptPlaylist'
 import ScenePlaylist from './ScenePlaylist'
-import DisplayPlaylist from './DisplayPlaylist'
 import SceneSelect from '../configGroups/SceneSelect'
 import {
-  playAudioPlaylist,
-  playDisplayPlaylist,
-  playScenePlaylist,
-  playScriptPlaylist
-} from '../../store/player/thunks'
-import { setFullScreen } from '../../data/actions'
+  useClonePlaylistMutation,
+  useDeletePlaylistMutation,
+  useGetPlaylistItemIdsQuery,
+  useGetPlaylistQuery,
+  usePlayPlaylistMutation
+} from '../../store/api/slice'
+import { useNavigate, useParams } from 'react-router'
+import { useGetDisplaySettingsFullScreenQuery } from '../../store/api/selectors'
+import { setFullScreen } from '../../data/fullscreen'
+import { setPlaylistEditingName } from '../../store/playlist/slice'
+import { selectPlaylistEditingName } from '../../store/playlist/selectors'
 
 const drawerWidth = 240
 
@@ -183,43 +179,33 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-export interface PlaylistSetupProps {
-  playlistID: number
-}
+function PlaylistSetup() {
+  const { id } = useParams()
+  const playlistID = Number(id)
+  const navigate = useNavigate()
 
-function PlaylistSetup(props: PlaylistSetupProps) {
-  const { playlistID } = props
   const dispatch = useAppDispatch()
   // TODO add playlist tutorials
-  const name = useAppSelector(selectPlaylistName(playlistID))
-  const type = useAppSelector(selectPlaylistType(playlistID))
-  const isEmpty = useAppSelector(selectPlaylistIsEmpty(playlistID))
-  const autoEdit = useAppSelector(selectAppSpecialMode()) === SP.autoEdit
-  const fullScreen = useAppSelector(selectAppConfigDisplaySettingsFullScreen())
+  const [deletePlaylist] = useDeletePlaylistMutation()
+  const [clonePlaylist] = useClonePlaylistMutation()
+  const [playPlaylist] = usePlayPlaylistMutation()
+  const { data: playlist } = useGetPlaylistQuery(playlistID)
+  const { data: items } = useGetPlaylistItemIdsQuery(playlistID)
+  const { data: fullScreen } = useGetDisplaySettingsFullScreenQuery()
+  const editingName = useAppSelector(selectPlaylistEditingName())
 
-  const [isEditingName, setIsEditingName] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string>()
   const [sceneID, setSceneID] = useState<number>(-1)
 
-  useEffect(() => {
-    if (autoEdit) {
-      setIsEditingName(name)
-    }
-  }, [autoEdit, name])
+  const goBack = () => navigate(-1)
 
-  const onPlayPlaylist = () => {
-    if (type === PLT.audio) {
-      dispatch(playAudioPlaylist(playlistID, sceneID))
-    } else if (type === PLT.display) {
-      dispatch(playDisplayPlaylist(playlistID))
-    } else if (type === PLT.scene) {
-      dispatch(playScenePlaylist(playlistID))
-    } else if (type === PLT.script) {
-      dispatch(playScriptPlaylist(playlistID, sceneID))
+  const onPlayPlaylist = async () => {
+    const { data } = await playPlaylist(playlistID)
+    if (data != null) {
+      setFullScreen(fullScreen === true)
+      navigate(`/player/${data.value}`)
     }
-
-    setFullScreen(fullScreen)
   }
 
   const onToggleDrawer = () => {
@@ -227,19 +213,19 @@ function PlaylistSetup(props: PlaylistSetupProps) {
   }
 
   const beginEditingName = () => {
-    setIsEditingName(name)
+    if (playlist != null) {
+      dispatch(setPlaylistEditingName(playlist.name))
+    }
   }
 
   const endEditingName = (e: FormEvent) => {
     e.preventDefault()
-    dispatch(
-      setPlaylistName({ id: playlistID, value: isEditingName as string })
-    )
-    setIsEditingName(undefined)
+    dispatch(setPlaylistName(playlistID, editingName as string))
+    dispatch(setPlaylistEditingName(undefined))
   }
 
   const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsEditingName(e.currentTarget.value)
+    dispatch(setPlaylistEditingName(e.currentTarget.value))
   }
 
   const onCloseDialog = () => {
@@ -250,9 +236,19 @@ function PlaylistSetup(props: PlaylistSetupProps) {
     setOpenMenu(MO.deleteAlert)
   }
 
-  const onFinishDeletePlaylist = () => {
-    dispatch(removePlaylist(props.playlistID))
-    setOpenMenu(undefined)
+  const onFinishDeletePlaylist = async () => {
+    onCloseDialog()
+    const { id, type } = playlist as Playlist
+    await deletePlaylist({ id, type })
+    goBack()
+  }
+
+  const onClonePlaylist = async () => {
+    const { id, type } = playlist as Playlist
+    const { data } = await clonePlaylist({ id, type })
+    if (data != null) {
+      await navigate(`/playlists/${data.value}`)
+    }
   }
 
   const { classes } = useStyles()
@@ -266,32 +262,30 @@ function PlaylistSetup(props: PlaylistSetupProps) {
               edge="start"
               color="inherit"
               aria-label="Back"
-              onClick={() => {
-                dispatch(setRouteGoBack())
-              }}
+              onClick={goBack}
               size="large"
             >
               <ArrowBackIcon />
             </IconButton>
           </Tooltip>
 
-          {isEditingName != null && (
+          {editingName != null && (
             <form onSubmit={endEditingName} className={classes.titleField}>
               <TextField
                 variant="standard"
                 autoFocus
                 fullWidth
                 id="title"
-                value={isEditingName}
+                value={editingName}
                 margin="none"
-                inputProps={{ className: classes.titleInput }}
+                slotProps={{ htmlInput: { className: classes.titleInput } }}
                 onBlur={endEditingName}
                 onChange={onChangeName}
               />
             </form>
           )}
-          {isEditingName == null && (
-            <React.Fragment>
+          {editingName == null && (
+            <>
               <div className={classes.fill} />
               <Typography
                 component="h1"
@@ -300,17 +294,17 @@ function PlaylistSetup(props: PlaylistSetupProps) {
                 noWrap
                 className={cx(
                   classes.title,
-                  name.length === 0 && classes.noTitle
+                  playlist?.name.length === 0 && classes.noTitle
                 )}
                 onClick={beginEditingName}
               >
-                {name}
+                {playlist?.name}
               </Typography>
               <div className={classes.fill} />
-            </React.Fragment>
+            </>
           )}
 
-          {(type === PLT.audio || type === PLT.script) && (
+          {(playlist?.type === PLT.audio || playlist?.type === PLT.script) && (
             <Box className={classes.sceneSelect}>
               <SceneSelect
                 value={sceneID}
@@ -321,7 +315,7 @@ function PlaylistSetup(props: PlaylistSetupProps) {
           )}
           <Fab
             className={classes.playButton}
-            disabled={isEmpty}
+            disabled={(items?.length ?? 0) === 0}
             color="secondary"
             aria-label="Play"
             onClick={onPlayPlaylist}
@@ -359,11 +353,7 @@ function PlaylistSetup(props: PlaylistSetupProps) {
             disableInteractive
             title={drawerOpen ? '' : 'Clone Playlist'}
           >
-            <ListItemButton
-              onClick={() => {
-                dispatch(clonePlaylist(playlistID))
-              }}
-            >
+            <ListItemButton onClick={onClonePlaylist}>
               <ListItemIcon>
                 <FileCopyIcon />
               </ListItemIcon>
@@ -403,11 +393,14 @@ function PlaylistSetup(props: PlaylistSetupProps) {
             aria-labelledby="delete-title"
             aria-describedby="delete-description"
           >
-            <DialogTitle id="Delete-title">Delete '{name}'</DialogTitle>
+            <DialogTitle id="Delete-title">
+              Delete '{playlist?.name}'
+            </DialogTitle>
             <DialogContent>
               <DialogContentText id="delete-description">
-                Are you sure you want to delete {name}? It will be automatically
-                removed from all scenes/displays.
+                Are you sure you want to delete {playlist?.name}? It will be
+                automatically removed from all{' '}
+                {playlist?.type === PLT.scene ? 'displays' : 'scenes'}.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -429,26 +422,23 @@ function PlaylistSetup(props: PlaylistSetupProps) {
             <div className={classes.tabPanel}>
               <div className={classes.drawerSpacer} />
               <Box p={2} className={classes.fill}>
-                <Grid container spacing={2} justifyContent="center">
-                  <Grid item xs={12} sm={10} md={8} lg={6}>
+                <Grid2 container spacing={2} justifyContent="center">
+                  <Grid2 size={{ xs: 12, sm: 10, md: 8, lg: 6 }}>
                     <Card>
                       <CardContent>
-                        {type === PLT.audio && (
+                        {playlist?.type === PLT.audio && (
                           <AudioPlaylist playlistID={playlistID} />
                         )}
-                        {type === PLT.display && (
-                          <DisplayPlaylist playlistID={playlistID} />
-                        )}
-                        {type === PLT.scene && (
+                        {playlist?.type === PLT.scene && (
                           <ScenePlaylist playlistID={playlistID} />
                         )}
-                        {type === PLT.script && (
+                        {playlist?.type === PLT.script && (
                           <ScriptPlaylist playlistID={playlistID} />
                         )}
                       </CardContent>
                     </Card>
-                  </Grid>
-                </Grid>
+                  </Grid2>
+                </Grid2>
               </Box>
             </div>
           </Typography>

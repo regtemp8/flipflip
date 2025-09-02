@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FocusEvent, useState } from 'react'
+import { ChangeEvent, FocusEvent, useState } from 'react'
 
 import {
   Button,
@@ -8,20 +8,19 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Grid,
+  Grid2,
   InputAdornment,
-  TextField,
-  type Theme
+  TextField
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
-import { getSourceType, ST } from 'flipflip-common'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { clipLibrarySource } from '../../store/app/thunks'
-import { selectLibrarySourceURLs } from '../../store/librarySource/selectors'
+// import { ST } from 'flipflip-common'
+// import { useAppDispatch, useAppSelector } from '../../store/hooks'
+// import { clipLibrarySource } from '../../store/app/thunks'
+// import { selectLibrarySourceURLs } from '../../store/librarySource/selectors'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   noScroll: {
     overflow: 'visible'
   },
@@ -38,8 +37,8 @@ export interface BatchClipDialogProps {
 }
 
 function BatchClipDialog(props: BatchClipDialogProps) {
-  const dispatch = useAppDispatch()
-  const sourceURLs = useAppSelector(selectLibrarySourceURLs(props.selected))
+  // const dispatch = useAppDispatch()
+  // const sourceURLs = useAppSelector(selectLibrarySourceURLs(props.selected))
   const [clipOffset, setClipOffset] = useState([0, 0])
   const [creatingClips, setCreatingClips] = useState(false)
 
@@ -68,38 +67,36 @@ function BatchClipDialog(props: BatchClipDialogProps) {
   }
 
   const batchClipFinish = () => {
-    let index = -1
-    const errorCallback = (msg: string) => {
-      console.error(msg)
-      createBatchClips()
-    }
-    const successCallback = (video: HTMLVideoElement, sourceURL: string) => {
-      dispatch(clipLibrarySource(sourceURL, video.duration, clipOffset))
-      createBatchClips()
-    }
+    // const index = -1
+    // const errorCallback = (msg: string) => {
+    //   console.error(msg)
+    //   createBatchClips()
+    // }
+    // const successCallback = (video: HTMLVideoElement, sourceURL: string) => {
+    //   dispatch(clipLibrarySource(sourceURL, video.duration, clipOffset))
+    //   createBatchClips()
+    // }
     const createBatchClips = () => {
-      index++
-      if (index === sourceURLs.length) {
-        onCloseDialog()
-        return
-      }
-
-      const sourceURL = sourceURLs[index]
-      const type = getSourceType(sourceURL)
-      if (type === ST.video) {
-        const video = document.createElement('video')
-        video.onloadeddata = () => {
-          successCallback(video, sourceURL)
-        }
-        video.onerror = video.onabort = () => {
-          errorCallback('Unable to load video: ' + sourceURL)
-        }
-
-        video.src = sourceURL
-        video.preload = 'auto'
-      } else {
-        createBatchClips()
-      }
+      // index++
+      // if (index === sourceURLs.length) {
+      //   onCloseDialog()
+      //   return
+      // }
+      // const sourceURL = sourceURLs[index]
+      // const type = getSourceType(sourceURL)
+      // if (type === ST.video) {
+      //   const video = document.createElement('video')
+      //   video.onloadeddata = () => {
+      //     successCallback(video, sourceURL)
+      //   }
+      //   video.onerror = video.onabort = () => {
+      //     errorCallback('Unable to load video: ' + sourceURL)
+      //   }
+      //   video.src = sourceURL
+      //   video.preload = 'auto'
+      // } else {
+      //   createBatchClips()
+      // }
     }
 
     setCreatingClips(true)
@@ -127,8 +124,8 @@ function BatchClipDialog(props: BatchClipDialogProps) {
           Choose offsets for new clips
         </DialogContentText>
         {props.open && (
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={4}>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField
                 variant="outlined"
                 label="Skip First"
@@ -140,19 +137,21 @@ function BatchClipDialog(props: BatchClipDialogProps) {
                 onBlur={(e: FocusEvent<HTMLInputElement>) =>
                   blurClipOffset(0, e)
                 }
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">ms</InputAdornment>
-                  )
-                }}
-                inputProps={{
-                  step: 100,
-                  min: 0,
-                  type: 'number'
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">ms</InputAdornment>
+                    )
+                  },
+                  htmlInput: {
+                    step: 100,
+                    min: 0,
+                    type: 'number'
+                  }
                 }}
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField
                 variant="outlined"
                 label="Skip Last"
@@ -164,19 +163,21 @@ function BatchClipDialog(props: BatchClipDialogProps) {
                 onBlur={(e: FocusEvent<HTMLInputElement>) =>
                   blurClipOffset(1, e)
                 }
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">ms</InputAdornment>
-                  )
-                }}
-                inputProps={{
-                  step: 100,
-                  min: 0,
-                  type: 'number'
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">ms</InputAdornment>
+                    )
+                  },
+                  htmlInput: {
+                    step: 100,
+                    min: 0,
+                    type: 'number'
+                  }
                 }}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         )}
       </DialogContent>
       <DialogActions>

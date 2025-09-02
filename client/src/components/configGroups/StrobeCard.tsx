@@ -1,7 +1,6 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
-import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, MenuItem, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
@@ -11,11 +10,6 @@ import ColorSetPicker from '../config/ColorSetPicker'
 import BaseSelect from '../common/BaseSelect'
 import TimingCard from '../common/TimingCard'
 import EasingCard from '../common/EasingCard'
-import { useAppSelector } from '../../store/hooks'
-import {
-  selectAppConfigDisplaySettingsEasingControls,
-  selectAppLastRouteIsPlayer
-} from '../../store/app/selectors'
 import {
   setSceneStrobe,
   setSceneStrobePulse,
@@ -41,36 +35,38 @@ import {
   setSceneStrobeOpacity,
   setSceneStrobeColor,
   setSceneStrobeColorSet
-} from '../../store/scene/actions'
+} from '../../store/api/thunks'
 import {
-  selectSceneHasBPM,
-  selectSceneStrobe,
-  selectSceneStrobePulse,
-  selectSceneStrobeTF,
-  selectSceneStrobeDuration,
-  selectSceneStrobeDurationMin,
-  selectSceneStrobeDurationMax,
-  selectSceneStrobeSinRate,
-  selectSceneStrobeBPMMulti,
-  selectSceneStrobeDelayTF,
-  selectSceneStrobeDelayDuration,
-  selectSceneStrobeDelayDurationMin,
-  selectSceneStrobeDelayDurationMax,
-  selectSceneStrobeDelaySinRate,
-  selectSceneStrobeDelayBPMMulti,
-  selectSceneStrobeEase,
-  selectSceneStrobeExp,
-  selectSceneStrobeOv,
-  selectSceneStrobeAmp,
-  selectSceneStrobePer,
-  selectSceneStrobeColorType,
-  selectSceneStrobeLayer,
-  selectSceneStrobeOpacity,
-  selectSceneStrobeColor,
-  selectSceneStrobeColorSet
-} from '../../store/scene/selectors'
+  useGetSceneStrobeQuery,
+  useGetSceneStrobePulseQuery,
+  useGetSceneStrobeTFQuery,
+  useGetSceneStrobeDurationQuery,
+  useGetSceneStrobeDurationMinQuery,
+  useGetSceneStrobeDurationMaxQuery,
+  useGetSceneStrobeSinRateQuery,
+  useGetSceneStrobeBPMMultiQuery,
+  useGetSceneStrobeDelayTFQuery,
+  useGetSceneStrobeDelayDurationQuery,
+  useGetSceneStrobeDelayDurationMinQuery,
+  useGetSceneStrobeDelayDurationMaxQuery,
+  useGetSceneStrobeDelaySinRateQuery,
+  useGetSceneStrobeDelayBPMMultiQuery,
+  useGetSceneStrobeEaseQuery,
+  useGetSceneStrobeExpQuery,
+  useGetSceneStrobeOvQuery,
+  useGetSceneStrobeAmpQuery,
+  useGetSceneStrobePerQuery,
+  useGetSceneStrobeColorTypeQuery,
+  useGetSceneStrobeLayerQuery,
+  useGetSceneStrobeOpacityQuery,
+  useGetSceneStrobeColorQuery,
+  useGetSceneStrobeColorSetQuery,
+  useGetDisplaySettingsEasingControlsQuery
+} from '../../store/api/selectors'
+import { useGetSceneHasBPMQuery } from '../../store/api/slice'
 import BaseSwitch from '../common/BaseSwitch'
 import BaseSlider from '../common/slider/BaseSlider'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -80,9 +76,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
     [theme.breakpoints.up('sm')]: {
       paddingLeft: theme.spacing(1)
     }
-  },
-  noPadding: {
-    padding: '0 !important'
   },
   endInput: {
     paddingLeft: theme.spacing(1),
@@ -94,34 +87,33 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface StrobeCardProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function StrobeCard(props: StrobeCardProps) {
   const { classes } = useStyles()
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const strobe = useAppSelector(selectSceneStrobe(props.sceneID))
-  const strobePulse = useAppSelector(selectSceneStrobePulse(props.sceneID))
-  const strobeColorType = useAppSelector(
-    selectSceneStrobeColorType(props.sceneID)
+  const sidebar = useIsPlayerRoute()
+  const { data: easingControls } = useGetDisplaySettingsEasingControlsQuery()
+
+  const { data: strobe } = useGetSceneStrobeQuery(props.sceneID)
+  const { data: strobePulse } = useGetSceneStrobePulseQuery(props.sceneID)
+  const { data: strobeColorType } = useGetSceneStrobeColorTypeQuery(
+    props.sceneID
   )
-  const strobeLayer = useAppSelector(selectSceneStrobeLayer(props.sceneID))
-  const easingControls = useAppSelector(
-    selectAppConfigDisplaySettingsEasingControls()
-  )
+  const { data: strobeLayer } = useGetSceneStrobeLayerQuery(props.sceneID)
 
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12}>
-        <Grid container alignItems="center">
-          <Grid item xs={12} sm={sidebar ? 12 : 5}>
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2 size={12}>
+        <Grid2 container alignItems="center">
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 5 }}>
             <BaseSwitch
               label="Strobe"
-              selector={selectSceneStrobe(props.sceneID)}
+              selector={() => useGetSceneStrobeQuery(props.sceneID)}
               action={setSceneStrobe(props.sceneID)}
             />
-          </Grid>
-          <Grid item xs={12} sm={sidebar ? 12 : 7}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 7 }}>
             <Collapse
               in={strobe}
               className={cx(classes.fullWidth, classes.paddingLeft)}
@@ -129,254 +121,245 @@ function StrobeCard(props: StrobeCardProps) {
               <BaseSwitch
                 label="Add Delay"
                 size="small"
-                selector={selectSceneStrobePulse(props.sceneID)}
+                selector={() => useGetSceneStrobePulseQuery(props.sceneID)}
                 action={setSceneStrobePulse(props.sceneID)}
               />
             </Collapse>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx(
-          (!strobe || strobeLayer === SL.image) && classes.noPadding
-        )}
-      >
-        <Collapse
-          in={strobe && strobeLayer !== SL.image}
-          className={classes.fullWidth}
-        >
-          <Grid container spacing={2} alignItems="center">
-            <Grid
-              item
-              xs={12}
-              sm={!sidebar && strobeLayer === SL.bottom ? 4 : 12}
-            >
-              <BaseSelect
-                label="Color Type"
-                controlClassName={classes.fullWidth}
-                selector={selectSceneStrobeColorType(props.sceneID)}
-                action={setSceneStrobeColorType(props.sceneID)}
+          </Grid2>
+        </Grid2>
+      </Grid2>
+      {strobe && strobeLayer !== SL.image && (
+        <Grid2 size={12}>
+          <Collapse
+            in={strobe && strobeLayer !== SL.image}
+            className={classes.fullWidth}
+          >
+            <Grid2 container spacing={2} alignItems="center">
+              <Grid2
+                size={{
+                  xs: 12,
+                  sm: !sidebar && strobeLayer === SL.bottom ? 4 : 12
+                }}
               >
-                {Object.values(SC).map((sc) => (
-                  <MenuItem key={sc} value={sc}>
-                    {en.get(sc)}
-                  </MenuItem>
-                ))}
-              </BaseSelect>
-            </Grid>
-          </Grid>
-        </Collapse>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx(
-          (!strobe || strobeLayer === SL.image) && classes.noPadding
-        )}
-      >
-        <Collapse
-          in={
-            strobe &&
-            strobeLayer !== SL.image &&
-            strobeColorType !== SC.colorRand
-          }
-          className={classes.fullWidth}
-        >
-          {strobe &&
-            strobeLayer !== SL.image &&
-            strobeColorType === SC.color && (
-              <ColorPicker
-                selector={selectSceneStrobeColor(props.sceneID)}
-                action={setSceneStrobeColor(props.sceneID)}
-              />
-            )}
-          {strobe &&
-            strobeLayer !== SL.image &&
-            strobeColorType === SC.colorSet && (
-              <ColorSetPicker
-                selector={selectSceneStrobeColorSet(props.sceneID)}
-                action={setSceneStrobeColorSet(props.sceneID)}
-              />
-            )}
-        </Collapse>
-      </Grid>
-      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
-        <Collapse in={strobe} className={classes.fullWidth}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid
-              item
-              xs={12}
-              sm={!sidebar && strobeLayer === SL.bottom ? 4 : 12}
-            >
-              <BaseSelect
-                label="Strobe Layer"
-                controlClassName={classes.fullWidth}
-                selector={selectSceneStrobeLayer(props.sceneID)}
-                action={setSceneStrobeLayer(props.sceneID)}
-              >
-                {Object.values(SL).map((sl) => (
-                  <MenuItem key={sl} value={sl}>
-                    {en.get(sl)}
-                  </MenuItem>
-                ))}
-              </BaseSelect>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={sidebar ? 12 : true}
-              className={cx(strobeLayer !== SL.bottom && classes.noPadding)}
-            >
-              <Collapse
-                in={strobeLayer === SL.bottom}
-                className={classes.fullWidth}
-              >
-                <BaseSlider
-                  min={0}
-                  max={100}
-                  scale={100}
-                  selector={selectSceneStrobeOpacity(props.sceneID)}
-                  action={setSceneStrobeOpacity(props.sceneID)}
-                  labelledBy="strobe-opacity-slider"
-                  label={{ text: 'Strobe Opacity' }}
-                  format={{ type: 'percent' }}
-                  textField={{ className: classes.endInput, step: 5 }}
-                />
-              </Collapse>
-            </Grid>
-          </Grid>
-        </Collapse>
-      </Grid>
-      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
-        <Collapse in={strobe} className={classes.fullWidth}>
-          <Divider />
-        </Collapse>
-      </Grid>
-      <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
-        <Collapse in={strobe} className={classes.fullWidth}>
-          <TimingCard
-            sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
-            timing={{
-              selector: selectSceneStrobeTF(props.sceneID),
-              action: setSceneStrobeTF(props.sceneID)
-            }}
-            duration={{
-              selector: selectSceneStrobeDuration(props.sceneID),
-              action: setSceneStrobeDuration(props.sceneID)
-            }}
-            durationMin={{
-              selector: selectSceneStrobeDurationMin(props.sceneID),
-              action: setSceneStrobeDurationMin(props.sceneID)
-            }}
-            durationMax={{
-              selector: selectSceneStrobeDurationMax(props.sceneID),
-              action: setSceneStrobeDurationMax(props.sceneID)
-            }}
-            wave={{
-              selector: selectSceneStrobeSinRate(props.sceneID),
-              action: setSceneStrobeSinRate(props.sceneID),
-              labelledBy: 'strobe-sin-rate-slider'
-            }}
-            bpm={{
-              selector: selectSceneStrobeBPMMulti(props.sceneID),
-              action: setSceneStrobeBPMMulti(props.sceneID),
-              labelledBy: 'strobe-bpm-multi-slider'
-            }}
-          />
-        </Collapse>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx((!strobe || !strobePulse) && classes.noPadding)}
-      >
-        <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
-          <Divider />
-        </Collapse>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx((!strobe || !strobePulse) && classes.noPadding)}
-      >
-        <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
-          <TimingCard
-            label="Delay Timing"
-            sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
-            timing={{
-              selector: selectSceneStrobeDelayTF(props.sceneID),
-              action: setSceneStrobeDelayTF(props.sceneID)
-            }}
-            duration={{
-              selector: selectSceneStrobeDelayDuration(props.sceneID),
-              action: setSceneStrobeDelayDuration(props.sceneID)
-            }}
-            durationMin={{
-              selector: selectSceneStrobeDelayDurationMin(props.sceneID),
-              action: setSceneStrobeDelayDurationMin(props.sceneID)
-            }}
-            durationMax={{
-              selector: selectSceneStrobeDelayDurationMax(props.sceneID),
-              action: setSceneStrobeDelayDurationMax(props.sceneID)
-            }}
-            wave={{
-              selector: selectSceneStrobeDelaySinRate(props.sceneID),
-              action: setSceneStrobeDelaySinRate(props.sceneID),
-              labelledBy: 'strobe-delay-sin-rate-slider'
-            }}
-            bpm={{
-              selector: selectSceneStrobeDelayBPMMulti(props.sceneID),
-              action: setSceneStrobeDelayBPMMulti(props.sceneID),
-              labelledBy: 'strobe-delay-bpm-multi-slider'
-            }}
-          />
-        </Collapse>
-      </Grid>
-      {easingControls && (
-        <React.Fragment>
-          <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
-            <Collapse in={strobe} className={classes.fullWidth}>
-              <Divider />
-            </Collapse>
-          </Grid>
-          <Grid item xs={12} className={cx(!strobe && classes.noPadding)}>
-            <Collapse in={strobe} className={classes.fullWidth}>
-              <EasingCard
-                sidebar={sidebar}
-                easing={{
-                  selector: selectSceneStrobeEase(props.sceneID),
-                  action: setSceneStrobeEase(props.sceneID)
-                }}
-                exponent={{
-                  selector: selectSceneStrobeExp(props.sceneID),
-                  action: setSceneStrobeExp(props.sceneID),
-                  labelledBy: 'strobe-exp-slider'
-                }}
-                overshoot={{
-                  selector: selectSceneStrobeOv(props.sceneID),
-                  action: setSceneStrobeOv(props.sceneID),
-                  labelledBy: 'strobe-ov-slider'
-                }}
-                amplitude={{
-                  selector: selectSceneStrobeAmp(props.sceneID),
-                  action: setSceneStrobeAmp(props.sceneID),
-                  labelledBy: 'strobe-amp-slider'
-                }}
-                period={{
-                  selector: selectSceneStrobePer(props.sceneID),
-                  action: setSceneStrobePer(props.sceneID),
-                  labelledBy: 'strobe-per-slider'
-                }}
-              />
-            </Collapse>
-          </Grid>
-        </React.Fragment>
+                <BaseSelect
+                  label="Color Type"
+                  controlClassName={classes.fullWidth}
+                  selector={() =>
+                    useGetSceneStrobeColorTypeQuery(props.sceneID)
+                  }
+                  action={setSceneStrobeColorType(props.sceneID)}
+                >
+                  {Object.values(SC).map((sc) => (
+                    <MenuItem key={sc} value={sc}>
+                      {en.get(sc)}
+                    </MenuItem>
+                  ))}
+                </BaseSelect>
+              </Grid2>
+            </Grid2>
+          </Collapse>
+        </Grid2>
       )}
-    </Grid>
+      {strobe &&
+        strobeLayer !== SL.image &&
+        strobeColorType !== SC.colorRand && (
+          <Grid2 size={12}>
+            <Collapse
+              in={
+                strobe &&
+                strobeLayer !== SL.image &&
+                strobeColorType !== SC.colorRand
+              }
+              className={classes.fullWidth}
+            >
+              {strobe &&
+                strobeLayer !== SL.image &&
+                strobeColorType === SC.color && (
+                  <ColorPicker
+                    type="strobe"
+                    selector={() => useGetSceneStrobeColorQuery(props.sceneID)}
+                    action={setSceneStrobeColor(props.sceneID)}
+                  />
+                )}
+              {strobe &&
+                strobeLayer !== SL.image &&
+                strobeColorType === SC.colorSet && (
+                  <ColorSetPicker
+                    selector={() =>
+                      useGetSceneStrobeColorSetQuery(props.sceneID)
+                    }
+                    action={setSceneStrobeColorSet(props.sceneID)}
+                  />
+                )}
+            </Collapse>
+          </Grid2>
+        )}
+      {strobe && (
+        <Grid2 size={12}>
+          <Collapse in={strobe} className={classes.fullWidth}>
+            <Grid2 container spacing={2} alignItems="center">
+              <Grid2
+                size={{
+                  xs: 12,
+                  sm: !sidebar && strobeLayer === SL.bottom ? 4 : 12
+                }}
+              >
+                <BaseSelect
+                  label="Strobe Layer"
+                  controlClassName={classes.fullWidth}
+                  selector={() => useGetSceneStrobeLayerQuery(props.sceneID)}
+                  action={setSceneStrobeLayer(props.sceneID)}
+                >
+                  {Object.values(SL).map((sl) => (
+                    <MenuItem key={sl} value={sl}>
+                      {en.get(sl)}
+                    </MenuItem>
+                  ))}
+                </BaseSelect>
+              </Grid2>
+              {strobeLayer === SL.bottom && (
+                <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 'grow' }}>
+                  <Collapse
+                    in={strobeLayer === SL.bottom}
+                    className={classes.fullWidth}
+                  >
+                    <BaseSlider
+                      min={0}
+                      max={100}
+                      scale={100}
+                      selector={() =>
+                        useGetSceneStrobeOpacityQuery(props.sceneID)
+                      }
+                      action={setSceneStrobeOpacity(props.sceneID)}
+                      labelledBy="strobe-opacity-slider"
+                      label={{ text: 'Strobe Opacity' }}
+                      format={{ type: 'percent' }}
+                      textField={{ className: classes.endInput, step: 5 }}
+                    />
+                  </Collapse>
+                </Grid2>
+              )}
+            </Grid2>
+          </Collapse>
+        </Grid2>
+      )}
+      {strobe && (
+        <Grid2 size={12}>
+          <Collapse in={strobe} className={classes.fullWidth}>
+            <Divider sx={{ mb: 2 }} />
+            <TimingCard
+              sidebar={sidebar}
+              hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
+              timing={{
+                selector: () => useGetSceneStrobeTFQuery(props.sceneID),
+                action: setSceneStrobeTF(props.sceneID)
+              }}
+              duration={{
+                selector: () => useGetSceneStrobeDurationQuery(props.sceneID),
+                action: setSceneStrobeDuration(props.sceneID)
+              }}
+              durationMin={{
+                selector: () =>
+                  useGetSceneStrobeDurationMinQuery(props.sceneID),
+                action: setSceneStrobeDurationMin(props.sceneID)
+              }}
+              durationMax={{
+                selector: () =>
+                  useGetSceneStrobeDurationMaxQuery(props.sceneID),
+                action: setSceneStrobeDurationMax(props.sceneID)
+              }}
+              wave={{
+                selector: () => useGetSceneStrobeSinRateQuery(props.sceneID),
+                action: setSceneStrobeSinRate(props.sceneID),
+                labelledBy: 'strobe-sin-rate-slider'
+              }}
+              bpm={{
+                selector: () => useGetSceneStrobeBPMMultiQuery(props.sceneID),
+                action: setSceneStrobeBPMMulti(props.sceneID),
+                labelledBy: 'strobe-bpm-multi-slider'
+              }}
+            />
+          </Collapse>
+        </Grid2>
+      )}
+      {strobe && strobePulse && (
+        <Grid2 size={12}>
+          <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
+            <Divider sx={{ mb: 2 }} />
+            <TimingCard
+              label="Delay Timing"
+              sidebar={sidebar}
+              hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
+              timing={{
+                selector: () => useGetSceneStrobeDelayTFQuery(props.sceneID),
+                action: setSceneStrobeDelayTF(props.sceneID)
+              }}
+              duration={{
+                selector: () =>
+                  useGetSceneStrobeDelayDurationQuery(props.sceneID),
+                action: setSceneStrobeDelayDuration(props.sceneID)
+              }}
+              durationMin={{
+                selector: () =>
+                  useGetSceneStrobeDelayDurationMinQuery(props.sceneID),
+                action: setSceneStrobeDelayDurationMin(props.sceneID)
+              }}
+              durationMax={{
+                selector: () =>
+                  useGetSceneStrobeDelayDurationMaxQuery(props.sceneID),
+                action: setSceneStrobeDelayDurationMax(props.sceneID)
+              }}
+              wave={{
+                selector: () =>
+                  useGetSceneStrobeDelaySinRateQuery(props.sceneID),
+                action: setSceneStrobeDelaySinRate(props.sceneID),
+                labelledBy: 'strobe-delay-sin-rate-slider'
+              }}
+              bpm={{
+                selector: () =>
+                  useGetSceneStrobeDelayBPMMultiQuery(props.sceneID),
+                action: setSceneStrobeDelayBPMMulti(props.sceneID),
+                labelledBy: 'strobe-delay-bpm-multi-slider'
+              }}
+            />
+          </Collapse>
+        </Grid2>
+      )}
+      {easingControls && strobe && (
+        <Grid2 size={12}>
+          <Collapse in={strobe} className={classes.fullWidth}>
+            <Divider sx={{ mb: 2 }} />
+            <EasingCard
+              sidebar={sidebar}
+              easing={{
+                selector: () => useGetSceneStrobeEaseQuery(props.sceneID),
+                action: setSceneStrobeEase(props.sceneID)
+              }}
+              exponent={{
+                selector: () => useGetSceneStrobeExpQuery(props.sceneID),
+                action: setSceneStrobeExp(props.sceneID),
+                labelledBy: 'strobe-exp-slider'
+              }}
+              overshoot={{
+                selector: () => useGetSceneStrobeOvQuery(props.sceneID),
+                action: setSceneStrobeOv(props.sceneID),
+                labelledBy: 'strobe-ov-slider'
+              }}
+              amplitude={{
+                selector: () => useGetSceneStrobeAmpQuery(props.sceneID),
+                action: setSceneStrobeAmp(props.sceneID),
+                labelledBy: 'strobe-amp-slider'
+              }}
+              period={{
+                selector: () => useGetSceneStrobePerQuery(props.sceneID),
+                action: setSceneStrobePer(props.sceneID),
+                labelledBy: 'strobe-per-slider'
+              }}
+            />
+          </Collapse>
+        </Grid2>
+      )}
+    </Grid2>
   )
 }
 

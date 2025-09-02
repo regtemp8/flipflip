@@ -91,6 +91,7 @@ export const en = new Map<string, string>([
   ['sf.duration', 'By Duration'],
   ['sf.resolution', 'By Resolution'],
   ['sf.random', 'Randomize Order'],
+  ['sf.name', 'By Name'],
 
   ['asf.url', 'By URL'],
   ['asf.name', 'By Name'],

@@ -1,11 +1,8 @@
-import React from 'react'
-
 import {
   Collapse,
   Divider,
   Fab,
-  Grid,
-  type Theme,
+  Grid2,
   Tooltip,
   IconButton
 } from '@mui/material'
@@ -14,26 +11,17 @@ import { makeStyles } from 'tss-react/mui'
 
 import AddIcon from '@mui/icons-material/Add'
 
-import { PLT } from 'flipflip-common'
 import BaseSwitch from '../common/BaseSwitch'
-import {
-  selectSceneAudioEnabled,
-  selectSceneAudioPlaylists
-} from '../../store/scene/selectors'
-import {
-  setSceneAddAudioPlaylist,
-  setSceneRemoveAudioPlaylist
-} from '../../store/scene/slice'
-import {
-  setSceneAudioEnabled,
-  setSceneAudioPlaylist
-} from '../../store/scene/actions'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import PlaylistSelect from '../common/PlaylistSelect'
-import { createSceneAudioPlaylist } from '../../store/scene/thunks'
 import DeleteIcon from '@mui/icons-material/Delete'
+import {
+  useAddSceneAudioPlaylistMutation,
+  useDeleteSceneAudioPlaylistMutation,
+  useGetSceneAudioPlaylistsQuery
+} from '../../store/api/slice'
+import { useGetSceneAudioEnabledQuery } from '../../store/api/selectors'
+import { setSceneAudioEnabled } from '../../store/api/thunks'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   addButton: {
     boxShadow: 'none'
   }
@@ -52,46 +40,37 @@ export interface AudioCardProps {
 }
 
 function AudioCard(props: AudioCardProps) {
-  const dispatch = useAppDispatch()
-  const audioEnabled = useAppSelector(selectSceneAudioEnabled(props.sceneID))
-  const audioPlaylists = useAppSelector(
-    selectSceneAudioPlaylists(props.sceneID)
-  )
+  const [addSceneAudioPlaylist] = useAddSceneAudioPlaylistMutation()
+  const [deleteSceneAudioPlaylist] = useDeleteSceneAudioPlaylistMutation()
+  const { data: audioEnabled } = useGetSceneAudioEnabledQuery(props.sceneID)
+  const { data: audioPlaylists } = useGetSceneAudioPlaylistsQuery(props.sceneID)
 
   const onAddPlaylist = () => {
-    dispatch(
-      setSceneAddAudioPlaylist({
-        id: props.sceneID,
-        value: 0
-      })
-    )
+    addSceneAudioPlaylist({ id: props.sceneID })
   }
 
-  const onDeletePlaylist = (index: number) => {
-    dispatch(
-      setSceneRemoveAudioPlaylist({
-        id: props.sceneID,
-        value: index
-      })
-    )
+  const onDeletePlaylist = (_index: number) => {
+    const { sceneID } = props
+    const playlistID = -1
+    deleteSceneAudioPlaylist({ sceneID, playlistID })
   }
 
   const { classes } = useStyles()
   return (
     <>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs>
+      <Grid2 container spacing={2} alignItems="center">
+        <Grid2 size="grow">
           <Collapse in={!props.persist}>
             <BaseSwitch
               label="Audio Tracks"
-              selector={selectSceneAudioEnabled(props.sceneID)}
+              selector={() => useGetSceneAudioEnabledQuery(props.sceneID)}
               action={setSceneAudioEnabled(props.sceneID)}
             />
           </Collapse>
-        </Grid>
-        <Grid item>
+        </Grid2>
+        <Grid2>
           <Collapse in={audioEnabled && !props.startPlaying}>
-            <Tooltip disableInteractive title={'Add Playlist'}>
+            <Tooltip disableInteractive title="Add Playlist">
               <Fab
                 className={classes.addButton}
                 onClick={onAddPlaylist}
@@ -101,34 +80,33 @@ function AudioCard(props: AudioCardProps) {
               </Fab>
             </Tooltip>
           </Collapse>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
       <Collapse in={audioEnabled || props.persist}>
-        <Grid container spacing={1} sx={{ mt: 2 }}>
-          {audioPlaylists.map((playlist, i) => (
+        <Grid2 container spacing={1} sx={{ mt: 2 }}>
+          {audioPlaylists?.map((_playlist, i) => (
             <>
-              <Grid item xs>
-                <PlaylistSelect
+              <Grid2 size="grow">
+                {/* <PlaylistSelect
                   type={PLT.audio}
-                  selector={() => playlist.toString()}
+                  selector={() => ({data: playlist})}
                   action={setSceneAudioPlaylist(props.sceneID, i)}
-                  create={createSceneAudioPlaylist(props.sceneID, i)}
                   hideLabel
-                />
-              </Grid>
-              <Grid item>
+                /> */}
+              </Grid2>
+              <Grid2>
                 <IconButton onClick={() => onDeletePlaylist(i)}>
                   <DeleteIcon color="error" />
                 </IconButton>
-              </Grid>
+              </Grid2>
               {i !== audioPlaylists.length - 1 && (
-                <Grid item xs={12}>
+                <Grid2 size={12}>
                   <Divider />
-                </Grid>
+                </Grid2>
               )}
             </>
           ))}
-        </Grid>
+        </Grid2>
       </Collapse>
     </>
   )

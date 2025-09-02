@@ -1,16 +1,10 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
-import { Collapse, Divider, Grid, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import { SDT } from 'flipflip-common'
-import {
-  selectAppTutorial,
-  selectAppConfigDisplaySettingsEasingControls,
-  selectAppLastRouteIsPlayer
-} from '../../store/app/selectors'
 import {
   setSceneFadeTF,
   setSceneFadeDuration,
@@ -25,27 +19,31 @@ import {
   setSceneFadeEase,
   setSceneCrossFade,
   setSceneCrossFadeAudio
-} from '../../store/scene/actions'
+} from '../../store/api/thunks'
 import {
-  selectSceneHasBPM,
-  selectSceneFadeAmp,
-  selectSceneFadeExp,
-  selectSceneFadeOv,
-  selectSceneFadePer,
-  selectSceneFadeBPMMulti,
-  selectSceneFadeDuration,
-  selectSceneFadeDurationMax,
-  selectSceneFadeDurationMin,
-  selectSceneFadeSinRate,
-  selectSceneFadeTF,
-  selectSceneFadeEase,
-  selectSceneCrossFade,
-  selectSceneCrossFadeAudio
-} from '../../store/scene/selectors'
+  useGetSceneFadeAmpQuery,
+  useGetSceneFadeExpQuery,
+  useGetSceneFadeOvQuery,
+  useGetSceneFadePerQuery,
+  useGetSceneFadeBPMMultiQuery,
+  useGetSceneFadeDurationQuery,
+  useGetSceneFadeDurationMaxQuery,
+  useGetSceneFadeDurationMinQuery,
+  useGetSceneFadeSinRateQuery,
+  useGetSceneFadeTFQuery,
+  useGetSceneFadeEaseQuery,
+  useGetSceneCrossFadeQuery,
+  useGetSceneCrossFadeAudioQuery,
+  useGetDisplaySettingsEasingControlsQuery
+} from '../../store/api/selectors'
+import {
+  useGetSceneHasBPMQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import BaseSwitch from '../common/BaseSwitch'
 import TimingCard from '../common/TimingCard'
 import EasingCard from '../common/EasingCard'
-import { useAppSelector } from '../../store/hooks'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -77,36 +75,35 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface CrossFadeCardProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function CrossFadeCard(props: CrossFadeCardProps) {
   const { classes } = useStyles()
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const tutorial = useAppSelector(selectAppTutorial())
-  const easingControls = useAppSelector(
-    selectAppConfigDisplaySettingsEasingControls()
-  )
-  const crossFade = useAppSelector(selectSceneCrossFade(props.sceneID))
+  const sidebar = useIsPlayerRoute()
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: easingControls } = useGetDisplaySettingsEasingControlsQuery()
+  const { data: crossFade } = useGetSceneCrossFadeQuery(props.sceneID)
 
   return (
-    <Grid container spacing={crossFade ? 2 : 0} alignItems="center">
-      <Grid
-        item
-        xs={12}
+    <Grid2 container spacing={crossFade ? 2 : 0} alignItems="center">
+      <Grid2
+        size={12}
         className={cx(
-          tutorial != null && tutorial !== SDT.fade1 && classes.disable
+          tutorial?.current != null &&
+            tutorial?.current !== SDT.fade1 &&
+            classes.disable
         )}
       >
-        <Grid container alignItems="center">
-          <Grid item xs={12} sm={sidebar ? 12 : 5}>
+        <Grid2 container alignItems="center">
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 5 }}>
             <BaseSwitch
               label="Cross-Fade"
-              selector={selectSceneCrossFade(props.sceneID)}
+              selector={() => useGetSceneCrossFadeQuery(props.sceneID)}
               action={setSceneCrossFade(props.sceneID)}
             />
-          </Grid>
-          <Grid item xs={12} sm={sidebar ? 12 : 7}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 7 }}>
             <Collapse
               in={crossFade}
               className={cx(classes.fullWidth, classes.paddingLeft)}
@@ -114,100 +111,99 @@ function CrossFadeCard(props: CrossFadeCardProps) {
               <BaseSwitch
                 label="Cross-Fade Audio"
                 size="small"
-                selector={selectSceneCrossFadeAudio(props.sceneID)}
+                selector={() => useGetSceneCrossFadeAudioQuery(props.sceneID)}
                 action={setSceneCrossFadeAudio(props.sceneID)}
               />
             </Collapse>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse in={crossFade} className={classes.fullWidth}>
           <Divider />
         </Collapse>
-      </Grid>
-      <Grid
-        item
-        xs={12}
+      </Grid2>
+      <Grid2
+        size={12}
         className={cx(
-          tutorial != null && classes.disable,
-          tutorial === SDT.fade2 && classes.highlight
+          tutorial?.current != null && classes.disable,
+          tutorial?.current === SDT.fade2 && classes.highlight
         )}
       >
         <Collapse in={crossFade} className={classes.fullWidth}>
           <TimingCard
             sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
-              selector: selectSceneFadeTF(props.sceneID),
+              selector: () => useGetSceneFadeTFQuery(props.sceneID),
               action: setSceneFadeTF(props.sceneID)
             }}
             duration={{
-              selector: selectSceneFadeDuration(props.sceneID),
+              selector: () => useGetSceneFadeDurationQuery(props.sceneID),
               action: setSceneFadeDuration(props.sceneID)
             }}
             durationMin={{
-              selector: selectSceneFadeDurationMin(props.sceneID),
+              selector: () => useGetSceneFadeDurationMinQuery(props.sceneID),
               action: setSceneFadeDurationMin(props.sceneID)
             }}
             durationMax={{
-              selector: selectSceneFadeDurationMax(props.sceneID),
+              selector: () => useGetSceneFadeDurationMaxQuery(props.sceneID),
               action: setSceneFadeDurationMax(props.sceneID)
             }}
             wave={{
-              selector: selectSceneFadeSinRate(props.sceneID),
+              selector: () => useGetSceneFadeSinRateQuery(props.sceneID),
               action: setSceneFadeSinRate(props.sceneID),
               labelledBy: 'fade-sin-rate-slider'
             }}
             bpm={{
-              selector: selectSceneFadeBPMMulti(props.sceneID),
+              selector: () => useGetSceneFadeBPMMultiQuery(props.sceneID),
               action: setSceneFadeBPMMulti(props.sceneID),
               labelledBy: 'fade-bpm-multi-slider'
             }}
           />
         </Collapse>
-      </Grid>
+      </Grid2>
       {easingControls && (
-        <React.Fragment>
-          <Grid item xs={12}>
+        <>
+          <Grid2 size={12}>
             <Collapse in={crossFade} className={classes.fullWidth}>
               <Divider />
             </Collapse>
-          </Grid>
-          <Grid item xs={12}>
+          </Grid2>
+          <Grid2 size={12}>
             <Collapse in={crossFade} className={classes.fullWidth}>
               <EasingCard
                 sidebar={sidebar}
                 easing={{
-                  selector: selectSceneFadeEase(props.sceneID),
+                  selector: () => useGetSceneFadeEaseQuery(props.sceneID),
                   action: setSceneFadeEase(props.sceneID)
                 }}
                 exponent={{
-                  selector: selectSceneFadeExp(props.sceneID),
+                  selector: () => useGetSceneFadeExpQuery(props.sceneID),
                   action: setSceneFadeExp(props.sceneID),
                   labelledBy: 'fade-exp-slider'
                 }}
                 overshoot={{
-                  selector: selectSceneFadeOv(props.sceneID),
+                  selector: () => useGetSceneFadeOvQuery(props.sceneID),
                   action: setSceneFadeOv(props.sceneID),
                   labelledBy: 'fade-ov-slider'
                 }}
                 amplitude={{
-                  selector: selectSceneFadeAmp(props.sceneID),
+                  selector: () => useGetSceneFadeAmpQuery(props.sceneID),
                   action: setSceneFadeAmp(props.sceneID),
                   labelledBy: 'fade-amp-slider'
                 }}
                 period={{
-                  selector: selectSceneFadePer(props.sceneID),
+                  selector: () => useGetSceneFadePerQuery(props.sceneID),
                   action: setSceneFadePer(props.sceneID),
                   labelledBy: 'fade-per-slider'
                 }}
               />
             </Collapse>
-          </Grid>
-        </React.Fragment>
+          </Grid2>
+        </>
       )}
-    </Grid>
+    </Grid2>
   )
 }
 

@@ -1,7 +1,6 @@
-import { AnyAction } from 'redux'
-import { type RootState } from '../../store/store'
+import { AppDispatch } from '../../store/store'
 
 export default interface ReduxProps<T, S = T> {
-  selector: (state: RootState) => S
-  action: (value: T) => AnyAction
+  selector: () => { data?: S }
+  action: (value: T) => (dispatch: AppDispatch) => void
 }

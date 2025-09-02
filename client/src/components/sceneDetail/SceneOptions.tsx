@@ -1,14 +1,13 @@
 import { cx } from '@emotion/css'
 
-import { Card, CardContent, Grid, type Theme } from '@mui/material'
+import { Card, CardContent, Grid2, type Theme } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import { SDT } from 'flipflip-common'
 import ImageVideoCard from '../configGroups/ImageVideoCard'
 import SceneOptionCard from '../configGroups/SceneOptionCard'
-import { useAppSelector } from '../../store/hooks'
-import { selectAppTutorial } from '../../store/app/selectors'
+import { useGetTutorialsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   backdropTop: {
@@ -28,11 +27,11 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface SceneOptionsProps {
-  sceneID?: number
+  sceneID: number
 }
 
 function SceneOptions(props: SceneOptionsProps) {
-  const tutorial = useAppSelector(selectAppTutorial())
+  const { data: tutorial } = useGetTutorialsQuery()
   const { classes } = useStyles()
   const tutorial1 =
     tutorial === SDT.optionsLeft ||
@@ -48,11 +47,9 @@ function SceneOptions(props: SceneOptionsProps) {
     tutorial === SDT.sordering ||
     tutorial === SDT.ordering
   return (
-    <Grid container spacing={2}>
-      <Grid
-        item
-        xs={12}
-        md={6}
+    <Grid2 container spacing={2}>
+      <Grid2
+        size={{ xs: 12, md: 6 }}
         className={cx(tutorial1 && cx(classes.backdropTop, classes.disable))}
       >
         <Card
@@ -63,11 +60,9 @@ function SceneOptions(props: SceneOptionsProps) {
             <SceneOptionCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        md={6}
+      </Grid2>
+      <Grid2
+        size={{ xs: 12, md: 6 }}
         className={cx(tutorial2 && cx(classes.backdropTop, classes.disable))}
       >
         <Card
@@ -77,8 +72,8 @@ function SceneOptions(props: SceneOptionsProps) {
             <ImageVideoCard sceneID={props.sceneID} />
           </CardContent>
         </Card>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

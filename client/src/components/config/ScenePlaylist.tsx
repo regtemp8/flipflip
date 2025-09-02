@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { cx } from '@emotion/css'
 import {
   Button,
@@ -7,13 +7,12 @@ import {
   DialogActions,
   DialogContent,
   FormControlLabel,
-  Grid,
+  Grid2,
   IconButton,
   InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
   ListItemText,
   Switch,
   TextField,
@@ -21,7 +20,6 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { makeStyles } from 'tss-react/mui'
 import AddIcon from '@mui/icons-material/Add'
 import BuildIcon from '@mui/icons-material/Build'
@@ -32,26 +30,31 @@ import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import SelectAllIcon from '@mui/icons-material/SelectAll'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 import Sortable from 'react-sortablejs'
-import { RP } from 'flipflip-common'
-import { addRoutes } from '../../store/app/slice'
+import {
+  PLT,
+  RP,
+  SCENE_NONE,
+  SCENE_RANDOM,
+  ScenePlaylistItem
+} from 'flipflip-common'
 import SceneSelect from '../configGroups/SceneSelect'
-import { addToPlaylist } from '../../store/scenePlaylistItem/thunks'
+import {
+  useGetPlaylistQuery,
+  useGetScenesQuery,
+  useCreatePlaylistItemMutation,
+  useGetPlaylistItemQuery,
+  useDeletePlaylistItemMutation,
+  useGetPlaylistItemIdsQuery,
+  useGetSceneSelectOptionsQuery
+} from '../../store/api/slice'
 import MultiSceneSelect from '../configGroups/MultiSceneSelect'
-import { selectAppScenes } from '../../store/app/selectors'
-import { RootState } from '../../store/store'
-import { selectSceneName } from '../../store/scene/selectors'
+import { useNavigate } from 'react-router'
+import { useAppDispatch } from '../../store/hooks'
 import {
-  setPlaylistChangeRepeat,
-  setPlaylistRemoveItem,
-  setPlaylistSortItems,
-  setPlaylistToggleShuffle
-} from '../../store/playlist/slice'
-import { selectPlaylist } from '../../store/playlist/selectors'
-import {
-  selectScenePlaylistItem,
-  selectScenePlaylistItemSceneID
-} from '../../store/scenePlaylistItem/selectors'
-import { setScenePlaylistItem } from '../../store/scenePlaylistItem/slice'
+  setPlaylistRepeat,
+  setPlaylistShuffle,
+  updatePlaylistItem
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   randomSceneDialog: {
@@ -96,17 +99,17 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 interface ScenePlaylistItemEditDialogProps {
-  itemID: number
+  playlistID: number
+  item?: ScenePlaylistItem
   open: boolean
   onClose: () => void
 }
 
 function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
-  const { itemID, open, onClose } = props
+  const { playlistID, item, open, onClose } = props
   const dispatch = useAppDispatch()
-  const allScenes = useAppSelector(selectAppScenes())
-  const { sceneID, randomScenes, duration, playAfterAllImages } =
-    useAppSelector(selectScenePlaylistItem(itemID))
+  const [createPlaylistItem] = useCreatePlaylistItemMutation()
+  const { data: allScenes } = useGetScenesQuery()
 
   const [unsavedSceneID, setUnsavedSceneID] = useState<number>()
   const [unsavedRandomScenes, setUnsavedRandomScenes] = useState<number[]>()
@@ -141,31 +144,60 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   }
 
   const onChangePlayAfterAllImages = (
-    event: ChangeEvent<HTMLInputElement>,
+    _event: ChangeEvent<HTMLInputElement>,
     checked: boolean
   ) => {
     setUnsavedPlayAfterAllImages(checked)
   }
 
-  const onSave = () => {
-    const item = {
-      id: itemID,
-      sceneID: unsavedSceneID ?? sceneID,
-      randomScenes: unsavedRandomScenes ?? randomScenes,
-      duration: unsavedDuration ?? duration,
-      playAfterAllImages: unsavedPlayAfterAllImages ?? playAfterAllImages
+  const onSave = async () => {
+    if (item == null) {
+      await createPlaylistItem({
+        id: playlistID,
+        type: PLT.scene,
+        index: 0,
+        sceneID: unsavedSceneID ?? SCENE_NONE,
+        randomScenes: unsavedRandomScenes ?? [],
+        duration: unsavedDuration ?? 0,
+        playAfterAllImages: unsavedPlayAfterAllImages ?? false
+      })
+    } else {
+      let sceneID = SCENE_NONE
+      let randomScenes: number[] = []
+      if (unsavedSceneID === SCENE_RANDOM) {
+        sceneID = SCENE_RANDOM
+        randomScenes = unsavedRandomScenes ?? item.randomScenes
+      } else if (unsavedSceneID != null) {
+        sceneID = unsavedSceneID
+      } else {
+        sceneID = item.sceneID
+        if (item.sceneID === SCENE_RANDOM) {
+          randomScenes = item.randomScenes
+        }
+      }
+
+      dispatch(
+        updatePlaylistItem({
+          playlistID,
+          itemID: item.id,
+          sceneID,
+          randomScenes,
+          duration: unsavedDuration ?? item.duration,
+          playAfterAllImages:
+            unsavedPlayAfterAllImages ?? item.playAfterAllImages
+        })
+      )
     }
 
-    dispatch(setScenePlaylistItem(item))
     onClose()
   }
 
   const { classes } = useStyles()
-  const currentSceneID = unsavedSceneID ?? sceneID
-  const currentRandomScenes = unsavedRandomScenes ?? randomScenes
-  const currentDuration = unsavedDuration ?? duration
+  const currentSceneID = unsavedSceneID ?? item?.sceneID ?? SCENE_NONE
+  const currentRandomScenes = unsavedRandomScenes ?? item?.randomScenes
+  const currentDuration = unsavedDuration ?? item?.duration
   const currentPlayAfterAllImages =
-    unsavedPlayAfterAllImages ?? playAfterAllImages
+    unsavedPlayAfterAllImages ?? item?.playAfterAllImages
   return (
     <Dialog
       classes={{ paper: classes.randomSceneDialog }}
@@ -173,8 +205,8 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
       onClose={onClose}
     >
       <DialogContent classes={{ root: classes.noScroll }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} className={classes.selectTop}>
+        <Grid2 container spacing={2} alignItems="center">
+          <Grid2 size={12} className={classes.selectTop}>
             <Typography className={classes.selectText} variant="caption">
               Scene
             </Typography>
@@ -183,37 +215,38 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
               onChange={onSceneChange}
               includeExtra
             />
-          </Grid>
-          <Grid item xs={12}>
-            <Collapse in={currentSceneID === -1}>
-              <Grid container spacing={1} alignItems="center">
-                <Grid item xs={12}>
+          </Grid2>
+          <Grid2 size={12}>
+            <Collapse in={currentSceneID === SCENE_RANDOM}>
+              <Grid2 container spacing={1} alignItems="center">
+                <Grid2 size={12}>
                   <Typography className={classes.selectText} variant="caption">
                     Select which scenes to include
                   </Typography>
-                </Grid>
-                <Grid
-                  item
-                  xs
+                </Grid2>
+                <Grid2
+                  size="grow"
                   className={cx(classes.noTopPadding, classes.multiSelectTop)}
                 >
                   <MultiSceneSelect
                     values={currentRandomScenes}
                     onChange={changeRandomScenes}
                   />
-                </Grid>
-                <Grid item xs="auto" className={classes.noTopPadding}>
+                </Grid2>
+                <Grid2 size="auto" className={classes.noTopPadding}>
                   <Tooltip disableInteractive title="Select All">
                     <IconButton onClick={onRandomSelectAll}>
                       <SelectAllIcon />
                     </IconButton>
                   </Tooltip>
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
             </Collapse>
-          </Grid>
-          <Grid item xs={12} sm>
-            <Collapse in={currentSceneID !== 0 && !currentPlayAfterAllImages}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 'grow' }}>
+            <Collapse
+              in={currentSceneID !== SCENE_NONE && !currentPlayAfterAllImages}
+            >
               <TextField
                 fullWidth
                 label="Play after"
@@ -221,21 +254,23 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
                 margin="dense"
                 value={currentDuration}
                 onChange={onChangeDuration}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">ms</InputAdornment>
-                  )
-                }}
-                inputProps={{
-                  min: 0,
-                  step: 100,
-                  type: 'number'
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">ms</InputAdornment>
+                    )
+                  },
+                  htmlInput: {
+                    min: 0,
+                    step: 100,
+                    type: 'number'
+                  }
                 }}
               />
             </Collapse>
-          </Grid>
-          <Grid item xs={12} sm="auto">
-            <Collapse in={currentSceneID !== 0}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 'auto' }}>
+            <Collapse in={currentSceneID !== SCENE_NONE}>
               <FormControlLabel
                 control={
                   <Switch
@@ -246,8 +281,8 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
                 label="Play After All Images"
               />
             </Collapse>
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">
@@ -261,45 +296,53 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   )
 }
 
-interface ScenePlaylistItemProps {
+interface ScenePlaylistRowProps {
   playlistID: number
   itemID: number
   index: number
+  onEdit: (item: ScenePlaylistItem) => void
 }
 
-function ScenePlaylistItem(props: ScenePlaylistItemProps) {
-  const { playlistID, itemID, index } = props
-  const dispatch = useAppDispatch()
-  const sceneID = useAppSelector(selectScenePlaylistItemSceneID(itemID))
-  const sceneNameSelector =
-    sceneID === 0
-      ? (state: RootState) => 'None'
-      : sceneID === -1
-        ? (state: RootState) => 'Random'
-        : selectSceneName(sceneID)
-  const sceneName = useAppSelector(sceneNameSelector)
-  const [editing, setEditing] = useState<boolean>(false)
+function ScenePlaylistRow(props: ScenePlaylistRowProps) {
+  const { playlistID, itemID } = props
+  const navigate = useNavigate()
+  const [deletePlaylistItem] = useDeletePlaylistItemMutation()
+  const { data: item } = useGetPlaylistItemQuery({ playlistID, itemID })
+  const { data: options } = useGetSceneSelectOptionsQuery({
+    includeExtra: true
+  })
+
+  const { sceneID } =
+    item != null ? (item as ScenePlaylistItem) : { sceneID: SCENE_NONE }
 
   const onOpenScene = () => {
-    dispatch(addRoutes([{ kind: 'scene', value: sceneID }]))
+    navigate(`/scenes/${sceneID}`)
   }
 
-  const removeItem = () => {
-    dispatch(
-      setPlaylistRemoveItem({
-        id: playlistID,
-        value: index
-      })
-    )
+  const editItem = () => {
+    if (item != null) {
+      props.onEdit(item as ScenePlaylistItem)
+    }
   }
-
-  const openEdit = () => setEditing(true)
-  const closeEdit = () => setEditing(false)
+  const removeItem = async () => {
+    await deletePlaylistItem({ playlistID, itemID })
+  }
 
   const { classes } = useStyles()
   return (
     <>
-      <ListItem>
+      <ListItem
+        secondaryAction={
+          <>
+            <IconButton edge="end" onClick={editItem} size="large">
+              <BuildIcon />
+            </IconButton>
+            <IconButton edge="end" onClick={removeItem} size="large">
+              <DeleteIcon color={'error'} />
+            </IconButton>
+          </>
+        }
+      >
         <ListItemAvatar className={classes.listAvatar}>
           <Tooltip disableInteractive placement={'bottom'} title="Open Scene">
             <span>
@@ -307,28 +350,17 @@ function ScenePlaylistItem(props: ScenePlaylistItemProps) {
                 size="small"
                 className={classes.avatar}
                 onClick={onOpenScene}
-                disabled={sceneID === -1 || sceneID === 0}
+                disabled={sceneID === SCENE_RANDOM || sceneID === SCENE_NONE}
               >
                 <MovieIcon className={classes.sourceIcon} />
               </IconButton>
             </span>
           </Tooltip>
         </ListItemAvatar>
-        <ListItemText primary={sceneName} />
-        <ListItemSecondaryAction>
-          <IconButton edge="end" onClick={openEdit} size="large">
-            <BuildIcon />
-          </IconButton>
-          <IconButton edge="end" onClick={removeItem} size="large">
-            <DeleteIcon color={'error'} />
-          </IconButton>
-        </ListItemSecondaryAction>
+        <ListItemText
+          primary={options != null ? options[sceneID.toString()] : ''}
+        />
       </ListItem>
-      <ScenePlaylistItemEditDialog
-        itemID={itemID}
-        open={editing}
-        onClose={closeEdit}
-      />
     </>
   )
 }
@@ -340,86 +372,124 @@ export interface ScenePlaylistProps {
 function ScenePlaylist(props: ScenePlaylistProps) {
   const { playlistID } = props
   const dispatch = useAppDispatch()
-  const playlist = useAppSelector(selectPlaylist(playlistID))
+  const { data: playlist } = useGetPlaylistQuery(playlistID)
+  const { data: itemIDs } = useGetPlaylistItemIdsQuery(playlistID)
+
+  const [editingItem, setEditingItem] = useState<ScenePlaylistItem>()
+  const [editing, setEditing] = useState(false)
 
   const toggleShuffle = () => {
-    dispatch(setPlaylistToggleShuffle(playlistID))
+    dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
   }
 
   const changeRepeat = () => {
-    dispatch(setPlaylistChangeRepeat(playlistID))
+    switch (playlist?.repeat) {
+      case RP.all:
+        dispatch(setPlaylistRepeat(playlistID, RP.one))
+        break
+      case RP.one:
+        dispatch(setPlaylistRepeat(playlistID, RP.none))
+        break
+      case RP.none:
+        dispatch(setPlaylistRepeat(playlistID, RP.all))
+        break
+    }
+  }
+
+  const addPlaylistItem = async () => {
+    setEditing(true)
+  }
+
+  const onShowEditDialog = (item?: ScenePlaylistItem) => {
+    setEditing(true)
+    setEditingItem(item)
+  }
+
+  const onCloseEditDialog = () => {
+    setEditing(false)
+    setEditingItem(undefined)
   }
 
   const { classes } = useStyles()
   return (
-    <List>
-      <Sortable
-        className={classes.scriptList}
-        options={{
-          animation: 150,
-          easing: 'cubic-bezier(1, 0, 0, 1)'
-        }}
-        onChange={(order: any, sortable: any, evt: any) => {
-          dispatch(
-            setPlaylistSortItems({
-              id: playlistID,
-              value: {
-                oldIndex: evt.oldIndex,
-                newIndex: evt.newIndex
+    <>
+      <List>
+        <Sortable
+          className={classes.scriptList}
+          options={{
+            animation: 150,
+            easing: 'cubic-bezier(1, 0, 0, 1)'
+          }}
+          onChange={(_order: any, _sortable: any, _evt: any) => {
+            // dispatch(
+            //   setPlaylistSortItems({
+            //     id: playlistID,
+            //     value: {
+            //       oldIndex: evt.oldIndex,
+            //       newIndex: evt.newIndex
+            //     }
+            //   })
+            // )
+          }}
+        >
+          {itemIDs?.map((id, index) => (
+            <ScenePlaylistRow
+              key={index}
+              playlistID={playlistID}
+              itemID={id}
+              index={index}
+              onEdit={onShowEditDialog}
+            />
+          ))}
+        </Sortable>
+        <div className={classes.playlistAction}>
+          <div className={classes.left}>
+            <Tooltip
+              disableInteractive
+              title={'Shuffle ' + (playlist?.shuffle ? '(On)' : '(Off)')}
+            >
+              <IconButton onClick={toggleShuffle} size="large">
+                <ShuffleIcon
+                  color={playlist?.shuffle ? 'primary' : undefined}
+                />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              disableInteractive
+              title={
+                'Repeat ' +
+                (playlist?.repeat === RP.none
+                  ? '(Off)'
+                  : playlist?.repeat === RP.all
+                    ? '(All)'
+                    : '(One)')
               }
-            })
-          )
-        }}
-      >
-        {playlist.items.map((id, index) => (
-          <ScenePlaylistItem
-            key={index}
-            playlistID={playlistID}
-            itemID={id}
-            index={index}
-          />
-        ))}
-      </Sortable>
-      <div className={classes.playlistAction}>
-        <div className={classes.left}>
-          <Tooltip
-            disableInteractive
-            title={'Shuffle ' + (playlist.shuffle ? '(On)' : '(Off)')}
-          >
-            <IconButton onClick={toggleShuffle} size="large">
-              <ShuffleIcon color={playlist.shuffle ? 'primary' : undefined} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            disableInteractive
-            title={
-              'Repeat ' +
-              (playlist.repeat === RP.none
-                ? '(Off)'
-                : playlist.repeat === RP.all
-                  ? '(All)'
-                  : '(One)')
-            }
-          >
-            <IconButton onClick={changeRepeat} size="large">
-              {playlist.repeat === RP.none && <RepeatIcon />}
-              {playlist.repeat === RP.all && <RepeatIcon color={'primary'} />}
-              {playlist.repeat === RP.one && (
-                <RepeatOneIcon color={'primary'} />
-              )}
+            >
+              <IconButton onClick={changeRepeat} size="large">
+                {playlist?.repeat === RP.none && <RepeatIcon />}
+                {playlist?.repeat === RP.all && (
+                  <RepeatIcon color={'primary'} />
+                )}
+                {playlist?.repeat === RP.one && (
+                  <RepeatOneIcon color={'primary'} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </div>
+          <Tooltip disableInteractive title="Add Scenes">
+            <IconButton onClick={addPlaylistItem} size="large">
+              <AddIcon />
             </IconButton>
           </Tooltip>
         </div>
-        <Tooltip disableInteractive title="Add Scenes">
-          <IconButton
-            onClick={() => dispatch(addToPlaylist(playlistID))}
-            size="large"
-          >
-            <AddIcon />
-          </IconButton>
-        </Tooltip>
-      </div>
-    </List>
+      </List>
+      <ScenePlaylistItemEditDialog
+        playlistID={playlistID}
+        item={editingItem}
+        open={editing}
+        onClose={onCloseEditDialog}
+      />
+    </>
   )
 }
 

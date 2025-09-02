@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cx } from '@emotion/css'
 
 import { type Theme, Typography } from '@mui/material'
@@ -9,15 +8,15 @@ import ThemeColorPicker from '../config/ThemeColorPicker'
 
 import BaseSwitch from '../common/BaseSwitch'
 import {
-  setThemeMode,
-  setThemePalettePrimary,
-  setThemePaletteSecondary
-} from '../../store/app/slice'
+  useGetThemeModeQuery,
+  useGetThemePrimaryColorQuery,
+  useGetThemeSecondaryColorQuery
+} from '../../store/api/selectors'
 import {
-  selectAppThemeMode,
-  selectAppThemePalettePrimary,
-  selectAppThemePaletteSecondary
-} from '../../store/app/selectors'
+  setThemeMode,
+  setThemePrimaryColor,
+  setThemeSecondaryColor
+} from '../../store/api/thunks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   themePicker: {
@@ -30,32 +29,33 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
+// TODO set theme colors based on primary/secondary color, it expects an object
 function ThemeCard() {
   const { classes } = useStyles()
   return (
-    <React.Fragment>
+    <>
       <div>
         <BaseSwitch
           label="Dark Mode"
-          selector={selectAppThemeMode()}
-          action={setThemeMode}
+          selector={useGetThemeModeQuery}
+          action={setThemeMode()}
         />
       </div>
       <div className={cx(classes.themePicker, classes.gutterBottom)}>
         <Typography>Primary Color</Typography>
         <ThemeColorPicker
-          selector={selectAppThemePalettePrimary()}
-          action={setThemePalettePrimary}
+          selector={useGetThemePrimaryColorQuery}
+          action={setThemePrimaryColor()}
         />
       </div>
       <div className={classes.themePicker}>
         <Typography>Secondary Color</Typography>
         <ThemeColorPicker
-          selector={selectAppThemePaletteSecondary()}
-          action={setThemePaletteSecondary}
+          selector={useGetThemeSecondaryColorQuery}
+          action={setThemeSecondaryColor()}
         />
       </div>
-    </React.Fragment>
+    </>
   )
 }
 

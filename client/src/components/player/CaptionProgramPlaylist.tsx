@@ -1,16 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { randomizeList } from '../../data/utils'
+import { randomizeList } from '../../utils'
 import CaptionProgram from './CaptionProgram'
 import type ChildCallbackHack from './ChildCallbackHack'
-import { RP } from 'flipflip-common'
-import { useAppSelector } from '../../store/hooks'
-import {
-  selectSceneIsScriptScene,
-  selectSceneScriptStartIndex
-} from '../../store/scene/selectors'
+import { PLT, Playlist, RP } from 'flipflip-common'
 import { HTMLContentElement } from './HTMLContentElement'
-import { selectPlaylist } from '../../store/playlist/selectors'
+import { useGetPlaylistQuery, useGetSceneQuery } from '../../store/api/slice'
 
 export interface CaptionProgramPlaylistProps {
   playlistIndex: number
@@ -28,14 +23,23 @@ export interface CaptionProgramPlaylistProps {
   onError?: (e: string) => void
 }
 
+const initialPlaylist = {
+  id: -1,
+  name: '',
+  type: PLT.script,
+  items: [],
+  repeat: RP.none,
+  shuffle: false
+}
+
 export default function CaptionProgramPlaylist(
   props: CaptionProgramPlaylistProps
 ) {
-  const playlist = useAppSelector(selectPlaylist(props.playlistID))
-  const isScriptScene = useAppSelector(selectSceneIsScriptScene(props.sceneID))
-  const scriptStartIndex = useAppSelector(
-    selectSceneScriptStartIndex(props.sceneID)
-  )
+  const playlistResult = useGetPlaylistQuery(props.playlistID)
+  const playlist: Playlist = playlistResult.data ?? initialPlaylist
+  const { data: scene } = useGetSceneQuery(props.sceneID)
+  const isScriptScene = scene?.scriptScene === true
+  const scriptStartIndex = scene?.scriptStartIndex ?? 0
 
   const [currentIndex, setCurrentIndex] = useState(
     props.playlistIndex === 0 ? scriptStartIndex : 0
@@ -43,7 +47,7 @@ export default function CaptionProgramPlaylist(
   const [playingScripts, setPlayingScripts] = useState<number[]>([])
 
   const restart = useCallback(() => {
-    let scripts = playlist.items
+    let scripts = playlist.items ?? []
     if (playlist.shuffle) {
       scripts = randomizeList(Array.from(scripts))
     }
@@ -68,7 +72,7 @@ export default function CaptionProgramPlaylist(
       }
     }
     setCurrentIndex(nextTrack)
-  }, [currentIndex, playlist.repeat, playlist.items.length])
+  }, [currentIndex, playlist.repeat, playlist.items?.length])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

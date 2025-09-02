@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useState,
   useRef,
@@ -21,84 +21,71 @@ import {
   InputAdornment,
   Link,
   List,
-  ListItemSecondaryAction,
   ListItemText,
   Menu,
   MenuItem,
   TextField,
   type Theme,
   Tooltip,
-  Typography
+  Typography,
+  ListItem
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import FolderIcon from '@mui/icons-material/Folder'
 
-import { getCachePath, getTimestamp } from '../../data/utils'
-import {
-  getFileName,
-  getSourceType,
-  urlToPath,
-  en,
-  RF,
-  RT,
-  SDT,
-  ST,
-  SDGT
-} from 'flipflip-common'
+import { getTimestamp } from '../../utils'
+import { en, RF, RT, SDT, ST } from 'flipflip-common'
 import SourceListItem from './SourceListItem'
 import BaseSwitch from '../common/BaseSwitch'
-import { selectConstants } from '../../store/constants/selectors'
+// import {
+//   selectAppLibraryYOffset
+// } from '../../store/app/selectors'
 import {
-  selectAppConfigCachingDirectory,
-  selectAppTutorial,
-  selectAppLibraryYOffset
-} from '../../store/app/selectors'
-import { selectClipEnd, selectClipStart } from '../../store/clip/selectors'
-import {
-  selectLibrarySourceDirOfSources,
-  selectLibrarySourceIncludeReplies,
-  selectLibrarySourceIncludeRetweets,
-  selectLibrarySourceIsEnabledClip,
-  selectLibrarySourceSubtitleFile,
-  selectLibrarySourceURL,
-  selectLibrarySourceWeight,
-  selectLibrarySourceRedditFunc,
-  selectLibrarySourceRedditTime,
-  selectLibrarySourceClips,
-  selectLibrarySourceBlacklist
-} from '../../store/librarySource/selectors'
-import {
-  setLibrarySourceDirOfSources,
-  setLibrarySourceIncludeReplies,
-  setLibrarySourceIncludeRetweets,
-  setLibrarySourceToggleEnabledClip,
-  setLibrarySourceWeight,
-  setLibrarySourceSubtitleFile,
-  setLibrarySourceRedditFunc,
-  setLibrarySourceRedditTime
-} from '../../store/librarySource/actions'
-import {
-  setSceneSourcesEditUrl,
-  setLibraryEditUrl,
-  editBlacklist
-} from '../../store/librarySource/thunks'
-import {
-  setSceneSwapSources,
-  setSceneSourcesRemoveOne
-} from '../../store/scene/thunks'
-import {
-  setLibraryYOffset,
-  setLibraryRemoveOne,
-  setLibrarySelected,
-  swapLibrary
-} from '../../store/app/slice'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+  setContentSourceDirOfSources,
+  setContentSourceIncludeReplies,
+  setContentSourceIncludeRetweets,
+  setClipEnabled,
+  setContentSourceWeight,
+  setContentSourceSubtitleFile,
+  setContentSourceRedditFunc,
+  setContentSourceRedditTime
+} from '../../store/api/thunks'
+// import {
+//   setSceneSourcesEditUrl,
+//   setLibraryEditUrl,
+//   editBlacklist
+// } from '../../store/librarySource/thunks'
+// import {
+//   setSceneSwapSources,
+//   setSceneSourcesRemoveOne
+// } from '../../store/scene/thunks'
+// import {
+//   setLibraryYOffset,
+//   setLibraryRemoveOne,
+//   setLibrarySelected,
+//   swapLibrary
+// } from '../../store/app/slice'
+import { useAppDispatch } from '../../store/hooks'
 import BaseTextField from '../common/text/BaseTextField'
 import BaseSelect from '../common/BaseSelect'
-import { RootState } from '../../store/store'
-import flipflip from '../../FlipFlipService'
+import {
+  useDeleteContentSourceMutation,
+  useGetClipQuery,
+  useGetContentSourceQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
+import {
+  useGetClipEnabledQuery,
+  useGetContentSourceDirOfSourcesQuery,
+  useGetContentSourceIncludeRepliesQuery,
+  useGetContentSourceIncludeRetweetsQuery,
+  useGetContentSourceRedditFuncQuery,
+  useGetContentSourceRedditTimeQuery,
+  useGetContentSourceSubtitleFileQuery,
+  useGetContentSourceWeightQuery
+} from '../../store/api/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -127,10 +114,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
   wordWrap: {
     wordWrap: 'break-word'
   },
-  arrow: {
+  arrowWrapper: {
     position: 'absolute',
+    overflow: 'hidden',
     bottom: 20,
-    right: 35,
+    right: 35
+  },
+  arrow: {
     fontSize: 220,
     transform: 'rotateY(0deg) rotate(45deg)'
   },
@@ -169,14 +159,13 @@ interface BlacklistDialogProps {
 }
 
 function BlacklistDialog(props: BlacklistDialogProps) {
-  const url = useAppSelector(selectLibrarySourceURL(props.sourceID))
-  const blacklist = useAppSelector(selectLibrarySourceBlacklist(props.sourceID))
+  const { data: source } = useGetContentSourceQuery(props.sourceID)
 
   const [blacklistToEdit, setBlacklistToEdit] = useState<string>()
 
   useEffect(() => {
-    setBlacklistToEdit(blacklist.join('\n'))
-  }, [blacklist])
+    setBlacklistToEdit(source?.blacklist.join('\n'))
+  }, [source?.blacklist])
 
   const onChangeBlacklist = (e: ChangeEvent<HTMLInputElement>) => {
     setBlacklistToEdit(e.currentTarget.value)
@@ -198,7 +187,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
     >
       <DialogContent>
         <DialogContentText id="edit-blacklist-description">
-          Blacklist ({url})
+          Blacklist ({source?.url})
         </DialogContentText>
         <TextField
           variant="standard"
@@ -207,7 +196,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
           helperText="One URL to blacklist per line"
           value={blacklistToEdit}
           margin="dense"
-          inputProps={{ className: classes.blacklistInput }}
+          slotProps={{ htmlInput: { className: classes.blacklistInput } }}
           onChange={onChangeBlacklist}
         />
       </DialogContent>
@@ -222,7 +211,7 @@ function BlacklistDialog(props: BlacklistDialogProps) {
         </Button>
         <Button
           onClick={() => {
-            props.onFinish(url as string, blacklistToEdit as string)
+            props.onFinish(source?.url as string, blacklistToEdit as string)
           }}
           color="primary"
         >
@@ -240,7 +229,8 @@ interface DeleteDialogProps {
 }
 
 function DeleteDialog(props: DeleteDialogProps) {
-  const url = useAppSelector(selectLibrarySourceURL(props.sourceID))
+  const { data: source } = useGetContentSourceQuery(props.sourceID)
+  const url = source?.url
 
   return (
     <Dialog
@@ -282,11 +272,11 @@ interface ClipMenuProps {
 }
 
 function ClipMenu(props: ClipMenuProps) {
-  const clips = useAppSelector(selectLibrarySourceClips(props.sourceID))
+  const { data: source } = useGetContentSourceQuery(props.sourceID)
 
   return (
     <>
-      {clips.map((c, index) => (
+      {source?.clips.map((c, index) => (
         <ClipMenuItem
           key={c}
           sourceID={props.sourceID}
@@ -305,36 +295,30 @@ interface ClipMenuItemProps {
 }
 
 function ClipMenuItem(props: ClipMenuItemProps) {
-  const start = useAppSelector(selectClipStart(props.clipID))
-  const end = useAppSelector(selectClipEnd(props.clipID))
+  const { data: clip } = useGetClipQuery(props.clipID)
   const { classes } = useStyles()
   return (
-    <MenuItem>
+    <ListItem
+      secondaryAction={
+        <BaseSwitch
+          size="small"
+          selector={() => useGetClipEnabledQuery(props.clipID)}
+          action={setClipEnabled(props.clipID)}
+        />
+      }
+    >
       <ListItemText
         primary={
           '(' +
           (props.index + 1) +
           ') ' +
-          getTimestamp(start as number) +
+          getTimestamp(clip?.start ?? 0) +
           ' - ' +
-          getTimestamp(end as number)
+          getTimestamp(clip?.end ?? 0)
         }
         className={classes.marginRight}
       />
-      <ListItemSecondaryAction>
-        <BaseSwitch
-          size="small"
-          selector={selectLibrarySourceIsEnabledClip(
-            props.sourceID,
-            props.clipID
-          )}
-          action={setLibrarySourceToggleEnabledClip(
-            props.sourceID,
-            props.clipID
-          )}
-        />
-      </ListItemSecondaryAction>
-    </MenuItem>
+    </ListItem>
   )
 }
 
@@ -344,17 +328,15 @@ interface SourceOptionsDialogProps {
 }
 
 function SourceOptionsDialog(props: SourceOptionsDialogProps) {
-  const dispatch = useAppDispatch()
-  const redditFunc = useAppSelector(
-    selectLibrarySourceRedditFunc(props.sourceID)
-  )
-  const url = useAppSelector(selectLibrarySourceURL(props.sourceID))
-  const type = url && getSourceType(url)
+  const { data: source } = useGetContentSourceQuery(props.sourceID)
+  const redditFunc = source?.redditFunc
+  const url = source?.url
+  const type = source?.type
 
   const onOpenSubtitleFile = async () => {
-    const subtitleFile = await flipflip().api.openSubtitleFile()
-    if (!subtitleFile) return
-    dispatch(setLibrarySourceSubtitleFile(props.sourceID)(subtitleFile))
+    // const subtitleFile = await flipflip().api.openSubtitleFile()
+    // if (!subtitleFile) return
+    // dispatch(setContentSourceSubtitleFile(props.sourceID)(subtitleFile))
   }
 
   const { classes } = useStyles()
@@ -373,8 +355,10 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
             <BaseSwitch
               label="Treat Inner Directories as Sources"
               tooltip="Enable this to treat directories directly inside this one as their own individual sources"
-              selector={selectLibrarySourceDirOfSources(props.sourceID)}
-              action={setLibrarySourceDirOfSources(props.sourceID)}
+              selector={() =>
+                useGetContentSourceDirOfSourcesQuery(props.sourceID)
+              }
+              action={setContentSourceDirOfSources(props.sourceID)}
             />
           </DialogContent>
         </Dialog>
@@ -395,8 +379,10 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
               fullWidth
               placeholder="Paste URL Here"
               margin="dense"
-              selector={selectLibrarySourceSubtitleFile(props.sourceID)}
-              action={setLibrarySourceSubtitleFile(props.sourceID)}
+              selector={() =>
+                useGetContentSourceSubtitleFileQuery(props.sourceID)
+              }
+              action={setContentSourceSubtitleFile(props.sourceID)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -429,8 +415,10 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
                 (url.includes('/user/') || url.includes('/u/'))
               }
               controlClassName={classes.fullWidth}
-              selector={selectLibrarySourceRedditFunc(props.sourceID)}
-              action={setLibrarySourceRedditFunc(props.sourceID)}
+              selector={() =>
+                useGetContentSourceRedditFuncQuery(props.sourceID)
+              }
+              action={setContentSourceRedditFunc(props.sourceID)}
             >
               {Object.values(RF).map((rf) => (
                 <MenuItem key={rf} value={rf}>
@@ -445,8 +433,10 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
                   url != null && (url.includes('/user/') || url.includes('/u/'))
                 }
                 controlClassName={classes.fullWidth}
-                selector={selectLibrarySourceRedditTime(props.sourceID)}
-                action={setLibrarySourceRedditTime(props.sourceID)}
+                selector={() =>
+                  useGetContentSourceRedditTimeQuery(props.sourceID)
+                }
+                action={setContentSourceRedditTime(props.sourceID)}
               >
                 {Object.values(RT).map((rt) => (
                   <MenuItem key={rt} value={rt}>
@@ -476,14 +466,18 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
             <BaseSwitch
               label="Include Replies"
               size="small"
-              selector={selectLibrarySourceIncludeReplies(props.sourceID)}
-              action={setLibrarySourceIncludeReplies(props.sourceID)}
+              selector={() =>
+                useGetContentSourceIncludeRepliesQuery(props.sourceID)
+              }
+              action={setContentSourceIncludeReplies(props.sourceID)}
             />
             <BaseSwitch
               label="Include Retweets"
               size="small"
-              selector={selectLibrarySourceIncludeRetweets(props.sourceID)}
-              action={setLibrarySourceIncludeRetweets(props.sourceID)}
+              selector={() =>
+                useGetContentSourceIncludeRetweetsQuery(props.sourceID)
+              }
+              action={setContentSourceIncludeRetweets(props.sourceID)}
             />
           </DialogContent>
         </Dialog>
@@ -503,23 +497,20 @@ export interface SourceListProps {
 
 function SourceList(props: SourceListProps) {
   const dispatch = useAppDispatch()
-  const { isWin32, pathSep } = useAppSelector(selectConstants())
-  const cachingDirectory = useAppSelector(selectAppConfigCachingDirectory())
-  const yOffsetSelector = props.isLibrary
-    ? selectAppLibraryYOffset()
-    : (state: RootState) => 0
-  const yOffset = useAppSelector(yOffsetSelector)
-  const firstSourceURL = useAppSelector(
-    selectLibrarySourceURL(props.sources.length > 0 ? props.sources[0] : -1)
-  )
-  let tutorial = useAppSelector(selectAppTutorial())
+  const [deleteContentSource] = useDeleteContentSourceMutation()
+  // const yOffsetSelector = props.isLibrary
+  //   ? selectAppLibraryYOffset()
+  //   : (state: RootState) => 0
+  // const yOffset = useAppSelector(yOffsetSelector)
+  const yOffset = 0
+
+  const { data: tutorial } = useGetTutorialsQuery()
   // TODO is this really needed?
-  if (tutorial === SDGT.final) {
-    tutorial = undefined
-  }
+  // if (tutorial === SDGT.final) {
+  //   tutorial = undefined
+  // }
 
   const [cachePath, setCachePath] = useState<string>()
-  const [isEditing, setIsEditing] = useState(-1)
   const [mouseX, setMouseX] = useState<any>()
   const [mouseY, setMouseY] = useState<any>()
   const [clipMenu, setClipMenu] = useState<number>()
@@ -534,9 +525,9 @@ function SourceList(props: SourceListProps) {
   const savePosition = useCallback(() => {
     const sortableList = document.getElementById('sortable-list')
     if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setLibraryYOffset(scrollTop))
+      const scrollTop = sortableList.firstElementChild?.scrollTop ?? 0
+      console.log(scrollTop)
+      // dispatch(setLibraryYOffset(scrollTop))
     }
   }, [dispatch])
 
@@ -557,12 +548,6 @@ function SourceList(props: SourceListProps) {
     }
   }, [savePosition])
 
-  useEffect(() => {
-    if (firstSourceURL === '') {
-      setIsEditing(props.sources[0])
-    }
-  }, [props.sources, firstSourceURL])
-
   const onSortEnd = ({
     oldIndex,
     newIndex
@@ -572,11 +557,12 @@ function SourceList(props: SourceListProps) {
   }) => {
     const oldSourceID = props.sources[oldIndex]
     const newSourceID = props.sources[newIndex]
-    if (props.isLibrary) {
-      dispatch(swapLibrary({ oldSourceID, newSourceID }))
-    } else {
-      dispatch(setSceneSwapSources(oldSourceID, newSourceID))
-    }
+    oldSourceID + newSourceID // TODO remove this
+    // if (props.isLibrary) {
+    //   dispatch(swapLibrary({ oldSourceID, newSourceID }))
+    // } else {
+    //   dispatch(setSceneSwapSources(oldSourceID, newSourceID))
+    // }
   }
 
   const onDelete = (sourceID: number) => {
@@ -586,28 +572,28 @@ function SourceList(props: SourceListProps) {
     setDeleteDialog(undefined)
   }
 
-  const onFinishDelete = async (sourceID: number, sourceURL: string) => {
-    const fileType = getSourceType(sourceURL)
-    if (fileType === ST.local) {
-      flipflip().api.rimrafSync(sourceURL)
-    } else if (
-      fileType === ST.video ||
-      fileType === ST.playlist ||
-      fileType === ST.list
-    ) {
-      await flipflip().api.unlink(sourceURL)
-    }
+  const onFinishDelete = async (sourceID: number, _sourceURL: string) => {
+    // const fileType = getSourceType(sourceURL)
+    // if (fileType === ST.local) {
+    //   flipflip().api.rimrafSync(sourceURL)
+    // } else if (
+    //   fileType === ST.video ||
+    //   fileType === ST.playlist ||
+    //   fileType === ST.list
+    // ) {
+    //   await flipflip().api.unlink(sourceURL)
+    // }
     onRemove(sourceID)
     onCloseDeleteDialog()
   }
 
-  const onRemove = (sourceID: number) => {
+  const onRemove = async (sourceID: number) => {
     if (props.isLibrary) {
-      const selected = props.selected as number[]
-      dispatch(setLibrarySelected(selected.filter((id) => id !== sourceID)))
-      dispatch(setLibraryRemoveOne(sourceID))
+      // const selected = props.selected as number[]
+      // dispatch(setLibrarySelected(selected.filter((id) => id !== sourceID)))
+      // dispatch(setLibraryRemoveOne(sourceID))
     } else {
-      dispatch(setSceneSourcesRemoveOne(sourceID))
+      await deleteContentSource(sourceID)
     }
   }
 
@@ -640,34 +626,25 @@ function SourceList(props: SourceListProps) {
       newSelected.push(sourceID)
     }
     _lastChecked.current = sourceID
-    if (props.isLibrary) {
-      dispatch(setLibrarySelected(newSelected))
-    }
+    // if (props.isLibrary) {
+    //   dispatch(setLibrarySelected(newSelected))
+    // }
   }
 
-  const onStartEdit = (sourceID: number) => {
-    setIsEditing(sourceID)
-  }
-
-  const onEndEdit = (newURL: string) => {
-    const action = props.isLibrary ? setLibraryEditUrl : setSceneSourcesEditUrl
-    dispatch(action(isEditing, newURL))
-    setIsEditing(-1)
-  }
-
-  const onClean = async (sourceURL: string) => {
-    const fileType = getSourceType(sourceURL)
-    if (fileType !== ST.local) {
-      let cachePath = await getCachePath(cachingDirectory, sourceURL)
-      if (fileType === ST.video || fileType === ST.playlist) {
-        cachePath = getFileName(sourceURL, pathSep)
-      }
-      setCachePath(cachePath)
-    }
+  const onClean = async (_sourceURL: string) => {
+    // TODO fix cache clean
+    // const fileType = getSourceType(sourceURL)
+    // if (fileType !== ST.local) {
+    //   let cachePath = await getCachePath(cachingDirectory, sourceURL)
+    //   if (fileType === ST.video || fileType === ST.playlist) {
+    //     cachePath = getFileName(sourceURL, pathSep)
+    //   }
+    //   setCachePath(cachePath)
+    // }
   }
 
   const onFinishClean = () => {
-    flipflip().api.rimrafSync(cachePath as string)
+    // flipflip().api.rimrafSync(cachePath as string)
     onCloseClean()
   }
 
@@ -675,16 +652,12 @@ function SourceList(props: SourceListProps) {
     setCachePath(undefined)
   }
 
-  const openDirectory = (cachePath: string) => {
-    if (isWin32) {
-      openExternalURL(cachePath)
-    } else {
-      openExternalURL(urlToPath(cachePath, isWin32))
-    }
-  }
-
-  const openExternalURL = (url: string) => {
-    window.open(url, '_blank')?.focus()
+  const openDirectory = (_cachePath: string) => {
+    // if (isWin32) {
+    //   openExternalURL(cachePath)
+    // } else {
+    //   openExternalURL(urlToPath(cachePath, isWin32))
+    // }
   }
 
   const onOpenClipMenu = (sourceID: number, e: MouseEvent) => {
@@ -708,8 +681,8 @@ function SourceList(props: SourceListProps) {
     setBlacklistSource(undefined)
   }
 
-  const onFinishBlacklist = (url: string, blacklist: string) => {
-    dispatch(editBlacklist(url, blacklist))
+  const onFinishBlacklist = (_url: string, _blacklist: string) => {
+    // dispatch(editBlacklist(url, blacklist))
     onCloseBlacklist()
   }
 
@@ -757,7 +730,6 @@ function SourceList(props: SourceListProps) {
             props.selected.includes(sourceID)
           }
           index={index}
-          isEditing={isEditing}
           isLibrary={props.isLibrary ?? false}
           isSelect={props.isSelect ?? false}
           source={sourceID}
@@ -767,12 +739,10 @@ function SourceList(props: SourceListProps) {
           onClean={onClean}
           onDelete={onDelete}
           onEditBlacklist={onEditBlacklist}
-          onEndEdit={onEndEdit}
           onOpenClipMenu={onOpenClipMenu}
           onOpenWeightMenu={onOpenWeightMenu}
           onRemove={onRemove}
           onSourceOptions={onSourceOptions}
-          onStartEdit={onStartEdit}
           onToggleSelect={onToggleSelect}
           savePosition={savePosition}
         />
@@ -788,7 +758,7 @@ function SourceList(props: SourceListProps) {
   const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -808,7 +778,7 @@ function SourceList(props: SourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -818,27 +788,29 @@ function SourceList(props: SourceListProps) {
             >
               Add new sources
             </Typography>
-            <div className={classes.arrow}>→</div>
-          </React.Fragment>
+            <div className={classes.arrowWrapper}>
+              <div className={classes.arrow}>→</div>
+            </div>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List
             id="sortable-list"
             disablePadding
             className={cx(
-              (tutorial === SDT.source ||
-                tutorial === SDT.sourceAvatar ||
-                tutorial === SDT.sourceTitle ||
-                tutorial === SDT.sourceTags ||
-                tutorial === SDT.sourceCount ||
-                tutorial === SDT.sourceButtons) &&
+              (tutorial?.current === SDT.source ||
+                tutorial?.current === SDT.sourceAvatar ||
+                tutorial?.current === SDT.sourceTitle ||
+                tutorial?.current === SDT.sourceTags ||
+                tutorial?.current === SDT.sourceCount ||
+                tutorial?.current === SDT.sourceButtons) &&
                 classes.backdropTop
             )}
           >
@@ -850,7 +822,7 @@ function SourceList(props: SourceListProps) {
               height={height - 1}
               width={width}
               onSortEnd={onSortEnd}
-              tutorial={tutorial}
+              tutorial={tutorial?.current}
               yOffset={yOffset}
               sources={props.sources}
             />
@@ -899,8 +871,8 @@ function SourceList(props: SourceListProps) {
             <BaseTextField
               variant="standard"
               margin="dense"
-              selector={selectLibrarySourceWeight(weightMenu)}
-              action={setLibrarySourceWeight(weightMenu)}
+              selector={() => useGetContentSourceWeightQuery(weightMenu)}
+              action={setContentSourceWeight(weightMenu)}
               inputProps={{
                 min: 1,
                 type: 'number'
@@ -959,7 +931,7 @@ function SourceList(props: SourceListProps) {
           onFinishDelete={onFinishDelete}
         />
       )}
-    </React.Fragment>
+    </>
   )
 }
 

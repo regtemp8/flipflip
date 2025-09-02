@@ -1,14 +1,12 @@
-import { Grid, MenuItem, Tooltip, Collapse, type Theme } from '@mui/material'
+import { Grid2, MenuItem, Tooltip, Collapse, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import type ReduxProps from './ReduxProps'
 import { en, TF } from 'flipflip-common'
-import { useAppSelector } from '../../store/hooks'
 import type CommonSliderProps from './slider/CommonSliderProps'
 import BaseSelect from './BaseSelect'
 import BaseSlider from './slider/BaseSlider'
 import MillisTextField from './text/MillisTextField'
-import { type RootState } from '../../store/store'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   endInput: {
@@ -39,7 +37,7 @@ export interface TimingCardProps {
   label?: string
   excludeScene?: boolean
   sidebar: boolean
-  hasBPMSelector: (state: RootState) => boolean
+  hasBPMSelector: () => { data?: boolean }
   timing: ReduxProps<string>
   duration: ReduxProps<number>
   wave: CommonSliderProps
@@ -49,12 +47,15 @@ export interface TimingCardProps {
 }
 
 function TimingCard(props: TimingCardProps) {
-  const hasBPM = useAppSelector(props.hasBPMSelector)
-  const timingFunction = useAppSelector(props.timing.selector)
+  const { data: hasBPM } = props.hasBPMSelector()
+  const { data: timingFunction } = props.timing.selector()
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12} sm={props.sidebar ? 12 : 4} style={{ paddingTop: 10 }}>
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2
+        size={{ xs: 12, sm: props.sidebar ? 12 : 4 }}
+        style={{ paddingTop: 10 }}
+      >
         <BaseSelect
           label={props.label ?? 'Timing'}
           controlClassName={classes.fullWidth}
@@ -91,8 +92,8 @@ function TimingCard(props: TimingCardProps) {
             }
           })}
         </BaseSelect>
-      </Grid>
-      <Grid item xs={12} sm={props.sidebar ? 12 : 8}>
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 8 }}>
         <Collapse in={timingFunction === TF.sin} className={classes.fullWidth}>
           <BaseSlider
             min={1}
@@ -133,31 +134,31 @@ function TimingCard(props: TimingCardProps) {
             action={props.duration.action}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Collapse
           in={timingFunction === TF.random || timingFunction === TF.sin}
           className={classes.fullWidth}
         >
-          <Grid container alignItems="center">
-            <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+          <Grid2 container alignItems="center">
+            <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
               <MillisTextField
                 label="Between"
                 selector={props.durationMin.selector}
                 action={props.durationMin.action}
               />
-            </Grid>
-            <Grid item xs={12} sm={props.sidebar ? 12 : 6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
               <MillisTextField
                 label="and"
                 selector={props.durationMax.selector}
                 action={props.durationMax.action}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Collapse>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

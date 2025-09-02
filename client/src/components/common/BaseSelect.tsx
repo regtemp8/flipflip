@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from 'react'
+import { type PropsWithChildren } from 'react'
 import {
   Divider,
   FormControl,
@@ -8,10 +8,7 @@ import {
   type SelectChangeEvent
 } from '@mui/material'
 import type ReduxProps from './ReduxProps'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { AnyAction } from 'redux'
-import { RootState } from '../../store/store'
-import { ThunkAction } from '@reduxjs/toolkit'
+import { useAppDispatch } from '../../store/hooks'
 
 export interface BaseSelectProps extends ReduxProps<string> {
   label: string
@@ -21,26 +18,31 @@ export interface BaseSelectProps extends ReduxProps<string> {
   style?: any
   MenuProps?: any
   valueMapper?: (value: string) => string
-  create?: ThunkAction<void, RootState, undefined, AnyAction>
+  create?: () => Promise<void>
   hideLabel?: boolean
 }
 
 const CREATE_NEW_VALUE = '-2'
 export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
   const dispatch = useAppDispatch()
-  let value = useAppSelector(props.selector)
-  if (props.valueMapper != null) {
-    value = props.valueMapper(value)
+  const { data } = props.selector()
+
+  const getValue = (data?: string) => {
+    let value = data ?? ''
+    if (props.valueMapper != null) {
+      value = props.valueMapper(value)
+    }
+
+    return value
   }
 
-  const onChange = (event: SelectChangeEvent<string>) => {
+  const onChange = async (event: SelectChangeEvent<string>) => {
     const { value } = event.target
-    const action =
-      value === CREATE_NEW_VALUE
-        ? (props.create as ThunkAction<void, RootState, undefined, AnyAction>)
-        : props.action(value)
-
-    dispatch(action)
+    if (value === CREATE_NEW_VALUE && props.create != null) {
+      await props.create()
+    } else if (value !== CREATE_NEW_VALUE) {
+      dispatch(props.action(value))
+    }
   }
 
   const hideLabel = props.hideLabel ?? false
@@ -50,7 +52,7 @@ export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
         {!hideLabel && <InputLabel>{props.label}</InputLabel>}
         <Select
           variant="standard"
-          value={value}
+          value={getValue(data)}
           onChange={onChange}
           className={props.selectClassName}
           disabled={props.disabled ?? false}

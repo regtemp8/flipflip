@@ -31,13 +31,13 @@ import SpeedIcon from '@mui/icons-material/Speed'
 import VolumeDownIcon from '@mui/icons-material/VolumeDown'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
 
-import { getTimestamp } from '../../data/utils'
-import {
-  selectClipVolume,
-  selectClipStartMarks
-} from '../../store/clip/selectors'
-import { useAppSelector } from '../../store/hooks'
-import { selectUndefined } from '../../store/app/selectors'
+import { getTimestamp } from '../../utils'
+// import {
+//   selectClipVolume,
+//   selectClipStartMarks
+// } from '../../store/clip/selectors'
+// import { useAppSelector } from '../../store/hooks'
+// import { selectUndefined } from '../../store/app/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -73,10 +73,10 @@ export interface VideoControlProps {
 }
 
 function VideoControl(props: VideoControlProps) {
-  const volumeSelector =
-    props.clipID != null ? selectClipVolume(props.clipID) : selectUndefined
-  const volume = useAppSelector(volumeSelector)
-  const clipStartMarks = useAppSelector(selectClipStartMarks(props.clips))
+  //   const volumeSelector =
+  //     props.clipID != null ? selectClipVolume(props.clipID) : selectUndefined
+  const volume = 0 //useAppSelector(volumeSelector)
+  const clipStartMarks: number[] = [] //useAppSelector(selectClipStartMarks(props.clips))
 
   const [playing, setPlaying] = useState(true)
   const [showSpeed, setShowSpeed] = useState(false)
@@ -84,7 +84,7 @@ function VideoControl(props: VideoControlProps) {
   const _interval = useRef<number>()
 
   const onChangeVolume = useCallback(
-    (e: Event, volume: number | number[]) => {
+    (_e: Event, volume: number | number[]) => {
       let newVolume = Array.isArray(volume) ? volume[0] : volume
       if (newVolume > 100) {
         newVolume = 100
@@ -111,7 +111,7 @@ function VideoControl(props: VideoControlProps) {
   }, [props.video])
 
   const onChangePosition = useCallback(
-    (e: Event, value: number | number[]) => {
+    (_e: Event, value: number | number[]) => {
       const newPosition: number = Array.isArray(value) ? value[0] : value
       props.video.currentTime = newPosition
     },
@@ -267,7 +267,7 @@ function VideoControl(props: VideoControlProps) {
   }
 
   const onChangeSpeed = (
-    e: Event | SyntheticEvent<Element>,
+    _e: Event | SyntheticEvent<Element>,
     speed: number | number[]
   ) => {
     const newSpeed = Array.isArray(speed) ? speed[0] : speed

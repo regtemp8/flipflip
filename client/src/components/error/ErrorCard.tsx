@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { ErrorInfo, useCallback, useEffect, useRef, useState } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -21,42 +21,64 @@ import {
   type SelectChangeEvent
 } from '@mui/material'
 
-import flipflip from '../../FlipFlipService'
-import { convertFromEpoch } from '../../data/utils'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppVersion } from '../../store/app/selectors'
-import { selectConstants } from '../../store/constants/selectors'
+import { formatBackup } from '../../utils'
+import { Backup } from 'flipflip-common'
+import { useLocation, useNavigate } from 'react-router'
 import {
-  setRouteGoBack,
-  restoreAppStorageFromBackup
-} from '../../store/app/thunks'
+  useGetBackupsQuery,
+  useGetVersionQuery,
+  useRestoreBackupMutation,
+  useResetDataMutation
+} from '../../store/api/slice'
 
 export interface ErrorCardProps {
   error: Error
-  info: React.ErrorInfo
+  info: ErrorInfo
   onClearError: () => void
 }
 
 export default function ErrorCard(props: ErrorCardProps) {
-  const dispatch = useAppDispatch()
-  const { savePath, saveDir, pathSep } = useAppSelector(selectConstants())
-  const version = useAppSelector(selectAppVersion())
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { data: version } = useGetVersionQuery()
+  const backupsResult = useGetBackupsQuery()
+  const [restoreBackup] = useRestoreBackupMutation()
+  const [resetData] = useResetDataMutation()
 
   const [resetCheck, setResetCheck] = useState(false)
   const [backupCheck, setBackupCheck] = useState(false)
-  const [backup, setBackup] = useState<{ url: string; size: number }>()
-  const [backups, setBackups] = useState<Array<{ url: string; size: number }>>(
-    []
-  )
+  const [backup, setBackup] = useState<Backup>()
+  const [backups, setBackups] = useState<Backup[]>([])
+
+  const _pathname = useRef<string>()
+
+  const clearError = useCallback(() => {
+    props.onClearError()
+    _pathname.current = undefined
+    setResetCheck(false)
+    setBackupCheck(false)
+    setBackup(undefined)
+    setBackups([])
+  }, [props, setResetCheck, setBackupCheck, setBackup, setBackups])
+
+  // clear error when going back
+  useEffect(() => {
+    if (_pathname.current == null) {
+      _pathname.current = location.pathname
+    }
+    if (_pathname.current !== location.pathname) {
+      clearError()
+    }
+  }, [location.pathname, clearError])
 
   const onSubmitIssue = () => {
-    const componentStack = props.info.componentStack
+    const componentStack = (props.info.componentStack ?? '')
       .trim()
       .replace(/\s*in (ForwardRef|div)/g, '')
     let title = props.error.name + ': ' + props.error.message
     const body =
       '[[Please describe the bug and how to reproduce it]]%0D%0A%0D%0A%0D%0AFlipFlip Version: ' +
-      version +
+      version?.value +
       '%0D%0A```%0D%0A' +
       props.error.name +
       ': ' +
@@ -74,21 +96,12 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const reset = async () => {
-    await flipflip().api.rimrafSync(savePath)
+    await resetData()
     window.location.reload()
   }
 
-  const clearError = () => {
-    props.onClearError()
-    setResetCheck(false)
-    setBackupCheck(false)
-    setBackup(undefined)
-    setBackups([])
-  }
-
   const goBack = () => {
-    clearError()
-    dispatch(setRouteGoBack())
+    navigate(-1)
   }
 
   const onCloseDialog = () => {
@@ -97,21 +110,21 @@ export default function ErrorCard(props: ErrorCardProps) {
   }
 
   const getBackups = async () => {
-    const backups = await flipflip().api.getBackups()
+    const backups = backupsResult.data ?? []
     setBackupCheck(true)
     setBackups(backups)
     setBackup(backups.length > 0 ? backups[0] : undefined)
   }
 
   const onChangeBackup = (e: SelectChangeEvent<string>) => {
-    setBackup(backups.find((b) => b.url === e.target.value))
+    setBackup(backups.find((b) => b.id === Number(e.target.value)))
   }
 
-  const onFinishRestore = () => {
+  const onFinishRestore = async () => {
     onCloseDialog()
     try {
-      const backupFile = saveDir + pathSep + backup?.url
-      dispatch(restoreAppStorageFromBackup(backupFile))
+      const { id } = backup as Backup
+      await restoreBackup(id)
       clearError()
     } catch (e) {
       console.error(e)
@@ -149,7 +162,7 @@ export default function ErrorCard(props: ErrorCardProps) {
         variant={'body2'}
         color={'error'}
       >
-        {props.info.componentStack
+        {(props.info.componentStack ?? '')
           .trim()
           .replace(/\s*in (ForwardRef|div)/g, '')}
       </Typography>
@@ -224,7 +237,7 @@ export default function ErrorCard(props: ErrorCardProps) {
         >
           <DialogTitle id="restore-title">Restore Backup</DialogTitle>
           {backups.length > 0 && (
-            <React.Fragment>
+            <>
               <DialogContent>
                 <DialogContentText id="restore-description">
                   Choose a backup to restore from:
@@ -234,7 +247,7 @@ export default function ErrorCard(props: ErrorCardProps) {
                     <InputLabel>Backups</InputLabel>
                     <Select
                       variant="standard"
-                      value={backup.url}
+                      value={`${backup.id}`}
                       MenuProps={{
                         PaperProps: {
                           style: {
@@ -245,9 +258,8 @@ export default function ErrorCard(props: ErrorCardProps) {
                       onChange={onChangeBackup}
                     >
                       {backups.map((b) => (
-                        <MenuItem value={b.url} key={b.url}>
-                          {convertFromEpoch(b.url)} ({Math.round(b.size / 1000)}{' '}
-                          KB)
+                        <MenuItem value={b.id} key={b.id}>
+                          {formatBackup(b)}
                         </MenuItem>
                       ))}
                     </Select>
@@ -262,10 +274,10 @@ export default function ErrorCard(props: ErrorCardProps) {
                   Restore
                 </Button>
               </DialogActions>
-            </React.Fragment>
+            </>
           )}
           {backups.length === 0 && (
-            <React.Fragment>
+            <>
               <DialogContent>
                 <DialogContentText id="restore-description">
                   You don't have any backups available
@@ -276,7 +288,7 @@ export default function ErrorCard(props: ErrorCardProps) {
                   Cancel
                 </Button>
               </DialogActions>
-            </React.Fragment>
+            </>
           )}
         </Dialog>
       )}

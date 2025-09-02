@@ -1,16 +1,16 @@
-import React, { type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import {
   Slider as MaterialSlider,
-  Grid,
+  Grid2,
   InputAdornment,
   Typography,
   InputProps
 } from '@mui/material'
-import { type Mark } from '@mui/base/useSlider'
+import { type Mark } from '@mui/material/Slider/useSlider.types'
 import { type Variant } from '@mui/material/styles/createTypography'
-import { useAppSelector, useAppDispatch } from '../../../store/hooks'
 import type ReduxProps from '../ReduxProps'
 import BaseTextField from '../text/BaseTextField'
+import { useAppDispatch } from '../../../store/hooks'
 
 export interface BaseSliderProps extends ReduxProps<number> {
   min?: number
@@ -38,13 +38,9 @@ export interface BaseSliderProps extends ReduxProps<number> {
 }
 
 export default function BaseSlider(props: BaseSliderProps) {
-  let value = useAppSelector(props.selector)
-  if (props.scale) {
-    value = value * props.scale
-    value = Number(value.toFixed())
-  }
-
   const dispatch = useAppDispatch()
+  const { data: value } = props.selector()
+
   const defaultFormatter = (v: number) =>
     props.format?.divideBy ? v / props.format.divideBy : v
 
@@ -69,7 +65,7 @@ export default function BaseSlider(props: BaseSliderProps) {
     )
   }
 
-  const onSliderChange = (event: Event, value: number | number[]) => {
+  const onSliderChange = (_event: Event, value: number | number[]) => {
     const numberValue = Array.isArray(value) ? value[0] : value
     dispatchValueChange(numberValue)
   }
@@ -89,15 +85,28 @@ export default function BaseSlider(props: BaseSliderProps) {
     dispatch(props.action(value))
   }
 
+  const getValue = (value?: number): number => {
+    return value ?? props.min ?? 0
+  }
+
+  const scaleValue = (value?: number): number => {
+    value = getValue(value)
+    if (props.scale == null) {
+      return value
+    }
+
+    return Number((value * props.scale).toFixed())
+  }
+
   const renderSlider = (): JSX.Element => {
     const formatter = props.format ? getFormatter() : undefined
     return (
       <MaterialSlider
         min={props.min}
         max={props.max}
-        step={props.marks ? null : props.step ?? 1}
+        step={props.marks ? null : (props.step ?? 1)}
         marks={props.marks}
-        value={value}
+        value={scaleValue(value)}
         onChange={onSliderChange}
         valueLabelDisplay={'auto'}
         valueLabelFormat={formatter}
@@ -108,15 +117,14 @@ export default function BaseSlider(props: BaseSliderProps) {
 
   const renderSliderWithTextField = (): JSX.Element => {
     return (
-      <Grid container spacing={1}>
-        <Grid item xs>
-          {renderSlider()}
-        </Grid>
-        <Grid item xs={3}>
+      <Grid2 container spacing={1}>
+        <Grid2 size="grow">{renderSlider()}</Grid2>
+        <Grid2 size={3}>
           <BaseTextField
             variant="standard"
             selector={props.selector}
             action={props.action}
+            scale={props.scale}
             InputProps={
               props?.format?.type === 'percent'
                 ? {
@@ -135,12 +143,13 @@ export default function BaseSlider(props: BaseSliderProps) {
               labelledBy: props.labelledBy
             }}
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     )
   }
 
   const renderLabel = () => {
+    const v = scaleValue(value)
     return (
       <Typography
         variant={props.label?.variant ?? 'caption'}
@@ -150,8 +159,8 @@ export default function BaseSlider(props: BaseSliderProps) {
         {props.label?.text}{' '}
         {props.label?.appendValue
           ? props.format
-            ? getFormatter()(value)
-            : value
+            ? getFormatter()(v)
+            : v
           : null}
       </Typography>
     )

@@ -1,11 +1,10 @@
-import React, { useRef, type PropsWithChildren, useEffect } from 'react'
+import { useRef, type PropsWithChildren, useEffect } from 'react'
 import { animated, useSpring } from '@react-spring/web'
-import { type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import { StrobeData } from '../../store/player/ContentPreloadService'
-import { getEaseFunction } from '../../data/utils'
+import { StrobeData } from 'flipflip-common'
+import { getEaseFunction } from '../../utils'
 
-const useStyles = makeStyles()((theme: Theme) => {
+const useStyles = makeStyles()(() => {
   return {
     strobeContainer: {
       position: 'absolute',

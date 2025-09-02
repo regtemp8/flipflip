@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
-import Sound from 'react-sound'
+import { Fragment, useEffect, useState, useRef } from 'react'
 import { cx } from '@emotion/css'
 
 import {
   Collapse,
-  Grid,
+  Grid2,
   IconButton,
   Slider,
-  type Theme,
   Tooltip,
   Typography
 } from '@mui/material'
@@ -25,31 +23,19 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 import VolumeDownIcon from '@mui/icons-material/VolumeDown'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
 
-import { getMsRemainder, getTimestamp } from '../../data/utils'
-import { RP, TF } from 'flipflip-common'
-import SoundTick from './SoundTick'
-import { nextScene } from '../../store/scene/thunks'
-import { playTrack } from '../../store/audio/slice'
+import { getMsRemainder, getTimestamp } from '../../utils'
+import { Audio } from 'flipflip-common'
 import BaseSlider from '../common/slider/BaseSlider'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  selectAudioBPM,
-  selectAudioUrl,
-  selectAudioTick,
-  selectAudioTickMode,
-  selectAudioTickDelay,
-  selectAudioTickMaxDelay,
-  selectAudioTickMinDelay,
-  selectAudioTickSinRate,
-  selectAudioTickBPMMulti,
-  selectAudioVolume,
-  selectAudioSpeed,
-  selectAudioStopAtEnd,
-  selectAudioNextSceneAtEnd
-} from '../../store/audio/selectors'
 import DurationCalculator from '../../data/DurationCalculator'
+import { AppDispatch } from '../../store/store'
+import { useAppSelector } from '../../store/hooks'
+import { setAudioOptionsVolume } from '../../store/audioOptions/slice'
+import {
+  selectAudioOptions,
+  selectAudioOptionsVolume
+} from '../../store/audioOptions/selectors'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   fullWidth: {
     width: '100%'
   },
@@ -72,7 +58,6 @@ export interface AudioControlProps {
   startPlaying: boolean
   shorterSeek?: boolean
   showMsTimestamp?: boolean
-  audioVolumeAction: (value: number) => any
   nextTrack?: () => void
   prevTrack?: () => void
   goBack?: () => void
@@ -80,226 +65,155 @@ export interface AudioControlProps {
 }
 
 function AudioControl(props: AudioControlProps) {
-  const dispatch = useAppDispatch()
-  const bpm = useAppSelector(selectAudioBPM(props.audioID))
-  const url = useAppSelector(selectAudioUrl(props.audioID))
-  const tick = useAppSelector(selectAudioTick(props.audioID))
-  const tickMode = useAppSelector(selectAudioTickMode(props.audioID))
-  const tickDelay = useAppSelector(selectAudioTickDelay(props.audioID))
-  const tickMaxDelay = useAppSelector(selectAudioTickMaxDelay(props.audioID))
-  const tickMinDelay = useAppSelector(selectAudioTickMinDelay(props.audioID))
-  const tickSinRate = useAppSelector(selectAudioTickSinRate(props.audioID))
-  const tickBPMMulti = useAppSelector(selectAudioTickBPMMulti(props.audioID))
-  const stopAtEnd = useAppSelector(selectAudioStopAtEnd(props.audioID))
-  const nextSceneAtEnd = useAppSelector(
-    selectAudioNextSceneAtEnd(props.audioID)
-  )
-  const volume = useAppSelector(selectAudioVolume(props.audioID))
-  const speed = useAppSelector(selectAudioSpeed(props.audioID))
+  const audio = useAppSelector(selectAudioOptions())
 
   const [playing, setPlaying] = useState(props.startPlaying)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [tickState, setTickState] = useState(false)
 
-  const _timeout = useRef<number>()
-  const _queueNextTrack = useRef(false)
   const _duration = useRef(new DurationCalculator())
+  const _control = useRef<HTMLAudioElement | null>(null)
+  const _tickDuration = useRef<number>(0)
 
-  const tickLoop = useCallback(
-    (starting: boolean = false) => {
-      if (!starting) {
-        if (_queueNextTrack.current) {
-          _queueNextTrack.current = false
-          props.nextTrack!()
-          setPosition(0)
-          setDuration(0)
-        }
-
-        setTickState(!tickState)
-      }
-      if (tick) {
-        const timeout = _duration.current.calc(
-          {
-            timingFunction: tickMode,
-            time: tickDelay,
-            timeMax: tickMaxDelay,
-            timeMin: tickMinDelay,
-            bpmMulti: tickBPMMulti,
-            sinRate: tickSinRate
-          },
-          0,
-          bpm
-        )
-        if (timeout != null) {
-          _timeout.current = window.setTimeout(tickLoop, timeout)
-          return
-        }
-      }
-      _timeout.current = undefined
-    },
-    [
-      bpm,
-      props.nextTrack,
+  const onTimeUpdate = (currentTime: number) => {
+    const {
       tick,
-      tickBPMMulti,
+      tickMode,
       tickDelay,
       tickMaxDelay,
       tickMinDelay,
-      tickMode,
+      tickBPMMulti,
       tickSinRate,
-      tickState
-    ]
-  )
+      bpm
+    } = audio as Audio
+    if (tick && currentTime >= _tickDuration.current) {
+      _control.current!.currentTime = 0
+      const nextTick = _duration.current.calc(
+        {
+          timingFunction: tickMode,
+          time: tickDelay,
+          timeMax: tickMaxDelay,
+          timeMin: tickMinDelay,
+          bpmMulti: tickBPMMulti,
+          sinRate: tickSinRate
+        },
+        0,
+        bpm
+      )
 
-  useEffect(() => {
-    if (playing) {
-      tickLoop(true)
+      _tickDuration.current = nextTick / 1000
+    } else {
+      setPosition(currentTime)
     }
-
-    _queueNextTrack.current = false
-    return () => {
-      if (_timeout.current) {
-        clearTimeout(_timeout.current)
-      }
-
-      _queueNextTrack.current = false
-    }
-  }, [playing, tickLoop])
+  }
 
   useEffect(() => {
     setPosition(0)
     setDuration(0)
-  }, [url])
+  }, [audio?.url])
 
   useEffect(() => {
-    if (playing && tick && tickMode !== TF.scene) {
-      tickLoop(true)
-    } else {
-      clearTimeout(_timeout.current)
+    if (!_control.current || audio == null) {
+      return
     }
-  }, [playing, tick, tickLoop, tickMode])
 
-  useEffect(() => {
-    if (
-      tick &&
-      tickMode === TF.scene &&
-      props.scenePaths &&
-      props.scenePaths.length > 0
-    ) {
-      if (_queueNextTrack.current) {
-        _queueNextTrack.current = false
-        props.nextTrack!()
-        setPosition(0)
-        setDuration(0)
-      }
-
-      setTickState(!tickState)
-    }
-  }, [tick, tickMode, props.scenePaths, props.nextTrack, tickState])
-
-  useEffect(() => {
+    _control.current.currentTime = 0
+    const {
+      tick,
+      tickMode,
+      tickDelay,
+      tickMaxDelay,
+      tickMinDelay,
+      tickBPMMulti,
+      tickSinRate,
+      bpm
+    } = audio
+    let nextTick = 0
     if (tick) {
-      tickLoop(true)
+      nextTick = _duration.current.calc(
+        {
+          timingFunction: tickMode,
+          time: tickDelay,
+          timeMax: tickMaxDelay,
+          timeMin: tickMinDelay,
+          bpmMulti: tickBPMMulti,
+          sinRate: tickSinRate
+        },
+        0,
+        bpm
+      )
     }
-  }, [tick, tickLoop])
+
+    _tickDuration.current = nextTick / 1000
+  }, [
+    audio?.tick,
+    audio?.tickMode,
+    audio?.tickDelay,
+    audio?.tickMaxDelay,
+    audio?.tickMinDelay,
+    audio?.tickBPMMulti,
+    audio?.tickSinRate,
+    audio?.bpm
+  ])
 
   useEffect(() => {
-    if (tick && tickMode === TF.scene) {
-      tickLoop(true)
+    if (!_control.current || audio == null) {
+      return
     }
-  }, [tickMode, tick, tickLoop])
 
-  const getTimestampFromMs = (ms: number): string => {
-    const secs = Math.floor(ms / 1000)
-    return getTimestamp(secs)
+    _control.current.volume = audio.volume / 100
+  }, [audio?.volume])
+
+  useEffect(() => {
+    if (!_control.current || audio == null) {
+      return
+    }
+
+    _control.current.playbackRate = audio.speed / 10
+  }, [audio?.speed])
+
+  const onChangePosition = (_: Event, value: number | number[]) => {
+    if (!_control.current || audio == null) {
+      return
+    }
+
+    _control.current.currentTime = Array.isArray(value) ? value[0] : value
   }
 
-  const onChangePosition = (
-    e: Event,
-    value: number | number[],
-    activeThumb: number
-  ) => {
-    const newPosition: number = Array.isArray(value) ? value[0] : value
-    setPosition(newPosition)
-  }
+  const togglePlay = () => {
+    if (!_control.current) {
+      return
+    }
 
-  const onFinishedPlaying = () => {
-    // Increment play count upon finish
-    dispatch(playTrack(props.audioID))
-
-    if (stopAtEnd && props.goBack) {
-      props.goBack()
-    } else if (nextSceneAtEnd) {
-      // TODO how is this going to work with scene playlists?
-      dispatch(nextScene(props.sceneID))
-      setPosition(0)
-      setDuration(0)
+    if (_control.current.paused) {
+      _control.current.play()
     } else {
-      if (props.repeat === RP.all) {
-        if (tick) {
-          _queueNextTrack.current = true
-        } else {
-          if (props.singleTrack) {
-            setPosition(1)
-          } else {
-            props.nextTrack!()
-            setPosition(0)
-            setDuration(0)
-          }
-        }
-      } else if (props.repeat === RP.one) {
-        setPosition(1)
-      } else if (props.repeat === RP.none) {
-        if (!props.lastTrack) {
-          if (tick) {
-            _queueNextTrack.current = true
-          } else {
-            props.nextTrack!()
-            setPosition(0)
-            setDuration(0)
-          }
-        } else {
-          setPlaying(false)
-        }
-      }
+      _control.current.pause()
     }
-  }
-
-  const onPlaying = () => {
-    if (props.onPlaying) {
-      props.onPlaying(position, duration)
-    }
-  }
-
-  const onError = (component: string) => {
-    console.error(component + ' - react-sound error')
-  }
-
-  const onPlay = () => {
-    setPlaying(true)
-  }
-
-  const onPause = () => {
-    setPlaying(false)
+    setPlaying((value) => !value)
   }
 
   const onBack = () => {
-    const amount = props.shorterSeek ? 5000 : 10000
-    setPosition(Math.max(position - amount, 0))
+    if (!_control.current) {
+      return
+    }
+
+    const amount = props.shorterSeek ? 5 : 10
+    _control.current.currentTime -= amount
   }
 
   const onForward = () => {
-    const amount = props.shorterSeek ? 5000 : 10000
-    setPosition(Math.min(position + amount, duration))
+    if (!_control.current) {
+      return
+    }
+
+    const amount = props.shorterSeek ? 5 : 10
+    _control.current.currentTime += amount
   }
 
   const { classes } = useStyles()
-  const playStatus = playing
-    ? (Sound as any).status.PLAYING
-    : (Sound as any).status.PAUSED
 
-  let msRemainder
+  let msRemainder = undefined
   if (props.showMsTimestamp) {
     msRemainder = getMsRemainder(position)
     if (msRemainder === '.000') {
@@ -308,57 +222,39 @@ function AudioControl(props: AudioControlProps) {
   }
 
   return (
-    <React.Fragment key={props.audioID}>
-      {props.audioEnabled && tick && playing && (
-        <SoundTick
-          url={url as string}
-          playing={playStatus}
-          speed={speed / 10}
-          volume={volume}
-          tick={tickState}
-          onPlaying={onPlaying}
-          onError={() => onError('SoundTick')}
-          onFinishedPlaying={onFinishedPlaying}
+    <Fragment key={props.audioID}>
+      {props.audioEnabled && (
+        <audio
+          ref={_control}
+          src={audio?.fileUrl ?? ''}
+          autoPlay={props.startPlaying}
+          onLoadedData={(e) => setDuration(e.currentTarget.duration)}
+          onTimeUpdate={(e) => onTimeUpdate(e.currentTarget.currentTime)}
+          onEnded={(_) => console.log('ENDED PLAYING')} // TODO play next track and/or switch to next scene
         />
       )}
-      {props.audioEnabled && !tick && (
-        <Sound
-          url={url as string}
-          playStatus={playStatus}
-          playbackRate={speed / 10}
-          volume={volume}
-          position={position}
-          onPlaying={onPlaying}
-          onError={() => onError('Sound')}
-          onFinishedPlaying={onFinishedPlaying}
-        />
-      )}
-      <Grid
-        item
-        xs={12}
-        className={cx(!props.audioEnabled && classes.noPadding)}
-      >
+      <Grid2 size={12} className={cx(!props.audioEnabled && classes.noPadding)}>
         <Collapse in={props.audioEnabled} className={classes.fullWidth}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12}>
-              <Grid
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={12}>
+              <Grid2
                 container
                 spacing={1}
                 alignItems="center"
                 justifyContent="center"
               >
-                <Grid item xs={12} sm={12}>
-                  <Grid container spacing={1} alignItems="center">
-                    <Grid item>
+                <Grid2 size={12}>
+                  <Grid2 container spacing={1} alignItems="center">
+                    <Grid2>
                       <Typography
                         variant="caption"
                         component="div"
                         color="textSecondary"
                       >
-                        {getTimestampFromMs(position)}
+                        {getTimestamp(position)}
                       </Typography>
-                    </Grid>
-                    <Grid item xs>
+                    </Grid2>
+                    <Grid2 size="grow">
                       <Slider
                         valueLabelDisplay={msRemainder ? 'auto' : 'off'}
                         valueLabelFormat={msRemainder}
@@ -370,19 +266,19 @@ function AudioControl(props: AudioControlProps) {
                         max={duration}
                         onChange={onChangePosition}
                       />
-                    </Grid>
-                    <Grid item>
+                    </Grid2>
+                    <Grid2>
                       <Typography
                         variant="caption"
                         component="div"
                         color="textSecondary"
                       >
-                        {getTimestampFromMs(duration)}
+                        {getTimestamp(duration)}
                       </Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item>
+                    </Grid2>
+                  </Grid2>
+                </Grid2>
+                <Grid2>
                   {props.prevTrack && (
                     <Tooltip disableInteractive title="Prev Track">
                       <IconButton onClick={props.prevTrack} size="large">
@@ -399,10 +295,7 @@ function AudioControl(props: AudioControlProps) {
                     disableInteractive
                     title={playing ? 'Pause' : 'Play'}
                   >
-                    <IconButton
-                      onClick={playing ? onPause : onPlay}
-                      size="large"
-                    >
+                    <IconButton onClick={togglePlay} size="large">
                       {playing ? <PauseIcon /> : <PlayArrowIcon />}
                     </IconButton>
                   </Tooltip>
@@ -418,30 +311,32 @@ function AudioControl(props: AudioControlProps) {
                       </IconButton>
                     </Tooltip>
                   )}
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container spacing={1} alignItems="center">
-                <Grid item>
+                </Grid2>
+              </Grid2>
+            </Grid2>
+            <Grid2 size={12}>
+              <Grid2 container spacing={1} alignItems="center">
+                <Grid2>
                   <VolumeDownIcon />
-                </Grid>
-                <Grid item xs>
+                </Grid2>
+                <Grid2 size="grow">
                   <BaseSlider
-                    selector={selectAudioVolume(props.audioID)}
-                    action={props.audioVolumeAction}
+                    selector={() => useAppSelector(selectAudioOptionsVolume())}
+                    action={(volume: number) => (dispatch: AppDispatch) =>
+                      dispatch(setAudioOptionsVolume(volume))
+                    }
                     labelledBy="audio-volume-slider"
                   />
-                </Grid>
-                <Grid item>
+                </Grid2>
+                <Grid2>
                   <VolumeUpIcon />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
+                </Grid2>
+              </Grid2>
+            </Grid2>
+          </Grid2>
         </Collapse>
-      </Grid>
-    </React.Fragment>
+      </Grid2>
+    </Fragment>
   )
 }
 

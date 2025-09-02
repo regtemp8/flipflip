@@ -145,6 +145,7 @@ const SF = {
   duration: 'sf.duration',
   resolution: 'sf.resolution',
   random: 'sf.random',
+  name: 'sf.name',
 };
 
 const ASF = {
@@ -598,10 +599,13 @@ const MVF = {
 const PLT = {
   // playlist type
   audio: 'plt.audio',
-  display: 'plt.display',
   scene: 'plt.scene',
   script: 'plt.script',
 };
+
+const SCENE_RANDOM = -1;
+const SCENE_NONE = 0;
+const PLAYLIST_NONE = 0;
 
 export {
   AF,
@@ -653,4 +657,7 @@ export {
   WF,
   MVF,
   PLT,
+  SCENE_NONE,
+  SCENE_RANDOM,
+  PLAYLIST_NONE,
 };

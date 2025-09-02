@@ -1,6 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
-
+import {
+  Link as RouterLink,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate
+} from 'react-router'
 import {
   AppBar,
   Box,
@@ -24,7 +30,8 @@ import {
   type Theme,
   Toolbar,
   Tooltip,
-  Typography
+  Typography,
+  LinearProgress
 } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
@@ -42,10 +49,13 @@ import SceneOptions from '../sceneDetail/SceneOptions'
 import SceneEffects from '../sceneDetail/SceneEffects'
 
 import { MO } from 'flipflip-common'
-import { setDefaultConfig, setResetAllTutorials } from '../../store/app/slice'
-import { setRouteGoBack } from '../../store/app/thunks'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectAppConfigTutorials } from '../../store/app/selectors'
+
+import {
+  useGetTutorialsQuery,
+  useResetTutorialsMutation,
+  useGetSceneSettingsQuery,
+  useResetSettingsMutation
+} from '../../store/api/slice'
 
 const drawerWidth = 240
 
@@ -186,30 +196,46 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
+const tabRoutes = [
+  '/settings/scene-options',
+  '/settings/scene-effects',
+  '/settings/general'
+]
+const getOpenTab = (pathname: string) => {
+  const index = tabRoutes.findIndex((tab) => tab === pathname)
+  return pathname.startsWith('/settings') && index === -1
+    ? tabRoutes.length - 1
+    : index
+}
+
 function ConfigForm() {
-  const dispatch = useAppDispatch()
-  const tutorials = useAppSelector(selectAppConfigTutorials())
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const { data: scene } = useGetSceneSettingsQuery()
+  const { data: tutorials } = useGetTutorialsQuery()
+  const [resetSettings] = useResetSettingsMutation()
+  const [resetTutorials] = useResetTutorialsMutation()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string>()
-  const [openTab, setOpenTab] = useState(2)
 
   const onToggleDrawer = () => {
     setDrawerOpen(!drawerOpen)
   }
-  const onChangeTab = (e: any, newTab: number) => {
-    setOpenTab(newTab)
-  }
   const onRestoreDefaults = () => {
     setOpenMenu(MO.deleteAlert)
   }
-  const onFinishRestoreDefaults = () => dispatch(setDefaultConfig())
+  const onFinishRestoreDefaults = async () => {
+    await resetSettings()
+    onCloseDialog()
+  }
 
   const onCloseDialog = () => {
     setOpenMenu(undefined)
     setDrawerOpen(false)
   }
 
+  const openTab = getOpenTab(pathname)
   const { classes } = useStyles()
   return (
     <div className={classes.root}>
@@ -221,7 +247,7 @@ function ConfigForm() {
               color="inherit"
               aria-label="Back"
               onClick={() => {
-                dispatch(setRouteGoBack())
+                navigate(-1)
               }}
               size="large"
             >
@@ -272,7 +298,6 @@ function ConfigForm() {
           <Tabs
             orientation="vertical"
             value={openTab}
-            onChange={onChangeTab}
             aria-label="scene detail tabs"
             className={classes.tabs}
           >
@@ -286,6 +311,11 @@ function ConfigForm() {
                 classes.optionsTab,
                 !drawerOpen && classes.tabClose
               )}
+              tabIndex={0}
+              disabled={scene == null}
+              component={(props) => (
+                <RouterLink {...props} replace to={tabRoutes[0]} />
+              )}
             />
             <Tab
               id="vertical-tab-1"
@@ -297,6 +327,11 @@ function ConfigForm() {
                 classes.effectsTab,
                 !drawerOpen && classes.tabClose
               )}
+              tabIndex={1}
+              disabled={scene == null}
+              component={(props) => (
+                <RouterLink {...props} replace to={tabRoutes[1]} />
+              )}
             />
             <Tab
               id="vertical-tab-2"
@@ -307,6 +342,10 @@ function ConfigForm() {
                 classes.tab,
                 classes.sourcesTab,
                 !drawerOpen && classes.tabClose
+              )}
+              tabIndex={2}
+              component={(props) => (
+                <RouterLink {...props} replace to={tabRoutes[2]} />
               )}
             />
           </Tabs>
@@ -320,6 +359,7 @@ function ConfigForm() {
           >
             <ListItemButton
               disabled={
+                tutorials != null &&
                 tutorials.scenePicker == null &&
                 tutorials.sceneDetail == null &&
                 tutorials.player == null &&
@@ -330,7 +370,7 @@ function ConfigForm() {
                 tutorials.sceneGenerator == null &&
                 tutorials.videoClipper == null
               }
-              onClick={() => dispatch(setResetAllTutorials())}
+              onClick={async () => await resetTutorials()}
               className={classes.deleteItem}
             >
               <ListItemIcon>
@@ -381,38 +421,36 @@ function ConfigForm() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth={false} className={classes.container}>
-          {openTab === 0 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <SceneOptions />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 1 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <SceneEffects />
-                </Box>
-              </div>
-            </Typography>
-          )}
-
-          {openTab === 2 && (
-            <Typography component="div">
-              <div className={classes.tabPanel}>
-                <div className={classes.drawerSpacer} />
-                <Box p={2} className={classes.fill}>
-                  <GeneralConfig />
-                </Box>
-              </div>
-            </Typography>
-          )}
+          <Typography component="div">
+            <div className={classes.tabPanel}>
+              <div className={classes.drawerSpacer} />
+              <Box p={2} className={classes.fill}>
+                <Routes>
+                  <Route
+                    path="/scene-options"
+                    element={
+                      scene != null ? (
+                        <SceneOptions sceneID={scene.id} />
+                      ) : (
+                        <LinearProgress />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/scene-effects"
+                    element={
+                      scene != null ? (
+                        <SceneEffects sceneID={scene.id} />
+                      ) : (
+                        <LinearProgress />
+                      )
+                    }
+                  />
+                  <Route path="*" element={<GeneralConfig />} />
+                </Routes>
+              </Box>
+            </div>
+          </Typography>
         </Container>
       </main>
     </div>

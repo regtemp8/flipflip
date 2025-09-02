@@ -1,5 +1,4 @@
-import { selectDisplayVisibleViews } from '../../store/display/selectors'
-import { useAppSelector } from '../../store/hooks'
+import { useGetVisibleDisplayViewIdsQuery } from '../../store/api/slice'
 import DisplayViewBox from './DisplayViewBox'
 
 export interface DisplaySetupPreviewProps {
@@ -8,10 +7,10 @@ export interface DisplaySetupPreviewProps {
 }
 
 function DisplaySetupPreview(props: DisplaySetupPreviewProps) {
-  const views = useAppSelector(selectDisplayVisibleViews(props.displayID))
+  const { data: views } = useGetVisibleDisplayViewIdsQuery(props.displayID)
   return (
     <>
-      {views.map((id) => (
+      {views?.map((id) => (
         <DisplayViewBox
           key={id}
           viewID={id}

@@ -4,21 +4,95 @@ export function copy<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-export function getFileName(url: string, pathSep: string, extension = true) {
-  let sep;
-  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
-    sep = '/';
-  } else {
-    sep = pathSep;
+const gridIDPrefix = '999';
+export function convertGridIDToSceneID(gridID: number): number {
+  return Number(gridIDPrefix + gridID);
+}
+
+export function isSceneIDAGridID(sceneID: number): boolean {
+  return isSceneIDTextAGridID(sceneID.toString());
+}
+
+function isSceneIDTextAGridID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(gridIDPrefix);
+}
+
+export function convertSceneIDToGridID(sceneID: number): number | undefined {
+  const sceneIDText = sceneID.toString();
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(gridIDPrefix.length))
+    : undefined;
+}
+
+const displayIDPrefix = '8888';
+export function convertDisplayIDToSceneID(displayID: number): number {
+  return Number(displayIDPrefix + displayID);
+}
+
+export function isSceneIDADisplayID(sceneID: number): boolean {
+  return isSceneIDTextADisplayID(sceneID.toString());
+}
+
+function isSceneIDTextADisplayID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(displayIDPrefix);
+}
+
+export function convertSceneIDToDisplayID(sceneID: number): number | undefined {
+  const sceneIDText = sceneID.toString();
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(displayIDPrefix.length))
+    : undefined;
+}
+
+const playlistIDPrefix = '77777';
+export function convertPlaylistIDToSceneID(displayID: number): number {
+  return Number(playlistIDPrefix + displayID);
+}
+
+export function isSceneIDAPlaylistID(sceneID: number): boolean {
+  return isSceneIDTextAPlaylistID(sceneID.toString());
+}
+
+function isSceneIDTextAPlaylistID(sceneIDText: string): boolean {
+  return sceneIDText.startsWith(playlistIDPrefix);
+}
+
+export function convertSceneIDToPlaylistID(
+  sceneID: number
+): number | undefined {
+  const sceneIDText = sceneID.toString();
+  return isSceneIDTextADisplayID(sceneIDText)
+    ? Number(sceneIDText.substring(playlistIDPrefix.length))
+    : undefined;
+}
+
+export function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
   }
-  url = url.substring(url.lastIndexOf(sep) + 1);
-  if (url.includes('?')) {
-    url = url.substring(0, url.indexOf('?'));
+  return color;
+}
+
+export function randomizeList<T>(list: T[]) {
+  let currentIndex = list.length,
+    temporaryValue,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = list[currentIndex];
+    list[currentIndex] = list[randomIndex];
+    list[randomIndex] = temporaryValue;
   }
-  if (!extension) {
-    url = url.substring(0, url.lastIndexOf('.'));
-  }
-  return url;
+
+  return list;
 }
 
 export function urlToPath(url: string, isWin32: boolean): string {
@@ -109,6 +183,40 @@ export function isVideoPlaylist(path: string, strict: boolean): boolean {
 export const isImageOrVideo = (path: string, strict: boolean): boolean => {
   return isImage(path, strict) || isVideo(path, strict);
 };
+
+export function filterPathsToJustPlayable(
+  imageTypeFilter: string,
+  paths: string[],
+  strict: boolean
+): string[] {
+  switch (imageTypeFilter) {
+    default:
+    case IF.any:
+      return paths.filter((p) => isImageOrVideo(p, strict));
+    case IF.stills:
+    case IF.images:
+      return paths.filter((p) => isImage(p, strict));
+    case IF.animated:
+      return paths.filter(
+        (p) => p.toLowerCase().endsWith('.gif') || isVideo(p, strict)
+      );
+    case IF.videos:
+      return paths.filter((p) => isVideo(p, strict));
+  }
+}
+
+export function removeDuplicatesBy<T>(
+  keyFn: (item: T) => string,
+  array: T[]
+): T[] {
+  const mySet = new Set();
+  return array.filter((x: T) => {
+    const key = keyFn(x);
+    const isNew = !mySet.has(key);
+    if (isNew) mySet.add(key);
+    return isNew;
+  });
+}
 
 export function getSourceType(url: string): string {
   if (isAudio(url, false)) {
@@ -363,36 +471,19 @@ export function getFileGroup(url: string, pathSep: string) {
   }
 }
 
-export function filterPathsToJustPlayable(
-  imageTypeFilter: string,
-  paths: string[],
-  strict: boolean
-): string[] {
-  switch (imageTypeFilter) {
-    default:
-    case IF.any:
-      return paths.filter((p) => isImageOrVideo(p, strict));
-    case IF.stills:
-    case IF.images:
-      return paths.filter((p) => isImage(p, strict));
-    case IF.animated:
-      return paths.filter(
-        (p) => p.toLowerCase().endsWith('.gif') || isVideo(p, strict)
-      );
-    case IF.videos:
-      return paths.filter((p) => isVideo(p, strict));
+export function getFileName(url: string, pathSep: string, extension = true) {
+  let sep;
+  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
+    sep = '/';
+  } else {
+    sep = pathSep;
   }
-}
-
-export function removeDuplicatesBy<T>(
-  keyFn: (item: T) => string,
-  array: T[]
-): T[] {
-  const mySet = new Set();
-  return array.filter((x: T) => {
-    const key = keyFn(x);
-    const isNew = !mySet.has(key);
-    if (isNew) mySet.add(key);
-    return isNew;
-  });
+  url = url.substring(url.lastIndexOf(sep) + 1);
+  if (url.includes('?')) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  if (!extension) {
+    url = url.substring(0, url.lastIndexOf('.'));
+  }
+  return url;
 }

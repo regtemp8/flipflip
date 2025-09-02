@@ -1,13 +1,14 @@
-import React, { ChangeEvent, MouseEvent, useState } from 'react'
-import { cx } from '@emotion/css'
+import { useState } from 'react'
 
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
+  FormControl,
+  Grid2,
   IconButton,
-  TextField,
   type Theme,
   Typography
 } from '@mui/material'
@@ -16,11 +17,34 @@ import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DeleteIcon from '@mui/icons-material/Delete'
-
-import { extractMusicMetadata } from '../../data/utils'
-import type Audio from '../../store/audio/Audio'
-import { newAudio } from '../../store/audio/Audio'
-import flipflip from '../../FlipFlipService'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import {
+  setAudioEditAlbum,
+  setAudioEditArtist,
+  setAudioEditComment,
+  setAudioEditEditing,
+  setAudioEditName,
+  setAudioEditThumb,
+  setAudioEditTrackNum,
+  updateAudioEditEditing
+} from '../../store/audioEdit/slice'
+import {
+  selectAudioEditAlbum,
+  selectAudioEditArtist,
+  selectAudioEditComment,
+  selectAudioEditIDs,
+  selectAudioEditName,
+  selectAudioEditThumb,
+  selectAudioEditTrackNum
+} from '../../store/audioEdit/selectors'
+import BaseTextField from '../common/text/BaseTextField'
+import { AppDispatch } from '../../store/store'
+import { saveAudioEdit } from '../../store/audioEdit/thunks'
+import FilePicker from '../common/FilePicker'
+import {
+  useLazyGetAudioMetadataQuery,
+  useUploadAudioThumbMutation
+} from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   input: {
@@ -67,161 +91,209 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
-export interface AudioEditProps {
-  audio: Audio
-  cachePath: string
-  title: string
-  allowSuggestion?: boolean
-  onCancel: () => void
-  onFinishEdit: (common: Audio) => void
-}
+function AudioEdit() {
+  const dispatch = useAppDispatch()
+  const [getAudioMetadata] = useLazyGetAudioMetadataQuery()
+  const [uploadAudioThumb] = useUploadAudioThumbMutation()
+  const ids = useAppSelector(selectAudioEditIDs())
+  const { data: name } = useAppSelector(selectAudioEditName())
+  const { data: thumb } = useAppSelector(selectAudioEditThumb())
 
-function AudioEdit(props: AudioEditProps) {
-  const [audio, setAudio] = useState(props.audio)
+  const [showThumbPicker, setShowThumbPicker] = useState(false)
 
-  const nop = () => {}
-
-  const onEditInt = (key: string, e: ChangeEvent<HTMLInputElement>) => {
-    const audioCopy = newAudio(audio)
-    audioCopy[key] = parseInt(e.target.value)
-    setAudio(audioCopy)
+  const onRemoveThumb = () => {
+    dispatch(setAudioEditThumb(undefined))
   }
 
-  const onEdit = (key: string, e: ChangeEvent<HTMLInputElement>) => {
-    const audioCopy = newAudio(audio)
-    audioCopy[key] = e.target.value
-    setAudio(audioCopy)
-  }
-
-  const onRemoveThumb = (e: MouseEvent) => {
-    e.preventDefault()
-    const audioCopy = newAudio(audio)
-    audioCopy.thumb = undefined
-    setAudio(audioCopy)
-  }
-
-  const loadThumb = async () => {
-    const thumb = await flipflip().api.loadThumb(props.cachePath)
-    if (thumb) {
-      const audioCopy = newAudio(audio)
-      audioCopy.thumb = thumb
-      setAudio(audioCopy)
+  const onPickThumb = async (chosenFiles?: string[]) => {
+    setShowThumbPicker(false)
+    if (chosenFiles?.length === 1) {
+      try {
+        const { thumb } = await uploadAudioThumb({
+          thumb: chosenFiles[0]
+        }).unwrap()
+        dispatch(setAudioEditThumb(thumb))
+      } catch (error) {
+        console.error('Failed to upload audio thumb', error)
+      }
     }
   }
 
-  const loadSuggestions = () => {
-    const url = audio.url as string
-    flipflip()
-      .api.parseMusicMetadataFile(url, props.cachePath)
-      .then(async (metadata: any) => {
-        return await extractMusicMetadata(newAudio(audio), newAudio(metadata))
-      })
-      .then((newAudio: Audio) => {
-        setAudio(newAudio)
-      })
-      .catch((err: any) => {
-        console.error('Error reading metadata:', err.message)
-      })
+  const loadThumb = async () => {
+    setShowThumbPicker(thumb == null)
+  }
+
+  const loadSuggestions = async () => {
+    if (ids?.length !== 1) {
+      return
+    }
+
+    const id = ids[0]
+    try {
+      const metadata = await getAudioMetadata(id).unwrap()
+      dispatch(updateAudioEditEditing(metadata))
+    } catch (error) {
+      console.error('Error getting metadata', error)
+    }
+  }
+
+  const onCancel = () => {
+    dispatch(setAudioEditEditing(undefined))
   }
 
   const { classes } = useStyles()
+  const isBatch = (ids?.length ?? 0) > 1
+  const title = `${isBatch ? 'Batch e' : 'E'}dit song info`
   return (
-    <Dialog
-      open={true}
-      onClose={props.onCancel}
-      aria-describedby="edit-description"
-    >
-      <DialogContent>
-        <Typography variant="h6">{props.title}</Typography>
-        <TextField
-          variant="standard"
-          className={classes.input}
-          value={audio.name == null ? '' : audio.name}
-          margin="normal"
-          label="Name"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onEdit('name', e)}
-        />
-        <div
-          className={cx(
-            classes.trackThumb,
-            audio.thumb == null && classes.pointer
-          )}
-          onClick={audio.thumb == null ? loadThumb : nop}
+    ids != null && (
+      <>
+        <Dialog
+          open={true}
+          onClose={onCancel}
+          aria-describedby="edit-description"
         >
-          {audio.thumb != null && (
-            <React.Fragment>
-              <IconButton
-                onClick={onRemoveThumb}
-                className={classes.deleteThumbButton}
-                edge="end"
-                size="small"
-                aria-label="delete"
-              >
-                <DeleteIcon className={classes.deleteIcon} color="inherit" />
-              </IconButton>
-              <img
-                className={classes.thumbImage}
-                src={audio.thumb}
-                alt={audio.name}
-              />
-            </React.Fragment>
-          )}
-          {audio.thumb == null && (
-            <AudiotrackIcon className={classes.audioIcon} />
-          )}
-        </div>
-        <TextField
-          variant="standard"
-          className={classes.input}
-          value={audio.artist == null ? '' : audio.artist}
-          margin="normal"
-          label="Artist"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onEdit('artist', e)}
+          <DialogContent>
+            <Typography variant="h6">{title}</Typography>
+            <Grid2 container spacing={2}>
+              <Grid2 size={{ xs: 12 }}>
+                <Grid2 container spacing={2}>
+                  <Grid2 size="grow">
+                    <Grid2 container spacing={2}>
+                      <Grid2 size={{ xs: 12 }}>
+                        <BaseTextField
+                          variant="standard"
+                          fullWidth
+                          margin="normal"
+                          label="Name"
+                          selector={() => useAppSelector(selectAudioEditName())}
+                          action={(name: string) => (dispatch: AppDispatch) =>
+                            dispatch(setAudioEditName(name))
+                          }
+                        />
+                      </Grid2>
+                      <Grid2 size={{ xs: 12 }}>
+                        <BaseTextField
+                          variant="standard"
+                          fullWidth
+                          margin="normal"
+                          label="Artist"
+                          selector={() =>
+                            useAppSelector(selectAudioEditArtist())
+                          }
+                          action={(artist: string) => (dispatch: AppDispatch) =>
+                            dispatch(setAudioEditArtist(artist))
+                          }
+                        />
+                      </Grid2>
+                    </Grid2>
+                  </Grid2>
+                  <Grid2 size="auto">
+                    <FormControl
+                      margin="normal"
+                      sx={{
+                        width: '140px',
+                        height: '140px',
+                        cursor: thumb == null ? 'pointer' : 'default'
+                      }}
+                      onClick={loadThumb}
+                    >
+                      {thumb != null && (
+                        <>
+                          <IconButton
+                            onClick={onRemoveThumb}
+                            className={classes.deleteThumbButton}
+                            edge="end"
+                            size="small"
+                            aria-label="delete"
+                          >
+                            <DeleteIcon
+                              className={classes.deleteIcon}
+                              color="inherit"
+                            />
+                          </IconButton>
+                          <img
+                            className={classes.thumbImage}
+                            src={thumb}
+                            alt={name}
+                          />
+                        </>
+                      )}
+                      {thumb == null && (
+                        <AudiotrackIcon className={classes.audioIcon} />
+                      )}
+                    </FormControl>
+                  </Grid2>
+                </Grid2>
+              </Grid2>
+              <Grid2 size={{ xs: 12 }}>
+                <Grid2 container spacing={2}>
+                  <Grid2 size="grow">
+                    <BaseTextField
+                      variant="standard"
+                      fullWidth
+                      margin="normal"
+                      label="Album"
+                      selector={() => useAppSelector(selectAudioEditAlbum())}
+                      action={(album: string) => (dispatch: AppDispatch) =>
+                        dispatch(setAudioEditAlbum(album))
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size="auto">
+                    <Box sx={{ width: '140px' }}>
+                      <BaseTextField
+                        variant="standard"
+                        margin="normal"
+                        label="Track #"
+                        inputProps={{
+                          min: 0,
+                          type: 'number'
+                        }}
+                        selector={() =>
+                          useAppSelector(selectAudioEditTrackNum())
+                        }
+                        action={(trackNum: number) => (dispatch: AppDispatch) =>
+                          dispatch(setAudioEditTrackNum(trackNum))
+                        }
+                      />
+                    </Box>
+                  </Grid2>
+                </Grid2>
+              </Grid2>
+            </Grid2>
+
+            <BaseTextField
+              variant="standard"
+              fullWidth
+              margin="normal"
+              label="Comment"
+              multiline
+              selector={() => useAppSelector(selectAudioEditComment())}
+              action={(comment: string) => (dispatch: AppDispatch) =>
+                dispatch(setAudioEditComment(comment))
+              }
+            />
+          </DialogContent>
+          <DialogActions className={classes.actions}>
+            {!isBatch && (
+              <Button onClick={loadSuggestions}>Use Suggestions</Button>
+            )}
+            <Button onClick={onCancel} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={() => dispatch(saveAudioEdit())} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <FilePicker
+          open={showThumbPicker}
+          type="img"
+          path=""
+          onClose={onPickThumb}
         />
-        <TextField
-          variant="standard"
-          className={classes.input}
-          value={audio.album == null ? '' : audio.album}
-          margin="normal"
-          label="Album"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onEdit('album', e)}
-        />
-        <TextField
-          variant="standard"
-          className={classes.inputShort}
-          value={audio.trackNum == null ? '' : audio.trackNum}
-          margin="normal"
-          label="Track #"
-          inputProps={{
-            min: 0,
-            type: 'number'
-          }}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            onEditInt('trackNum', e)
-          }
-        />
-        <TextField
-          variant="standard"
-          className={classes.inputFull}
-          value={audio.comment == null ? '' : audio.comment}
-          margin="normal"
-          label="Comment"
-          multiline
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onEdit('comment', e)}
-        />
-      </DialogContent>
-      <DialogActions className={classes.actions}>
-        {props.allowSuggestion && (
-          <Button onClick={loadSuggestions}>Use Suggestions</Button>
-        )}
-        <Button onClick={props.onCancel} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={() => props.onFinishEdit(audio)} color="primary">
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </>
+    )
   )
 }
 

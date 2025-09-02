@@ -1,0 +1,40 @@
+ARG NODE_ENV="production"
+
+FROM node:22-alpine AS builder
+ARG NODE_ENV
+
+RUN apk add python3 py3-setuptools build-base make
+
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
+
+COPY --chown=node:node . /home/node/builder
+
+WORKDIR /home/node/builder/common
+RUN yarn install --immutable
+RUN yarn build:main
+RUN yarn build:module
+
+WORKDIR /home/node/builder/client
+RUN yarn install --immutable
+RUN yarn build
+
+WORKDIR /home/node/builder/server
+RUN yarn install --immutable
+RUN yarn prod
+
+FROM node:22-alpine
+ARG NODE_ENV
+ENV NODE_ENV=$NODE_ENV
+
+COPY --chown=node:node ./server/package.json /home/node/server/
+COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
+COPY --chown=node:node --from=builder /home/node/builder/client/dist /home/node/server/public
+COPY --chown=node:node --from=builder /home/node/builder/common/build/main /home/node/common
+WORKDIR /home/node/server
+
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
+RUN yarn workspaces focus --production
+
+ENTRYPOINT ["yarn", "node", "./server.js"]

@@ -1,6 +1,5 @@
-import React from 'react'
 import { cx } from '@emotion/css'
-import { Collapse, Divider, Grid, MenuItem, type Theme } from '@mui/material'
+import { Collapse, Divider, Grid2, MenuItem, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import {
@@ -22,33 +21,31 @@ import {
   setSceneTimingDurationMin,
   setSceneTimingSinRate,
   setSceneTimingTF
-} from '../../store/scene/actions'
-import { useAppSelector } from '../../store/hooks'
+} from '../../store/api/thunks'
 import {
-  selectAppLastRouteIsPlayer,
-  selectAppTutorial
-} from '../../store/app/selectors'
+  useGetSceneBackForthQuery,
+  useGetSceneBackForthBPMMultiQuery,
+  useGetSceneBackForthDurationQuery,
+  useGetSceneBackForthDurationMaxQuery,
+  useGetSceneBackForthDurationMinQuery,
+  useGetSceneBackForthSinRateQuery,
+  useGetSceneBackForthTFQuery,
+  useGetSceneBackgroundBlurQuery,
+  useGetSceneBackgroundColorQuery,
+  useGetSceneBackgroundColorSetQuery,
+  useGetSceneBackgroundTypeQuery,
+  useGetSceneImageTypeQuery,
+  useGetSceneTimingBPMMultiQuery,
+  useGetSceneTimingDurationQuery,
+  useGetSceneTimingDurationMaxQuery,
+  useGetSceneTimingDurationMinQuery,
+  useGetSceneTimingSinRateQuery,
+  useGetSceneTimingTFQuery
+} from '../../store/api/selectors'
 import {
-  selectSceneBackForth,
-  selectSceneBackForthBPMMulti,
-  selectSceneBackForthDuration,
-  selectSceneBackForthDurationMax,
-  selectSceneBackForthDurationMin,
-  selectSceneBackForthSinRate,
-  selectSceneBackForthTF,
-  selectSceneBackgroundBlur,
-  selectSceneBackgroundColor,
-  selectSceneBackgroundColorSet,
-  selectSceneBackgroundType,
-  selectSceneHasBPM,
-  selectSceneImageType,
-  selectSceneTimingBPMMulti,
-  selectSceneTimingDuration,
-  selectSceneTimingDurationMax,
-  selectSceneTimingDurationMin,
-  selectSceneTimingSinRate,
-  selectSceneTimingTF
-} from '../../store/scene/selectors'
+  useGetSceneHasBPMQuery,
+  useGetTutorialsQuery
+} from '../../store/api/slice'
 import { en, BT, IT, SDT } from 'flipflip-common'
 import BaseSelect from '../common/BaseSelect'
 import BaseSwitch from '../common/BaseSwitch'
@@ -56,6 +53,7 @@ import BaseSlider from '../common/slider/BaseSlider'
 import TimingCard from '../common/TimingCard'
 import ColorPicker from '../config/ColorPicker'
 import ColorSetPicker from '../config/ColorSetPicker'
+import { useIsPlayerRoute } from '../useIsPlayerRoute'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -120,124 +118,123 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export interface SceneOptionCardProps {
   isTagging?: boolean
-  sceneID?: number
+  sceneID: number
 }
 
 function SceneOptionCard(props: SceneOptionCardProps) {
-  const tutorial = useAppSelector(selectAppTutorial())
-  const sidebar = useAppSelector(selectAppLastRouteIsPlayer())
-  const backForth = useAppSelector(selectSceneBackForth(props.sceneID))
-  const backgroundType = useAppSelector(
-    selectSceneBackgroundType(props.sceneID)
-  )
+  const sidebar = useIsPlayerRoute()
+  const { data: tutorial } = useGetTutorialsQuery()
+  const { data: backForth } = useGetSceneBackForthQuery(props.sceneID)
+  const { data: backgroundType } = useGetSceneBackgroundTypeQuery(props.sceneID)
 
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid
-        item
-        xs={12}
-        className={cx(tutorial === SDT.timing && classes.highlight)}
+    <Grid2 container spacing={2} alignItems="center">
+      <Grid2
+        size={12}
+        className={cx(tutorial?.current === SDT.timing && classes.highlight)}
       >
         <TimingCard
           excludeScene={true}
           sidebar={sidebar}
-          hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+          hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
           timing={{
-            selector: selectSceneTimingTF(props.sceneID),
+            selector: () => useGetSceneTimingTFQuery(props.sceneID),
             action: setSceneTimingTF(props.sceneID)
           }}
           duration={{
-            selector: selectSceneTimingDuration(props.sceneID),
+            selector: () => useGetSceneTimingDurationQuery(props.sceneID),
             action: setSceneTimingDuration(props.sceneID)
           }}
           durationMin={{
-            selector: selectSceneTimingDurationMin(props.sceneID),
+            selector: () => useGetSceneTimingDurationMinQuery(props.sceneID),
             action: setSceneTimingDurationMin(props.sceneID)
           }}
           durationMax={{
-            selector: selectSceneTimingDurationMax(props.sceneID),
+            selector: () => useGetSceneTimingDurationMaxQuery(props.sceneID),
             action: setSceneTimingDurationMax(props.sceneID)
           }}
           wave={{
-            selector: selectSceneTimingSinRate(props.sceneID),
+            selector: () => useGetSceneTimingSinRateQuery(props.sceneID),
             action: setSceneTimingSinRate(props.sceneID),
             labelledBy: 'scene-sin-rate-slider'
           }}
           bpm={{
-            selector: selectSceneTimingBPMMulti(props.sceneID),
+            selector: () => useGetSceneTimingBPMMultiQuery(props.sceneID),
             action: setSceneTimingBPMMulti(props.sceneID),
             labelledBy: 'scene-bpm-multi-slider'
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Divider />
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx(tutorial === SDT.backForth && classes.highlight)}
+      </Grid2>
+      <Grid2
+        size={12}
+        className={cx(tutorial?.current === SDT.backForth && classes.highlight)}
       >
-        <Grid container alignItems="center">
-          <Grid item xs={12}>
+        <Grid2 container alignItems="center">
+          <Grid2 size={12}>
             <BaseSwitch
               label="Back/Forth"
               tooltip="Go back and forth between the last two images"
-              selector={selectSceneBackForth(props.sceneID)}
+              selector={() => useGetSceneBackForthQuery(props.sceneID)}
               action={setSceneBackForth(props.sceneID)}
             />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
         <Collapse in={backForth}>
           <TimingCard
             label="Back/Forth Timing"
             excludeScene={true}
             sidebar={sidebar}
-            hasBPMSelector={selectSceneHasBPM(props.sceneID)}
+            hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
-              selector: selectSceneBackForthTF(props.sceneID),
+              selector: () => useGetSceneBackForthTFQuery(props.sceneID),
               action: setSceneBackForthTF(props.sceneID)
             }}
             duration={{
-              selector: selectSceneBackForthDuration(props.sceneID),
+              selector: () => useGetSceneBackForthDurationQuery(props.sceneID),
               action: setSceneBackForthDuration(props.sceneID)
             }}
             durationMin={{
-              selector: selectSceneBackForthDurationMin(props.sceneID),
+              selector: () =>
+                useGetSceneBackForthDurationMinQuery(props.sceneID),
               action: setSceneBackForthDurationMin(props.sceneID)
             }}
             durationMax={{
-              selector: selectSceneBackForthDurationMax(props.sceneID),
+              selector: () =>
+                useGetSceneBackForthDurationMaxQuery(props.sceneID),
               action: setSceneBackForthDurationMax(props.sceneID)
             }}
             wave={{
-              selector: selectSceneBackForthSinRate(props.sceneID),
+              selector: () => useGetSceneBackForthSinRateQuery(props.sceneID),
               action: setSceneBackForthSinRate(props.sceneID),
               labelledBy: 'bf-sin-rate-slider'
             }}
             bpm={{
-              selector: selectSceneBackForthBPMMulti(props.sceneID),
+              selector: () => useGetSceneBackForthBPMMultiQuery(props.sceneID),
               action: setSceneBackForthBPMMulti(props.sceneID),
               labelledBy: 'bf-bpm-multi-slider'
             }}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <Divider />
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        className={cx(tutorial === SDT.imageSizing && classes.highlight)}
+      </Grid2>
+      <Grid2
+        size={12}
+        className={cx(
+          tutorial?.current === SDT.imageSizing && classes.highlight
+        )}
       >
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={sidebar ? 8 : 12} sm={sidebar ? 8 : 6}>
+        <Grid2 container spacing={2} alignItems="center">
+          <Grid2 size={{ xs: sidebar ? 8 : 12, sm: sidebar ? 8 : 6 }}>
             <BaseSelect
               label="Image Sizing"
               controlClassName={classes.fullWidth}
-              selector={selectSceneImageType(props.sceneID)}
+              selector={() => useGetSceneImageTypeQuery(props.sceneID)}
               action={setSceneImageType(props.sceneID)}
             >
               {Object.values(IT).map((it) => (
@@ -246,13 +243,13 @@ function SceneOptionCard(props: SceneOptionCardProps) {
                 </MenuItem>
               ))}
             </BaseSelect>
-          </Grid>
-          <Grid item xs={12} sm={sidebar ? 12 : 6} />
-          <Grid item xs={sidebar ? 8 : 12} sm={sidebar ? 8 : 4}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 6 }} />
+          <Grid2 size={{ xs: sidebar ? 8 : 12, sm: sidebar ? 8 : 4 }}>
             <BaseSelect
               label="Background"
               controlClassName={classes.fullWidth}
-              selector={selectSceneBackgroundType(props.sceneID)}
+              selector={() => useGetSceneBackgroundTypeQuery(props.sceneID)}
               action={setSceneBackgroundType(props.sceneID)}
             >
               {Object.values(BT).map((bt) => (
@@ -261,8 +258,8 @@ function SceneOptionCard(props: SceneOptionCardProps) {
                 </MenuItem>
               ))}
             </BaseSelect>
-          </Grid>
-          <Grid item xs={12} sm={sidebar ? 12 : 8}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 8 }}>
             <Collapse
               in={backgroundType === BT.blur}
               className={classes.fullWidth}
@@ -270,7 +267,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
               <BaseSlider
                 min={0}
                 max={30}
-                selector={selectSceneBackgroundBlur(props.sceneID)}
+                selector={() => useGetSceneBackgroundBlurQuery(props.sceneID)}
                 action={setSceneBackgroundBlur(props.sceneID)}
                 format={{ type: 'pixel' }}
                 labelledBy="scene-bg-color-slider"
@@ -283,7 +280,10 @@ function SceneOptionCard(props: SceneOptionCardProps) {
             >
               {backgroundType === BT.color && (
                 <ColorPicker
-                  selector={selectSceneBackgroundColor(props.sceneID)}
+                  type="background"
+                  selector={() =>
+                    useGetSceneBackgroundColorQuery(props.sceneID)
+                  }
                   action={setSceneBackgroundColor(props.sceneID)}
                 />
               )}
@@ -294,15 +294,17 @@ function SceneOptionCard(props: SceneOptionCardProps) {
             >
               {backgroundType === BT.colorSet && (
                 <ColorSetPicker
-                  selector={selectSceneBackgroundColorSet(props.sceneID)}
+                  selector={() =>
+                    useGetSceneBackgroundColorSetQuery(props.sceneID)
+                  }
                   action={setSceneBackgroundColorSet(props.sceneID)}
                 />
               )}
             </Collapse>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+    </Grid2>
   )
 }
 

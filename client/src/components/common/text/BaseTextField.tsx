@@ -1,8 +1,8 @@
-import React, { type ChangeEvent, type ReactNode } from 'react'
+import { type ChangeEvent, type ReactNode } from 'react'
 import { TextField, type TextFieldVariants, Tooltip } from '@mui/material'
-import { useAppSelector, useAppDispatch } from '../../../store/hooks'
+import { useAppDispatch } from '../../../store/hooks'
 import type ReduxProps from '../ReduxProps'
-import { AnyAction } from 'redux'
+import { AppDispatch } from '../../../store/store'
 
 export interface BaseTextFieldProps<T, S> extends ReduxProps<T, S> {
   className?: string
@@ -17,6 +17,7 @@ export interface BaseTextFieldProps<T, S> extends ReduxProps<T, S> {
   multiline?: boolean
   id?: string
   onBlur?: () => void
+  scale?: number
   inputProps?: {
     className?: string
     min?: number
@@ -37,13 +38,28 @@ export default function BaseTextField<
   S extends string | number | undefined
 >(props: BaseTextFieldProps<T, S>) {
   const min = props?.inputProps?.min ?? 0
-  const value = useAppSelector(props.selector)
+  const { data: value } = props.selector()
   const dispatch = useAppDispatch()
+
+  const getValue = (value?: S) => {
+    if (props.inputProps?.type === 'number') {
+      let num: number = (value as number) ?? min
+      if (props.scale != null) {
+        num *= props.scale
+      }
+
+      return Number(num).toFixed()
+    } else {
+      return value ?? ''
+    }
+  }
 
   const onChangeText = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const action = props.action as (value: string) => AnyAction
+    const action = props.action as (
+      value: string
+    ) => (dispatch: AppDispatch) => void
     dispatch(action(event.target.value))
   }
 
@@ -55,8 +71,13 @@ export default function BaseTextField<
     if (props?.inputProps?.max != null) {
       value = Math.min(value, props.inputProps.max)
     }
+    if (props.scale != null) {
+      value = value / props.scale
+    }
 
-    const action = props.action as (value: number) => AnyAction
+    const action = props.action as (
+      value: number
+    ) => (dispatch: AppDispatch) => void
     dispatch(action(value))
   }
 
@@ -89,11 +110,13 @@ export default function BaseTextField<
         label={props.label}
         placeholder={props.placeholder}
         margin={props.margin}
-        value={value}
+        value={getValue(value)}
         onChange={onChange}
         onBlur={onBlur}
-        InputProps={props.InputProps}
-        inputProps={inputProps}
+        slotProps={{
+          input: props.InputProps,
+          htmlInput: inputProps
+        }}
       />
     )
   }

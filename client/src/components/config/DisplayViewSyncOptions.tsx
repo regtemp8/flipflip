@@ -1,19 +1,18 @@
-import { Grid, MenuItem, Theme } from '@mui/material'
+import { Grid2, MenuItem } from '@mui/material'
 import BaseSelect from '../common/BaseSelect'
 import {
   setDisplayViewMirrorSyncedView,
   setDisplayViewSyncWithView
-} from '../../store/displayView/actions'
+} from '../../store/api/thunks'
 import {
-  selectDisplayViewMirrorSyncedView,
-  selectDisplayViewSyncWithView
-} from '../../store/displayView/selectors'
+  useGetDisplayViewMirrorSyncedViewQuery,
+  useGetDisplayViewSyncWithViewQuery
+} from '../../store/api/selectors'
 import { MVF, en } from 'flipflip-common'
-import { useAppSelector } from '../../store/hooks'
-import { selectDisplayViewSyncOptions } from '../../store/display/selectors'
 import { makeStyles } from 'tss-react/mui'
+import { useGetDisplayViewSyncOptionsQuery } from '../../store/api/slice'
 
-const useStyles = makeStyles()((theme: Theme) => ({
+const useStyles = makeStyles()(() => ({
   fullWidth: {
     width: '100%'
   }
@@ -25,17 +24,16 @@ export interface DisplayViewSyncOptionsProps {
 }
 
 function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
-  const viewSyncOptions = useAppSelector(
-    selectDisplayViewSyncOptions(props.displayID)
-  )
+  const { data } = useGetDisplayViewSyncOptionsQuery(props.displayID)
 
+  const viewSyncOptions: Record<string, string> = data ?? {}
   const { classes } = useStyles()
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
+    <Grid2 container spacing={2}>
+      <Grid2 size={12}>
         <BaseSelect
           label="Sync With"
-          selector={selectDisplayViewSyncWithView(props.viewID)}
+          selector={() => useGetDisplayViewSyncWithViewQuery(props.viewID)}
           action={setDisplayViewSyncWithView(props.viewID)}
           controlClassName={classes.fullWidth}
         >
@@ -47,11 +45,11 @@ function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
             )
           })}
         </BaseSelect>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSelect
           label="Mirror"
-          selector={selectDisplayViewMirrorSyncedView(props.viewID)}
+          selector={() => useGetDisplayViewMirrorSyncedViewQuery(props.viewID)}
           action={setDisplayViewMirrorSyncedView(props.viewID)}
           controlClassName={classes.fullWidth}
         >
@@ -63,8 +61,8 @@ function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
             )
           })}
         </BaseSelect>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

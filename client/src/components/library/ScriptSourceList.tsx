@@ -1,10 +1,4 @@
-import React, {
-  ChangeEvent,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react'
+import { ChangeEvent, useEffect, useState, useRef, useCallback } from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
@@ -24,23 +18,15 @@ import { makeStyles } from 'tss-react/mui'
 
 import ScriptSourceListItem from './ScriptSourceListItem'
 import SceneSelect from '../configGroups/SceneSelect'
-import ScriptOptions from './ScriptOptions'
-import { SP } from 'flipflip-common'
+import { SCENE_NONE, SP } from 'flipflip-common'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  systemMessage,
-  setScriptYOffset,
-  setScriptsRemoveOne
-} from '../../store/app/slice'
-import { swapScripts, setScriptsEditUrl } from '../../store/app/thunks'
-import { playScript } from '../../store/scene/thunks'
-import {
-  selectAppScriptYOffset,
-  selectAppSpecialMode,
-  selectUndefined
-} from '../../store/app/selectors'
-import { selectCaptionScriptUrl } from '../../store/captionScript/selectors'
-import flipflip from '../../FlipFlipService'
+import { selectSpecialMode } from '../../store/app/selectors'
+import { deleteCaptionScript, moveCaptionScript } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
+import { saveScriptLibraryYOffset } from '../../store/scriptLibrary/thunks'
+import { selectScriptLibraryYOffset } from '../../store/scriptLibrary/selectors'
+import { setScriptLibraryLastSelected } from '../../store/scriptLibrary/slice'
+import snackbar from '../../data/Snackbar'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -53,10 +39,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
   marginRight: {
     marginRight: theme.spacing(1)
   },
-  arrow: {
+  arrowWrapper: {
     position: 'absolute',
+    overflow: 'hidden',
     bottom: 20,
-    right: 35,
+    right: 35
+  },
+  arrow: {
     fontSize: 220,
     transform: 'rotateY(0deg) rotate(45deg)'
   },
@@ -79,6 +68,8 @@ interface SortableVirtualListProps {
 
 export interface ScriptSourceListProps {
   showHelp: boolean
+  scripts: number[]
+  filters: string[]
   sources: number[]
   selected: number[]
   onUpdateSelected: (selected: number[]) => void
@@ -86,38 +77,16 @@ export interface ScriptSourceListProps {
 
 function ScriptSourceList(props: ScriptSourceListProps) {
   const dispatch = useAppDispatch()
-  const [sourceOptions, setSourceOptions] = useState<number>()
-  const [lastSelected, setLastSelected] = useState<number>()
-  const [isEditing, setIsEditing] = useState(-1)
-  const [deleteDialog, setDeleteDialog] = useState<number>()
+
   const [beginPlay, setBeginPlay] = useState<number>()
   const [playWithScene, setPlayWithScene] = useState<number>()
 
-  const deleteDialogSelector =
-    deleteDialog != null
-      ? selectCaptionScriptUrl(deleteDialog)
-      : selectUndefined
-  const deleteDialogURL = useAppSelector(deleteDialogSelector)
-  const beginPlaySelector =
-    beginPlay != null ? selectCaptionScriptUrl(beginPlay) : selectUndefined
-  const beginPlayURL = useAppSelector(beginPlaySelector)
-  const firstSourceURL = useAppSelector(
-    selectCaptionScriptUrl(props.sources.length > 0 ? props.sources[0] : -1)
-  )
-  const specialMode = useAppSelector(selectAppSpecialMode())
-  const yOffset = useAppSelector(selectAppScriptYOffset())
+  const beginPlayURL = '' //useAppSelector(beginPlaySelector)
+  const specialMode = useAppSelector(selectSpecialMode())
+  const yOffset = useAppSelector(selectScriptLibraryYOffset())
 
   const _shiftDown = useRef<boolean>()
   const _lastChecked = useRef<number>()
-
-  const savePosition = useCallback(() => {
-    const sortableList = document.getElementById('sortable-list')
-    if (sortableList) {
-      const scrollElement = sortableList.firstElementChild
-      const scrollTop = scrollElement ? scrollElement.scrollTop : 0
-      dispatch(setScriptYOffset(scrollTop))
-    }
-  }, [dispatch])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -135,15 +104,8 @@ function ScriptSourceList(props: ScriptSourceListProps) {
       window.removeEventListener('keyup', onKeyUp)
       _shiftDown.current = undefined
       _lastChecked.current = undefined
-      savePosition()
     }
-  }, [savePosition])
-
-  useEffect(() => {
-    if (firstSourceURL === '') {
-      setIsEditing(props.sources[0])
-    }
-  }, [props.sources, firstSourceURL])
+  }, [])
 
   const onSortEnd = ({
     oldIndex,
@@ -152,43 +114,24 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     oldIndex: number
     newIndex: number
   }) => {
-    const oldSourceID = props.sources[oldIndex]
-    const newSourceID = props.sources[newIndex]
-    dispatch(swapScripts(oldSourceID, newSourceID))
+    const oldID = props.sources[oldIndex]
+    const newID = props.sources[newIndex]
+    const newSources = arrayMove(props.sources, oldIndex, newIndex)
+    const newScripts = arrayMove(
+      props.scripts,
+      props.scripts.indexOf(oldID),
+      props.scripts.indexOf(newID)
+    )
+    dispatch(moveCaptionScript(newScripts, props.filters, newSources))
   }
 
   const clearLastSelected = () => {
-    if (!sourceOptions) {
-      setLastSelected(undefined)
-    }
-  }
-
-  const onSourceOptions = (scriptID: number) => {
-    setSourceOptions(scriptID)
-    setLastSelected(scriptID)
-  }
-
-  const onCloseSourceOptions = () => {
-    setSourceOptions(undefined)
-  }
-
-  const onDelete = (scriptID: number) => {
-    setDeleteDialog(scriptID)
-  }
-
-  const onCloseDeleteDialog = () => {
-    setDeleteDialog(undefined)
-  }
-
-  const onFinishDelete = async () => {
-    await flipflip().api.unlink(deleteDialogURL as string)
-    onRemove(deleteDialog as number)
-    onCloseDeleteDialog()
+    dispatch(setScriptLibraryLastSelected(undefined))
   }
 
   const onRemove = (scriptID: number) => {
     props.onUpdateSelected(props.selected.filter((id) => id !== scriptID))
-    dispatch(setScriptsRemoveOne(scriptID))
+    dispatch(deleteCaptionScript(scriptID))
   }
 
   const onToggleSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -227,18 +170,9 @@ function ScriptSourceList(props: ScriptSourceListProps) {
     }
   }
 
-  const onStartEdit = (id: number) => {
-    setIsEditing(id)
-  }
-
-  const onEndEdit = (newURL: string) => {
-    dispatch(setScriptsEditUrl(isEditing, newURL))
-    setIsEditing(-1)
-  }
-
   const onPlay = (scriptID: number) => {
     setBeginPlay(scriptID)
-    setPlayWithScene(0)
+    setPlayWithScene(SCENE_NONE)
   }
 
   const onClosePlayDialog = () => {
@@ -247,15 +181,15 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   }
 
   const onFinishPlay = () => {
-    savePosition()
+    dispatch(saveScriptLibraryYOffset())
     try {
-      const scriptID = beginPlay as number
-      const sceneID = playWithScene as number
-      dispatch(playScript(scriptID, sceneID, props.sources))
-    } catch (e) {
-      dispatch(
-        systemMessage('The source ' + beginPlayURL + " isn't in your Library")
-      )
+      // const scriptID = beginPlay as number
+      // const sceneID = playWithScene as number
+      // dispatch(playScript(scriptID, sceneID, sources))
+    } catch {
+      snackbar().showMessage({
+        error: 'The source ' + beginPlayURL + " isn't in your Library"
+      })
     }
   }
 
@@ -305,18 +239,11 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             key={index}
             checked={isChecked(scriptID)}
             index={index}
-            isEditing={isEditing}
-            lastSelected={scriptID === lastSelected}
             scriptID={scriptID}
             style={value.style}
-            onDelete={onDelete}
-            onEndEdit={onEndEdit}
             onPlay={onPlay}
             onRemove={onRemove}
-            onSourceOptions={onSourceOptions}
-            onStartEdit={onStartEdit}
             onToggleSelect={onToggleSelect}
-            savePosition={savePosition}
           />
         )
       }
@@ -328,7 +255,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
   const { classes } = useStyles()
   if (props.sources.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -348,7 +275,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           Nothing here
         </Typography>
         {props.showHelp && (
-          <React.Fragment>
+          <>
             <Typography
               component="h1"
               variant="h6"
@@ -358,17 +285,19 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             >
               Add new scripts
             </Typography>
-            <div className={classes.arrow}>→</div>
-          </React.Fragment>
+            <div className={classes.arrowWrapper}>
+              <div className={classes.arrow}>→</div>
+            </div>
+          </>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   const SortableVirtualList =
     SortableContainer<SortableVirtualListProps>(VirtualList)
   return (
-    <React.Fragment>
+    <>
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List id="sortable-list" disablePadding onClick={clearLastSelected}>
@@ -386,30 +315,6 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           </List>
         )}
       </AutoSizer>
-      {deleteDialog != null && (
-        <Dialog
-          open={true}
-          onClose={onCloseDeleteDialog}
-          aria-describedby="delete-description"
-        >
-          <DialogContent>
-            <DialogContentText id="delete-description">
-              Are you sure you want to delete {deleteDialogURL}?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onCloseDeleteDialog} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={onFinishDelete} color="primary">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-      {sourceOptions != null && (
-        <ScriptOptions scriptID={sourceOptions} onDone={onCloseSourceOptions} />
-      )}
       {beginPlay != null && (
         <Dialog
           open={true}
@@ -423,7 +328,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
             <SceneSelect
               autoFocus
               menuIsOpen
-              value={playWithScene ?? 0}
+              value={playWithScene ?? SCENE_NONE}
               onChange={onChangeScene}
             />
           </DialogContent>
@@ -432,7 +337,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
               Cancel
             </Button>
             <Button
-              disabled={playWithScene == null || playWithScene === 0}
+              disabled={playWithScene == null || playWithScene === SCENE_NONE}
               onClick={onFinishPlay}
               color="primary"
             >
@@ -441,7 +346,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
           </DialogActions>
         </Dialog>
       )}
-    </React.Fragment>
+    </>
   )
 }
 

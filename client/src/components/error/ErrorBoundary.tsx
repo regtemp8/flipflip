@@ -1,18 +1,16 @@
-import * as React from 'react'
+import { Component, ErrorInfo, PropsWithChildren } from 'react'
 import ErrorCard from './ErrorCard'
 
 interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
-  info?: React.ErrorInfo
+  info?: ErrorInfo
 }
 
-export default class ErrorBoundary extends React.Component<
-  React.PropsWithChildren<{}>
-> {
+class ErrorBoundary extends Component<PropsWithChildren> {
   readonly state: ErrorBoundaryState = { hasError: false }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     // Display fallback UI
     this.setState({ hasError: true, error, info })
   }
@@ -30,7 +28,7 @@ export default class ErrorBoundary extends React.Component<
       return (
         <ErrorCard
           error={this.state.error as Error}
-          info={this.state.info as React.ErrorInfo}
+          info={this.state.info as ErrorInfo}
           onClearError={this.clearError.bind(this)}
         />
       )
@@ -41,3 +39,4 @@ export default class ErrorBoundary extends React.Component<
 }
 
 ;(ErrorBoundary as any).displayName = 'ErrorBoundary'
+export default ErrorBoundary

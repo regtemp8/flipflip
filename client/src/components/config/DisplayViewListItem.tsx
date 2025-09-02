@@ -1,27 +1,36 @@
-import React, { CSSProperties, ChangeEvent, useState } from 'react'
+import { CSSProperties, ChangeEvent } from 'react'
 import {
   IconButton,
   ListItem,
   ListItemText,
   Typography,
   type Theme,
-  TextField
+  TextField,
+  Tooltip
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from 'tss-react/mui'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
-  selectDisplayViewColor,
-  selectDisplayViewName,
-  selectDisplayViewVisible
-} from '../../store/displayView/selectors'
-import { setDisplayViewColor } from '../../store/displayView/actions'
-import { setDisplayViewName } from '../../store/displayView/slice'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { setDisplayViewVisible } from '../../store/displayView/slice'
-import ColorPickerMinimal from './ColorPickerMinimal'
-import { setDisplaySelectedView } from '../../store/display/slice'
+  setDisplayViewColor,
+  setDisplayViewName,
+  setDisplayViewVisible
+} from '../../store/api/thunks'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import PlayDisabledIcon from '@mui/icons-material/PlayDisabled'
+import {
+  setDisplayEditingViewName,
+  setDisplaySelectedView
+} from '../../store/display/slice'
 import { cx } from '@emotion/css'
+import { useGetDisplayViewQuery } from '../../store/api/slice'
+import ColorPickerMinimal from './ColorPickerMinimal'
+import { useGetDisplayViewColorQuery } from '../../store/api/selectors'
+import {
+  selectDisplayEditingViewName,
+  selectDisplayViewError
+} from '../../store/display/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -138,38 +147,36 @@ export interface DisplayViewListItemProps {
 }
 
 function DisplayViewListItem(props: DisplayViewListItemProps) {
-  const { index, viewID, displayID, selected } = props
+  const { index, viewID, selected } = props
   const dispatch = useAppDispatch()
-  const name = useAppSelector(selectDisplayViewName(viewID))
-  const visible = useAppSelector(selectDisplayViewVisible(viewID))
+  const { data: view } = useGetDisplayViewQuery(viewID)
 
-  const [editingName, setEditingName] = useState<string>()
+  const editingName = useAppSelector(selectDisplayEditingViewName())
+  const error = useAppSelector(selectDisplayViewError(viewID))
 
   const onStartEdit = () => {
-    setEditingName(name)
+    dispatch(setDisplayEditingViewName(view?.name))
   }
 
   const onEndEdit = () => {
     const value = editingName as string
     if (value) {
-      dispatch(setDisplayViewName({ id: viewID, value }))
+      dispatch(setDisplayViewName(viewID, value))
     }
-    setEditingName(undefined)
+    dispatch(setDisplayEditingViewName(undefined))
   }
 
   const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
-    setEditingName(event.currentTarget.value)
+    dispatch(setDisplayEditingViewName(event.currentTarget.value))
   }
 
   const toggleVisibility = () => {
-    dispatch(setDisplayViewVisible({ id: viewID, value: !visible }))
+    dispatch(setDisplayViewVisible(viewID, !view?.visible))
   }
 
   const onItemClick = () => {
     const yOffset = props.getScrollTop()
-    dispatch(
-      setDisplaySelectedView({ id: displayID, value: { viewID, yOffset } })
-    )
+    dispatch(setDisplaySelectedView({ viewID, yOffset }))
   }
 
   const { classes } = useStyles()
@@ -189,39 +196,45 @@ function DisplayViewListItem(props: DisplayViewListItemProps) {
           onClick={toggleVisibility}
           className={selected ? classes.selectedText : undefined}
         >
-          {visible ? <Visibility /> : <VisibilityOff />}
+          {view?.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
         </IconButton>
         <ColorPickerMinimal
-          selector={selectDisplayViewColor(viewID)}
+          selector={() => useGetDisplayViewColorQuery(viewID)}
           action={setDisplayViewColor(viewID)}
         />
         <ListItemText classes={{ primary: classes.root }} onClick={onItemClick}>
-          {editingName != null ? (
+          {selected && editingName != null ? (
             <form onSubmit={onEndEdit} className={classes.urlField}>
               <TextField
                 variant="standard"
                 autoFocus
-                id="title"
                 margin="none"
                 value={editingName}
                 onChange={onChangeName}
                 onBlur={onEndEdit}
-                inputProps={{
-                  className: cx(
-                    classes.urlField,
-                    selected ? classes.selectedText : ''
-                  )
+                slotProps={{
+                  htmlInput: {
+                    className: cx(
+                      classes.urlField,
+                      selected ? classes.selectedText : ''
+                    )
+                  }
                 }}
               />
             </form>
           ) : (
             <Typography
               noWrap
-              className={classes.noUserSelect}
+              className={cx(classes.urlField, classes.noUserSelect)}
               onClick={onStartEdit}
             >
-              {name}
+              {view?.name}
             </Typography>
+          )}
+          {error != null && (
+            <Tooltip title={error} placement="bottom-end">
+              <PlayDisabledIcon color="error" />
+            </Tooltip>
           )}
         </ListItemText>
       </ListItem>

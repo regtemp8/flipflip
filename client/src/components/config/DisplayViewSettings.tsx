@@ -1,4 +1,4 @@
-import { Collapse, Grid, InputAdornment, type Theme } from '@mui/material'
+import { Collapse, Grid2, InputAdornment, type Theme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
   setDisplayViewHeight,
@@ -9,23 +9,22 @@ import {
   setDisplayViewZ,
   setDisplayViewSync,
   setDisplayViewScenePlaylistID
-} from '../../store/displayView/actions'
+} from '../../store/api/thunks'
 import {
-  selectDisplayViewHeight,
-  selectDisplayViewOpacity,
-  selectDisplayViewSync,
-  selectDisplayViewWidth,
-  selectDisplayViewX,
-  selectDisplayViewY,
-  selectDisplayViewZ,
-  selectDisplayViewScenePlaylistID
-} from '../../store/displayView/selectors'
+  useGetDisplayViewHeightQuery,
+  useGetDisplayViewOpacityQuery,
+  useGetDisplayViewSyncQuery,
+  useGetDisplayViewWidthQuery,
+  useGetDisplayViewXQuery,
+  useGetDisplayViewYQuery,
+  useGetDisplayViewZQuery,
+  useGetDisplayViewScenePlaylistIDQuery
+} from '../../store/api/selectors'
 import BaseSlider from '../common/slider/BaseSlider'
 import BaseSwitch from '../common/BaseSwitch'
-import { useAppSelector } from '../../store/hooks'
 import DisplayViewSyncOptions from './DisplayViewSyncOptions'
 import { PLT } from 'flipflip-common'
-import { createScenePlaylist } from '../../store/displayView/thunks'
+// import { useCreateScenePlaylistMutation } from '../../store/api/slice'
 import PlaylistSelect from '../common/PlaylistSelect'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -46,13 +45,13 @@ export interface DisplayViewSettingsProps {
 function DisplayViewSettings(props: DisplayViewSettingsProps) {
   const { displayID, viewID } = props
   const { classes } = useStyles()
-  const xSelector = selectDisplayViewX(viewID)
-  const ySelector = selectDisplayViewY(viewID)
-  const zSelector = selectDisplayViewZ(viewID)
-  const widthSelector = selectDisplayViewWidth(viewID)
-  const heightSelector = selectDisplayViewHeight(viewID)
-  const opacitySelector = selectDisplayViewOpacity(viewID)
-  const syncSelector = selectDisplayViewSync(viewID)
+  const xSelector = () => useGetDisplayViewXQuery(viewID)
+  const ySelector = () => useGetDisplayViewYQuery(viewID)
+  const zSelector = () => useGetDisplayViewZQuery(viewID)
+  const widthSelector = () => useGetDisplayViewWidthQuery(viewID)
+  const heightSelector = () => useGetDisplayViewHeightQuery(viewID)
+  const opacitySelector = () => useGetDisplayViewOpacityQuery(viewID)
+  const syncSelector = () => useGetDisplayViewSyncQuery(viewID)
   const xAction = setDisplayViewX(viewID)
   const yAction = setDisplayViewY(viewID)
   const zAction = setDisplayViewZ(viewID)
@@ -61,32 +60,31 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
   const opacityAction = setDisplayViewOpacity(viewID)
   const syncAction = setDisplayViewSync(viewID)
 
-  const sync = useAppSelector(syncSelector)
+  const { data: sync } = syncSelector()
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
+    <Grid2 container spacing={2}>
+      <Grid2 size={12}>
         <BaseSwitch
           label="Sync"
           tooltip="Synchronize this view with another view"
           selector={syncSelector}
           action={syncAction}
         />
-      </Grid>
-      <Grid item xs={12}>
-        <Collapse in={sync}>
+      </Grid2>
+      <Grid2 size={12}>
+        <Collapse in={sync ?? false}>
           <DisplayViewSyncOptions displayID={displayID} viewID={viewID} />
         </Collapse>
         <Collapse in={!sync}>
           <PlaylistSelect
             type={PLT.scene}
             includeSingles
-            selector={selectDisplayViewScenePlaylistID(viewID)}
+            selector={() => useGetDisplayViewScenePlaylistIDQuery(viewID)}
             action={setDisplayViewScenePlaylistID(viewID)}
-            create={createScenePlaylist(viewID)}
           />
         </Collapse>
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={xSelector}
           action={xAction}
@@ -105,8 +103,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             step: 5
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={ySelector}
           action={yAction}
@@ -125,8 +123,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             step: 5
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={zSelector}
           action={zAction}
@@ -155,8 +153,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             }
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={widthSelector}
           action={widthAction}
@@ -175,8 +173,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             step: 5
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={heightSelector}
           action={heightAction}
@@ -195,8 +193,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             step: 5
           }}
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid2>
+      <Grid2 size={12}>
         <BaseSlider
           selector={opacitySelector}
           action={opacityAction}
@@ -215,8 +213,8 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
             step: 5
           }}
         />
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   )
 }
 

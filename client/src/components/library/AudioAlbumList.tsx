@@ -1,19 +1,19 @@
-import React, { useState } from 'react'
+import { useState, MouseEvent } from 'react'
 import { cx } from '@emotion/css'
 
 import {
   Card,
   CardContent,
   CardMedia,
-  Grid,
+  Grid2,
+  LinearProgress,
   type Theme,
   Tooltip,
   Typography
 } from '@mui/material'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import { makeStyles } from 'tss-react/mui'
-import { selectAudioAlbums } from '../../store/audio/selectors'
-import { useAppSelector } from '../../store/hooks'
+import { useGetAudioAlbumsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -60,7 +60,7 @@ export interface AudioAlbumListProps {
 }
 
 function AudioAlbumList(props: AudioAlbumListProps) {
-  const albums = useAppSelector(selectAudioAlbums(props.sources))
+  const { data: albums, isLoading } = useGetAudioAlbumsQuery(props.sources)
   const [hover, setHover] = useState<string>()
 
   const onMouseEnter = (album: string) => {
@@ -71,10 +71,17 @@ function AudioAlbumList(props: AudioAlbumListProps) {
     setHover(undefined)
   }
 
+  const onClickArtist = (e: MouseEvent, artist: string) => {
+    e.stopPropagation()
+    props.onClickArtist(artist)
+  }
+
   const { classes } = useStyles()
-  if (albums.size === 0) {
+  if (isLoading) {
+    return <LinearProgress />
+  } else if (albums == null || albums.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -104,56 +111,51 @@ function AudioAlbumList(props: AudioAlbumListProps) {
             Add tracks by going to the "Songs" tab and clicking the +
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
-  const va = 'Various Artists'
-  const albumsArray = Array.from(albums.entries())
   return (
-    <Grid container spacing={2}>
-      {albumsArray.map(([a, data]) => {
-        let thumb: string | undefined = data.thumb
-        if (thumb) thumb = thumb.replace(/\\/g, '/')
-        const artist = data.artist
-        const count = data.count
+    <Grid2 container spacing={2}>
+      {albums.map((album) => {
+        const { name, artist, isSingleArtist, thumb, count } = album
         return (
-          <Grid
-            key={a}
-            item
-            xs={6}
-            sm={4}
-            md={3}
-            lg={2}
+          <Grid2
+            key={name}
+            size={{ xs: 6, sm: 4, md: 3, lg: 2 }}
             className={classes.pointer}
-            onClick={() => props.onClickAlbum(a)}
-            onMouseEnter={() => onMouseEnter(a)}
+            onClick={() => {
+              props.onClickAlbum(name)
+            }}
+            onMouseEnter={() => onMouseEnter(name)}
             onMouseLeave={onMouseLeave}
           >
             <Card classes={{ root: classes.root }}>
               {thumb && (
-                <CardMedia className={classes.media} image={thumb} title={a} />
+                <CardMedia
+                  className={classes.media}
+                  image={thumb}
+                  title={name}
+                />
               )}
               {!thumb && <AudiotrackIcon className={classes.mediaIcon} />}
               <CardContent classes={{ root: classes.cardContent }}>
-                <Tooltip disableInteractive title={a} enterDelay={800}>
+                <Tooltip disableInteractive title={name} enterDelay={800}>
                   <Typography
-                    className={cx(hover === a && classes.underlineTitle)}
+                    className={cx(hover === name && classes.underlineTitle)}
                     noWrap
                     variant="body1"
                   >
-                    {a}
+                    {name}
                   </Typography>
                 </Tooltip>
                 <Typography
                   id={'artist-link'}
                   noWrap
-                  onClick={() => {
-                    if (artist !== va) {
-                      props.onClickArtist(artist)
-                    }
-                  }}
-                  className={cx(artist !== va && classes.artist)}
+                  onClick={
+                    isSingleArtist ? (e) => onClickArtist(e, artist) : undefined
+                  }
+                  className={cx(isSingleArtist && classes.artist)}
                   color="textSecondary"
                   variant="body2"
                 >
@@ -164,10 +166,10 @@ function AudioAlbumList(props: AudioAlbumListProps) {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Grid2>
         )
       })}
-    </Grid>
+    </Grid2>
   )
 }
 

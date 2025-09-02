@@ -1,11 +1,11 @@
-import React, { type ChangeEvent, type MouseEvent, useState } from 'react'
-import { SketchPicker } from 'react-color'
+import { type ChangeEvent, type MouseEvent, useState } from 'react'
+import { Color, HEXColor, SketchPicker } from 'react-color'
 
-import { Fab, Grid, Menu, TextField, type Theme, Tooltip } from '@mui/material'
+import { Fab, Grid2, Menu, TextField, type Theme, Tooltip } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 import type ReduxProps from '../common/ReduxProps'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppDispatch } from '../../store/hooks'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   colorGrid: {
@@ -56,14 +56,16 @@ const COLORS = [
   '#000'
 ]
 
-export interface ColorPickerProps extends ReduxProps<string> {}
+export interface ColorPickerProps extends ReduxProps<string> {
+  type: string
+}
 
 function ColorPicker(props: ColorPickerProps) {
   const dispatch = useAppDispatch()
-  const currentColor = useAppSelector(props.selector)
+  const { data: currentColor } = props.selector()
 
-  const [pickerColor, setPickerColor] = useState<any>()
-  const [pickerAnchorEl, setPickerAnchorEl] = useState<any>()
+  const [pickerColor, setPickerColor] = useState<Color>()
+  const [pickerAnchorEl, setPickerAnchorEl] = useState<Element>()
 
   const onToggleColorPicker = (e: MouseEvent) => {
     if (pickerColor) {
@@ -76,28 +78,35 @@ function ColorPicker(props: ColorPickerProps) {
     }
   }
 
-  const onChangePickerColor = (color: any) => {
+  const onChangePickerColor = (color: Color) => {
     setPickerColor(color)
   }
 
-  const onChangeColor = (color: any) => {
-    const value = color?.hex ?? color
+  const onChangeColor = (color: Color) => {
+    const value = (color as HEXColor)?.hex ?? color
     dispatch(props.action(value))
+  }
+
+  const getStyleValue = (
+    pickerColor?: Color,
+    currentColor?: string
+  ): string => {
+    return (pickerColor as HEXColor)?.hex ?? pickerColor ?? currentColor
+  }
+
+  const getTextValue = (pickerColor?: Color, currentColor?: string): string => {
+    return (pickerColor as HEXColor)?.hex ?? pickerColor ?? currentColor ?? ''
   }
 
   const { classes } = useStyles()
   return (
-    <Grid container alignItems="center">
-      <Grid item className={classes.colorGrid}>
+    <Grid2 container alignItems="center">
+      <Grid2 className={classes.colorGrid}>
         <Tooltip disableInteractive title="Pick Color">
           <Fab
             className={classes.colorButton}
             style={{
-              backgroundColor: pickerColor
-                ? pickerColor.hex
-                  ? pickerColor.hex
-                  : pickerColor
-                : currentColor
+              backgroundColor: getStyleValue(pickerColor, currentColor)
             }}
             onClick={onToggleColorPicker}
             size="medium"
@@ -109,19 +118,13 @@ function ColorPicker(props: ColorPickerProps) {
           variant="standard"
           className={classes.colorField}
           label="Color"
-          value={
-            pickerColor
-              ? pickerColor.hex
-                ? pickerColor.hex
-                : pickerColor
-              : currentColor
-          }
+          value={getTextValue(pickerColor, currentColor)}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             dispatch(props.action(e.target.value))
           }
         />
         <Menu
-          id="color-picker"
+          id={`${props.type}-color-picker`}
           elevation={1}
           anchorOrigin={{
             vertical: 'bottom',
@@ -143,11 +146,11 @@ function ColorPicker(props: ColorPickerProps) {
             onChange={onChangePickerColor}
           />
         </Menu>
-      </Grid>
-      <Grid item xs={12} sm>
-        <Grid container alignItems="center">
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: 'grow' }}>
+        <Grid2 container alignItems="center">
           {COLORS.map((c) => (
-            <Grid key={c} item>
+            <Grid2 key={c}>
               <Fab
                 className={classes.colorPickerButton}
                 style={{ backgroundColor: c }}
@@ -159,11 +162,11 @@ function ColorPicker(props: ColorPickerProps) {
               >
                 <div />
               </Fab>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
-      </Grid>
-    </Grid>
+        </Grid2>
+      </Grid2>
+    </Grid2>
   )
 }
 

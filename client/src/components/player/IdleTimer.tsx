@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from 'react'
+import { type PropsWithChildren } from 'react'
 import { withIdleTimer } from 'react-idle-timer'
 
 function IdleTimerComponent(props: PropsWithChildren<void>) {

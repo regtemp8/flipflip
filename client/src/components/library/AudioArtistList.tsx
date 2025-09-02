@@ -1,14 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { cx } from '@emotion/css'
 
-import { Avatar, type Theme, Typography } from '@mui/material'
+import { Avatar, LinearProgress, type Theme, Typography } from '@mui/material'
 
 import { makeStyles } from 'tss-react/mui'
 
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
-
-import { selectAudioArtists } from '../../store/audio/selectors'
-import { useAppSelector } from '../../store/hooks'
+import { useGetAudioArtistsQuery } from '../../store/api/slice'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   emptyMessage: {
@@ -60,7 +58,7 @@ export interface AudioArtistListProps {
 }
 
 function AudioArtistList(props: AudioArtistListProps) {
-  const artists = useAppSelector(selectAudioArtists(props.sources))
+  const { data: artists, isLoading } = useGetAudioArtistsQuery(props.sources)
   const [hover, setHover] = useState<string>()
 
   const onMouseEnter = (artist: string) => {
@@ -72,9 +70,11 @@ function AudioArtistList(props: AudioArtistListProps) {
   }
 
   const { classes } = useStyles()
-  if (artists.size === 0) {
+  if (isLoading) {
+    return <LinearProgress />
+  } else if (artists == null || artists.length === 0) {
     return (
-      <React.Fragment>
+      <>
         <Typography
           component="h1"
           variant="h3"
@@ -104,33 +104,31 @@ function AudioArtistList(props: AudioArtistListProps) {
             Add tracks by going to the "Songs" tab and clicking the +
           </Typography>
         )}
-      </React.Fragment>
+      </>
     )
   }
 
-  const artistKeys = Array.from(artists.keys())
   const width = window.innerWidth - 104 // 72px drawer + 2x18px padding
   const numIcons = Math.floor(width / 178) // 160xp width + 2x9px padding
   const remainingWidth = width - numIcons * 178
   const padding = Math.floor(remainingWidth / numIcons / 2) + 6
   return (
     <div className={classes.artistContainer}>
-      {artistKeys.map((a) => {
-        let thumb: string | undefined = artists.get(a)
-        if (thumb) thumb = thumb.replace(/\\/g, '/')
+      {artists.map((artist) => {
+        const { name, thumb } = artist
         return (
           <div
-            key={a}
+            key={name}
             className={classes.artist}
             style={{ padding }}
-            onClick={() => props.onClickArtist(a)}
-            onMouseEnter={() => onMouseEnter(a)}
+            onClick={() => props.onClickArtist(name)}
+            onMouseEnter={() => onMouseEnter(name)}
             onMouseLeave={onMouseLeave}
           >
             <Avatar
-              alt={a}
+              alt={name}
               src={thumb}
-              className={cx(classes.large, hover === a && classes.shadow)}
+              className={cx(classes.large, hover === name && classes.shadow)}
             >
               {thumb == null && (
                 <AudiotrackIcon className={classes.mediaIcon} />
@@ -140,11 +138,11 @@ function AudioArtistList(props: AudioArtistListProps) {
               display={'block'}
               className={cx(
                 classes.trackArtist,
-                hover === a && classes.underlineTitle
+                hover === name && classes.underlineTitle
               )}
               variant={'h6'}
             >
-              {a}
+              {name}
             </Typography>
           </div>
         )

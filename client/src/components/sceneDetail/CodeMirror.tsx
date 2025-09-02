@@ -1,16 +1,13 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { getTimingFromString } from '../../data/utils'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { getTimingFromString } from '../../utils'
 import type ChildCallbackHack from '../player/ChildCallbackHack'
-import { type Mode, type Editor, type EditorChange } from 'codemirror'
-
-const { registerHelper } =
-  typeof window !== 'undefined'
-    ? require('codemirror')
-    : { registerHelper: (namespace: string, name: string, helper: any) => {} }
-const { Controlled } =
-  typeof window !== 'undefined'
-    ? require('react-codemirror2')
-    : { Controlled: null }
+import {
+  type Mode,
+  type Editor,
+  type EditorChange,
+  registerHelper
+} from 'codemirror'
+import { Controlled } from 'react-codemirror2'
 
 const actions = [
   'blink',
@@ -472,7 +469,7 @@ export default function CodeMirror(props: CodeMirrorProps) {
 
   const onBeforeChangeScript = (
     editor: Editor,
-    data: EditorChange,
+    _data: EditorChange,
     value: string
   ) => {
     if (scriptText !== value) {

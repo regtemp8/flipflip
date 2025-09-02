@@ -20,10 +20,18 @@ import PauseIcon from '@mui/icons-material/Pause'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 import { PT } from 'flipflip-common'
-import { setFullScreen, toggleFullScreen } from '../../data/actions'
-import { useAppSelector } from '../../store/hooks'
-import { selectAppTutorial } from '../../store/app/selectors'
-import { selectDisplayName } from '../../store/display/selectors'
+import { setFullScreen, toggleFullScreen } from '../../data/fullscreen'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import {
+  selectPlayerHasStarted,
+  selectPlayerIsPlaying
+} from '../../store/imagePlayer/selectors'
+import {
+  pauseImagePlayers,
+  resumeImagePlayers
+} from '../../store/imagePlayer/thunks'
+// import { selectAppTutorial } from '../../store/app/selectors'
+// import { selectDisplayName } from '../../store/display/selectors'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   hoverBar: {
@@ -84,22 +92,21 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export interface DisplayManagerAppBarProps {
   drawerHover: boolean
-  isPlaying: boolean
-  hasStarted: boolean
-  play: () => void
-  pause: () => void
-  displayID: number
   goBack: () => void
+  playerID: string
 }
 
 function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
-  const { drawerHover, isPlaying, hasStarted, goBack, play, pause } = props
+  const dispatch = useAppDispatch()
+  const isPlaying = useAppSelector(selectPlayerIsPlaying())
+  const hasStarted = useAppSelector(selectPlayerHasStarted())
+  const { drawerHover, goBack } = props
   const [appBarHover, setAppBarHover] = useState(false)
 
   const _appBarTimeout = useRef<number>()
 
-  const tutorial = useAppSelector(selectAppTutorial())
-  const title = useAppSelector(selectDisplayName(props.displayID))
+  const tutorial = '' //useAppSelector(selectAppTutorial())
+  const title = '' //useAppSelector(selectDisplayName(props.displayID))
 
   const onMouseEnterAppBar = () => {
     clearTimeout(_appBarTimeout.current)
@@ -119,6 +126,9 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
     setFullScreen(false)
     goBack()
   }, [goBack])
+
+  const play = () => dispatch(resumeImagePlayers())
+  const pause = () => dispatch(pauseImagePlayers())
 
   const historyGoBack = useCallback(
     () => {
