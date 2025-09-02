@@ -30,14 +30,14 @@
 
 - Settings
 
-  - [Overview](v4/config.md)
-  - [Environment Variables](v4/environment_variables.md)
+  - [Overview](config.md)
+  - [Environment Variables](environment_variables.md)
 
-- [Displays](v4/displays.md)
-- [Video Clipper](v4/clips.md)
-- [Import/Export](v4/import_export.md)
-- [Caption Scriptor Tool](v4/scriptor.md)
-- [Caption Script Format](v4/caption_script.md)
+- [Displays](displays.md)
+- [Video Clipper](clips.md)
+- [Import/Export](import_export.md)
+- [Caption Scriptor Tool](scriptor.md)
+- [Caption Script Format](caption_script.md)
 - [Screen Capture](screen_capture.md)
 - [Developers](developers.md)
 - [Changelog](changelog.md)
