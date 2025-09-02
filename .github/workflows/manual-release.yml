@@ -30,6 +30,9 @@ jobs:
       PLATFORM_NAME: ${{ inputs.os == 'ubuntu-latest' && 'linux' || (inputs.os == 'windows-latest' && 'windows' || 'macos') }}
       EXTENSION: ${{ inputs.os == 'windows-latest' && '.exe' || '' }}
     steps:
+    - name: Install setuptools
+      if: ${{inputs.os == 'macos-latest'}}
+      run: brew install python-setuptools
     - uses: actions/checkout@v4
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -59,8 +62,6 @@ jobs:
       uses: stevenbenitez/get-package-version-action@v1
       with:
         path: ./server
-    - name: Install setuptools
-      run: python3 -m pip install setuptools
     - name: Install Server
       working-directory: ./server
       run: yarn install --immutable
