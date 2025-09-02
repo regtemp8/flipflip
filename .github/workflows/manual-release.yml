@@ -59,6 +59,8 @@ jobs:
       uses: stevenbenitez/get-package-version-action@v1
       with:
         path: ./server
+    - name: Install setuptools
+      run: python3 -m pip install setuptools
     - name: Install Server
       working-directory: ./server
       run: yarn install --immutable
