@@ -30,29 +30,22 @@ const typeDirs = new Map<string, string | undefined>([
 ])
 
 const router = express.Router()
-router.get('/pick/:cwd(*)?', async (req, res) => {
-  let dir: string
+router.get('/pick', async (req, res) => {
   const type = req.query.type as string
-  if (req.params.cwd) {
-    let cwd = req.params.cwd
-    if (!cwd.startsWith('/')) {
-      cwd = '/' + cwd
-    }
-    if (!fs.existsSync(cwd)) {
-      res.status(400).send({ error: `Path '${cwd}' doesn't exist` })
-      return
-    }
-    if (!fs.statSync(cwd).isDirectory()) {
-      res.status(400).send({ error: `Path '${cwd}' is not a directory` })
-      return
-    }
-
-    dir = cwd
-  } else {
-    dir = typeDirs.get(type) ?? getSaveDir()
-  }
+  let dir = req.query.dir
+    ? (req.query.dir as string)
+    : (typeDirs.get(type) ?? getSaveDir())
 
   dir = path.resolve(dir)
+  if (!fs.existsSync(dir)) {
+    res.status(400).send({ error: `Path '${dir}' doesn't exist` })
+    return
+  }
+  if (!fs.statSync(dir).isDirectory()) {
+    res.status(400).send({ error: `Path '${dir}' is not a directory` })
+    return
+  }
+
   let dirents: Dirent[]
   try {
     dirents = await fs.promises.readdir(dir, { withFileTypes: true })
@@ -62,7 +55,7 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     return
   }
   if (dirents.length === 0) {
-    const data: FilePickerData = { path: dir, items: [] }
+    const data: FilePickerData = { path: dir, sep: path.sep, items: [] }
     res.status(200).send(data)
     return
   }
@@ -103,7 +96,7 @@ router.get('/pick/:cwd(*)?', async (req, res) => {
     })
   }
 
-  const data: FilePickerData = { path: dir, items }
+  const data: FilePickerData = { path: dir, sep: path.sep, items }
   res.status(200).send(data)
 })
 

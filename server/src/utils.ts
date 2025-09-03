@@ -29,14 +29,23 @@ export function getElectronSaveDir() {
       directory = process.env.APPDATA
       break
     case 'darwin':
-      directory = process.env.HOME + '/Library/Application Support'
+      if (process.env.HOME != null) {
+        directory = path.join(
+          process.env.HOME,
+          'Library',
+          'Application Support'
+        )
+      }
       break
     case 'linux':
-      directory = process.env.XDG_CONFIG_HOME ?? process.env.HOME + '/.config'
+      directory = process.env.XDG_CONFIG_HOME ?? process.env.HOME
+      if (directory != null) {
+        directory = path.join(directory, '.config')
+      }
       break
   }
 
-  return directory != null ? directory + '/flipflip' : undefined
+  return directory != null ? path.join(directory, 'flipflip') : undefined
 }
 
 export function getSaveDir() {

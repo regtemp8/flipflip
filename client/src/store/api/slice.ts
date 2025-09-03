@@ -48,6 +48,12 @@ import snackbar from '../../data/Snackbar'
 import { loadImageViews } from '../imagePlayer/thunks'
 import { updateLocalDisplayView } from './thunks'
 
+function toArrayParam<T>(array: T[]) {
+  return array.length > 0
+    ? encodeURIComponent(JSON.stringify(array))
+    : undefined
+}
+
 const baseUrl =
   import.meta.env.VITE_API_BASE_URL ||
   `${window.location.protocol}//${window.location.host}/`
@@ -393,31 +399,22 @@ export const flipflipApi = createApi({
       number[],
       { filters: string[]; sceneId?: number }
     >({
-      query: ({ filters, sceneId }) => {
-        const queries: string[] = []
-        if (sceneId != null) {
-          queries.push(`scene=${sceneId}`)
+      query: ({ filters, sceneId }) => ({
+        url: `api/content-sources/filtered`,
+        params: {
+          scene: sceneId,
+          filters: toArrayParam(filters)
         }
-        if (filters.length > 0) {
-          queries.push(`filters=${encodeURIComponent(JSON.stringify(filters))}`)
-        }
-
-        const query = queries.length > 0 ? '?' + queries.join('&') : ''
-        return {
-          url: `api/content-sources/filtered${query}`
-        }
-      },
+      }),
       providesTags: (_result, error) =>
         error == null ? [{ type: 'ContentSource', id: 'FilteredList' }] : []
     }),
     deleteContentSources: builder.mutation<void, number | undefined>({
-      query: (sceneId) => {
-        const query = sceneId != null ? `?scene=${sceneId}` : ''
-        return {
-          url: `api/content-sources${query}`,
-          method: 'DELETE'
-        }
-      },
+      query: (sceneId) => ({
+        url: `api/content-sources`,
+        params: { scene: sceneId },
+        method: 'DELETE'
+      }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
@@ -913,7 +910,10 @@ export const flipflipApi = createApi({
       ImageViewData[],
       { id: string; size: number }
     >({
-      query: ({ id, size }) => `api/view-players/${id}/items?size=${size}`
+      query: ({ id, size }) => ({
+        url: `api/view-players/${id}/items`,
+        params: { size }
+      })
     }),
     sendViewPlayerEvent: builder.mutation<
       ValueResponse | undefined,
@@ -1225,15 +1225,12 @@ export const flipflipApi = createApi({
       providesTags: [{ type: 'CaptionScript', id: 'List' }]
     }),
     getFilteredCaptionScripts: builder.query<number[], string[]>({
-      query: (filters) => {
-        let filtersQuery =
-          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
-        if (filtersQuery !== '') {
-          filtersQuery = `?filters=${filtersQuery}`
+      query: (filters) => ({
+        url: `api/caption-scripts/filtered`,
+        params: {
+          filters: toArrayParam(filters)
         }
-
-        return { url: `api/caption-scripts/filtered${filtersQuery}` }
-      },
+      }),
       providesTags: [{ type: 'CaptionScript', id: 'FilteredList' }]
     }),
     getCaptionScript: builder.query<CaptionScript, number>({
@@ -1629,37 +1626,30 @@ export const flipflipApi = createApi({
       providesTags: [{ type: 'Audio', id: 'List' }]
     }),
     getAudioAlbums: builder.query<AudioAlbum[], number[]>({
-      query: (ids) => {
-        let idsQuery = encodeURIComponent(JSON.stringify(ids))
-        if (idsQuery !== '') {
-          idsQuery = '?ids=' + idsQuery
+      query: (ids) => ({
+        url: `api/audios/albums`,
+        params: {
+          ids: toArrayParam(ids)
         }
-
-        return { url: `api/audios/albums${idsQuery}` }
-      },
+      }),
       providesTags: [{ type: 'Audio', id: 'AlbumList' }]
     }),
     getAudioArtists: builder.query<AudioArtist[], number[]>({
-      query: (ids) => {
-        let idsQuery = encodeURIComponent(JSON.stringify(ids))
-        if (idsQuery !== '') {
-          idsQuery = '?ids=' + idsQuery
+      query: (ids) => ({
+        url: `api/audios/artists`,
+        params: {
+          ids: toArrayParam(ids)
         }
-
-        return { url: `api/audios/artists${idsQuery}` }
-      },
+      }),
       providesTags: [{ type: 'Audio', id: 'ArtistList' }]
     }),
     getFilteredAudios: builder.query<number[], string[]>({
-      query: (filters) => {
-        let filtersQuery =
-          filters.length > 0 ? encodeURIComponent(JSON.stringify(filters)) : ''
-        if (filtersQuery !== '') {
-          filtersQuery = `?filters=${filtersQuery}`
+      query: (filters) => ({
+        url: `api/audios/filtered`,
+        params: {
+          filters: toArrayParam(filters)
         }
-
-        return { url: `api/audios/filtered${filtersQuery}` }
-      },
+      }),
       providesTags: [{ type: 'Audio', id: 'FilteredList' }]
     }),
     getAudio: builder.query<Audio, number>({
@@ -1916,8 +1906,9 @@ export const flipflipApi = createApi({
       FilePickerData,
       { path?: string; type?: string }
     >({
-      query: (data) => ({
-        url: `fs/pick/${data.path ?? ''}${data.type ? '?type=' + data.type : ''}`
+      query: ({ path, type }) => ({
+        url: `fs/pick`,
+        params: { dir: path, type }
       }),
       async onQueryStarted(_, { queryFulfilled }) {
         await queryFulfilled.catch((reason) => {

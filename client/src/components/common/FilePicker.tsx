@@ -33,7 +33,7 @@ import {
   useCreateDirectoryMutation,
   useGetFilePickerDataQuery
 } from '../../store/api/slice'
-import { FilePickerItem } from 'flipflip-common'
+import { AF, FilePickerItem } from 'flipflip-common'
 import { filesize } from 'filesize'
 import { makeStyles } from 'tss-react/mui'
 
@@ -124,6 +124,7 @@ const PathTextField = (props: PathTextFieldProps) => {
 
 interface CreateDirectoryPopoverProps {
   parentPath?: string
+  sep?: string
   setSelected: (selected: string[]) => void
 }
 
@@ -142,8 +143,9 @@ const CreateDirectoryPopover = (props: CreateDirectoryPopoverProps) => {
   }
 
   const onCreate = async () => {
+    const { parentPath, sep } = props
     if (folderName) {
-      await createDirectory({ path: props.parentPath + '/' + folderName })
+      await createDirectory({ path: `${parentPath}${sep}${folderName}` })
       props.setSelected([folderName])
       handleClose()
     }
@@ -300,8 +302,12 @@ export default function FilePicker(props: FilePickerProps) {
         )
       }
       case FilePickerMode.PathNavigation: {
-        const path = data?.path ?? ''
-        const crumbs = path.split('/')
+        if (data == null) {
+          return null
+        }
+
+        const path = data.path
+        const crumbs = path.split(data.sep)
         const last = crumbs.pop()
         return (
           <Breadcrumbs
@@ -317,7 +323,7 @@ export default function FilePicker(props: FilePickerProps) {
                 underline="hover"
                 color="inherit"
                 onClick={() => {
-                  setPath(array.slice(0, index + 1).join('/'))
+                  setPath(array.slice(0, index + 1).join(data.sep))
                   setSelected([])
                 }}
               >
@@ -356,14 +362,18 @@ export default function FilePicker(props: FilePickerProps) {
   }
 
   const onDoubleClick = (item: FilePickerItem) => {
+    if (data == null) {
+      return
+    }
+
     setSearch('')
     setMode(FilePickerMode.PathNavigation)
     if (item.directory) {
-      setPath(`${data?.path}/${item.name}`)
+      setPath(`${data.path}${data.sep}${item.name}`)
       setSelected([])
       _lastSelected.current = undefined
     } else {
-      onClose([`${data?.path}/${item.name}`])
+      onClose([`${data.path}${data.sep}${item.name}`])
     }
   }
 
@@ -415,12 +425,17 @@ export default function FilePicker(props: FilePickerProps) {
     _lastSelected.current = undefined
   }
 
+  const isDir = () => props.type === 'dir' || props.type === AF.directory
+
   const onChoose = () => {
-    const path = data?.path ?? ''
+    if (data == null) {
+      return
+    }
+
     const chosenFiles =
-      props.type === 'dir' && selected.length === 0
-        ? [path]
-        : selected.map((name) => `${path}/${name}`)
+      isDir() && selected.length === 0
+        ? [data.path]
+        : selected.map((name) => `${data.path}${data.sep}${name}`)
     onClose(chosenFiles)
   }
 
@@ -433,7 +448,7 @@ export default function FilePicker(props: FilePickerProps) {
   }
   sortItems(items, sort)
   const canChoose =
-    (props.type === 'dir' && (selected.length === 1 || path !== '')) ||
+    (isDir() && (selected.length === 1 || path !== '')) ||
     (selected.length > 0 &&
       selected
         .map((n) => items.find((i) => i.name === n))
@@ -459,11 +474,12 @@ export default function FilePicker(props: FilePickerProps) {
               >
                 <SearchIcon />
               </IconButton>
-              {props.type === 'dir' && (
+              {isDir() && (
                 <>
                   <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
                   <CreateDirectoryPopover
                     parentPath={data?.path}
+                    sep={data?.sep}
                     setSelected={setSelected}
                   />
                 </>
