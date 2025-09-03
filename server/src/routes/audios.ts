@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
     res.status(500).end()
   }
 })
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const userId = (req.user as User).id as number
   const messages: Message[] = []
   const urls: string[] = []
@@ -72,17 +72,13 @@ router.post('/', async (req, res, next) => {
   }
 
   if (urls.length > 0) {
-    try {
-      const audios: Array<Partial<Audio>> = []
-      for (const url of urls) {
-        audios.push(await readAudioMetadata(url))
-      }
-      const ids = await createAudios(audios, userId)
-      if (ids.length === 0) {
-        messages.push({ info: 'No new audios added' })
-      }
-    } catch (error) {
-      next(error)
+    const audios: Array<Partial<Audio>> = []
+    for (const url of urls) {
+      audios.push(await readAudioMetadata(url))
+    }
+    const ids = await createAudios(audios, userId)
+    if (ids.length === 0) {
+      messages.push({ info: 'No new audios added' })
     }
   }
 
@@ -92,14 +88,10 @@ router.post('/', async (req, res, next) => {
     res.status(204).end()
   }
 })
-router.delete('/', async (req, res, next) => {
+router.delete('/', async (req, res) => {
   const ids = req.body?.ids as number[] | undefined
-  try {
-    await deleteAllAudios(ids)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await deleteAllAudios(ids)
+  res.status(204).end()
 })
 router.get('/filtered', async (req, res) => {
   let filtersQuery = req.query.filters
@@ -281,35 +273,27 @@ router.get('/search-options', async (req, res) => {
       toSearchSelectOptions(options, totalCount, untaggedCount, markedCount)
     )
 })
-router.post('/tags', async (req, res, next) => {
+router.post('/tags', async (req, res) => {
   const userId = (req.user as User).id as number
   const body = req.body as BatchTagRequest
-  try {
-    switch (body.operation) {
-      case 'add':
-        await addAudioTags(userId, body.ids, body.tags)
-        break
-      case 'overwrite':
-        await setAudioTags(userId, body.ids, body.tags)
-        break
-      case 'remove':
-        await removeAudioTags(userId, body.ids, body.tags)
-        break
-    }
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+  switch (body.operation) {
+    case 'add':
+      await addAudioTags(userId, body.ids, body.tags)
+      break
+    case 'overwrite':
+      await setAudioTags(userId, body.ids, body.tags)
+      break
+    case 'remove':
+      await removeAudioTags(userId, body.ids, body.tags)
+      break
   }
+  res.status(204).end()
 })
-router.post('/mark', async (req, res, next) => {
+router.post('/mark', async (req, res) => {
   const userId = (req.user as User).id as number
   const ids = req.body as number[]
-  try {
-    await markAudios(userId, ids)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await markAudios(userId, ids)
+  res.status(204).end()
 })
 
 // TODO make separate endpoint for audio playlist sorting
@@ -374,38 +358,31 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.patch('/:id', async (req, res, next) => {
-  try {
-    const body = req.body as Partial<Audio>
-    if (body.thumb != null) {
-      body.thumb = fromAudioThumb(body.thumb)
-    }
+router.patch('/:id', async (req, res) => {
+  const body = req.body as Partial<Audio>
+  if (body.thumb != null) {
+    body.thumb = fromAudioThumb(body.thumb)
+  }
 
-    let isUrl = false
-    const update = toAudioUpdate(body)
-    if (update.url) {
-      isUrl = update.url.startsWith('http')
-      if (
-        !isAudio(update.url, false) ||
-        (!isUrl && !fs.existsSync(update.url))
-      ) {
-        res.status(400).send({
-          error: `Invalid audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
-        })
-        return
-      }
-    }
-
-    const didDeleteRow = await updateAudio(Number(req.params.id), update)
-    if (didDeleteRow) {
-      res.status(404).send({
-        error: `Duplicate audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
+  let isUrl = false
+  const update = toAudioUpdate(body)
+  if (update.url) {
+    isUrl = update.url.startsWith('http')
+    if (!isAudio(update.url, false) || (!isUrl && !fs.existsSync(update.url))) {
+      res.status(400).send({
+        error: `Invalid audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
       })
-    } else {
-      res.status(204).end()
+      return
     }
-  } catch (error) {
-    next(error)
+  }
+
+  const didDeleteRow = await updateAudio(Number(req.params.id), update)
+  if (didDeleteRow) {
+    res.status(404).send({
+      error: `Duplicate audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
+    })
+  } else {
+    res.status(204).end()
   }
 })
 router.delete('/:id', async (req, res) => {
@@ -413,30 +390,22 @@ router.delete('/:id', async (req, res) => {
   const status = result[0].numDeletedRows > 0n ? 204 : 500
   res.status(status).end()
 })
-router.get('/:id/metadata', async (req, res, next) => {
+router.get('/:id/metadata', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
-  try {
-    const url = await findAudioUrlById(id, userId)
-    const metadata = await readAudioMetadata(url)
-    if (metadata?.thumb != null) {
-      metadata.thumb = toAudioThumb(metadata.thumb)
-    }
+  const url = await findAudioUrlById(id, userId)
+  const metadata = await readAudioMetadata(url)
+  if (metadata?.thumb != null) {
+    metadata.thumb = toAudioThumb(metadata.thumb)
+  }
 
-    res.status(200).send({ ...metadata, id })
-  } catch (error) {
-    next(error)
-  }
+  res.status(200).send({ ...metadata, id })
 })
-router.get('/:id/bpm', async (req, res, next) => {
+router.get('/:id/bpm', async (req, res) => {
   const userId = (req.user as User).id as number
   const id = Number(req.params.id)
-  try {
-    const url = await findAudioUrlById(id, userId)
-    const metadata = await readAudioMetadata(url)
-    res.status(200).send({ id, bpm: metadata.bpm })
-  } catch (error) {
-    next(error)
-  }
+  const url = await findAudioUrlById(id, userId)
+  const metadata = await readAudioMetadata(url)
+  res.status(200).send({ id, bpm: metadata.bpm })
 })
 export default router

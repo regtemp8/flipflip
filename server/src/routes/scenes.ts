@@ -52,15 +52,11 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const user = req.user as User
-  try {
-    const { id } = await createScene(user.id as number)
-    const response: ValueResponse = { value: id as number }
-    res.status(200).send(response)
-  } catch (error) {
-    next(error)
-  }
+  const { id } = await createScene(user.id as number)
+  const response: ValueResponse = { value: id as number }
+  res.status(200).send(response)
 })
 
 router.get('/select-options', async (req, res) => {
@@ -89,32 +85,24 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/:id/clone', async (req, res, next) => {
-  try {
-    const userId = (req.user as User).id as number
-    const newSceneId = await cloneScene(Number(req.params.id), userId)
-    res.status(200).send({ value: newSceneId })
-  } catch (error) {
-    next(error)
-  }
+router.post('/:id/clone', async (req, res) => {
+  const userId = (req.user as User).id as number
+  const newSceneId = await cloneScene(Number(req.params.id), userId)
+  res.status(200).send({ value: newSceneId })
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req, res) => {
   const userId = (req.user as User).id as number
   const sceneId = Number(req.params.id)
-  try {
-    const canDelete = await isSceneCreator(sceneId, userId)
-    if (canDelete == null) {
-      res.status(403).end()
-      return
-    }
-
-    const result = await deleteScene(Number(req.params.id))
-    const status = result[0].numDeletedRows > 0n ? 204 : 500
-    res.status(status).end()
-  } catch (error) {
-    next(error)
+  const canDelete = await isSceneCreator(sceneId, userId)
+  if (canDelete == null) {
+    res.status(403).end()
+    return
   }
+
+  const result = await deleteScene(Number(req.params.id))
+  const status = result[0].numDeletedRows > 0n ? 204 : 500
+  res.status(status).end()
 })
 
 router.get('/:id/disable-weight-options', async (req, res) => {

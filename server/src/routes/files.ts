@@ -120,31 +120,23 @@ router.post('/create-directory', async (req, res) => {
   }
 })
 
-router.get('/file/audio-thumb/:name', async (req, res, next) => {
+router.get('/file/audio-thumb/:name', async (req, res) => {
   const { name } = req.params
-  try {
-    const thumb = path.join(getThumbsDir(), name)
-    if (fs.existsSync(thumb)) {
-      res.status(200).type(name.substring(name.lastIndexOf('.')))
-      fs.createReadStream(thumb).pipe(res)
-    } else {
-      res.status(404).end()
-    }
-  } catch (error) {
-    next(error)
+  const thumb = path.join(getThumbsDir(), name)
+  if (fs.existsSync(thumb)) {
+    res.status(200).type(name.substring(name.lastIndexOf('.')))
+    fs.createReadStream(thumb).pipe(res)
+  } else {
+    res.status(404).end()
   }
 })
 
-router.get('/file/registry/:uuid', async (req, res, next) => {
-  try {
-    const url = fileRegistry().get(req.params.uuid)
-    await handleFileUrl(req, res, url)
-  } catch (error) {
-    next(error)
-  }
+router.get('/file/registry/:uuid', async (req, res) => {
+  const url = fileRegistry().get(req.params.uuid)
+  await handleFileUrl(req, res, url)
 })
 
-router.get('/file/:type/:id', async (req, res, next) => {
+router.get('/file/:type/:id', async (req, res) => {
   const { id, type } = req.params
   const queries = new Map([
     ['caption-script', findCaptionScriptUrlById],
@@ -158,13 +150,9 @@ router.get('/file/:type/:id', async (req, res, next) => {
     return
   }
 
-  try {
-    const userId = (req.user as User).id as number
-    const url = await query(Number(id), userId)
-    await handleFileUrl(req, res, url)
-  } catch (error) {
-    next(error)
-  }
+  const userId = (req.user as User).id as number
+  const url = await query(Number(id), userId)
+  await handleFileUrl(req, res, url)
 })
 
 async function handleFileUrl(req: Request, res: Response, url?: string) {

@@ -30,15 +30,11 @@ import players from '../player/PlayerService'
 
 const router = express.Router()
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const user = req.user as User
-  try {
-    const id = await createDisplay(user.id as number)
-    const response: ValueResponse = { value: id as number }
-    res.status(200).send(response)
-  } catch (error) {
-    next(error)
-  }
+  const id = await createDisplay(user.id as number)
+  const response: ValueResponse = { value: id as number }
+  res.status(200).send(response)
 })
 
 router.get('/grouped', async (req, res) => {
@@ -62,75 +58,51 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id)
   const user = req.user as User
   const userId = user.id as number
-  try {
-    await deleteDisplay(id, userId)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await deleteDisplay(id, userId)
+  res.status(204).end()
 })
 
-router.post('/:id/clone', async (req, res, next) => {
-  try {
-    const userId = (req.user as User).id as number
-    const newDisplayId = await cloneDisplay(Number(req.params.id), userId)
-    res.status(200).send({ value: newDisplayId })
-  } catch (error) {
-    next(error)
-  }
+router.post('/:id/clone', async (req, res) => {
+  const userId = (req.user as User).id as number
+  const newDisplayId = await cloneDisplay(Number(req.params.id), userId)
+  res.status(200).send({ value: newDisplayId })
 })
 
-router.post('/:id/display-views', async (req, res, next) => {
+router.post('/:id/display-views', async (req, res) => {
   const id = Number(req.params.id)
   const user = req.user as User
   const userId = user.id as number
-  try {
-    await addDisplayView(id, userId)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await addDisplayView(id, userId)
+  res.status(204).end()
 })
 
-router.get('/:id/visible-display-views', async (req, res, next) => {
+router.get('/:id/visible-display-views', async (req, res) => {
   const id = Number(req.params.id)
-  try {
-    const rows = await findVisibleDisplayViewIds(id)
-    const ids = rows.map((row) => row.id as number)
-    res.status(200).send(ids)
-  } catch (error) {
-    next(error)
-  }
+  const rows = await findVisibleDisplayViewIds(id)
+  const ids = rows.map((row) => row.id as number)
+  res.status(200).send(ids)
 })
 
-router.delete('/:id/display-views/:viewId', async (req, res, next) => {
+router.delete('/:id/display-views/:viewId', async (req, res) => {
   const id = Number(req.params.id)
   const viewId = Number(req.params.viewId)
   const user = req.user as User
   const userId = user.id as number
-  try {
-    await deleteDisplayView(id, viewId, userId)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await deleteDisplayView(id, viewId, userId)
+  res.status(204).end()
 })
 
-router.post('/:id/display-views/:viewId/clone', async (req, res, next) => {
+router.post('/:id/display-views/:viewId/clone', async (req, res) => {
   const id = Number(req.params.id)
   const viewId = Number(req.params.viewId)
   const user = req.user as User
   const userId = user.id as number
-  try {
-    await cloneDisplayView(id, viewId, userId)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await cloneDisplayView(id, viewId, userId)
+  res.status(204).end()
 })
 
 router.get('/:id/visible-views', async (req, res) => {

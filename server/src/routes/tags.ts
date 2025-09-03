@@ -23,21 +23,17 @@ router.get('/', async (req, res) => {
     res.status(500).end()
   }
 })
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const userId = (req.user as User).id as number
   const { name, phraseString } = req.body as Tag
-  try {
-    const { tagsCount } = await findTagsCount()
-    const tag = await createTag({
-      userId,
-      name,
-      phraseString: phraseString ?? null,
-      index: tagsCount
-    })
-    res.status(200).send(tag)
-  } catch (error) {
-    next(error)
-  }
+  const { tagsCount } = await findTagsCount()
+  const tag = await createTag({
+    userId,
+    name,
+    phraseString: phraseString ?? null,
+    index: tagsCount
+  })
+  res.status(200).send(tag)
 })
 router.delete('/', async (req, res) => {
   const result = await deleteAllTags()

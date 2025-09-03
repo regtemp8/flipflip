@@ -37,21 +37,17 @@ import {
 
 const router = express.Router()
 
-router.post('/', async (req, res, next) => {
-  try {
-    const userId = (req.user as User).id as number
-    const ids = await createContentSources(
-      req.body as AddContentSourceRequest,
-      userId
-    )
-    if (ids.length === 0) {
-      const message: Message = { info: 'No new sources added' }
-      res.status(200).send(message)
-    } else {
-      res.status(204).end()
-    }
-  } catch (error) {
-    next(error)
+router.post('/', async (req, res) => {
+  const userId = (req.user as User).id as number
+  const ids = await createContentSources(
+    req.body as AddContentSourceRequest,
+    userId
+  )
+  if (ids.length === 0) {
+    const message: Message = { info: 'No new sources added' }
+    res.status(200).send(message)
+  } else {
+    res.status(204).end()
   }
 })
 
@@ -110,35 +106,27 @@ router.get('/ignored-tag-options', async (req, res) => {
   const typeOptions = await findTypeOptions(userId)
   res.status(200).send(toIgnoredTagSelectOptions(tagOptions, typeOptions))
 })
-router.post('/tags', async (req, res, next) => {
+router.post('/tags', async (req, res) => {
   const userId = (req.user as User).id as number
   const body = req.body as BatchTagRequest
-  try {
-    switch (body.operation) {
-      case 'add':
-        await addContentSourceTags(userId, body.ids, body.tags)
-        break
-      case 'overwrite':
-        await setContentSourceTags(userId, body.ids, body.tags)
-        break
-      case 'remove':
-        await removeContentSourceTags(userId, body.ids, body.tags)
-        break
-    }
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+  switch (body.operation) {
+    case 'add':
+      await addContentSourceTags(userId, body.ids, body.tags)
+      break
+    case 'overwrite':
+      await setContentSourceTags(userId, body.ids, body.tags)
+      break
+    case 'remove':
+      await removeContentSourceTags(userId, body.ids, body.tags)
+      break
   }
+  res.status(204).end()
 })
-router.post('/mark', async (req, res, next) => {
+router.post('/mark', async (req, res) => {
   const userId = (req.user as User).id as number
   const ids = req.body as number[]
-  try {
-    markContentSources(userId, ids)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  markContentSources(userId, ids)
+  res.status(204).end()
 })
 router.post('/sort', async (req, res) => {
   const sort = req.body as ContentSortRequest

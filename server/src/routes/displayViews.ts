@@ -17,15 +17,11 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', async (req, res) => {
   const id = Number(req.params.id)
   const body = req.body as Partial<DisplayView>
-  try {
-    const error = await updateDisplayView(id, toDisplayViewUpdate(body))
-    res.status(200).send({ error })
-  } catch (error) {
-    next(error)
-  }
+  const error = await updateDisplayView(id, toDisplayViewUpdate(body))
+  res.status(200).send({ error })
 })
 
 export default router

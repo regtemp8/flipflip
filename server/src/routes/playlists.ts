@@ -95,14 +95,10 @@ router.delete('/:id', async (req, res) => {
   res.status(status).end()
 })
 
-router.post('/:id/clone', async (req, res, next) => {
-  try {
-    const userId = (req.user as User).id as number
-    const newPlaylistId = await clonePlaylist(Number(req.params.id), userId)
-    res.status(200).send({ value: newPlaylistId })
-  } catch (error) {
-    next(error)
-  }
+router.post('/:id/clone', async (req, res) => {
+  const userId = (req.user as User).id as number
+  const newPlaylistId = await clonePlaylist(Number(req.params.id), userId)
+  res.status(200).send({ value: newPlaylistId })
 })
 
 router.post('/:id/play', async (req, res) => {
@@ -123,38 +119,34 @@ router.post('/:id/play', async (req, res) => {
   }
 })
 
-router.post('/:id/items', async (req, res, next) => {
+router.post('/:id/items', async (req, res) => {
   const id = Number(req.params.id)
-  try {
-    const playlist = await findPlaylistType(id)
-    switch (playlist?.type) {
-      case PLT.audio: {
-        const item = req.body as AudioPlaylistItem
-        await createAudioPlaylistItem(toAudioPlaylistItemInsert(id, item))
-        break
-      }
-      case PLT.scene: {
-        const item = req.body as ScenePlaylistItem
-        const update = toScenePlaylistItemInsert(id, item)
-        const scenes = toScenePlaylistItemSceneInsert(item)
-        await createScenePlaylistItem(update, scenes)
-        break
-      }
-      case PLT.script: {
-        const item = req.body as CaptionScriptPlaylistItem
-        await createCaptionScriptPlaylistItem(
-          toCaptionScriptPlaylistItemInsert(id, item)
-        )
-        break
-      }
-      default: {
-        throw new Error(`Playlist type '${playlist?.type}' not supported`)
-      }
+  const playlist = await findPlaylistType(id)
+  switch (playlist?.type) {
+    case PLT.audio: {
+      const item = req.body as AudioPlaylistItem
+      await createAudioPlaylistItem(toAudioPlaylistItemInsert(id, item))
+      break
     }
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+    case PLT.scene: {
+      const item = req.body as ScenePlaylistItem
+      const update = toScenePlaylistItemInsert(id, item)
+      const scenes = toScenePlaylistItemSceneInsert(item)
+      await createScenePlaylistItem(update, scenes)
+      break
+    }
+    case PLT.script: {
+      const item = req.body as CaptionScriptPlaylistItem
+      await createCaptionScriptPlaylistItem(
+        toCaptionScriptPlaylistItemInsert(id, item)
+      )
+      break
+    }
+    default: {
+      throw new Error(`Playlist type '${playlist?.type}' not supported`)
+    }
   }
+  res.status(204).end()
 })
 
 router.get('/:id/items', async (req, res) => {
@@ -216,52 +208,44 @@ router.get('/:id/items/:itemId', async (req, res) => {
   }
 })
 
-router.patch('/:id/items/:itemId', async (req, res, next) => {
+router.patch('/:id/items/:itemId', async (req, res) => {
   const id = Number(req.params.id)
-  try {
-    const playlist = await findPlaylistType(id)
-    switch (playlist?.type) {
-      case PLT.audio: {
-        const item = req.body as Partial<AudioPlaylistItem>
-        item.id = Number(req.params.itemId)
-        await updateAudioPlaylistItem(toAudioPlaylistItemUpdate(item))
-        break
-      }
-      case PLT.scene: {
-        const item = req.body as Partial<ScenePlaylistItem>
-        item.id = Number(req.params.itemId)
-        const update = toScenePlaylistItemUpdate(item)
-        const scenes = toScenePlaylistItemSceneInsert(item)
-        await updateScenePlaylistItem(update, scenes)
-        break
-      }
-      case PLT.script: {
-        const item = req.body as Partial<CaptionScriptPlaylistItem>
-        item.id = Number(req.params.itemId)
-        await updateCaptionScriptPlaylistItem(
-          toCaptionScriptPlaylistItemUpdate(item)
-        )
-        break
-      }
-      default: {
-        throw new Error(`Playlist type '${playlist?.type}' not supported`)
-      }
+  const playlist = await findPlaylistType(id)
+  switch (playlist?.type) {
+    case PLT.audio: {
+      const item = req.body as Partial<AudioPlaylistItem>
+      item.id = Number(req.params.itemId)
+      await updateAudioPlaylistItem(toAudioPlaylistItemUpdate(item))
+      break
     }
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+    case PLT.scene: {
+      const item = req.body as Partial<ScenePlaylistItem>
+      item.id = Number(req.params.itemId)
+      const update = toScenePlaylistItemUpdate(item)
+      const scenes = toScenePlaylistItemSceneInsert(item)
+      await updateScenePlaylistItem(update, scenes)
+      break
+    }
+    case PLT.script: {
+      const item = req.body as Partial<CaptionScriptPlaylistItem>
+      item.id = Number(req.params.itemId)
+      await updateCaptionScriptPlaylistItem(
+        toCaptionScriptPlaylistItemUpdate(item)
+      )
+      break
+    }
+    default: {
+      throw new Error(`Playlist type '${playlist?.type}' not supported`)
+    }
   }
+  res.status(204).end()
 })
 
-router.delete('/:id/items/:itemId', async (req, res, next) => {
+router.delete('/:id/items/:itemId', async (req, res) => {
   const id = Number(req.params.id)
   const itemId = Number(req.params.itemId)
-  try {
-    await deletePlaylistItem(id, itemId)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await deletePlaylistItem(id, itemId)
+  res.status(204).end()
 })
 
 // TODO remove if not used (currently not used)
@@ -274,20 +258,16 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const { type } = req.body
   if (![PLT.audio, PLT.scene, PLT.script].includes(type)) {
     res.status(400).end()
   }
 
   const user = req.user as User
-  try {
-    const { id } = await createPlaylist(type, user.id as number)
-    const response: ValueResponse = { value: id as number }
-    res.status(200).send(response)
-  } catch (error) {
-    next(error)
-  }
+  const { id } = await createPlaylist(type, user.id as number)
+  const response: ValueResponse = { value: id as number }
+  res.status(200).send(response)
 })
 
 router.get('/options/:type', async (req, res) => {

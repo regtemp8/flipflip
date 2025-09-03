@@ -2550,6 +2550,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"express-async-errors@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "express-async-errors@npm:3.1.1"
+  peerDependencies:
+    express: ^4.16.2
+  checksum: 10c0/56c4e90c44e98c7edc5bd38e18dd23b0d9a7139cb94ff3e25943ba257415b433e0e52ea8f9bc1fb5b70a5e6c5246eaace4fb69ab171edfb8896580928bb97ec6
+  languageName: node
+  linkType: hard
+
 "express-session@npm:^1.18.0":
   version: 1.18.1
   resolution: "express-session@npm:1.18.1"
@@ -5629,6 +5638,7 @@ __metadata:
     eslint: "npm:^8.0.1"
     eslint-plugin-import: "npm:^2.25.0"
     express: "npm:^4.21.0"
+    express-async-errors: "npm:^3.1.1"
     express-session: "npm:^1.18.0"
     fast-redact: "npm:^3.5.0"
     ffprobe: "npm:^1.1.2"

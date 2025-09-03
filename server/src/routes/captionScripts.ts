@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
     res.status(500).end()
   }
 })
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const userId = (req.user as User).id as number
   const messages: Message[] = []
   const urls: string[] = []
@@ -70,13 +70,9 @@ router.post('/', async (req, res, next) => {
   }
 
   if (urls.length > 0) {
-    try {
-      const ids = await createCaptionScripts(urls, userId)
-      if (ids.length === 0) {
-        messages.push({ info: 'No new caption scripts added' })
-      }
-    } catch (error) {
-      next(error)
+    const ids = await createCaptionScripts(urls, userId)
+    if (ids.length === 0) {
+      messages.push({ info: 'No new caption scripts added' })
     }
   }
 
@@ -86,14 +82,10 @@ router.post('/', async (req, res, next) => {
     res.status(204).end()
   }
 })
-router.delete('/', async (req, res, next) => {
+router.delete('/', async (req, res) => {
   const ids = req.body?.ids as number[] | undefined
-  try {
-    await deleteAllCaptionScripts(ids)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await deleteAllCaptionScripts(ids)
+  res.status(204).end()
 })
 router.get('/filtered', async (req, res) => {
   let filtersQuery = req.query.filters
@@ -187,35 +179,27 @@ router.get('/search-options', async (req, res) => {
       toSearchSelectOptions(options, totalCount, untaggedCount, markedCount)
     )
 })
-router.post('/tags', async (req, res, next) => {
+router.post('/tags', async (req, res) => {
   const userId = (req.user as User).id as number
   const body = req.body as BatchTagRequest
-  try {
-    switch (body.operation) {
-      case 'add':
-        await addCaptionScriptTags(userId, body.ids, body.tags)
-        break
-      case 'overwrite':
-        await setCaptionScriptTags(userId, body.ids, body.tags)
-        break
-      case 'remove':
-        await removeCaptionScriptTags(userId, body.ids, body.tags)
-        break
-    }
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+  switch (body.operation) {
+    case 'add':
+      await addCaptionScriptTags(userId, body.ids, body.tags)
+      break
+    case 'overwrite':
+      await setCaptionScriptTags(userId, body.ids, body.tags)
+      break
+    case 'remove':
+      await removeCaptionScriptTags(userId, body.ids, body.tags)
+      break
   }
+  res.status(204).end()
 })
-router.post('/mark', async (req, res, next) => {
+router.post('/mark', async (req, res) => {
   const userId = (req.user as User).id as number
   const ids = req.body as number[]
-  try {
-    await markCaptionScripts(userId, ids)
-    res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+  await markCaptionScripts(userId, ids)
+  res.status(204).end()
 })
 router.get('/:id', async (req, res) => {
   const userId = (req.user as User).id as number
@@ -228,33 +212,26 @@ router.get('/:id', async (req, res) => {
     res.status(404).end()
   }
 })
-router.patch('/:id', async (req, res, next) => {
-  try {
-    let isUrl = false
-    const update = toCaptionScriptUpdate(req.body)
-    if (update.url) {
-      isUrl = update.url.startsWith('http')
-      if (!isUrl && (!isText(update.url, true) || !fs.existsSync(update.url))) {
-        res
-          .status(400)
-          .send({ error: `Invalid caption script path: ${update.url}` })
-        return
-      }
+router.patch('/:id', async (req, res) => {
+  let isUrl = false
+  const update = toCaptionScriptUpdate(req.body)
+  if (update.url) {
+    isUrl = update.url.startsWith('http')
+    if (!isUrl && (!isText(update.url, true) || !fs.existsSync(update.url))) {
+      res
+        .status(400)
+        .send({ error: `Invalid caption script path: ${update.url}` })
+      return
     }
+  }
 
-    const didDeleteRow = await updateCaptionScript(
-      Number(req.params.id),
-      update
-    )
-    if (didDeleteRow) {
-      res.status(404).send({
-        error: `Duplicate caption script ${isUrl ? 'URL' : 'path'}: ${update.url}`
-      })
-    } else {
-      res.status(204).end()
-    }
-  } catch (error) {
-    next(error)
+  const didDeleteRow = await updateCaptionScript(Number(req.params.id), update)
+  if (didDeleteRow) {
+    res.status(404).send({
+      error: `Duplicate caption script ${isUrl ? 'URL' : 'path'}: ${update.url}`
+    })
+  } else {
+    res.status(204).end()
   }
 })
 router.delete('/:id', async (req, res) => {
