@@ -8,7 +8,7 @@ import {
 import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
-import { toNumber } from './utils'
+import { sortNumber, sortString, toNumber } from './utils'
 import {
   ASF,
   AudioAlbum,
@@ -21,7 +21,6 @@ import {
   AudioArtist
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
-import { SortValue } from './types/SortValue'
 
 export async function findAudios(): Promise<Audio[]> {
   return await db()
@@ -675,81 +674,68 @@ function audioSortFunction(
   ascending: boolean
 ): (a: Partial<Audio>, b: Partial<Audio>) => number {
   return (a, b) => {
-    let secondary = null
-    let aValue: SortValue, bValue: SortValue
+    let secondary: string | undefined = undefined
+    let compare: number
     switch (algorithm) {
       case ASF.url: {
-        aValue = a.url as string
-        bValue = b.url as string
+        compare = sortString(a.url as string, b.url as string, ascending)
         break
       }
       case ASF.name: {
         const reA = /^(A\s|a\s|The\s|the\s)/g
-        aValue = (a.name ?? '').replace(reA, '')
-        bValue = (b.name ?? '').replace(reA, '')
-
-        const compare = aValue.localeCompare(bValue, 'en', { numeric: true })
-        if (compare != 0) {
-          return ascending ? compare : compare * -1
-        }
-
-        aValue = ''
-        bValue = ''
+        const aValue = (a.name ?? '').replace(reA, '')
+        const bValue = (b.name ?? '').replace(reA, '')
+        compare = sortString(aValue, bValue, ascending, { numeric: true })
         secondary = ASF.url
         break
       }
       case ASF.artist: {
-        aValue = a.artist ?? ''
-        bValue = b.artist ?? ''
+        compare = sortString(a.artist ?? '', b.artist ?? '', ascending)
         secondary = ASF.album
         break
       }
       case ASF.album: {
-        aValue = a.album ?? ''
-        bValue = b.album ?? ''
+        compare = sortString(a.album ?? '', b.album ?? '', ascending)
         secondary = ASF.trackNum
         break
       }
       case ASF.date: {
-        aValue = a.createdAt as number
-        bValue = b.createdAt as number
+        compare = sortNumber(
+          a.createdAt as number,
+          b.createdAt as number,
+          ascending
+        )
         secondary = ASF.url
         break
       }
       case ASF.trackNum: {
-        aValue = a.trackNum ?? 0
-        bValue = b.trackNum ?? 0
+        compare = sortNumber(a.trackNum ?? 0, b.trackNum ?? 0, ascending)
         secondary = ASF.name
         break
       }
       case ASF.duration: {
-        aValue = a.duration ?? 0
-        bValue = b.duration ?? 0
+        compare = sortNumber(a.duration ?? 0, b.duration ?? 0, ascending)
         secondary = ASF.url
         break
       }
       case ASF.playedCount: {
-        aValue = a.playedCount as number
-        bValue = b.playedCount as number
+        compare = sortNumber(
+          a.playedCount as number,
+          b.playedCount as number,
+          ascending
+        )
         secondary = ASF.artist
         break
       }
       default: {
-        aValue = ''
-        bValue = ''
+        compare = 0
+        break
       }
     }
-    if (aValue < bValue) {
-      return ascending ? -1 : 1
-    } else if (aValue > bValue) {
-      return ascending ? 1 : -1
-    } else {
-      if (secondary) {
-        return audioSortFunction(secondary, true)(a, b)
-      } else {
-        return 0
-      }
-    }
+
+    return compare === 0 && secondary != null
+      ? audioSortFunction(secondary, true)(a, b)
+      : compare
   }
 }
 

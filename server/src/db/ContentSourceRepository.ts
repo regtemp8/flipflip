@@ -7,7 +7,7 @@ import {
 import { DB } from './types/generated'
 import db from './database'
 import { SearchOption } from './types/SearchOption'
-import { toNumber } from './utils'
+import { sortNumber, sortString, toNumber } from './utils'
 import {
   getSourceType,
   randomizeList,
@@ -23,7 +23,6 @@ import { findTagIdsByName } from './TagRepository'
 import { getFileName, getFileGroup } from '../utils'
 import recursiveReadDir from 'recursive-readdir'
 import Logger from '../logging/Logger'
-import { SortValue } from './types/SortValue'
 
 export const IS_LIBRARY = 0
 const logger = Logger.create('ContentSourceRepository')
@@ -567,50 +566,36 @@ function sortFunction(
   secondary?: string
 ): (a: SortRow, b: SortRow) => number {
   return (a, b) => {
-    let aValue: SortValue, bValue: SortValue
+    let compare: number
     switch (algorithm) {
       case SF.alpha:
-        aValue = getName(a)
-        bValue = getName(b)
+        compare = sortString(getName(a), getName(b), ascending)
         break
       case SF.alphaFull:
-        aValue = a.url
-        bValue = b.url
+        compare = sortString(a.url, b.url, ascending)
         break
       case SF.date:
-        aValue = a.id as number
-        bValue = b.id as number
+        compare = sortNumber(a.id as number, b.id as number, ascending)
         break
       case SF.count:
-        aValue = getCount(a)
-        bValue = getCount(b)
+        compare = sortNumber(getCount(a), getCount(b), ascending)
         break
       case SF.type:
-        aValue = a.type
-        bValue = b.type
+        compare = sortString(a.type, b.type, ascending)
         break
       case SF.duration:
-        aValue = a.duration
-        bValue = b.duration
+        compare = sortNumber(a.duration, b.duration, ascending)
         break
       case SF.resolution:
-        aValue = a.resolution
-        bValue = b.resolution
+        compare = sortNumber(a.resolution, b.resolution, ascending)
         break
       default:
-        aValue = ''
-        bValue = ''
+        compare = 0
     }
 
-    if (aValue < bValue) {
-      return ascending ? -1 : 1
-    } else if (aValue > bValue) {
-      return ascending ? 1 : -1
-    } else if (secondary != null) {
-      return sortFunction(secondary, true)(a, b)
-    } else {
-      return 0
-    }
+    return compare === 0 && secondary != null
+      ? sortFunction(secondary, true)(a, b)
+      : compare
   }
 }
 

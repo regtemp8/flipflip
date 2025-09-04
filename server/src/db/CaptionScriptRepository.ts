@@ -17,7 +17,7 @@ import {
   SF,
   SortRequest
 } from 'flipflip-common'
-import { toNumber } from './utils'
+import { sortString, toNumber } from './utils'
 import { getFileName } from '../utils'
 import { SearchOption } from './types/SearchOption'
 import { findTagIdsByName } from './TagRepository'
@@ -349,14 +349,12 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
       if (sortBy === SF.random) {
         rows = randomizeList(rows)
       } else if (sortBy === SF.alpha) {
-        let lessThan = -1
-        let greaterThan = 1
-        if (sortOrder === 'desc') {
-          lessThan = 1
-          greaterThan = -1
-        }
         rows = rows.sort((a, b) =>
-          getFileName(a.url) < getFileName(b.url) ? lessThan : greaterThan
+          sortString(
+            getFileName(a.url),
+            getFileName(b.url),
+            sortOrder === 'asc'
+          )
         )
       }
 

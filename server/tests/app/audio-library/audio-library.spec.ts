@@ -920,16 +920,16 @@ test('Sort By Album', async ({ page }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(3)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    '32Foundation3:41Vibe Tracks'
-  )
-  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
   )
-  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Sea2:09MBBSea'
   )
-  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
     '32Sugar3:50Vibe Tracks'
@@ -948,16 +948,16 @@ test('Sort By Album', async ({ page }) => {
   await page.locator('#sort-menu .MuiBackdrop-root').click()
   await expect(page.locator('#sort-menu li').nth(3)).not.toBeVisible()
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    '32Foundation3:41Vibe Tracks'
-  )
-  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
   )
-  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Sea2:09MBBSea'
   )
-  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
     '32Sugar3:50Vibe Tracks'
@@ -969,16 +969,16 @@ test('Sort By Album', async ({ page }) => {
 
 test('Sort By Date', async ({ page }) => {
   await expect(page.locator('#sortable-list li').nth(0)).toHaveText(
-    '32Foundation3:41Vibe Tracks'
-  )
-  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Run Free1:45Hotham, Royalty Free MusicRun Free'
   )
-  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(1)).toHaveText(
     'Sea2:09MBBSea'
   )
-  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+  await expect(page.locator('#sortable-list li').nth(2)).toHaveText(
     'Smile2:04Aftertune, Ultimate MixSmile'
+  )
+  await expect(page.locator('#sortable-list li').nth(3)).toHaveText(
+    '32Foundation3:41Vibe Tracks'
   )
   await expect(page.locator('#sortable-list li').nth(4)).toHaveText(
     '32Sugar3:50Vibe Tracks'

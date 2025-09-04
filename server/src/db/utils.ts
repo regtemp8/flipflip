@@ -19,3 +19,36 @@ export const toText = (value: unknown) => JSON.stringify(value)
 
 export const toTextOpt = (value?: unknown) =>
   value != null ? JSON.stringify(value) : undefined
+
+export const sortNumber = (a: number, b: number, ascending: boolean) => {
+  if (a === 0 && b !== 0) {
+    return 1
+  } else if (a !== 0 && b === 0) {
+    return -1
+  } else {
+    let compare = a - b
+    if (!ascending) {
+      compare *= -1
+    }
+
+    return compare
+  }
+}
+
+export const sortString = (
+  a: string,
+  b: string,
+  ascending: boolean,
+  options?: Intl.CollatorOptions
+) => {
+  if (a === '' && b !== '') {
+    return 1
+  }
+
+  let compare = a.localeCompare(b, 'en', options)
+  if (!ascending) {
+    compare *= -1
+  }
+
+  return compare
+}
