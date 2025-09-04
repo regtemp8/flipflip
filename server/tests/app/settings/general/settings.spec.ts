@@ -250,155 +250,113 @@ test('Confirm File Deletion setting', async ({ page }) => {
 })
 
 test('Min Image Size setting', async ({ page }) => {
-  await expect(
-    page.getByLabel('Min Image Size', { exact: true })
-  ).toHaveAttribute('type', 'number')
-  await page.getByLabel('Min Image Size', { exact: true }).hover()
+  const input = page.getByLabel('Min Image Size', { exact: true })
+  await expect(input).toHaveAttribute('type', 'number')
+  await input.hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
   await expect(page.getByRole('tooltip')).toHaveText(
     'Images under this size (width or height) will be skipped'
   )
 
-  await page.getByLabel('Min Image Size', { exact: true }).click()
-  await page.getByLabel('Min Image Size', { exact: true }).fill('-1')
-  await page.getByLabel('Min Image Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Image Size', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('-1')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Min Image Size', { exact: true }).click()
-  await page.getByLabel('Min Image Size', { exact: true }).fill('0')
-  await page.getByLabel('Min Image Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Image Size', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('0')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Min Image Size', { exact: true }).click()
-  await page.getByLabel('Min Image Size', { exact: true }).fill('1234567890')
-  await page.getByLabel('Min Image Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Image Size')).toHaveValue('1234567890')
+  await input.fill('1234567890')
+  await input.press('Enter')
+  await expect(input).toHaveValue('1234567890')
 })
 
 test('Min Video Size setting', async ({ page }) => {
-  await expect(
-    page.getByLabel('Min Video Size', { exact: true })
-  ).toHaveAttribute('type', 'number')
-  await page.getByLabel('Min Video Size', { exact: true }).hover()
+  const input = page.getByLabel('Min Video Size', { exact: true })
+  await expect(input).toHaveAttribute('type', 'number')
+  await input.hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
   await expect(page.getByRole('tooltip')).toHaveText(
     'Videos under this size (width or height) will be skipped'
   )
 
-  await page.getByLabel('Min Video Size', { exact: true }).click()
-  await page.getByLabel('Min Video Size', { exact: true }).fill('-1')
-  await page.getByLabel('Min Video Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Video Size', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('-1')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Min Video Size', { exact: true }).click()
-  await page.getByLabel('Min Video Size', { exact: true }).fill('0')
-  await page.getByLabel('Min Video Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Video Size', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('0')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Min Video Size', { exact: true }).click()
-  await page.getByLabel('Min Video Size', { exact: true }).fill('1234567890')
-  await page.getByLabel('Min Video Size', { exact: true }).blur()
-  await expect(page.getByLabel('Min Video Size')).toHaveValue('1234567890')
+  await input.fill('1234567890')
+  await input.press('Enter')
+  await expect(input).toHaveValue('1234567890')
 })
 
 test('Max in History setting', async ({ page }) => {
-  await expect(
-    page.getByLabel('Max in History', { exact: true })
-  ).toHaveAttribute('type', 'number')
-  await page.getByLabel('Max in History', { exact: true }).hover()
+  const input = page.getByLabel('Max in History', { exact: true })
+  await expect(input).toHaveAttribute('type', 'number')
+  await input.hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
   await expect(page.getByRole('tooltip')).toHaveText(
     'The maximum number of images/videos to keep in player history. Reduce this number to reduce memory usage and improve performance.'
   )
 
-  await page.getByLabel('Max in History', { exact: true }).click()
-  await page.getByLabel('Max in History', { exact: true }).fill('-1')
-  await page.getByLabel('Max in History', { exact: true }).blur()
-  await expect(page.getByLabel('Max in History', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('-1')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max in History', { exact: true }).click()
-  await page.getByLabel('Max in History', { exact: true }).fill('0')
-  await page.getByLabel('Max in History', { exact: true }).blur()
-  await expect(page.getByLabel('Max in History', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('0')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max in History', { exact: true }).click()
-  await page.getByLabel('Max in History', { exact: true }).fill('1234567890')
-  await page.getByLabel('Max in History', { exact: true }).blur()
-  await expect(page.getByLabel('Max in History')).toHaveValue('1234567890')
+  await input.fill('1234567890')
+  await input.press('Enter')
+  await expect(input).toHaveValue('1234567890')
 })
 
 test('Max in Memory setting', async ({ page }) => {
-  await expect(
-    page.getByLabel('Max in Memory', { exact: true })
-  ).toHaveAttribute('type', 'number')
-  await page.getByLabel('Max in Memory', { exact: true }).hover()
+  const input = page.getByLabel('Max in Memory', { exact: true })
+  await expect(input).toHaveAttribute('type', 'number')
+  await input.hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
   await expect(page.getByRole('tooltip')).toHaveText(
     'The maximum number of images/videos to queue up for rendering. Reduce this number to reduce memory usage and improve performance.'
   )
 
-  await page.getByLabel('Max in Memory', { exact: true }).click()
-  await page.getByLabel('Max in Memory', { exact: true }).fill('-1')
-  await page.getByLabel('Max in Memory', { exact: true }).blur()
-  await expect(page.getByLabel('Max in Memory', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('-1')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max in Memory', { exact: true }).click()
-  await page.getByLabel('Max in Memory', { exact: true }).fill('0')
-  await page.getByLabel('Max in Memory', { exact: true }).blur()
-  await expect(page.getByLabel('Max in Memory', { exact: true })).toHaveValue(
-    '0'
-  )
+  await input.fill('0')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max in Memory', { exact: true }).click()
-  await page.getByLabel('Max in Memory', { exact: true }).fill('1234567890')
-  await page.getByLabel('Max in Memory', { exact: true }).blur()
-  await expect(page.getByLabel('Max in Memory')).toHaveValue('1234567890')
+  await input.fill('1234567890')
+  await input.press('Enter')
+  await expect(input).toHaveValue('1234567890')
 })
 
 test('Max Loading at Once setting', async ({ page }) => {
-  await expect(
-    page.getByLabel('Max Loading at Once', { exact: true })
-  ).toHaveAttribute('type', 'number')
-  await page.getByLabel('Max Loading at Once', { exact: true }).hover()
+  const input = page.getByLabel('Max Loading at Once', { exact: true })
+  await expect(input).toHaveAttribute('type', 'number')
+  await input.hover()
   await expect(page.getByRole('tooltip')).toBeVisible()
   await expect(page.getByRole('tooltip')).toHaveText(
     'The maximum number of simultaneous images/videos loading. Increase this number to load sources faster. Reduce this number to improve display performance.'
   )
 
-  await page.getByLabel('Max Loading at Once', { exact: true }).click()
-  await page.getByLabel('Max Loading at Once', { exact: true }).fill('-1')
-  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
-  await expect(
-    page.getByLabel('Max Loading at Once', { exact: true })
-  ).toHaveValue('0')
+  await input.fill('-1')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max Loading at Once', { exact: true }).click()
-  await page.getByLabel('Max Loading at Once', { exact: true }).fill('0')
-  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
-  await expect(
-    page.getByLabel('Max Loading at Once', { exact: true })
-  ).toHaveValue('0')
+  await input.fill('0')
+  await input.press('Enter')
+  await expect(input).toHaveValue('0')
 
-  await page.getByLabel('Max Loading at Once', { exact: true }).click()
-  await page
-    .getByLabel('Max Loading at Once', { exact: true })
-    .fill('1234567890')
-  await page.getByLabel('Max Loading at Once', { exact: true }).blur()
-  await expect(page.getByLabel('Max Loading at Once')).toHaveValue('1234567890')
+  await input.fill('1234567890')
+  await input.press('Enter')
+  await expect(input).toHaveValue('1234567890')
 })
 
 test('Restore Defaults', async ({ page }) => {
