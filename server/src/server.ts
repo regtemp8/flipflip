@@ -191,7 +191,7 @@ void (async function () {
     logger.info(template, { url })
   })
 
-  const signals = ['SIGTERM', 'SIGINT']
+  const signals = ['SIGTERM', 'SIGINT', 'SIGHUP']
   signals.forEach((signal) => {
     process.on(signal, () => {
       logger.info(`${signal} signal received: closing HTTP server`)
