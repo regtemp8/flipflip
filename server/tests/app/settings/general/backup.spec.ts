@@ -87,12 +87,13 @@ test('Auto Clean Backup', async ({ page }) => {
   ).toBeDisabled()
 
   await page.getByLabel('Auto Clean', { exact: true }).hover()
-  await expect(
-    page.getByRole('tooltip', {
-      name: 'If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period.',
-      exact: true
-    })
-  ).toBeVisible()
+  const tooltip = page.getByRole('tooltip', {
+    name: /^If enabled, backups will/
+  })
+  await expect(tooltip).toBeVisible()
+  await expect(tooltip).toHaveText(
+    'If enabled, backups will be automatically cleaned up. This algorithm will keep the configured amount of backups for each period.'
+  )
 
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
