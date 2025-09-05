@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test'
+import { Page, Locator, expect } from '@playwright/test'
 
 export type Color = {
   name: string
@@ -102,8 +102,51 @@ export async function dragListItem(
 ) {
   await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
   await page.mouse.down({ button: 'left' })
-  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, {
-    steps: 20
-  })
+  for (let i = 0; i < 2; i++) {
+    // do 2 mouse moves to trigger dragover event
+    await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, {
+      steps: 20
+    })
+  }
+  await page.mouse.up({ button: 'left' })
+}
+
+export async function dragCard(
+  page: Page,
+  selector: string,
+  startIndex: number,
+  endIndex: number
+) {
+  const start = page.locator(selector).nth(startIndex)
+  const startBox = await start.getByRole('button').boundingBox()
+  const end = page.locator(selector).nth(endIndex)
+  const endBox = await end.getByRole('button').boundingBox()
+  if (startBox == null || endBox == null) {
+    throw new Error('Failed to get bounding box')
+  }
+
+  await page.mouse.move(
+    startBox.x + startBox.width / 2,
+    startBox.y + startBox.height / 2
+  )
+  await page.mouse.down({ button: 'left' })
+  const chosenCard = page.locator(
+    `${selector}:nth-child(${startIndex + 1}).sortable-chosen`
+  )
+  await expect(chosenCard).toBeVisible()
+  await expect(chosenCard).toHaveAttribute('draggable', 'true')
+
+  let endX = endBox.x
+  if (endIndex > startIndex) {
+    endX += endBox.width
+  }
+  for (let i = 0; i < 2; i++) {
+    // do 2 mouse moves to trigger dragover event
+    await page.mouse.move(endX, endBox.y + endBox.height / 2, {
+      steps: 20
+    })
+  }
+
+  await page.waitForTimeout(500)
   await page.mouse.up({ button: 'left' })
 }

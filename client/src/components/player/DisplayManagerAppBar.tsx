@@ -30,6 +30,7 @@ import {
   pauseImagePlayers,
   resumeImagePlayers
 } from '../../store/imagePlayer/thunks'
+import { isPrimaryModifierKey } from '../../utils'
 // import { selectAppTutorial } from '../../store/app/selectors'
 // import { selectDisplayName } from '../../store/display/selectors'
 
@@ -193,7 +194,7 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
           if (
             hasStarted &&
             (!drawerHover || focus !== 'input') &&
-            !e.ctrlKey &&
+            !isPrimaryModifierKey(e) &&
             !e.shiftKey
           ) {
             e.preventDefault()
@@ -225,7 +226,7 @@ function DisplayManagerAppBar(props: DisplayManagerAppBarProps) {
           navigateBack()
           break
         case 'f':
-          if (!e.ctrlKey && !e.shiftKey) {
+          if (!isPrimaryModifierKey(e) && !e.shiftKey) {
             e.preventDefault()
             toggleFullScreen()
           }

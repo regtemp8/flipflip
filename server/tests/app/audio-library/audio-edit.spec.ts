@@ -1,45 +1,29 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-let page: Page
-test.beforeAll(async ({ browser }) => {
-  page = await browser.newPage()
-  await page.goto('/audio-library')
-  await page.getByTestId('AddIcon').click()
-  await page.getByLabel('Local Audio').click()
-  await expect(page.getByRole('button', { name: /^audio/ })).toBeVisible()
-  await page.getByRole('button', { name: /^audio/ }).dblclick()
-  await expect(
-    page.getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
-  ).toBeVisible()
-  await page
-    .getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
-    .click()
-  await page.getByRole('button', { name: 'Choose', exact: true }).click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(1)
+test.afterAll(async ({ request }) => {
+  await request.delete('http://localhost:5050/api/audios/1')
 })
 
-test.afterAll(async () => {
+test.beforeEach(async ({ page }) => {
   await page.goto('/audio-library')
-
-  const responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/audios/1' &&
-      request.method() === 'DELETE' &&
-      res.status() === 204
-    )
-  })
-  await page.getByTestId('DeleteIcon').nth(0).click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(0)
-  await responsePromise
-  await page.close()
+  const count = await page.locator('#sortable-list li').count()
+  if (count === 0) {
+    await page.getByTestId('AddIcon').click()
+    await page.getByLabel('Local Audio').click()
+    await expect(page.getByRole('button', { name: /^audio/ })).toBeVisible()
+    await page.getByRole('button', { name: /^audio/ }).dblclick()
+    await expect(
+      page.getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
+    ).toBeVisible()
+    await page
+      .getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
+      .click()
+    await page.getByRole('button', { name: 'Choose', exact: true }).click()
+    await expect(page.locator('#sortable-list li')).toHaveCount(1)
+  }
 })
 
-test.beforeEach(async () => {
-  await page.goto('/audio-library')
-})
-
-test('Audio edit cancel', async () => {
+test('Audio edit cancel', async ({ page }) => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
@@ -99,7 +83,7 @@ test('Audio edit cancel', async () => {
   )
 })
 
-test('Audio edit cover art', async () => {
+test('Audio edit cover art', async ({ page }) => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
@@ -140,7 +124,7 @@ test('Audio edit cover art', async () => {
   )
 })
 
-test('Audio edit inputs', async () => {
+test('Audio edit inputs', async ({ page }) => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 
@@ -173,7 +157,7 @@ test('Audio edit inputs', async () => {
   await expect(dialog.getByLabel('Comment')).toHaveValue('Comment')
 })
 
-test('Audio edit use suggestions', async () => {
+test('Audio edit use suggestions', async ({ page }) => {
   const item = page.locator('#sortable-list li').first()
   const dialog = page.locator('.MuiDialog-container')
 

@@ -159,7 +159,7 @@ export const flipflipApi = createApi({
         await queryFulfilled.then(() => {
           window.setTimeout(
             () => dispatch(flipflipApi.util.resetApiState()),
-            500
+            2000
           )
         })
       }

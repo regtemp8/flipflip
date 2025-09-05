@@ -326,6 +326,7 @@ function ScriptSourceList(props: ScriptSourceListProps) {
               Choose a scene to test with:
             </DialogContentText>
             <SceneSelect
+              id="script-test-scene-select"
               autoFocus
               menuIsOpen
               value={playWithScene ?? SCENE_NONE}

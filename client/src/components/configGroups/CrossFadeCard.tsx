@@ -132,6 +132,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
       >
         <Collapse in={crossFade} className={classes.fullWidth}>
           <TimingCard
+            id="cross-fade"
             sidebar={sidebar}
             hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
@@ -173,6 +174,7 @@ function CrossFadeCard(props: CrossFadeCardProps) {
           <Grid2 size={12}>
             <Collapse in={crossFade} className={classes.fullWidth}>
               <EasingCard
+                id="cross-fade-easing"
                 sidebar={sidebar}
                 easing={{
                   selector: () => useGetSceneFadeEaseQuery(props.sceneID),

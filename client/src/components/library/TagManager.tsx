@@ -367,6 +367,7 @@ function TagManager() {
         <div className={cx(classes.root, classes.fill)}>
           <Container maxWidth={false} className={classes.container}>
             <Sortable
+              id="tag-list"
               className={classes.tagList}
               options={{
                 animation: 150,

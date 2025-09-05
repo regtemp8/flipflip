@@ -45,6 +45,7 @@ import {
   deleteCaptionScript,
   updateCaptionScript
 } from '../../store/api/thunks'
+import { isPrimaryModifierKey } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   root: {
@@ -189,9 +190,9 @@ function ScriptSourceListItem(props: ScriptSourceListItemProps) {
   }
 
   const onSourceIconClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (e.shiftKey && !e.ctrlKey) {
+    if (e.shiftKey && !isPrimaryModifierKey(e)) {
       window.open(script?.fileUrl, '_blank')?.focus()
-    } else if (!e.shiftKey && !e.ctrlKey) {
+    } else if (!e.shiftKey && !isPrimaryModifierKey(e)) {
       props.onPlay(props.scriptID)
     }
   }

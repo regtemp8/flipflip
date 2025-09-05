@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { colors, changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Strobe")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
@@ -65,11 +67,13 @@ test('Add strobe delay', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
+  await expect(
+    page.getByLabel('Delay Timing', { exact: true })
+  ).not.toBeVisible()
 
   await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).toBeChecked()
-  await expect(page.getByText('Delay TimingConstant')).toBeVisible()
+  await expect(page.getByLabel('Delay Timing', { exact: true })).toBeVisible()
 
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -82,7 +86,9 @@ test('Add strobe delay', async ({ page }) => {
   })
   await page.getByLabel('Add Delay', { exact: true }).click()
   await expect(page.getByLabel('Add Delay', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('Delay TimingConstant')).not.toBeVisible()
+  await expect(
+    page.getByLabel('Delay Timing', { exact: true })
+  ).not.toBeVisible()
   await responsePromise
 
   responsePromise = page.waitForResponse((res) => {
@@ -106,7 +112,10 @@ test('Random strobe timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
     container
@@ -182,7 +191,10 @@ test('Wave strobe timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
   await expect(
     container
@@ -314,7 +326,10 @@ test('Audio BPM strobe timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
@@ -396,7 +411,10 @@ test('With scene strobe timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'With Scene', exact: true }).click()
   await expect(
     container
@@ -441,7 +459,10 @@ test('Constant strobe timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container
@@ -504,7 +525,7 @@ test('Random strobe delay timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('Delay Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
     container
@@ -594,7 +615,7 @@ test('Wave strobe delay timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('Delay Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
   await expect(
     container
@@ -740,7 +761,7 @@ test('Audio BPM strobe delay timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('Delay Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
@@ -836,7 +857,7 @@ test('With scene strobe delay timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('Delay Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'With Scene', exact: true }).click()
   await expect(
     container
@@ -895,7 +916,7 @@ test('Constant strobe delay timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Delay Timing")'
   )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('Delay Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container
@@ -965,42 +986,59 @@ test('Strobe layer', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
 
-  await expect(page.getByText('Strobe LayerAbove All')).toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Above All'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByText('Strobe Opacity')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Above Scene', exact: true }).click()
-  await expect(page.getByText('Strobe LayerAbove Scene')).toBeVisible()
+  await expect(page.locator('#strobe-layer-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Above Scene'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByText('Strobe Opacity')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Strobe Image', exact: true }).click()
-  await expect(page.getByText('Strobe LayerStrobe Image')).toBeVisible()
+  await expect(page.locator('#strobe-layer-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Strobe Image'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).not.toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).not.toBeVisible()
   await expect(page.getByText('Strobe Opacity')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Behind Image', exact: true }).click()
-  await expect(page.getByText('Strobe LayerBehind Image')).toBeVisible()
+  await expect(page.locator('#strobe-layer-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Behind Image'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByText('Strobe Opacity')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Behind All', exact: true }).click()
-  await expect(page.getByText('Strobe LayerBehind All')).toBeVisible()
+  await expect(page.locator('#strobe-layer-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Behind All'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByText('Strobe Opacity')).toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Above All', exact: true }).click()
-  await expect(page.getByText('Strobe LayerAbove All')).toBeVisible()
+  await expect(page.locator('#strobe-layer-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Strobe Layer', { exact: true })).toHaveText(
+    'Above All'
+  )
   await expect(page.getByText('Solid Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByText('Strobe Opacity')).not.toBeVisible()
@@ -1027,23 +1065,26 @@ test('Strobe color type', async ({ page }) => {
   await expect(page.getByLabel('Add Color')).not.toBeVisible()
   await expect(page.getByLabel('Clear Colors')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Color Type').click()
   await page.getByRole('option', { name: 'Set of Colors', exact: true }).click()
-  await expect(page.getByText('Color TypeSet of Colors')).toBeVisible()
+  await expect(page.locator('#strobe-color-type-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Color Type')).toHaveText('Set of Colors')
   await expect(page.getByLabel('Color', { exact: true })).not.toBeVisible()
   await expect(page.getByLabel('Add Color')).toBeVisible()
   await expect(page.getByLabel('Clear Colors')).toBeVisible()
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Color Type').click()
   await page.getByRole('option', { name: 'Random Colors', exact: true }).click()
-  await expect(page.getByText('Color TypeRandom Colors')).toBeVisible()
+  await expect(page.locator('#strobe-color-type-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Color Type')).toHaveText('Random Colors')
   await expect(page.getByLabel('Color', { exact: true })).not.toBeVisible()
   await expect(page.getByLabel('Add Color')).not.toBeVisible()
   await expect(page.getByLabel('Clear Colors')).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Color Type').click()
   await page.getByRole('option', { name: 'Solid Color', exact: true }).click()
-  await expect(page.getByText('Color TypeSolid Color')).toBeVisible()
+  await expect(page.locator('#strobe-color-type-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Color Type')).toHaveText('Solid Color')
   await expect(page.getByLabel('Color', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Add Color')).not.toBeVisible()
   await expect(page.getByLabel('Clear Colors')).not.toBeVisible()
@@ -1065,7 +1106,7 @@ test('Strobe color type', async ({ page }) => {
 test('Strobe solid color', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Color Type', { exact: true }).click()
   await page.getByRole('option', { name: 'Solid Color', exact: true }).click()
 
   await expect(page.getByLabel('Pick Color', { exact: true })).toHaveCSS(
@@ -1136,7 +1177,7 @@ test('Strobe solid color', async ({ page }) => {
 test('Strobe set of colors', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Color Type', { exact: true }).click()
   await page.getByRole('option', { name: 'Set of Colors', exact: true }).click()
   await expect(page.locator('#color-0')).not.toBeVisible()
   await expect(page.locator('#color-1')).not.toBeVisible()
@@ -1213,7 +1254,7 @@ test('Strobe set of colors', async ({ page }) => {
 test('Strobe opacity', async ({ page }) => {
   await page.getByLabel('Strobe', { exact: true }).click()
   await expect(page.getByLabel('Strobe', { exact: true })).toBeChecked()
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Strobe Layer', { exact: true }).click()
   await page.getByRole('option', { name: 'Behind All', exact: true }).click()
   await expect(page.getByText('Strobe LayerBehind All')).toBeVisible()
 

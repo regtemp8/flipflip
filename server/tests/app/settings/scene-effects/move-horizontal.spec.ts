@@ -2,11 +2,14 @@ import { test, expect } from '@playwright/test'
 import { HTF } from 'flipflip-common'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Zoom")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
 test('Move horizontally setting', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
   const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
   )
@@ -19,8 +22,11 @@ test('Move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('None')
 
-  await container.locator('.MuiInputBase-root:has-text("None")').first().click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Left', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -31,8 +37,11 @@ test('Move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Left')
 
-  await container.locator('.MuiInputBase-root:has-text("Left")').first().click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Right', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -43,11 +52,11 @@ test('Move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Right')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Right")')
-    .first()
-    .click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Left/Right', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -58,6 +67,9 @@ test('Move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Left/Right')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -68,10 +80,7 @@ test('Move horizontally setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await container
-    .locator('.MuiInputBase-root:has-text("Left/Right")')
-    .first()
-    .click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -82,6 +91,9 @@ test('Move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('None')
   await responsePromise
 })
 

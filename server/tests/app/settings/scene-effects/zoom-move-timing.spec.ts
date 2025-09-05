@@ -1,53 +1,111 @@
 import { test, expect } from '@playwright/test'
-import { VTF } from 'flipflip-common'
+import { HTF, VTF } from 'flipflip-common'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Zoom")'
+const TIMING_SELECTOR =
+  '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
-test('Enable zoom/move timing', async ({ page }) => {
-  const container = page.locator(
-    '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
-  )
+test('Enable zoom', async ({ page }) => {
+  const container = page.locator(TIMING_SELECTOR)
   await expect(container).not.toBeVisible()
   await expect(page.getByLabel('Zoom', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('None').first()).toBeVisible()
-  await expect(page.getByText('None').nth(1)).toBeVisible()
 
   await page.getByLabel('Zoom', { exact: true }).click()
   await expect(container).toBeVisible()
 
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.zoom === false &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Zoom', { exact: true }).click()
   await expect(container).not.toBeVisible()
+  await responsePromise
+})
 
-  await page.getByText('None').first().click()
+test('Horizontal move options', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
+  const container = page.locator(TIMING_SELECTOR)
+  await expect(container).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('None')
+
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Left', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Left')
 
-  await page.getByText('Left').first().click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Right', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Right')
 
-  await page.getByText('Right').first().click()
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'Left/Right', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Left/Right')
 
-  await page.getByText('Left/Right').first().click()
+  const responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/scenes/1' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON()?.horizTransType === HTF.none &&
+      res.status() === 204
+    )
+  })
+  await card.getByLabel('Move Horizontally', { exact: true }).click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(container).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('None')
+  await responsePromise
+})
 
-  await page.getByText('None').nth(1).click()
+test('Vertical move options', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
+  const container = page.locator(TIMING_SELECTOR)
+  await expect(container).not.toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'None'
+  )
+
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Up', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Up'
+  )
 
-  await page.getByText('Up').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Down', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Down'
+  )
 
-  await page.getByText('Down').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Up/Down', exact: true }).click()
   await expect(container).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Up/Down'
+  )
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -58,9 +116,12 @@ test('Enable zoom/move timing', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByText('Up/Down').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(container).not.toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'None'
+  )
   await responsePromise
 })
 

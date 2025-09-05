@@ -180,6 +180,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           )}
           <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 6 }}>
             <BaseSelect
+              id="scene-image-filter-select"
               label="Image Filter"
               controlClassName={classes.fullWidth}
               selector={() => useGetSceneImageTypeFilterQuery(props.sceneID)}
@@ -208,6 +209,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
           >
             <Collapse in={imageTypeFilter !== IF.videos}>
               <BaseSelect
+                id="scene-image-orientation-select"
                 label="Image Orientation"
                 controlClassName={classes.fullWidth}
                 selector={() => useGetSceneImageOrientationQuery(props.sceneID)}
@@ -236,6 +238,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
               }
             >
               <BaseSelect
+                id="scene-gif-options-select"
                 label="GIF Options"
                 controlClassName={classes.fullWidth}
                 selector={() => useGetSceneGifOptionQuery(props.sceneID)}
@@ -314,6 +317,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
             in={imageTypeFilter !== IF.stills && imageTypeFilter !== IF.images}
           >
             <BaseSelect
+              id="scene-video-options-select"
               label="Video Options"
               controlClassName={classes.fullWidth}
               selector={() => useGetSceneVideoOptionQuery(props.sceneID)}
@@ -387,6 +391,7 @@ function ImageVideoCard(props: ImageVideoCardProps) {
                 }
               >
                 <BaseSelect
+                  id="scene-video-orientation-select"
                   label="Video Orientation"
                   controlClassName={classes.fullWidth}
                   selector={() =>

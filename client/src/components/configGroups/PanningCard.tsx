@@ -157,6 +157,7 @@ function PanningCard(props: PanningCardProps) {
                 return en.get(value) as string
             }
           }}
+          id="panning-move-horizontal-select"
           label="Move Horizontally"
           type={{
             selector: () => useGetScenePanHorizTransTypeQuery(props.sceneID),
@@ -208,6 +209,7 @@ function PanningCard(props: PanningCardProps) {
                 return en.get(value) as string
             }
           }}
+          id="panning-move-vertical-select"
           label="Move Vertically"
           type={{
             selector: () => useGetScenePanVertTransTypeQuery(props.sceneID),
@@ -243,6 +245,7 @@ function PanningCard(props: PanningCardProps) {
       <Grid2 size={12}>
         <Collapse in={panning} className={classes.fullWidth}>
           <TimingCard
+            id="panning"
             sidebar={sidebar}
             hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
@@ -284,6 +287,7 @@ function PanningCard(props: PanningCardProps) {
           <Grid2 size={12}>
             <Collapse in={panning} className={classes.fullWidth}>
               <EasingCard
+                id="panning-start-easing"
                 label="Start Easing"
                 sidebar={sidebar}
                 easing={{
@@ -312,6 +316,7 @@ function PanningCard(props: PanningCardProps) {
                 }}
               />
               <EasingCard
+                id="panning-end-easing"
                 label="End Easing"
                 sidebar={sidebar}
                 easing={{

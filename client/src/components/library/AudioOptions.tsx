@@ -371,6 +371,7 @@ function AudioOptions() {
             <Grid2 size={12} className={cx(!audio.tick && classes.noPadding)}>
               <Collapse in={audio.tick} className={classes.fullWidth}>
                 <TimingCard
+                  id="audio-tick"
                   sidebar={false}
                   hasBPMSelector={() =>
                     useAppSelector(selectAudioOptionsHasBPM())

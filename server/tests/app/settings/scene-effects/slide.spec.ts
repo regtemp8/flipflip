@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Slide")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
 test('Slide effect', async ({ page }) => {
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('DirectionLeft')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).not.toBeVisible()
   await expect(page.getByText('Distance: 100%100%')).not.toBeVisible()
   await expect(page.getByText('TimingConstant').nth(1)).not.toBeVisible()
   await expect(
@@ -16,7 +18,7 @@ test('Slide effect', async ({ page }) => {
 
   await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
-  await expect(page.getByText('DirectionLeft')).toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toBeVisible()
   await expect(page.getByText('Distance: 100%100%')).toBeVisible()
   await expect(page.getByText('TimingConstant').nth(1)).toBeVisible()
   await expect(
@@ -34,7 +36,7 @@ test('Slide effect', async ({ page }) => {
   })
   await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('DirectionLeft')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).not.toBeVisible()
   await expect(page.getByText('Distance: 100%100%')).not.toBeVisible()
   await expect(page.getByText('TimingConstant').nth(1)).not.toBeVisible()
   await expect(
@@ -50,7 +52,10 @@ test('Random slide timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
     container
@@ -126,7 +131,10 @@ test('Wave slide timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
   await expect(
     container
@@ -258,7 +266,10 @@ test('Audio BPM slide timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
@@ -340,7 +351,10 @@ test('With scene slide timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'With Scene', exact: true }).click()
   await expect(
     container
@@ -385,7 +399,10 @@ test('Constant slide timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container
@@ -443,33 +460,48 @@ test('Slide direction', async ({ page }) => {
   await page.getByLabel('Slide', { exact: true }).click()
   await expect(page.getByLabel('Slide', { exact: true })).toBeChecked()
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Right', exact: true }).click()
-  await expect(page.getByText('DirectionRight')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText(
+    'Right'
+  )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Left/Right', exact: true }).click()
-  await expect(page.getByText('DirectionLeft/Right')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText(
+    'Left/Right'
+  )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Up', exact: true }).click()
-  await expect(page.getByText('DirectionUp')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText('Up')
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Down', exact: true }).click()
-  await expect(page.getByText('DirectionDown')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText('Down')
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Up/Down', exact: true }).click()
-  await expect(page.getByText('DirectionUp/Down')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText(
+    'Up/Down'
+  )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
-  await expect(page.getByText('DirectionRandom')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText(
+    'Random'
+  )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page.getByLabel('Direction', { exact: true }).click()
   await page.getByRole('option', { name: 'Left', exact: true }).click()
-  await expect(page.getByText('DirectionLeft')).toBeVisible()
+  await expect(page.locator('#strobe-direction-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Direction', { exact: true })).toHaveText('Left')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()

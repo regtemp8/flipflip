@@ -174,9 +174,9 @@ test('Add Single Local Caption Script', async ({ page }) => {
     page.getByRole('button', { name: /^wave-timing.txt/ })
   ).toHaveClass(/ Mui-selected /)
 
-  await page.keyboard.down('Control')
+  await page.keyboard.down('ControlOrMeta')
   await page.getByRole('button', { name: /^random-timing.txt/ }).click()
-  await page.keyboard.up('Control')
+  await page.keyboard.up('ControlOrMeta')
   await expect(
     page.getByRole('button', { name: /^bpm-timing.txt/ })
   ).not.toHaveClass(/ Mui-selected /)

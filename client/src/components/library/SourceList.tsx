@@ -409,6 +409,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
               Reddit Options ({url})
             </DialogContentText>
             <BaseSelect
+              id="reddit-post-order-select"
               label="Post Order"
               disabled={
                 url !== undefined &&
@@ -428,6 +429,7 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
             </BaseSelect>
             {redditFunc === RF.top && (
               <BaseSelect
+                id="reddit-post-time-select"
                 label="Post Time"
                 disabled={
                   url != null && (url.includes('/user/') || url.includes('/u/'))

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { dragCard } from '../utils'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/tags')
@@ -206,13 +207,13 @@ test('Sort By Title', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: 'dogs', exact: true })
   ).toBeVisible()
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'dogs'
   )
 
@@ -230,38 +231,38 @@ test('Sort By Title', async ({ page }) => {
   await page.locator('li').first().getByTestId('ArrowDownwardIcon').click()
   await page.locator('.MuiBackdrop-root').click()
   await expect(page.locator('li').first()).not.toBeVisible()
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'car'
   )
 
   await page.getByTestId('SortIcon').click()
   await page.locator('li').first().getByTestId('ArrowUpwardIcon').click()
   await page.locator('.MuiBackdrop-root').click()
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'pets'
   )
 })
 
 test('Sort By Date', async ({ page }) => {
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'pets'
   )
 
@@ -279,109 +280,71 @@ test('Sort By Date', async ({ page }) => {
   await page.locator('li').nth(1).getByTestId('ArrowDownwardIcon').click()
   await page.locator('.MuiBackdrop-root').click()
   await expect(page.locator('li').nth(1)).not.toBeVisible()
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'car'
   )
 
   await page.getByTestId('SortIcon').click()
   await page.locator('li').nth(1).getByTestId('ArrowUpwardIcon').click()
   await page.locator('.MuiBackdrop-root').click()
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'dogs'
   )
 })
 
 test('Move Tag', async ({ page }) => {
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'dogs'
   )
 
-  let box2 = await page
-    .locator('main')
-    .getByRole('button', { name: 'dogs', exact: true })
-    .boundingBox()
-  if (box2 == null) {
-    throw new Error('Failed to get button bounding box')
-  }
-
-  await page
-    .locator('main')
-    .getByRole('button')
-    .nth(0)
-    .dragTo(
-      page.locator('main').getByRole('button', { name: 'dogs', exact: true }),
-      {
-        targetPosition: { x: box2.width, y: 0 }
-      }
-    )
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await dragCard(page, '#tag-list > div', 0, 2)
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'car'
   )
 
-  await page
-    .locator('main')
-    .getByRole('button')
-    .nth(1)
-    .dragTo(page.locator('main').getByRole('button').nth(0))
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await dragCard(page, '#tag-list > div', 1, 0)
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'pets'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'car'
   )
 
-  box2 = await page
-    .locator('main')
-    .getByRole('button', { name: 'car', exact: true })
-    .boundingBox()
-  if (box2 == null) {
-    throw new Error('Failed to get button bounding box')
-  }
-
-  await page
-    .locator('main')
-    .getByRole('button')
-    .nth(1)
-    .dragTo(
-      page.locator('main').getByRole('button', { name: 'car', exact: true }),
-      {
-        targetPosition: { x: box2.width, y: 0 }
-      }
-    )
-  await expect(page.locator('main').getByRole('button').nth(0)).toHaveText(
+  await dragCard(page, '#tag-list > div', 1, 2)
+  await expect(page.locator('#tag-list').getByRole('button').nth(0)).toHaveText(
     'dogs'
   )
-  await expect(page.locator('main').getByRole('button').nth(1)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(1)).toHaveText(
     'car'
   )
-  await expect(page.locator('main').getByRole('button').nth(2)).toHaveText(
+  await expect(page.locator('#tag-list').getByRole('button').nth(2)).toHaveText(
     'pets'
   )
 })

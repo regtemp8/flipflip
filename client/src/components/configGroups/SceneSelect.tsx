@@ -19,6 +19,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface SceneSelectProps {
+  id: string
   value: number
   menuIsOpen?: boolean
   autoFocus?: boolean
@@ -59,6 +60,7 @@ function SceneSelect(props: SceneSelectProps) {
   const { classes } = useStyles()
   return (
     <Autocomplete
+      id={props.id}
       className={classes.select}
       value={{
         value: props.value.toString(),
@@ -74,6 +76,11 @@ function SceneSelect(props: SceneSelectProps) {
             {label}
           </li>
         )
+      }}
+      slotProps={{
+        popper: {
+          id: `${props.id}-popper`
+        }
       }}
       onChange={onChange}
     />

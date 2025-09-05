@@ -23,7 +23,7 @@ test('Enable Watermark', async ({ page }) => {
     page.getByLabel('Show on Displays', { exact: true })
   ).toBeVisible()
   await expect(
-    page.getByText('Watermark Corner', { exact: true })
+    page.getByLabel('Watermark Corner', { exact: true })
   ).toBeVisible()
   await expect(page.getByLabel('Watermark Text', { exact: true })).toBeVisible()
   await expect(page.getByText('Font', { exact: true })).toBeVisible()
@@ -47,7 +47,7 @@ test('Enable Watermark', async ({ page }) => {
     page.getByLabel('Show on Displays', { exact: true })
   ).not.toBeVisible()
   await expect(
-    page.getByText('Watermark Corner', { exact: true })
+    page.getByLabel('Watermark Corner', { exact: true })
   ).not.toBeVisible()
   await expect(
     page.getByLabel('Watermark Text', { exact: true })
@@ -108,25 +108,37 @@ test('Watermark Corner', async ({ page }) => {
   await expect(
     page.getByLabel('Enable Watermark', { exact: true })
   ).toBeChecked()
-  await expect(
-    page.getByText('Watermark CornerBottom Right', { exact: true })
-  ).toBeVisible()
+  await expect(page.getByLabel('Watermark Corner', { exact: true })).toHaveText(
+    'Bottom Right'
+  )
 
-  await await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Watermark Corner', { exact: true }).click()
   await page.getByRole('option', { name: 'Bottom Left', exact: true }).click()
-  await expect(page.getByText('Watermark CornerBottom Left')).toBeVisible()
+  await expect(page.locator('#watermark-corner-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Watermark Corner', { exact: true })).toHaveText(
+    'Bottom Left'
+  )
 
-  await await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Watermark Corner', { exact: true }).click()
   await page.getByRole('option', { name: 'Top Right', exact: true }).click()
-  await expect(page.getByText('Watermark CornerTop Right')).toBeVisible()
+  await expect(page.locator('#watermark-corner-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Watermark Corner', { exact: true })).toHaveText(
+    'Top Right'
+  )
 
-  await await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Watermark Corner', { exact: true }).click()
   await page.getByRole('option', { name: 'Top Left', exact: true }).click()
-  await expect(page.getByText('Watermark CornerTop Left')).toBeVisible()
+  await expect(page.locator('#watermark-corner-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Watermark Corner', { exact: true })).toHaveText(
+    'Top Left'
+  )
 
-  await await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Watermark Corner', { exact: true }).click()
   await page.getByRole('option', { name: 'Bottom Right', exact: true }).click()
-  await expect(page.getByText('Watermark CornerBottom Right')).toBeVisible()
+  await expect(page.locator('#watermark-corner-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('Watermark Corner', { exact: true })).toHaveText(
+    'Bottom Right'
+  )
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -199,18 +211,22 @@ test('Watermark Font', async ({ page }) => {
   await page.getByLabel('Clear', { exact: true }).click()
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Font', { exact: true }).fill('cree')
-  await expect(page.getByRole('option').nth(0)).toHaveClass(
+  await page
+    .getByLabel('Font', { exact: true })
+    .pressSequentially('cree', { delay: 250 })
+  const popper = page.locator('#watermark-font-popper')
+  await expect(popper).toBeVisible()
+  await expect(popper.getByRole('option')).toHaveCount(3, { timeout: 30000 })
+  await expect(popper.getByRole('option').nth(0)).toHaveClass(
     / font-preview-creepster /
   )
-  await expect(page.getByRole('option').nth(1)).toHaveClass(
+  await expect(popper.getByRole('option').nth(1)).toHaveClass(
     / font-preview-sancreek /
   )
-  await expect(page.getByRole('option').nth(2)).toHaveClass(
+  await expect(popper.getByRole('option').nth(2)).toHaveClass(
     / font-preview-silkscreen /
   )
-  await expect(page.getByRole('option').nth(3)).not.toBeVisible()
-  await page.getByRole('option').nth(1).click()
+  await popper.getByRole('option').nth(1).click()
   await expect(page.getByLabel('Font', { exact: true })).toHaveValue('Sancreek')
 
   await page.getByLabel('Font', { exact: true }).fill('')

@@ -31,6 +31,7 @@ import {
   useGetPlaylistQuery
 } from '../../store/api/slice'
 import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+// import { isPrimaryModifierKey } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   scriptList: {
@@ -92,13 +93,13 @@ export function ScriptPlaylistItem(props: ScriptPlaylistItemProps) {
 
   const onSourceIconClick = (_e: MouseEvent<HTMLDivElement>) => {
     // const sourceURL = url as string
-    // if (e.shiftKey && !e.ctrlKey) {
+    // if (e.shiftKey && !isPrimaryModifierKey(e)) {
     //   flipflip()
     //     .api.getFileUrl(sourceURL)
     //     .then((fileURL) => window.open(fileURL, '_blank')?.focus())
-    // } else if (!e.shiftKey && e.ctrlKey) {
+    // } else if (!e.shiftKey && isPrimaryModifierKey(e)) {
     //   flipflip().api.showItemInFolder(sourceURL)
-    // } else if (!e.shiftKey && !e.ctrlKey) {
+    // } else if (!e.shiftKey && !isPrimaryModifierKey(e)) {
     //   // TODO make playScript work
     //   // dispatch(playScript(props.scriptID, props.sceneID, props.scripts))
     // }

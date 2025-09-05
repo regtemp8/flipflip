@@ -1,21 +1,27 @@
 import { test, expect } from '@playwright/test'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR =
+  '.MuiGrid2-container .MuiGrid2-root:has-text("Fade In/Out")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
 test('Fade effect', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
-  await expect(page.getByRole('combobox').nth(2)).not.toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
 
   await page.getByLabel('Fade In/Out', { exact: true }).click()
   await expect(page.getByLabel('Fade In/Out', { exact: true })).toBeChecked()
-  await expect(page.getByRole('combobox').nth(2)).toBeVisible()
-  await expect(page.getByRole('combobox').nth(2)).toHaveText('Constant')
+  await expect(card.getByLabel('Timing', { exact: true })).toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).toHaveText(
+    'Constant'
+  )
   await expect(page.getByRole('spinbutton', { name: 'For' })).toBeVisible()
 
   const responsePromise = page.waitForResponse((res) => {
@@ -31,7 +37,7 @@ test('Fade effect', async ({ page }) => {
   await expect(
     page.getByLabel('Fade In/Out', { exact: true })
   ).not.toBeChecked()
-  await expect(page.getByRole('combobox').nth(2)).not.toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
   await responsePromise
 })
@@ -43,7 +49,10 @@ test('Random fade timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
     container
@@ -121,7 +130,10 @@ test('Wave fade timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
   await expect(
     container
@@ -255,7 +267,10 @@ test('Audio BPM fade timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
@@ -339,7 +354,10 @@ test('With scene fade timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'With Scene', exact: true }).click()
   await expect(
     container
@@ -386,7 +404,10 @@ test('Constant fade timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(2).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container

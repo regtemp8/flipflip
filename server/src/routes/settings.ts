@@ -34,7 +34,7 @@ import {
   toCacheSize
 } from '../db/mappers'
 import { toNumber } from '../db/utils'
-import { WC } from 'flipflip-common'
+import { SIZE_UNKNOWN, WC } from 'flipflip-common'
 import Logger from '../logging/Logger'
 import getFolderSize from 'get-folder-size'
 
@@ -103,7 +103,7 @@ router.get('/cache/size', async (req, res) => {
     !fs.existsSync(settings.directory) ||
     !fs.statSync(settings.directory).isDirectory()
   ) {
-    res.status(200).send(toCacheSize(0))
+    res.status(200).send(toCacheSize(SIZE_UNKNOWN))
     return
   }
 

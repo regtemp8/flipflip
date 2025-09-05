@@ -105,6 +105,7 @@ function WatermarkCard() {
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={12}>
               <BaseSelect
+                id="watermark-corner-select"
                 label="Watermark Corner"
                 controlClassName={classes.fullWidth}
                 selector={useGetGeneralSettingsWatermarkCornerQuery}

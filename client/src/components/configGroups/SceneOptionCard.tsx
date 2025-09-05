@@ -135,6 +135,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
         className={cx(tutorial?.current === SDT.timing && classes.highlight)}
       >
         <TimingCard
+          id="scene"
           excludeScene={true}
           sidebar={sidebar}
           hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
@@ -185,6 +186,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
         </Grid2>
         <Collapse in={backForth}>
           <TimingCard
+            id="scene-back-forth"
             label="Back/Forth Timing"
             excludeScene={true}
             sidebar={sidebar}
@@ -232,6 +234,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
         <Grid2 container spacing={2} alignItems="center">
           <Grid2 size={{ xs: sidebar ? 8 : 12, sm: sidebar ? 8 : 6 }}>
             <BaseSelect
+              id="scene-image-sizing-select"
               label="Image Sizing"
               controlClassName={classes.fullWidth}
               selector={() => useGetSceneImageTypeQuery(props.sceneID)}
@@ -247,6 +250,7 @@ function SceneOptionCard(props: SceneOptionCardProps) {
           <Grid2 size={{ xs: 12, sm: sidebar ? 12 : 6 }} />
           <Grid2 size={{ xs: sidebar ? 8 : 12, sm: sidebar ? 8 : 4 }}>
             <BaseSelect
+              id="scene-background-select"
               label="Background"
               controlClassName={classes.fullWidth}
               selector={() => useGetSceneBackgroundTypeQuery(props.sceneID)}

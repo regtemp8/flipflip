@@ -1,15 +1,22 @@
 import { test, expect } from '@playwright/test'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Panning")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
 test('Panning effect', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('None').nth(2)).not.toBeVisible()
-  await expect(page.getByText('None').nth(3)).not.toBeVisible()
-  await expect(page.getByRole('combobox').nth(4)).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Vertically', { exact: true })
+  ).not.toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).not.toBeVisible()
   await expect(
     page.getByRole('spinbutton', { name: 'For', exact: true })
   ).not.toBeVisible()
@@ -17,9 +24,13 @@ test('Panning effect', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
 
-  await expect(page.getByText('None').nth(2)).toBeVisible()
-  await expect(page.getByText('None').nth(3)).toBeVisible()
-  await expect(page.getByRole('combobox').nth(4)).toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).toBeVisible()
+  await expect(
+    card.getByLabel('Move Vertically', { exact: true })
+  ).toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).toBeVisible()
   await expect(
     page.getByRole('spinbutton', { name: 'For', exact: true })
   ).toBeVisible()
@@ -35,9 +46,13 @@ test('Panning effect', async ({ page }) => {
   })
   await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('None').nth(2)).not.toBeVisible()
-  await expect(page.getByText('None').nth(3)).not.toBeVisible()
-  await expect(page.getByRole('combobox').nth(4)).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Horizontally', { exact: true })
+  ).not.toBeVisible()
+  await expect(
+    card.getByLabel('Move Vertically', { exact: true })
+  ).not.toBeVisible()
+  await expect(card.getByLabel('Timing', { exact: true })).not.toBeVisible()
   await expect(page.getByRole('spinbutton', { name: 'For' })).not.toBeVisible()
   await responsePromise
 })
@@ -49,7 +64,10 @@ test('Random panning timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
     container
@@ -125,7 +143,10 @@ test('Wave panning timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
   await expect(
     container
@@ -257,7 +278,10 @@ test('Audio BPM panning timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
@@ -339,7 +363,10 @@ test('With scene panning timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'With Scene', exact: true }).click()
   await expect(
     container
@@ -384,7 +411,10 @@ test('Constant panning timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Timing")'
   )
 
-  await page.getByRole('combobox').nth(4).click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Timing', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
   await expect(
     container
@@ -441,7 +471,7 @@ test('Constant panning timing', async ({ page }) => {
 test('Panning move horizontally setting', async ({ page }) => {
   await page.getByLabel('Panning', { exact: true }).click()
   await expect(page.getByLabel('Panning', { exact: true })).toBeChecked()
-  const container = await page
+  const container = page
     .locator(
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
@@ -459,7 +489,10 @@ test('Panning move horizontally setting', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
 
-  await container.locator('.MuiInputBase-root:has-text("None")').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -475,10 +508,13 @@ test('Panning move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Left then Right')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Left then Right")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
     .click()
   await page
     .getByRole('option', { name: 'Right then Left', exact: true })
@@ -495,10 +531,13 @@ test('Panning move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Right then Left')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Right then Left")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
     .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
@@ -513,10 +552,13 @@ test('Panning move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('Random')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Random")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
     .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(
@@ -531,6 +573,9 @@ test('Panning move horizontally setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Horizontally', { exact: true })
+  ).toHaveText('None')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -554,7 +599,10 @@ test('Panning move horizontally use img width setting', async ({ page }) => {
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -607,7 +655,10 @@ test('Panning move horizontally use img width setting', async ({ page }) => {
     await container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -631,7 +682,10 @@ test('Randomize panning move horizontally setting', async ({ page }) => {
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -661,7 +715,10 @@ test('Randomize panning move horizontally setting', async ({ page }) => {
   await expect(container.getByText(/^Min:/).first()).not.toBeVisible()
   await expect(container.getByText(/^Max:/).first()).not.toBeVisible()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -685,7 +742,10 @@ test('Panning move horizontally slider', async ({ page }) => {
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -750,7 +810,10 @@ test('Panning move horizontally slider', async ({ page }) => {
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100%')
   expect(await testSliderValue(thumb, slider, 1)).toBe(true)
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -774,7 +837,10 @@ test('Panning move horizontally min slider', async ({ page }) => {
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -817,7 +883,10 @@ test('Panning move horizontally min slider', async ({ page }) => {
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -841,7 +910,10 @@ test('Panning move horizontally max slider', async ({ page }) => {
       '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Horizontally")'
     )
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page
     .getByRole('option', { name: 'Left then Right', exact: true })
     .click()
@@ -884,7 +956,10 @@ test('Panning move horizontally max slider', async ({ page }) => {
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Horizontally', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -919,7 +994,10 @@ test('Panning move vertically setting', async ({ page }) => {
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
 
-  await container.locator('.MuiInputBase-root:has-text("None")').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -933,10 +1011,13 @@ test('Panning move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Vertically', { exact: true })
+  ).toHaveText('Up then Down')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Up then Down")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
     .click()
   await page.getByRole('option', { name: 'Down then Up', exact: true }).click()
   await expect(
@@ -951,10 +1032,13 @@ test('Panning move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Vertically', { exact: true })
+  ).toHaveText('Down then Up')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Down then Up")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
     .click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
   await expect(
@@ -969,10 +1053,13 @@ test('Panning move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Vertically', { exact: true })
+  ).toHaveText('Random')
 
-  await container
-    .locator('.MuiInputBase-root:has-text("Random")')
-    .first()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
     .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(
@@ -987,6 +1074,9 @@ test('Panning move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(
+    page.locator(CARD_SELECTOR).getByLabel('Move Vertically', { exact: true })
+  ).toHaveText('None')
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -1008,7 +1098,10 @@ test('Panning move vertically use img height setting', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
 
   await expect(
@@ -1059,7 +1152,10 @@ test('Panning move vertically use img height setting', async ({ page }) => {
     await container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -1081,7 +1177,10 @@ test('Randomize panning move vertically setting', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
 
   await expect(
@@ -1109,7 +1208,10 @@ test('Randomize panning move vertically setting', async ({ page }) => {
   await expect(container.getByText(/^Min:/).first()).not.toBeVisible()
   await expect(container.getByText(/^Max:/).first()).not.toBeVisible()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -1131,7 +1233,10 @@ test('Panning move vertically slider', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
 
   const slider = await container.locator('.MuiCollapse-entered .MuiSlider-root')
@@ -1194,7 +1299,10 @@ test('Panning move vertically slider', async ({ page }) => {
   await expect(thumb.locator('.MuiSlider-valueLabelOpen')).toHaveText('100%')
   expect(await testSliderValue(thumb, slider, 1)).toBe(true)
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -1216,7 +1324,10 @@ test('Panning move vertically min slider', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -1257,7 +1368,10 @@ test('Panning move vertically min slider', async ({ page }) => {
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -1279,7 +1393,10 @@ test('Panning move vertically max slider', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")')
     .nth(1)
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'Up then Down', exact: true }).click()
   await container
     .getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -1320,7 +1437,10 @@ test('Panning move vertically max slider', async ({ page }) => {
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
   ).not.toBeChecked()
 
-  await container.getByRole('combobox').first().click()
+  await page
+    .locator(CARD_SELECTOR)
+    .getByLabel('Move Vertically', { exact: true })
+    .click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()

@@ -167,6 +167,11 @@ export default function FontFamilySelect(props: FontFamilySelectProps) {
         popper: StyledPopper,
         listbox: ListboxComponent
       }}
+      slotProps={{
+        popper: {
+          id: `${props.id}-popper`
+        }
+      }}
     />
   )
 }

@@ -1,6 +1,7 @@
 import * as easings from 'd3-ease'
-import { useRef } from 'react'
+import { KeyboardEvent as ReactKeyboardEvent, useRef } from 'react'
 import { filesize } from 'filesize'
+import { MouseEvent } from 'react'
 import { Backup, ContentSource, ScraperHelpers, EA, TF } from 'flipflip-common'
 
 export const captionProgramDefaults = {
@@ -338,4 +339,10 @@ export default function useTrackVariableChanges<T>(
   })
 
   _prevVariables.current = variables
+}
+
+export function isPrimaryModifierKey(
+  event: MouseEvent | KeyboardEvent | ReactKeyboardEvent
+) {
+  return event.ctrlKey || event.metaKey
 }

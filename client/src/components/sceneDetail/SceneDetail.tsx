@@ -108,6 +108,7 @@ import { setFullScreen } from '../../data/fullscreen'
 import FilePicker from '../common/FilePicker'
 import { setSceneDetailEditingName } from '../../store/sceneDetail/slice'
 import { setSourceLibraryAddHttpUrl } from '../../store/sourceLibrary/slice'
+import { isPrimaryModifierKey } from '../../utils'
 
 const drawerWidth = 240
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -486,7 +487,7 @@ function SceneDetail() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'p' || e.key === 'π')
       ) {
@@ -820,6 +821,7 @@ function SceneDetail() {
           {openTab === 3 && (
             <div className={classes.librarySearch}>
               {/* <LibrarySearch
+                id='scene-sources-search'
                 appBar
                 displaySources={displaySources}
                 filters={filters}
@@ -1779,6 +1781,7 @@ function SceneDetail() {
           >
             {/* {openMenu === MO.simpleRule && (
               <LibrarySearch
+                id='scene-rule-search'
                 displaySources={library}
                 filters={(generatorWeights as WeightGroup[])
                   .filter((wg) => wg.rules == null)

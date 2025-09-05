@@ -21,6 +21,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface SceneSearchProps {
+  id: string
   placeholder: string
 }
 
@@ -69,6 +70,7 @@ function SceneSearch(props: SceneSearchProps) {
   const { classes } = useStyles()
   return (
     <Autocomplete
+      id={props.id}
       className={classes.searchSelect}
       multiple
       value={options}
@@ -117,6 +119,11 @@ function SceneSearch(props: SceneSearchProps) {
           }}
         />
       )}
+      slotProps={{
+        popper: {
+          id: `${props.id}-popper`
+        }
+      }}
     />
   )
 }

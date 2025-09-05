@@ -36,6 +36,7 @@ import {
 import { AF, FilePickerItem } from 'flipflip-common'
 import { filesize } from 'filesize'
 import { makeStyles } from 'tss-react/mui'
+import { isPrimaryModifierKey } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   itemSelected: {
@@ -52,7 +53,11 @@ interface FilePickerListItemProps {
   selected: boolean
   item: FilePickerItem
   onDoubleClick: (item: FilePickerItem) => void
-  onSelect: (item: FilePickerItem, ctrlKey: boolean, shiftKey: boolean) => void
+  onSelect: (
+    item: FilePickerItem,
+    primaryModifierKey: boolean,
+    shiftKey: boolean
+  ) => void
   style?: CSSProperties
 }
 
@@ -64,7 +69,9 @@ const FilePickerListItem = (props: FilePickerListItemProps) => {
       style={style}
       selected={selected}
       onDoubleClick={() => onDoubleClick(item)}
-      onClick={(event) => onSelect(item, event.ctrlKey, event.shiftKey)}
+      onClick={(event) =>
+        onSelect(item, isPrimaryModifierKey(event), event.shiftKey)
+      }
       classes={{
         selected: classes.itemSelected
       }}
@@ -379,10 +386,10 @@ export default function FilePicker(props: FilePickerProps) {
 
   const onSelect = (
     item: FilePickerItem,
-    ctrlKey: boolean,
+    primaryModifierKey: boolean,
     shiftKey: boolean
   ) => {
-    if (props.multiple && ctrlKey) {
+    if (props.multiple && primaryModifierKey) {
       _lastSelected.current = item.name
       setSelected((value) => {
         const oldLength = value.length

@@ -90,6 +90,7 @@ import { useNavigate } from 'react-router'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectSpecialMode } from '../../store/app/selectors'
 import snackbar from '../../data/Snackbar'
+import { isPrimaryModifierKey } from '../../utils'
 
 const drawerWidth = 240
 
@@ -403,7 +404,7 @@ function Library() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'p' || e.key === 'π')
       ) {
@@ -412,14 +413,14 @@ function Library() {
         )
       } else if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'm' || e.key === 'µ')
       ) {
         toggleMarked()
       } else if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'l' || e.key === '¬')
       ) {
@@ -544,7 +545,7 @@ function Library() {
   }
 
   const onRemoveAll = (e: MouseEvent) => {
-    if (e.shiftKey && e.altKey && e.ctrlKey) {
+    if (e.shiftKey && e.altKey && isPrimaryModifierKey(e)) {
       setOpenMenu(MO.deleteAlert)
     } else {
       setOpenMenu(MO.removeAllAlert)
@@ -743,6 +744,7 @@ function Library() {
                 />
               )}
               <LibrarySearch
+                id="content-library-search"
                 appBar
                 options={searchOptions ?? []}
                 filters={filters}
@@ -1516,6 +1518,7 @@ function Library() {
           </DialogContentText>
           {openMenu === MO.batchTag && (
             <LibrarySearch
+              id="batch-tag-search"
               filters={selectedTags}
               options={tagOptions ?? []}
               placeholder={'Tag These Sources'}

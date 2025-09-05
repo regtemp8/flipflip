@@ -304,6 +304,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           enabled={true}
           values={HTF}
           valueMapper={(value: string) => en.get(value) as string}
+          id="zoom-move-horizontal-select"
           label="Move Horizontally"
           type={{
             selector: () => useGetSceneHorizTransTypeQuery(props.sceneID),
@@ -339,6 +340,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           enabled={true}
           values={VTF}
           valueMapper={(value: string) => en.get(value) as string}
+          id="zoom-move-vertical-select"
           label="Move Vertically"
           type={{
             selector: () => useGetSceneVertTransTypeQuery(props.sceneID),
@@ -376,6 +378,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
         >
           <Collapse in={enabled} className={classes.fullWidth}>
             <TimingCard
+              id="zoom"
               sidebar={sidebar}
               hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
               timing={{
@@ -413,6 +416,7 @@ function ZoomMoveCard(props: ZoomMoveCardProps) {
           <Collapse in={enabled} className={classes.fullWidth}>
             <Divider sx={{ mb: 2 }} />
             <EasingCard
+              id="zoom-easing"
               sidebar={sidebar}
               easing={{
                 selector: () => useGetSceneTransEaseQuery(props.sceneID),
