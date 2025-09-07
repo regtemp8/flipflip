@@ -26,7 +26,7 @@ on:
         type: boolean
     outputs:
       run_tests:
-        value: ${{ jobs.check,outputs.changed_files }}
+        value: ${{ jobs.check.outputs.changed_files }}
 jobs:
   check:
     runs-on: ubuntu-latest
