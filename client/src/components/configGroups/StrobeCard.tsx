@@ -142,6 +142,7 @@ function StrobeCard(props: StrobeCardProps) {
                 }}
               >
                 <BaseSelect
+                  id="strobe-color-type-select"
                   label="Color Type"
                   controlClassName={classes.fullWidth}
                   selector={() =>
@@ -205,6 +206,7 @@ function StrobeCard(props: StrobeCardProps) {
                 }}
               >
                 <BaseSelect
+                  id="strobe-layer-select"
                   label="Strobe Layer"
                   controlClassName={classes.fullWidth}
                   selector={() => useGetSceneStrobeLayerQuery(props.sceneID)}
@@ -248,6 +250,7 @@ function StrobeCard(props: StrobeCardProps) {
           <Collapse in={strobe} className={classes.fullWidth}>
             <Divider sx={{ mb: 2 }} />
             <TimingCard
+              id="strobe"
               sidebar={sidebar}
               hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
               timing={{
@@ -287,6 +290,7 @@ function StrobeCard(props: StrobeCardProps) {
           <Collapse in={strobe && strobePulse} className={classes.fullWidth}>
             <Divider sx={{ mb: 2 }} />
             <TimingCard
+              id="strobe-delay"
               label="Delay Timing"
               sidebar={sidebar}
               hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
@@ -330,6 +334,7 @@ function StrobeCard(props: StrobeCardProps) {
           <Collapse in={strobe} className={classes.fullWidth}>
             <Divider sx={{ mb: 2 }} />
             <EasingCard
+              id="strobe-easing"
               sidebar={sidebar}
               easing={{
                 selector: () => useGetSceneStrobeEaseQuery(props.sceneID),

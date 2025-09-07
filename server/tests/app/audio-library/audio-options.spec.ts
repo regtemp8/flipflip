@@ -1,41 +1,28 @@
-import { test, expect, Page } from '@playwright/test'
+import path from 'path'
+import { test } from '@playwright/test'
 
-let page: Page
-test.beforeAll(async ({ browser }) => {
-  page = await browser.newPage()
-  await page.goto('/audio-library')
-  await page.getByTestId('AddIcon').click()
-  await page.getByLabel('Local Audio').click()
-  await expect(page.getByRole('button', { name: /^audio/ })).toBeVisible()
-  await page.getByRole('button', { name: /^audio/ }).dblclick()
-  await expect(
-    page.getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
-  ).toBeVisible()
-  await page
-    .getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
-    .click()
-  await page.getByRole('button', { name: 'Choose', exact: true }).click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(1)
-})
-
-test.afterAll(async () => {
-  await page.goto('/audio-library')
-
-  const responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/audios/1' &&
-      request.method() === 'DELETE' &&
-      res.status() === 204
-    )
+test.beforeAll(async ({ request }) => {
+  await request.get('http://localhost:5050/authenticated')
+  const audio = path.resolve(
+    __dirname,
+    'tests',
+    'config',
+    'audio',
+    'Aftertune, Ultimate Mix - Smile.mp3'
+  )
+  const response = await request.post('http://localhost:5050/api/audios', {
+    data: [audio]
   })
-  await page.getByTestId('DeleteIcon').nth(0).click()
-  await expect(page.locator('#sortable-list li')).toHaveCount(0)
-  await responsePromise
-  await page.close()
+  if (!response.ok) {
+    throw new Error('Failed to create caption script')
+  }
 })
 
-test.beforeEach(async () => {
+test.afterAll(async ({ request }) => {
+  await request.delete('http://localhost:5050/api/audios/1')
+})
+
+test.beforeEach(async ({ page }) => {
   await page.goto('/audio-library')
 })
 

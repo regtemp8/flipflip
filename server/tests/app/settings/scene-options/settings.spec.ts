@@ -31,11 +31,18 @@ test('Re-Generate on Playback', async ({ page }) => {
 })
 
 test('Image Filter', async ({ page }) => {
-  await expect(page.getByText('Image FilterAll Files')).toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'All files'
+  )
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Image Filter', { exact: true }).click()
   await page.getByRole('option', { name: 'Only videos', exact: true }).click()
-  await expect(page.getByText('Image FilterOnly videos')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-filter-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'Only videos'
+  )
   await expect(page.getByText('Image Orientation')).not.toBeVisible()
   await expect(page.getByText('GIF Options')).not.toBeVisible()
   await expect(page.getByText('Video Options')).toBeVisible()
@@ -50,9 +57,14 @@ test('Image Filter', async ({ page }) => {
     page.locator('input[aria-labelledby="video-volume-slider"]')
   ).toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Image Filter', { exact: true }).click()
   await page.getByRole('option', { name: 'Only animated', exact: true }).click()
-  await expect(page.getByText('Image FilterOnly animated')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-filter-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'Only animated'
+  )
   await expect(page.getByText('Image Orientation')).toBeVisible()
   await expect(page.getByText('GIF Options')).toBeVisible()
   await expect(page.getByText('Video Options')).toBeVisible()
@@ -67,11 +79,16 @@ test('Image Filter', async ({ page }) => {
     page.locator('input[aria-labelledby="video-volume-slider"]')
   ).toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Image Filter', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Only image files', exact: true })
     .click()
-  await expect(page.getByText('Image FilterOnly image files')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-filter-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'Only image files'
+  )
   await expect(page.getByText('Image Orientation')).toBeVisible()
   await expect(page.getByText('GIF Options')).toBeVisible()
   await expect(page.getByText('Video Options')).not.toBeVisible()
@@ -86,9 +103,14 @@ test('Image Filter', async ({ page }) => {
     page.locator('input[aria-labelledby="video-volume-slider"]')
   ).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Image Filter', { exact: true }).click()
   await page.getByRole('option', { name: 'Only stills', exact: true }).click()
-  await expect(page.getByText('Image FilterOnly stills')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-filter-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'Only stills'
+  )
   await expect(page.getByText('Image Orientation')).toBeVisible()
   await expect(page.getByText('GIF Options')).not.toBeVisible()
   await expect(page.getByText('Video Options')).not.toBeVisible()
@@ -112,9 +134,14 @@ test('Image Filter', async ({ page }) => {
       res.status() === 204
     )
   })
-  await page.getByRole('combobox').nth(3).click()
+  await page.getByLabel('Image Filter', { exact: true }).click()
   await page.getByRole('option', { name: 'All files', exact: true }).click()
-  await expect(page.getByText('Image FilterAll files')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-filter-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Image Filter', { exact: true })).toHaveText(
+    'All files'
+  )
   await expect(page.getByText('Image Orientation')).toBeVisible()
   await expect(page.getByText('GIF Options')).toBeVisible()
   await expect(page.getByText('Video Options')).toBeVisible()
@@ -156,79 +183,123 @@ test('Play Full Sources', async ({ page }) => {
 })
 
 test('Image Orientation', async ({ page }) => {
-  await expect(page.getByText('Image OrientationNo Change')).toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('No Change')
 
-  await page.getByRole('combobox').nth(4).click()
+  await page.getByLabel('Image Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Only Landscape', exact: true })
     .click()
-  await expect(page.getByText('Image OrientationOnly Landscape')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('Only Landscape')
 
-  await page.getByRole('combobox').nth(4).click()
+  await page.getByLabel('Image Orientation', { exact: true }).click()
   await page.getByRole('option', { name: 'Only Portrait', exact: true }).click()
-  await expect(page.getByText('Image OrientationOnly Portrait')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('Only Portrait')
 
-  await page.getByRole('combobox').nth(4).click()
+  await page.getByLabel('Image Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Force Landscape', exact: true })
     .click()
-  await expect(page.getByText('Image OrientationForce Landscape')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('Force Landscape')
 
-  await page.getByRole('combobox').nth(4).click()
+  await page.getByLabel('Image Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Force Portrait', exact: true })
     .click()
-  await expect(page.getByText('Image OrientationForce Portrait')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('Force Portrait')
 
-  await page.getByRole('combobox').nth(4).click()
+  await page.getByLabel('Image Orientation', { exact: true }).click()
   await page.getByRole('option', { name: 'No Change', exact: true }).click()
-  await expect(page.getByText('Image OrientationNo Change')).toBeVisible()
+  await expect(
+    page.locator('#scene-image-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Image Orientation', { exact: true })
+  ).toHaveText('No Change')
 })
 
 test('GIF Options', async ({ page }) => {
-  await expect(page.getByText('GIF OptionsNo Change')).toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'No Change'
+  )
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Constant)', exact: true })
     .click()
-  await expect(page.getByText('GIF OptionsPlay Part (Constant)')).toBeVisible()
+  await expect(page.locator('#scene-gif-options-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'Play Part (Constant)'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(2)).toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(2)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(2)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Random)', exact: true })
     .click()
-  await expect(page.getByText('GIF OptionsPlay Part (Random)')).toBeVisible()
+  await expect(page.locator('#scene-gif-options-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'Play Part (Random)'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(2)).not.toBeVisible()
   await expect(page.getByLabel('Between', { exact: true }).nth(2)).toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(2)).toBeVisible()
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play At Least', exact: true }).click()
-  await expect(page.getByText('GIF OptionsPlay At Least')).toBeVisible()
+  await expect(page.locator('#scene-gif-options-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'Play At Least'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(2)).toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(2)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(2)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play Full', exact: true }).click()
-  await expect(page.getByText('GIF OptionsPlay Full')).toBeVisible()
+  await expect(page.locator('#scene-gif-options-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'Play Full'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(2)).not.toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(2)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(2)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page.getByRole('option', { name: 'No Change', exact: true }).click()
-  await expect(page.getByText('GIF OptionsNo Change')).toBeVisible()
+  await expect(page.locator('#scene-gif-options-select-menu')).not.toBeVisible()
+  await expect(page.getByLabel('GIF Options', { exact: true })).toHaveText(
+    'No Change'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(2)).not.toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(2)
@@ -237,7 +308,7 @@ test('GIF Options', async ({ page }) => {
 })
 
 test('GIF Play Constant Part Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Constant)', exact: true })
     .click()
@@ -257,7 +328,7 @@ test('GIF Play Constant Part Option', async ({ page }) => {
 })
 
 test('GIF Play Random Part Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Random)', exact: true })
     .click()
@@ -287,7 +358,7 @@ test('GIF Play Random Part Option', async ({ page }) => {
 })
 
 test('GIF Play At Least Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(5).click()
+  await page.getByLabel('GIF Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play At Least', exact: true }).click()
   await expect(page.getByLabel('For', { exact: true }).nth(2)).toBeVisible()
   await expect(page.getByLabel('For', { exact: true }).nth(2)).toHaveAttribute(
@@ -305,51 +376,76 @@ test('GIF Play At Least Option', async ({ page }) => {
 })
 
 test('Video Options', async ({ page }) => {
-  await expect(page.getByText('Video OptionsNo Change')).toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'No Change'
+  )
 
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Constant)', exact: true })
     .click()
   await expect(
-    page.getByText('Video OptionsPlay Part (Constant)')
-  ).toBeVisible()
+    page.locator('#scene-video-options-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'Play Part (Constant)'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(3)).toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(3)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(3)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Random)', exact: true })
     .click()
-  await expect(page.getByText('Video OptionsPlay Part (Random)')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-options-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'Play Part (Random)'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(3)).not.toBeVisible()
   await expect(page.getByLabel('Between', { exact: true }).nth(3)).toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(3)).toBeVisible()
 
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play At Least', exact: true }).click()
-  await expect(page.getByText('Video OptionsPlay At Least')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-options-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'Play At Least'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(3)).toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(3)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(3)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play Full', exact: true }).click()
-  await expect(page.getByText('Video OptionsPlay Full')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-options-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'Play Full'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(3)).not.toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(3)
   ).not.toBeVisible()
   await expect(page.getByLabel('and', { exact: true }).nth(3)).not.toBeVisible()
 
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page.getByRole('option', { name: 'No Change', exact: true }).click()
-  await expect(page.getByText('Video OptionsNo Change')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-options-select-menu')
+  ).not.toBeVisible()
+  await expect(page.getByLabel('Video Options', { exact: true })).toHaveText(
+    'No Change'
+  )
   await expect(page.getByLabel('For', { exact: true }).nth(3)).not.toBeVisible()
   await expect(
     page.getByLabel('Between', { exact: true }).nth(3)
@@ -358,7 +454,7 @@ test('Video Options', async ({ page }) => {
 })
 
 test('Video Play Constant Part Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Constant)', exact: true })
     .click()
@@ -378,7 +474,7 @@ test('Video Play Constant Part Option', async ({ page }) => {
 })
 
 test('Video Play Random Part Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Play Part (Random)', exact: true })
     .click()
@@ -408,7 +504,7 @@ test('Video Play Random Part Option', async ({ page }) => {
 })
 
 test('Video Play At Least Option', async ({ page }) => {
-  await page.getByRole('combobox').nth(6).click()
+  await page.getByLabel('Video Options', { exact: true }).click()
   await page.getByRole('option', { name: 'Play At Least', exact: true }).click()
   await expect(page.getByLabel('For', { exact: true }).nth(3)).toBeVisible()
   await expect(page.getByLabel('For', { exact: true }).nth(3)).toHaveAttribute(
@@ -426,33 +522,60 @@ test('Video Play At Least Option', async ({ page }) => {
 })
 
 test('Video Orientation', async ({ page }) => {
-  await expect(page.getByText('Video OrientationNo Change')).toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('No Change')
 
-  await page.getByRole('combobox').nth(7).click()
+  await page.getByLabel('Video Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Only Landscape', exact: true })
     .click()
-  await expect(page.getByText('Video OrientationOnly Landscape')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('Only Landscape')
 
-  await page.getByRole('combobox').nth(7).click()
+  await page.getByLabel('Video Orientation', { exact: true }).click()
   await page.getByRole('option', { name: 'Only Portrait', exact: true }).click()
-  await expect(page.getByText('Video OrientationOnly Portrait')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('Only Portrait')
 
-  await page.getByRole('combobox').nth(7).click()
+  await page.getByLabel('Video Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Force Landscape', exact: true })
     .click()
-  await expect(page.getByText('Video OrientationForce Landscape')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('Force Landscape')
 
-  await page.getByRole('combobox').nth(7).click()
+  await page.getByLabel('Video Orientation', { exact: true }).click()
   await page
     .getByRole('option', { name: 'Force Portrait', exact: true })
     .click()
-  await expect(page.getByText('Video OrientationForce Portrait')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('Force Portrait')
 
-  await page.getByRole('combobox').nth(7).click()
+  await page.getByLabel('Video Orientation', { exact: true }).click()
   await page.getByRole('option', { name: 'No Change', exact: true }).click()
-  await expect(page.getByText('Video OrientationNo Change')).toBeVisible()
+  await expect(
+    page.locator('#scene-video-orientation-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Video Orientation', { exact: true })
+  ).toHaveText('No Change')
 })
 
 test('Video Speed', async ({ page }) => {

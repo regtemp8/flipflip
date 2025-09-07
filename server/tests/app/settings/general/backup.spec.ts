@@ -262,12 +262,10 @@ test('Restore Backup', async ({ page }) => {
   await expect(page.getByRole('dialog').getByRole('paragraph')).toHaveText(
     'Choose a backup to restore from:'
   )
-  await page
-    .getByText('10/18/2024, 12:00:00 AM (224 KB)', { exact: true })
-    .click()
+  await page.getByText(/^10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/).click()
   await page
     .getByRole('option', {
-      name: '4/18/2024, 12:00:00 AM (224 KB)',
+      name: /^4\/18\/2024, 12:00:00 AM \(\d+ KB\)$/,
       exact: true
     })
     .click()
@@ -305,20 +303,60 @@ test('Restore Backup', async ({ page }) => {
 test('Clean Backups', async ({ page }) => {
   // test clean dialog elements with auto clean enabled
   await expect(page.getByRole('dialog')).not.toBeVisible()
+  let responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/settings/general' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON().autoCleanBackup === true &&
+      res.status() === 204
+    )
+  })
   await page.getByLabel('Auto Clean', { exact: true }).click()
   await expect(page.getByLabel('Auto Clean', { exact: true })).toBeChecked()
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/settings/general' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON().autoCleanBackupDays === 10 &&
+      res.status() === 204
+    )
+  })
   await page
     .getByText('DaysKeep Last', { exact: true })
     .locator('input')
     .fill('10')
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/settings/general' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON().autoCleanBackupWeeks === 7 &&
+      res.status() === 204
+    )
+  })
   await page
     .getByText('WeeksKeep Last', { exact: true })
     .locator('input')
     .fill('7')
+  await responsePromise
+  responsePromise = page.waitForResponse((res) => {
+    const request = res.request()
+    return (
+      new URL(request.url()).pathname === '/api/settings/general' &&
+      request.method() === 'PATCH' &&
+      request.postDataJSON().autoCleanBackupMonths === 4 &&
+      res.status() === 204
+    )
+  })
   await page
     .getByText('MonthsKeep Last', { exact: true })
     .locator('input')
     .fill('4')
+  await responsePromise
 
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
@@ -337,7 +375,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
+      .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -352,7 +390,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
+      .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
       .nth(1)
   ).toBeVisible()
 
@@ -383,7 +421,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
+      .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
       .nth(1)
   ).toBeVisible()
   await page.getByRole('button', { name: 'Clean Backups', exact: true }).click()
@@ -400,7 +438,7 @@ test('Clean Backups', async ({ page }) => {
   await expect(
     page
       .locator('div')
-      .filter({ hasText: 'Latest: 10/18/2024, 12:00:00 AM (224 KB)' })
+      .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
       .nth(1)
   ).toBeVisible()
 

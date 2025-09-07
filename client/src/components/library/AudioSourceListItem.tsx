@@ -21,7 +21,7 @@ import BuildIcon from '@mui/icons-material/Build'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 
-import { getTimestamp } from '../../utils'
+import { getTimestamp, isPrimaryModifierKey } from '../../utils'
 import { grey } from '@mui/material/colors'
 import SourceIcon from './SourceIcon'
 import TagChip from './TagChip'
@@ -198,9 +198,9 @@ function AudioSourceListItem(props: AudioSourceListItemProps) {
   const { data: audio } = useGetAudioQuery(props.audioID)
 
   const onSourceIconClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.shiftKey && !e.ctrlKey) {
+    if (e.shiftKey && !isPrimaryModifierKey(e)) {
       window.open(audio?.fileUrl, '_blank')?.focus()
-    } else if (!e.shiftKey && !e.ctrlKey) {
+    } else if (!e.shiftKey && !isPrimaryModifierKey(e)) {
       dispatch(saveAudioLibraryYOffset())
       // TODO get playAudio to work
       // try {

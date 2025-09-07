@@ -2,11 +2,14 @@ import { test, expect } from '@playwright/test'
 import { VTF } from 'flipflip-common'
 import { changeSlider, testSliderValue } from '../../utils'
 
+const CARD_SELECTOR = '.MuiGrid2-container .MuiGrid2-root:has-text("Zoom")'
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/settings/scene-effects')
 })
 
 test('Move vertically setting', async ({ page }) => {
+  const card = page.locator(CARD_SELECTOR)
   const container = page.locator(
     '.MuiGrid2-root > .MuiGrid2-container:has-text("Move Vertically")'
   )
@@ -19,8 +22,11 @@ test('Move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'None'
+  )
 
-  await container.locator('.MuiInputBase-root:has-text("None")').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Up', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -31,8 +37,11 @@ test('Move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Up'
+  )
 
-  await container.locator('.MuiInputBase-root:has-text("Up")').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Down', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -43,8 +52,11 @@ test('Move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Down'
+  )
 
-  await container.locator('.MuiInputBase-root:has-text("Down")').first().click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'Up/Down', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -55,6 +67,9 @@ test('Move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'Up/Down'
+  )
 
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
@@ -65,10 +80,7 @@ test('Move vertically setting', async ({ page }) => {
       res.status() === 204
     )
   })
-  await container
-    .locator('.MuiInputBase-root:has-text("Up/Down")')
-    .first()
-    .click()
+  await card.getByLabel('Move Vertically', { exact: true }).click()
   await page.getByRole('option', { name: 'None', exact: true }).click()
   await expect(
     container.getByRole('checkbox', { name: 'Randomize', exact: true })
@@ -79,6 +91,9 @@ test('Move vertically setting', async ({ page }) => {
   await expect(
     container.locator('.MuiCollapse-entered .MuiTextField-root input')
   ).not.toBeVisible()
+  await expect(card.getByLabel('Move Vertically', { exact: true })).toHaveText(
+    'None'
+  )
   await responsePromise
 })
 

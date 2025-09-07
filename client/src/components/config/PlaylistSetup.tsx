@@ -307,6 +307,7 @@ function PlaylistSetup() {
           {(playlist?.type === PLT.audio || playlist?.type === PLT.script) && (
             <Box className={classes.sceneSelect}>
               <SceneSelect
+                id={`${playlist.type === PLT.audio ? 'audio' : 'script'}-playlist-scene-select`}
                 value={sceneID}
                 onChange={setSceneID}
                 includeRandom

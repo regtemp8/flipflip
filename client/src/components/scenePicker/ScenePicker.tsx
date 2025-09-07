@@ -550,7 +550,7 @@ function ScenePicker() {
           </Typography>
           <div className={classes.fill} />
           <FlipFlipUpdateNotification />
-          {/* <SceneSearch placeholder={'Search ...'} /> */}
+          {/* <SceneSearch id="scene-picker-search" placeholder={'Search ...'} /> */}
         </Toolbar>
       </AppBar>
 

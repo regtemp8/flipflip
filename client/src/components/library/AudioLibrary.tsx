@@ -100,6 +100,7 @@ import { selectAudioLibraryFilters } from '../../store/audioLibrary/selectors'
 import { editAudioEdit } from '../../store/audioEdit/thunks'
 import { saveAudioLibraryYOffset } from '../../store/audioLibrary/thunks'
 import { setSpecialMode } from '../../store/app/slice'
+import { isPrimaryModifierKey } from '../../utils'
 
 const drawerWidth = 240
 
@@ -625,7 +626,7 @@ function AudioLibrary() {
     const onKeyDown = async (e: KeyboardEvent) => {
       if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'm' || e.key === 'µ') &&
         displaySources != null
@@ -940,6 +941,7 @@ function AudioLibrary() {
                 />
               )}
               <LibrarySearch
+                id="audio-library-search"
                 appBar
                 filters={filters}
                 options={searchOptions ?? []}
@@ -1717,6 +1719,7 @@ function AudioLibrary() {
             </DialogContentText>
             {openMenu === MO.batchTag && (
               <LibrarySearch
+                id="batch-tag-search"
                 options={tagOptions ?? []}
                 filters={selectedTags}
                 placeholder={'Tag These Sources'}

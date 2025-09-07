@@ -116,6 +116,7 @@ function SlideCard(props: SlideCardProps) {
               style={{ paddingTop: 10 }}
             >
               <BaseSelect
+                id="strobe-direction-select"
                 label="Direction"
                 controlClassName={classes.fullWidth}
                 selector={() => useGetSceneSlideTypeQuery(props.sceneID)}
@@ -141,6 +142,7 @@ function SlideCard(props: SlideCardProps) {
             </Grid2>
           </Grid2>
           <TimingCard
+            id="slide"
             sidebar={sidebar}
             hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
@@ -182,6 +184,7 @@ function SlideCard(props: SlideCardProps) {
           <Grid2 size={12}>
             <Collapse in={slide} className={classes.fullWidth}>
               <EasingCard
+                id="slide-easing"
                 sidebar={sidebar}
                 easing={{
                   selector: () => useGetSceneSlideEaseQuery(props.sceneID),

@@ -42,7 +42,7 @@ import {
   useGetCachingDirectoryQuery,
   useGetCachingEnabledQuery
 } from '../../store/api/selectors'
-import { getTimestamp } from '../../utils'
+import { getTimestamp /*, isPrimaryModifierKey*/ } from '../../utils'
 import { selectSourceLibraryEditing } from '../../store/sourceLibrary/selectors'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import {
@@ -212,7 +212,7 @@ function SourceListItem(props: SourceListItemProps) {
   const onSourceIconClick = async (/*e: MouseEvent<HTMLButtonElement>*/) => {
     // const sourceURL = source?.url as string
     // const sourceType = getSourceType(sourceURL)
-    // if (e.shiftKey && e.ctrlKey && e.altKey) {
+    // if (e.shiftKey && isPrimaryModifierKey(e) && e.altKey) {
     //   if (
     //     sourceType === ST.local ||
     //     sourceType === ST.video ||
@@ -224,9 +224,9 @@ function SourceListItem(props: SourceListItemProps) {
     //       props.onDelete(props.source)
     //     }
     //   }
-    // } else if (e.shiftKey && !e.ctrlKey && !e.altKey) {
+    // } else if (e.shiftKey && !isPrimaryModifierKey(e) && !e.altKey) {
     //   openExternalURL(sourceURL)
-    // } else if (!e.shiftKey && !e.ctrlKey && e.altKey) {
+    // } else if (!e.shiftKey && !isPrimaryModifierKey(e) && e.altKey) {
     //   // If local source, still catch keypress, but don't do anything
     //   if (
     //     sourceType !== ST.local &&
@@ -237,7 +237,7 @@ function SourceListItem(props: SourceListItemProps) {
     //   ) {
     //     dispatch(downloadSource(props.source))
     //   }
-    // } else if (!e.shiftKey && e.ctrlKey && !e.altKey) {
+    // } else if (!e.shiftKey && isPrimaryModifierKey(e) && !e.altKey) {
     //   const fileType = getSourceType(sourceURL)
     //   let cachePath = await getCachePath(cachingDirectory, sourceURL)
     //   // TODO fix this, move to server?
@@ -254,7 +254,7 @@ function SourceListItem(props: SourceListItemProps) {
     //   if (cachePath) {
     //     openDirectory(cachePath)
     //   }
-    // } else if (!e.shiftKey && !e.ctrlKey) {
+    // } else if (!e.shiftKey && !isPrimaryModifierKey(e)) {
     //   props.savePosition()
     //   try {
     //     dispatch(playSceneFromLibrary(props.source, props.sources))

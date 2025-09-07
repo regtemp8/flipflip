@@ -27,6 +27,7 @@ export interface MoveCardProps {
   enabled: boolean
   values: Record<string, string>
   valueMapper: (value: string) => string
+  id: string
   label: string
   type: ReduxProps<string>
   random: ReduxProps<boolean>
@@ -58,6 +59,7 @@ function MoveCard(props: MoveCardProps) {
       >
         <Collapse in={props.enabled} className={classes.fullWidth}>
           <BaseSelect
+            id={props.id}
             label={props.label}
             selector={props.type.selector}
             action={props.type.action}

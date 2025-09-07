@@ -14,12 +14,12 @@ jobs:
       build-task: build:main
       build-task-extra: build:module
   client:
-    if: false # disable for now, too many linter errors
     uses: ./.github/workflows/module-check.yml
     with:
       display-name: Client
       working-directory: ./client
       depends-on-common: true
+      do-lint-task: false
   server:
     uses: ./.github/workflows/module-check.yml
     with:
@@ -28,39 +28,49 @@ jobs:
       build-task: tsc
       depends-on-common: true
   test:
-    if: false # disable for now, tests have only been tested with browser not headless
     needs: [common, client, server]
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+          os: ["ubuntu-22.04","macos-13","windows-2022"]
     steps:
+    - name: macos-13 dependencies fix
+      if: ${{ matrix.os == 'macos-13' }}
+      run: sudo -H pip install setuptools
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
       with:
         node-version: 22.x
-    - name: Install common dependencies
-      run: npm ci
+    - name: Enable Yarn
+      run: |
+        corepack enable
+        corepack prepare yarn@stable --activate
+    - name: Install Common
       working-directory: ./common
-    - name: Build common main
-      run: npm run build:main
+      run: yarn install --immutable
+    - name: Build Common Main
       working-directory: ./common
-    - name: Build common module
-      run: npm run build:module
+      run: yarn build:main
+    - name: Build Common Module
       working-directory: ./common
-    - name: Install client dependencies
-      run: npm ci
+      run: yarn build:module      
+    - name: Install Client
       working-directory: ./client
-    - name: Install client dependencies
-      run: npm ci
+      run: yarn install --immutable
+    - name: Install Server
       working-directory: ./server
+      run: yarn install --immutable
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install chromium --with-deps --only-shell
       working-directory: ./server
     - name: Run Playwright tests
-      run: npx playwright test
+      run: bash ./playwright.sh
       working-directory: ./server
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report
+        name: playwright-report-${{ matrix.os }}
         path: ./server/playwright-report/
         retention-days: 30

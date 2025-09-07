@@ -14,7 +14,13 @@ router.get('/latest', async (req, res) => {
   const response = await fetch(
     'https://api.github.com/repos/regtemp8/flipflip/releases?per_page=1'
   )
-  const json = await response.json()
+
+  const json = response.ok ? await response.json() : undefined
+  if (json?.length !== 1) {
+    res.status(204).end()
+    return
+  }
+
   const newestReleaseTag = json[0].tag_name
   let releaseVersion = newestReleaseTag
     .replace('v', '')

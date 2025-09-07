@@ -78,6 +78,7 @@ import {
   setScriptLibraryAddHttpUrl,
   setScriptLibraryFilters
 } from '../../store/scriptLibrary/slice'
+import { isPrimaryModifierKey } from '../../utils'
 
 const drawerWidth = 240
 
@@ -378,7 +379,7 @@ function ScriptLibrary() {
     const onKeyDown = async (e: KeyboardEvent) => {
       if (
         !e.shiftKey &&
-        !e.ctrlKey &&
+        !isPrimaryModifierKey(e) &&
         e.altKey &&
         (e.key === 'm' || e.key === 'µ') &&
         displaySources != null
@@ -588,6 +589,7 @@ function ScriptLibrary() {
                 />
               )}
               <LibrarySearch
+                id="script-library-search"
                 appBar
                 filters={filters}
                 options={searchOptions ?? []}
@@ -975,6 +977,7 @@ function ScriptLibrary() {
           </DialogContentText>
           {openMenu === MO.batchTag && (
             <LibrarySearch
+              id="batch-tag-search"
               filters={selectedTags}
               placeholder={'Tag These Sources'}
               showCheckboxes

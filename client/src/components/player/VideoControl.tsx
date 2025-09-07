@@ -31,7 +31,7 @@ import SpeedIcon from '@mui/icons-material/Speed'
 import VolumeDownIcon from '@mui/icons-material/VolumeDown'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
 
-import { getTimestamp } from '../../utils'
+import { getTimestamp, isPrimaryModifierKey } from '../../utils'
 // import {
 //   selectClipVolume,
 //   selectClipStartMarks
@@ -167,16 +167,20 @@ function VideoControl(props: VideoControlProps) {
       switch (e.key) {
         case ' ':
           e.preventDefault()
-          playing ? onPause() : onPlay()
+          if (playing) {
+            onPause()
+          } else {
+            onPlay()
+          }
           break
         case 'ArrowUp':
-          if (e.ctrlKey) {
+          if (isPrimaryModifierKey(e)) {
             e.preventDefault()
             onChangeVolume(new Event(e.key), props.video.volume * 100 + 5)
           }
           break
         case 'ArrowDown':
-          if (e.ctrlKey) {
+          if (isPrimaryModifierKey(e)) {
             e.preventDefault()
             onChangeVolume(new Event(e.key), props.video.volume * 100 - 5)
           }
@@ -201,16 +205,20 @@ function VideoControl(props: VideoControlProps) {
         switch (e.key) {
           case ' ':
             e.preventDefault()
-            playing ? onPause() : onPlay()
+            if (playing) {
+              onPause()
+            } else {
+              onPlay()
+            }
             break
           case 'ArrowUp':
-            if (e.ctrlKey) {
+            if (isPrimaryModifierKey(e)) {
               e.preventDefault()
               onChangeVolume(new Event(e.key), props.video.volume * 100 + 5)
             }
             break
           case 'ArrowDown':
-            if (e.ctrlKey) {
+            if (isPrimaryModifierKey(e)) {
               e.preventDefault()
               onChangeVolume(new Event(e.key), props.video.volume * 100 - 5)
             }

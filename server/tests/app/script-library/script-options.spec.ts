@@ -1,67 +1,34 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import { changeSlider, colors } from '../utils'
 
-let page: Page
 const url = 'https://pastebin.com/raw/ZNJ5A40S'
-test.beforeAll(async ({ browser }) => {
-  page = await browser.newPage()
-  await page.goto('/script-library')
-  await page.getByTestId('AddIcon').click()
-  await expect(page.getByTestId('HttpIcon')).toBeVisible()
+test.beforeAll(async ({ request }) => {
+  await request.get('http://localhost:5050/authenticated')
+  const response = await request.post(
+    'http://localhost:5050/api/caption-scripts',
+    { data: [url] }
+  )
 
-  let responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
-      request.method() === 'GET' &&
-      res.status() === 200
-    )
-  })
-  await page.getByTestId('HttpIcon').click()
-
-  await expect(page.locator('#sortable-list li')).toHaveCount(1)
-  await responsePromise
-  responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
-      request.method() === 'PATCH' &&
-      res.status() === 204
-    )
-  })
-  await page.locator('#sortable-list li input').fill(url)
-  await expect(page.locator('#sortable-list li input')).toHaveValue(url)
-  await page.locator('.MuiDrawer-root').click()
-  await responsePromise
+  if (!response.ok) {
+    throw new Error('Failed to create caption script')
+  }
 })
 
-test.afterAll(async () => {
-  await page.goto('/script-library')
-
-  const responsePromise = page.waitForResponse((res) => {
-    const request = res.request()
-    return (
-      new URL(request.url()).pathname === '/api/caption-scripts/1' &&
-      request.method() === 'DELETE' &&
-      res.status() === 204
-    )
-  })
-  await page.getByTestId('DeleteIcon').nth(0).click()
-  await responsePromise
-  await page.close()
+test.afterAll(async ({ request }) => {
+  await request.delete('http://localhost:5050/api/caption-scripts/1')
 })
 
-test.beforeEach(async () => {
+test.beforeEach(async ({ page }) => {
   await page.goto('/scripts/1/options')
 })
 
-test('Title', async () => {
+test('Title', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: url, exact: true })
   ).toBeVisible()
 })
 
-test('Stop at End', async () => {
+test('Stop at End', async ({ page }) => {
   const label = 'Stop at End'
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(
@@ -91,7 +58,7 @@ test('Stop at End', async () => {
   await responsePromise
 })
 
-test('Next Scene at End', async () => {
+test('Next Scene at End', async ({ page }) => {
   const label = 'Next Scene at End'
   await expect(page.getByLabel(label, { exact: true })).not.toBeChecked()
   await expect(page.getByLabel('Stop at End', { exact: true })).toBeVisible()
@@ -117,7 +84,7 @@ test('Next Scene at End', async () => {
   await responsePromise
 })
 
-test('Sync Timestamp with Audio', async () => {
+test('Sync Timestamp with Audio', async ({ page }) => {
   const label = 'Sync Timestamp with Audio'
   await expect(page.getByLabel(label, { exact: true })).toBeChecked()
 
@@ -138,7 +105,7 @@ test('Sync Timestamp with Audio', async () => {
   await responsePromise
 })
 
-test('Script Opacity', async () => {
+test('Script Opacity', async ({ page }) => {
   const container = await page
     .locator('.MuiGrid2-container .MuiGrid2-root:has-text("Script Opacity")')
     .nth(1)
@@ -180,7 +147,7 @@ test('Script Opacity', async () => {
   )
 })
 
-test('Blink Font', async () => {
+test('Blink Font', async ({ page }) => {
   await expect(page.getByLabel('Blink Font', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Blink Font', { exact: true })).toHaveValue('')
 
@@ -207,18 +174,22 @@ test('Blink Font', async () => {
   await page.getByLabel('Clear', { exact: true }).nth(0).click()
   await expect(page.getByLabel('Blink Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Blink Font', { exact: true }).fill('cree')
-  await expect(page.getByRole('option').nth(0)).toHaveClass(
+  await page
+    .getByLabel('Blink Font', { exact: true })
+    .pressSequentially('cree', { delay: 250 })
+  const popper = page.locator('#blink-font-popper')
+  await expect(popper).toBeVisible()
+  await expect(popper.getByRole('option')).toHaveCount(3, { timeout: 30000 })
+  await expect(popper.getByRole('option').nth(0)).toHaveClass(
     / font-preview-creepster /
   )
-  await expect(page.getByRole('option').nth(1)).toHaveClass(
+  await expect(popper.getByRole('option').nth(1)).toHaveClass(
     / font-preview-sancreek /
   )
-  await expect(page.getByRole('option').nth(2)).toHaveClass(
+  await expect(popper.getByRole('option').nth(2)).toHaveClass(
     / font-preview-silkscreen /
   )
-  await expect(page.getByRole('option').nth(3)).not.toBeVisible()
-  await page.getByRole('option').nth(1).click()
+  await popper.getByRole('option').nth(1).click()
   await expect(page.getByLabel('Blink Font', { exact: true })).toHaveValue(
     'Sancreek'
   )
@@ -227,7 +198,7 @@ test('Blink Font', async () => {
   await expect(page.getByLabel('Blink Font', { exact: true })).toHaveValue('')
 })
 
-test('Caption Font', async () => {
+test('Caption Font', async ({ page }) => {
   await expect(page.getByLabel('Caption Font', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Caption Font', { exact: true })).toHaveValue('')
 
@@ -254,18 +225,22 @@ test('Caption Font', async () => {
   await page.getByLabel('Clear', { exact: true }).nth(1).click()
   await expect(page.getByLabel('Caption Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Caption Font', { exact: true }).fill('cree')
-  await expect(page.getByRole('option').nth(0)).toHaveClass(
+  await page
+    .getByLabel('Caption Font', { exact: true })
+    .pressSequentially('cree', { delay: 250 })
+  const popper = page.locator('#caption-font-popper')
+  await expect(popper).toBeVisible()
+  await expect(popper.getByRole('option')).toHaveCount(3, { timeout: 30000 })
+  await expect(popper.getByRole('option').nth(0)).toHaveClass(
     / font-preview-creepster /
   )
-  await expect(page.getByRole('option').nth(1)).toHaveClass(
+  await expect(popper.getByRole('option').nth(1)).toHaveClass(
     / font-preview-sancreek /
   )
-  await expect(page.getByRole('option').nth(2)).toHaveClass(
+  await expect(popper.getByRole('option').nth(2)).toHaveClass(
     / font-preview-silkscreen /
   )
-  await expect(page.getByRole('option').nth(3)).not.toBeVisible()
-  await page.getByRole('option').nth(1).click()
+  await popper.getByRole('option').nth(1).click()
   await expect(page.getByLabel('Caption Font', { exact: true })).toHaveValue(
     'Sancreek'
   )
@@ -274,7 +249,7 @@ test('Caption Font', async () => {
   await expect(page.getByLabel('Caption Font', { exact: true })).toHaveValue('')
 })
 
-test('Big Caption Font', async () => {
+test('Big Caption Font', async ({ page }) => {
   await expect(
     page.getByLabel('Big Caption Font', { exact: true })
   ).toBeVisible()
@@ -307,18 +282,22 @@ test('Big Caption Font', async () => {
     page.getByLabel('Big Caption Font', { exact: true })
   ).toHaveValue('')
 
-  await page.getByLabel('Big Caption Font', { exact: true }).fill('cree')
-  await expect(page.getByRole('option').nth(0)).toHaveClass(
+  await page
+    .getByLabel('Big Caption Font', { exact: true })
+    .pressSequentially('cree', { delay: 250 })
+  const popper = page.locator('#captionbig-font-popper')
+  await expect(popper).toBeVisible()
+  await expect(popper.getByRole('option')).toHaveCount(3, { timeout: 30000 })
+  await expect(popper.getByRole('option').nth(0)).toHaveClass(
     / font-preview-creepster /
   )
-  await expect(page.getByRole('option').nth(1)).toHaveClass(
+  await expect(popper.getByRole('option').nth(1)).toHaveClass(
     / font-preview-sancreek /
   )
-  await expect(page.getByRole('option').nth(2)).toHaveClass(
+  await expect(popper.getByRole('option').nth(2)).toHaveClass(
     / font-preview-silkscreen /
   )
-  await expect(page.getByRole('option').nth(3)).not.toBeVisible()
-  await page.getByRole('option').nth(1).click()
+  await popper.getByRole('option').nth(1).click()
   await expect(
     page.getByLabel('Big Caption Font', { exact: true })
   ).toHaveValue('Sancreek')
@@ -329,7 +308,7 @@ test('Big Caption Font', async () => {
   ).toHaveValue('')
 })
 
-test('Count Font', async () => {
+test('Count Font', async ({ page }) => {
   await expect(page.getByLabel('Count Font', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Count Font', { exact: true })).toHaveValue('')
 
@@ -356,18 +335,22 @@ test('Count Font', async () => {
   await page.getByLabel('Clear', { exact: true }).nth(3).click()
   await expect(page.getByLabel('Count Font', { exact: true })).toHaveValue('')
 
-  await page.getByLabel('Count Font', { exact: true }).fill('cree')
-  await expect(page.getByRole('option').nth(0)).toHaveClass(
+  await page
+    .getByLabel('Count Font', { exact: true })
+    .pressSequentially('cree', { delay: 250 })
+  const popper = page.locator('#count-font-popper')
+  await expect(popper).toBeVisible()
+  await expect(popper.getByRole('option')).toHaveCount(3, { timeout: 30000 })
+  await expect(popper.getByRole('option').nth(0)).toHaveClass(
     / font-preview-creepster /
   )
-  await expect(page.getByRole('option').nth(1)).toHaveClass(
+  await expect(popper.getByRole('option').nth(1)).toHaveClass(
     / font-preview-sancreek /
   )
-  await expect(page.getByRole('option').nth(2)).toHaveClass(
+  await expect(popper.getByRole('option').nth(2)).toHaveClass(
     / font-preview-silkscreen /
   )
-  await expect(page.getByRole('option').nth(3)).not.toBeVisible()
-  await page.getByRole('option').nth(1).click()
+  await popper.getByRole('option').nth(1).click()
   await expect(page.getByLabel('Count Font', { exact: true })).toHaveValue(
     'Sancreek'
   )
@@ -376,7 +359,7 @@ test('Count Font', async () => {
   await expect(page.getByLabel('Count Font', { exact: true })).toHaveValue('')
 })
 
-test('Blink Font Size', async () => {
+test('Blink Font Size', async ({ page }) => {
   const input = page.getByLabel('Size', { exact: true }).nth(0)
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
@@ -423,7 +406,7 @@ test('Blink Font Size', async () => {
   await responsePromise
 })
 
-test('Caption Font Size', async () => {
+test('Caption Font Size', async ({ page }) => {
   const input = page.getByLabel('Size', { exact: true }).nth(1)
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
@@ -470,7 +453,7 @@ test('Caption Font Size', async () => {
   await responsePromise
 })
 
-test('Big Caption Font Size', async () => {
+test('Big Caption Font Size', async ({ page }) => {
   const input = page.getByLabel('Size', { exact: true }).nth(2)
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
@@ -517,7 +500,7 @@ test('Big Caption Font Size', async () => {
   await responsePromise
 })
 
-test('Count Font Size', async () => {
+test('Count Font Size', async ({ page }) => {
   const input = page.getByLabel('Size', { exact: true }).nth(3)
   await expect(input).toHaveAttribute('type', 'number')
   await expect(input).toHaveAttribute('min', '1')
@@ -564,7 +547,7 @@ test('Count Font Size', async () => {
   await responsePromise
 })
 
-test('Blink Font Color', async () => {
+test('Blink Font Color', async ({ page }) => {
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(0)).toHaveCSS(
     'background-color',
     'rgb(255, 255, 255)'
@@ -628,7 +611,7 @@ test('Blink Font Color', async () => {
   )
 })
 
-test('Caption Font Color', async () => {
+test('Caption Font Color', async ({ page }) => {
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(2)).toHaveCSS(
     'background-color',
     'rgb(255, 255, 255)'
@@ -692,7 +675,7 @@ test('Caption Font Color', async () => {
   )
 })
 
-test('Big Caption Font Color', async () => {
+test('Big Caption Font Color', async ({ page }) => {
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(4)).toHaveCSS(
     'background-color',
     'rgb(255, 255, 255)'
@@ -756,7 +739,7 @@ test('Big Caption Font Color', async () => {
   )
 })
 
-test('Count Font Color', async () => {
+test('Count Font Color', async ({ page }) => {
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(6)).toHaveCSS(
     'background-color',
     'rgb(255, 255, 255)'
@@ -820,7 +803,7 @@ test('Count Font Color', async () => {
   )
 })
 
-test('Blink Border', async () => {
+test('Blink Border', async ({ page }) => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(0)
   ).not.toBeChecked()
@@ -871,7 +854,7 @@ test('Blink Border', async () => {
   await responsePromise
 })
 
-test('Caption Border', async () => {
+test('Caption Border', async ({ page }) => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(1)
   ).not.toBeChecked()
@@ -922,7 +905,7 @@ test('Caption Border', async () => {
   await responsePromise
 })
 
-test('Big Caption Border', async () => {
+test('Big Caption Border', async ({ page }) => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(2)
   ).not.toBeChecked()
@@ -973,7 +956,7 @@ test('Big Caption Border', async () => {
   await responsePromise
 })
 
-test('Count Border', async () => {
+test('Count Border', async ({ page }) => {
   await expect(
     page.getByLabel('Border', { exact: true }).nth(3)
   ).not.toBeChecked()
@@ -1024,7 +1007,7 @@ test('Count Border', async () => {
   await responsePromise
 })
 
-test('Blink Border Width', async () => {
+test('Blink Border Width', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(0).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(0)).toBeVisible()
 
@@ -1059,7 +1042,7 @@ test('Blink Border Width', async () => {
   await responsePromise
 })
 
-test('Caption Border Width', async () => {
+test('Caption Border Width', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(1).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(1)).toBeVisible()
 
@@ -1094,7 +1077,7 @@ test('Caption Border Width', async () => {
   await responsePromise
 })
 
-test('Big Caption Border Width', async () => {
+test('Big Caption Border Width', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(2).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(2)).toBeVisible()
 
@@ -1129,7 +1112,7 @@ test('Big Caption Border Width', async () => {
   await responsePromise
 })
 
-test('Count Border Width', async () => {
+test('Count Border Width', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(3).click()
   await expect(page.getByLabel('Width', { exact: true }).nth(3)).toBeVisible()
 
@@ -1164,7 +1147,7 @@ test('Count Border Width', async () => {
   await responsePromise
 })
 
-test('Blink Border Color', async () => {
+test('Blink Border Color', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(0).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(1)).toHaveCSS(
     'background-color',
@@ -1242,7 +1225,7 @@ test('Blink Border Color', async () => {
   await responsePromise
 })
 
-test('Caption Border Color', async () => {
+test('Caption Border Color', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(1).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(3)).toHaveCSS(
     'background-color',
@@ -1320,7 +1303,7 @@ test('Caption Border Color', async () => {
   await responsePromise
 })
 
-test('Big Caption Border Color', async () => {
+test('Big Caption Border Color', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(2).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(5)).toHaveCSS(
     'background-color',
@@ -1398,7 +1381,7 @@ test('Big Caption Border Color', async () => {
   await responsePromise
 })
 
-test('Count Border Color', async () => {
+test('Count Border Color', async ({ page }) => {
   await page.getByLabel('Border', { exact: true }).nth(3).click()
   await expect(page.getByLabel('Pick Color', { exact: true }).nth(7)).toHaveCSS(
     'background-color',

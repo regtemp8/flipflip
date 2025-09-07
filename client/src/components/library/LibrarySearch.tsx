@@ -24,6 +24,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 }))
 
 export interface LibrarySearchProps {
+  id: string
   filters: string[]
   options: SelectOption[]
   placeholder: string
@@ -125,6 +126,7 @@ function LibrarySearch(props: LibrarySearchProps) {
   const { classes } = useStyles()
   return (
     <Autocomplete
+      id={props.id}
       multiple
       autoHighlight
       freeSolo={props.isCreatable}
@@ -208,6 +210,11 @@ function LibrarySearch(props: LibrarySearchProps) {
             )
           : undefined
       }
+      slotProps={{
+        popper: {
+          id: `${props.id}-popper`
+        }
+      }}
       onChange={handleChange}
       open={open}
       onClose={() => setOpen(false)}

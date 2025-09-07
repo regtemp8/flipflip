@@ -32,6 +32,7 @@ function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
     <Grid2 container spacing={2}>
       <Grid2 size={12}>
         <BaseSelect
+          id="display-sync-with-select"
           label="Sync With"
           selector={() => useGetDisplayViewSyncWithViewQuery(props.viewID)}
           action={setDisplayViewSyncWithView(props.viewID)}
@@ -48,6 +49,7 @@ function DisplayViewSyncOptions(props: DisplayViewSyncOptionsProps) {
       </Grid2>
       <Grid2 size={12}>
         <BaseSelect
+          id="display-mirror-select"
           label="Mirror"
           selector={() => useGetDisplayViewMirrorSyncedViewQuery(props.viewID)}
           action={setDisplayViewMirrorSyncedView(props.viewID)}

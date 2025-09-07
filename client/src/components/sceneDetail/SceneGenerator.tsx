@@ -725,6 +725,7 @@ function SceneGenerator(props: SceneGeneratorProps) {
               >
                 {/* {addRule && (
                   <LibrarySearch
+                    id='scene-generator-rule-search'
                     displaySources={library}
                     filters={weights[isEditingIndex]
                       .rules!.filter((wg) => wg.rules == null)

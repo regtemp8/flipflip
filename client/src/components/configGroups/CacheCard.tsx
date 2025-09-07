@@ -41,6 +41,7 @@ import {
   useGetCachingMaxSizeQuery
 } from '../../store/api/selectors'
 import FilePicker from '../common/FilePicker'
+import { SIZE_UNKNOWN } from 'flipflip-common'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   fullWidth: {
@@ -164,7 +165,7 @@ function CacheCard() {
             </Grid2>
             <Grid2>
               <Chip
-                label={`Current: ${(cacheSize?.size ?? 0) > 0 ? cacheSize?.size.toFixed(2) : '--'} MB`}
+                label={`Current: ${(cacheSize?.size ?? SIZE_UNKNOWN) !== SIZE_UNKNOWN ? cacheSize?.size.toFixed(2) : '--'} MB`}
                 color="primary"
                 variant="outlined"
               />

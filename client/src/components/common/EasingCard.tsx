@@ -13,6 +13,7 @@ const useStyles = makeStyles()(() => ({
 }))
 
 export interface EasingCardProps {
+  id: string
   label?: string
   sidebar: boolean
   easing: ReduxProps<string>
@@ -30,6 +31,7 @@ function EasingCard(props: EasingCardProps) {
     <Grid2 container spacing={2} alignItems="center">
       <Grid2 size={{ xs: 12, sm: props.sidebar ? 12 : 6 }}>
         <BaseSelect
+          id={props.id}
           label={props.label ?? 'Easing'}
           controlClassName={classes.fullWidth}
           selector={props.easing.selector}

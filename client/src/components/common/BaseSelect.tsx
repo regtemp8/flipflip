@@ -11,6 +11,7 @@ import type ReduxProps from './ReduxProps'
 import { useAppDispatch } from '../../store/hooks'
 
 export interface BaseSelectProps extends ReduxProps<string> {
+  id: string
   label: string
   controlClassName?: string
   selectClassName?: string
@@ -46,18 +47,24 @@ export default function BaseSelect(props: PropsWithChildren<BaseSelectProps>) {
   }
 
   const hideLabel = props.hideLabel ?? false
+  const labelId = `${props.id}-label`
   return (
     <>
       <FormControl variant="standard" className={props.controlClassName}>
-        {!hideLabel && <InputLabel>{props.label}</InputLabel>}
+        {!hideLabel && <InputLabel id={labelId}>{props.label}</InputLabel>}
         <Select
+          id={props.id}
+          labelId={labelId}
           variant="standard"
           value={getValue(data)}
           onChange={onChange}
           className={props.selectClassName}
           disabled={props.disabled ?? false}
           style={props.style}
-          MenuProps={props.MenuProps}
+          MenuProps={{
+            ...props.MenuProps,
+            id: `${props.id}-menu`
+          }}
         >
           {props.children}
           {props.create && <Divider />}

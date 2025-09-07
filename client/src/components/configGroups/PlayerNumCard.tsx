@@ -137,6 +137,7 @@ function PlayerNumCard() {
               Ignored Tags/Types
             </Typography>
             <LibrarySearch
+              id="ignored-tags-search"
               filters={ignoredTags}
               showCheckboxes
               placeholder={'Search ...'}

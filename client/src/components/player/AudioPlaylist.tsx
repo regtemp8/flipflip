@@ -24,7 +24,7 @@ import RepeatIcon from '@mui/icons-material/Repeat'
 import RepeatOneIcon from '@mui/icons-material/RepeatOne'
 import ShuffleIcon from '@mui/icons-material/Shuffle'
 
-import { getTimestamp } from '../../utils'
+import { getTimestamp /*, isPrimaryModifierKey*/ } from '../../utils'
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
@@ -103,13 +103,13 @@ function PlaylistItem(props: PlaylistItemProps) {
 
   const onSourceIconClick = (_e: MouseEvent<HTMLDivElement>) => {
     // const sourceURL = url as string
-    // if (e.shiftKey && !e.ctrlKey) {
+    // if (e.shiftKey && !isPrimaryModifierKey(e)) {
     //   flipflip()
     //     .api.getFileUrl(sourceURL)
     //     .then((fileURL) => window.open(fileURL, '_blank')?.focus())
-    // } else if (!e.shiftKey && e.ctrlKey) {
+    // } else if (!e.shiftKey && isPrimaryModifierKey(e)) {
     //   flipflip().api.showItemInFolder(sourceURL)
-    // } else if (!e.shiftKey && !e.ctrlKey) {
+    // } else if (!e.shiftKey && !isPrimaryModifierKey(e)) {
     //   // TODO get playAudio to work
     //   // dispatch(playAudio(props.audioID, props.audios))
     // }

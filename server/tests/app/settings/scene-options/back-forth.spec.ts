@@ -7,11 +7,13 @@ test.beforeEach(async ({ page }) => {
 
 test('Back/Forth effect', async ({ page }) => {
   // set scene timing to constant
-  await page.getByRole('combobox').first().click()
+  await page.getByLabel('Timing', { exact: true }).first().click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
 
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('TimingConstant').nth(1)).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).not.toBeVisible()
   await expect(
     page.getByRole('spinbutton', { name: 'For', exact: true }).nth(1)
   ).not.toBeVisible()
@@ -26,7 +28,12 @@ test('Back/Forth effect', async ({ page }) => {
 
   await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).toBeChecked()
-  await expect(page.getByText('TimingConstant').nth(1)).toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toHaveText('Constant')
   await expect(
     page.getByRole('spinbutton', { name: 'For', exact: true }).nth(1)
   ).toBeVisible()
@@ -42,7 +49,9 @@ test('Back/Forth effect', async ({ page }) => {
   })
   await page.getByLabel('Back/Forth', { exact: true }).click()
   await expect(page.getByLabel('Back/Forth', { exact: true })).not.toBeChecked()
-  await expect(page.getByText('TimingConstant').nth(1)).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).not.toBeVisible()
   await expect(
     page.getByRole('spinbutton', { name: 'For', exact: true }).nth(1)
   ).not.toBeVisible()
@@ -56,8 +65,14 @@ test('Random back/forth timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
   )
 
-  await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Back/Forth Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Random', exact: true }).click()
+  await expect(
+    page.locator('#scene-back-forth-timing-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toHaveText('Random')
   await expect(
     container
       .locator('.MuiCollapse-entered')
@@ -132,8 +147,14 @@ test('Wave back/forth timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
   )
 
-  await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Back/Forth Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Wave', exact: true }).click()
+  await expect(
+    page.locator('#scene-back-forth-timing-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toHaveText('Wave')
   await expect(
     container
       .locator('.MuiCollapse-entered')
@@ -264,8 +285,14 @@ test('Audio BPM back/forth timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
   )
 
-  await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Back/Forth Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Audio BPM', exact: true }).click()
+  await expect(
+    page.locator('#scene-back-forth-timing-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toHaveText('Audio BPM')
 
   await page.getByTestId('ErrorOutlineIcon').first().hover()
   await expect(
@@ -346,8 +373,15 @@ test('Constant back/forth timing', async ({ page }) => {
     '.MuiGrid2-container .MuiGrid2-root > .MuiCollapse-entered:has-text("Back/Forth")'
   )
 
-  await page.getByRole('combobox').nth(1).click()
+  await page.getByLabel('Back/Forth Timing', { exact: true }).click()
   await page.getByRole('option', { name: 'Constant', exact: true }).click()
+  await expect(
+    page.locator('#scene-back-forth-timing-select-menu')
+  ).not.toBeVisible()
+  await expect(
+    page.getByLabel('Back/Forth Timing', { exact: true })
+  ).toHaveText('Constant')
+
   await expect(
     container
       .locator('.MuiCollapse-entered')

@@ -236,11 +236,11 @@ test('Add Single Local Audio', async ({ page }) => {
     page.getByRole('button', { name: /^Riyhsal - Bright.mp3/ })
   ).toHaveClass(/ Mui-selected /)
 
-  await page.keyboard.down('Control')
+  await page.keyboard.down('ControlOrMeta')
   await page
     .getByRole('button', { name: /^Put It On The Floor - Otis McDonald.mp3/ })
     .click()
-  await page.keyboard.up('Control')
+  await page.keyboard.up('ControlOrMeta')
   await expect(
     page.getByRole('button', { name: /^Aftertune, Ultimate Mix - Smile.mp3/ })
   ).not.toHaveClass(/ Mui-selected /)

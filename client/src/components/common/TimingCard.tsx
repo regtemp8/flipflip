@@ -34,6 +34,7 @@ export interface BPMSliderProps extends CommonSliderProps {
 }
 
 export interface TimingCardProps {
+  id: string
   label?: string
   excludeScene?: boolean
   sidebar: boolean
@@ -57,6 +58,7 @@ function TimingCard(props: TimingCardProps) {
         style={{ paddingTop: 10 }}
       >
         <BaseSelect
+          id={`${props.id}-timing-select`}
           label={props.label ?? 'Timing'}
           controlClassName={classes.fullWidth}
           selectClassName={classes.select}

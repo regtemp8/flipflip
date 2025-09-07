@@ -114,6 +114,7 @@ function FadeIOCard(props: FadeIOCardProps) {
       <Grid2 size={12}>
         <Collapse in={fadeInOut} className={classes.fullWidth}>
           <TimingCard
+            id="fade-in-out"
             sidebar={sidebar}
             hasBPMSelector={() => useGetSceneHasBPMQuery(props.sceneID)}
             timing={{
@@ -155,6 +156,7 @@ function FadeIOCard(props: FadeIOCardProps) {
           <Grid2 size={12}>
             <Collapse in={fadeInOut} className={classes.fullWidth}>
               <EasingCard
+                id="fade-in-out-start-easing"
                 label="Start Easing"
                 sidebar={sidebar}
                 easing={{
@@ -184,6 +186,7 @@ function FadeIOCard(props: FadeIOCardProps) {
                 }}
               />
               <EasingCard
+                id="fade-in-out-end-easing"
                 label="End Easing"
                 sidebar={sidebar}
                 easing={{

@@ -2,6 +2,7 @@ import fs from 'fs'
 import os, { NetworkInterfaceInfo } from 'os'
 import path from 'path'
 import express, { Request, Response } from 'express'
+import { pathToFileURL } from 'url'
 import 'express-async-errors'
 import session from 'express-session'
 import passport from 'passport'
@@ -93,6 +94,11 @@ const extractBinaries = async () => {
   }
 }
 
+const importLocalModule = async (module: string) => {
+  const fileUrl = pathToFileURL(path.resolve(module)).href
+  return import(fileUrl)
+}
+
 void (async function () {
   const dirs = [
     getSaveDir(),
@@ -117,7 +123,9 @@ void (async function () {
     process.env.NODE_ENV === 'development' ||
     process.env.NODE_ENV === 'testing'
   ) {
-    const { default: cors } = await import(path.join(__dirname, 'cors.js'))
+    const { default: cors } = await importLocalModule(
+      path.join(__dirname, 'cors.js')
+    )
     app.use(cors.default)
   }
   app.use(express.json())

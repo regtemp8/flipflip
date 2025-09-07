@@ -77,6 +77,7 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
         </span>
       </Tooltip>
       <BaseSelect
+        id={`${playlistTypeDisplayNames[props.type].toLowerCase()}-playlist`}
         label={label}
         selector={props.selector}
         action={props.action}

@@ -211,6 +211,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
               Scene
             </Typography>
             <SceneSelect
+              id="scene-playlist-item-scene-select"
               value={currentSceneID}
               onChange={onSceneChange}
               includeExtra

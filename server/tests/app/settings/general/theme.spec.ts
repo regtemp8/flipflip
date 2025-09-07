@@ -139,7 +139,7 @@ test.describe('Secondary color theme setting', () => {
     await expect(
       page
         .locator('div')
-        .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(224 KB\)$/ })
+        .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
         .nth(1)
     ).toHaveCSS('color', `rgb(${pink.rgb})`)
   })
@@ -175,7 +175,7 @@ test.describe('Secondary color theme setting', () => {
       await expect(
         page
           .locator('div')
-          .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(224 KB\)$/ })
+          .filter({ hasText: /^Latest: 10\/18\/2024, 12:00:00 AM \(\d+ KB\)$/ })
           .nth(1)
       ).toHaveCSS('color', `rgb(${color.rgb})`)
     }

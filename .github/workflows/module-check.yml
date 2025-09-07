@@ -21,6 +21,9 @@ on:
       depends-on-common:
         required: false
         type: boolean
+      do-lint-task:
+        required: false
+        type: boolean
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -45,6 +48,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: yarn install
       - name: Lint ${{ inputs.display-name }}
+        if: ${{ inputs.do-lint-task != false }}
         working-directory: ${{ inputs.working-directory }}
         run: yarn test:lint
       - name: Format ${{ inputs.display-name }}

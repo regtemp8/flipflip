@@ -872,6 +872,7 @@ function CaptionScriptor() {
                         </Typography>
                       )}
                       <SceneSelect
+                        id="caption-scriptor-test-scene-select"
                         value={sceneID}
                         onChange={
                           (/*sceneID: number*/) => {

@@ -49,8 +49,10 @@ function MultiSceneSelect(props: MultiSceneSelectProps) {
   }
 
   const { classes } = useStyles()
+  const id = 'multi-scene-select'
   return (
     <Autocomplete
+      id={id}
       multiple
       className={classes.select}
       value={props.values ? props.values.map(toValue) : []}
@@ -80,6 +82,11 @@ function MultiSceneSelect(props: MultiSceneSelectProps) {
             {label}
           </li>
         )
+      }}
+      slotProps={{
+        popper: {
+          id: `${id}-popper`
+        }
       }}
       disableCloseOnSelect
       onChange={onChange}
