@@ -501,7 +501,7 @@ function ScenePicker() {
   }
 
   const onOpenSortMenu = () => {}
-  const onCloseDialog = () => {}
+  const onCloseDialog = () => setOpenMenu(undefined)
   const sortScenes = (_sortBy: string, _asc: boolean) => {}
 
   const sceneCount = scenes?.length ?? 0
