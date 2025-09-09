@@ -83,7 +83,8 @@
     "scripts": "bin/**/*.js",
     "assets": [
       "bin/public/**/*",
-      "node_modules/@ffprobe-installer/**/ffprobe*",
+      "node_modules/@ffprobe-installer/**/ffprobe",
+      "node_modules/@ffprobe-installer/**/ffprobe.exe",
       "node_modules/@ffprobe-installer/**/package.json",
       "node_modules/better-sqlite3/build/Release/better_sqlite3.node"
     ],

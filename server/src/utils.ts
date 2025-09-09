@@ -73,9 +73,16 @@ export function getLogsDir() {
 }
 
 export function getFfprobePath() {
-  return process.pkg != null
-    ? path.join(getBinDir(), 'ffprobe')
-    : ffprobeInstaller.path
+  if (process.pkg != null) {
+    let file = 'ffprobe'
+    if (isWin32) {
+      file += '.exe'
+    }
+
+    return path.join(getBinDir(), file)
+  } else {
+    return ffprobeInstaller.path
+  }
 }
 
 export function getServerHost() {
