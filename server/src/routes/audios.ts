@@ -310,7 +310,7 @@ router.post('/move', async (req, res) => {
 router.post('/upload-thumb', async (req, res) => {
   const path = req.body.thumb as string
   const thumb = await copyThumbFile(path)
-  res.status(200).send({ thumb: toAudioThumb(thumb) })
+  res.status(200).send({ thumb: toAudioThumb(thumb, req) })
 })
 router.get('/albums', async (req, res) => {
   let ids: number[] = []
@@ -324,7 +324,7 @@ router.get('/albums', async (req, res) => {
   const albums = await findAudioAlbums(ids, userId)
   albums.forEach((album) => {
     if (album.thumb != null) {
-      album.thumb = toAudioThumb(album.thumb)
+      album.thumb = toAudioThumb(album.thumb, req)
     }
   })
   res.status(200).send(albums)
@@ -341,7 +341,7 @@ router.get('/artists', async (req, res) => {
   const artists = await findAudioArtists(ids, userId)
   artists.forEach((artist) => {
     if (artist.thumb != null) {
-      artist.thumb = toAudioThumb(artist.thumb)
+      artist.thumb = toAudioThumb(artist.thumb, req)
     }
   })
   res.status(200).send(artists)
@@ -352,7 +352,7 @@ router.get('/:id', async (req, res) => {
   const source = await findAudioById(userId, id)
   if (source != null) {
     const tags = await findAudioTagIds(userId, id)
-    res.status(200).send(toAudio(source, tags))
+    res.status(200).send(toAudio(source, tags, req))
   } else {
     res.status(404).end()
   }
@@ -396,7 +396,7 @@ router.get('/:id/metadata', async (req, res) => {
   const url = await findAudioUrlById(id, userId)
   const metadata = await readAudioMetadata(url)
   if (metadata?.thumb != null) {
-    metadata.thumb = toAudioThumb(metadata.thumb)
+    metadata.thumb = toAudioThumb(metadata.thumb, req)
   }
 
   res.status(200).send({ ...metadata, id })

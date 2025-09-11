@@ -34,7 +34,6 @@ import { findRemoteSettings } from '../db/RemoteSettingsRepository'
 import { findContentSourceClipIds } from '../db/ClipRepository'
 import { StaticPool } from 'node-worker-threads-pool'
 import { ScrapeRequest } from './ScrapeRequest'
-import { getServerHost, getServerPort } from '../utils'
 import { ScrapeResult } from './ScrapeResult'
 import proxy, { ProxyRequest } from '../routes/ProxyService'
 import fileRegistry from '../routes/FileRegistry'
@@ -286,7 +285,7 @@ export default class SourceScraper {
       const sourceType = getSourceType(url)
       if (sourceType === ST.local || sourceType === ST.video) {
         const uuid = fileRegistry().set(url)
-        url = `http://${getServerHost()}:${getServerPort()}/fs/file/registry/${uuid}`
+        url = `http://localhost/fs/file/registry/${uuid}`
       } else if (
         sourceType === ST.imagefap ||
         sourceType === ST.deviantart ||
@@ -308,7 +307,7 @@ export default class SourceScraper {
         }
 
         const uuid = proxy().set(proxyRequest, ext)
-        url = `http://${getServerHost()}:${getServerPort()}/proxy/${uuid}`
+        url = `http://localhost/proxy/${uuid}`
       }
 
       return url

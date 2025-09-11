@@ -207,7 +207,7 @@ router.get('/:id', async (req, res) => {
   const source = await findCaptionScriptById(userId, id)
   if (source != null) {
     const tags = await findCaptionScriptTagIds(userId, id)
-    res.status(200).send(toCaptionScript(source, tags))
+    res.status(200).send(toCaptionScript(source, tags, req))
   } else {
     res.status(404).end()
   }
