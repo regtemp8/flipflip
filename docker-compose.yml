@@ -1,12 +1,15 @@
 services:
   flipflip:
-    image: flipflip
-    build:
-      context: .
+    # run latest release
+    image: ghcr.io/regtemp8/flipflip:latest
+    # run from source
+    # image: flipflip
+    # build:
+    #   context: .
     # pull_policy: build # force build
     environment:
       FF_PORT: 5050
-      FF_HOST: localhost
+      FF_HOST: 0.0.0.0
       FF_SAVE_DIR: /opt/flipflip
       FF3_DATA_DIR: /tmp/flipflip
       FF_SCRIPT_DIR: /home/root/scripts
