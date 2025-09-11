@@ -19,6 +19,17 @@ export const selectImagePlayerImageViews = (uuid: string) => {
   }
 }
 
+export const selectImagePlayerShownImageView = (uuid: string) => {
+  return (state: RootState) => {
+    const loader = state.imagePlayer[uuid]?.loader
+    const imageViews = loader.imageViews
+    const shownIndex = loader.shownIndex
+    return imageViews != null && shownIndex != null
+      ? imageViews[shownIndex]
+      : undefined
+  }
+}
+
 export const selectPlayerHasStarted = () =>
   createSelector([(state: RootState) => state.imagePlayer], (imagePlayer) =>
     Object.values(imagePlayer).every((value) => value.hasStarted)
