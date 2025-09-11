@@ -26,6 +26,10 @@ export default class Player {
     await deleteTemporaryDisplay(this.displayId as number)
   }
 
+  public getDisplayId(): number {
+    return this.displayId as number
+  }
+
   public getViewPlayerRefs(): string[] {
     return this.viewPlayerRefs
   }

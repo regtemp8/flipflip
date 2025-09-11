@@ -1715,6 +1715,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-helmet@npm:^6":
+  version: 6.1.11
+  resolution: "@types/react-helmet@npm:6.1.11"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/f7b3bb2151d992a108ae46fed876fb9c8119108397d9a01d150c5642782997542c8b3c52e742b56e8689b7dbfa62ca9cfc76aa7e05dec4e60c652f7ef53fa783
+  languageName: node
+  linkType: hard
+
 "@types/react-page-visibility@npm:^6.4.4":
   version: 6.4.4
   resolution: "@types/react-page-visibility@npm:6.4.4"
@@ -2182,6 +2191,7 @@ __metadata:
     "@types/react": "npm:^18.3.3"
     "@types/react-color": "npm:^2"
     "@types/react-dom": "npm:^18.3.0"
+    "@types/react-helmet": "npm:^6"
     "@types/react-page-visibility": "npm:^6.4.4"
     "@types/react-window": "npm:^1.8.8"
     "@types/sortablejs": "npm:^1"
@@ -2204,6 +2214,7 @@ __metadata:
     react-codemirror2: "npm:^8.0.0"
     react-color: "npm:^2.19.3"
     react-dom: "npm:^18.3.1"
+    react-helmet: "npm:^6.1.0"
     react-idle-timer: "npm:^5.7.2"
     react-page-visibility: "npm:^7.0.0"
     react-redux: "npm:^9.1.2"
@@ -3905,6 +3916,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-fast-compare@npm:^3.1.1":
+  version: 3.2.2
+  resolution: "react-fast-compare@npm:3.2.2"
+  checksum: 10c0/0bbd2f3eb41ab2ff7380daaa55105db698d965c396df73e6874831dbafec8c4b5b08ba36ff09df01526caa3c61595247e3269558c284e37646241cba2b90a367
+  languageName: node
+  linkType: hard
+
+"react-helmet@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "react-helmet@npm:6.1.0"
+  dependencies:
+    object-assign: "npm:^4.1.1"
+    prop-types: "npm:^15.7.2"
+    react-fast-compare: "npm:^3.1.1"
+    react-side-effect: "npm:^2.1.0"
+  peerDependencies:
+    react: ">=16.3.0"
+  checksum: 10c0/1d2831d9c3b4f5c91f020076aeb6502437a4788077d0c438421e466eb9633d5dc2aacedf7b779a970b807d61cf87793c5ff76ee3190a185d71c90b5cfb367e96
+  languageName: node
+  linkType: hard
+
 "react-idle-timer@npm:^5.7.2":
   version: 5.7.2
   resolution: "react-idle-timer@npm:5.7.2"
@@ -3990,6 +4022,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/171343500f7ff0f178de6faefbe70ac199ec54a9145ef2f0230bee84589c467ada4b686c2a3649e47cc853e0aa287e61c4460b951e7735a87419741a33411214
+  languageName: node
+  linkType: hard
+
+"react-side-effect@npm:^2.1.0":
+  version: 2.1.2
+  resolution: "react-side-effect@npm:2.1.2"
+  peerDependencies:
+    react: ^16.3.0 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/5d934cae438f701ce646f566750ae6a445e99185ce1a026108f9db728147f7962a22ecf8db79ff26089953a3799b3607766904f4f10194ce42bcd5a1aa0215e8
   languageName: node
   linkType: hard
 

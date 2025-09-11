@@ -432,18 +432,36 @@ export default function FilePicker(props: FilePickerProps) {
     _lastSelected.current = undefined
   }
 
-  const isDir = () => props.type === 'dir' || props.type === AF.directory
+  const isDir = () =>
+    props.type === 'dir' ||
+    props.type === AF.directory ||
+    props.type === AF.videoDir
+
+  const getChosenFiles = () => {
+    const directory = isDir()
+    const selectedItems = selected
+      .map((name) => items.find((item) => item.name === name))
+      .filter((item) => item?.directory === directory)
+
+    return selectedItems.length === 0 && directory
+      ? [data?.path as string]
+      : selectedItems.map((item) => item?.name)
+  }
+
+  const canChoose = () => {
+    return getChosenFiles().length > 0
+  }
 
   const onChoose = () => {
     if (data == null) {
       return
     }
 
-    const chosenFiles =
-      isDir() && selected.length === 0
-        ? [data.path]
-        : selected.map((name) => `${data.path}${data.sep}${name}`)
-    onClose(chosenFiles)
+    onClose(
+      getChosenFiles().map((name) =>
+        name !== data.path ? `${data.path}${data.sep}${name}` : name
+      )
+    )
   }
 
   let items: FilePickerItem[] = []
@@ -454,12 +472,6 @@ export default function FilePicker(props: FilePickerProps) {
     items = items.filter((item) => item.name.includes(search))
   }
   sortItems(items, sort)
-  const canChoose =
-    (isDir() && (selected.length === 1 || path !== '')) ||
-    (selected.length > 0 &&
-      selected
-        .map((n) => items.find((i) => i.name === n))
-        .find((i) => i?.directory) == null)
   return (
     <Dialog open={props.open} fullWidth maxWidth="lg">
       <DialogContent sx={{ overflow: 'hidden' }}>
@@ -549,7 +561,7 @@ export default function FilePicker(props: FilePickerProps) {
           Cancel
         </Button>
         <Button
-          disabled={!canChoose}
+          disabled={!canChoose()}
           onClick={() => onChoose()}
           color="primary"
           sx={{ mr: 2 }}

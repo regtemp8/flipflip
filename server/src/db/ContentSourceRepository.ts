@@ -1,3 +1,4 @@
+import path from 'path'
 import { Kysely } from 'kysely'
 import {
   ContentSource,
@@ -17,10 +18,11 @@ import {
   ST,
   AddContentSourceRequest,
   isVideo,
-  isVideoPlaylist
+  isVideoPlaylist,
+  getFileName,
+  getFileGroup
 } from 'flipflip-common'
 import { findTagIdsByName } from './TagRepository'
-import { getFileName, getFileGroup } from '../utils'
 import recursiveReadDir from 'recursive-readdir'
 import Logger from '../logging/Logger'
 
@@ -552,8 +554,8 @@ export async function sortContentSources({
 
 function getName({ type, url }: SortRow) {
   return type === ST.video || type === ST.playlist
-    ? getFileName(url)
-    : getFileGroup(url)
+    ? getFileName(url, path.sep)
+    : (getFileGroup(url, path.sep) ?? '')
 }
 
 function getCount({ type, count, clips }: SortRow) {

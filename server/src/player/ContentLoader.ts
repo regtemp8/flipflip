@@ -44,9 +44,7 @@ import {
   getRandomBoolean,
   getRandomFloat,
   getRandomInteger,
-  getRandomListItem,
-  getServerHost,
-  getServerPort
+  getRandomListItem
 } from '../utils'
 import Logger from '../logging/Logger'
 import gifInfo from 'gif-info'
@@ -326,10 +324,7 @@ export default class ContentLoader {
   }
 
   private isLocal(url: URL) {
-    return (
-      url.hostname === getServerHost() &&
-      url.port === getServerPort().toString()
-    )
+    return url.host === 'localhost'
   }
 
   private getLocalFilePath(url: URL) {
@@ -470,11 +465,9 @@ export default class ContentLoader {
   }
 
   private proxyNimjaURL(url: string) {
-    const host = getServerHost()
-    const port = getServerPort()
     return url.replace(
       'https://hypno.nimja.com',
-      `http://${host}:${port}/proxy/nimja`
+      `http://localhost/proxy/nimja`
     )
   }
 

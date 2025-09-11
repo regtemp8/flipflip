@@ -139,7 +139,7 @@ router.get('/:id', async (req, res) => {
   const source = await findContentSourceById(userId, id)
   if (source != null) {
     const tags = await findContentSourceTagIds(userId, id)
-    res.status(200).send(toContentSource(source, tags))
+    res.status(200).send(toContentSource(source, tags, [], req))
   } else {
     res.status(404).end()
   }

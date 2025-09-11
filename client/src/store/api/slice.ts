@@ -41,7 +41,8 @@ import {
   CaptionScriptPlaylistItem,
   ViewerEvent,
   LatestVersion,
-  AddContentSourceRequest
+  AddContentSourceRequest,
+  WatermarkSettings
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -883,6 +884,9 @@ export const flipflipApi = createApi({
             }
           })
       }
+    }),
+    getPlayerWatermark: builder.query<WatermarkSettings, string>({
+      query: (id) => `api/players/${id}/watermark`
     }),
     getPlayerViewPlayers: builder.query<string[], string>({
       query: (id) => `api/players/${id}/view-players`
@@ -1995,6 +1999,7 @@ export const {
   useGetDisplaysQuery,
   usePlayDisplayMutation,
   useGetDisplayQuery,
+  useGetPlayerWatermarkQuery,
   useGetPlayerViewPlayersQuery,
   useStopPlayerMutation,
   useGetViewPlayerConfigQuery,

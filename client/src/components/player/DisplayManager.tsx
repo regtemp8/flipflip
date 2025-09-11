@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import ImagePlayer from './ImagePlayer'
 import ChildCallbackHack from './ChildCallbackHack'
-import { MVF } from 'flipflip-common'
+import { MVF, WatermarkSettings } from 'flipflip-common'
 import DisplayManagerAppBar from './DisplayManagerAppBar'
 import useStayAwake from 'use-stay-awake'
 import { usePageVisibility } from 'react-page-visibility'
@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import {
   useGetPlayerViewPlayersQuery,
+  useGetPlayerWatermarkQuery,
   useGetViewPlayerConfigQuery,
   useStopPlayerMutation
 } from '../../store/api/slice'
@@ -31,6 +32,8 @@ import {
   pauseImagePlayers,
   startImagePlayers
 } from '../../store/imagePlayer/thunks'
+import Watermark from './Watermark'
+import { Helmet } from 'react-helmet'
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -108,6 +111,7 @@ function ProgressCard() {
 
 interface DisplayViewProps {
   viewPlayerID: string
+  watermark?: WatermarkSettings
 }
 
 const hack = new ChildCallbackHack() // TODO get rid of hacks
@@ -151,6 +155,7 @@ function DisplayView(props: DisplayViewProps) {
         setTimeToNextFrame={() => {}}
         synced={view.sync}
       />
+      {props.watermark && <Watermark uuid={uuid} watermark={props.watermark} />}
     </Box>
   )
 }
@@ -163,6 +168,7 @@ function DisplayManager() {
   const [stopPlayer] = useStopPlayerMutation()
   const [recentPictureGrid, setRecentPictureGrid] = useState(false)
 
+  const { data: watermark } = useGetPlayerWatermarkQuery(playerID)
   const { data: viewPlayers } = useGetPlayerViewPlayersQuery(playerID)
   const hasStarted = useAppSelector(selectPlayerHasStarted())
 
@@ -205,6 +211,15 @@ function DisplayManager() {
   const { classes } = useStyles()
   return (
     <>
+      {watermark && (
+        <Helmet>
+          <link
+            rel="stylesheet"
+            id="watermark-google-font"
+            href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(watermark.watermarkFontFamily)}&display=swap`}
+          />
+        </Helmet>
+      )}
       <DisplayManagerAppBar
         drawerHover={false} // TODO add settings drawer for single view
         playerID={playerID}
@@ -213,7 +228,9 @@ function DisplayManager() {
       {!hasStarted && <ProgressCard />}
       <Box className={classes.container}>
         {viewPlayers &&
-          viewPlayers.map((id) => <DisplayView key={id} viewPlayerID={id} />)}
+          viewPlayers.map((id) => (
+            <DisplayView key={id} viewPlayerID={id} watermark={watermark} />
+          ))}
       </Box>
     </>
   )

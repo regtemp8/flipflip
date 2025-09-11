@@ -1,4 +1,9 @@
 # Changelog
+#### v4.0.0-beta6 <small>(09/11/2025)</small>
+- Add watermark
+- Fix urls for 0.0.0.0 host
+- Use same logic for choose and canChoose in FilePicker
+
 #### v4.0.0-beta5 <small>(09/02/2025)</small>
 - Transform FlipFlip into a web application
 - Use SQLite to store data

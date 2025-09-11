@@ -1,3 +1,4 @@
+import path from 'path'
 import { DeleteResult, Kysely } from 'kysely'
 import {
   CaptionScript,
@@ -15,10 +16,10 @@ import {
   randomizeList,
   getSourceType,
   SF,
-  SortRequest
+  SortRequest,
+  getFileName
 } from 'flipflip-common'
 import { sortString, toNumber } from './utils'
-import { getFileName } from '../utils'
 import { SearchOption } from './types/SearchOption'
 import { findTagIdsByName } from './TagRepository'
 
@@ -351,8 +352,8 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
       } else if (sortBy === SF.alpha) {
         rows = rows.sort((a, b) =>
           sortString(
-            getFileName(a.url),
-            getFileName(b.url),
+            getFileName(a.url, path.sep),
+            getFileName(b.url, path.sep),
             sortOrder === 'asc'
           )
         )

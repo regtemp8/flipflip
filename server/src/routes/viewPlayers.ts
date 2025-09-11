@@ -4,7 +4,7 @@ import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { User } from '../db/types/entities'
 import { SCENE_NONE, ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
 import { findDisplayViewById } from '../db/DisplayViewRepository'
-import { toDisplayView } from '../db/mappers'
+import { rewriteImageViewDataUrls, toDisplayView } from '../db/mappers'
 
 const router = express.Router()
 router.get('/:id/config', async (req, res) => {
@@ -68,7 +68,7 @@ router.get('/:id/items', async (req, res) => {
   }
 
   const items = viewPlayer.take(size)
-  res.status(200).send(items)
+  res.status(200).send(rewriteImageViewDataUrls(items, req))
 })
 
 router.post('/:id/event', async (req, res) => {

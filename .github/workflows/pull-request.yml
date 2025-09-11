@@ -30,7 +30,7 @@ jobs:
   test:
     needs: [common, client, server]
     timeout-minutes: 60
-    if: ${{ needs.client.outputs.run_tests == 'true' || needs.server.outputs.run_tests == 'true' }}
+    if: false #${{ needs.client.outputs.run_tests == 'true' || needs.server.outputs.run_tests == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:

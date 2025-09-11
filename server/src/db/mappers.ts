@@ -33,7 +33,8 @@ import {
   AudioPlaylistItem,
   SCENE_RANDOM,
   SCENE_NONE,
-  PLAYLIST_NONE
+  PLAYLIST_NONE,
+  ImageViewData
 } from 'flipflip-common'
 import {
   Scene as SceneRow,
@@ -90,15 +91,10 @@ import {
 } from './utils'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import {
-  getBackupsDir,
-  getCacheDir,
-  getServerHost,
-  getServerPort,
-  getThumbsDir
-} from '../utils'
+import { getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
+import { Request } from 'express'
 
 export function toSceneGroups(
   rows: Array<SceneGroupRow | PlaylistGroupRow>,
@@ -1058,7 +1054,8 @@ export function toCacheSettingsUpdate(
 export function toContentSource(
   row: ContentSourceRow,
   tags: number[],
-  clips: number[] = []
+  clips: number[] = [],
+  request?: Request
 ): ContentSource {
   const {
     count,
@@ -1080,8 +1077,10 @@ export function toContentSource(
     weight
   } = row
 
-  const host = getServerHost()
-  const port = getServerPort()
+  let fileUrl = `http://localhost/fs/file/content-source/${id}`
+  if (request != null) {
+    fileUrl = rewriteUrl(fileUrl, request)
+  }
   return {
     id: id as number,
     url,
@@ -1104,7 +1103,7 @@ export function toContentSource(
     redditTime: opt<string>(redditTime),
     includeRetweets: toBoolean(twitterIncludeRetweets),
     includeReplies: toBoolean(twitterIncludeReplies),
-    fileUrl: `http://${host}:${port}/fs/file/content-source/${id}`
+    fileUrl
   }
 }
 
@@ -1272,17 +1271,22 @@ export function toPlaylistUpdate(playlist: Partial<Playlist>): PlaylistUpdate {
   }
 }
 
-export function toAudioThumb(thumb: string) {
-  const host = getServerHost()
-  const port = getServerPort()
-  return `http://${host}:${port}/fs/file/audio-thumb/${thumb.split(path.sep).pop()}`
+export function toAudioThumb(thumb: string, request: Request) {
+  return rewriteUrl(
+    `http://localhost/fs/file/audio-thumb/${thumb.split(path.sep).pop()}`,
+    request
+  )
 }
 
 export function fromAudioThumb(thumb: string) {
   return path.join(getThumbsDir(), thumb.split('/').pop() as string)
 }
 
-export function toAudio(row: AudioRow, tags: number[]): Audio {
+export function toAudio(
+  row: AudioRow,
+  tags: number[],
+  request: Request
+): Audio {
   const {
     album,
     artist,
@@ -1311,11 +1315,9 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
 
   let thumb: string | undefined = undefined
   if (row.thumb != null) {
-    thumb = toAudioThumb(row.thumb)
+    thumb = toAudioThumb(row.thumb, request)
   }
 
-  const host = getServerHost()
-  const port = getServerPort()
   return {
     id: id as number,
     url,
@@ -1342,7 +1344,7 @@ export function toAudio(row: AudioRow, tags: number[]): Audio {
     duration: opt<number>(duration),
     comment: opt<string>(comment),
     playedCount,
-    fileUrl: `http://${host}:${port}/fs/file/audio/${id}`
+    fileUrl: rewriteUrl(`http://localhost/fs/file/audio/${id}`, request)
   }
 }
 
@@ -1400,7 +1402,8 @@ export function toAudioUpdate(audio: Partial<Audio>): AudioUpdate {
 
 export function toCaptionScript(
   row: CaptionScriptRow,
-  tags: number[]
+  tags: number[],
+  request: Request
 ): CaptionScript {
   const {
     id,
@@ -1414,8 +1417,6 @@ export function toCaptionScript(
     url
   } = row
 
-  const host = getServerHost()
-  const port = getServerPort()
   return {
     id: id as number,
     url,
@@ -1427,7 +1428,10 @@ export function toCaptionScript(
     stopAtEnd: toBoolean(stopAtEnd),
     nextSceneAtEnd: toBoolean(nextSceneAtEnd),
     syncWithAudio: toBoolean(syncWithAudio),
-    fileUrl: `http://${host}:${port}/fs/file/caption-script/${id}`
+    fileUrl: rewriteUrl(
+      `http://localhost/fs/file/caption-script/${id}`,
+      request
+    )
   }
 }
 
@@ -1833,4 +1837,28 @@ export function toDisplayViewUpdate(
     y,
     z
   }
+}
+
+export function rewriteImageViewDataUrls(
+  items: ImageViewData[],
+  request: Request
+): ImageViewData[] {
+  return items.map((item) => {
+    item.data.url = rewriteUrl(item.data.url, request)
+    if (item.data.clip != null) {
+      item.data.clip.url = rewriteUrl(item.data.clip.url, request)
+    }
+    if (item.view.video != null) {
+      item.view.video.url = rewriteUrl(item.view.video.url, request)
+    }
+
+    return item
+  })
+}
+
+function rewriteUrl(rewrite: string, request: Request) {
+  const url = new URL(rewrite)
+  url.protocol = request.protocol
+  url.host = request.get('host') as string
+  return url.href
 }
