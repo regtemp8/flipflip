@@ -71,17 +71,26 @@ export default abstract class UrlLoader {
 
   public abstract getUrl(canScrape: boolean): Promise<LoadedUrl | undefined>
 
-  protected addToUrlList(urlList: number[], end: number, randomize: boolean) {
+  protected addToUrlList(
+    urlList: number[],
+    urlIndex: number,
+    end: number,
+    randomize: boolean
+  ) {
     const start = urlList.length
     const toAdd = Array.from(
       { length: end - start },
       (_, index) => start + index
     )
+    urlList.push(...toAdd)
+
     if (randomize) {
-      randomizeList(toAdd)
+      const shownUrls = urlList.splice(0, urlIndex - 1)
+      randomizeList(urlList)
+      urlList = shownUrls.concat(urlList)
     }
 
-    urlList.push(...toAdd)
+    return urlList
   }
 }
 
@@ -152,7 +161,12 @@ class SourceWeightedUrlLoader extends UrlLoader {
       return undefined
     } else if (collection.length > urlState.urlList.length) {
       const randomize = orderFunction === OF.random && (forceAll || fullSource)
-      this.addToUrlList(urlState.urlList, collection.length, randomize)
+      urlState.urlList = this.addToUrlList(
+        urlState.urlList,
+        urlState.urlIndex,
+        collection.length,
+        randomize
+      )
     }
 
     let urlIndex: number
@@ -243,7 +257,12 @@ class ImageWeightedUrlLoader extends UrlLoader {
       return undefined
     } else if (collection.length > this.state.urlList.length) {
       const randomize = orderFunction === OF.random && forceAll
-      this.addToUrlList(this.state.urlList, collection.length, randomize)
+      this.state.urlList = this.addToUrlList(
+        this.state.urlList,
+        this.state.urlIndex,
+        collection.length,
+        randomize
+      )
     }
 
     let index: number
