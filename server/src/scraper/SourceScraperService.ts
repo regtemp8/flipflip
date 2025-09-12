@@ -25,6 +25,14 @@ class SourceScraperService {
     return this.subscriptions.get(sceneId)?.getSourceUrls(willScrape) ?? []
   }
 
+  public getSource(sceneId: number, url: string) {
+    return this.subscriptions.get(sceneId)?.getSource(url)
+  }
+
+  public getPost(sceneId: number, url: string) {
+    return this.subscriptions.get(sceneId)?.getPost(url)
+  }
+
   public async getScrapedUrls(
     sceneId: number,
     canScrape: boolean,

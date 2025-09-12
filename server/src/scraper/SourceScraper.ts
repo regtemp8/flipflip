@@ -81,6 +81,7 @@ export default class SourceScraper {
 
   private allURLs: Map<string, string[]>
   private allPosts: Record<string, string>
+  private sourceLookup: Map<string, string>
   private scrapeQueue: Record<string, Array<ScrapedSourcePromise>>
   private availableToScrape: string[]
   private sourceIndex: number
@@ -142,6 +143,7 @@ export default class SourceScraper {
     this.remoteSettings = remoteSettings
     this.scrapeQueue = {}
     this.allPosts = {}
+    this.sourceLookup = new Map<string, string>()
     this.allURLs = new Map<string, string[]>()
     this.sourceIndex = 0
     this.queueEmpty = sceneSources.length === 0
@@ -153,6 +155,16 @@ export default class SourceScraper {
         { source, helpers: { next: -1, count: 0, retries: 0 } }
       ]
     }
+  }
+
+  public getPost(url: string) {
+    return Object.prototype.hasOwnProperty.call(this.allPosts, url)
+      ? this.allPosts[url]
+      : undefined
+  }
+
+  public getSource(url: string) {
+    return this.sourceLookup.get(url)
   }
 
   public getSourceUrls(willScrape: boolean): string[] {
@@ -290,5 +302,10 @@ export default class SourceScraper {
     }
 
     this.allURLs.set(key, urls)
+    if (weight === WF.images) {
+      for (const url of data) {
+        this.sourceLookup.set(url, source.url)
+      }
+    }
   }
 }

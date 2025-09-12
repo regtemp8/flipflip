@@ -30,6 +30,12 @@ interface UrlState {
   urlList: number[]
 }
 
+export interface LoadedUrl {
+  url: string
+  source?: string
+  post?: string
+}
+
 export default abstract class UrlLoader {
   public static async create(scene: Scene, user: User) {
     const sources: ContentSource[] = []
@@ -63,7 +69,7 @@ export default abstract class UrlLoader {
     }
   }
 
-  public abstract getUrl(canScrape: boolean): Promise<string | undefined>
+  public abstract getUrl(canScrape: boolean): Promise<LoadedUrl | undefined>
 
   protected addToUrlList(urlList: number[], end: number, randomize: boolean) {
     const start = urlList.length
@@ -174,7 +180,9 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
 
     this.state.urlState[source] = urlState
-    return collection[urlIndex]
+    const url = collection[urlIndex]
+    const post = sourceScrapers().getPost(this.scene.id, url)
+    return { source, post, url }
   }
 
   private updateSourceState(canScrape: boolean) {
@@ -258,6 +266,9 @@ class ImageWeightedUrlLoader extends UrlLoader {
         (this.state.urlIndex + 1) % this.state.urlList.length
     }
 
-    return collection[index]
+    const url = collection[index]
+    const source = sourceScrapers().getSource(this.scene.id, url)
+    const post = sourceScrapers().getPost(this.scene.id, url)
+    return { source, post, url }
   }
 }

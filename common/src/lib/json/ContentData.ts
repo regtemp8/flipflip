@@ -2,6 +2,9 @@ export type ContentType = 'image' | 'video' | 'iframe';
 
 export type ContentData = {
   url: string;
+  sourceUrl?: string;
+  sourceName?: string;
+  postUrl?: string;
   type?: ContentType;
   error?: boolean;
   width?: number;
