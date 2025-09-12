@@ -1112,8 +1112,9 @@ export default class ContentLoader {
       this.displayIndex++
     }
 
+    const { id, name } = this.scene
     return {
-      sceneId: this.scene.id,
+      scene: { id, name },
       displayIndex,
       data,
       view,

@@ -44,7 +44,7 @@ function getWatermarkText(
   imageViewState?: ImageViewState
 ) {
   let watermarkText = watermark.watermarkText
-  const url = imageViewState?.data.url
+  const url = imageViewState?.data?.url
   if (url != null) {
     watermarkText = watermarkText.replace('{file_url}', url)
     watermarkText = watermarkText.replace(
@@ -55,8 +55,9 @@ function getWatermarkText(
     watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, '')
     watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
   }
-  // TODO if display use display.name else scene.name
-  // watermarkText = watermarkText.replace("{scene_name}", this.props.scene.name);
+
+  const sceneName = imageViewState?.scene?.name ?? ''
+  watermarkText = watermarkText.replace('{scene_name}', sceneName)
 
   // TODO add extra image source data
   // const img = this.state.historyPaths[(this.state.historyPaths.length - 1) + this.state.historyOffset];
@@ -68,8 +69,6 @@ function getWatermarkText(
   //   } else {
   //     watermarkText = watermarkText.replace(/\{post_url\}\s*/g, "");
   //   }
-  //   watermarkText = watermarkText.replace("{file_url}", img.src.startsWith("file") ? urlToPath(img.src) : img.src);
-  //   watermarkText = watermarkText.replace("{file_name}", decodeURIComponent(getFileName(img.src)));
   // } else {
   watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
   watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')

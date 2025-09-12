@@ -126,7 +126,7 @@ export default function ImagePlayer(props: ImagePlayerProps) {
           <ImageView
             key={index}
             index={index}
-            sceneID={state.sceneId}
+            sceneID={state.scene.id}
             show={state.show}
             isPlaying={isPlaying}
             zIndex={state.zIndex}
