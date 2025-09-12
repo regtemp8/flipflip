@@ -1,5 +1,10 @@
 import { CSSProperties, useMemo } from 'react'
-import { WC, WatermarkSettings, getFileName } from 'flipflip-common'
+import {
+  WC,
+  WatermarkSettings,
+  getFileGroup,
+  getFileName
+} from 'flipflip-common'
 import { useAppSelector } from '../../store/hooks'
 import { selectImagePlayerShownImageView } from '../../store/imagePlayer/selectors'
 import { ImageViewState } from '../../store/imagePlayer/slice'
@@ -44,6 +49,14 @@ function getWatermarkText(
   imageViewState?: ImageViewState
 ) {
   let watermarkText = watermark.watermarkText
+
+  const sceneName = imageViewState?.scene?.name
+  if (sceneName != null) {
+    watermarkText = watermarkText.replace('{scene_name}', sceneName)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{scene_name\}\s*/g, '')
+  }
+
   const url = imageViewState?.data?.url
   if (url != null) {
     watermarkText = watermarkText.replace('{file_url}', url)
@@ -56,25 +69,26 @@ function getWatermarkText(
     watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
   }
 
-  const sceneName = imageViewState?.scene?.name ?? ''
-  watermarkText = watermarkText.replace('{scene_name}', sceneName)
+  const sourceUrl = imageViewState?.data?.sourceUrl
+  if (sourceUrl != null) {
+    watermarkText = watermarkText.replace('{source_url}', sourceUrl)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
+  }
 
-  // TODO add extra image source data
-  // const img = this.state.historyPaths[(this.state.historyPaths.length - 1) + this.state.historyOffset];
-  // if (img) {
-  //   watermarkText = watermarkText.replace("{source_url}", img.getAttribute("source"));
-  //   watermarkText = watermarkText.replace("{source_name}", getFileGroup(img.getAttribute("source")));
-  //   if (img.hasAttribute("post")) {
-  //     watermarkText = watermarkText.replace("{post_url}", img.getAttribute("post"));
-  //   } else {
-  //     watermarkText = watermarkText.replace(/\{post_url\}\s*/g, "");
-  //   }
-  // } else {
-  watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
-  watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
-  watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+  const sourceName = imageViewState?.data?.sourceName
+  if (sourceName != null) {
+    watermarkText = watermarkText.replace('{source_name}', sourceName)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
+  }
 
-  // }
+  const postUrl = imageViewState?.data?.postUrl
+  if (postUrl != null) {
+    watermarkText = watermarkText.replace('{post_url}', postUrl)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+  }
 
   // TODO add audio playback
   // if (this.state.currentAudio) {

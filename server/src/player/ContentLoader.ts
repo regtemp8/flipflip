@@ -35,7 +35,8 @@ import {
   FadeInOutLoopData,
   PanningLoopData,
   PanningData,
-  ViewVideoData
+  ViewVideoData,
+  getFileGroup
 } from 'flipflip-common'
 import DurationCalculator from './DurationCalculator'
 import { imageSize } from 'image-size'
@@ -54,15 +55,21 @@ import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { toBoolean } from '../db/utils'
 import fileRegistry from '../routes/FileRegistry'
 import proxy from '../routes/ProxyService'
+import { LoadedUrl } from './UrlLoader'
+import path from 'path'
 
 function newContentData(
   url: string,
+  sourceUrl?: string,
+  postUrl?: string,
   type?: ContentType,
   width?: number,
   height?: number
 ): ContentData {
   const error = type == null
-  return { url, error, type, width, height }
+  const sourceName =
+    sourceUrl != null ? getFileGroup(sourceUrl, path.sep) : undefined
+  return { url, sourceUrl, sourceName, postUrl, error, type, width, height }
 }
 
 interface LoadCriteria {
@@ -364,7 +371,11 @@ export default class ContentLoader {
     return Buffer.from(buffer)
   }
 
-  public async getData(url: string): Promise<ContentData | undefined> {
+  public async getData({
+    url,
+    source,
+    post
+  }: LoadedUrl): Promise<ContentData | undefined> {
     const data = this.dataCache.get(url)
     if (data != null) {
       return data
@@ -373,7 +384,7 @@ export default class ContentLoader {
     const sourceType = getSourceType(url)
     if (sourceType === ST.nimja) {
       const proxyURL = this.proxyNimjaURL(url)
-      const data = newContentData(proxyURL, 'iframe')
+      const data = newContentData(proxyURL, source, post, 'iframe')
       this.dataCache.set(url, data)
       return data
     } else if (isImage(url, false)) {
@@ -383,13 +394,12 @@ export default class ContentLoader {
         buffer = await this.getImageBuffer(url)
       } catch {
         const errorData = newContentData(url)
-        errorData.error = true
         this.dataCache.set(url, errorData)
         return errorData
       }
 
       const { width, height } = imageSize(buffer)
-      const data = newContentData(url, 'image', width, height)
+      const data = newContentData(url, source, post, 'image', width, height)
 
       // TODO parse URL and use path in case there are query params
       if (url.endsWith('.gif')) {
@@ -401,7 +411,6 @@ export default class ContentLoader {
           }
         } catch {
           const errorData = newContentData(url)
-          errorData.error = true
           this.dataCache.set(url, errorData)
           return errorData
         }
@@ -444,13 +453,12 @@ export default class ContentLoader {
       } catch (error) {
         logger.error('Failed to read video stream', { error })
         const errorData = newContentData(url)
-        errorData.error = true
         this.dataCache.set(url, errorData)
         return errorData
       }
 
       const { width, height, duration } = videoStream
-      const data = newContentData(url, 'video', width, height)
+      const data = newContentData(url, source, post, 'video', width, height)
       data.clip = clip
       if (duration != null) {
         data.duration = Number(duration) * 1000
