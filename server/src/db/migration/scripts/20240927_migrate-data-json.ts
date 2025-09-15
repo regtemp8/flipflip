@@ -317,7 +317,7 @@ const tagInsert = async (
     .returningAll()
     .executeTakeFirst()
 
-  if(insertedTag == null) {
+  if (insertedTag == null) {
     logger.info(`! Failed to insert tag '{name}' (id: ${id})`, { name })
   }
 
@@ -1117,10 +1117,12 @@ const sceneGroupInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedSceneGroup != null) {
+    if (insertedSceneGroup != null) {
       insertedSceneGroups.push(group)
     } else {
-      logger.info(`! Failed to insert scene group '{name}' (id: ${id})`, { name })
+      logger.info(`! Failed to insert scene group '{name}' (id: ${id})`, {
+        name
+      })
     }
   }
 
@@ -1215,7 +1217,7 @@ const audioInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedAudio == null) {
+    if (insertedAudio == null) {
       logger.info(`! Failed to insert audio {url} (id: ${id})`, { url })
       continue
     }
@@ -1288,8 +1290,10 @@ const audioPlaylistInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedPlaylist == null) {
-      logger.info(`! Failed to insert audio playlist '{name}' (id: ${id})`, { name })
+    if (insertedPlaylist == null) {
+      logger.info(`! Failed to insert audio playlist '{name}' (id: ${id})`, {
+        name
+      })
       continue
     }
 
@@ -1393,8 +1397,10 @@ const captionScriptInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedScript == null) {
-      logger.info(`! Failed to insert caption script {url} (id: ${id})`, { url })
+    if (insertedScript == null) {
+      logger.info(`! Failed to insert caption script {url} (id: ${id})`, {
+        url
+      })
       continue
     }
 
@@ -1406,7 +1412,13 @@ const captionScriptInsert = async (
     await fontSettingsInsert(trx, caption, insertedScriptId, 'caption', userId)
 
     logger.info('+ Insert big caption font settings')
-    await fontSettingsInsert(trx, captionBig, insertedScriptId, 'captionBig', userId)
+    await fontSettingsInsert(
+      trx,
+      captionBig,
+      insertedScriptId,
+      'captionBig',
+      userId
+    )
 
     logger.info('+ Insert count font settings')
     await fontSettingsInsert(trx, count, insertedScriptId, 'count', userId)
@@ -1952,7 +1964,7 @@ const sceneInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedScene == null) {
+    if (insertedScene == null) {
       logger.info(`! Failed to insert scene '{name}' (id: ${id})`, { name })
       continue
     }
@@ -2026,7 +2038,12 @@ const sceneInsert = async (
         )
         if (weightGroup.rules != null) {
           for (const rule of weightGroup.rules) {
-            await weightGroupInsert(trx, rule, insertedSceneId, insertedWeightGroup.id)
+            await weightGroupInsert(
+              trx,
+              rule,
+              insertedSceneId,
+              insertedWeightGroup.id
+            )
           }
         }
       }
@@ -2064,7 +2081,7 @@ const displayInsert = async (
       .returningAll()
       .executeTakeFirst()
 
-    if(insertedDisplay == null) {
+    if (insertedDisplay == null) {
       logger.info(`! Failed to insert display '{name}' (id: ${id})`, { name })
       continue
     }

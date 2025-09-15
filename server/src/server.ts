@@ -99,10 +99,10 @@ const importLocalModule = async (module: string) => {
   return import(fileUrl)
 }
 
-const shutdown = async(code: number) => {
-    await db(false)?.destroy()
-    await Logger.close()
-    process.exit(code)
+const shutdown = async (code: number) => {
+  await db(false)?.destroy()
+  await Logger.close()
+  process.exit(code)
 }
 
 void (async function () {
@@ -115,12 +115,9 @@ void (async function () {
 
   process.on('unhandledRejection', async (reason) => {
     const error = reason instanceof Error ? reason : undefined
-    logger.error(
-      `Unhandled Promise Rejection: ${error?.message ?? reason}`,
-      {
-        error
-      }
-    )
+    logger.error(`Unhandled Promise Rejection: ${error?.message ?? reason}`, {
+      error
+    })
     await shutdown(1)
   })
 
