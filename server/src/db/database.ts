@@ -163,8 +163,8 @@ export class DatabaseService {
     return getBackupsDir() + path.sep + fileName
   }
 
-  public static getInstance(): DatabaseService {
-    if (!DatabaseService.instance) {
+  public static getInstance(initialize: boolean) {
+    if (initialize && !DatabaseService.instance) {
       DatabaseService.instance = new DatabaseService()
     }
 
@@ -172,6 +172,6 @@ export class DatabaseService {
   }
 }
 
-export default function db() {
-  return DatabaseService.getInstance()
+export default function db(initialize = true) {
+  return DatabaseService.getInstance(initialize)
 }

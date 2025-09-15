@@ -99,7 +99,31 @@ const importLocalModule = async (module: string) => {
   return import(fileUrl)
 }
 
+const shutdown = async(code: number) => {
+    await db(false)?.destroy()
+    await Logger.close()
+    process.exit(code)
+}
+
 void (async function () {
+  process.on('uncaughtException', async (error) => {
+    logger.error(`Uncaught Exception: ${error.message}`, {
+      error
+    })
+    await shutdown(1)
+  })
+
+  process.on('unhandledRejection', async (reason) => {
+    const error = reason instanceof Error ? reason : undefined
+    logger.error(
+      `Unhandled Promise Rejection: ${error?.message ?? reason}`,
+      {
+        error
+      }
+    )
+    await shutdown(1)
+  })
+
   const dirs = [
     getSaveDir(),
     getBackupsDir(),
@@ -205,9 +229,7 @@ void (async function () {
       logger.info(`${signal} signal received: closing HTTP server`)
       server.close(async () => {
         logger.info('HTTP server closed')
-        await db().destroy()
-        logger.info('Database connection closed')
-        process.exit(0)
+        await shutdown(0)
       })
     })
   })

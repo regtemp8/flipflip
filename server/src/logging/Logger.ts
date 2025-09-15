@@ -22,4 +22,19 @@ export default class Logger {
   public static create(className: string) {
     return new Logger(className)
   }
+
+  public static close() {
+    return new Promise<void>((resolve) => {
+      for (const transport of logger.transports) {
+        if (typeof transport.close === 'function') {
+          transport.close()
+        }
+      }
+
+      // wait for file to close
+      setTimeout(() => {
+        resolve()
+      }, 200)
+    })
+  }
 }
