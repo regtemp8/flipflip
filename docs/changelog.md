@@ -1,4 +1,8 @@
 # Changelog
+#### v4.0.0-beta7 <small>(09/15/2025)</small>
+- Finish logging before shutdown
+- Add more checks to data.json migration
+
 #### v4.0.0-beta6 <small>(09/11/2025)</small>
 - Add watermark
 - Fix urls for 0.0.0.0 host

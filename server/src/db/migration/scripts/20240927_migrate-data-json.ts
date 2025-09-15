@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import path from 'path'
 import { Kysely } from 'kysely'
 import {
+  Audio as DBAudio,
   Tag as DBTag,
   DisplayView as DBDisplayView
 } from '../../types/entities'
@@ -303,7 +304,7 @@ const tagInsert = async (
   }
 
   logger.info(`+ Insert tag '{name}' (id: ${id})`, { name })
-  return await trx
+  const insertedTag = await trx
     .insertInto('tag')
     .values({
       id,
@@ -312,8 +313,15 @@ const tagInsert = async (
       phraseString,
       index
     })
+    .onConflict((oc) => oc.doNothing())
     .returningAll()
-    .executeTakeFirstOrThrow()
+    .executeTakeFirst()
+
+  if (insertedTag == null) {
+    logger.info(`! Failed to insert tag '{name}' (id: ${id})`, { name })
+  }
+
+  return insertedTag
 }
 
 const displaySettingsInsert = async (
@@ -1090,6 +1098,8 @@ const sceneGroupInsert = async (
   } else {
     logger.info(': No scene groups')
   }
+
+  const insertedSceneGroups = []
   for (const group of json.sceneGroups) {
     const { id, name, type } = group
     if (type == null) {
@@ -1100,12 +1110,23 @@ const sceneGroupInsert = async (
     }
 
     logger.info(`+ Insert scene group '{name}' (id: ${id})`, { name })
-    await trx
+    const insertedSceneGroup = await trx
       .insertInto('sceneGroup')
       .values({ id, userId, name, type })
+      .onConflict((oc) => oc.doNothing())
       .returningAll()
-      .executeTakeFirstOrThrow()
+      .executeTakeFirst()
+
+    if (insertedSceneGroup != null) {
+      insertedSceneGroups.push(group)
+    } else {
+      logger.info(`! Failed to insert scene group '{name}' (id: ${id})`, {
+        name
+      })
+    }
   }
+
+  json.sceneGroups = insertedSceneGroups
 }
 
 const audioInsert = async (
@@ -1119,6 +1140,7 @@ const audioInsert = async (
   } else {
     logger.info(': No audios')
   }
+  const insertedAudios: DBAudio[] = []
   for (let i = 0; i < json.audios.length; i++) {
     const audio = json.audios[i]
     const {
@@ -1160,7 +1182,7 @@ const audioInsert = async (
     }
 
     logger.info(`+ Insert audio {url} (id: ${id})`, { url })
-    await trx
+    const insertedAudio = await trx
       .insertInto('audio')
       .values({
         id,
@@ -1191,8 +1213,16 @@ const audioInsert = async (
         index: i,
         createdAt: Date.now()
       })
-      .execute()
+      .onConflict((oc) => oc.doNothing())
+      .returningAll()
+      .executeTakeFirst()
 
+    if (insertedAudio == null) {
+      logger.info(`! Failed to insert audio {url} (id: ${id})`, { url })
+      continue
+    }
+
+    insertedAudios.push(insertedAudio)
     if (audio.tags.length > 0) {
       logger.info('+ Insert audio tags')
     }
@@ -1208,38 +1238,43 @@ const audioInsert = async (
       logger.info(`+ Insert audio tag '{name}' (id: ${tagId})`, {
         name: tag.name
       })
-      return await trx
+      await trx
         .insertInto('audioTag')
         .values({
-          audioId: id,
+          audioId: insertedAudio.id as number,
           tagId,
           userId
         })
         .execute()
     }
   }
+
+  return insertedAudios
 }
 
 const audioPlaylistInsert = async (
   trx: Kysely<DB>,
   json: AppStorage,
-  userId: number
+  userId: number,
+  audios: DBAudio[]
 ) => {
+  let audioIds: number[] = []
   if (json.playlists.length > 0) {
     logger.info('+ Insert audio playlists')
+    audioIds = audios.map((a) => a.id as number)
   } else {
     logger.info(': No audio playlists')
   }
   for (const playlist of json.playlists) {
-    const { id, name, audios } = playlist
+    const { id, name } = playlist
     const sceneGroupId = json.sceneGroups.find(
       (group) =>
         group.type === SG.playlist &&
         group.scenes.includes(convertPlaylistIDToSceneID(id))
     )?.id
 
-    logger.info(`+ Insert audio playlist`)
-    await trx
+    logger.info(`+ Insert audio playlist '{name}' (id: ${id})`, { name })
+    const insertedPlaylist = await trx
       .insertInto('playlist')
       .values({
         id,
@@ -1251,8 +1286,18 @@ const audioPlaylistInsert = async (
         shuffle: toNumber(false),
         temporary: toNumber(false)
       })
-      .execute()
+      .onConflict((oc) => oc.doNothing())
+      .returningAll()
+      .executeTakeFirst()
 
+    if (insertedPlaylist == null) {
+      logger.info(`! Failed to insert audio playlist '{name}' (id: ${id})`, {
+        name
+      })
+      continue
+    }
+
+    const audios = playlist.audios.filter((id) => audioIds.includes(id))
     if (audios.length > 0) {
       logger.info('+ Insert audio playlist items')
     }
@@ -1261,7 +1306,7 @@ const audioPlaylistInsert = async (
       await trx
         .insertInto('audioPlaylistItem')
         .values({
-          playlistId: id,
+          playlistId: insertedPlaylist.id as number,
           index: i,
           audioId: audios[i]
         })
@@ -1331,8 +1376,8 @@ const captionScriptInsert = async (
     }
 
     // TODO how is script column used?
-    logger.info(`+ Insert caption script (id: ${id})`)
-    await trx
+    logger.info(`+ Insert caption script {url} (id: ${id})`, { url })
+    const insertedScript = await trx
       .insertInto('captionScript')
       .values({
         id,
@@ -1348,19 +1393,35 @@ const captionScriptInsert = async (
         index: i,
         createdAt: Date.now()
       })
-      .execute()
+      .onConflict((oc) => oc.doNothing())
+      .returningAll()
+      .executeTakeFirst()
 
+    if (insertedScript == null) {
+      logger.info(`! Failed to insert caption script {url} (id: ${id})`, {
+        url
+      })
+      continue
+    }
+
+    const insertedScriptId = insertedScript.id as number
     logger.info('+ Insert blink font settings')
-    await fontSettingsInsert(trx, blink, id, 'blink', userId)
+    await fontSettingsInsert(trx, blink, insertedScriptId, 'blink', userId)
 
     logger.info('+ Insert caption font settings')
-    await fontSettingsInsert(trx, caption, id, 'caption', userId)
+    await fontSettingsInsert(trx, caption, insertedScriptId, 'caption', userId)
 
     logger.info('+ Insert big caption font settings')
-    await fontSettingsInsert(trx, captionBig, id, 'captionBig', userId)
+    await fontSettingsInsert(
+      trx,
+      captionBig,
+      insertedScriptId,
+      'captionBig',
+      userId
+    )
 
     logger.info('+ Insert count font settings')
-    await fontSettingsInsert(trx, count, id, 'count', userId)
+    await fontSettingsInsert(trx, count, insertedScriptId, 'count', userId)
 
     if (captionScript.tags.length > 0) {
       logger.info('+ Insert caption script tags')
@@ -1378,7 +1439,7 @@ const captionScriptInsert = async (
       return await trx
         .insertInto('captionScriptTag')
         .values({
-          captionScriptId: id,
+          captionScriptId: insertedScriptId,
           tagId,
           userId
         })
@@ -1696,7 +1757,7 @@ const sceneInsert = async (
       (group) => group.type === SG.scene && group.scenes.includes(id)
     )?.id
     logger.info(`+ Insert scene '{name}' (id: ${id})`, { name })
-    await trx
+    const insertedScene = await trx
       .insertInto('scene')
       .values({
         id,
@@ -1899,14 +1960,22 @@ const sceneInsert = async (
         weightsValid: toNumber(areWeightsValid(scene)),
         defaultScene: toNumber(false)
       })
-      .execute()
+      .onConflict((oc) => oc.doNothing())
+      .returningAll()
+      .executeTakeFirst()
 
+    if (insertedScene == null) {
+      logger.info(`! Failed to insert scene '{name}' (id: ${id})`, { name })
+      continue
+    }
+
+    const insertedSceneId = insertedScene.id as number
     if (scene.sources.length > 0) {
       logger.info('+ Insert scene content sources')
     }
     for (let i = 0; i < scene.sources.length; i++) {
       const source = scene.sources[i]
-      await contentSourceInsert(trx, source, userId, tags, i, scene.id)
+      await contentSourceInsert(trx, source, userId, tags, i, insertedSceneId)
     }
 
     for (let i = 0; i < scene.audioPlaylists.length; i++) {
@@ -1914,7 +1983,7 @@ const sceneInsert = async (
       const sceneGroupId = json.sceneGroups.find(
         (group) =>
           group.type === SG.playlist &&
-          group.scenes.includes(convertPlaylistIDToSceneID(id))
+          group.scenes.includes(convertPlaylistIDToSceneID(insertedSceneId))
       )?.id
 
       const insertedPlaylist = await playlistInsert(
@@ -1939,7 +2008,7 @@ const sceneInsert = async (
       const sceneGroupId = json.sceneGroups.find(
         (group) =>
           group.type === SG.playlist &&
-          group.scenes.includes(convertPlaylistIDToSceneID(id))
+          group.scenes.includes(convertPlaylistIDToSceneID(insertedSceneId))
       )?.id
 
       const insertedPlaylist = await playlistInsert(
@@ -1964,12 +2033,17 @@ const sceneInsert = async (
         const insertedWeightGroup = await weightGroupInsert(
           trx,
           weightGroup,
-          id,
+          insertedSceneId,
           null
         )
         if (weightGroup.rules != null) {
           for (const rule of weightGroup.rules) {
-            await weightGroupInsert(trx, rule, id, insertedWeightGroup.id)
+            await weightGroupInsert(
+              trx,
+              rule,
+              insertedSceneId,
+              insertedWeightGroup.id
+            )
           }
         }
       }
@@ -1994,7 +2068,7 @@ const displayInsert = async (
     )?.id
 
     logger.info(`+ Insert display '{name}' (id: ${id})`, { name })
-    await trx
+    const insertedDisplay = await trx
       .insertInto('display')
       .values({
         id,
@@ -2003,8 +2077,16 @@ const displayInsert = async (
         sceneGroupId,
         temporary: toNumber(false)
       })
-      .execute()
+      .onConflict((oc) => oc.doNothing())
+      .returningAll()
+      .executeTakeFirst()
 
+    if (insertedDisplay == null) {
+      logger.info(`! Failed to insert display '{name}' (id: ${id})`, { name })
+      continue
+    }
+
+    const insertedDisplayId = insertedDisplay.id as number
     const rows = grid.grid.length
     const cols = grid.grid[0].length
     const width = 100 / cols
@@ -2022,7 +2104,7 @@ const displayInsert = async (
         const view = await trx
           .insertInto('displayView')
           .values({
-            displayId: id,
+            displayId: insertedDisplayId,
             name: `${cellName} [${r}, ${c}]`,
             x: c * width,
             y: r * height,
@@ -2080,8 +2162,8 @@ export async function up(db: Kysely<DB>): Promise<void> {
     await displaySettingsInsert(trx, json, userId, tags)
     await tutorialsInsert(trx, json, userId)
     await themeInsert(trx, json, userId)
-    await audioInsert(trx, json, userId, tags)
-    await audioPlaylistInsert(trx, json, userId)
+    const audios = await audioInsert(trx, json, userId, tags)
+    await audioPlaylistInsert(trx, json, userId, audios)
     await captionScriptInsert(trx, json, userId, tags)
     for (let i = 0; i < json.library.length; i++) {
       const source = json.library[i]
@@ -2129,9 +2211,6 @@ export async function down(db: Kysely<DB>): Promise<void> {
 
     logger.info('- Delete weightGroup rows')
     await trx.deleteFrom('weightGroup').execute()
-
-    logger.info('- Delete scenePlaylist rows')
-    await trx.deleteFrom('scenePlaylist').execute()
 
     logger.info('- Delete scene rows')
     await trx.deleteFrom('scene').execute()
