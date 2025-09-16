@@ -105,6 +105,7 @@ interface ScenePlaylistItemEditDialogProps {
   onClose: () => void
 }
 
+const DEFAULT_DURATION = 900000
 function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   const { playlistID, item, open, onClose } = props
   const dispatch = useAppDispatch()
@@ -158,7 +159,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
         index: 0,
         sceneID: unsavedSceneID ?? SCENE_NONE,
         randomScenes: unsavedRandomScenes ?? [],
-        duration: unsavedDuration ?? 0,
+        duration: unsavedDuration ?? DEFAULT_DURATION,
         playAfterAllImages: unsavedPlayAfterAllImages ?? false
       })
     } else {
@@ -195,7 +196,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   const { classes } = useStyles()
   const currentSceneID = unsavedSceneID ?? item?.sceneID ?? SCENE_NONE
   const currentRandomScenes = unsavedRandomScenes ?? item?.randomScenes
-  const currentDuration = unsavedDuration ?? item?.duration
+  const currentDuration = unsavedDuration ?? item?.duration ?? DEFAULT_DURATION
   const currentPlayAfterAllImages =
     unsavedPlayAfterAllImages ?? item?.playAfterAllImages
   return (
