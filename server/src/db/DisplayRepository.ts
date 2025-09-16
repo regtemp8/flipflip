@@ -69,7 +69,8 @@ export async function createTempDisplayForScene(
           type: PLT.scene,
           shuffle: toNumber(false),
           repeat: RP.none,
-          temporary: toNumber(true)
+          temporary: toNumber(true),
+          visible: toNumber(false)
         })
         .returning('id')
         .executeTakeFirstOrThrow()

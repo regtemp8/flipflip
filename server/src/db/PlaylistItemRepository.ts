@@ -10,6 +10,8 @@ import {
   ScenePlaylistItemSceneInsert
 } from './types/entities'
 import { findPlaylistType } from './PlaylistRepository'
+import { Kysely } from 'kysely'
+import { DB } from './types/generated'
 
 export async function isAudioPlaylistItem(
   audioId: number,
@@ -70,35 +72,59 @@ export async function createCaptionScriptPlaylistItem(
     })
 }
 
-export async function createScenePlaylistItem(
-  item: ScenePlaylistItemInsert,
+async function insertScenePlaylistItem(
+  trx: Kysely<DB>,
+  item: ScenePlaylistItemInsert
+) {
+  const { index } = await trx
+    .selectFrom('scenePlaylistItem')
+    .select((eb) => [eb.fn.countAll<number>().as('index')])
+    .where('playlistId', '=', item.playlistId)
+    .executeTakeFirstOrThrow()
+
+  item.index = index
+  const { id } = await trx
+    .insertInto('scenePlaylistItem')
+    .values(item)
+    .returning('id')
+    .executeTakeFirstOrThrow()
+
+  return id as number
+}
+
+async function insertScenePlaylistItemScenes(
+  trx: Kysely<DB>,
+  scenePlaylistItemId: number,
   scenes?: ScenePlaylistItemSceneInsert[]
 ) {
-  return await db()
-    .query()
-    .transaction()
-    .execute(async (trx) => {
-      const { index } = await trx
-        .selectFrom('scenePlaylistItem')
-        .select((eb) => [eb.fn.countAll<number>().as('index')])
-        .where('playlistId', '=', item.playlistId)
-        .executeTakeFirstOrThrow()
+  if (scenes == null) {
+    return
+  }
 
-      item.index = index
-      const { id } = await trx
-        .insertInto('scenePlaylistItem')
-        .values(item)
-        .returning('id')
-        .executeTakeFirstOrThrow()
+  scenes = scenes.map((scene) => ({
+    ...scene,
+    scenePlaylistItemId
+  }))
+  await trx.insertInto('scenePlaylistItemScene').values(scenes).execute()
+}
 
-      if (scenes != null) {
-        scenes = scenes.map((scene) => ({
-          ...scene,
-          scenePlaylistItemId: id as number
-        }))
-        await trx.insertInto('scenePlaylistItemScene').values(scenes).execute()
-      }
-    })
+export async function createScenePlaylistItem(
+  item: ScenePlaylistItemInsert,
+  scenes?: ScenePlaylistItemSceneInsert[],
+  trx?: Kysely<DB>
+) {
+  if (trx != null) {
+    const scenePlaylistItemId = await insertScenePlaylistItem(trx, item)
+    await insertScenePlaylistItemScenes(trx, scenePlaylistItemId, scenes)
+  } else {
+    return await db()
+      .query()
+      .transaction()
+      .execute(async (trx) => {
+        const scenePlaylistItemId = await insertScenePlaylistItem(trx, item)
+        await insertScenePlaylistItemScenes(trx, scenePlaylistItemId, scenes)
+      })
+  }
 }
 
 export async function updateAudioPlaylistItem(update: AudioPlaylistItemUpdate) {
@@ -158,6 +184,24 @@ export async function updateScenePlaylistItem(
         await trx.insertInto('scenePlaylistItemScene').values(scenes).execute()
       }
     })
+}
+
+export async function findSingleScenePlaylistItemSceneId(playlistId: number) {
+  const item = await db()
+    .query()
+    .selectFrom('playlist as p')
+    .innerJoin('scenePlaylistItem as spi', 'spi.playlistId', 'p.id')
+    .innerJoin(
+      'scenePlaylistItemScene as spis',
+      'spis.scenePlaylistItemId',
+      'spi.id'
+    )
+    .select('spis.sceneId')
+    .where('p.type', '=', PLT.singleScene)
+    .where('p.id', '=', playlistId)
+    .executeTakeFirstOrThrow()
+
+  return item.sceneId as number
 }
 
 export async function deletePlaylistItem(playlistId: number, itemId: number) {

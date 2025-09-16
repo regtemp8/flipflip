@@ -42,7 +42,8 @@ import {
   ViewerEvent,
   LatestVersion,
   AddContentSourceRequest,
-  WatermarkSettings
+  WatermarkSettings,
+  PLT
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -217,10 +218,18 @@ export const flipflipApi = createApi({
       query: () => `api/playlists/ungrouped`,
       providesTags: ['UngroupedPlaylists']
     }),
-    getPlaylistOptions: builder.query<SelectOption[], string>({
-      query: (type: string) => `api/playlists/options/${type}`,
-      providesTags: (result, _error, type) =>
-        result != null ? [{ type: 'PlaylistOptions', id: type }] : []
+    getPlaylistOptions: builder.query<
+      SelectOption[],
+      { type: string; includeNone?: boolean }
+    >({
+      query: ({ type, includeNone }) => ({
+        url: `api/playlists/options/${type}`,
+        params: { includeNone }
+      }),
+      providesTags: (result, _error, { type }) =>
+        result != null
+          ? [{ type: 'PlaylistOptions', id: `${type}` }]
+          : []
     }),
     getTutorials: builder.query<Tutorials, void>({
       query: () => `api/tutorials`,
@@ -436,7 +445,8 @@ export const flipflipApi = createApi({
             'UngroupedScenes',
             { type: 'ContentSource', id: 'FilteredList' },
             { type: 'Scene', id },
-            { type: 'Scene', id: 'List' }
+            { type: 'Scene', id: 'List' },
+            {type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -452,7 +462,8 @@ export const flipflipApi = createApi({
           flipflipApi.util.invalidateTags([
             'GroupedScenes',
             'UngroupedScenes',
-            { type: 'Scene', id: 'List' }
+            { type: 'Scene', id: 'List' },
+            {type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -469,7 +480,8 @@ export const flipflipApi = createApi({
           flipflipApi.util.invalidateTags([
             'GroupedScenes',
             'UngroupedScenes',
-            { type: 'Scene', id: 'List' }
+            { type: 'Scene', id: 'List' },
+            {type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -521,7 +533,8 @@ export const flipflipApi = createApi({
                 flipflipApi.util.invalidateTags([
                   'GroupedScenes',
                   'UngroupedScenes',
-                  'SceneSelectOptions'
+                  'SceneSelectOptions',
+                  {type: 'PlaylistOptions', id: PLT.singleScene }
                 ])
               )
             }
@@ -986,11 +999,11 @@ export const flipflipApi = createApi({
     playPlaylist: builder.mutation<ValueResponse, number>({
       query: (id) => ({ url: `api/playlists/${id}/play`, method: 'POST' })
     }),
-    createPlaylist: builder.mutation<ValueResponse, string>({
-      query: (type) => ({
+    createPlaylist: builder.mutation<ValueResponse, {type: string, name?: string}>({
+      query: (body) => ({
         url: `api/playlists`,
         method: 'POST',
-        body: { type }
+        body
       }),
       async onQueryStarted(type, { dispatch, queryFulfilled }) {
         await queryFulfilled

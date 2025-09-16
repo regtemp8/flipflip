@@ -50,6 +50,7 @@ import {
   findScenePlaylistItem,
   findScenePlaylistItemIds,
   findScenePlaylistItemScenes,
+  findSingleScenePlaylistItemSceneId,
   updateAudioPlaylistItem,
   updateCaptionScriptPlaylistItem,
   updateScenePlaylistItem
@@ -72,6 +73,12 @@ router.get('/ungrouped', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const playlist = await findPlaylistById(Number(req.params.id))
   if (playlist != null) {
+    if (playlist.type === PLT.singleScene) {
+      playlist.id = await findSingleScenePlaylistItemSceneId(
+        playlist.id as number
+      )
+    }
+
     res.status(200).send(toPlaylist(playlist))
   } else {
     res.status(404).end()
@@ -259,13 +266,13 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-  const { type } = req.body
+  const { type, name } = req.body
   if (![PLT.audio, PLT.scene, PLT.script].includes(type)) {
     res.status(400).end()
   }
 
   const user = req.user as User
-  const { id } = await createPlaylist(type, user.id as number)
+  const { id } = await createPlaylist(type, true, user.id as number, name)
   const response: ValueResponse = { value: id as number }
   res.status(200).send(response)
 })
@@ -273,7 +280,9 @@ router.post('/', async (req, res) => {
 router.get('/options/:type', async (req, res) => {
   const rows = await findPlaylistOptionsByType(req.params.type)
   const options: SelectOption[] = []
-  options.push({ value: '0', label: 'None' })
+  if (req.query.includeNone === 'true') {
+    options.push({ value: '0', label: 'None' })
+  }
   for (const { itemId, itemName } of rows) {
     options.push({ value: (itemId as number).toString(), label: itemName })
   }

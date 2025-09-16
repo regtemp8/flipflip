@@ -595,6 +595,7 @@ const PLT = {
   // playlist type
   audio: 'plt.audio',
   scene: 'plt.scene',
+  singleScene: 'plt.scene_single',
   script: 'plt.script',
 };
 
@@ -602,6 +603,7 @@ const SCENE_RANDOM = -1;
 const SCENE_NONE = 0;
 const PLAYLIST_NONE = 0;
 const SIZE_UNKNOWN = -1;
+const SCENE_DURATION = 900000
 
 export {
   AF,
@@ -657,4 +659,5 @@ export {
   SCENE_RANDOM,
   PLAYLIST_NONE,
   SIZE_UNKNOWN,
+  SCENE_DURATION
 };

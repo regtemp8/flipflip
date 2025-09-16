@@ -248,6 +248,7 @@ export interface Playlist {
   temporary: number
   type: string
   userId: number
+  visible: Generated<number>
 }
 
 export interface RemoteSettings {

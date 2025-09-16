@@ -22,7 +22,7 @@ export async function findPlaylistsWithSceneGroup(): Promise<
       'p.name as itemName',
       'p.type as itemType'
     ])
-    .where('p.temporary', '=', toNumber(false))
+    .where('p.visible', '=', toNumber(true))
     .execute()
 }
 
@@ -33,7 +33,7 @@ export async function findPlaylistsWithoutSceneGroup(): Promise<
     .query()
     .selectFrom('playlist as p')
     .select(['p.id as itemId', 'p.name as itemName', 'p.type as itemType'])
-    .where('p.temporary', '=', toNumber(false))
+    .where('p.visible', '=', toNumber(true))
     .where('p.sceneGroupId', 'is', null)
     .execute()
 }
@@ -55,7 +55,7 @@ export async function findPlaylistIds(): Promise<number[]> {
     .query()
     .selectFrom('playlist')
     .select('id')
-    .where('temporary', '=', toNumber(false))
+    .where('visible', '=', toNumber(false))
     .execute()
     .then((value) => value.map((v) => v.id as number))
 }
@@ -100,7 +100,8 @@ export async function clonePlaylist(id: number, userId: number) {
           'type',
           'shuffle',
           'repeat',
-          'temporary'
+          'temporary',
+          'visible'
         ])
         .expression((eb) =>
           eb
@@ -112,7 +113,8 @@ export async function clonePlaylist(id: number, userId: number) {
               'type',
               'shuffle',
               'repeat',
-              'temporary'
+              'temporary',
+              'visible'
             ])
             .where('id', '=', id)
             .where('userId', '=', userId)
@@ -211,7 +213,9 @@ export async function findPlaylistByDisplayView(displayViewId: number) {
     .innerJoin('playlist as p', 'p.id', 'dv.playlistId')
     .select(['p.id', 'p.repeat', 'p.shuffle'])
     .where('dv.id', '=', displayViewId)
-    .where('p.type', '=', PLT.scene)
+    .where((eb) =>
+      eb('p.type', '=', PLT.scene).or('p.type', '=', PLT.singleScene)
+    )
     .executeTakeFirst()
 }
 
@@ -224,18 +228,25 @@ export async function findPlaylistType(id: number, trx?: Kysely<DB>) {
     .executeTakeFirst()
 }
 
-export async function createPlaylist(type: string, userId: number) {
+export async function createPlaylist(
+  type: string,
+  visible: boolean,
+  userId: number,
+  name = 'New playlist',
+  trx?: Kysely<DB>
+) {
   const values: PlaylistInsert = {
     userId,
-    name: 'New playlist',
+    name,
     type,
     shuffle: toNumber(false),
     repeat: RP.all,
-    temporary: toNumber(false)
+    temporary: toNumber(false),
+    visible: toNumber(visible)
   }
 
-  return await db()
-    .query()
+  const query = trx ?? db().query()
+  return await query
     .insertInto('playlist')
     .values(values)
     .returning('id')

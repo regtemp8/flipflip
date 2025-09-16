@@ -1285,7 +1285,8 @@ const audioPlaylistInsert = async (
         type: PLT.audio,
         repeat: RP.none,
         shuffle: toNumber(false),
-        temporary: toNumber(false)
+        temporary: toNumber(false),
+        visible: toNumber(true)
       })
       .onConflict((oc) => oc.doNothing())
       .returningAll()
@@ -1476,7 +1477,8 @@ const playlistInsert = async (
       name: name ?? '',
       shuffle: toNumber(shuffle),
       repeat,
-      temporary: toNumber(false)
+      temporary: toNumber(false),
+      visible: toNumber(true)
     })
     .returningAll()
     .executeTakeFirstOrThrow()
