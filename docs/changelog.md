@@ -1,4 +1,8 @@
 # Changelog
+#### v4.0.0-beta8 <small>(09/16/2025)</small>
+- Add default duration to scene playlist item
+- Fix library source migration
+
 #### v4.0.0-beta7 <small>(09/15/2025)</small>
 - Finish logging before shutdown
 - Add more checks to data.json migration
