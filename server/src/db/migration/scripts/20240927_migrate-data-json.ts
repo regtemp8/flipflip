@@ -732,9 +732,10 @@ const sceneSettingsInsert = async (
   } = sceneSettings
 
   logger.info(`+ Insert scene settings`)
-  await trx
+  return await trx
     .insertInto('scene')
     .values({
+      id: IS_LIBRARY,
       userId,
       defaultScene: toNumber(true),
       name,
@@ -933,7 +934,8 @@ const sceneSettingsInsert = async (
       regenerate: toNumber(regenerate),
       weightsValid: toNumber(false)
     })
-    .execute()
+    .returning('id')
+    .executeTakeFirstOrThrow()
 }
 
 const clipInsert = async (
@@ -2165,14 +2167,15 @@ export async function up(db: Kysely<DB>): Promise<void> {
     const audios = await audioInsert(trx, json, userId, tags)
     await audioPlaylistInsert(trx, json, userId, audios)
     await captionScriptInsert(trx, json, userId, tags)
+    const sceneSettings = await sceneSettingsInsert(trx, json, userId)
+    const libraryId = sceneSettings.id as number
     for (let i = 0; i < json.library.length; i++) {
       const source = json.library[i]
-      await contentSourceInsert(trx, source, userId, tags, i, IS_LIBRARY)
+      await contentSourceInsert(trx, source, userId, tags, i, libraryId)
     }
 
     await sceneGroupInsert(trx, json, userId)
     await sceneInsert(trx, json, userId, tags)
-    await sceneSettingsInsert(trx, json, userId)
     await displayInsert(trx, json, userId)
   })
 }
