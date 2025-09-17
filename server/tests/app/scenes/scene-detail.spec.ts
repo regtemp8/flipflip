@@ -35,6 +35,8 @@ test('Add scene', async ({ page }) => {
       res.status() === 204
     )
   })
+  await page.getByRole('option', { name: 'New scene', exact: true }).click()
+  await page.getByLabel('Open Scene').getByRole('button').click()
   await page.goto('/scenes/1')
   await page.getByRole('heading', { name: 'New scene', exact: true }).dblclick()
   await expect(page.locator('#title')).toBeFocused()

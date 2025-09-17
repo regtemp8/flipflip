@@ -127,6 +127,8 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
           onChange={async (event, newValue) => {
             if (typeof newValue === 'string') {
               await onCreate(newValue)
+            } else if (newValue?.label.match(/^Add ".*"$/)) {
+              await onCreate(newValue.value)
             } else if (newValue != null) {
               dispatch(props.action(newValue.value))
             }
