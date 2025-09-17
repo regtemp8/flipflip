@@ -81,6 +81,73 @@ export async function updatePlaylist(id: number, update: PlaylistUpdate) {
 export async function deletePlaylist(id: number) {
   return await db()
     .query()
+    .transaction()
+    .execute(async (trx) => {
+      const playlist = await trx
+        .selectFrom('playlist')
+        .select('type')
+        .where('id', '=', id)
+        .executeTakeFirst()
+      if (playlist == null) {
+        return
+      }
+
+      const { type } = playlist
+      switch (type) {
+        case PLT.audio: {
+          await trx
+            .deleteFrom('audioPlaylistItem')
+            .where('playlistId', '=', id)
+            .execute()
+          break
+        }
+        case PLT.script: {
+          await trx
+            .deleteFrom('captionScriptPlaylistItem')
+            .where('playlistId', '=', id)
+            .execute()
+          break
+        }
+        case PLT.scene: {
+          const items = (
+            await trx
+              .selectFrom('scenePlaylistItem')
+              .select('id')
+              .where('playlistId', '=', id)
+              .execute()
+          ).map((item) => item.id as number)
+
+          await trx
+            .deleteFrom('scenePlaylistItemScene')
+            .where('scenePlaylistItemId', 'in', items)
+            .execute()
+
+          await trx
+            .deleteFrom('scenePlaylistItem')
+            .where('playlistId', '=', id)
+            .execute()
+
+          await trx
+            .updateTable('displayView')
+            .set({ playlistId: null })
+            .where('playlistId', '=', id)
+            .execute()
+          break
+        }
+        default: {
+          throw new Error(`Deleting playlist of type '${type}' not supported`)
+        }
+      }
+
+      await trx
+        .deleteFrom('scenePlaylist')
+        .where('playlistId', '=', id)
+        .execute()
+      return await trx.deleteFrom('playlist').where('id', '=', id).execute()
+    })
+
+  return await db()
+    .query()
     .deleteFrom('playlist')
     .where('id', '=', id)
     .execute()

@@ -109,7 +109,9 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const result = await deletePlaylist(Number(req.params.id))
   const status =
-    result.length === 1 && result[0].numDeletedRows === 1n ? 204 : 500
+    result != null && result.length === 1 && result[0].numDeletedRows === 1n
+      ? 204
+      : 500
   res.status(status).end()
 })
 

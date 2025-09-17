@@ -1140,18 +1140,19 @@ export const flipflipApi = createApi({
         method: 'DELETE'
       }),
       async onQueryStarted({ id, type }, { dispatch, queryFulfilled }) {
-        await queryFulfilled
-        // TODO update cache instead of invalidating it
-        dispatch(
-          flipflipApi.util.invalidateTags([
-            'GroupedPlaylists',
-            'UngroupedPlaylists',
-            { type: 'Playlist', id },
-            { type: 'SelectedPlaylist', id },
-            { type: 'PlaylistItemIds', id },
-            { type: 'PlaylistOptions', id: type }
-          ])
-        )
+        await queryFulfilled.then(() => {
+          dispatch(
+            flipflipApi.util.invalidateTags([
+              'GroupedPlaylists',
+              'UngroupedPlaylists',
+              'DisplayView',
+              { type: 'Playlist', id },
+              { type: 'SelectedPlaylist', id },
+              { type: 'PlaylistItemIds', id },
+              { type: 'PlaylistOptions', id: type }
+            ])
+          )
+        })
       }
     }),
     getSceneSelectOptions: builder.query<
