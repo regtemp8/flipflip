@@ -7,6 +7,7 @@ import {
   SG,
   ScenePlaylistItem,
   SelectOption,
+  SelectedPlaylist,
   ValueResponse
 } from 'flipflip-common'
 import {
@@ -73,13 +74,23 @@ router.get('/ungrouped', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const playlist = await findPlaylistById(Number(req.params.id))
   if (playlist != null) {
+    res.status(200).send(toPlaylist(playlist))
+  } else {
+    res.status(404).end()
+  }
+})
+
+router.get('/:id/selected', async (req, res) => {
+  const playlist = await findPlaylistById(Number(req.params.id))
+  if (playlist != null) {
+    const id = playlist.id as number
+    let itemId: number | undefined = undefined
     if (playlist.type === PLT.singleScene) {
-      playlist.id = await findSingleScenePlaylistItemSceneId(
-        playlist.id as number
-      )
+      itemId = await findSingleScenePlaylistItemSceneId(id)
     }
 
-    res.status(200).send(toPlaylist(playlist))
+    const body: SelectedPlaylist = { id, type: playlist.type, itemId }
+    res.status(200).send(body)
   } else {
     res.status(404).end()
   }

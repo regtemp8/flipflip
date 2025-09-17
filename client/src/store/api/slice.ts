@@ -43,7 +43,8 @@ import {
   LatestVersion,
   AddContentSourceRequest,
   WatermarkSettings,
-  PLT
+  PLT,
+  SelectedPlaylist
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -104,6 +105,7 @@ export const flipflipApi = createApi({
     'VisibleDisplayViewIds',
     'DisplayViewSyncOptions',
     'Playlist',
+    'SelectedPlaylist',
     'SceneSelectOptions',
     'DisplaySelectOptions',
     'PlaylistItem',
@@ -227,9 +229,7 @@ export const flipflipApi = createApi({
         params: { includeNone }
       }),
       providesTags: (result, _error, { type }) =>
-        result != null
-          ? [{ type: 'PlaylistOptions', id: `${type}` }]
-          : []
+        result != null ? [{ type: 'PlaylistOptions', id: `${type}` }] : []
     }),
     getTutorials: builder.query<Tutorials, void>({
       query: () => `api/tutorials`,
@@ -446,7 +446,7 @@ export const flipflipApi = createApi({
             { type: 'ContentSource', id: 'FilteredList' },
             { type: 'Scene', id },
             { type: 'Scene', id: 'List' },
-            {type: 'PlaylistOptions', id: PLT.singleScene }
+            { type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -463,7 +463,7 @@ export const flipflipApi = createApi({
             'GroupedScenes',
             'UngroupedScenes',
             { type: 'Scene', id: 'List' },
-            {type: 'PlaylistOptions', id: PLT.singleScene }
+            { type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -481,7 +481,7 @@ export const flipflipApi = createApi({
             'GroupedScenes',
             'UngroupedScenes',
             { type: 'Scene', id: 'List' },
-            {type: 'PlaylistOptions', id: PLT.singleScene }
+            { type: 'PlaylistOptions', id: PLT.singleScene }
           ])
         )
       }
@@ -534,7 +534,7 @@ export const flipflipApi = createApi({
                   'GroupedScenes',
                   'UngroupedScenes',
                   'SceneSelectOptions',
-                  {type: 'PlaylistOptions', id: PLT.singleScene }
+                  { type: 'PlaylistOptions', id: PLT.singleScene }
                 ])
               )
             }
@@ -996,10 +996,18 @@ export const flipflipApi = createApi({
       providesTags: (playlist) =>
         playlist != null ? [{ type: 'Playlist', id: playlist.id }] : []
     }),
+    getSelectedPlaylist: builder.query<SelectedPlaylist, number>({
+      query: (id) => `api/playlists/${id}/selected`,
+      providesTags: (playlist) =>
+        playlist != null ? [{ type: 'SelectedPlaylist', id: playlist.id }] : []
+    }),
     playPlaylist: builder.mutation<ValueResponse, number>({
       query: (id) => ({ url: `api/playlists/${id}/play`, method: 'POST' })
     }),
-    createPlaylist: builder.mutation<ValueResponse, {type: string, name?: string}>({
+    createPlaylist: builder.mutation<
+      ValueResponse,
+      { type: string; name?: string }
+    >({
       query: (body) => ({
         url: `api/playlists`,
         method: 'POST',
@@ -1117,6 +1125,11 @@ export const flipflipApi = createApi({
               dispatch(
                 flipflipApi.util.invalidateTags([{ type: 'Playlist', id }])
               )
+              dispatch(
+                flipflipApi.util.invalidateTags([
+                  { type: 'SelectedPlaylist', id }
+                ])
+              )
             }
           })
       }
@@ -1134,6 +1147,7 @@ export const flipflipApi = createApi({
             'GroupedPlaylists',
             'UngroupedPlaylists',
             { type: 'Playlist', id },
+            { type: 'SelectedPlaylist', id },
             { type: 'PlaylistItemIds', id },
             { type: 'PlaylistOptions', id: type }
           ])
@@ -2023,6 +2037,7 @@ export const {
   useGetDisplayViewSyncOptionsQuery,
   useCreateScenePlaylistMutation,
   useGetPlaylistQuery,
+  useGetSelectedPlaylistQuery,
   usePlayPlaylistMutation,
   useCreatePlaylistMutation,
   useClonePlaylistMutation,

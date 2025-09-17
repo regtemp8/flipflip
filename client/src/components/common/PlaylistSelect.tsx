@@ -1,5 +1,14 @@
 import ReduxProps from './ReduxProps'
-import { Autocomplete, AutocompleteRenderInputParams, Box, createFilterOptions, IconButton, TextField, Theme, Tooltip } from '@mui/material'
+import {
+  Autocomplete,
+  AutocompleteRenderInputParams,
+  Box,
+  createFilterOptions,
+  IconButton,
+  TextField,
+  Theme,
+  Tooltip
+} from '@mui/material'
 import { PLT, SelectOption } from 'flipflip-common'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import MovieIcon from '@mui/icons-material/Movie'
@@ -9,7 +18,8 @@ import { useNavigate } from 'react-router'
 import {
   useCreatePlaylistMutation,
   useGetPlaylistOptionsQuery,
-  useGetPlaylistQuery
+  useGetPlaylistQuery,
+  useGetSelectedPlaylistQuery
 } from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 
@@ -46,7 +56,7 @@ export interface PlaylistSelectProps extends ReduxProps<string> {
   hideLabel?: boolean
 }
 
-const filter = createFilterOptions<SelectOption>();
+const filter = createFilterOptions<SelectOption>()
 
 export default function PlaylistSelect(props: PlaylistSelectProps) {
   const navigate = useNavigate()
@@ -63,20 +73,22 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
   const { data: value } = props.selector()
 
   const playlistID = value != null ? Number(value) : 0
-  const { data: playlist } = useGetPlaylistQuery(playlistID, {
+  const { data: selectedPlaylist } = useGetSelectedPlaylistQuery(playlistID, {
     skip: playlistID === 0
   })
 
   const onOpen = () => {
-    if (playlist == null) {
+    if (selectedPlaylist == null) {
       return
     }
 
-    navigate(`/${playlistTypePages[playlist.type]}/${playlist.id}`)
+    navigate(
+      `/${playlistTypePages[selectedPlaylist.type]}/${selectedPlaylist.itemId ?? selectedPlaylist.id}`
+    )
   }
 
   const onCreate = async (name: string) => {
-    const { data } = await createPlaylist({type: props.type, name})
+    const { data } = await createPlaylist({ type: props.type, name })
     if (data != null) {
       dispatch(props.action(data.value.toString()))
       navigate(`/${playlistTypePages[props.type]}/${data.value}`)
@@ -84,16 +96,21 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
   }
 
   const autoCompleteOptions = [...(singleOptions ?? []), ...(options ?? [])]
-  const optionValue = autoCompleteOptions.find((option) => option.value === value)
+  const optionValue = autoCompleteOptions.find(
+    (option) => option.value === value
+  )
   const { classes } = useStyles()
   return (
     <Box className={classes.flex}>
-      <Tooltip disableInteractive title={`Open ${playlistTypeDisplayNames[playlist?.type ?? props.type]}`}>
+      <Tooltip
+        disableInteractive
+        title={`Open ${playlistTypeDisplayNames[selectedPlaylist?.type ?? props.type]}`}
+      >
         <span className={classes.btnWrapper}>
           <IconButton
             onClick={onOpen}
             className={classes.btn}
-            disabled={playlist == null}
+            disabled={selectedPlaylist == null}
           >
             {props.type === PLT.audio && <AudiotrackIcon />}
             {(props.type === PLT.scene || props.type === PLT.singleScene) && (
@@ -104,52 +121,63 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
         </span>
       </Tooltip>
 
-    {optionValue && <Autocomplete
-      value={optionValue}
-      onChange={async (event, newValue) => {
-        if (typeof newValue === 'string') {
-          await onCreate(newValue)
-        } else if(newValue != null) {
-          dispatch(props.action(newValue.value))
-        }
-      }}
-      filterOptions={(options, params) => {
-        const filtered = filter(options, params);
+      {optionValue && (
+        <Autocomplete
+          value={optionValue}
+          onChange={async (event, newValue) => {
+            if (typeof newValue === 'string') {
+              await onCreate(newValue)
+            } else if (newValue != null) {
+              dispatch(props.action(newValue.value))
+            }
+          }}
+          filterOptions={(options, params) => {
+            const filtered = filter(options, params)
 
-        const { inputValue } = params;
-        const isExisting = options.some((option) => inputValue === option.label);
-        if (inputValue !== '' && !isExisting) {
-          // Suggest the creation of a new value
-          filtered.push({
-            value: inputValue,
-            label: `Add "${inputValue}"`,
-          });
-        }
+            const { inputValue } = params
+            const isExisting = options.some(
+              (option) => inputValue === option.label
+            )
+            if (inputValue !== '' && !isExisting) {
+              // Suggest the creation of a new value
+              filtered.push({
+                value: inputValue,
+                label: `Add "${inputValue}"`
+              })
+            }
 
-        return filtered;
-      }}
-      selectOnFocus
-      clearOnBlur
-      handleHomeEndKeys
-      fullWidth
-      freeSolo
-      id={`${playlistTypeDisplayNames[props.type].toLowerCase().split(' ').join('-')}`}
-      options={autoCompleteOptions}
-      isOptionEqualToValue={(option, value) => option.value === value.value}
-      getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
-      getOptionKey={(option) => typeof option === 'string' ? option : option.value}
-      renderOption={(props, option) => {
-        const { key, ...optionProps } = props;
-        return (
-          <li key={key} {...optionProps}>
-            {option.label}
-          </li>
-        );
-      }}
-      renderInput={(params: AutocompleteRenderInputParams) => (
-        <TextField {...params} label={playlistTypeDisplayNames[props.type]} />
+            return filtered
+          }}
+          selectOnFocus
+          clearOnBlur
+          handleHomeEndKeys
+          fullWidth
+          freeSolo
+          id={`${playlistTypeDisplayNames[props.type].toLowerCase().split(' ').join('-')}`}
+          options={autoCompleteOptions}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
+          getOptionLabel={(option) =>
+            typeof option === 'string' ? option : option.label
+          }
+          getOptionKey={(option) =>
+            typeof option === 'string' ? option : option.value
+          }
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props
+            return (
+              <li key={key} {...optionProps}>
+                {option.label}
+              </li>
+            )
+          }}
+          renderInput={(params: AutocompleteRenderInputParams) => (
+            <TextField
+              {...params}
+              label={playlistTypeDisplayNames[props.type]}
+            />
+          )}
+        />
       )}
-    />}
     </Box>
   )
 }
