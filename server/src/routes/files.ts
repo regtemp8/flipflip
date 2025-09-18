@@ -20,7 +20,6 @@ import proxy from './ProxyService'
 import fileRegistry from './FileRegistry'
 
 const logger = Logger.create('files')
-
 const typeDirs = new Map<string, string | undefined>([
   [AF.script, process.env.FF_SCRIPT_DIR],
   [AF.audios, process.env.FF_AUDIO_DIR],
@@ -158,9 +157,14 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
     } else {
       res.status(302).location(url).end()
     }
-  } else if (!fs.existsSync(url)) {
-    res.status(404).end()
   } else {
+    try {
+      await fs.promises.access(url, fs.constants.F_OK)
+    } catch {
+      res.status(404).end()
+      return
+    }
+
     let ranges = undefined
     const { size } = await fs.promises.stat(url)
     if (isVideo(url, true) || isAudio(url, true)) {
@@ -174,8 +178,18 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
     } else if (ranges == -2) {
       // Syntactically invalid parser result, return HTTP status 400: bad request
       res.status(400).end()
-    } else if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
-      const { start, end } = ranges[0]
+    } else {
+      let start: number
+      let end: number
+      const chunk = 1024 * 1024 // 1MB
+      if (ranges != null && ranges.length > 0 && ranges.type === 'bytes') {
+        start = ranges[0].start
+        end = Math.min(start + chunk, start + ranges[0].end, size - 1)
+      } else {
+        start = 0
+        end = Math.min(chunk, size - 1)
+      }
+
       res
         .status(206)
         .set({
@@ -193,8 +207,6 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
         logger.error(`Failed to read file ${req.url}`, { error })
       })
       stream.pipe(res)
-    } else {
-      res.status(200).sendFile(url)
     }
   }
 }

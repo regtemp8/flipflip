@@ -43,6 +43,7 @@ import Logger from './logging/Logger'
 import proxy from './routes/proxy'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
 import { pipeline } from 'stream/promises'
+import RateLimit from 'express-rate-limit'
 
 const host = getServerHost()
 const port = getServerPort()
@@ -149,6 +150,13 @@ void (async function () {
     )
     app.use(cors.default)
   }
+
+  app.use(
+    RateLimit({
+      windowMs: 1000,
+      max: 100
+    })
+  )
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
