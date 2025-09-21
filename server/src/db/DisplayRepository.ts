@@ -178,6 +178,7 @@ export async function deleteTemporaryDisplay(displayId: number) {
       const tempDisplay = await trx
         .selectFrom('display')
         .select((eb) => eb.lit(1).as('exists'))
+        .where('id', '=', displayId)
         .where('temporary', '=', toNumber(true))
         .executeTakeFirst()
 
