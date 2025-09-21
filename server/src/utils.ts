@@ -304,3 +304,12 @@ export function areWeightsValid(scene: Scene): boolean {
     (remaining === 0 || (remaining === 100 && weightRules.length === 0))
   )
 }
+
+export function pushInChunks<T>(target: T[], newItems: T[], chunkSize = 50000) {
+  for (let i = 0; i < newItems.length; i += chunkSize) {
+    const end = Math.min(i + chunkSize, newItems.length)
+    const chunk = newItems.slice(i, end);
+    target.push(...chunk);
+  }
+  return target;
+}

@@ -288,7 +288,7 @@ export default class SourceScraper {
     if (urls == null) {
       urls = data
     } else {
-      urls.push(...data)
+      pushInChunks(urls, data)
     }
 
     this.allURLs.set(key, urls)
