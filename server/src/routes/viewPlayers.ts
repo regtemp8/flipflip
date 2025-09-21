@@ -3,7 +3,10 @@ import viewPlayers from '../player/ViewPlayerService'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { User } from '../db/types/entities'
 import { SCENE_NONE, ViewerEvent, ViewPlayerConfig } from 'flipflip-common'
-import { findDisplayViewById } from '../db/DisplayViewRepository'
+import {
+  findDisplayViewById,
+  findLoadingDisplayViewIds
+} from '../db/DisplayViewRepository'
 import { rewriteImageViewDataUrls, toDisplayView } from '../db/mappers'
 
 const router = express.Router()
@@ -32,9 +35,12 @@ router.get('/:id/config', async (req, res) => {
       return
     }
 
+    const views = await findLoadingDisplayViewIds(
+      displayView?.displayId as number
+    )
     const displaySettings = await findDisplaySettings(req.user as User)
-    maxCanLoad = displaySettings.maxInMemory
-    maxCanLoadAtOnce = displaySettings.maxLoadingAtOnce
+    maxCanLoad = displaySettings.maxInMemory / views.length
+    maxCanLoadAtOnce = displaySettings.maxLoadingAtOnce / views.length
     sceneId = viewPlayer.getCurrentSceneId()
   } else {
     uuid = viewPlayers().getViewPlayerId(view.syncWithView as number)
