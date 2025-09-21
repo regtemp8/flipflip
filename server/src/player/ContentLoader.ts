@@ -53,7 +53,7 @@ import { User } from '../db/types/entities'
 import { findDisplaySettings } from '../db/DisplaySettingsRepository'
 import { toBoolean } from '../db/utils'
 import fileRegistry from '../routes/FileRegistry'
-import proxy from '../routes/ProxyService'
+import proxy, { ProxyRequest } from '../routes/ProxyService'
 
 function newContentData(
   url: string,
@@ -371,6 +371,33 @@ export default class ContentLoader {
     }
 
     const sourceType = getSourceType(url)
+    if (sourceType === ST.local || sourceType === ST.video) {
+      const uuid = fileRegistry().set(url)
+      url = `http://localhost/fs/file/registry/${uuid}`
+    } else if (
+      sourceType === ST.imagefap ||
+      sourceType === ST.deviantart ||
+      sourceType === ST.luscious ||
+      sourceType === ST.bdsmlr ||
+      sourceType === ST.hydrus
+    ) {
+      let ext: string | undefined = undefined
+      if (sourceType === ST.hydrus) {
+        ext = new URL(url).searchParams.get('ext') ?? undefined
+      }
+
+      let proxyRequest: ProxyRequest
+      if (sourceType === ST.bdsmlr) {
+        const pieces = url.split(':::')
+        proxyRequest = { url: pieces[0], headers: JSON.parse(pieces[1]) }
+      } else {
+        proxyRequest = { url }
+      }
+
+      const uuid = proxy().set(proxyRequest, ext)
+      url = `http://localhost/proxy/${uuid}`
+    }
+
     if (sourceType === ST.nimja) {
       const proxyURL = this.proxyNimjaURL(url)
       const data = newContentData(proxyURL, 'iframe')

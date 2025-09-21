@@ -35,8 +35,7 @@ import { findContentSourceClipIds } from '../db/ClipRepository'
 import { StaticPool } from 'node-worker-threads-pool'
 import { ScrapeRequest } from './ScrapeRequest'
 import { ScrapeResult } from './ScrapeResult'
-import proxy, { ProxyRequest } from '../routes/ProxyService'
-import fileRegistry from '../routes/FileRegistry'
+import { pushInChunks } from '../utils'
 
 const logger = Logger.create('SourceScraper')
 async function getDirectories(path: string) {
@@ -114,7 +113,7 @@ export default class SourceScraper {
         try {
           const directories = await getDirectories(row.url)
           for (const directory of directories) {
-            sources.push(toContentSourceUrl(row.url + path.sep + directory))
+            sources.push(toContentSourceUrl(path.join(row.url, directory)))
           }
         } catch (e) {
           sources.push(toContentSource(row, tags, clips))
@@ -275,43 +274,8 @@ export default class SourceScraper {
         )
       }
 
-      object.data = this.rewriteURLs(object.data)
       this.processAllURLs(object.data, object.source, object.weight)
     }
-  }
-
-  private rewriteURLs(data: string[]) {
-    return data.map((url) => {
-      const sourceType = getSourceType(url)
-      if (sourceType === ST.local || sourceType === ST.video) {
-        const uuid = fileRegistry().set(url)
-        url = `http://localhost/fs/file/registry/${uuid}`
-      } else if (
-        sourceType === ST.imagefap ||
-        sourceType === ST.deviantart ||
-        sourceType === ST.luscious ||
-        sourceType === ST.bdsmlr ||
-        sourceType === ST.hydrus
-      ) {
-        let ext: string | undefined = undefined
-        if (sourceType === ST.hydrus) {
-          ext = new URL(url).searchParams.get('ext') ?? undefined
-        }
-
-        let proxyRequest: ProxyRequest
-        if (sourceType === ST.bdsmlr) {
-          const pieces = url.split(':::')
-          proxyRequest = { url: pieces[0], headers: JSON.parse(pieces[1]) }
-        } else {
-          proxyRequest = { url }
-        }
-
-        const uuid = proxy().set(proxyRequest, ext)
-        url = `http://localhost/proxy/${uuid}`
-      }
-
-      return url
-    })
   }
 
   private processAllURLs(
