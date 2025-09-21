@@ -39,6 +39,18 @@ export async function findVisibleDisplayViewIds(displayId: number) {
     .execute()
 }
 
+export async function findLoadingDisplayViewIds(displayId: number) {
+  return await db()
+    .query()
+    .selectFrom('displayView')
+    .select('id')
+    .where('displayId', '=', displayId)
+    .where('visible', '=', toNumber(true))
+    .where('sync', '=', toNumber(false))
+    .orderBy('index asc')
+    .execute()
+}
+
 export async function findDisplayViewIds(displayId: number) {
   const rows = await db()
     .query()
