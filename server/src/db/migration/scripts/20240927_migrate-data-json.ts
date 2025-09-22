@@ -215,10 +215,6 @@ const remoteSettingsInsert = async (
     redditClientID,
     redditDeviceID,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -244,10 +240,6 @@ const remoteSettingsInsert = async (
       redditClientId: redditClientID,
       redditDeviceId: redditDeviceID,
       redditRefreshToken,
-      twitterConsumerKey,
-      twitterConsumerSecret,
-      twitterAccessTokenKey,
-      twitterAccessTokenSecret,
       instagramUsername,
       instagramPassword,
       hydrusProtocol,
@@ -1019,9 +1011,7 @@ const contentSourceInsert = async (
     duration,
     resolution,
     redditFunc,
-    redditTime,
-    includeRetweets,
-    includeReplies
+    redditTime
   } = source
 
   logger.info(`+ Insert content source {url} (id: ${id})`, { url })
@@ -1044,8 +1034,6 @@ const contentSourceInsert = async (
       videoResolution: resolution,
       redditFunc,
       redditTime,
-      twitterIncludeRetweets: toNumber(includeRetweets),
-      twitterIncludeReplies: toNumber(includeReplies),
       index,
       createdAt: Date.now()
     })
