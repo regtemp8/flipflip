@@ -65,9 +65,7 @@ function toContentSourceUrl(url: string): ContentSource {
     countComplete: false,
     weight: 0,
     fileUrl: '',
-    dirOfSources: false,
-    includeRetweets: false,
-    includeReplies: false
+    dirOfSources: false
   }
 }
 

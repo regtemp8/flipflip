@@ -6,7 +6,6 @@ import ListIcon from '@mui/icons-material/List'
 import MovieIcon from '@mui/icons-material/Movie'
 import RedditIcon from '@mui/icons-material/Reddit'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
-import TwitterIcon from '@mui/icons-material/Twitter'
 import { ST } from 'flipflip-common'
 
 function RedGifsIcon(props: any) {
@@ -269,10 +268,6 @@ export default function SourceIcon(props: SourceIconProps) {
       return <RedditIcon style={{ color: 'red' }} className={props.className} />
     case ST.redgifs:
       return <RedGifsIcon className={props.className} />
-    case ST.twitter:
-      return (
-        <TwitterIcon style={{ color: 'red' }} className={props.className} />
-      )
     case ST.instagram:
       return <InstagramIcon className={props.className} />
     case ST.tumblr:

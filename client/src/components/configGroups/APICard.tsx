@@ -41,8 +41,6 @@ import {
   setConfigRemoteSettingsTumblrOAuthTokenSecret,
   setConfigRemoteSettingsRedditDeviceID,
   setConfigRemoteSettingsRedditRefreshToken,
-  setConfigRemoteSettingsTwitterAccessTokenKey,
-  setConfigRemoteSettingsTwitterAccessTokenSecret,
   setConfigRemoteSettingsInstagramUsername,
   setConfigRemoteSettingsInstagramPassword,
   setConfigRemoteSettingsHydrusProtocol,
@@ -58,7 +56,6 @@ import {
   useGetRemoteSettingsSilenceTumblrAlertQuery,
   useGetRemoteSettingsTumblrAuthorizedQuery,
   // useGetRemoteSettingsRedditAuthorizedQuery,
-  // useGetRemoteSettingsTwitterAuthorizedQuery,
   useGetRemoteSettingsInstagramConfiguredQuery,
   useGetRemoteSettingsHydrusConfiguredQuery,
   useGetRemoteSettingsPiwigoConfiguredQuery
@@ -151,17 +148,6 @@ function APICard() {
     onCloseDialog()
   }
 
-  // const onClearTwitter = () => {
-  //   setOpenMenu(MO.signOut)
-  //   setMenuType(ST.twitter)
-  // }
-
-  const onFinishClearTwitter = () => {
-    dispatch(setConfigRemoteSettingsTwitterAccessTokenKey(''))
-    dispatch(setConfigRemoteSettingsTwitterAccessTokenSecret(''))
-    onCloseDialog()
-  }
-
   const onClearInstagram = () => {
     setOpenMenu(MO.signOut)
     setMenuType(ST.instagram)
@@ -215,11 +201,6 @@ function APICard() {
   // const onAuthReddit = () => {
   //   setOpenMenu(MO.signIn)
   //   setMenuType(ST.reddit)
-  // }
-
-  // const onAuthTwitter = () => {
-  //   setOpenMenu(MO.signIn)
-  //   setMenuType(ST.twitter)
   // }
 
   const onAuthInstagram = () => {
@@ -352,40 +333,6 @@ function APICard() {
       dispatch(setConfigRemoteSettingsRedditRefreshToken(data.refresh_token))
 
       showSuccess('Reddit is now activated')
-    }
-  }
-
-  const onFinishAuthTwitter = async () => {
-    onCloseDialog()
-
-    // Twitter endpoints
-    // const authorizeUrl = 'https://api.twitter.com/oauth/authorize'
-    // const requestTokenUrl = 'https://api.twitter.com/oauth/request_token'
-    // const accessTokenUrl = 'https://api.twitter.com/oauth/access_token'
-
-    // Twitter OAuth
-    const data: any | undefined = undefined
-    try {
-      // TODO re-implement twitter oauth flow
-      // data = await flipflip().api.twitterOAuth(
-      //   requestTokenUrl,
-      //   accessTokenUrl,
-      //   twitterConsumerKey,
-      //   twitterConsumerSecret,
-      //   authorizeUrl
-      // )
-    } catch (err: any) {
-      // TODO is error ever thrown? need other error handling logic?
-      const message = err.statusCode + ' - ' + err.data
-      console.error(message)
-      showError(message)
-    }
-
-    if (data) {
-      dispatch(setConfigRemoteSettingsTwitterAccessTokenKey(data.token))
-      dispatch(setConfigRemoteSettingsTwitterAccessTokenSecret(data.secret))
-
-      showSuccess('Twitter is now activated')
     }
   }
 
@@ -539,8 +486,6 @@ function APICard() {
         return onFinishClearTumblr
       case ST.reddit:
         return onFinishClearReddit
-      case ST.twitter:
-        return onFinishClearTwitter
       case ST.instagram:
         return onFinishClearInstagram
       case ST.hydrus:
@@ -595,16 +540,6 @@ function APICard() {
               onClick={redditAuthorized ? onClearReddit : onAuthReddit}
               size="large">
               <SourceIcon className={classes.icon} type={ST.reddit}/>
-            </Fab>
-          </Tooltip>
-        </Grid2> */}
-        {/* <Grid2>
-          <Tooltip disableInteractive title={twitterAuthorized ? "Authorized: Click to Sign Out of Twitter" : "Unauthorized: Click to Authorize Twitter"}  placement="top-end">
-            <Fab
-              className={cx(classes.fab, twitterAuthorized ? classes.authorized : classes.noAuth)}
-              onClick={twitterAuthorized ? onClearTwitter : onAuthTwitter}
-              size="large">
-              <SourceIcon className={classes.icon} type={ST.twitter}/>
             </Fab>
           </Tooltip>
         </Grid2> */}
@@ -858,45 +793,6 @@ function APICard() {
           </Button>
           <Button onClick={onFinishAuthReddit} color="primary">
             Authorize FlipFlip on Reddit
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={openMenu === MO.signIn && menuType === ST.twitter}
-        onClose={onCloseDialog}
-        aria-labelledby="sign-in-title"
-        aria-describedby="sign-in-description"
-      >
-        <DialogTitle id="sign-in-title">
-          Twitter Sign In
-          <Avatar className={classes.iconAvatar}>
-            <SourceIcon className={classes.icon} type={ST.twitter} />
-          </Avatar>
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="sign-in-description">
-            You are about to be directed to{' '}
-            <Link
-              href="#"
-              onClick={() => {
-                openLink('https://www.twitter.com')
-              }}
-              underline="hover"
-            >
-              Twitter.com
-            </Link>{' '}
-            to authorize flipflip(). You should only have to do this once.
-            FlipFlip does not store any user information or make any changes to
-            your account.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseDialog} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={onFinishAuthTwitter} color="primary">
-            Authorize FlipFlip on Twitter
           </Button>
         </DialogActions>
       </Dialog>

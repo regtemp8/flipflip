@@ -81,7 +81,6 @@ import {
 } from '../../store/api/slice'
 import {
   useGetRemoteSettingsRedditAuthorizedQuery,
-  useGetRemoteSettingsTwitterAuthorizedQuery,
   useGetRemoteSettingsTumblrAuthorizedQuery,
   useGetRemoteSettingsInstagramConfiguredQuery,
   useGetRemoteSettingsPiwigoConfiguredQuery
@@ -366,8 +365,6 @@ function Library() {
   const [sortContentSources] = useSortContentSourcesMutation()
   const { data: tumblrAuthorized } = useGetRemoteSettingsTumblrAuthorizedQuery()
   const { data: redditAuthorized } = useGetRemoteSettingsRedditAuthorizedQuery()
-  const { data: twitterAuthorized } =
-    useGetRemoteSettingsTwitterAuthorizedQuery()
   const { data: instagramConfigured } =
     useGetRemoteSettingsInstagramConfiguredQuery()
   const { data: piwigoConfigured } = useGetRemoteSettingsPiwigoConfiguredQuery()
@@ -666,7 +663,6 @@ function Library() {
           'Cancel Import ( ' + progressCurrent + ' / ' + progressTotal + ' )'
         )
       case PR.reddit:
-      case PR.twitter:
       case PR.instagram:
         return 'Cancel Import'
     }
@@ -675,7 +671,6 @@ function Library() {
   const remoteAuthorized =
     tumblrAuthorized ||
     redditAuthorized ||
-    twitterAuthorized ||
     instagramConfigured
   const { classes } = useStyles()
   const open = drawerOpen
@@ -886,16 +881,6 @@ function Library() {
                       <SourceIcon type={ST.reddit}/>
                     </ListItemIcon>
                     <ListItemText primary="Reddit" />
-                  </ListItemButton>
-                </Tooltip>
-              )} */}
-              {/* {twitterAuthorized && (
-                <Tooltip disableInteractive title={drawerOpen ? "" : "Import from Twitter"}>
-                  <ListItemButton disabled={progressMode != null} onClick={() => dispatch(importTwitter())}>
-                    <ListItemIcon>
-                      <SourceIcon type={ST.twitter}/>
-                    </ListItemIcon>
-                    <ListItemText primary="Twitter" />
                   </ListItemButton>
                 </Tooltip>
               )} */}

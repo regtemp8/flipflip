@@ -2,8 +2,6 @@ export * from './lib/const';
 export * from './lib/en';
 export * from './lib/utils';
 export * from './lib/websocket';
-export * from './lib/twitter/TwitterFollowers';
-export * from './lib/twitter/TwitterItems';
 export * from './lib/instagram/InstagramItems';
 export * from './lib/SystemConstants';
 export * from './lib/json/Backup';

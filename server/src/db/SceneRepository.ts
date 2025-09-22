@@ -1065,8 +1065,6 @@ export async function cloneScene(originalId: number, userId: number) {
           'videoResolution',
           'redditFunc',
           'redditTime',
-          'twitterIncludeRetweets',
-          'twitterIncludeReplies',
           'createdAt',
           'index'
         ])
@@ -1090,8 +1088,6 @@ export async function cloneScene(originalId: number, userId: number) {
           videoResolution,
           redditFunc,
           redditTime,
-          twitterIncludeReplies,
-          twitterIncludeRetweets,
           createdAt,
           index
         } = contentSource
@@ -1115,8 +1111,6 @@ export async function cloneScene(originalId: number, userId: number) {
             videoResolution,
             redditFunc,
             redditTime,
-            twitterIncludeReplies,
-            twitterIncludeRetweets,
             createdAt,
             index
           })

@@ -107,7 +107,6 @@ export const en = new Map<string, string>([
   ['st.redgifs', 'RedGifs'],
   ['st.imagefap', 'ImageFap'],
   ['st.imgur', 'Imgur'],
-  ['st.twitter', 'Twitter'],
   ['st.deviantart', 'DeviantArt'],
   ['st.instagram', 'Instagram'],
   ['st.danbooru', 'Danbooru'],

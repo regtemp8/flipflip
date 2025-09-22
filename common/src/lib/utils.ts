@@ -235,8 +235,6 @@ export function getSourceType(url: string): string {
     return ST.imagefap;
   } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
     return ST.imgur;
-  } else if (/^https?:\/\/(www\.)?twitter\.com\//.exec(url) != null) {
-    return ST.twitter;
   } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
     return ST.deviantart;
   } else if (/^https?:\/\/(www\.)?instagram\.com\//.exec(url) != null) {
@@ -326,15 +324,6 @@ export function getFileGroup(url: string, pathSep: string) {
         .split('/')[0];
     case ST.imgur:
       return url.replace(/https?:\/\/imgur.com\//, '').replace(/a\//, '');
-    case ST.twitter:
-      url = url.replace(/https?:\/\/twitter.com\//, '');
-      if (url.includes('?')) {
-        url = url.substring(0, url.indexOf('?'));
-      }
-      if (url.endsWith('/')) {
-        url = url.substring(0, url.length - 1);
-      }
-      return url;
     case ST.deviantart:
       url = url.replace(/https?:\/\/www.deviantart.com\//, '');
       if (url.includes('/')) {

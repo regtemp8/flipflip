@@ -396,7 +396,6 @@ function SourceListItem(props: SourceListItemProps) {
                 )}
               {(sourceType === ST.local ||
                 sourceType === ST.video ||
-                sourceType === ST.twitter ||
                 sourceType === ST.reddit) && (
                 <IconButton
                   onClick={() => props.onSourceOptions(props.source)}

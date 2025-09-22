@@ -44,13 +44,13 @@ export const initialRemoteSettings: RemoteSettings = {
   tumblrOAuthTokenSecret: '',
   silenceTumblrAlert: false,
 
-  redditUserAgent: 'desktop:flipflip:v2.0.0 (by /u/ififfy)',
-  redditClientID: '2Iqe-1CsO4VQlA',
+  redditUserAgent: '',
+  redditClientID: '',
   redditDeviceID: '',
   redditRefreshToken: '',
 
-  twitterConsumerKey: 'qSRfdIWfpkesYDVJHrRh05wji',
-  twitterConsumerSecret: 'ad11IC4CLwVzYyGyYwHKVMP9WwAcKxymw4D9162S5Ex75l5eWw',
+  twitterConsumerKey: '',
+  twitterConsumerSecret: '',
   twitterAccessTokenKey: '',
   twitterAccessTokenSecret: '',
 

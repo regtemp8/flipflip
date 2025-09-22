@@ -172,7 +172,6 @@ const ST = {
   redgifs: 'st.redgifs',
   imagefap: 'st.imagefap',
   imgur: 'st.imgur',
-  twitter: 'st.twitter',
   deviantart: 'st.deviantart',
   instagram: 'st.instagram',
   danbooru: 'st.danbooru',
@@ -249,7 +248,6 @@ const IPC = {
   igSerializeCookieJar: 'ipc.igSerializeCookieJar',
   igFollowingFeed: 'ipc.igFollowingFeed',
   igGetMoreFollowingFeed: 'ipc.igGetMoreFollowingFeed',
-  twitterFriendsList: 'ipc.twitterFriendsList',
   redditGetSubscriptions: 'ipc.redditGetSubscriptions',
   tumblrTotalBlogs: 'ipc.tumblrTotalBlogs',
   tumblrBlogs: 'ipc.tumblrBlogs',
@@ -261,7 +259,6 @@ const IPC = {
   rimrafSync: 'ipc.rimrafSync',
   cleanBackups: 'ipc.cleanBackups',
   tumblrOAuth: 'ipc.tumblrOAuth',
-  twitterOAuth: 'ipc.twitterOAuth',
   redditOAuth: 'ipc.redditOAuth',
   getFileUrl: 'ipc.getFileUrl',
   getContext: 'ipc.getContext',
@@ -350,7 +347,6 @@ const PR = {
   bpm: 'pr.bpm',
   tumblr: 'pr.tumblr',
   reddit: 'pr.reddit',
-  twitter: 'pr.twitter',
   instagram: 'pr.instagram',
 };
 
