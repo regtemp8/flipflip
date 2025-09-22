@@ -106,7 +106,6 @@ export const en = new Map<string, string>([
   ['st.reddit', 'Reddit'],
   ['st.redgifs', 'RedGifs'],
   ['st.imagefap', 'ImageFap'],
-  ['st.sexcom', 'SexCom'],
   ['st.imgur', 'Imgur'],
   ['st.twitter', 'Twitter'],
   ['st.deviantart', 'DeviantArt'],
