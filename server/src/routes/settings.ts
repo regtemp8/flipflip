@@ -37,6 +37,7 @@ import { toNumber } from '../db/utils'
 import { SIZE_UNKNOWN, WC } from 'flipflip-common'
 import Logger from '../logging/Logger'
 import getFolderSize from 'get-folder-size'
+import { fileExists } from '../utils'
 
 const logger = Logger.create('settings')
 const router = express.Router()
@@ -99,10 +100,13 @@ router.get('/cache', async (req, res) => {
 })
 router.get('/cache/size', async (req, res) => {
   const settings = await findCacheSettings(req.user as User)
-  if (
-    !fs.existsSync(settings.directory) ||
-    !fs.statSync(settings.directory).isDirectory()
-  ) {
+  let directory = await fileExists(settings.directory)
+  if (directory) {
+    const stat = await fs.promises.stat(settings.directory)
+    directory = stat.isDirectory()
+  }
+
+  if (!directory) {
     res.status(200).send(toCacheSize(SIZE_UNKNOWN))
     return
   }
@@ -127,10 +131,13 @@ router.patch('/cache', async (req, res) => {
 })
 router.post('/cache/clear', async (req, res) => {
   const settings = await findCacheSettings(req.user as User)
-  if (
-    fs.existsSync(settings.directory) &&
-    fs.statSync(settings.directory).isDirectory()
-  ) {
+  let directory = await fileExists(settings.directory)
+  if (directory) {
+    const stat = await fs.promises.stat(settings.directory)
+    directory = stat.isDirectory()
+  }
+
+  if (directory) {
     const entries = await fs.promises.readdir(settings.directory)
     for (const entry of entries) {
       const dirPath = path.join(settings.directory, entry)

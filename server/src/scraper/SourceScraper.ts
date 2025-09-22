@@ -115,9 +115,9 @@ export default class SourceScraper {
           for (const directory of directories) {
             sources.push(toContentSourceUrl(path.join(row.url, directory)))
           }
-        } catch (e) {
+        } catch (error) {
           sources.push(toContentSource(row, tags, clips))
-          logger.error('Failed to read local directory', e as object)
+          logger.error('Failed to read local directory', { error })
         }
       } else {
         sources.push(toContentSource(row, tags, clips))

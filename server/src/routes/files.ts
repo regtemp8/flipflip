@@ -11,7 +11,7 @@ import {
   isVideoPlaylist
 } from 'flipflip-common'
 import Logger from '../logging/Logger'
-import { getSaveDir, getThumbsDir } from '../utils'
+import { fileExists, getSaveDir, getThumbsDir } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
@@ -36,11 +36,14 @@ router.get('/pick', async (req, res) => {
     : (typeDirs.get(type) ?? getSaveDir())
 
   dir = path.resolve(dir)
-  if (!fs.existsSync(dir)) {
+  const exists = await fileExists(dir)
+  if (!exists) {
     res.status(400).send({ error: `Path '${dir}' doesn't exist` })
     return
   }
-  if (!fs.statSync(dir).isDirectory()) {
+
+  const stat = await fs.promises.stat(dir)
+  if (!stat.isDirectory()) {
     res.status(400).send({ error: `Path '${dir}' is not a directory` })
     return
   }
@@ -115,7 +118,8 @@ router.post('/create-directory', async (req, res) => {
 router.get('/file/audio-thumb/:name', async (req, res) => {
   const { name } = req.params
   const thumb = path.join(getThumbsDir(), name)
-  if (fs.existsSync(thumb)) {
+  const thumbExists = await fileExists(thumb)
+  if (thumbExists) {
     res.status(200).type(name.substring(name.lastIndexOf('.')))
     fs.createReadStream(thumb).pipe(res)
   } else {

@@ -91,7 +91,7 @@ import {
 } from './utils'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
+import { fileExists, getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
 import { Request } from 'express'
@@ -1488,10 +1488,11 @@ export function toFontSettingsUpdate(
   }
 }
 
-export function toBackup(row: BackupRow): Backup {
+export async function toBackup(row: BackupRow): Promise<Backup> {
   const { id, createdAt, fileName } = row
   const filePath = path.join(getBackupsDir(), fileName)
-  const size = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
+  const exists = await fileExists(filePath)
+  const size = exists ? (await fs.promises.stat(filePath)).size : 0
   return { id: id as number, createdAt, size }
 }
 

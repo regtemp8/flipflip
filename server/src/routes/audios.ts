@@ -1,4 +1,3 @@
-import fs from 'fs'
 import express from 'express'
 import {
   fromAudioThumb,
@@ -43,7 +42,7 @@ import {
   Message,
   MoveRequest
 } from 'flipflip-common'
-import { copyThumbFile, readAudioMetadata } from '../utils'
+import { copyThumbFile, fileExists, readAudioMetadata } from '../utils'
 import { toBoolean } from '../db/utils'
 import { isAudioPlaylistItem } from '../db/PlaylistItemRepository'
 
@@ -62,7 +61,7 @@ router.post('/', async (req, res) => {
   const urls: string[] = []
   for (const url of req.body) {
     const isUrl = url.startsWith('http')
-    if (isAudio(url, false) && (isUrl || fs.existsSync(url))) {
+    if (isAudio(url, false) && (isUrl || (await fileExists(url)))) {
       urls.push(url)
     } else {
       messages.push({
@@ -368,7 +367,10 @@ router.patch('/:id', async (req, res) => {
   const update = toAudioUpdate(body)
   if (update.url) {
     isUrl = update.url.startsWith('http')
-    if (!isAudio(update.url, false) || (!isUrl && !fs.existsSync(update.url))) {
+    if (
+      !isAudio(update.url, false) ||
+      (!isUrl && !(await fileExists(update.url)))
+    ) {
       res.status(400).send({
         error: `Invalid audio ${isUrl ? 'URL' : 'path'}: ${update.url}`
       })
