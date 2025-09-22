@@ -669,9 +669,7 @@ function Library() {
   }
 
   const remoteAuthorized =
-    tumblrAuthorized ||
-    redditAuthorized ||
-    instagramConfigured
+    tumblrAuthorized || redditAuthorized || instagramConfigured
   const { classes } = useStyles()
   const open = drawerOpen
   const cancelProgressMessage = getCancelProgressMessage()
