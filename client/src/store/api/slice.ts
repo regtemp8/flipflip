@@ -1013,7 +1013,7 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      async onQueryStarted({type}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ type }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(
           flipflipApi.util.invalidateTags([

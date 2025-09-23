@@ -1,9 +1,5 @@
 import { CSSProperties, useMemo } from 'react'
-import {
-  WC,
-  WatermarkSettings,
-  getFileName
-} from 'flipflip-common'
+import { WC, WatermarkSettings, getFileName } from 'flipflip-common'
 import { useAppSelector } from '../../store/hooks'
 import { selectImagePlayerShownImageView } from '../../store/imagePlayer/selectors'
 import { ImageViewState } from '../../store/imagePlayer/slice'
