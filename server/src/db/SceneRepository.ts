@@ -5,6 +5,8 @@ import { Scene, SceneUpdate } from './types/entities'
 import { toBoolean, toNumber } from './utils'
 import { PLT } from 'flipflip-common'
 import { sql } from 'kysely'
+import { createPlaylist } from './PlaylistRepository'
+import { createScenePlaylistItem } from './PlaylistItemRepository'
 
 export async function findScenesWithSceneGroup(): Promise<SceneGroupRow[]> {
   return await db()
@@ -117,213 +119,14 @@ export async function findSceneHasBpm(id: number): Promise<boolean> {
 export async function createScene(userId: number) {
   return await db()
     .query()
-    .insertInto('scene')
-    .columns([
-      'userId',
-      'defaultScene',
-      'name',
-      'useWeights',
-      'weightsValid',
-      'timingFunction',
-      'timingConstant',
-      'timingMin',
-      'timingMax',
-      'timingSinRate',
-      'timingBpmMulti',
-      'backForth',
-      'backForthTf',
-      'backForthConstant',
-      'backForthMin',
-      'backForthMax',
-      'backForthSinRate',
-      'backForthBpmMulti',
-      'imageType',
-      'backgroundType',
-      'backgroundColor',
-      'backgroundColorSet',
-      'backgroundBlur',
-      'imageTypeFilter',
-      'fullSource',
-      'imageOrientation',
-      'gifOption',
-      'gifTimingConstant',
-      'gifTimingMin',
-      'gifTimingMax',
-      'videoOrientation',
-      'videoOption',
-      'videoTimingConstant',
-      'videoTimingMin',
-      'videoTimingMax',
-      'videoSpeed',
-      'videoRandomSpeed',
-      'videoSpeedMin',
-      'videoSpeedMax',
-      'videoSkip',
-      'randomVideoStart',
-      'continueVideo',
-      'playVideoClips',
-      'skipVideoStart',
-      'skipVideoEnd',
-      'videoVolume',
-      'weightFunction',
-      'sourceOrderFunction',
-      'forceAllSource',
-      'orderFunction',
-      'forceAll',
-      'zoom',
-      'zoomRandom',
-      'zoomStart',
-      'zoomStartMin',
-      'zoomStartMax',
-      'zoomEnd',
-      'zoomEndMin',
-      'zoomEndMax',
-      'horizTransType',
-      'horizTransLevel',
-      'horizTransLevelMin',
-      'horizTransLevelMax',
-      'horizTransRandom',
-      'vertTransType',
-      'vertTransLevel',
-      'vertTransLevelMin',
-      'vertTransLevelMax',
-      'vertTransRandom',
-      'transTf',
-      'transDuration',
-      'transDurationMin',
-      'transDurationMax',
-      'transSinRate',
-      'transBpmMulti',
-      'transEase',
-      'transExp',
-      'transAmp',
-      'transPer',
-      'transOv',
-      'crossFade',
-      'crossFadeAudio',
-      'fadeTf',
-      'fadeDuration',
-      'fadeDurationMin',
-      'fadeDurationMax',
-      'fadeSinRate',
-      'fadeBpmMulti',
-      'fadeEase',
-      'fadeExp',
-      'fadeAmp',
-      'fadePer',
-      'fadeOv',
-      'slide',
-      'slideTf',
-      'slideType',
-      'slideDistance',
-      'slideDuration',
-      'slideDurationMin',
-      'slideDurationMax',
-      'slideSinRate',
-      'slideBpmMulti',
-      'slideEase',
-      'slideExp',
-      'slideAmp',
-      'slidePer',
-      'slideOv',
-      'strobe',
-      'strobePulse',
-      'strobeLayer',
-      'strobeOpacity',
-      'strobeTf',
-      'strobeTime',
-      'strobeTimeMin',
-      'strobeTimeMax',
-      'strobeSinRate',
-      'strobeBpmMulti',
-      'strobeDelayTf',
-      'strobeDelay',
-      'strobeDelayMin',
-      'strobeDelayMax',
-      'strobeDelaySinRate',
-      'strobeDelayBpmMulti',
-      'strobeColorType',
-      'strobeColor',
-      'strobeColorSet',
-      'strobeEase',
-      'strobeExp',
-      'strobeAmp',
-      'strobePer',
-      'strobeOv',
-      'fadeInOut',
-      'fadeIoPulse',
-      'fadeIoTf',
-      'fadeIoDuration',
-      'fadeIoDurationMin',
-      'fadeIoDurationMax',
-      'fadeIoSinRate',
-      'fadeIoBpmMulti',
-      'fadeIoDelayTf',
-      'fadeIoDelay',
-      'fadeIoDelayMin',
-      'fadeIoDelayMax',
-      'fadeIoDelaySinRate',
-      'fadeIoDelayBpmMulti',
-      'fadeIoStartEase',
-      'fadeIoStartExp',
-      'fadeIoStartAmp',
-      'fadeIoStartPer',
-      'fadeIoStartOv',
-      'fadeIoEndEase',
-      'fadeIoEndExp',
-      'fadeIoEndAmp',
-      'fadeIoEndPer',
-      'fadeIoEndOv',
-      'panning',
-      'panTf',
-      'panDuration',
-      'panDurationMin',
-      'panDurationMax',
-      'panSinRate',
-      'panBpmMulti',
-      'panHorizTransType',
-      'panHorizTransImg',
-      'panHorizTransLevel',
-      'panHorizTransLevelMax',
-      'panHorizTransLevelMin',
-      'panHorizTransRandom',
-      'panVertTransType',
-      'panVertTransImg',
-      'panVertTransLevel',
-      'panVertTransLevelMax',
-      'panVertTransLevelMin',
-      'panVertTransRandom',
-      'panStartEase',
-      'panStartExp',
-      'panStartAmp',
-      'panStartPer',
-      'panStartOv',
-      'panEndEase',
-      'panEndExp',
-      'panEndAmp',
-      'panEndPer',
-      'panEndOv',
-      'overrideIgnore',
-      'scriptScene',
-      'downloadScene',
-      'generatorMax',
-      'persistAudio',
-      'persistText',
-      'libraryId',
-      'audioScene',
-      'audioEnabled',
-      'audioStartIndex',
-      'textEnabled',
-      'scriptStartIndex',
-      'regenerate'
-    ])
-    .expression((eb) =>
-      eb
-        .selectFrom('scene')
-        .select((eb) => [
-          eb.lit(userId).as('userId'),
-          eb.lit(toNumber(false)).as('defaultScene'),
-          eb.val('New scene').as('name'),
+    .transaction()
+    .execute(async (trx) => {
+      const scene = await trx
+        .insertInto('scene')
+        .columns([
+          'userId',
+          'defaultScene',
+          'name',
           'useWeights',
           'weightsValid',
           'timingFunction',
@@ -519,19 +322,266 @@ export async function createScene(userId: number) {
           'scriptStartIndex',
           'regenerate'
         ])
-        .where('defaultScene', '=', toNumber(true))
-    )
-    .returning('id')
-    .executeTakeFirstOrThrow()
+        .expression((eb) =>
+          eb
+            .selectFrom('scene')
+            .select((eb) => [
+              eb.lit(userId).as('userId'),
+              eb.lit(toNumber(false)).as('defaultScene'),
+              eb.val('New scene').as('name'),
+              'useWeights',
+              'weightsValid',
+              'timingFunction',
+              'timingConstant',
+              'timingMin',
+              'timingMax',
+              'timingSinRate',
+              'timingBpmMulti',
+              'backForth',
+              'backForthTf',
+              'backForthConstant',
+              'backForthMin',
+              'backForthMax',
+              'backForthSinRate',
+              'backForthBpmMulti',
+              'imageType',
+              'backgroundType',
+              'backgroundColor',
+              'backgroundColorSet',
+              'backgroundBlur',
+              'imageTypeFilter',
+              'fullSource',
+              'imageOrientation',
+              'gifOption',
+              'gifTimingConstant',
+              'gifTimingMin',
+              'gifTimingMax',
+              'videoOrientation',
+              'videoOption',
+              'videoTimingConstant',
+              'videoTimingMin',
+              'videoTimingMax',
+              'videoSpeed',
+              'videoRandomSpeed',
+              'videoSpeedMin',
+              'videoSpeedMax',
+              'videoSkip',
+              'randomVideoStart',
+              'continueVideo',
+              'playVideoClips',
+              'skipVideoStart',
+              'skipVideoEnd',
+              'videoVolume',
+              'weightFunction',
+              'sourceOrderFunction',
+              'forceAllSource',
+              'orderFunction',
+              'forceAll',
+              'zoom',
+              'zoomRandom',
+              'zoomStart',
+              'zoomStartMin',
+              'zoomStartMax',
+              'zoomEnd',
+              'zoomEndMin',
+              'zoomEndMax',
+              'horizTransType',
+              'horizTransLevel',
+              'horizTransLevelMin',
+              'horizTransLevelMax',
+              'horizTransRandom',
+              'vertTransType',
+              'vertTransLevel',
+              'vertTransLevelMin',
+              'vertTransLevelMax',
+              'vertTransRandom',
+              'transTf',
+              'transDuration',
+              'transDurationMin',
+              'transDurationMax',
+              'transSinRate',
+              'transBpmMulti',
+              'transEase',
+              'transExp',
+              'transAmp',
+              'transPer',
+              'transOv',
+              'crossFade',
+              'crossFadeAudio',
+              'fadeTf',
+              'fadeDuration',
+              'fadeDurationMin',
+              'fadeDurationMax',
+              'fadeSinRate',
+              'fadeBpmMulti',
+              'fadeEase',
+              'fadeExp',
+              'fadeAmp',
+              'fadePer',
+              'fadeOv',
+              'slide',
+              'slideTf',
+              'slideType',
+              'slideDistance',
+              'slideDuration',
+              'slideDurationMin',
+              'slideDurationMax',
+              'slideSinRate',
+              'slideBpmMulti',
+              'slideEase',
+              'slideExp',
+              'slideAmp',
+              'slidePer',
+              'slideOv',
+              'strobe',
+              'strobePulse',
+              'strobeLayer',
+              'strobeOpacity',
+              'strobeTf',
+              'strobeTime',
+              'strobeTimeMin',
+              'strobeTimeMax',
+              'strobeSinRate',
+              'strobeBpmMulti',
+              'strobeDelayTf',
+              'strobeDelay',
+              'strobeDelayMin',
+              'strobeDelayMax',
+              'strobeDelaySinRate',
+              'strobeDelayBpmMulti',
+              'strobeColorType',
+              'strobeColor',
+              'strobeColorSet',
+              'strobeEase',
+              'strobeExp',
+              'strobeAmp',
+              'strobePer',
+              'strobeOv',
+              'fadeInOut',
+              'fadeIoPulse',
+              'fadeIoTf',
+              'fadeIoDuration',
+              'fadeIoDurationMin',
+              'fadeIoDurationMax',
+              'fadeIoSinRate',
+              'fadeIoBpmMulti',
+              'fadeIoDelayTf',
+              'fadeIoDelay',
+              'fadeIoDelayMin',
+              'fadeIoDelayMax',
+              'fadeIoDelaySinRate',
+              'fadeIoDelayBpmMulti',
+              'fadeIoStartEase',
+              'fadeIoStartExp',
+              'fadeIoStartAmp',
+              'fadeIoStartPer',
+              'fadeIoStartOv',
+              'fadeIoEndEase',
+              'fadeIoEndExp',
+              'fadeIoEndAmp',
+              'fadeIoEndPer',
+              'fadeIoEndOv',
+              'panning',
+              'panTf',
+              'panDuration',
+              'panDurationMin',
+              'panDurationMax',
+              'panSinRate',
+              'panBpmMulti',
+              'panHorizTransType',
+              'panHorizTransImg',
+              'panHorizTransLevel',
+              'panHorizTransLevelMax',
+              'panHorizTransLevelMin',
+              'panHorizTransRandom',
+              'panVertTransType',
+              'panVertTransImg',
+              'panVertTransLevel',
+              'panVertTransLevelMax',
+              'panVertTransLevelMin',
+              'panVertTransRandom',
+              'panStartEase',
+              'panStartExp',
+              'panStartAmp',
+              'panStartPer',
+              'panStartOv',
+              'panEndEase',
+              'panEndExp',
+              'panEndAmp',
+              'panEndPer',
+              'panEndOv',
+              'overrideIgnore',
+              'scriptScene',
+              'downloadScene',
+              'generatorMax',
+              'persistAudio',
+              'persistText',
+              'libraryId',
+              'audioScene',
+              'audioEnabled',
+              'audioStartIndex',
+              'textEnabled',
+              'scriptStartIndex',
+              'regenerate'
+            ])
+            .where('defaultScene', '=', toNumber(true))
+        )
+        .returning(['id', 'name'])
+        .executeTakeFirstOrThrow()
+
+      const playlist = await createPlaylist(
+        PLT.singleScene,
+        false,
+        userId,
+        scene.name,
+        trx
+      )
+      const item = {
+        duration: Infinity,
+        index: 0,
+        playlistId: playlist.id as number,
+        playAfterAllImages: toNumber(false)
+      }
+      const scenes = [{ sceneId: scene.id, scenePlaylistItemId: 0 }]
+      await createScenePlaylistItem(item, scenes, trx)
+      return scene
+    })
 }
 
 export async function updateScene(id: number, update: SceneUpdate) {
   return await db()
     .query()
-    .updateTable('scene')
-    .set(update)
-    .where('id', '=', id)
-    .execute()
+    .transaction()
+    .execute(async (trx) => {
+      const result = await trx
+        .updateTable('scene')
+        .set(update)
+        .where('id', '=', id)
+        .execute()
+
+      if (update.name != null) {
+        const playlistId = await trx
+          .selectFrom('playlist as p')
+          .innerJoin('scenePlaylistItem as spi', 'spi.playlistId', 'p.id')
+          .innerJoin(
+            'scenePlaylistItemScene as spis',
+            'spis.scenePlaylistItemId',
+            'spi.id'
+          )
+          .select('p.id')
+          .where('p.type', '=', PLT.singleScene)
+          .where('spis.sceneId', '=', id)
+          .executeTakeFirstOrThrow()
+
+        await trx
+          .updateTable('playlist')
+          .set({ name: update.name })
+          .where('id', '=', playlistId.id as number)
+          .execute()
+      }
+
+      return result
+    })
 }
 
 export async function findSceneIds(): Promise<number[]> {
@@ -597,6 +647,42 @@ export async function deleteScene(id: number) {
       await trx.deleteFrom('contentSource').where('sceneId', '=', id).execute()
       await trx.deleteFrom('scenePlaylist').where('sceneId', '=', id).execute()
       await trx.deleteFrom('weightGroup').where('sceneId', '=', id).execute()
+
+      // Delete single scene playlist
+      const singleScenePlaylist = await trx
+        .selectFrom('playlist as p')
+        .innerJoin('scenePlaylistItem as spi', 'spi.playlistId', 'p.id')
+        .innerJoin(
+          'scenePlaylistItemScene as spis',
+          'spis.scenePlaylistItemId',
+          'spi.id'
+        )
+        .select([
+          'p.id as playlistId',
+          'spi.id as playlistItemId',
+          'spis.id as playlistItemSceneId'
+        ])
+        .where('p.type', '=', PLT.singleScene)
+        .where('spis.sceneId', '=', id)
+        .executeTakeFirstOrThrow()
+
+      await trx
+        .deleteFrom('scenePlaylistItemScene')
+        .where('id', '=', singleScenePlaylist.playlistItemSceneId)
+        .execute()
+      await trx
+        .deleteFrom('scenePlaylistItem')
+        .where('id', '=', singleScenePlaylist.playlistItemId)
+        .execute()
+      await trx
+        .updateTable('displayView')
+        .set({ playlistId: null })
+        .where('playlistId', '=', singleScenePlaylist.playlistId)
+        .execute()
+      await trx
+        .deleteFrom('playlist')
+        .where('id', '=', singleScenePlaylist.playlistId)
+        .execute()
 
       const playlistItems = await trx
         .selectFrom('scenePlaylistItemScene')
@@ -1044,7 +1130,7 @@ export async function cloneScene(originalId: number, userId: number) {
             .where('userId', '=', userId)
             .where('defaultScene', '=', toNumber(false))
         )
-        .returning('id')
+        .returning(['id', 'name'])
         .executeTakeFirstOrThrow()
 
       const contentSources = await trx
@@ -1189,6 +1275,22 @@ export async function cloneScene(originalId: number, userId: number) {
             .where('sceneId', '=', originalId)
         )
         .execute()
+
+      const playlist = await createPlaylist(
+        PLT.singleScene,
+        false,
+        userId,
+        newScene.name,
+        trx
+      )
+      const item = {
+        duration: Infinity,
+        index: 0,
+        playlistId: playlist.id as number,
+        playAfterAllImages: toNumber(false)
+      }
+      const scenes = [{ sceneId: newScene.id, scenePlaylistItemId: 0 }]
+      await createScenePlaylistItem(item, scenes, trx)
 
       // TODO clone weightGroup table rows for generators
       return newScene.id as number

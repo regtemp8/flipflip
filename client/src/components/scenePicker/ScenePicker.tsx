@@ -481,7 +481,9 @@ function ScenePicker() {
   }
 
   const onFinishCreatePlaylist = async () => {
-    const { data } = await createPlaylist(createPlaylistType as string)
+    const { data } = await createPlaylist({
+      type: createPlaylistType as string
+    })
     setCreatePlaylistType(undefined)
     setOpenMenu(undefined)
     if (data != null) {

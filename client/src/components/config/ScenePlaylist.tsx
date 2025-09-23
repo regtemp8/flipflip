@@ -33,6 +33,7 @@ import Sortable from 'react-sortablejs'
 import {
   PLT,
   RP,
+  SCENE_DURATION,
   SCENE_NONE,
   SCENE_RANDOM,
   ScenePlaylistItem
@@ -105,7 +106,6 @@ interface ScenePlaylistItemEditDialogProps {
   onClose: () => void
 }
 
-const DEFAULT_DURATION = 900000
 function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   const { playlistID, item, open, onClose } = props
   const dispatch = useAppDispatch()
@@ -159,7 +159,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
         index: 0,
         sceneID: unsavedSceneID ?? SCENE_NONE,
         randomScenes: unsavedRandomScenes ?? [],
-        duration: unsavedDuration ?? DEFAULT_DURATION,
+        duration: unsavedDuration ?? SCENE_DURATION,
         playAfterAllImages: unsavedPlayAfterAllImages ?? false
       })
     } else {
@@ -196,7 +196,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
   const { classes } = useStyles()
   const currentSceneID = unsavedSceneID ?? item?.sceneID ?? SCENE_NONE
   const currentRandomScenes = unsavedRandomScenes ?? item?.randomScenes
-  const currentDuration = unsavedDuration ?? item?.duration ?? DEFAULT_DURATION
+  const currentDuration = unsavedDuration ?? item?.duration ?? SCENE_DURATION
   const currentPlayAfterAllImages =
     unsavedPlayAfterAllImages ?? item?.playAfterAllImages
   return (

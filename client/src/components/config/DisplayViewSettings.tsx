@@ -78,7 +78,7 @@ function DisplayViewSettings(props: DisplayViewSettingsProps) {
         <Collapse in={!sync}>
           <PlaylistSelect
             type={PLT.scene}
-            includeSingles
+            singleType={PLT.singleScene}
             selector={() => useGetDisplayViewScenePlaylistIDQuery(viewID)}
             action={setDisplayViewScenePlaylistID(viewID)}
           />
