@@ -3,592 +3,593 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely'
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>
 
 export interface Audio {
-  album: string | null;
-  artist: string | null;
-  bpm: number;
-  comment: string | null;
-  createdAt: number;
-  duration: number | null;
-  id: Generated<number | null>;
-  index: number;
-  marked: number;
-  name: string | null;
-  nextSceneAtEnd: number;
-  playedCount: number;
-  speed: number;
-  stopAtEnd: number;
-  thumb: string | null;
-  tick: number;
-  tickBpmMulti: number;
-  tickDelay: number;
-  tickMaxDelay: number;
-  tickMinDelay: number;
-  tickMode: string;
-  tickSinRate: number;
-  trackNum: number | null;
-  type: string;
-  url: string;
-  userId: number;
-  volume: number;
+  album: string | null
+  artist: string | null
+  bpm: number
+  comment: string | null
+  createdAt: number
+  duration: number | null
+  id: Generated<number | null>
+  index: number
+  marked: number
+  name: string | null
+  nextSceneAtEnd: number
+  playedCount: number
+  speed: number
+  stopAtEnd: number
+  thumb: string | null
+  tick: number
+  tickBpmMulti: number
+  tickDelay: number
+  tickMaxDelay: number
+  tickMinDelay: number
+  tickMode: string
+  tickSinRate: number
+  trackNum: number | null
+  type: string
+  url: string
+  userId: number
+  volume: number
 }
 
 export interface AudioPlaylistItem {
-  audioId: number;
-  id: Generated<number | null>;
-  index: number;
-  playlistId: number;
+  audioId: number
+  id: Generated<number | null>
+  index: number
+  playlistId: number
 }
 
 export interface AudioTag {
-  audioId: number;
-  id: Generated<number | null>;
-  tagId: number;
-  userId: number;
+  audioId: number
+  id: Generated<number | null>
+  tagId: number
+  userId: number
 }
 
 export interface Backup {
-  createdAt: number;
-  fileName: string;
-  id: Generated<number | null>;
-  interval: string;
-  intervalValue: number;
-  year: number;
+  createdAt: number
+  fileName: string
+  id: Generated<number | null>
+  interval: string
+  intervalValue: number
+  year: number
 }
 
 export interface CacheSettings {
-  directory: string;
-  enabled: number;
-  id: Generated<number | null>;
-  maxSize: number;
-  userId: number;
+  directory: string
+  enabled: number
+  id: Generated<number | null>
+  maxSize: number
+  userId: number
 }
 
 export interface CaptionScript {
-  createdAt: number;
-  id: Generated<number | null>;
-  index: number;
-  marked: number;
-  nextSceneAtEnd: number;
-  opacity: number;
-  script: string | null;
-  stopAtEnd: number;
-  syncWithAudio: number;
-  type: string;
-  url: string;
-  userId: number;
+  createdAt: number
+  id: Generated<number | null>
+  index: number
+  marked: number
+  nextSceneAtEnd: number
+  opacity: number
+  script: string | null
+  stopAtEnd: number
+  syncWithAudio: number
+  type: string
+  url: string
+  userId: number
 }
 
 export interface CaptionScriptPlaylistItem {
-  captionScriptId: number;
-  id: Generated<number | null>;
-  index: number;
-  playlistId: number;
+  captionScriptId: number
+  id: Generated<number | null>
+  index: number
+  playlistId: number
 }
 
 export interface CaptionScriptTag {
-  captionScriptId: number;
-  id: Generated<number | null>;
-  tagId: number;
-  userId: number;
+  captionScriptId: number
+  id: Generated<number | null>
+  tagId: number
+  userId: number
 }
 
 export interface Clip {
-  contentSourceId: number;
-  disabled: number;
-  end: number | null;
-  id: Generated<number | null>;
-  start: number | null;
-  userId: number;
-  volume: number | null;
+  contentSourceId: number
+  disabled: number
+  end: number | null
+  id: Generated<number | null>
+  start: number | null
+  userId: number
+  volume: number | null
 }
 
 export interface ClipTag {
-  clipId: number;
-  id: Generated<number | null>;
-  tagId: number;
-  userId: number;
+  clipId: number
+  id: Generated<number | null>
+  tagId: number
+  userId: number
 }
 
 export interface ContentSource {
-  count: number;
-  countComplete: number;
-  createdAt: number;
-  id: Generated<number | null>;
-  index: number;
-  lastCheck: number | null;
-  localDirOfSources: number;
-  marked: number;
-  offline: number;
-  redditFunc: string | null;
-  redditTime: string | null;
-  sceneId: number;
-  twitterIncludeReplies: number;
-  twitterIncludeRetweets: number;
-  type: string;
-  url: string;
-  userId: number;
-  videoDuration: number | null;
-  videoResolution: number | null;
-  videoSubtitleFile: string | null;
-  weight: number;
+  count: number
+  countComplete: number
+  createdAt: number
+  id: Generated<number | null>
+  index: number
+  lastCheck: number | null
+  localDirOfSources: number
+  marked: number
+  offline: number
+  redditFunc: string | null
+  redditTime: string | null
+  sceneId: number
+  twitterIncludeReplies: number
+  twitterIncludeRetweets: number
+  type: string
+  url: string
+  userId: number
+  videoDuration: number | null
+  videoResolution: number | null
+  videoSubtitleFile: string | null
+  weight: number
 }
 
 export interface ContentSourceBlacklistItem {
-  contentSourceId: number;
-  id: Generated<number | null>;
-  url: string;
+  contentSourceId: number
+  id: Generated<number | null>
+  url: string
 }
 
 export interface ContentSourceTag {
-  contentSourceId: number;
-  id: Generated<number | null>;
-  tagId: number;
-  userId: number;
+  contentSourceId: number
+  id: Generated<number | null>
+  tagId: number
+  userId: number
 }
 
 export interface Display {
-  id: Generated<number | null>;
-  name: string;
-  sceneGroupId: number | null;
-  temporary: number;
-  userId: number;
+  id: Generated<number | null>
+  name: string
+  sceneGroupId: number | null
+  temporary: number
+  userId: number
 }
 
 export interface DisplaySettings {
-  audioAlert: number;
-  clickToProgress: number;
-  clickToProgressWhilePlaying: number;
-  easingControls: number;
-  fullScreen: number;
-  id: Generated<number | null>;
-  maxInHistory: number;
-  maxInMemory: number;
-  maxLoadingAtOnce: number;
-  minImageSize: number;
-  minVideoSize: number;
-  startImmediately: number;
-  userId: number;
+  audioAlert: number
+  clickToProgress: number
+  clickToProgressWhilePlaying: number
+  easingControls: number
+  fullScreen: number
+  id: Generated<number | null>
+  maxInHistory: number
+  maxInMemory: number
+  maxLoadingAtOnce: number
+  minImageSize: number
+  minVideoSize: number
+  startImmediately: number
+  userId: number
 }
 
 export interface DisplayView {
-  color: string;
-  displayId: number;
-  error: string | null;
-  height: number;
-  id: Generated<number | null>;
-  index: number;
-  mirrorSyncedView: string;
-  name: string;
-  opacity: number;
-  playlistId: number | null;
-  sync: number;
-  syncWithView: number | null;
-  visible: number;
-  width: number;
-  x: number;
-  y: number;
-  z: number;
+  color: string
+  displayId: number
+  error: string | null
+  height: number
+  id: Generated<number | null>
+  index: number
+  mirrorSyncedView: string
+  name: string
+  opacity: number
+  playlistId: number | null
+  sync: number
+  syncWithView: number | null
+  visible: number
+  width: number
+  x: number
+  y: number
+  z: number
 }
 
 export interface FontSettings {
-  border: number;
-  borderColor: string;
-  borderpx: number;
-  captionScriptId: number;
-  color: string;
-  fontFamily: string;
-  fontSize: number;
-  id: Generated<number | null>;
-  type: string;
-  userId: number;
+  border: number
+  borderColor: string
+  borderpx: number
+  captionScriptId: number
+  color: string
+  fontFamily: string
+  fontSize: number
+  id: Generated<number | null>
+  type: string
+  userId: number
 }
 
 export interface GeneralSettings {
-  autoBackup: number;
-  autoBackupDays: number;
-  autoCleanBackup: number;
-  autoCleanBackupDays: number;
-  autoCleanBackupMonths: number;
-  autoCleanBackupWeeks: number;
-  cleanRetain: number;
-  confirmBlacklist: number;
-  confirmFileDeletion: number;
-  confirmSceneDeletion: number;
-  id: Generated<number | null>;
-  prioritizePerformance: number;
-  userId: number;
-  watermark: number;
-  watermarkColor: string;
-  watermarkCorner: string;
-  watermarkDisplay: number;
-  watermarkFontFamily: string;
-  watermarkFontSize: number;
-  watermarkText: string;
+  autoBackup: number
+  autoBackupDays: number
+  autoCleanBackup: number
+  autoCleanBackupDays: number
+  autoCleanBackupMonths: number
+  autoCleanBackupWeeks: number
+  cleanRetain: number
+  confirmBlacklist: number
+  confirmFileDeletion: number
+  confirmSceneDeletion: number
+  id: Generated<number | null>
+  prioritizePerformance: number
+  userId: number
+  watermark: number
+  watermarkColor: string
+  watermarkCorner: string
+  watermarkDisplay: number
+  watermarkFontFamily: string
+  watermarkFontSize: number
+  watermarkText: string
 }
 
 export interface IgnoredTag {
-  displaySettingsId: number;
-  id: Generated<number | null>;
-  tagId: number;
-  userId: number;
+  displaySettingsId: number
+  id: Generated<number | null>
+  tagId: number
+  userId: number
 }
 
 export interface Playlist {
-  id: Generated<number | null>;
-  name: string;
-  repeat: string;
-  sceneGroupId: number | null;
-  shuffle: number;
-  temporary: number;
-  type: string;
-  userId: number;
+  id: Generated<number | null>
+  name: string
+  repeat: string
+  sceneGroupId: number | null
+  shuffle: number
+  temporary: number
+  type: string
+  userId: number
 }
 
 export interface RemoteSettings {
-  hydrusApiKey: string;
-  hydrusDomain: string;
-  hydrusPort: number;
-  hydrusProtocol: string;
-  id: Generated<number | null>;
-  instagramPassword: string;
-  instagramUsername: string;
-  piwigoHost: string;
-  piwigoPassword: string;
-  piwigoProtocol: string;
-  piwigoUsername: string;
-  redditClientId: string;
-  redditDeviceId: string;
-  redditRefreshToken: string;
-  redditUserAgent: string;
-  silenceTumblrAlert: number;
-  tumblrKey: string;
-  tumblrOauthToken: string;
-  tumblrOauthTokenSecret: string;
-  tumblrSecret: string;
-  twitterAccessTokenKey: string;
-  twitterAccessTokenSecret: string;
-  twitterConsumerKey: string;
-  twitterConsumerSecret: string;
-  userId: number;
+  hydrusApiKey: string
+  hydrusDomain: string
+  hydrusPort: number
+  hydrusProtocol: string
+  id: Generated<number | null>
+  instagramPassword: string
+  instagramUsername: string
+  piwigoHost: string
+  piwigoPassword: string
+  piwigoProtocol: string
+  piwigoUsername: string
+  redditClientId: string
+  redditDeviceId: string
+  redditRefreshToken: string
+  redditUserAgent: string
+  silenceTumblrAlert: number
+  tumblrKey: string
+  tumblrOauthToken: string
+  tumblrOauthTokenSecret: string
+  tumblrSecret: string
+  twitterAccessTokenKey: string
+  twitterAccessTokenSecret: string
+  twitterConsumerKey: string
+  twitterConsumerSecret: string
+  userId: number
 }
 
 export interface Scene {
-  audioEnabled: number;
-  audioScene: number;
-  audioStartIndex: number;
-  backForth: number;
-  backForthBpmMulti: number;
-  backForthConstant: number;
-  backForthMax: number;
-  backForthMin: number;
-  backForthSinRate: number;
-  backForthTf: string;
-  backgroundBlur: number;
-  backgroundColor: string;
-  backgroundColorSet: string;
-  backgroundType: string;
-  continueVideo: number;
-  crossFade: number;
-  crossFadeAudio: number;
-  defaultScene: number;
-  downloadScene: number;
-  fadeAmp: number;
-  fadeBpmMulti: number;
-  fadeDuration: number;
-  fadeDurationMax: number;
-  fadeDurationMin: number;
-  fadeEase: string;
-  fadeExp: number;
-  fadeInOut: number;
-  fadeIoBpmMulti: number;
-  fadeIoDelay: number;
-  fadeIoDelayBpmMulti: number;
-  fadeIoDelayMax: number;
-  fadeIoDelayMin: number;
-  fadeIoDelaySinRate: number;
-  fadeIoDelayTf: string;
-  fadeIoDuration: number;
-  fadeIoDurationMax: number;
-  fadeIoDurationMin: number;
-  fadeIoEndAmp: number;
-  fadeIoEndEase: string;
-  fadeIoEndExp: number;
-  fadeIoEndOv: number;
-  fadeIoEndPer: number;
-  fadeIoPulse: number;
-  fadeIoSinRate: number;
-  fadeIoStartAmp: number;
-  fadeIoStartEase: string;
-  fadeIoStartExp: number;
-  fadeIoStartOv: number;
-  fadeIoStartPer: number;
-  fadeIoTf: string;
-  fadeOv: number;
-  fadePer: number;
-  fadeSinRate: number;
-  fadeTf: string;
-  forceAll: number;
-  forceAllSource: number;
-  fullSource: number;
-  generatorMax: number;
-  gifOption: string;
-  gifTimingConstant: number;
-  gifTimingMax: number;
-  gifTimingMin: number;
-  horizTransLevel: number;
-  horizTransLevelMax: number;
-  horizTransLevelMin: number;
-  horizTransRandom: number;
-  horizTransType: string;
-  id: Generated<number | null>;
-  imageOrientation: string;
-  imageType: string;
-  imageTypeFilter: string;
-  libraryId: number;
-  name: string;
-  orderFunction: string;
-  overrideIgnore: number;
-  panBpmMulti: number;
-  panDuration: number;
-  panDurationMax: number;
-  panDurationMin: number;
-  panEndAmp: number;
-  panEndEase: string;
-  panEndExp: number;
-  panEndOv: number;
-  panEndPer: number;
-  panHorizTransImg: number;
-  panHorizTransLevel: number;
-  panHorizTransLevelMax: number;
-  panHorizTransLevelMin: number;
-  panHorizTransRandom: number;
-  panHorizTransType: string;
-  panning: number;
-  panSinRate: number;
-  panStartAmp: number;
-  panStartEase: string;
-  panStartExp: number;
-  panStartOv: number;
-  panStartPer: number;
-  panTf: string;
-  panVertTransImg: number;
-  panVertTransLevel: number;
-  panVertTransLevelMax: number;
-  panVertTransLevelMin: number;
-  panVertTransRandom: number;
-  panVertTransType: string;
-  persistAudio: number;
-  persistText: number;
-  playVideoClips: number;
-  randomVideoStart: number;
-  regenerate: number;
-  sceneGroupId: number | null;
-  scriptScene: number;
-  scriptStartIndex: number;
-  skipVideoEnd: number;
-  skipVideoStart: number;
-  slide: number;
-  slideAmp: number;
-  slideBpmMulti: number;
-  slideDistance: number;
-  slideDuration: number;
-  slideDurationMax: number;
-  slideDurationMin: number;
-  slideEase: string;
-  slideExp: number;
-  slideOv: number;
-  slidePer: number;
-  slideSinRate: number;
-  slideTf: string;
-  slideType: string;
-  sourceOrderFunction: string;
-  strobe: number;
-  strobeAmp: number;
-  strobeBpmMulti: number;
-  strobeColor: string;
-  strobeColorSet: string;
-  strobeColorType: string;
-  strobeDelay: number;
-  strobeDelayBpmMulti: number;
-  strobeDelayMax: number;
-  strobeDelayMin: number;
-  strobeDelaySinRate: number;
-  strobeDelayTf: string;
-  strobeEase: string;
-  strobeExp: number;
-  strobeLayer: string;
-  strobeOpacity: number;
-  strobeOv: number;
-  strobePer: number;
-  strobePulse: number;
-  strobeSinRate: number;
-  strobeTf: string;
-  strobeTime: number;
-  strobeTimeMax: number;
-  strobeTimeMin: number;
-  textEnabled: number;
-  timingBpmMulti: number;
-  timingConstant: number;
-  timingFunction: string;
-  timingMax: number;
-  timingMin: number;
-  timingSinRate: number;
-  transAmp: number;
-  transBpmMulti: number;
-  transDuration: number;
-  transDurationMax: number;
-  transDurationMin: number;
-  transEase: string;
-  transExp: number;
-  transOv: number;
-  transPer: number;
-  transSinRate: number;
-  transTf: string;
-  userId: number;
-  useWeights: number;
-  vertTransLevel: number;
-  vertTransLevelMax: number;
-  vertTransLevelMin: number;
-  vertTransRandom: number;
-  vertTransType: string;
-  videoOption: string;
-  videoOrientation: string;
-  videoRandomSpeed: number;
-  videoSkip: number;
-  videoSpeed: number;
-  videoSpeedMax: number;
-  videoSpeedMin: number;
-  videoTimingConstant: number;
-  videoTimingMax: number;
-  videoTimingMin: number;
-  videoVolume: number;
-  weightFunction: string;
-  weightsValid: number;
-  zoom: number;
-  zoomEnd: number;
-  zoomEndMax: number;
-  zoomEndMin: number;
-  zoomRandom: number;
-  zoomStart: number;
-  zoomStartMax: number;
-  zoomStartMin: number;
+  audioEnabled: number
+  audioScene: number
+  audioStartIndex: number
+  backForth: number
+  backForthBpmMulti: number
+  backForthConstant: number
+  backForthMax: number
+  backForthMin: number
+  backForthSinRate: number
+  backForthTf: string
+  backgroundBlur: number
+  backgroundColor: string
+  backgroundColorSet: string
+  backgroundType: string
+  continueVideo: number
+  crossFade: number
+  crossFadeAudio: number
+  defaultScene: number
+  downloadScene: number
+  fadeAmp: number
+  fadeBpmMulti: number
+  fadeDuration: number
+  fadeDurationMax: number
+  fadeDurationMin: number
+  fadeEase: string
+  fadeExp: number
+  fadeInOut: number
+  fadeIoBpmMulti: number
+  fadeIoDelay: number
+  fadeIoDelayBpmMulti: number
+  fadeIoDelayMax: number
+  fadeIoDelayMin: number
+  fadeIoDelaySinRate: number
+  fadeIoDelayTf: string
+  fadeIoDuration: number
+  fadeIoDurationMax: number
+  fadeIoDurationMin: number
+  fadeIoEndAmp: number
+  fadeIoEndEase: string
+  fadeIoEndExp: number
+  fadeIoEndOv: number
+  fadeIoEndPer: number
+  fadeIoPulse: number
+  fadeIoSinRate: number
+  fadeIoStartAmp: number
+  fadeIoStartEase: string
+  fadeIoStartExp: number
+  fadeIoStartOv: number
+  fadeIoStartPer: number
+  fadeIoTf: string
+  fadeOv: number
+  fadePer: number
+  fadeSinRate: number
+  fadeTf: string
+  forceAll: number
+  forceAllSource: number
+  fullSource: number
+  generatorMax: number
+  gifOption: string
+  gifTimingConstant: number
+  gifTimingMax: number
+  gifTimingMin: number
+  horizTransLevel: number
+  horizTransLevelMax: number
+  horizTransLevelMin: number
+  horizTransRandom: number
+  horizTransType: string
+  id: Generated<number | null>
+  imageOrientation: string
+  imageType: string
+  imageTypeFilter: string
+  libraryId: number
+  name: string
+  orderFunction: string
+  overrideIgnore: number
+  panBpmMulti: number
+  panDuration: number
+  panDurationMax: number
+  panDurationMin: number
+  panEndAmp: number
+  panEndEase: string
+  panEndExp: number
+  panEndOv: number
+  panEndPer: number
+  panHorizTransImg: number
+  panHorizTransLevel: number
+  panHorizTransLevelMax: number
+  panHorizTransLevelMin: number
+  panHorizTransRandom: number
+  panHorizTransType: string
+  panning: number
+  panSinRate: number
+  panStartAmp: number
+  panStartEase: string
+  panStartExp: number
+  panStartOv: number
+  panStartPer: number
+  panTf: string
+  panVertTransImg: number
+  panVertTransLevel: number
+  panVertTransLevelMax: number
+  panVertTransLevelMin: number
+  panVertTransRandom: number
+  panVertTransType: string
+  persistAudio: number
+  persistText: number
+  playVideoClips: number
+  randomVideoStart: number
+  regenerate: number
+  sceneGroupId: number | null
+  scriptScene: number
+  scriptStartIndex: number
+  skipVideoEnd: number
+  skipVideoStart: number
+  slide: number
+  slideAmp: number
+  slideBpmMulti: number
+  slideDistance: number
+  slideDuration: number
+  slideDurationMax: number
+  slideDurationMin: number
+  slideEase: string
+  slideExp: number
+  slideOv: number
+  slidePer: number
+  slideSinRate: number
+  slideTf: string
+  slideType: string
+  sourceOrderFunction: string
+  strobe: number
+  strobeAmp: number
+  strobeBpmMulti: number
+  strobeColor: string
+  strobeColorSet: string
+  strobeColorType: string
+  strobeDelay: number
+  strobeDelayBpmMulti: number
+  strobeDelayMax: number
+  strobeDelayMin: number
+  strobeDelaySinRate: number
+  strobeDelayTf: string
+  strobeEase: string
+  strobeExp: number
+  strobeLayer: string
+  strobeOpacity: number
+  strobeOv: number
+  strobePer: number
+  strobePulse: number
+  strobeSinRate: number
+  strobeTf: string
+  strobeTime: number
+  strobeTimeMax: number
+  strobeTimeMin: number
+  textEnabled: number
+  timingBpmMulti: number
+  timingConstant: number
+  timingFunction: string
+  timingMax: number
+  timingMin: number
+  timingSinRate: number
+  transAmp: number
+  transBpmMulti: number
+  transDuration: number
+  transDurationMax: number
+  transDurationMin: number
+  transEase: string
+  transExp: number
+  transOv: number
+  transPer: number
+  transSinRate: number
+  transTf: string
+  userId: number
+  useWeights: number
+  vertTransLevel: number
+  vertTransLevelMax: number
+  vertTransLevelMin: number
+  vertTransRandom: number
+  vertTransType: string
+  videoOption: string
+  videoOrientation: string
+  videoRandomSpeed: number
+  videoSkip: number
+  videoSpeed: number
+  videoSpeedMax: number
+  videoSpeedMin: number
+  videoTimingConstant: number
+  videoTimingMax: number
+  videoTimingMin: number
+  videoVolume: number
+  weightFunction: string
+  weightsValid: number
+  zoom: number
+  zoomEnd: number
+  zoomEndMax: number
+  zoomEndMin: number
+  zoomRandom: number
+  zoomStart: number
+  zoomStartMax: number
+  zoomStartMin: number
 }
 
 export interface SceneGroup {
-  id: Generated<number | null>;
-  name: string;
-  type: string;
-  userId: number;
+  id: Generated<number | null>
+  name: string
+  type: string
+  userId: number
 }
 
 export interface ScenePlaylist {
-  id: Generated<number | null>;
-  playlistId: number;
-  sceneId: number;
+  id: Generated<number | null>
+  playlistId: number
+  sceneId: number
 }
 
 export interface ScenePlaylistItem {
-  duration: number;
-  id: Generated<number | null>;
-  index: number;
-  playAfterAllImages: number;
-  playlistId: number;
+  duration: number
+  id: Generated<number | null>
+  index: number
+  playAfterAllImages: number
+  playlistId: number
 }
 
 export interface ScenePlaylistItemScene {
-  id: Generated<number | null>;
-  sceneId: number | null;
-  scenePlaylistItemId: number;
+  id: Generated<number | null>
+  sceneId: number | null
+  scenePlaylistItemId: number
 }
 
 export interface Tag {
-  id: Generated<number | null>;
-  index: number;
-  name: string;
-  phraseString: string | null;
-  userId: number;
+  id: Generated<number | null>
+  index: number
+  name: string
+  phraseString: string | null
+  userId: number
 }
 
 export interface Theme {
-  id: Generated<number | null>;
-  mode: string;
-  primaryColor: string;
-  secondaryColor: string;
-  userId: number;
+  id: Generated<number | null>
+  mode: string
+  primaryColor: string
+  secondaryColor: string
+  userId: number
 }
 
 export interface Tutorials {
-  audios: string | null;
-  current: string | null;
-  id: Generated<number | null>;
-  library: string | null;
-  player: string | null;
-  sceneDetail: string | null;
-  sceneGenerator: string | null;
-  scenePicker: string | null;
-  scriptor: string | null;
-  scripts: string | null;
-  userId: number;
-  videoClipper: string | null;
+  audios: string | null
+  current: string | null
+  id: Generated<number | null>
+  library: string | null
+  player: string | null
+  sceneDetail: string | null
+  sceneGenerator: string | null
+  scenePicker: string | null
+  scriptor: string | null
+  scripts: string | null
+  userId: number
+  videoClipper: string | null
 }
 
 export interface User {
-  hashedPassword: Buffer;
-  id: Generated<number | null>;
-  salt: Buffer;
-  tokenExpiry: number | null;
-  tokenValue: string | null;
-  username: string;
+  hashedPassword: Buffer
+  id: Generated<number | null>
+  salt: Buffer
+  tokenExpiry: number | null
+  tokenValue: string | null
+  username: string
 }
 
 export interface WeightGroup {
-  chosen: number | null;
-  id: Generated<number | null>;
-  max: number | null;
-  percent: number | null;
-  ruleId: number | null;
-  sceneId: number;
-  search: string | null;
-  type: string | null;
+  chosen: number | null
+  id: Generated<number | null>
+  max: number | null
+  percent: number | null
+  ruleId: number | null
+  sceneId: number
+  search: string | null
+  type: string | null
 }
 
 export interface DB {
-  audio: Audio;
-  audioPlaylistItem: AudioPlaylistItem;
-  audioTag: AudioTag;
-  backup: Backup;
-  cacheSettings: CacheSettings;
-  captionScript: CaptionScript;
-  captionScriptPlaylistItem: CaptionScriptPlaylistItem;
-  captionScriptTag: CaptionScriptTag;
-  clip: Clip;
-  clipTag: ClipTag;
-  contentSource: ContentSource;
-  contentSourceBlacklistItem: ContentSourceBlacklistItem;
-  contentSourceTag: ContentSourceTag;
-  display: Display;
-  displaySettings: DisplaySettings;
-  displayView: DisplayView;
-  fontSettings: FontSettings;
-  generalSettings: GeneralSettings;
-  ignoredTag: IgnoredTag;
-  playlist: Playlist;
-  remoteSettings: RemoteSettings;
-  scene: Scene;
-  sceneGroup: SceneGroup;
-  scenePlaylist: ScenePlaylist;
-  scenePlaylistItem: ScenePlaylistItem;
-  scenePlaylistItemScene: ScenePlaylistItemScene;
-  tag: Tag;
-  theme: Theme;
-  tutorials: Tutorials;
-  user: User;
-  weightGroup: WeightGroup;
+  audio: Audio
+  audioPlaylistItem: AudioPlaylistItem
+  audioTag: AudioTag
+  backup: Backup
+  cacheSettings: CacheSettings
+  captionScript: CaptionScript
+  captionScriptPlaylistItem: CaptionScriptPlaylistItem
+  captionScriptTag: CaptionScriptTag
+  clip: Clip
+  clipTag: ClipTag
+  contentSource: ContentSource
+  contentSourceBlacklistItem: ContentSourceBlacklistItem
+  contentSourceTag: ContentSourceTag
+  display: Display
+  displaySettings: DisplaySettings
+  displayView: DisplayView
+  fontSettings: FontSettings
+  generalSettings: GeneralSettings
+  ignoredTag: IgnoredTag
+  playlist: Playlist
+  remoteSettings: RemoteSettings
+  scene: Scene
+  sceneGroup: SceneGroup
+  scenePlaylist: ScenePlaylist
+  scenePlaylistItem: ScenePlaylistItem
+  scenePlaylistItemScene: ScenePlaylistItemScene
+  tag: Tag
+  theme: Theme
+  tutorials: Tutorials
+  user: User
+  weightGroup: WeightGroup
 }
