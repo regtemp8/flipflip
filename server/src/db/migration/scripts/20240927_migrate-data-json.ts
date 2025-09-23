@@ -215,6 +215,10 @@ const remoteSettingsInsert = async (
     redditClientID,
     redditDeviceID,
     redditRefreshToken,
+    twitterConsumerKey,
+    twitterConsumerSecret,
+    twitterAccessTokenKey,
+    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -240,6 +244,10 @@ const remoteSettingsInsert = async (
       redditClientId: redditClientID,
       redditDeviceId: redditDeviceID,
       redditRefreshToken,
+      twitterConsumerKey,
+      twitterConsumerSecret,
+      twitterAccessTokenKey,
+      twitterAccessTokenSecret,
       instagramUsername,
       instagramPassword,
       hydrusProtocol,
@@ -1011,7 +1019,9 @@ const contentSourceInsert = async (
     duration,
     resolution,
     redditFunc,
-    redditTime
+    redditTime,
+    includeRetweets,
+    includeReplies
   } = source
 
   logger.info(`+ Insert content source {url} (id: ${id})`, { url })
@@ -1034,6 +1044,8 @@ const contentSourceInsert = async (
       videoResolution: resolution,
       redditFunc,
       redditTime,
+      twitterIncludeRetweets: toNumber(includeRetweets),
+      twitterIncludeReplies: toNumber(includeReplies),
       index,
       createdAt: Date.now()
     })
@@ -1175,7 +1187,7 @@ const audioInsert = async (
     }
 
     let thumb: string | undefined = undefined
-    if (audio.thumb != null && (await fileExists(audio.thumb))) {
+    if (audio.thumb != null && fs.existsSync(audio.thumb)) {
       logger.info(`+ Create audio thumb {path} (id: ${id})`, {
         path: audio.thumb
       })
@@ -1285,8 +1297,7 @@ const audioPlaylistInsert = async (
         type: PLT.audio,
         repeat: RP.none,
         shuffle: toNumber(false),
-        temporary: toNumber(false),
-        visible: toNumber(true)
+        temporary: toNumber(false)
       })
       .onConflict((oc) => oc.doNothing())
       .returningAll()
@@ -1477,8 +1488,7 @@ const playlistInsert = async (
       name: name ?? '',
       shuffle: toNumber(shuffle),
       repeat,
-      temporary: toNumber(false),
-      visible: toNumber(true)
+      temporary: toNumber(false)
     })
     .returningAll()
     .executeTakeFirstOrThrow()
