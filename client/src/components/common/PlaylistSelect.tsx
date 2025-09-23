@@ -18,7 +18,6 @@ import { useNavigate } from 'react-router'
 import {
   useCreatePlaylistMutation,
   useGetPlaylistOptionsQuery,
-  useGetPlaylistQuery,
   useGetSelectedPlaylistQuery
 } from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
@@ -124,7 +123,7 @@ export default function PlaylistSelect(props: PlaylistSelectProps) {
       {optionValue && (
         <Autocomplete
           value={optionValue}
-          onChange={async (event, newValue) => {
+          onChange={async (_event, newValue) => {
             if (typeof newValue === 'string') {
               await onCreate(newValue)
             } else if (newValue?.label.match(/^Add ".*"$/)) {

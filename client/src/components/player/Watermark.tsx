@@ -2,7 +2,6 @@ import { CSSProperties, useMemo } from 'react'
 import {
   WC,
   WatermarkSettings,
-  getFileGroup,
   getFileName
 } from 'flipflip-common'
 import { useAppSelector } from '../../store/hooks'
