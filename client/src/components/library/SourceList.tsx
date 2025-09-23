@@ -44,8 +44,6 @@ import BaseSwitch from '../common/BaseSwitch'
 // } from '../../store/app/selectors'
 import {
   setContentSourceDirOfSources,
-  setContentSourceIncludeReplies,
-  setContentSourceIncludeRetweets,
   setClipEnabled,
   setContentSourceWeight,
   setContentSourceSubtitleFile,
@@ -79,8 +77,6 @@ import {
 import {
   useGetClipEnabledQuery,
   useGetContentSourceDirOfSourcesQuery,
-  useGetContentSourceIncludeRepliesQuery,
-  useGetContentSourceIncludeRetweetsQuery,
   useGetContentSourceRedditFuncQuery,
   useGetContentSourceRedditTimeQuery,
   useGetContentSourceSubtitleFileQuery,
@@ -452,35 +448,6 @@ function SourceOptionsDialog(props: SourceOptionsDialogProps) {
                 This only applies to subreddits, not user profiles
               </DialogContentText>
             )}
-          </DialogContent>
-        </Dialog>
-      )}
-      {type === ST.twitter && (
-        <Dialog
-          open={type === ST.twitter}
-          onClose={props.onClose}
-          aria-describedby="twitter-options-description"
-        >
-          <DialogContent>
-            <DialogContentText id="twitter-options-description">
-              Twitter Options ({url})
-            </DialogContentText>
-            <BaseSwitch
-              label="Include Replies"
-              size="small"
-              selector={() =>
-                useGetContentSourceIncludeRepliesQuery(props.sourceID)
-              }
-              action={setContentSourceIncludeReplies(props.sourceID)}
-            />
-            <BaseSwitch
-              label="Include Retweets"
-              size="small"
-              selector={() =>
-                useGetContentSourceIncludeRetweetsQuery(props.sourceID)
-              }
-              action={setContentSourceIncludeRetweets(props.sourceID)}
-            />
           </DialogContent>
         </Dialog>
       )}

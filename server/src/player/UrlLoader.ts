@@ -7,7 +7,7 @@ import {
   WF
 } from 'flipflip-common'
 import sourceScrapers from '../scraper/SourceScraperService'
-import { getRandomListItem } from '../utils'
+import { getRandomListItem, pushInChunks } from '../utils'
 import {
   findContentSources,
   findContentSourceTagIds
@@ -75,7 +75,7 @@ export default abstract class UrlLoader {
       randomizeList(toAdd)
     }
 
-    urlList.push(...toAdd)
+    pushInChunks(urlList, toAdd)
   }
 }
 
@@ -207,7 +207,7 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
 
     this.state.sourceIndex = this.state.sourceList.length
-    this.state.sourceList.push(...toAdd)
+    pushInChunks(this.state.sourceList, toAdd)
     this.state.sources = sourceUrls
   }
 }

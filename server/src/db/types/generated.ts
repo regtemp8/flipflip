@@ -130,8 +130,6 @@ export interface ContentSource {
   redditFunc: string | null
   redditTime: string | null
   sceneId: number
-  twitterIncludeReplies: number
-  twitterIncludeRetweets: number
   type: string
   url: string
   userId: number
@@ -273,10 +271,6 @@ export interface RemoteSettings {
   tumblrOauthToken: string
   tumblrOauthTokenSecret: string
   tumblrSecret: string
-  twitterAccessTokenKey: string
-  twitterAccessTokenSecret: string
-  twitterConsumerKey: string
-  twitterConsumerSecret: string
   userId: number
 }
 

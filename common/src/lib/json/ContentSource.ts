@@ -24,7 +24,4 @@ export type ContentSource = {
   // Reddit
   redditFunc?: string;
   redditTime?: string;
-  // Twitter
-  includeRetweets: boolean;
-  includeReplies: boolean;
 };

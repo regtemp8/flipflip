@@ -1,4 +1,3 @@
-import fs from 'fs'
 import express from 'express'
 import {
   toCaptionScript,
@@ -43,6 +42,7 @@ import {
 } from 'flipflip-common'
 import { User } from '../db/types/entities'
 import { toBoolean } from '../db/utils'
+import { fileExists } from '../utils'
 
 const router = express.Router()
 router.get('/', async (req, res) => {
@@ -61,7 +61,7 @@ router.post('/', async (req, res) => {
     if (
       url === '' ||
       url.startsWith('http') ||
-      (isText(url, true) && fs.existsSync(url))
+      (isText(url, true) && (await fileExists(url)))
     ) {
       urls.push(url)
     } else {
@@ -217,7 +217,10 @@ router.patch('/:id', async (req, res) => {
   const update = toCaptionScriptUpdate(req.body)
   if (update.url) {
     isUrl = update.url.startsWith('http')
-    if (!isUrl && (!isText(update.url, true) || !fs.existsSync(update.url))) {
+    if (
+      !isUrl &&
+      (!isText(update.url, true) || !(await fileExists(update.url)))
+    ) {
       res
         .status(400)
         .send({ error: `Invalid caption script path: ${update.url}` })

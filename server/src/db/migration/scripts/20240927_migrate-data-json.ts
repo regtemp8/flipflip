@@ -1,4 +1,4 @@
-import fs, { existsSync, readFileSync } from 'fs'
+import fs from 'fs'
 import crypto from 'crypto'
 import path from 'path'
 import { Kysely } from 'kysely'
@@ -28,7 +28,7 @@ import {
 } from '../data/migrate-data-json/LibrarySource'
 import { Tag, newTag } from '../data/migrate-data-json/Tag'
 import { Route, newRoute } from '../data/migrate-data-json/Route'
-import { copyThumbFile, getElectronSaveDir } from '../../../utils'
+import { copyThumbFile, fileExists, getElectronSaveDir } from '../../../utils'
 import { toNumber, toText } from '../../utils'
 import { Clip } from '../data/migrate-data-json/Clip'
 import { FontSettings } from '../data/migrate-data-json/FontSettings'
@@ -58,7 +58,7 @@ const getDataJsonPortablePath = () => {
   return path.join(saveDir, 'data.json')
 }
 
-const readDataJsonFile = (): AppStorage | undefined => {
+const readDataJsonFile = async (): Promise<AppStorage | undefined> => {
   if (process.env.NODE_ENV === 'testing') {
     logger.info(": Generating test database, don't read data.json file")
     return undefined
@@ -78,20 +78,23 @@ const readDataJsonFile = (): AppStorage | undefined => {
   let data
   let dataPath
   let portableMode = false
-  const savePathExists = savePath != null && existsSync(savePath)
-  const portablePathExists = existsSync(portablePath)
+  const savePathExists = savePath != null && (await fileExists(savePath))
+  const portablePathExists = await fileExists(portablePath)
   if (portablePathExists) {
     dataPath = portablePath
-    data = JSON.parse(readFileSync(portablePath, 'utf-8'))
+    const json = await fs.promises.readFile(portablePath, 'utf-8')
+    data = JSON.parse(json)
     portableMode = data.config.generalSettings.portableMode
   }
   if ((!portablePathExists || !portableMode) && savePathExists) {
     dataPath = savePath
-    data = JSON.parse(readFileSync(savePath, 'utf-8'))
+    const json = await fs.promises.readFile(savePath, 'utf-8')
+    data = JSON.parse(json)
     portableMode = data.config.generalSettings.portableMode
     if (portableMode && portablePathExists) {
       dataPath = portablePath
-      data = JSON.parse(readFileSync(portablePath, 'utf-8'))
+      const json = await fs.promises.readFile(portablePath, 'utf-8')
+      data = JSON.parse(json)
     } else {
       portableMode = false
     }
@@ -174,7 +177,15 @@ const userInsert = async (
 ): Promise<number> => {
   logger.info('+ Insert user')
   const salt = crypto.randomBytes(16)
-  const hashedPassword = crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256')
+  const hashedPassword = await new Promise<Buffer>((resolve, reject) =>
+    crypto.pbkdf2(password, salt, 310000, 32, 'sha256', (error, derivedKey) => {
+      if (error != null) {
+        reject(error)
+      } else {
+        resolve(derivedKey)
+      }
+    })
+  )
   const user = await trx
     .insertInto('user')
     .values({
@@ -204,10 +215,6 @@ const remoteSettingsInsert = async (
     redditClientID,
     redditDeviceID,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -233,10 +240,6 @@ const remoteSettingsInsert = async (
       redditClientId: redditClientID,
       redditDeviceId: redditDeviceID,
       redditRefreshToken,
-      twitterConsumerKey,
-      twitterConsumerSecret,
-      twitterAccessTokenKey,
-      twitterAccessTokenSecret,
       instagramUsername,
       instagramPassword,
       hydrusProtocol,
@@ -1008,9 +1011,7 @@ const contentSourceInsert = async (
     duration,
     resolution,
     redditFunc,
-    redditTime,
-    includeRetweets,
-    includeReplies
+    redditTime
   } = source
 
   logger.info(`+ Insert content source {url} (id: ${id})`, { url })
@@ -1033,8 +1034,6 @@ const contentSourceInsert = async (
       videoResolution: resolution,
       redditFunc,
       redditTime,
-      twitterIncludeRetweets: toNumber(includeRetweets),
-      twitterIncludeReplies: toNumber(includeReplies),
       index,
       createdAt: Date.now()
     })
@@ -1176,7 +1175,7 @@ const audioInsert = async (
     }
 
     let thumb: string | undefined = undefined
-    if (audio.thumb != null && fs.existsSync(audio.thumb)) {
+    if (audio.thumb != null && (await fileExists(audio.thumb))) {
       logger.info(`+ Create audio thumb {path} (id: ${id})`, {
         path: audio.thumb
       })
@@ -2155,7 +2154,7 @@ const displayInsert = async (
 
 export async function up(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
-    const json = readDataJsonFile() ?? initialAppStorage
+    const json = (await readDataJsonFile()) ?? initialAppStorage
     const userId = await userInsert(trx, 'dummy', 'password')
     await generalSettingsInsert(trx, json, userId)
     await remoteSettingsInsert(trx, json, userId)

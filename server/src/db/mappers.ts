@@ -91,7 +91,7 @@ import {
 } from './utils'
 import { PlaylistGroupRow } from './types/PlaylistGroupRow'
 import { PlaylistGroupItemRow } from './types/PlaylistGroupItemRow'
-import { getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
+import { fileExists, getBackupsDir, getCacheDir, getThumbsDir } from '../utils'
 import { BackupSettings } from './types/BackupSettings'
 import { SearchOption } from './types/SearchOption'
 import { Request } from 'express'
@@ -420,10 +420,6 @@ export function toRemoteSettings(row: RemoteSettingsRow): RemoteSettings {
     redditClientId,
     redditDeviceId,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -445,10 +441,6 @@ export function toRemoteSettings(row: RemoteSettingsRow): RemoteSettings {
     redditClientID: redditClientId,
     redditDeviceID: redditDeviceId,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -964,10 +956,6 @@ export function toRemoteSettingsUpdate(
     redditClientID,
     redditDeviceID,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -990,10 +978,6 @@ export function toRemoteSettingsUpdate(
     redditClientId: redditClientID,
     redditDeviceId: redditDeviceID,
     redditRefreshToken,
-    twitterConsumerKey,
-    twitterConsumerSecret,
-    twitterAccessTokenKey,
-    twitterAccessTokenSecret,
     instagramUsername,
     instagramPassword,
     hydrusProtocol,
@@ -1067,8 +1051,6 @@ export function toContentSource(
     offline,
     redditFunc,
     redditTime,
-    twitterIncludeReplies,
-    twitterIncludeRetweets,
     type,
     url,
     videoDuration,
@@ -1101,8 +1083,6 @@ export function toContentSource(
     resolution: opt<number>(videoResolution),
     redditFunc: opt<string>(redditFunc),
     redditTime: opt<string>(redditTime),
-    includeRetweets: toBoolean(twitterIncludeRetweets),
-    includeReplies: toBoolean(twitterIncludeReplies),
     fileUrl
   }
 }
@@ -1123,8 +1103,6 @@ export function toContentSourceUpdate(
     offline,
     redditFunc,
     redditTime,
-    includeReplies,
-    includeRetweets,
     url,
     duration,
     resolution,
@@ -1141,8 +1119,6 @@ export function toContentSourceUpdate(
     offline: toNumberOpt(offline),
     redditFunc,
     redditTime,
-    twitterIncludeReplies: toNumberOpt(includeReplies),
-    twitterIncludeRetweets: toNumberOpt(includeRetweets),
     url,
     videoDuration: duration,
     videoResolution: resolution,
@@ -1488,10 +1464,11 @@ export function toFontSettingsUpdate(
   }
 }
 
-export function toBackup(row: BackupRow): Backup {
+export async function toBackup(row: BackupRow): Promise<Backup> {
   const { id, createdAt, fileName } = row
   const filePath = path.join(getBackupsDir(), fileName)
-  const size = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
+  const exists = await fileExists(filePath)
+  const size = exists ? (await fs.promises.stat(filePath)).size : 0
   return { id: id as number, createdAt, size }
 }
 

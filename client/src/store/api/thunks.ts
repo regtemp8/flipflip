@@ -578,18 +578,6 @@ export const setContentSourceRedditTime = (id: number) => {
   }
 }
 
-export const setContentSourceIncludeReplies = (id: number) => {
-  return (includeReplies: boolean) => {
-    return updateContentSource({ id, includeReplies })
-  }
-}
-
-export const setContentSourceIncludeRetweets = (id: number) => {
-  return (includeRetweets: boolean) => {
-    return updateContentSource({ id, includeRetweets })
-  }
-}
-
 export const setContentSourceWeight = (id: number) => {
   return (weight: number) => {
     return updateContentSource({ id, weight })
@@ -1987,18 +1975,6 @@ export const setConfigRemoteSettingsRedditRefreshToken = (
   redditRefreshToken: string
 ) => {
   return updateRemoteSettings({ redditRefreshToken })
-}
-
-export const setConfigRemoteSettingsTwitterAccessTokenKey = (
-  twitterAccessTokenKey: string
-) => {
-  return updateRemoteSettings({ twitterAccessTokenKey })
-}
-
-export const setConfigRemoteSettingsTwitterAccessTokenSecret = (
-  twitterAccessTokenSecret: string
-) => {
-  return updateRemoteSettings({ twitterAccessTokenSecret })
 }
 
 export const setConfigRemoteSettingsInstagramUsername = (

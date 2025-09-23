@@ -114,7 +114,8 @@ export async function readAudioMetadata(url: string): Promise<Partial<Audio>> {
     const hash = crypto.createHash('sha256').update(cover.data).digest('hex')
     const extension = mime.extension(cover.format)
     const thumb = path.join(getThumbsDir(), `${hash}.${extension}`)
-    if (!fs.existsSync(thumb)) {
+    const thumbExists = await fileExists(thumb)
+    if (!thumbExists) {
       await fs.promises.writeFile(thumb, cover.data)
     }
 
@@ -164,7 +165,8 @@ export async function copyThumbFile(thumb: string) {
   const hash = await getFileHash(thumb)
   const extension = thumb.split('.').pop() ?? ''
   const thumbPath = path.join(getThumbsDir(), `${hash}.${extension}`)
-  if (!fs.existsSync(thumbPath)) {
+  const thumbExists = await fileExists(thumbPath)
+  if (!thumbExists) {
     await fs.promises.copyFile(thumb, thumbPath)
   }
 
@@ -303,4 +305,22 @@ export function areWeightsValid(scene: Scene): boolean {
       orRules.length === scene.generatorWeights.length) &&
     (remaining === 0 || (remaining === 100 && weightRules.length === 0))
   )
+}
+
+export function pushInChunks<T>(target: T[], newItems: T[], chunkSize = 50000) {
+  for (let i = 0; i < newItems.length; i += chunkSize) {
+    const end = Math.min(i + chunkSize, newItems.length)
+    const chunk = newItems.slice(i, end)
+    target.push(...chunk)
+  }
+  return target
+}
+
+export async function fileExists(file: string) {
+  try {
+    await fs.promises.access(file, fs.constants.F_OK)
+    return true
+  } catch {
+    return false
+  }
 }

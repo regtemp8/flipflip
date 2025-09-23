@@ -18,7 +18,7 @@
 * **[Subreddit](https://www.reddit.com/r/flipflip/)**
 
 ## Features
-* Local files as well as Tumblr, ~~Reddit~~, ~~Twitter~~, Instagram, Imgur, DeviantArt, Booru & More
+* Local files as well as Tumblr, ~~Reddit~~, Instagram, Imgur, DeviantArt, Booru & More
 * Animated GIF and video support
 * Display editor to configure views: x, y, z coordinates, opacity, mirror other view
 * Visual effects: zoom/transition, cross-fade, slide, strobe/pulse, fade in/out, panning

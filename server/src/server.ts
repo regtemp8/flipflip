@@ -36,7 +36,8 @@ import {
   getThumbsDir,
   getBinDir,
   getFfprobePath,
-  getServerHost
+  getServerHost,
+  fileExists
 } from './utils'
 import scheduler from './scheduler'
 import Logger from './logging/Logger'
@@ -86,11 +87,12 @@ const extractBinaries = async () => {
   }
 
   const ffprobePath = getFfprobePath()
-  if (!fs.existsSync(ffprobePath)) {
+  const exists = await fileExists(ffprobePath)
+  if (!exists) {
     const file = fs.createWriteStream(ffprobePath)
     await pipeline(fs.createReadStream(ffprobeInstaller.path), file)
 
-    fs.chmodSync(ffprobePath, 0o755)
+    await fs.promises.chmod(ffprobePath, 0o755)
     logger.info('+ ffprobe copied to {path}', { path: ffprobePath })
   }
 }
@@ -130,7 +132,8 @@ void (async function () {
     getBinDir()
   ]
   for (const path of dirs) {
-    if (!fs.existsSync(path)) {
+    const exists = await fileExists(path)
+    if (!exists) {
       logger.info('+ Creating directory {path}', { path })
       await fs.promises.mkdir(path)
     }

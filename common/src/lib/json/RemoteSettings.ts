@@ -10,11 +10,6 @@ export type RemoteSettings = {
   redditDeviceID: string;
   redditRefreshToken: string;
 
-  twitterConsumerKey: string;
-  twitterConsumerSecret: string;
-  twitterAccessTokenKey: string;
-  twitterAccessTokenSecret: string;
-
   instagramUsername: string;
   instagramPassword: string;
 

@@ -289,16 +289,6 @@ export const useGetContentSourceRedditTimeQuery = (id: number) => {
     selectFromResult: ({ data }) => ({ data: data?.redditTime })
   })
 }
-export const useGetContentSourceIncludeRepliesQuery = (id: number) => {
-  return useGetContentSourceQuery(id, {
-    selectFromResult: ({ data }) => ({ data: data?.includeReplies })
-  })
-}
-export const useGetContentSourceIncludeRetweetsQuery = (id: number) => {
-  return useGetContentSourceQuery(id, {
-    selectFromResult: ({ data }) => ({ data: data?.includeRetweets })
-  })
-}
 export const useGetContentSourceWeightQuery = (id: number) => {
   return useGetContentSourceQuery(id, {
     selectFromResult: ({ data }) => ({ data: data?.weight })
@@ -1335,15 +1325,6 @@ export const useGetRemoteSettingsTumblrAuthorizedQuery = () => {
       data:
         !!data?.tumblrOAuthToken?.length &&
         !!data?.tumblrOAuthTokenSecret?.length
-    })
-  })
-}
-export const useGetRemoteSettingsTwitterAuthorizedQuery = () => {
-  return useGetRemoteSettingsQuery(undefined, {
-    selectFromResult: ({ data }) => ({
-      data:
-        !!data?.twitterAccessTokenKey?.length &&
-        !!data?.twitterAccessTokenSecret?.length
     })
   })
 }

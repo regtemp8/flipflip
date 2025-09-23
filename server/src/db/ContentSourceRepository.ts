@@ -94,8 +94,6 @@ export async function createContentSources(
             countComplete: librarySource?.countComplete ?? toNumber(false),
             weight: 1,
             localDirOfSources: toNumber(false),
-            twitterIncludeRetweets: toNumber(false),
-            twitterIncludeReplies: toNumber(false),
             createdAt,
             index: i
           })

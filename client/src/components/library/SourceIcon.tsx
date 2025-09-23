@@ -6,7 +6,6 @@ import ListIcon from '@mui/icons-material/List'
 import MovieIcon from '@mui/icons-material/Movie'
 import RedditIcon from '@mui/icons-material/Reddit'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
-import TwitterIcon from '@mui/icons-material/Twitter'
 import { ST } from 'flipflip-common'
 
 function RedGifsIcon(props: any) {
@@ -71,21 +70,6 @@ function ImageFapIcon(props: any) {
       232.154 C 237.637 232.167 234.408 232.972 233.381 235.092 C 232.741 236.415 231.854 244.118 231.843 248.454 L
       231.839 250.077 227.202 250.077 L 222.566 250.077 222.566 154.560 L 222.566 59.042 281.762 59.042 L 340.958
       59.042 340.962 62.983 "
-      />
-    </SvgIcon>
-  )
-}
-
-function SexComIcon(props: any) {
-  return (
-    <SvgIcon {...props} viewBox="0 0 232 367" fontSize="small">
-      <path
-        d="M190.02 279.731c0-34.495-18.11-62.963-71.584-81.073l-40.537-13.793C25.28 166.742 4.157 133.97 4.157
-      94.737c0-61.24 47.433-94.01 109.527-94.01 43.13 0 69.874 9.054 94.446
-      23.716v52.605h-4.318c-19.399-49.157-51.736-62.964-88.824-62.964-39.682 0-69.86 27.6-69.86 61.24 0 29.323 11.213
-      52.185 53.895 67.28l31.916 11.2c42.26 14.662 100.907 35.8 100.907 105.66 0 64.252-44.84 107.382-118.162
-      107.382-45.709 0-84.087-9.924-113.41-30.192v-59.516H4.59c28.454 71.598 68.136 74.177 103.5 74.177 55.199 0
-      81.929-31.916 81.929-71.584"
       />
     </SvgIcon>
   )
@@ -284,18 +268,12 @@ export default function SourceIcon(props: SourceIconProps) {
       return <RedditIcon style={{ color: 'red' }} className={props.className} />
     case ST.redgifs:
       return <RedGifsIcon className={props.className} />
-    case ST.twitter:
-      return (
-        <TwitterIcon style={{ color: 'red' }} className={props.className} />
-      )
     case ST.instagram:
       return <InstagramIcon className={props.className} />
     case ST.tumblr:
       return <TumblrIcon className={props.className} />
     case ST.imagefap:
       return <ImageFapIcon className={props.className} />
-    case ST.sexcom:
-      return <SexComIcon style={{ color: 'red' }} className={props.className} />
     case ST.imgur:
       return <ImgurIcon className={props.className} />
     case ST.deviantart:

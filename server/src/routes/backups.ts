@@ -11,9 +11,14 @@ import { CleanBackupsRequest } from 'flipflip-common'
 
 const router = express.Router()
 router.get('/', async (req, res) => {
-  const backups = (await findBackups())
-    .map((b) => toBackup(b))
-    .filter((b) => b.size > 0)
+  const backups = []
+  const rows = await findBackups()
+  for (const row of rows) {
+    const backup = await toBackup(row)
+    if (backup.size > 0) {
+      backups.push(backup)
+    }
+  }
 
   res.status(200).send(backups)
 })
