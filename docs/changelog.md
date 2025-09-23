@@ -1,4 +1,12 @@
 # Changelog
+#### v4.0.0-beta9 <small>(09/23/2025)</small>
+- Add single scene to display view
+- Improve avoid repeats shuffling
+- Add watermark to player
+- Remove Twitter
+- Load large directories
+- Fix video playback
+
 #### v4.0.0-beta8 <small>(09/16/2025)</small>
 - Add default duration to scene playlist item
 - Fix library source migration
