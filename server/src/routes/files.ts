@@ -117,7 +117,13 @@ router.post('/create-directory', async (req, res) => {
 
 router.get('/file/audio-thumb/:name', async (req, res) => {
   const { name } = req.params
-  const thumb = path.join(getThumbsDir(), name)
+  const thumbsDir = getThumbsDir()
+  const thumb = path.resolve(thumbsDir, name)
+  if(!thumb.startsWith(`${thumbsDir}${path.sep}`)) {
+    res.status(403).end()
+    return
+  }
+
   const thumbExists = await fileExists(thumb)
   if (thumbExists) {
     res.status(200).type(name.substring(name.lastIndexOf('.')))
