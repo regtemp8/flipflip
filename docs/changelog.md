@@ -5,7 +5,7 @@
 - Add watermark to player
 - Remove Twitter
 - Load large directories
-- Fix video playback
+- Improve video playback
 
 #### v4.0.0-beta8 <small>(09/16/2025)</small>
 - Add default duration to scene playlist item
