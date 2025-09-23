@@ -128,7 +128,7 @@ test('Image Filter', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.imageTypeFilter === IF.any &&
       res.status() === 204
@@ -686,7 +686,7 @@ test('Video Speed Min', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.videoRandomSpeed === false &&
       res.status() === 204
@@ -746,7 +746,7 @@ test('Video Speed Max', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.videoRandomSpeed === false &&
       res.status() === 204
@@ -886,7 +886,7 @@ test('Skip First', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.playVideoClips === true &&
       res.status() === 204
@@ -918,7 +918,7 @@ test('Skip Last', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.playVideoClips === true &&
       res.status() === 204
@@ -996,7 +996,7 @@ test('Weighting', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.weightFunction === WF.sources &&
       res.status() === 204

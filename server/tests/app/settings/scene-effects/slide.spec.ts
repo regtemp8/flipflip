@@ -28,7 +28,7 @@ test('Slide effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -113,7 +113,7 @@ test('Random slide timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -248,7 +248,7 @@ test('Wave slide timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -333,7 +333,7 @@ test('Audio BPM slide timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -381,7 +381,7 @@ test('With scene slide timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -445,7 +445,7 @@ test('Constant slide timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -506,7 +506,7 @@ test('Slide direction', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204
@@ -566,7 +566,7 @@ test('Slide distance', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.slide === false &&
       res.status() === 204

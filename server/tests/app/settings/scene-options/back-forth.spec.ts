@@ -41,7 +41,7 @@ test('Back/Forth effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.backForth === false &&
       res.status() === 204
@@ -129,7 +129,7 @@ test('Random back/forth timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.backForth === false &&
       res.status() === 204
@@ -267,7 +267,7 @@ test('Wave back/forth timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.backForth === false &&
       res.status() === 204
@@ -355,7 +355,7 @@ test('Audio BPM back/forth timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.backForth === false &&
       res.status() === 204
@@ -423,7 +423,7 @@ test('Constant back/forth timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.backForth === false &&
       res.status() === 204

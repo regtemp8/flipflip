@@ -27,7 +27,7 @@ test('Fade effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204
@@ -110,7 +110,7 @@ test('Random fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204
@@ -247,7 +247,7 @@ test('Wave fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204
@@ -334,7 +334,7 @@ test('Audio BPM fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204
@@ -384,7 +384,7 @@ test('With scene fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204
@@ -450,7 +450,7 @@ test('Constant fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.fadeInOut === false &&
       res.status() === 204

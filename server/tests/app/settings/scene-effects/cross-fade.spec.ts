@@ -43,7 +43,7 @@ test('Cross-fade effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204
@@ -124,7 +124,7 @@ test('Random cross-fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204
@@ -259,7 +259,7 @@ test('Wave cross-fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204
@@ -344,7 +344,7 @@ test('Audio BPM cross-fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204
@@ -392,7 +392,7 @@ test('With scene cross-fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204
@@ -456,7 +456,7 @@ test('Constant cross-fade timing', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.crossFade === false &&
       res.status() === 204

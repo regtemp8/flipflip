@@ -22,7 +22,7 @@ test('Zoom effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -79,7 +79,7 @@ test('Zoom start slider', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -127,7 +127,7 @@ test('Zoom end slider', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -170,7 +170,7 @@ test('Randomize zoom effect', async ({ page }) => {
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -229,7 +229,7 @@ test('Zoom start min slider', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoomRandom === false &&
       res.status() === 204
@@ -243,7 +243,7 @@ test('Zoom start min slider', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -302,7 +302,7 @@ test('Zoom start max slider', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoomRandom === false &&
       res.status() === 204
@@ -316,7 +316,7 @@ test('Zoom start max slider', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -375,7 +375,7 @@ test('Zoom end min slider', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoomRandom === false &&
       res.status() === 204
@@ -389,7 +389,7 @@ test('Zoom end min slider', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
@@ -448,7 +448,7 @@ test('Zoom end max slider', async ({ page }) => {
   let responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoomRandom === false &&
       res.status() === 204
@@ -462,7 +462,7 @@ test('Zoom end max slider', async ({ page }) => {
   responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
-      new URL(request.url()).pathname === '/api/scenes/1' &&
+      new URL(request.url()).pathname === '/api/scenes/0' &&
       request.method() === 'PATCH' &&
       request.postDataJSON()?.zoom === false &&
       res.status() === 204
