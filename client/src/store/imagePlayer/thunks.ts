@@ -163,7 +163,7 @@ export function loadImageViews(uuid: string) {
       } else {
         const displayItem: DisplayItem = {
           index,
-          sceneID: item.sceneId,
+          sceneID: item.scene.id,
           duration: item.view.timeToNextFrame
         }
         dispatch(discardedImageView(uuid, displayItem))

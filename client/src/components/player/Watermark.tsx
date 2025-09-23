@@ -44,7 +44,15 @@ function getWatermarkText(
   imageViewState?: ImageViewState
 ) {
   let watermarkText = watermark.watermarkText
-  const url = imageViewState?.data.url
+
+  const sceneName = imageViewState?.scene?.name
+  if (sceneName != null) {
+    watermarkText = watermarkText.replace('{scene_name}', sceneName)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{scene_name\}\s*/g, '')
+  }
+
+  const url = imageViewState?.data?.url
   if (url != null) {
     watermarkText = watermarkText.replace('{file_url}', url)
     watermarkText = watermarkText.replace(
@@ -55,27 +63,27 @@ function getWatermarkText(
     watermarkText = watermarkText.replace(/\s*\{file_url\}\s*/g, '')
     watermarkText = watermarkText.replace(/\s*\{file_name\}\s*/g, '')
   }
-  // TODO if display use display.name else scene.name
-  // watermarkText = watermarkText.replace("{scene_name}", this.props.scene.name);
 
-  // TODO add extra image source data
-  // const img = this.state.historyPaths[(this.state.historyPaths.length - 1) + this.state.historyOffset];
-  // if (img) {
-  //   watermarkText = watermarkText.replace("{source_url}", img.getAttribute("source"));
-  //   watermarkText = watermarkText.replace("{source_name}", getFileGroup(img.getAttribute("source")));
-  //   if (img.hasAttribute("post")) {
-  //     watermarkText = watermarkText.replace("{post_url}", img.getAttribute("post"));
-  //   } else {
-  //     watermarkText = watermarkText.replace(/\{post_url\}\s*/g, "");
-  //   }
-  //   watermarkText = watermarkText.replace("{file_url}", img.src.startsWith("file") ? urlToPath(img.src) : img.src);
-  //   watermarkText = watermarkText.replace("{file_name}", decodeURIComponent(getFileName(img.src)));
-  // } else {
-  watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
-  watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
-  watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+  const sourceUrl = imageViewState?.data?.sourceUrl
+  if (sourceUrl != null) {
+    watermarkText = watermarkText.replace('{source_url}', sourceUrl)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, '')
+  }
 
-  // }
+  const sourceName = imageViewState?.data?.sourceName
+  if (sourceName != null) {
+    watermarkText = watermarkText.replace('{source_name}', sourceName)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{source_name\}\s*/g, '')
+  }
+
+  const postUrl = imageViewState?.data?.postUrl
+  if (postUrl != null) {
+    watermarkText = watermarkText.replace('{post_url}', postUrl)
+  } else {
+    watermarkText = watermarkText.replace(/\s*\{post_url\}\s*/g, '')
+  }
 
   // TODO add audio playback
   // if (this.state.currentAudio) {

@@ -101,8 +101,15 @@ test('Playlist selected', async ({ page }) => {
   await expect(item).toHaveCount(2)
   await expect(item.getByTestId('PlayDisabledIcon')).toHaveCount(2)
 
-  await page.getByRole('combobox').click()
-  await page.getByRole('option', { name: 'Create Scene Playlist' }).click()
+  await page
+    .getByRole('combobox', { name: 'Scene Playlist', exact: true })
+    .click()
+  await page
+    .getByRole('combobox', { name: 'Scene Playlist', exact: true })
+    .fill('New playlist')
+  await page
+    .getByRole('option', { name: 'Add "New playlist"', exact: true })
+    .click()
   const responsePromise = page.waitForResponse((res) => {
     const request = res.request()
     return (
@@ -112,9 +119,24 @@ test('Playlist selected', async ({ page }) => {
       res.status() === 204
     )
   })
+  await expect(page).toHaveURL('/playlists/1')
   await page.locator('#title').press('Enter')
   await responsePromise
   await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page).toHaveURL('/displays/1')
+  await expect(
+    page.getByRole('combobox', { name: 'Scene Playlist', exact: true })
+  ).toHaveValue('New playlist')
+
+  await page.getByLabel('Open Scene Playlist').getByRole('button').click()
+  await page.getByRole('heading', { name: 'New playlist' }).dblclick()
+  await page.locator('#title').fill('My Playlist')
+  await page.locator('#title').press('Enter')
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page).toHaveURL('/displays/1')
+  await expect(
+    page.getByRole('combobox', { name: 'Scene Playlist', exact: true })
+  ).toHaveValue('My Playlist')
 
   await expect(item).toHaveCount(2)
   await expect(item.getByTestId('PlayDisabledIcon')).toHaveCount(0)

@@ -1,5 +1,6 @@
 import { ContentData } from './ContentData';
 import { EffectsData } from './EffectsData';
+import { SceneData } from './SceneData';
 import { TransformData } from './TransformData';
 import { ViewData } from './ViewData';
 
@@ -8,6 +9,6 @@ export type ImageViewData = {
   transform: TransformData;
   view: ViewData;
   effects: EffectsData;
-  sceneId: number;
+  scene: SceneData;
   displayIndex?: number;
 };

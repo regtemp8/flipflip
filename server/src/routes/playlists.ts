@@ -7,6 +7,7 @@ import {
   SG,
   ScenePlaylistItem,
   SelectOption,
+  SelectedPlaylist,
   ValueResponse
 } from 'flipflip-common'
 import {
@@ -50,6 +51,7 @@ import {
   findScenePlaylistItem,
   findScenePlaylistItemIds,
   findScenePlaylistItemScenes,
+  findSingleScenePlaylistItemSceneId,
   updateAudioPlaylistItem,
   updateCaptionScriptPlaylistItem,
   updateScenePlaylistItem
@@ -78,6 +80,22 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+router.get('/:id/selected', async (req, res) => {
+  const playlist = await findPlaylistById(Number(req.params.id))
+  if (playlist != null) {
+    const id = playlist.id as number
+    let itemId: number | undefined = undefined
+    if (playlist.type === PLT.singleScene) {
+      itemId = await findSingleScenePlaylistItemSceneId(id)
+    }
+
+    const body: SelectedPlaylist = { id, type: playlist.type, itemId }
+    res.status(200).send(body)
+  } else {
+    res.status(404).end()
+  }
+})
+
 router.patch('/:id', async (req, res) => {
   const result = await updatePlaylist(
     Number(req.params.id),
@@ -91,7 +109,9 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const result = await deletePlaylist(Number(req.params.id))
   const status =
-    result.length === 1 && result[0].numDeletedRows === 1n ? 204 : 500
+    result != null && result.length === 1 && result[0].numDeletedRows === 1n
+      ? 204
+      : 500
   res.status(status).end()
 })
 
@@ -259,13 +279,13 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-  const { type } = req.body
+  const { type, name } = req.body
   if (![PLT.audio, PLT.scene, PLT.script].includes(type)) {
     res.status(400).end()
   }
 
   const user = req.user as User
-  const { id } = await createPlaylist(type, user.id as number)
+  const { id } = await createPlaylist(type, true, user.id as number, name)
   const response: ValueResponse = { value: id as number }
   res.status(200).send(response)
 })
@@ -273,7 +293,9 @@ router.post('/', async (req, res) => {
 router.get('/options/:type', async (req, res) => {
   const rows = await findPlaylistOptionsByType(req.params.type)
   const options: SelectOption[] = []
-  options.push({ value: '0', label: 'None' })
+  if (req.query.includeNone === 'true') {
+    options.push({ value: '0', label: 'None' })
+  }
   for (const { itemId, itemName } of rows) {
     options.push({ value: (itemId as number).toString(), label: itemName })
   }

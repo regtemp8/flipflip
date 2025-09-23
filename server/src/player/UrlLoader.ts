@@ -30,6 +30,12 @@ interface UrlState {
   urlList: number[]
 }
 
+export interface LoadedUrl {
+  url: string
+  source?: string
+  post?: string
+}
+
 export default abstract class UrlLoader {
   public static async create(scene: Scene, user: User) {
     const sources: ContentSource[] = []
@@ -63,19 +69,28 @@ export default abstract class UrlLoader {
     }
   }
 
-  public abstract getUrl(canScrape: boolean): Promise<string | undefined>
+  public abstract getUrl(canScrape: boolean): Promise<LoadedUrl | undefined>
 
-  protected addToUrlList(urlList: number[], end: number, randomize: boolean) {
+  protected addToUrlList(
+    urlList: number[],
+    urlIndex: number,
+    end: number,
+    randomize: boolean
+  ) {
     const start = urlList.length
     const toAdd = Array.from(
       { length: end - start },
       (_, index) => start + index
     )
-    if (randomize) {
-      randomizeList(toAdd)
-    }
 
     pushInChunks(urlList, toAdd)
+    if (randomize) {
+      const shownUrls = urlList.splice(0, urlIndex - 1)
+      randomizeList(urlList)
+      urlList = shownUrls.concat(urlList)
+    }
+
+    return urlList
   }
 }
 
@@ -146,7 +161,12 @@ class SourceWeightedUrlLoader extends UrlLoader {
       return undefined
     } else if (collection.length > urlState.urlList.length) {
       const randomize = orderFunction === OF.random && (forceAll || fullSource)
-      this.addToUrlList(urlState.urlList, collection.length, randomize)
+      urlState.urlList = this.addToUrlList(
+        urlState.urlList,
+        urlState.urlIndex,
+        collection.length,
+        randomize
+      )
     }
 
     let urlIndex: number
@@ -174,7 +194,9 @@ class SourceWeightedUrlLoader extends UrlLoader {
     }
 
     this.state.urlState[source] = urlState
-    return collection[urlIndex]
+    const url = collection[urlIndex]
+    const post = sourceScrapers().getPost(this.scene.id, url)
+    return { source, post, url }
   }
 
   private updateSourceState(canScrape: boolean) {
@@ -235,7 +257,12 @@ class ImageWeightedUrlLoader extends UrlLoader {
       return undefined
     } else if (collection.length > this.state.urlList.length) {
       const randomize = orderFunction === OF.random && forceAll
-      this.addToUrlList(this.state.urlList, collection.length, randomize)
+      this.state.urlList = this.addToUrlList(
+        this.state.urlList,
+        this.state.urlIndex,
+        collection.length,
+        randomize
+      )
     }
 
     let index: number
@@ -258,6 +285,9 @@ class ImageWeightedUrlLoader extends UrlLoader {
         (this.state.urlIndex + 1) % this.state.urlList.length
     }
 
-    return collection[index]
+    const url = collection[index]
+    const source = sourceScrapers().getSource(this.scene.id, url)
+    const post = sourceScrapers().getPost(this.scene.id, url)
+    return { source, post, url }
   }
 }
