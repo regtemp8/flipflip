@@ -56,25 +56,54 @@ export async function up(db: Kysely<DB>): Promise<void> {
 export async function down(db: Kysely<DB>): Promise<void> {
   return await db.transaction().execute(async (trx) => {
     logger.info(`: Get all single scene playlists`)
-    const sceneIds = (
+    const rows = await trx
+      .selectFrom('playlist as p')
+      .innerJoin('scenePlaylistItem as spi', 'spi.playlistId', 'p.id')
+      .innerJoin(
+        'scenePlaylistItemScene as spis',
+        'spis.scenePlaylistItemId',
+        'spi.id'
+      )
+      .select([
+        'p.id as playlistId',
+        'spi.id as playlistItemId',
+        'spis.id as playlistItemSceneId'
+      ])
+      .where('p.type', '=', PLT.singleScene)
+      .execute()
+
+    for (const row of rows) {
+      logger.info(
+        `- Delete single scene playlist item scene (id: ${row.playlistItemSceneId})`
+      )
       await trx
-        .selectFrom('playlist')
-        .select('id')
-        .where('type', '=', PLT.singleScene)
+        .deleteFrom('scenePlaylistItemScene')
+        .where('id', '=', row.playlistItemSceneId)
         .execute()
-    ).map((row) => row.id as number)
 
-    logger.info(`- Delete single scene playlist items`)
-    await trx
-      .deleteFrom('scenePlaylistItem')
-      .where('playlistId', 'in', sceneIds)
-      .execute()
+      logger.info(
+        `- Delete single scene playlist item (id: ${row.playlistItemId})`
+      )
+      await trx
+        .deleteFrom('scenePlaylistItem')
+        .where('id', '=', row.playlistItemId)
+        .execute()
 
-    logger.info(`- Delete single scene playlists`)
-    await trx
-      .deleteFrom('playlist')
-      .where('type', '=', PLT.singleScene)
-      .execute()
+      logger.info(
+        `- Update display views that reference single scene playlist (id: ${row.playlistId})`
+      )
+      await trx
+        .updateTable('displayView')
+        .set({ playlistId: null })
+        .where('playlistId', '=', row.playlistId)
+        .execute()
+
+      logger.info(`- Delete single scene playlist (id: ${row.playlistId})`)
+      await trx
+        .deleteFrom('playlist')
+        .where('id', '=', row.playlistId)
+        .execute()
+    }
 
     logger.info(`- Drop 'visible' column from playlist table`)
     await trx.schema.alterTable('playlist').dropColumn('visible').execute()

@@ -82,7 +82,7 @@ export default abstract class UrlLoader {
       { length: end - start },
       (_, index) => start + index
     )
-    
+
     pushInChunks(urlList, toAdd)
     if (randomize) {
       const shownUrls = urlList.splice(0, urlIndex - 1)
