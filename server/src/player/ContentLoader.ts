@@ -381,7 +381,7 @@ export default class ContentLoader {
       return data
     }
 
-    const sourceType = getSourceType(url)
+    const sourceType = getSourceType(source)
     if (sourceType === ST.local || sourceType === ST.video) {
       const uuid = fileRegistry().set(url)
       url = `http://localhost/fs/file/registry/${uuid}`

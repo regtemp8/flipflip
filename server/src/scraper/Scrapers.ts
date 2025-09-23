@@ -2263,7 +2263,7 @@ export const loadBDSMlr: WorkerFunction = async (
   }
 
   const controller = new AbortController()
-  const timeoutID = setTimeout(() => controller.abort(), 5000)
+  const timeoutID = setTimeout(() => controller.abort(), 15000)
   try {
     const res = await fetch(
       url + '/rss?page=' + ((helpers.next as number) + 1),

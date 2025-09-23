@@ -32,7 +32,7 @@ interface UrlState {
 
 export interface LoadedUrl {
   url: string
-  source?: string
+  source: string
   post?: string
 }
 
@@ -288,6 +288,6 @@ class ImageWeightedUrlLoader extends UrlLoader {
     const url = collection[index]
     const source = sourceScrapers().getSource(this.scene.id, url)
     const post = sourceScrapers().getPost(this.scene.id, url)
-    return { source, post, url }
+    return { source: source as string, post, url }
   }
 }
