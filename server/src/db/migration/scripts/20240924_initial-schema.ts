@@ -1,5 +1,5 @@
 import { Kysely } from 'kysely'
-import { DB } from '../../types/generated'
+import { DB } from '../../types/generated-v400-beta8'
 import Logger from '../../../logging/Logger'
 
 const logger = Logger.create('DB Migration - initial-schema')

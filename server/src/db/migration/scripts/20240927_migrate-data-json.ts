@@ -7,7 +7,7 @@ import {
   Tag as DBTag,
   DisplayView as DBDisplayView
 } from '../../types/entities'
-import { DB } from '../../types/generated'
+import { DB } from '../../types/generated-v400-beta8'
 import {
   AppStorage,
   initialAppStorage
