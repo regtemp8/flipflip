@@ -119,7 +119,7 @@ router.get('/file/audio-thumb/:name', async (req, res) => {
   const { name } = req.params
   const thumbsDir = getThumbsDir()
   const thumb = path.resolve(thumbsDir, name)
-  if(!thumb.startsWith(`${thumbsDir}${path.sep}`)) {
+  if (!thumb.startsWith(`${thumbsDir}${path.sep}`)) {
     res.status(403).end()
     return
   }
