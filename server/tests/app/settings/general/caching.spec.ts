@@ -85,6 +85,17 @@ test('Caching Directory', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^old-cache/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^scripts/ })).toBeVisible()
   await page.getByRole('button', { name: /^logs/ }).click()
+  await page.getByTestId('OtherHousesIcon').click()
+  await expect(page.getByRole('button', { name: /^backups/ })).not.toBeVisible()
+  await expect(page.getByRole('button', { name: /^logs/ })).not.toBeVisible()
+  await expect(
+    page.getByRole('button', { name: /^old-cache/ })
+  ).not.toBeVisible()
+  await expect(page.getByRole('button', { name: /^scripts/ })).not.toBeVisible()
+  await page.getByTestId('EditIcon').click()
+  await expect(page.getByRole('textbox')).toHaveValue(
+    process.platform === 'win32' ? '' : '/'
+  )
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(
     page.getByLabel('Caching Directory', { exact: true })
@@ -110,6 +121,12 @@ test('Caching Directory', async ({ page }) => {
   await page.getByTestId('CreateNewFolderIcon').click()
   await page.getByRole('textbox').fill('cache')
   await page.getByRole('button', { name: 'Create', exact: true }).click()
+  await expect(
+    page.getByText(
+      `Directory '${path.resolve(__dirname, '..', '..', '..', 'data', 'cache')}' already exists`,
+      { exact: true }
+    )
+  ).toBeVisible()
   await expect(page.getByRole('button', { name: /^cache/ })).toBeVisible()
   await page.getByRole('button', { name: /^cache/ }).dblclick()
   await page.getByRole('button', { name: 'Choose', exact: true }).click()

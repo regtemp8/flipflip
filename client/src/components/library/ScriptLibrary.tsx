@@ -1011,7 +1011,6 @@ function ScriptLibrary() {
         open={openMenu === MO.openLocal}
         type={AF.script}
         multiple
-        path=""
         onClose={onOpenLocalFiles}
       />
     </div>
