@@ -174,13 +174,14 @@ async function handleFileUrl(req: Request, res: Response, url?: string) {
       res.status(404).end()
       return
     }
-
-    let ranges = undefined
-    const { size } = await fs.promises.stat(url)
-    if (isVideo(url, true) || isAudio(url, true)) {
-      res.setHeader('Accept-Ranges', 'bytes')
-      ranges = req.range(size)
+    if (!isVideo(url, true) && !isAudio(url, true)) {
+      res.status(200).sendFile(url)
+      return
     }
+
+    const { size } = await fs.promises.stat(url)
+    res.setHeader('Accept-Ranges', 'bytes')
+    const ranges = req.range(size)
 
     if (ranges == -1) {
       // Unsatisfiable range parser result, return HTTP status 416: range not satisfiable
