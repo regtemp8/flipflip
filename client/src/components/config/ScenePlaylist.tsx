@@ -251,7 +251,7 @@ function ScenePlaylistItemEditDialog(props: ScenePlaylistItemEditDialogProps) {
             >
               <TextField
                 fullWidth
-                label="Play after"
+                label="Play for"
                 variant="outlined"
                 margin="dense"
                 value={currentDuration}
