@@ -286,12 +286,7 @@ function AudioEdit() {
             </Button>
           </DialogActions>
         </Dialog>
-        <FilePicker
-          open={showThumbPicker}
-          type="img"
-          path=""
-          onClose={onPickThumb}
-        />
+        <FilePicker open={showThumbPicker} type="img" onClose={onPickThumb} />
       </>
     )
   )

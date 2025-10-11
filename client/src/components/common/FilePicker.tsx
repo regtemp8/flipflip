@@ -28,12 +28,13 @@ import FolderIcon from '@mui/icons-material/Folder'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder'
+import OtherHousesIcon from '@mui/icons-material/OtherHouses'
 import { FixedSizeList } from 'react-window'
 import {
   useCreateDirectoryMutation,
   useGetFilePickerDataQuery
 } from '../../store/api/slice'
-import { AF, FilePickerItem } from 'flipflip-common'
+import { AF, BASE_DIR, FilePickerItem } from 'flipflip-common'
 import { filesize } from 'filesize'
 import { makeStyles } from 'tss-react/mui'
 import { isPrimaryModifierKey } from '../../utils'
@@ -276,14 +277,14 @@ export interface FilePickerProps {
   open: boolean
   multiple?: boolean
   type: string
-  path: string
+  path?: string
   onClose: (chosenFiles?: string[]) => void
 }
 
 export default function FilePicker(props: FilePickerProps) {
   const [selected, setSelected] = useState<string[]>([])
   const [sort, setSort] = useState<SortBy>({ column: 'name', asc: true })
-  const [path, setPath] = useState('')
+  const [path, setPath] = useState(props.path ?? BASE_DIR)
   const [search, setSearch] = useState<string>()
   const [mode, setMode] = useState(FilePickerMode.PathNavigation)
   const { data } = useGetFilePickerDataQuery({ path, type: props.type })
@@ -291,7 +292,7 @@ export default function FilePicker(props: FilePickerProps) {
   const _lastSelected = useRef<string>()
 
   useEffect(() => {
-    setPath(props.path)
+    setPath(props.path ?? BASE_DIR)
   }, [props.path])
 
   const renderFilePickerTopBar = () => {
@@ -321,22 +322,38 @@ export default function FilePicker(props: FilePickerProps) {
             maxItems={10}
             itemsBeforeCollapse={2}
             itemsAfterCollapse={5}
+            separator={data.sep}
             sx={{ ml: 1, flex: 1 }}
           >
-            {crumbs.map((crumb, index, array) => (
-              <Link
-                component="button"
-                variant="body2"
-                underline="hover"
-                color="inherit"
-                onClick={() => {
-                  setPath(array.slice(0, index + 1).join(data.sep))
-                  setSelected([])
-                }}
-              >
-                {crumb}
-              </Link>
-            ))}
+            <Link
+              component="button"
+              variant="body2"
+              underline="hover"
+              color="inherit"
+              onClick={() => {
+                setPath('')
+                setSelected([])
+              }}
+            >
+              {<OtherHousesIcon />}
+            </Link>
+            {crumbs.map(
+              (crumb, index, array) =>
+                (index !== 0 || crumb !== '') && (
+                  <Link
+                    component="button"
+                    variant="body2"
+                    underline="hover"
+                    color="inherit"
+                    onClick={() => {
+                      setPath(array.slice(0, index + 1).join(data.sep))
+                      setSelected([])
+                    }}
+                  >
+                    {crumb}
+                  </Link>
+                )
+            )}
             {last && (
               <Typography sx={{ color: 'text.primary' }}>{last}</Typography>
             )}
@@ -375,13 +392,22 @@ export default function FilePicker(props: FilePickerProps) {
 
     setSearch('')
     setMode(FilePickerMode.PathNavigation)
+    const newPath = joinPath(data.path, item.name, data.sep)
     if (item.directory) {
-      setPath(`${data.path}${data.sep}${item.name}`)
+      setPath(newPath)
       setSelected([])
       _lastSelected.current = undefined
     } else {
-      onClose([`${data.path}${data.sep}${item.name}`])
+      onClose([newPath])
     }
+  }
+
+  const joinPath = (dir: string, file: string, sep: string) => {
+    if (dir !== '' && dir !== sep) {
+      dir += sep
+    }
+
+    return `${dir}${file}`
   }
 
   const onSelect = (
@@ -428,7 +454,7 @@ export default function FilePicker(props: FilePickerProps) {
     setSelected([])
     setSort({ column: 'name', asc: true })
     setSearch(undefined)
-    setPath('')
+    setPath(props.path ?? BASE_DIR)
     _lastSelected.current = undefined
   }
 
@@ -442,10 +468,11 @@ export default function FilePicker(props: FilePickerProps) {
     const selectedItems = selected
       .map((name) => items.find((item) => item.name === name))
       .filter((item) => item?.directory === directory)
+      .map((item) => item as FilePickerItem)
 
     return selectedItems.length === 0 && directory
       ? [data?.path as string]
-      : selectedItems.map((item) => item?.name)
+      : selectedItems.map((item) => item.name)
   }
 
   const canChoose = () => {
@@ -459,7 +486,7 @@ export default function FilePicker(props: FilePickerProps) {
 
     onClose(
       getChosenFiles().map((name) =>
-        name !== data.path ? `${data.path}${data.sep}${name}` : name
+        name !== data.path ? joinPath(data.path, name, data.sep) : name
       )
     )
   }

@@ -2047,6 +2047,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"drivelist@npm:^12.0.2":
+  version: 12.0.2
+  resolution: "drivelist@npm:12.0.2"
+  dependencies:
+    bindings: "npm:^1.5.0"
+    debug: "npm:^4.3.4"
+    node-addon-api: "npm:^8.0.0"
+    node-gyp: "npm:latest"
+    prebuild-install: "npm:^7.1.1"
+  checksum: 10c0/eb548a933d5d1140ce1e64ed60010b8f430c98838930cb7625a97156a2e8f47d429a2a476078e5d114f0d587e4f7276bc6bfad36f89a50a422fa0d4fbe0fd9a5
+  languageName: node
+  linkType: hard
+
 "dunder-proto@npm:^1.0.1":
   version: 1.0.1
   resolution: "dunder-proto@npm:1.0.1"
@@ -4582,6 +4595,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-addon-api@npm:^8.0.0":
+  version: 8.5.0
+  resolution: "node-addon-api@npm:8.5.0"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: 10c0/e4de0b4e70998fed7ef41933946f60565fc3a17cb83b7d626a0c0bb1f734cf7852e0e596f12681e7c8ed424163ee3cdbb4f0abaa9cc269d03f48834c263ba162
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:^2.6.6":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
@@ -5653,6 +5675,7 @@ __metadata:
     connect-sqlite3: "npm:^0.9.15"
     cookie-parser: "npm:^1.4.6"
     cors: "npm:^2.8.5"
+    drivelist: "npm:^12.0.2"
     eslint: "npm:^8.0.1"
     eslint-plugin-import: "npm:^2.25.0"
     express: "npm:^4.21.0"

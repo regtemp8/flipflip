@@ -195,7 +195,7 @@ function CacheCard() {
       <FilePicker
         open={showFilePicker}
         type="dir"
-        path={data?.directory || data?.defaultDirectory || ''}
+        path={data?.directory || data?.defaultDirectory || undefined}
         onClose={(chosenFiles?: string[]) => {
           setShowFilePicker(false)
           if (chosenFiles?.length === 1) {

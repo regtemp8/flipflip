@@ -1,8 +1,10 @@
 import fs, { Dirent } from 'fs'
 import path from 'path'
+import * as drivelist from 'drivelist'
 import express, { Request, Response } from 'express'
 import {
   AF,
+  BASE_DIR,
   FilePickerData,
   FilePickerItem,
   isAudio,
@@ -11,7 +13,7 @@ import {
   isVideoPlaylist
 } from 'flipflip-common'
 import Logger from '../logging/Logger'
-import { fileExists, getSaveDir, getThumbsDir } from '../utils'
+import { fileExists, getSaveDir, getThumbsDir, isWin32 } from '../utils'
 import { findCaptionScriptUrlById } from '../db/CaptionScriptRepository'
 import { findAudioUrlById } from '../db/AudioRepository'
 import { findContentSourceUrlById } from '../db/ContentSourceRepository'
@@ -31,19 +33,52 @@ const typeDirs = new Map<string, string | undefined>([
 const router = express.Router()
 router.get('/pick', async (req, res) => {
   const type = req.query.type as string
-  let dir = req.query.dir
-    ? (req.query.dir as string)
-    : (typeDirs.get(type) ?? getSaveDir())
+  let dir =
+    req.query.dir === BASE_DIR
+      ? (typeDirs.get(type) ?? getSaveDir())
+      : (req.query.dir as string)
 
-  dir = path.resolve(dir)
+  if (dir === '') {
+    if (isWin32) {
+      const drives = await drivelist.list()
+      const drivePaths = drives
+        .flatMap((drive) => drive.mountpoints)
+        .map((mountpoint) => mountpoint.path)
+
+      const items: FilePickerItem[] = []
+      for (const drivePath of drivePaths) {
+        const stat = await fs.promises.stat(drivePath)
+        items.push({
+          name: drivePath,
+          lastModified: stat.mtimeMs,
+          size: stat.size,
+          directory: true
+        })
+      }
+
+      const data: FilePickerData = { path: dir, sep: path.sep, items }
+      res.status(200).send(data)
+      return
+    } else {
+      dir = '/'
+    }
+  } else {
+    if (!dir.endsWith(path.sep)) {
+      dir += path.sep
+    }
+    dir = path.resolve(dir)
+  }
+
   const exists = await fileExists(dir)
   if (!exists) {
+    logger.error(`Path '{path}' doesn't exist`, { path: dir })
     res.status(400).send({ error: `Path '${dir}' doesn't exist` })
     return
   }
 
   const stat = await fs.promises.stat(dir)
   if (!stat.isDirectory()) {
+    logger.error(`Path '{path}' is not a directory`, { path: dir })
     res.status(400).send({ error: `Path '${dir}' is not a directory` })
     return
   }
@@ -52,8 +87,8 @@ router.get('/pick', async (req, res) => {
   try {
     dirents = await fs.promises.readdir(dir, { withFileTypes: true })
   } catch (error) {
-    logger.error(`Failed to read directory {path}`, { path: dir, error })
-    res.status(500).end()
+    logger.error(`Failed to read directory '{path}'`, { path: dir, error })
+    res.status(500).send({ error: `Failed to read directory '${dir}'` })
     return
   }
   if (dirents.length === 0) {
@@ -87,6 +122,10 @@ router.get('/pick', async (req, res) => {
 
   const items: FilePickerItem[] = []
   for (const dirent of dirents) {
+    if (dirent.parentPath == null) {
+      continue
+    }
+
     const stat = await fs.promises.stat(
       path.join(dirent.parentPath, dirent.name)
     )
@@ -104,6 +143,15 @@ router.get('/pick', async (req, res) => {
 
 router.post('/create-directory', async (req, res) => {
   try {
+    const exists = await fileExists(req.body.path)
+    if (exists) {
+      logger.error(`Directory '{path}' already exists`, { path: req.body.path })
+      res
+        .status(400)
+        .send({ error: `Directory '${req.body.path}' already exists` })
+      return
+    }
+
     await fs.promises.mkdir(req.body.path, { recursive: false })
     res.status(204).end()
   } catch (error) {

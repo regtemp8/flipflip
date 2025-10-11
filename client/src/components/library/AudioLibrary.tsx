@@ -1754,7 +1754,6 @@ function AudioLibrary() {
         open={openMenu === MO.openLocal}
         type={AF.audios}
         multiple
-        path=""
         onClose={onOpenLocalFiles}
       />
     </div>

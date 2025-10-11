@@ -10,6 +10,7 @@
     "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "drivelist": "^12.0.2",
     "express": "^4.21.0",
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^8.1.0",
@@ -87,7 +88,8 @@
       "node_modules/@ffprobe-installer/**/ffprobe",
       "node_modules/@ffprobe-installer/**/ffprobe.exe",
       "node_modules/@ffprobe-installer/**/package.json",
-      "node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+      "node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+      "node_modules/drivelist/build/Release/drivelist.node"
     ],
     "outputPath": "dist"
   },

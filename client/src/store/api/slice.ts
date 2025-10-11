@@ -1944,9 +1944,8 @@ export const flipflipApi = createApi({
       }),
       async onQueryStarted(_, { queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
-          const status = reason.meta?.response?.status
-          if (status === 400) {
-            const message = (reason as any)?.error?.data as Message
+          const message = (reason as any)?.error?.data
+          if (message != null) {
             snackbar().showMessage(message)
           }
         })
@@ -1959,7 +1958,20 @@ export const flipflipApi = createApi({
         method: 'POST',
         body
       }),
-      invalidatesTags: ['FilePicker']
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+          .then(({ meta }) => {
+            if (meta?.response?.ok) {
+              dispatch(flipflipApi.util.invalidateTags(['FilePicker']))
+            }
+          })
+          .catch((reason) => {
+            const message = (reason as any)?.error?.data
+            if (message != null) {
+              snackbar().showMessage(message)
+            }
+          })
+      }
     })
   })
 })

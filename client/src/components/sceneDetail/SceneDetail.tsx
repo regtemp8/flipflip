@@ -1462,7 +1462,6 @@ function SceneDetail() {
           <FilePicker
             open={openMenu === MO.openLocal}
             type={addFunction ?? ''}
-            path=""
             multiple
             onClose={async (chosenFiles?: string[]) => {
               const addFn = addFunction as string
