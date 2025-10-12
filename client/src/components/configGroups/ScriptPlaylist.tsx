@@ -30,7 +30,8 @@ import {
   useGetPlaylistItemIdsQuery,
   useGetPlaylistQuery
 } from '../../store/api/slice'
-import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import { movePlaylistItem, setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
 // import { isPrimaryModifierKey } from '../../utils'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -201,19 +202,19 @@ function ScriptPlaylist(props: ScriptPlaylistProps) {
     <>
       <List disablePadding>
         <Sortable
+          id="script-playlist-items"
           className={classes.scriptList}
           options={{
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          onChange={(_order: any, _sortable: any, _evt: any) => {
-            // const { oldIndex, newIndex } = evt
-            // dispatch(
-            //   setPlaylistSortItems({
-            //     id: props.playlistID,
-            //     value: { oldIndex, newIndex }
-            //   })
-            // )
+          onChange={(_order: any, _sortable: any, evt: any) => {
+            const newItemIDs = arrayMove(
+              itemIDs as number[],
+              evt.oldIndex,
+              evt.newIndex
+            )
+            dispatch(movePlaylistItem(playlistID, newItemIDs))
           }}
         >
           {itemIDs?.map((id, index) => (

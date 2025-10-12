@@ -28,10 +28,11 @@ import { getTimestamp /*, isPrimaryModifierKey*/ } from '../../utils'
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
-import { useGetAudioQuery, useGetPlaylistQuery } from '../../store/api/slice'
+import { useGetAudioQuery, useGetPlaylistItemIdsQuery, useGetPlaylistQuery } from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 import { editAudioOptions } from '../../store/audioOptions/thunks'
-import { setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import { movePlaylistItem, setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   audioList: {
@@ -222,13 +223,12 @@ export interface AudioPlaylistProps {
 function AudioPlaylist(props: AudioPlaylistProps) {
   const dispatch = useAppDispatch()
   const { playlistID } = props
-  // const [sceneID, setSceneID] = useState<number>(0)
+  const { data: playlist } = useGetPlaylistQuery(playlistID)
+  const { data: itemIDs } = useGetPlaylistItemIdsQuery(playlistID)
 
   const onSourceOptions = (audioID: number) => {
     dispatch(editAudioOptions(audioID))
   }
-
-  const { data: playlist } = useGetPlaylistQuery(playlistID)
 
   const toggleShuffle = () => {
     dispatch(setPlaylistShuffle(playlistID, !playlist?.shuffle))
@@ -257,20 +257,20 @@ function AudioPlaylist(props: AudioPlaylistProps) {
     <>
       <List disablePadding>
         <Sortable
+          id="audio-playlist-items"
           className={classes.audioList}
           options={{
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          // onChange={(order: any, sortable: any, evt: any) => {
-          //   const { oldIndex, newIndex } = evt
-          //   dispatch(
-          //     setPlaylistSortItems({
-          //       id: props.playlistID,
-          //       value: { oldIndex, newIndex }
-          //     })
-          //   )
-          // }}
+          onChange={(_order: any, _sortable: any, evt: any) => {
+            const newItemIDs = arrayMove(
+              itemIDs as number[],
+              evt.oldIndex,
+              evt.newIndex
+            )
+            dispatch(movePlaylistItem(playlistID, newItemIDs))
+          }}
         >
           {playlist?.items.map((audioID: number, index: number) => (
             <PlaylistItem
@@ -318,7 +318,7 @@ function AudioPlaylist(props: AudioPlaylistProps) {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={() => {} /*dispatch(addTracks(props.playlistID))*/}
+              onClick={() => { } /*dispatch(addTracks(props.playlistID))*/}
               size="large"
             >
               <AddIcon />
@@ -330,5 +330,5 @@ function AudioPlaylist(props: AudioPlaylistProps) {
   )
 }
 
-;(AudioPlaylist as any).displayName = 'AudioPlaylist'
+; (AudioPlaylist as any).displayName = 'AudioPlaylist'
 export default AudioPlaylist
