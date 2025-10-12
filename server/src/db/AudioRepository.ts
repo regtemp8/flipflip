@@ -739,17 +739,11 @@ function audioSortFunction(
   }
 }
 
-export async function moveAudio(move: MoveRequest) {
+export async function moveAudio(ids: number[]) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
-      await trx
-        .updateTable('audio')
-        .set((eb) => ({ index: eb('index', '+', ids.length) }))
-        .execute()
-
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('audio')

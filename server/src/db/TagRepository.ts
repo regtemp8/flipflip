@@ -32,12 +32,11 @@ export async function updateTag(id: number, update: TagUpdate) {
     .execute()
 }
 
-export async function moveTag(move: MoveRequest) {
+export async function moveTag(ids: number[]) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('tag')

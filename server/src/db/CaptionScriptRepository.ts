@@ -374,17 +374,11 @@ export async function sortCaptionScripts({ sortBy, sortOrder }: SortRequest) {
     })
 }
 
-export async function moveCaptionScript(move: MoveRequest) {
+export async function moveCaptionScript(ids: number[]) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
-      await trx
-        .updateTable('captionScript')
-        .set((eb) => ({ index: eb('index', '+', ids.length) }))
-        .execute()
-
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('captionScript')
