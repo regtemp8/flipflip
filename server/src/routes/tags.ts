@@ -73,7 +73,11 @@ router.delete('/:id', async (req, res) => {
   res.status(status).end()
 })
 router.post('/move', async (req, res) => {
-  await moveTag(req.body as MoveRequest)
+  const { ids } = req.body as MoveRequest
+  if (!Array.isArray(ids) || ids.length > 1000) {
+    throw new Error('Unable to process tag move request')
+  }
+  await moveTag(ids)
   res.status(204).end()
 })
 export default router

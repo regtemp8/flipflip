@@ -1,4 +1,4 @@
-import { PLT, SCENE_NONE } from 'flipflip-common'
+import { MoveRequest, PLT, SCENE_NONE } from 'flipflip-common'
 import db from './database'
 import {
   AudioPlaylistItemUpdate,
@@ -97,7 +97,7 @@ async function insertScenePlaylistItemScenes(
   scenePlaylistItemId: number,
   scenes?: ScenePlaylistItemSceneInsert[]
 ) {
-  if (scenes == null) {
+  if (scenes == null || scenes.length === 0) {
     return
   }
 
@@ -327,6 +327,7 @@ export async function findScenePlaylistItemScenes(
     .selectFrom('scenePlaylistItemScene')
     .select('sceneId')
     .where('scenePlaylistItemId', '=', itemId)
+    .orderBy('id asc')
     .execute()
 
   return rows.map((row) => row.sceneId ?? SCENE_NONE)
@@ -381,4 +382,61 @@ export async function findCaptionScriptPlaylistItemIds(playlistId: number) {
     .execute()
 
   return rows.map((row) => row.id as number)
+}
+
+export async function moveAudioPlaylistItemIds(
+  playlistId: number,
+  ids: number[]
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('audioPlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
+}
+
+export async function moveScenePlaylistItemIds(
+  playlistId: number,
+  ids: number[]
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('scenePlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
+}
+
+export async function moveCaptionScriptPlaylistItemIds(
+  playlistId: number,
+  ids: number[]
+) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('captionScriptPlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
 }

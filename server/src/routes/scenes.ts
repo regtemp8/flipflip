@@ -1,5 +1,5 @@
 import express from 'express'
-import { SG, ValueResponse } from 'flipflip-common'
+import { SCENE_NONE, SCENE_RANDOM, SG, ValueResponse } from 'flipflip-common'
 import {
   createScene,
   findDefaultScene,
@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const user = req.user as User
-  const { id } = await createScene(user.id as number)
+  const { id } = await createScene(user.id as number, req.body.name)
   const response: ValueResponse = { value: id as number }
   res.status(200).send(response)
 })
@@ -63,14 +63,39 @@ router.get('/select-options', async (req, res) => {
   const options = await findSceneSelectOptions()
   const { includeExtra, includeRandom, onlyExtra } = req.query
   if (includeExtra === 'true') {
-    options['0'] = 'None'
-    options['-1'] = 'Random'
+    options.push({
+      value: SCENE_NONE.toString(),
+      label: 'None',
+      hasSources: true,
+      hasValidWeights: true
+    })
+    options.push({
+      value: SCENE_RANDOM.toString(),
+      label: 'Random',
+      hasSources: true,
+      hasValidWeights: true
+    })
   } else if (includeRandom === 'true') {
-    options['-1'] = 'Random'
+    options.push({
+      value: SCENE_RANDOM.toString(),
+      label: 'Random',
+      hasSources: true,
+      hasValidWeights: true
+    })
   } else if (onlyExtra === 'true') {
-    options['-1'] = '~~EMPTY~~'
+    options.push({
+      value: SCENE_RANDOM.toString(),
+      label: '~~EMPTY~~',
+      hasSources: true,
+      hasValidWeights: true
+    })
   } else {
-    options['0'] = 'None'
+    options.push({
+      value: SCENE_NONE.toString(),
+      label: 'None',
+      hasSources: true,
+      hasValidWeights: true
+    })
   }
 
   res.status(200).send(options)

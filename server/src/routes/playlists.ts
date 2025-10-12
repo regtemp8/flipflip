@@ -2,6 +2,7 @@ import express from 'express'
 import {
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,
+  MoveRequest,
   PLT,
   PlaylistItem,
   SG,
@@ -52,6 +53,9 @@ import {
   findScenePlaylistItemIds,
   findScenePlaylistItemScenes,
   findSingleScenePlaylistItemSceneId,
+  moveAudioPlaylistItemIds,
+  moveCaptionScriptPlaylistItemIds,
+  moveScenePlaylistItemIds,
   updateAudioPlaylistItem,
   updateCaptionScriptPlaylistItem,
   updateScenePlaylistItem
@@ -150,9 +154,9 @@ router.post('/:id/items', async (req, res) => {
     }
     case PLT.scene: {
       const item = req.body as ScenePlaylistItem
-      const update = toScenePlaylistItemInsert(id, item)
+      const insert = toScenePlaylistItemInsert(id, item)
       const scenes = toScenePlaylistItemSceneInsert(item)
-      await createScenePlaylistItem(update, scenes)
+      await createScenePlaylistItem(insert, scenes)
       break
     }
     case PLT.script: {
@@ -189,6 +193,32 @@ router.get('/:id/items', async (req, res) => {
   }
 
   res.status(200).send(items)
+})
+
+router.post('/:id/move', async (req, res) => {
+  const playlistId = Number(req.params.id)
+  const { ids } = req.body as MoveRequest
+  if (!Array.isArray(ids) || ids.length > 1000) {
+    throw new Error('Unable to process playlist move request')
+  }
+
+  const playlist = await findPlaylistType(playlistId)
+  switch (playlist?.type) {
+    case PLT.audio:
+      await moveAudioPlaylistItemIds(playlistId, ids)
+      break
+    case PLT.scene:
+      await moveScenePlaylistItemIds(playlistId, ids)
+      break
+    case PLT.script:
+      await moveCaptionScriptPlaylistItemIds(playlistId, ids)
+      break
+    default: {
+      throw new Error(`Playlist type '${playlist?.type}' not supported`)
+    }
+  }
+
+  res.status(204).end()
 })
 
 router.get('/:id/items/:itemId', async (req, res) => {

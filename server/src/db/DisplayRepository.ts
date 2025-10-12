@@ -81,8 +81,9 @@ export async function createTempDisplayForScene(
         .values({
           playlistId,
           index: 0,
-          duration: Number.POSITIVE_INFINITY, // TODO special value for infinity, like -1
-          playAfterAllImages: toNumber(false)
+          duration: Number.POSITIVE_INFINITY,
+          playAfterAllImages: toNumber(false),
+          random: toNumber(false)
         })
         .returning('id')
         .executeTakeFirstOrThrow()

@@ -1659,9 +1659,15 @@ export function toScenePlaylistItem(
     return undefined
   }
 
-  const { duration, id, index, playAfterAllImages } = item
+  const { duration, id, index, playAfterAllImages, random } = item
   scenes = scenes as number[]
-  const sceneID = scenes.length === 1 ? scenes[0] : SCENE_RANDOM
+  let sceneID = SCENE_NONE
+  if (toBoolean(random)) {
+    sceneID = SCENE_RANDOM
+  } else if (scenes.length === 1) {
+    sceneID = scenes[0]
+  }
+
   return {
     id: id as number,
     index,
@@ -1714,11 +1720,17 @@ export function toCaptionScriptPlaylistItemUpdate(
 export function toScenePlaylistItemUpdate(
   item: Partial<ScenePlaylistItem>
 ): ScenePlaylistItemUpdate {
-  const { id, index, duration, playAfterAllImages } = item
+  const { id, index, duration, playAfterAllImages, sceneID } = item
+  let random: number | undefined
+  if (sceneID != null) {
+    random = toNumber(sceneID === SCENE_RANDOM)
+  }
+
   return {
     id,
     index,
     duration,
+    random,
     playAfterAllImages: toNumberOpt(playAfterAllImages)
   }
 }
@@ -1727,11 +1739,12 @@ export function toScenePlaylistItemInsert(
   playlistId: number,
   item: ScenePlaylistItem
 ): ScenePlaylistItemInsert {
-  const { index, duration, playAfterAllImages } = item
+  const { index, duration, playAfterAllImages, sceneID } = item
   return {
     index,
     playlistId,
     duration,
+    random: toNumber(sceneID === SCENE_RANDOM),
     playAfterAllImages: toNumber(playAfterAllImages)
   }
 }
@@ -1746,14 +1759,17 @@ export function toScenePlaylistItemSceneInsert(
 
   const scenePlaylistItemId = id as number
   const updates: ScenePlaylistItemSceneInsert[] = []
-  if (sceneID == SCENE_NONE) {
-    updates.push({ scenePlaylistItemId, sceneId: null })
-  } else if (sceneID == SCENE_RANDOM) {
-    randomScenes?.forEach((randomSceneId) => {
-      updates.push({ scenePlaylistItemId, sceneId: randomSceneId })
-    })
+  const sceneId = sceneID !== SCENE_NONE ? sceneID : null
+  if (sceneId === SCENE_RANDOM) {
+    randomScenes
+      ?.map((randomSceneId) =>
+        randomSceneId != SCENE_NONE ? randomSceneId : null
+      )
+      .forEach((randomSceneId) => {
+        updates.push({ scenePlaylistItemId, sceneId: randomSceneId })
+      })
   } else {
-    updates.push({ scenePlaylistItemId, sceneId: sceneID })
+    updates.push({ scenePlaylistItemId, sceneId })
   }
 
   return updates

@@ -40,7 +40,7 @@
     "winston": "^3.15.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.0",
     "@types/better-sqlite3": "^7.6.11",
     "@types/connect-sqlite3": "^0",
     "@types/cookie-parser": "^1",

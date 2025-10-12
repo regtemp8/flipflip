@@ -7,7 +7,8 @@ import { grey } from '@mui/material/colors'
 
 import { useGetSceneSelectOptionsQuery } from '../../store/api/slice'
 import { SyntheticEvent } from 'react'
-import { SelectOption } from 'flipflip-common'
+import { SceneSelectOption, SelectOption } from 'flipflip-common'
+import SceneSelectErrorTooltip from './SceneSelectErrorTooltip'
 
 const useStyles = makeStyles()(() => ({
   select: {
@@ -26,37 +27,32 @@ function MultiSceneSelect(props: MultiSceneSelectProps) {
     includeExtra: false,
     includeRandom: false
   })
-  const options = data ?? {}
-  const optionsList = Object.keys(options).map((key) => {
-    return { value: key, label: options[key] }
-  })
+  const options = data ?? []
 
   const onChange = (
     _event: SyntheticEvent<Element, Event>,
     options: unknown[]
   ) => {
     const values = options.map((option) => {
-      const { value } = option as SelectOption
+      const { value } = option as SceneSelectOption
       return Number(value)
     })
 
     props.onChange(values)
   }
 
-  const toValue = (id: number) => {
-    const value = id.toString()
-    return { value, label: options[value] }
-  }
-
   const { classes } = useStyles()
   const id = 'multi-scene-select'
+  const value = options.filter((option) =>
+    props.values?.includes(Number(option.value))
+  )
   return (
     <Autocomplete
       id={id}
       multiple
       className={classes.select}
-      value={props.values ? props.values.map(toValue) : []}
-      options={optionsList}
+      value={value}
+      options={options}
       renderInput={(params) => <TextField {...params} variant="standard" />}
       renderTags={(value, getTagProps) => (
         <Box sx={{ maxHeight: 200, overflowY: 'scroll' }}>
@@ -80,6 +76,7 @@ function MultiSceneSelect(props: MultiSceneSelectProps) {
               checked={selected}
             />
             {label}
+            <SceneSelectErrorTooltip option={option} />
           </li>
         )
       }}

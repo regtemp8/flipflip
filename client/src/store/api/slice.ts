@@ -44,7 +44,8 @@ import {
   AddContentSourceRequest,
   WatermarkSettings,
   PLT,
-  SelectedPlaylist
+  SelectedPlaylist,
+  SceneSelectOption
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -428,7 +429,12 @@ export const flipflipApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
-        dispatch(flipflipApi.util.invalidateTags(['ContentSource']))
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'ContentSource',
+            'SceneSelectOptions'
+          ])
+        )
       }
     }),
     deleteScene: builder.mutation<void, number>({
@@ -451,10 +457,11 @@ export const flipflipApi = createApi({
         )
       }
     }),
-    createScene: builder.mutation<ValueResponse, void>({
-      query: () => ({
+    createScene: builder.mutation<ValueResponse, { name?: string }>({
+      query: (body) => ({
         url: `api/scenes`,
-        method: 'POST'
+        method: 'POST',
+        body
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
@@ -462,6 +469,7 @@ export const flipflipApi = createApi({
           flipflipApi.util.invalidateTags([
             'GroupedScenes',
             'UngroupedScenes',
+            'SceneSelectOptions',
             { type: 'Scene', id: 'List' },
             { type: 'PlaylistOptions', id: PLT.singleScene }
           ])
@@ -574,6 +582,7 @@ export const flipflipApi = createApi({
 
             dispatch(
               flipflipApi.util.invalidateTags([
+                'SceneSelectOptions',
                 { type: 'ContentSource', id: 'List' },
                 { type: 'ContentSource', id: 'FilteredList' }
               ])
@@ -715,6 +724,7 @@ export const flipflipApi = createApi({
         await queryFulfilled
         dispatch(
           flipflipApi.util.invalidateTags([
+            'SceneSelectOptions',
             'ContentSourceBatchTagOptions',
             'ContentSourceSearchOptions',
             { type: 'ContentSource', id },
@@ -1093,6 +1103,30 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    movePlaylistItem: builder.mutation<
+      void,
+      { playlistID: number; body: MoveRequest }
+    >({
+      query: ({ playlistID, body }) => ({
+        url: `api/playlists/${playlistID}/move`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted({ playlistID }, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([
+                { type: 'PlaylistItemIds', id: playlistID }
+              ])
+            )
+          }
+        })
+      }
+    }),
     updatePlaylist: builder.mutation<
       void,
       Pick<Playlist, 'id'> & Partial<Playlist>
@@ -1156,7 +1190,7 @@ export const flipflipApi = createApi({
       }
     }),
     getSceneSelectOptions: builder.query<
-      Record<string, string>,
+      SceneSelectOption[],
       SceneSelectOptionsRequest
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({

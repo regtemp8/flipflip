@@ -159,7 +159,11 @@ router.post('/sort', async (req, res) => {
   res.status(204).end()
 })
 router.post('/move', async (req, res) => {
-  await moveCaptionScript(req.body as MoveRequest)
+  const { ids } = req.body as MoveRequest
+  if (!Array.isArray(ids) || ids.length > 1000) {
+    throw new Error('Unable to process script move request')
+  }
+  await moveCaptionScript(ids)
   res.status(204).end()
 })
 router.get('/batch-tag-options', async (req, res) => {
