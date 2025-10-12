@@ -95,6 +95,70 @@ export interface BoundingBox {
   height: number
 }
 
+interface PageFunctionArgs {
+  _originSelector: string
+  _destinationSelector: string
+  originPayload: MouseEventInit
+  destinationPayload: MouseEventInit
+}
+
+export async function dragAndDrop(page: Page, originSelector: string, destinationSelector: string) {
+  const origin = await page.waitForSelector(originSelector);
+  const destination = await page.waitForSelector(destinationSelector);
+  const originBox = await origin.boundingBox() as BoundingBox;
+  const destinationBox = await destination.boundingBox() as BoundingBox;
+  const lastPositionCoordenate = (box: BoundingBox) => ({
+    x: box.x + box.width / 2,
+    y: box.y + box.height,
+  });
+  const getPayload = (box: BoundingBox) => {
+    const {x, y} = lastPositionCoordenate(box)
+    return {bubbles: true,
+    cancelable: true,
+    screenX: x,
+    screenY: y,
+    clientX: x,
+    clientY: y
+    }
+  };
+
+  // Function in browser.
+  const pageFunction = async (args: PageFunctionArgs) => {
+    const {
+      _originSelector,
+      _destinationSelector,
+      originPayload,
+      destinationPayload
+    } = args
+
+    const _origin = document.querySelector(_originSelector) as Element;
+    let _destination = document.querySelector(_destinationSelector) as Element;
+    // If has child, put at the end.
+    _destination = _destination.lastElementChild || _destination;
+
+    // Init Events
+    _origin.dispatchEvent(new MouseEvent('pointerdown', originPayload));
+    _origin.dispatchEvent(new DragEvent('dragstart', originPayload));
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    _destination.dispatchEvent(new MouseEvent('dragenter', destinationPayload));
+    _origin.dispatchEvent(new DragEvent('dragend', destinationPayload));
+  };
+
+  // Init drag and drop.
+  const originPayload = getPayload(originBox)
+  const destinationPayload = getPayload(destinationBox)
+  await page.evaluate(
+    pageFunction,
+    {
+      _originSelector: originSelector,
+      _destinationSelector: destinationSelector,
+      originPayload,
+      destinationPayload
+    }
+  );
+}
+
 export async function dragListItem(
   page: Page,
   start: BoundingBox,
