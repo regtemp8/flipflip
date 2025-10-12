@@ -386,13 +386,12 @@ export async function findCaptionScriptPlaylistItemIds(playlistId: number) {
 
 export async function moveAudioPlaylistItemIds(
   playlistId: number,
-  move: MoveRequest
+  ids: number[]
 ) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('audioPlaylistItem')
@@ -406,13 +405,12 @@ export async function moveAudioPlaylistItemIds(
 
 export async function moveScenePlaylistItemIds(
   playlistId: number,
-  move: MoveRequest
+  ids: number[]
 ) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('scenePlaylistItem')
@@ -426,13 +424,12 @@ export async function moveScenePlaylistItemIds(
 
 export async function moveCaptionScriptPlaylistItemIds(
   playlistId: number,
-  move: MoveRequest
+  ids: number[]
 ) {
   return await db()
     .query()
     .transaction()
     .execute(async (trx) => {
-      const { ids } = move
       for (let i = 0; i < ids.length; i++) {
         await trx
           .updateTable('captionScriptPlaylistItem')

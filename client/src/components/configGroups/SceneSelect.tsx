@@ -15,6 +15,7 @@ import {
 import { useNavigate } from 'react-router'
 import { SCENE_NONE, SceneSelectOption } from 'flipflip-common'
 import SceneSelectErrorTooltip from './SceneSelectErrorTooltip'
+import { SyntheticEvent } from 'react'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -66,7 +67,10 @@ function SceneSelect(props: SceneSelectProps) {
     }
   }
 
-  const onChange = async (_event, newValue) => {
+  const onChange = async (
+    _event: SyntheticEvent<Element, Event>,
+    newValue: string | SceneSelectOption | null
+  ) => {
     if (typeof newValue === 'string') {
       await onCreate(newValue)
     } else if (newValue?.label.match(/^Add ".*"$/)) {
