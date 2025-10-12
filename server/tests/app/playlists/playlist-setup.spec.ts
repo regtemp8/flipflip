@@ -971,7 +971,7 @@ test('Add scene playlist items', async ({ page }) => {
   await expect(listItems).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Add Scenes' }).click()
-  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click()
   await expect(listItems).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Add Scenes' }).click()
@@ -996,63 +996,100 @@ test('Add scene playlist items', async ({ page }) => {
   await expect(listItems.nth(0)).toHaveText('None')
   await expect(listItems.nth(1)).toHaveText('Random')
 
-  await page.getByRole('button', { name: 'Add Scenes' }).click();
-  await page.locator('#scene-playlist-item-scene-select').click();
-  await page.locator('#scene-playlist-item-scene-select').fill('Test');
-  await expect(page.getByRole('option', { name: 'Add "Test"' })).toBeVisible();
-  await page.getByRole('option', { name: 'Add "Test"' }).click();
+  await page.getByRole('button', { name: 'Add Scenes' }).click()
+  await page.locator('#scene-playlist-item-scene-select').click()
+  await page.locator('#scene-playlist-item-scene-select').fill('Test')
+  await expect(page.getByRole('option', { name: 'Add "Test"' })).toBeVisible()
+  await page.getByRole('option', { name: 'Add "Test"' }).click()
   await expect(page).toHaveURL('/scenes/1')
-  await page.getByRole('button', { name: 'Back' }).click();
-  await expect(page.getByTestId('ErrorOutlineIcon').nth(0)).toBeVisible();
-  await page.locator('#scene-playlist-item-scene-select').click();
-  await expect(page.getByRole('option', { name: 'Test' }).getByTestId('ErrorOutlineIcon')).toBeVisible();
-  await page.getByText('CancelSave').click();
-  await page.getByRole('spinbutton', { name: 'Play for' }).click();
-  await page.getByRole('spinbutton', { name: 'Play for' }).fill('400000');
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue('400000');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.getByTestId('ErrorOutlineIcon').nth(0)).toBeVisible()
+  await page.locator('#scene-playlist-item-scene-select').click()
+  await expect(
+    page.getByRole('option', { name: 'Test' }).getByTestId('ErrorOutlineIcon')
+  ).toBeVisible()
+  await page.getByText('CancelSave').click()
+  await page.getByRole('spinbutton', { name: 'Play for' }).click()
+  await page.getByRole('spinbutton', { name: 'Play for' }).fill('400000')
+  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue(
+    '400000'
+  )
+  await page.getByRole('button', { name: 'Save' }).click()
   await expect(listItems).toHaveCount(3)
   await expect(listItems.nth(0)).toHaveText('None')
   await expect(listItems.nth(1)).toHaveText('Random')
   await expect(listItems.nth(2)).toHaveText('Test')
 
-  await page.getByRole('listitem').filter({ hasText: 'Test' }).getByLabel('Open Scene').getByRole('button').click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Test' })
+    .getByLabel('Open Scene')
+    .getByRole('button')
+    .click()
   await expect(page).toHaveURL('/scenes/1')
-  await page.locator('#vertical-tab-3').click();
+  await page.locator('#vertical-tab-3').click()
   await expect(page).toHaveURL('/scenes/1/sources')
-  await page.locator('.MuiButtonBase-root.MuiFab-root.MuiFab-circular.MuiFab-sizeLarge.MuiFab-default').click();
-  await page.getByRole('button', { name: 'Local Directory' }).click();
-  await page.getByRole('button', { name: /^thumbs/ }).click();
-  await page.getByRole('button', { name: 'Choose' }).click();
+  await page
+    .locator(
+      '.MuiButtonBase-root.MuiFab-root.MuiFab-circular.MuiFab-sizeLarge.MuiFab-default'
+    )
+    .click()
+  await page.getByRole('button', { name: 'Local Directory' }).click()
+  await page.getByRole('button', { name: /^thumbs/ }).click()
+  await page.getByRole('button', { name: 'Choose' }).click()
   await expect(page.locator('#sortable-list li p')).toHaveText(
     path.resolve(__dirname, '..', '..', 'data', 'thumbs')
   )
-  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Back' }).click()
   await expect(page).toHaveURL('/playlists/5')
-  await page.getByRole('listitem').filter({ hasText: 'Test' }).getByRole('button').nth(1).click();
-  await expect(page.getByTestId('ErrorOutlineIcon')).not.toBeVisible();
-  await page.locator('#scene-playlist-item-scene-select').click();
-  await expect(page.getByRole('option', { name: 'Test' }).getByTestId('ErrorOutlineIcon')).not.toBeVisible();
-  await page.getByText('CancelSave').click();
-  await page.getByRole('checkbox', { name: 'Play After All Images' }).check();
-  await expect(page.getByRole('checkbox', { name: 'Play After All Images' })).toBeChecked();
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).not.toBeVisible();
-  await page.getByRole('checkbox', { name: 'Play After All Images' }).uncheck();
-  await expect(page.getByRole('checkbox', { name: 'Play After All Images' })).not.toBeChecked();
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toBeVisible();
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue('400000');
-  await page.getByRole('spinbutton', { name: 'Play for' }).click();
-  await page.getByRole('spinbutton', { name: 'Play for' }).fill('450000');
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue('450000');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Test' })
+    .getByRole('button')
+    .nth(1)
+    .click()
+  await expect(page.getByTestId('ErrorOutlineIcon')).not.toBeVisible()
+  await page.locator('#scene-playlist-item-scene-select').click()
+  await expect(
+    page.getByRole('option', { name: 'Test' }).getByTestId('ErrorOutlineIcon')
+  ).not.toBeVisible()
+  await page.getByText('CancelSave').click()
+  await page.getByRole('checkbox', { name: 'Play After All Images' }).check()
+  await expect(
+    page.getByRole('checkbox', { name: 'Play After All Images' })
+  ).toBeChecked()
+  await expect(
+    page.getByRole('spinbutton', { name: 'Play for' })
+  ).not.toBeVisible()
+  await page.getByRole('checkbox', { name: 'Play After All Images' }).uncheck()
+  await expect(
+    page.getByRole('checkbox', { name: 'Play After All Images' })
+  ).not.toBeChecked()
+  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toBeVisible()
+  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue(
+    '400000'
+  )
+  await page.getByRole('spinbutton', { name: 'Play for' }).click()
+  await page.getByRole('spinbutton', { name: 'Play for' }).fill('450000')
+  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue(
+    '450000'
+  )
+  await page.getByRole('button', { name: 'Save' }).click()
   await expect(listItems).toHaveCount(3)
   await expect(listItems.nth(0)).toHaveText('None')
   await expect(listItems.nth(1)).toHaveText('Random')
   await expect(listItems.nth(2)).toHaveText('Test')
 
-  await page.getByRole('listitem').filter({ hasText: 'Test' }).getByRole('button').nth(1).click();
-  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue('450000');
-  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Test' })
+    .getByRole('button')
+    .nth(1)
+    .click()
+  await expect(page.getByRole('spinbutton', { name: 'Play for' })).toHaveValue(
+    '450000'
+  )
+  await page.getByRole('button', { name: 'Cancel' }).click()
 })
 
 test('Move scene playlist item', async ({ page }) => {
@@ -1064,7 +1101,11 @@ test('Move scene playlist item', async ({ page }) => {
   await expect(listItems.nth(1)).toHaveText('Random')
   await expect(listItems.nth(2)).toHaveText('Test')
 
-  await dragAndDrop(page, '#scene-playlist-items li:last-child', '#scene-playlist-items li:first-child')
+  await dragAndDrop(
+    page,
+    '#scene-playlist-items li:last-child',
+    '#scene-playlist-items li:first-child'
+  )
   await expect(listItems.nth(0)).toHaveText('Test')
   await expect(listItems.nth(1)).toHaveText('None')
   await expect(listItems.nth(2)).toHaveText('Random')
@@ -1078,7 +1119,11 @@ test('Move scene playlist item', async ({ page }) => {
     )
   })
   await page.waitForTimeout(2000)
-  await dragAndDrop(page, '#scene-playlist-items li:nth-child(2)', '#scene-playlist-items li:first-child')
+  await dragAndDrop(
+    page,
+    '#scene-playlist-items li:nth-child(2)',
+    '#scene-playlist-items li:first-child'
+  )
   await expect(listItems.nth(0)).toHaveText('None')
   await expect(listItems.nth(1)).toHaveText('Test')
   await expect(listItems.nth(2)).toHaveText('Random')
