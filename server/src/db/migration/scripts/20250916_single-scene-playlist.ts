@@ -45,7 +45,8 @@ export async function up(db: Kysely<DB>): Promise<void> {
         duration: Infinity,
         index: 0,
         playlistId: playlist.id as number,
-        playAfterAllImages: toNumber(false)
+        playAfterAllImages: toNumber(false),
+        random: toNumber(false)
       }
       const scenes = [{ sceneId: scene.id, scenePlaylistItemId: 0 }]
       await createScenePlaylistItem(item, scenes, trx)

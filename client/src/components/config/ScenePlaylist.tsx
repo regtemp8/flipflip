@@ -419,6 +419,7 @@ function ScenePlaylist(props: ScenePlaylistProps) {
     <>
       <List>
         <Sortable
+          id="scene-playlist-items"
           className={classes.scriptList}
           options={{
             animation: 150,

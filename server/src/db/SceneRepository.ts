@@ -540,7 +540,8 @@ export async function createScene(userId: number) {
         duration: Infinity,
         index: 0,
         playlistId: playlist.id as number,
-        playAfterAllImages: toNumber(false)
+        playAfterAllImages: toNumber(false),
+        random: toNumber(false)
       }
       const scenes = [{ sceneId: scene.id, scenePlaylistItemId: 0 }]
       await createScenePlaylistItem(item, scenes, trx)
@@ -1287,7 +1288,8 @@ export async function cloneScene(originalId: number, userId: number) {
         duration: Infinity,
         index: 0,
         playlistId: playlist.id as number,
-        playAfterAllImages: toNumber(false)
+        playAfterAllImages: toNumber(false),
+        random: toNumber(false)
       }
       const scenes = [{ sceneId: newScene.id, scenePlaylistItemId: 0 }]
       await createScenePlaylistItem(item, scenes, trx)

@@ -327,6 +327,7 @@ export async function findScenePlaylistItemScenes(
     .selectFrom('scenePlaylistItemScene')
     .select('sceneId')
     .where('scenePlaylistItemId', '=', itemId)
+    .orderBy('id asc')
     .execute()
 
   return rows.map((row) => row.sceneId ?? SCENE_NONE)
@@ -383,7 +384,10 @@ export async function findCaptionScriptPlaylistItemIds(playlistId: number) {
   return rows.map((row) => row.id as number)
 }
 
-export async function moveAudioPlaylistItemIds(playlistId: number, move: MoveRequest) {
+export async function moveAudioPlaylistItemIds(
+  playlistId: number,
+  move: MoveRequest
+) {
   return await db()
     .query()
     .transaction()
@@ -400,7 +404,10 @@ export async function moveAudioPlaylistItemIds(playlistId: number, move: MoveReq
     })
 }
 
-export async function moveScenePlaylistItemIds(playlistId: number, move: MoveRequest) {
+export async function moveScenePlaylistItemIds(
+  playlistId: number,
+  move: MoveRequest
+) {
   return await db()
     .query()
     .transaction()
@@ -417,7 +424,10 @@ export async function moveScenePlaylistItemIds(playlistId: number, move: MoveReq
     })
 }
 
-export async function moveCaptionScriptPlaylistItemIds(playlistId: number, move: MoveRequest) {
+export async function moveCaptionScriptPlaylistItemIds(
+  playlistId: number,
+  move: MoveRequest
+) {
   return await db()
     .query()
     .transaction()

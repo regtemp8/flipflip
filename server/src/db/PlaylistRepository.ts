@@ -239,7 +239,8 @@ export async function clonePlaylist(id: number, userId: number) {
                 playlistId: newPlaylistId,
                 index,
                 duration,
-                playAfterAllImages
+                playAfterAllImages,
+                random: toNumber(false)
               })
               .returning('id')
               .executeTakeFirst()

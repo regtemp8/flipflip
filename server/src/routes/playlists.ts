@@ -154,9 +154,9 @@ router.post('/:id/items', async (req, res) => {
     }
     case PLT.scene: {
       const item = req.body as ScenePlaylistItem
-      const update = toScenePlaylistItemInsert(id, item)
+      const insert = toScenePlaylistItemInsert(id, item)
       const scenes = toScenePlaylistItemSceneInsert(item)
-      await createScenePlaylistItem(update, scenes)
+      await createScenePlaylistItem(insert, scenes)
       break
     }
     case PLT.script: {
