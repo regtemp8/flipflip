@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const user = req.user as User
-  const { id } = await createScene(user.id as number)
+  const { id } = await createScene(user.id as number, req.body.name)
   const response: ValueResponse = { value: id as number }
   res.status(200).send(response)
 })

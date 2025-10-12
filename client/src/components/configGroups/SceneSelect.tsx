@@ -1,10 +1,19 @@
-import { Autocomplete, TextField, type Theme } from '@mui/material'
+import {
+  Autocomplete,
+  createFilterOptions,
+  TextField,
+  type Theme
+} from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import { grey } from '@mui/material/colors'
 
-import { SyntheticEvent } from 'react'
-import { useGetSceneSelectOptionsQuery } from '../../store/api/slice'
+import {
+  useCreateSceneMutation,
+  useGetSceneSelectOptionsQuery
+} from '../../store/api/slice'
+import { SelectOption } from 'flipflip-common'
+import { useNavigate } from 'react-router'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -29,13 +38,11 @@ export interface SceneSelectProps {
   onChange: (sceneID: number) => void
 }
 
-type SceneSelectOption = {
-  value: string
-  label: string
-}
-
+const filter = createFilterOptions<SelectOption>()
 function SceneSelect(props: SceneSelectProps) {
   const { onlyExtra, includeExtra, includeRandom } = props
+  const navigate = useNavigate()
+  const [createScene] = useCreateSceneMutation()
   const { data } = useGetSceneSelectOptionsQuery({
     onlyExtra,
     includeExtra,
@@ -43,17 +50,25 @@ function SceneSelect(props: SceneSelectProps) {
   })
   const options = data ?? {}
 
-  const optionsList: SceneSelectOption[] = Object.keys(options).map((key) => {
+  const optionsList: SelectOption[] = Object.keys(options).map((key) => {
     return { value: key, label: options[key] }
   })
 
-  const onChange = (
-    _event: SyntheticEvent<Element, Event>,
-    option: unknown
-  ) => {
-    if (option != null) {
-      const { value } = option as SceneSelectOption
-      props.onChange(Number(value))
+  const onCreate = async (name: string) => {
+    const { data } = await createScene({ name })
+    if (data != null) {
+      props.onChange(data.value as number)
+      navigate(`/scenes/${data.value}`)
+    }
+  }
+
+  const onChange = async (_event, newValue) => {
+    if (typeof newValue === 'string') {
+      await onCreate(newValue)
+    } else if (newValue?.label.match(/^Add ".*"$/)) {
+      await onCreate(newValue.value)
+    } else if (newValue != null) {
+      props.onChange(Number(newValue.value))
     }
   }
 
@@ -61,19 +76,45 @@ function SceneSelect(props: SceneSelectProps) {
   return (
     <Autocomplete
       id={props.id}
+      selectOnFocus
+      clearOnBlur
+      handleHomeEndKeys
+      fullWidth
+      freeSolo
       className={classes.select}
       value={{
         value: props.value.toString(),
         label: options[props.value.toString()] ?? ''
       }}
+      filterOptions={(options, params) => {
+        const filtered = filter(options, params)
+
+        const { inputValue } = params
+        const isExisting = options.some((option) => inputValue === option.label)
+        if (inputValue !== '' && !isExisting) {
+          // Suggest the creation of a new value
+          filtered.push({
+            value: inputValue,
+            label: `Add "${inputValue}"`
+          })
+        }
+
+        return filtered
+      }}
       options={optionsList}
       renderInput={(params) => <TextField {...params} variant="standard" />}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
+      getOptionLabel={(option) =>
+        typeof option === 'string' ? option : option.label
+      }
+      getOptionKey={(option) =>
+        typeof option === 'string' ? option : option.value
+      }
       renderOption={(props, option) => {
-        const { ...optionProps } = props
-        const { value, label } = option as SceneSelectOption
+        const { key, ...optionProps } = props
         return (
-          <li {...optionProps} key={value}>
-            {label}
+          <li key={key} {...optionProps}>
+            {option.label}
           </li>
         )
       }}

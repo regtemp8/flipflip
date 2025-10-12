@@ -14,14 +14,29 @@ export async function up(db: Kysely<DB>): Promise<void> {
       )
       .execute()
 
-    const rows = await trx.selectFrom('scenePlaylistItem').select('id').execute()
-    for(const row of rows) {
+    const rows = await trx
+      .selectFrom('scenePlaylistItem')
+      .select('id')
+      .execute()
+
+    for (const row of rows) {
       const id = row.id as number
-      const count = await trx.selectFrom('scenePlaylistItemScene').select((eb) => eb.fn.count<number>('id').as('count')).where('scenePlaylistItemId', '=', id).executeTakeFirst()
-      if((count?.count ?? 0) > 1) {
-        logger.info(`+ Set 'random' value to 'true' for scene playlist item (id: ${id})`)
-        const update = {random: toNumber(true)}
-        await trx.updateTable('scenePlaylistItem').set(update).where('id', '=', id).execute()
+      const count = await trx
+        .selectFrom('scenePlaylistItemScene')
+        .select((eb) => eb.fn.count<number>('id').as('count'))
+        .where('scenePlaylistItemId', '=', id)
+        .executeTakeFirst()
+
+      if ((count?.count ?? 0) > 1) {
+        logger.info(
+          `+ Set 'random' value to 'true' for scene playlist item (id: ${id})`
+        )
+        const update = { random: toNumber(true) }
+        await trx
+          .updateTable('scenePlaylistItem')
+          .set(update)
+          .where('id', '=', id)
+          .execute()
       }
     }
   })

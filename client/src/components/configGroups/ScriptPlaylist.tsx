@@ -30,7 +30,11 @@ import {
   useGetPlaylistItemIdsQuery,
   useGetPlaylistQuery
 } from '../../store/api/slice'
-import { movePlaylistItem, setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import {
+  movePlaylistItem,
+  setPlaylistRepeat,
+  setPlaylistShuffle
+} from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'
 // import { isPrimaryModifierKey } from '../../utils'
 

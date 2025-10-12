@@ -463,7 +463,7 @@ function ScenePicker() {
   const onDeleteScenes = () => {}
   const importAction = () => {}
   const onAddScene = async () => {
-    const { data } = await createScene()
+    const { data } = await createScene({})
     if (data != null) {
       navigate(`/scenes/${data.value}`)
     }

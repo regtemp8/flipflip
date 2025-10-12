@@ -28,10 +28,18 @@ import { getTimestamp /*, isPrimaryModifierKey*/ } from '../../utils'
 import { RP } from 'flipflip-common'
 import SourceIcon from '../library/SourceIcon'
 import TagChip from '../library/TagChip'
-import { useGetAudioQuery, useGetPlaylistItemIdsQuery, useGetPlaylistQuery } from '../../store/api/slice'
+import {
+  useGetAudioQuery,
+  useGetPlaylistItemIdsQuery,
+  useGetPlaylistQuery
+} from '../../store/api/slice'
 import { useAppDispatch } from '../../store/hooks'
 import { editAudioOptions } from '../../store/audioOptions/thunks'
-import { movePlaylistItem, setPlaylistRepeat, setPlaylistShuffle } from '../../store/api/thunks'
+import {
+  movePlaylistItem,
+  setPlaylistRepeat,
+  setPlaylistShuffle
+} from '../../store/api/thunks'
 import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -318,7 +326,7 @@ function AudioPlaylist(props: AudioPlaylistProps) {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={() => { } /*dispatch(addTracks(props.playlistID))*/}
+              onClick={() => {} /*dispatch(addTracks(props.playlistID))*/}
               size="large"
             >
               <AddIcon />
@@ -330,5 +338,5 @@ function AudioPlaylist(props: AudioPlaylistProps) {
   )
 }
 
-; (AudioPlaylist as any).displayName = 'AudioPlaylist'
+;(AudioPlaylist as any).displayName = 'AudioPlaylist'
 export default AudioPlaylist

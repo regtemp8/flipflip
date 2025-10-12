@@ -364,13 +364,31 @@ export const updatePlaylistItem = (
   }
 }
 
-const moveLocalPlaylistItem = (playlistID: number, ids: number[], dispatch: AppDispatch) => {
-  dispatch(flipflipApi.util.updateQueryData('getPlaylistItemIds', playlistID, () => ids))
+const moveLocalPlaylistItem = (
+  playlistID: number,
+  ids: number[],
+  dispatch: AppDispatch
+) => {
+  dispatch(
+    flipflipApi.util.updateQueryData(
+      'getPlaylistItemIds',
+      playlistID,
+      () => ids
+    )
+  )
 }
 
-const moveRemotePlaylistItem = debounce((playlistID: number, ids: number[], dispatch: AppDispatch) => {
-  dispatch(flipflipApi.endpoints.movePlaylistItem.initiate({ playlistID, body: {ids} }))
-}, 250)
+const moveRemotePlaylistItem = debounce(
+  (playlistID: number, ids: number[], dispatch: AppDispatch) => {
+    dispatch(
+      flipflipApi.endpoints.movePlaylistItem.initiate({
+        playlistID,
+        body: { ids }
+      })
+    )
+  },
+  250
+)
 
 export const movePlaylistItem = (playlistID: number, ids: number[]) => {
   return (dispatch: AppDispatch) => {

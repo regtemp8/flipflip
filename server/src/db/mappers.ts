@@ -1662,7 +1662,7 @@ export function toScenePlaylistItem(
   const { duration, id, index, playAfterAllImages, random } = item
   scenes = scenes as number[]
   let sceneID = SCENE_NONE
-  if(toBoolean(random)) {
+  if (toBoolean(random)) {
     sceneID = SCENE_RANDOM
   } else if (scenes.length === 1) {
     sceneID = scenes[0]
@@ -1722,7 +1722,7 @@ export function toScenePlaylistItemUpdate(
 ): ScenePlaylistItemUpdate {
   const { id, index, duration, playAfterAllImages, sceneID } = item
   let random: number | undefined
-  if(sceneID != null) {
+  if (sceneID != null) {
     random = toNumber(sceneID === SCENE_RANDOM)
   }
 

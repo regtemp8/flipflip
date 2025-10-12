@@ -451,10 +451,11 @@ export const flipflipApi = createApi({
         )
       }
     }),
-    createScene: builder.mutation<ValueResponse, void>({
-      query: () => ({
+    createScene: builder.mutation<ValueResponse, { name?: string }>({
+      query: (body) => ({
         url: `api/scenes`,
-        method: 'POST'
+        method: 'POST',
+        body
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
@@ -462,6 +463,7 @@ export const flipflipApi = createApi({
           flipflipApi.util.invalidateTags([
             'GroupedScenes',
             'UngroupedScenes',
+            'SceneSelectOptions',
             { type: 'Scene', id: 'List' },
             { type: 'PlaylistOptions', id: PLT.singleScene }
           ])
@@ -1093,20 +1095,25 @@ export const flipflipApi = createApi({
         })
       }
     }),
-    movePlaylistItem: builder.mutation<void, { playlistID: number; body: MoveRequest }>({
-      query: ({playlistID, body}) => ({
+    movePlaylistItem: builder.mutation<
+      void,
+      { playlistID: number; body: MoveRequest }
+    >({
+      query: ({ playlistID, body }) => ({
         url: `api/playlists/${playlistID}/move`,
         method: 'POST',
         body
       }),
-      async onQueryStarted({playlistID}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ playlistID }, { dispatch, queryFulfilled }) {
         await queryFulfilled.catch((reason) => {
           const status = reason.meta?.response?.status
           // TODO implement etags (412)
           // TODO implement userId checks (403)
           if (status === 412 || status === 403) {
             dispatch(
-              flipflipApi.util.invalidateTags([{ type: 'PlaylistItemIds', id: playlistID }])
+              flipflipApi.util.invalidateTags([
+                { type: 'PlaylistItemIds', id: playlistID }
+              ])
             )
           }
         })

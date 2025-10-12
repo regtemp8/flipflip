@@ -116,7 +116,11 @@ export async function findSceneHasBpm(id: number): Promise<boolean> {
   return result?.hasBpm != null
 }
 
-export async function createScene(userId: number) {
+export async function createScene(userId: number, name?: string) {
+  if (name == null) {
+    name = 'New scene'
+  }
+
   return await db()
     .query()
     .transaction()
@@ -328,7 +332,7 @@ export async function createScene(userId: number) {
             .select((eb) => [
               eb.lit(userId).as('userId'),
               eb.lit(toNumber(false)).as('defaultScene'),
-              eb.val('New scene').as('name'),
+              eb.val(name).as('name'),
               'useWeights',
               'weightsValid',
               'timingFunction',
