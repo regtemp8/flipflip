@@ -1093,6 +1093,25 @@ export const flipflipApi = createApi({
         })
       }
     }),
+    movePlaylistItem: builder.mutation<void, { playlistID: number; body: MoveRequest }>({
+      query: ({playlistID, body}) => ({
+        url: `api/playlists/${playlistID}/move`,
+        method: 'POST',
+        body
+      }),
+      async onQueryStarted({playlistID}, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch((reason) => {
+          const status = reason.meta?.response?.status
+          // TODO implement etags (412)
+          // TODO implement userId checks (403)
+          if (status === 412 || status === 403) {
+            dispatch(
+              flipflipApi.util.invalidateTags([{ type: 'PlaylistItemIds', id: playlistID }])
+            )
+          }
+        })
+      }
+    }),
     updatePlaylist: builder.mutation<
       void,
       Pick<Playlist, 'id'> & Partial<Playlist>

@@ -54,8 +54,10 @@ import { useAppDispatch } from '../../store/hooks'
 import {
   setPlaylistRepeat,
   setPlaylistShuffle,
-  updatePlaylistItem
+  updatePlaylistItem,
+  movePlaylistItem
 } from '../../store/api/thunks'
+import { arrayMove } from 'react-sortable-hoc'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   randomSceneDialog: {
@@ -422,16 +424,13 @@ function ScenePlaylist(props: ScenePlaylistProps) {
             animation: 150,
             easing: 'cubic-bezier(1, 0, 0, 1)'
           }}
-          onChange={(_order: any, _sortable: any, _evt: any) => {
-            // dispatch(
-            //   setPlaylistSortItems({
-            //     id: playlistID,
-            //     value: {
-            //       oldIndex: evt.oldIndex,
-            //       newIndex: evt.newIndex
-            //     }
-            //   })
-            // )
+          onChange={(_order: any, _sortable: any, evt: any) => {
+            const newItemIDs = arrayMove(
+              itemIDs as number[],
+              evt.oldIndex,
+              evt.newIndex
+            )
+            dispatch(movePlaylistItem(playlistID, newItemIDs))
           }}
         >
           {itemIDs?.map((id, index) => (

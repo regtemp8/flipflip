@@ -1,4 +1,4 @@
-import { PLT, SCENE_NONE } from 'flipflip-common'
+import { MoveRequest, PLT, SCENE_NONE } from 'flipflip-common'
 import db from './database'
 import {
   AudioPlaylistItemUpdate,
@@ -381,4 +381,55 @@ export async function findCaptionScriptPlaylistItemIds(playlistId: number) {
     .execute()
 
   return rows.map((row) => row.id as number)
+}
+
+export async function moveAudioPlaylistItemIds(playlistId: number, move: MoveRequest) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { ids } = move
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('audioPlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
+}
+
+export async function moveScenePlaylistItemIds(playlistId: number, move: MoveRequest) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { ids } = move
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('scenePlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
+}
+
+export async function moveCaptionScriptPlaylistItemIds(playlistId: number, move: MoveRequest) {
+  return await db()
+    .query()
+    .transaction()
+    .execute(async (trx) => {
+      const { ids } = move
+      for (let i = 0; i < ids.length; i++) {
+        await trx
+          .updateTable('captionScriptPlaylistItem')
+          .set({ index: i })
+          .where('id', '=', ids[i])
+          .where('playlistId', '=', playlistId)
+          .execute()
+      }
+    })
 }

@@ -2,6 +2,7 @@ import express from 'express'
 import {
   AudioPlaylistItem,
   CaptionScriptPlaylistItem,
+  MoveRequest,
   PLT,
   PlaylistItem,
   SG,
@@ -52,6 +53,9 @@ import {
   findScenePlaylistItemIds,
   findScenePlaylistItemScenes,
   findSingleScenePlaylistItemSceneId,
+  moveAudioPlaylistItemIds,
+  moveCaptionScriptPlaylistItemIds,
+  moveScenePlaylistItemIds,
   updateAudioPlaylistItem,
   updateCaptionScriptPlaylistItem,
   updateScenePlaylistItem
@@ -189,6 +193,28 @@ router.get('/:id/items', async (req, res) => {
   }
 
   res.status(200).send(items)
+})
+
+router.post('/:id/move', async (req, res) => {
+  const playlistId = Number(req.params.id)
+  const request = req.body as MoveRequest
+  const playlist = await findPlaylistType(playlistId)
+  switch (playlist?.type) {
+    case PLT.audio:
+      await moveAudioPlaylistItemIds(playlistId, request)
+      break
+    case PLT.scene:
+      await moveScenePlaylistItemIds(playlistId, request)
+      break
+    case PLT.script:
+      await moveCaptionScriptPlaylistItemIds(playlistId, request)
+      break
+    default: {
+      throw new Error(`Playlist type '${playlist?.type}' not supported`)
+    }
+  }
+
+  res.status(204).end()
 })
 
 router.get('/:id/items/:itemId', async (req, res) => {
