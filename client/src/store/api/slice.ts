@@ -44,7 +44,8 @@ import {
   AddContentSourceRequest,
   WatermarkSettings,
   PLT,
-  SelectedPlaylist
+  SelectedPlaylist,
+  SceneSelectOption
 } from 'flipflip-common'
 import { SceneSelectOptionsRequest } from 'flipflip-common/src'
 import snackbar from '../../data/Snackbar'
@@ -428,7 +429,12 @@ export const flipflipApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         await queryFulfilled
         // TODO update cache instead of invalidating it
-        dispatch(flipflipApi.util.invalidateTags(['ContentSource']))
+        dispatch(
+          flipflipApi.util.invalidateTags([
+            'ContentSource',
+            'SceneSelectOptions'
+          ])
+        )
       }
     }),
     deleteScene: builder.mutation<void, number>({
@@ -576,6 +582,7 @@ export const flipflipApi = createApi({
 
             dispatch(
               flipflipApi.util.invalidateTags([
+                'SceneSelectOptions',
                 { type: 'ContentSource', id: 'List' },
                 { type: 'ContentSource', id: 'FilteredList' }
               ])
@@ -717,6 +724,7 @@ export const flipflipApi = createApi({
         await queryFulfilled
         dispatch(
           flipflipApi.util.invalidateTags([
+            'SceneSelectOptions',
             'ContentSourceBatchTagOptions',
             'ContentSourceSearchOptions',
             { type: 'ContentSource', id },
@@ -1182,7 +1190,7 @@ export const flipflipApi = createApi({
       }
     }),
     getSceneSelectOptions: builder.query<
-      Record<string, string>,
+      SceneSelectOption[],
       SceneSelectOptionsRequest
     >({
       query: ({ includeExtra, includeRandom, onlyExtra }) => ({

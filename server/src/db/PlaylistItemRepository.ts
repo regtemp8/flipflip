@@ -97,7 +97,7 @@ async function insertScenePlaylistItemScenes(
   scenePlaylistItemId: number,
   scenes?: ScenePlaylistItemSceneInsert[]
 ) {
-  if (scenes == null) {
+  if (scenes == null || scenes.length === 0) {
     return
   }
 

@@ -3,7 +3,7 @@ import { SceneGroupRow } from './types/SceneGroupRow'
 import { SceneGroupItemRow } from './types/SceneGroupItemRow'
 import { Scene, SceneUpdate } from './types/entities'
 import { toBoolean, toNumber } from './utils'
-import { PLT } from 'flipflip-common'
+import { PLT, SceneSelectOption } from 'flipflip-common'
 import { sql } from 'kysely'
 import { createPlaylist } from './PlaylistRepository'
 import { createScenePlaylistItem } from './PlaylistItemRepository'
@@ -599,39 +599,36 @@ export async function findSceneIds(): Promise<number[]> {
     .then((value) => value.map((v) => v.id as number))
 }
 
-export async function findSceneSelectOptions(): Promise<
-  Record<string, string>
-> {
-  const scenesWithSources = await db()
-    .query()
-    .selectFrom('contentSource')
-    .select('sceneId')
-    .distinct()
-    .execute()
-
-  const scenesWithValidWeights = await db()
-    .query()
-    .selectFrom('scene')
-    .select('id')
-    .where('regenerate', '=', toNumber(true))
-    .where('weightsValid', '=', toNumber(true))
-    .execute()
-
-  const ids = new Set<number>()
-  scenesWithSources.forEach(({ sceneId }) => ids.add(sceneId))
-  scenesWithValidWeights.forEach(({ id }) => ids.add(id as number))
-
+export async function findSceneSelectOptions(): Promise<SceneSelectOption[]> {
   const rows = await db()
     .query()
     .selectFrom('scene')
-    .select(['id', 'name'])
-    .where('id', 'in', Array.from(ids))
-    .where('name', '<>', 'library_scene_temp')
+    .select(({ selectFrom }) => [
+      'id',
+      'name',
+      'useWeights',
+      'weightsValid',
+      selectFrom('contentSource')
+        .select((eb) => eb.fn.count<number>('id').as('count'))
+        .whereRef('sceneId', '=', 'scene.id')
+        .as('sourcesCount')
+    ])
+    .where('name', '<>', 'library_scene_temp') // TODO can this be removed?
+    .where('defaultScene', '=', toNumber(false))
     .execute()
 
-  const options: Record<string, string> = {}
-  rows.forEach(({ id, name }) => (options[(id as number).toString()] = name))
-  return options
+  return rows.map((row) => {
+    const hasSources = (row.sourcesCount ?? 0) > 0
+    const hasValidWeights =
+      !toBoolean(row.useWeights) || toBoolean(row.weightsValid)
+    const id = row.id as number
+    return {
+      value: id.toString(),
+      label: row.name,
+      hasSources,
+      hasValidWeights
+    }
+  })
 }
 
 export async function isSceneCreator(id: number, userId: number) {

@@ -12,8 +12,9 @@ import {
   useCreateSceneMutation,
   useGetSceneSelectOptionsQuery
 } from '../../store/api/slice'
-import { SelectOption } from 'flipflip-common'
 import { useNavigate } from 'react-router'
+import { SCENE_NONE, SceneSelectOption } from 'flipflip-common'
+import SceneSelectErrorTooltip from './SceneSelectErrorTooltip'
 
 const useStyles = makeStyles()((theme: Theme) => ({
   searchSelect: {
@@ -27,6 +28,13 @@ const useStyles = makeStyles()((theme: Theme) => ({
   }
 }))
 
+const DEFAULT_VALUE = {
+  value: SCENE_NONE.toString(),
+  label: 'None',
+  hasSources: true,
+  hasValidWeights: true
+}
+
 export interface SceneSelectProps {
   id: string
   value: number
@@ -38,7 +46,7 @@ export interface SceneSelectProps {
   onChange: (sceneID: number) => void
 }
 
-const filter = createFilterOptions<SelectOption>()
+const filter = createFilterOptions<SceneSelectOption>()
 function SceneSelect(props: SceneSelectProps) {
   const { onlyExtra, includeExtra, includeRandom } = props
   const navigate = useNavigate()
@@ -48,11 +56,7 @@ function SceneSelect(props: SceneSelectProps) {
     includeExtra,
     includeRandom
   })
-  const options = data ?? {}
-
-  const optionsList: SelectOption[] = Object.keys(options).map((key) => {
-    return { value: key, label: options[key] }
-  })
+  const options = data ?? []
 
   const onCreate = async (name: string) => {
     const { data } = await createScene({ name })
@@ -73,6 +77,9 @@ function SceneSelect(props: SceneSelectProps) {
   }
 
   const { classes } = useStyles()
+  const value = options.find(
+    (option) => option.value === props.value.toString()
+  )
   return (
     <Autocomplete
       id={props.id}
@@ -82,10 +89,7 @@ function SceneSelect(props: SceneSelectProps) {
       fullWidth
       freeSolo
       className={classes.select}
-      value={{
-        value: props.value.toString(),
-        label: options[props.value.toString()] ?? ''
-      }}
+      value={value ?? DEFAULT_VALUE}
       filterOptions={(options, params) => {
         const filtered = filter(options, params)
 
@@ -95,14 +99,35 @@ function SceneSelect(props: SceneSelectProps) {
           // Suggest the creation of a new value
           filtered.push({
             value: inputValue,
-            label: `Add "${inputValue}"`
+            label: `Add "${inputValue}"`,
+            hasSources: true,
+            hasValidWeights: true
           })
         }
 
         return filtered
       }}
-      options={optionsList}
-      renderInput={(params) => <TextField {...params} variant="standard" />}
+      options={options}
+      renderInput={(params) => {
+        const option = options.find(
+          (option) => option.label === params.inputProps.value
+        )
+        return (
+          <TextField
+            {...params}
+            variant="standard"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  <SceneSelectErrorTooltip option={option} />
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
+          />
+        )
+      }}
       isOptionEqualToValue={(option, value) => option.value === value.value}
       getOptionLabel={(option) =>
         typeof option === 'string' ? option : option.label
@@ -115,6 +140,7 @@ function SceneSelect(props: SceneSelectProps) {
         return (
           <li key={key} {...optionProps}>
             {option.label}
+            <SceneSelectErrorTooltip option={option} />
           </li>
         )
       }}

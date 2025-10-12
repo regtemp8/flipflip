@@ -33,6 +33,7 @@ export * from './lib/json/Playlist';
 export * from './lib/json/FontSettings';
 export * from './lib/json/FontSettingsType';
 export * from './lib/json/SceneSelectOptionsRequest';
+export * from './lib/json/SceneSelectOption';
 export * from './lib/json/CaptionScript';
 export * from './lib/json/Audio';
 export * from './lib/json/AudioAlbum';
