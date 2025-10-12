@@ -1,9 +1,19 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { flipflipApi } from '../api/slice'
 
+export interface ScenePlaylistItemEditDialog {
+  playlistID: number
+  itemID?: number
+  sceneID: number
+  randomScenes: number[]
+  duration: number
+  playAfterAllImages: boolean
+}
+
 interface PlaylistState {
   autoEdit: boolean
   editingName?: string
+  scenePlaylistItemEditDialog?: ScenePlaylistItemEditDialog
 }
 
 export const initialState: PlaylistState = {
@@ -18,6 +28,44 @@ export const playlistSlice = createSlice({
       action: PayloadAction<string | undefined>
     ) => {
       state.editingName = action.payload
+    },
+    setScenePlaylistItemEditDialog: (
+      state,
+      action: PayloadAction<ScenePlaylistItemEditDialog | undefined>
+    ) => {
+      state.scenePlaylistItemEditDialog = action.payload
+    },
+    setScenePlaylistItemEditDialogScene: (
+      state,
+      action: PayloadAction<number>
+    ) => {
+      if (state.scenePlaylistItemEditDialog != null) {
+        state.scenePlaylistItemEditDialog.sceneID = action.payload
+      }
+    },
+    setScenePlaylistItemEditDialogRandomScenes: (
+      state,
+      action: PayloadAction<number[]>
+    ) => {
+      if (state.scenePlaylistItemEditDialog != null) {
+        state.scenePlaylistItemEditDialog.randomScenes = action.payload
+      }
+    },
+    setScenePlaylistItemEditDialogDuration: (
+      state,
+      action: PayloadAction<number>
+    ) => {
+      if (state.scenePlaylistItemEditDialog != null) {
+        state.scenePlaylistItemEditDialog.duration = action.payload
+      }
+    },
+    setScenePlaylistItemEditDialogPlayAfterAllImages: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      if (state.scenePlaylistItemEditDialog != null) {
+        state.scenePlaylistItemEditDialog.playAfterAllImages = action.payload
+      }
     }
   },
   extraReducers: (builder) => {
@@ -45,6 +93,13 @@ export const playlistSlice = createSlice({
   }
 })
 
-export const { setPlaylistEditingName } = playlistSlice.actions
+export const {
+  setPlaylistEditingName,
+  setScenePlaylistItemEditDialog,
+  setScenePlaylistItemEditDialogScene,
+  setScenePlaylistItemEditDialogRandomScenes,
+  setScenePlaylistItemEditDialogDuration,
+  setScenePlaylistItemEditDialogPlayAfterAllImages
+} = playlistSlice.actions
 
 export default playlistSlice.reducer
