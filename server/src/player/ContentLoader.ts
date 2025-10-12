@@ -57,6 +57,7 @@ import fileRegistry from '../routes/FileRegistry'
 import proxy, { ProxyRequest } from '../routes/ProxyService'
 import { LoadedUrl } from './UrlLoader'
 import path from 'path'
+import { ISizeCalculationResult } from 'image-size/types/interface'
 
 function newContentData(
   url: string,
@@ -416,16 +417,18 @@ export default class ContentLoader {
       return data
     } else if (isImage(url, false)) {
       let buffer: Buffer
+      let size: ISizeCalculationResult
       try {
         // TODO loading image into memory is quite expensive, optimize this
         buffer = await this.getImageBuffer(url)
+        size = imageSize(buffer)
       } catch {
         const errorData = newContentData(url)
         this.dataCache.set(url, errorData)
         return errorData
       }
 
-      const { width, height } = imageSize(buffer)
+      const { width, height } = size
       const data = newContentData(url, source, post, 'image', width, height)
 
       // TODO parse URL and use path in case there are query params
