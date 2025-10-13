@@ -1,6 +1,6 @@
 import { Kysely } from 'kysely'
 import Logger from '../../../logging/Logger'
-import { DB } from '../../types/generated'
+import { DB } from '../../types/generated-v400-beta9'
 import { toNumber } from '../../utils'
 
 const logger = Logger.create('DB Migration - remove-twitter')

@@ -1,10 +1,8 @@
 import { Kysely } from 'kysely'
 import Logger from '../../../logging/Logger'
-import { DB } from '../../types/generated'
+import { DB } from '../../types/generated-v400-beta9'
 import { toNumber } from '../../utils'
-import { createScenePlaylistItem } from '../../PlaylistItemRepository'
-import { createPlaylist } from '../../PlaylistRepository'
-import { PLT } from 'flipflip-common'
+import { PLT, RP } from 'flipflip-common'
 
 const logger = Logger.create('DB Migration - visible-playlist')
 export async function up(db: Kysely<DB>): Promise<void> {
@@ -34,22 +32,38 @@ export async function up(db: Kysely<DB>): Promise<void> {
       logger.info(`+ Create playlist for scene '{name}' (id: ${scene.id})`, {
         name: scene.name
       })
-      const playlist = await createPlaylist(
-        PLT.singleScene,
-        false,
-        scene.userId,
-        scene.name,
-        trx
-      )
-      const item = {
-        duration: Infinity,
-        index: 0,
-        playlistId: playlist.id as number,
-        playAfterAllImages: toNumber(false),
-        random: toNumber(false)
-      }
-      const scenes = [{ sceneId: scene.id, scenePlaylistItemId: 0 }]
-      await createScenePlaylistItem(item, scenes, trx)
+      const playlist = await trx
+        .insertInto('playlist')
+        .values({
+          userId: scene.userId,
+          name: scene.name,
+          type: PLT.singleScene,
+          shuffle: toNumber(false),
+          repeat: RP.all,
+          temporary: toNumber(false),
+          visible: toNumber(false)
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      const scenePlaylistItemId = await trx
+        .insertInto('scenePlaylistItem')
+        .values({
+          duration: Infinity,
+          index: 0,
+          playlistId: playlist.id as number,
+          playAfterAllImages: toNumber(false)
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      await trx
+        .insertInto('scenePlaylistItemScene')
+        .values({
+          sceneId: scene.id as number,
+          scenePlaylistItemId: scenePlaylistItemId.id as number
+        })
+        .execute()
     }
   })
 }
