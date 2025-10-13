@@ -496,7 +496,6 @@ export interface ScenePlaylistItem {
   index: number
   playAfterAllImages: number
   playlistId: number
-  random: Generated<number>
 }
 
 export interface ScenePlaylistItemScene {
