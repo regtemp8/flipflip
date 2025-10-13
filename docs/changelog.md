@@ -1,4 +1,12 @@
 # Changelog
+#### v4.0.0-beta10 <small>(10/13/2025)</small>
+- Fix images only partially loading
+- Add ability to drag and drop items in a scene playlist
+- Display drives in file picker
+- Fix the way file system root is shown in file picker
+- Change scene playlist label "Play after" to "Play for"
+- Try catch imageSize to protect against corrupted images
+
 #### v4.0.0-beta9 <small>(09/23/2025)</small>
 - Add single scene to display view
 - Improve avoid repeats shuffling

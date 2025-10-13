@@ -1,7 +1,7 @@
 import express from 'express'
 import { LatestVersion, ValueResponse } from 'flipflip-common'
 
-const VERSION = '4.0.0-beta9'
+const VERSION = '4.0.0-beta10'
 
 const router = express.Router()
 router.get('/', (req, res) => {
