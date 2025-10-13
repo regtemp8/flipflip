@@ -27,6 +27,8 @@ FROM node:22-alpine
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 
+RUN apk add python3 build-base make
+
 COPY --chown=node:node ./server/package.json /home/node/server/
 COPY --chown=node:node --from=builder /home/node/builder/server/bin /home/node/server
 COPY --chown=node:node --from=builder /home/node/builder/client/dist /home/node/server/public
@@ -36,5 +38,8 @@ WORKDIR /home/node/server
 RUN corepack enable
 RUN corepack prepare yarn@stable --activate
 RUN yarn workspaces focus --production
+
+# debug yarn build.log when 'yarn workspaces focus --production' fails
+# RUN yarn workspaces focus --production | grep -Eo '(/tmp/.*?\.log)' | xargs -I{} sh -c 'echo {}: && cat {}' && exit 1
 
 ENTRYPOINT ["yarn", "node", "./server.js"]
