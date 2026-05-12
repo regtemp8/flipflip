@@ -2,7 +2,6 @@ import { IAudioMetadata } from "music-metadata";
 import AppStorageState from "./common/AppStorageState";
 import Audio from "./common/Audio";
 import Backup from "./common/Backup";
-import RedditSubscriptionResponse from "./common/RedditSubscriptionResponse";
 import TumblrFollowingResponse from "./common/TumblrFollowingResponse";
 import { Config } from "./common/Config";
 import LibrarySource from "./common/LibrarySource";
@@ -61,20 +60,6 @@ declare global {
         limit: number,
         offset: number,
       ) => Promise<TumblrFollowingResponse>;
-      redditAuthRequest: (
-        userAgent: string,
-        clientID: string,
-        deviceID: string,
-      ) => void;
-      onRedditAuthResponse: (
-        callback: (response: AuthResponse) => void,
-      ) => void;
-      redditSubscriptions: (
-        userAgent: string,
-        clientId: string,
-        refreshToken: string,
-        after: string,
-      ) => Promise<RedditSubscriptionResponse>;
       buildPlayerMenu: (
         isPlaying: boolean,
         fullScreen: boolean,

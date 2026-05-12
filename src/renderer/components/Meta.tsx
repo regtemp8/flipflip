@@ -293,7 +293,6 @@ export default class Meta extends React.Component {
                     actions.importLibrary,
                     actions.createBackup.bind(this.state),
                   )}
-                  onImportReddit={p(actions.importReddit)}
                   onImportTumblr={p(actions.importTumblr)}
                   onManageTags={a(actions.manageTags)}
                   onMarkOffline={p(actions.markOffline)}

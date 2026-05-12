@@ -368,7 +368,6 @@ interface LibraryProps {
   onExportLibrary(): void;
   onImportFromLibrary(sources: Array<LibrarySource>): void;
   onImportLibrary(importLibrary: any): void;
-  onImportReddit(): void;
   onImportTumblr(): void;
   onManageTags(): void;
   onMarkOffline(): void;
@@ -424,14 +423,11 @@ class Library extends React.Component<LibraryProps> {
     const tumblrAuthorized =
       this.props.config.remoteSettings.tumblrOAuthToken != "" &&
       this.props.config.remoteSettings.tumblrOAuthTokenSecret != "";
-    const redditAuthorized =
-      this.props.config.remoteSettings.redditRefreshToken != "";
     const piwigoConfigured =
       this.props.config.remoteSettings.piwigoProtocol != "" &&
       this.props.config.remoteSettings.piwigoHost != "";
     const hydrusConfigured =
       this.props.config.remoteSettings.hydrusAPIKey != "";
-    const remoteAuthorized = tumblrAuthorized || redditAuthorized;
 
     let cancelProgressMessage;
     switch (this.props.progressMode) {
@@ -458,9 +454,6 @@ class Library extends React.Component<LibraryProps> {
           " / " +
           this.props.progressTotal +
           " )";
-        break;
-      case PR.reddit:
-        cancelProgressMessage = "Cancel Import";
         break;
     }
 
@@ -651,7 +644,7 @@ class Library extends React.Component<LibraryProps> {
             </Tooltip>
           </div>
 
-          {remoteAuthorized && (
+          {tumblrAuthorized && (
             <React.Fragment>
               <Divider />
 
@@ -661,33 +654,21 @@ class Library extends React.Component<LibraryProps> {
                 <Collapse in={open}>
                   <ListSubheader inset>Import Remote Sources</ListSubheader>
                 </Collapse>
-                {tumblrAuthorized && (
-                  <Tooltip
-                    disableInteractive
-                    title={this.state.drawerOpen ? "" : "Import from Tumblr"}
+                <Tooltip
+                  disableInteractive
+                  title={this.state.drawerOpen ? "" : "Import from Tumblr"}
+                >
+                  <ListItem
+                    button
+                    disabled={this.props.progressMode != null}
+                    onClick={this.props.onImportTumblr.bind(this)}
                   >
-                    <ListItem
-                      button
-                      disabled={this.props.progressMode != null}
-                      onClick={this.props.onImportTumblr.bind(this)}
-                    >
-                      <ListItemIcon>
-                        <SourceIcon type={ST.tumblr} />
-                      </ListItemIcon>
-                      <ListItemText primary="Tumblr" />
-                    </ListItem>
-                  </Tooltip>
-                )}
-                {/*{redditAuthorized && (
-                  <Tooltip disableInteractive title={this.state.drawerOpen ? "" : "Import from Reddit"}>
-                    <ListItem button disabled={this.props.progressMode != null} onClick={this.props.onImportReddit.bind(this)}>
-                      <ListItemIcon>
-                        <SourceIcon type={ST.reddit}/>
-                      </ListItemIcon>
-                      <ListItemText primary="Reddit" />
-                    </ListItem>
-                  </Tooltip>
-                )}*/}
+                    <ListItemIcon>
+                      <SourceIcon type={ST.tumblr} />
+                    </ListItemIcon>
+                    <ListItemText primary="Tumblr" />
+                  </ListItem>
+                </Tooltip>
               </div>
             </React.Fragment>
           )}

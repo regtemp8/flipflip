@@ -36,12 +36,11 @@ import FolderIcon from "@mui/icons-material/Folder";
 
 import { arrayMove, getTimestamp } from "../../data/utils";
 import { getSourceType, urlToPath } from "../../../common/utils";
-import { RF, RT, SDT, ST } from "../../../common/const";
+import { SDT, ST } from "../../../common/const";
 import Config from "../../../common/Config";
 import LibrarySource from "../../../common/LibrarySource";
 import SourceListItem from "./SourceListItem";
 import Clip from "../../../common/Clip";
-import en from "../../../common/en";
 import Scene from "../../../common/Scene";
 
 const styles = (theme: Theme) =>
@@ -456,69 +455,6 @@ class SourceList extends React.Component<SourceListProps> {
                 }}
                 onChange={this.onSourceInput.bind(this, "subtitleFile")}
               />
-            </DialogContent>
-          </Dialog>
-        )}
-        {this.state.sourceOptionsType == ST.reddit && (
-          <Dialog
-            open={this.state.sourceOptionsType == ST.reddit}
-            onClose={this.onCloseSourceOptions.bind(this)}
-            aria-describedby="reddit-options-description"
-          >
-            <DialogContent>
-              <DialogContentText id="reddit-options-description">
-                Reddit Options ({this.state.sourceOptions.url})
-              </DialogContentText>
-              <FormControl variant="standard" className={classes.fullWidth}>
-                <InputLabel>Post Order</InputLabel>
-                <Select
-                  variant="standard"
-                  disabled={
-                    this.state.sourceOptions.url.includes("/user/") ||
-                    this.state.sourceOptions.url.includes("/u/")
-                  }
-                  value={
-                    this.state.sourceOptions.redditFunc == null
-                      ? RF.hot
-                      : this.state.sourceOptions.redditFunc
-                  }
-                  onChange={this.onSourceInput.bind(this, "redditFunc")}
-                >
-                  {Object.values(RF).map((rf) => (
-                    <MenuItem key={rf} value={rf}>
-                      {en.get(rf)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {this.state.sourceOptions.redditFunc == RF.top && (
-                <Select
-                  variant="standard"
-                  className={classes.fullWidth}
-                  disabled={
-                    this.state.sourceOptions.url.includes("/user/") ||
-                    this.state.sourceOptions.url.includes("/u/")
-                  }
-                  value={
-                    this.state.sourceOptions.redditTime == null
-                      ? RT.day
-                      : this.state.sourceOptions.redditTime
-                  }
-                  onChange={this.onSourceInput.bind(this, "redditTime")}
-                >
-                  {Object.values(RT).map((rt) => (
-                    <MenuItem key={rt} value={rt}>
-                      {en.get(rt)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-              {(this.state.sourceOptions.url.includes("/user/") ||
-                this.state.sourceOptions.url.includes("/u/")) && (
-                <DialogContentText>
-                  This only applies to subreddits, not user profiles
-                </DialogContentText>
-              )}
             </DialogContent>
           </Dialog>
         )}

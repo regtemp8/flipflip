@@ -66,7 +66,6 @@ alt="Options" width="20" height="20">
   * This will only show up for certain types of sources:
   * _**Local** - toggle whether to treat inner directories as if they were their own sources_
   * _**Video** - specify a subtitle file_
-  * ~~_**Reddit** - specify feed for subreddits (i.e. "Hot", "Top", "New", etc.)_~~
 * To edit the blacklist for a source, click the <img style="vertical-align: -5px" src="doc_icons/blacklist.svg" 
 alt="Blacklist" width="20" height="20">
   * _This will only appear for sources which have a blacklist._
@@ -116,7 +115,6 @@ local video/playlist file, add a `Local video/playlsit` and choose the video(s) 
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/b.svg" alt="BDSMlr" width="15" height="15">BDSMlr Blog (Only works for blogs with images in RSS feed)
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/nimja.svg" alt="Nimja" width="15" height="15">Nimja Spiral
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/luscious.svg" alt="Luscious" width="15" height="15">Luscious Album/User
-* ~~<img style="vertical-align: -2px" src="doc_icons/reddit.svg" alt="Reddit" width="15" height="15"> Reddit Subreddits/Users/Saved~~ _API no longer public_
 * ~~<img style="vertical-align: -2px" src="doc_icons/sexcom.svg" alt="Sex.com" width="15" height="15"> Sex.com Gallery/User~~ _Currently broken_
 
 #### Gooninator import

@@ -24,9 +24,6 @@ import { OAuth } from "oauth";
 import http from "http";
 import { shell } from "electron";
 import { IPC } from "../common/const";
-import wretch from "wretch";
-import Snoowrap from "snoowrap";
-import RedditSubscriptionResponse from "../common/RedditSubscriptionResponse";
 import TumblrFollowingResponse from "../common/TumblrFollowingResponse";
 import tumblr from "tumblr.js";
 
@@ -292,104 +289,6 @@ export function tumblrAuth(
     .listen(65010);
 }
 
-export function redditAuth(
-  window: BrowserWindow,
-  userAgent: string,
-  clientID: string,
-  deviceID: string,
-) {
-  // Start a server to listen for Reddit OAuth response
-  const server = http.createServer();
-  server
-    .on(
-      "request",
-      (
-        req: http.IncomingMessage,
-        res: http.ServerResponse<http.IncomingMessage> & {
-          req: http.IncomingMessage;
-        },
-      ) => {
-        // Can't seem to get electron to properly return focus to FlipFlip, just alert the user in the response
-        const html =
-          "<html><body><h1>Please return to FlipFlip</h1></body></html>";
-        res.writeHead(200, { "Content-Type": "text/html" });
-        res.write(html);
-
-        if (!req.url.endsWith("favicon.ico")) {
-          if (req.url.includes("state") && req.url.includes("code")) {
-            const args = req.url.replace("\/?", "").split("&");
-            // This should be the same as the deviceID
-            const state = args[0].substring(6);
-            if (state == deviceID) {
-              // This is what we use to get our token
-              const code = args[1].substring(5);
-              wretch("https://www.reddit.com/api/v1/access_token")
-                .headers({
-                  "User-Agent": userAgent,
-                  Authorization: "Basic " + btoa(clientID + ":"),
-                })
-                .formData({
-                  grant_type: "authorization_code",
-                  code: code,
-                  redirect_uri: "http://localhost:65010",
-                })
-                .post()
-                .json((json) => {
-                  window.webContents.send(IPC.redditAuthResponse, {
-                    success: { token: json.refresh_token, secret: "" },
-                  });
-                  window.show();
-                  server.close();
-                  req.socket.destroy();
-                })
-                .catch((e) => {
-                  console.error(e);
-                  window.webContents.send(IPC.redditAuthResponse, {
-                    error: e.message,
-                  });
-                  server.close();
-                  req.socket.destroy();
-                  res.end();
-                });
-            }
-          } else if (req.url.includes("state") && req.url.includes("error")) {
-            const args = req.url.replace("\/?", "").split("&");
-            // This should be the same as the deviceID
-            const state = args[0].substring(6);
-            if (state == deviceID) {
-              const error = args[1].substring(6);
-              console.error(error);
-              window.webContents.send(IPC.redditAuthResponse, { error });
-            }
-
-            server.close();
-            req.socket.destroy();
-          }
-        }
-        res.end();
-      },
-    )
-    .listen(65010);
-
-  // Make initial request and open authorization form in browser
-  wretch(
-    "https://www.reddit.com/api/v1/authorize?client_id=" +
-      clientID +
-      "&response_type=code&state=" +
-      deviceID +
-      "&redirect_uri=http://localhost:65010&duration=permanent&scope=read,mysubreddits,history",
-  )
-    .post()
-    .res((res) => {
-      shell.openExternal(res.url);
-    })
-    .catch((e) => {
-      console.error(e);
-      window.webContents.send(IPC.redditAuthResponse, { error: e.message });
-      server.close();
-    });
-}
-
 export function printMemoryReport() {
   function format(x: any) {
     let f = x.toString();
@@ -432,29 +331,6 @@ export function printMemoryReport() {
   );
   Object.entries(webFrame.getResourceUsage()).map(logCount);
   console.log("------");
-}
-
-export function getRedditSubscriptions(
-  userAgent: string,
-  clientId: string,
-  refreshToken: string,
-  after: string,
-): RedditSubscriptionResponse {
-  const reddit = new Snoowrap({
-    userAgent,
-    clientId,
-    clientSecret: "",
-    refreshToken,
-  });
-
-  const listing = reddit.getSubscriptions({ limit: 20, after });
-  const subs: string[] = [];
-  for (const sub of listing) {
-    subs.push(sub.url);
-  }
-
-  const next = listing[listing.length - 1].name;
-  return { subs, next };
 }
 
 export function getTumblrFollowing(

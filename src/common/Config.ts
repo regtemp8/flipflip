@@ -230,11 +230,6 @@ interface RemoteSettingsI {
   tumblrOAuthTokenSecret: string;
   silenceTumblrAlert: boolean;
 
-  redditUserAgent: string;
-  redditClientID: string;
-  redditDeviceID: string;
-  redditRefreshToken: string;
-
   hydrusProtocol: string;
   hydrusDomain: string;
   hydrusPort: string;
@@ -543,11 +538,6 @@ export class RemoteSettings implements RemoteSettingsI {
   tumblrOAuthToken = "";
   tumblrOAuthTokenSecret = "";
   silenceTumblrAlert = false;
-
-  redditUserAgent = "desktop:flipflip:v2.0.0 (by /u/ififfy)";
-  redditClientID = "2Iqe-1CsO4VQlA";
-  redditDeviceID = "";
-  redditRefreshToken = "";
 
   hydrusProtocol = "http";
   hydrusDomain = "localhost";

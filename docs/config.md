@@ -80,23 +80,6 @@ make any changes to your account.
 
 ?> Enable **Silence Tumblr Throttle Alert** to prevent FlipFlip from alerting you when Tumblr starts returning 429 responses.
 
-### Reddit
-
-!> Reddit's API is no longer publicly available and so this service is no longer functioning in FlipFlip. If this changes
-in the future, access will be re-enabled.
-
-~~In order to use Reddit Subreddits/Users as sources or import your Subscriptions, you must first activate FlipFlip 
-with your account. You should only ever have to do this once.~~
-
-~~FlipFlip does not store any user information or make any changes to your account.~~
-
-* ~~Click the `Reddit` icon~~
-* ~~Click `OK` on the confirmation dialog~~
-* ~~You will be directed to Reddit.com in your browser~~
-* ~~Click `Allow` to give FlipFlip read permission~~
-* ~~Go back to FlipFlip~~
-* ~~You should see a Success! message~~
-
 ### Hydrus
 In order to use a Hydrus server for sources, you'll need to provide the server details. This includes protocol 
 (`http` vs `https`), domain, port, and API Key.
@@ -149,7 +132,7 @@ with the relevant information:
 | `{audio_artist}` | Arist (metadata) of the currently playing **Audio** |
 | `{audio_album}`  | Album (metadata) of the currently playing **Audio** |
 
-?> A source/file/audio "Name" is the shortened name parsed from the full "URL". (e.g. `https://www.reddit.com/r/AnimalsBeingDerps/` becomes `AnimalsBeingDerps`)
+?> A source/file/audio "Name" is the shortened name parsed from the full "URL". (e.g. `https://imgur.com/t/AnimalsBeingDerps/` becomes `AnimalsBeingDerps`)
 
 ## Backup
 Backup your FlipFlip data or restore from a previous backup.
