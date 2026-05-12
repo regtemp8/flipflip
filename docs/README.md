@@ -6,7 +6,7 @@
 #### [Latest Release](https://github.com/regtemp8/flipflip/releases/latest)
 
 ## Features
-* Local files as well as Tumblr, ~~Reddit~~, Imgur, DeviantArt, Booru & More
+* Local files as well as Tumblr, Imgur, DeviantArt, Booru & More
 * Animated GIF and video support
 * Grid view with cloneable grid cells
 * Multiple windows

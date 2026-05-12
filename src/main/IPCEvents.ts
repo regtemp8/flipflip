@@ -55,9 +55,7 @@ import AppStorageState from "../common/AppStorageState";
 import {
   cleanBackups,
   getFonts,
-  getRedditSubscriptions,
   getTumblrFollowing,
-  redditAuth,
   reset,
   restoreFromBackup,
   tumblrAuth,
@@ -197,20 +195,6 @@ function onTumblrAuthRequest(
   tumblrAuth(window, tumblrKey, tumblrSecret);
 }
 
-function onRedditAuthRequest(
-  ev: IpcMainEvent,
-  userAgent: string,
-  clientID: string,
-  deviceID: string,
-) {
-  const window = getWindow(ev.sender.id);
-  if (window == null) {
-    return;
-  }
-
-  redditAuth(window, userAgent, clientID, deviceID);
-}
-
 async function onInitScenePicker(ev: IpcMainInvokeEvent, version: string) {
   const response: ScenePickerInitResponse = {
     isFirstWindow: ev.sender.id === 1,
@@ -282,16 +266,6 @@ async function onInitScenePicker(ev: IpcMainInvokeEvent, version: string) {
 
 function onSetProgressBar(ev: IpcMainEvent, progress: number) {
   setProgressBar(ev.sender.id, progress);
-}
-
-function onGetRedditSubscriptions(
-  ev: IpcMainInvokeEvent,
-  userAgent: string,
-  clientId: string,
-  refreshToken: string,
-  after: string,
-) {
-  return getRedditSubscriptions(userAgent, clientId, refreshToken, after);
 }
 
 async function onGetTumblrFollowing(
@@ -1312,9 +1286,7 @@ export function initializeIpcEvents() {
   ipcMain.handle(IPC.saveScript, onSaveScript);
   ipcMain.handle(IPC.getFonts, onGetFonts);
   ipcMain.on(IPC.tumblrAuthRequest, onTumblrAuthRequest);
-  ipcMain.on(IPC.redditAuthRequest, onRedditAuthRequest);
   ipcMain.on(IPC.setProgressBar, onSetProgressBar);
-  ipcMain.handle(IPC.redditSubscriptions, onGetRedditSubscriptions);
   ipcMain.handle(IPC.tumblrFollowing, onGetTumblrFollowing);
   ipcMain.on(IPC.buildPlayerMenu, onBuildPlayerMenu);
   ipcMain.on(IPC.destroyPlayerMenu, onDestroyPlayerMenu);

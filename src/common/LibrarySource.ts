@@ -23,9 +23,6 @@ export default class LibrarySource {
   duration: number;
   resolution: number;
   fileSize: number;
-  // Reddit
-  redditFunc: string;
-  redditTime: string;
 
   constructor(init?: Partial<LibrarySource>) {
     Object.assign(this, init);

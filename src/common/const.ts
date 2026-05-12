@@ -168,7 +168,6 @@ const ST = {
   playlist: "st.playlist",
   list: "st.list",
   tumblr: "st.tumblr",
-  reddit: "st.reddit",
   redgifs: "st.redgifs",
   imagefap: "st.imagefap",
   sexcom: "st.sexcom",
@@ -235,10 +234,7 @@ const IPC = {
   getFonts: "ipc.getFonts",
   tumblrAuthRequest: "ipc.tumblrAuthRequest",
   tumblrAuthResponse: "ipc.tumblrAuthResponse",
-  redditAuthRequest: "ipc.redditAuthRequest",
-  redditAuthResponse: "ipc.redditAuthResponse",
   setProgressBar: "ipc.setProgressBar",
-  redditSubscriptions: "ipc.redditSubscriptions",
   tumblrFollowing: "ipc.tumblrFollowing",
   buildPlayerMenu: "ipc.buildPlayerMenu",
   destroyPlayerMenu: "ipc.destroyPlayerMenu",
@@ -353,26 +349,6 @@ const PR = {
   videoMetadata: "pr.video",
   bpm: "pr.bpm",
   tumblr: "pr.tumblr",
-  reddit: "pr.reddit",
-};
-
-const RF = {
-  // Reddit functions
-  hot: "rf.hot",
-  new: "rf.new",
-  top: "rf.top",
-  controversial: "rf.cont",
-  rising: "rf.rising",
-};
-
-const RT = {
-  // Reddit timespan
-  hour: "hour",
-  day: "day",
-  week: "week",
-  month: "month",
-  year: "year",
-  all: "all",
 };
 
 const SG = {
@@ -622,9 +598,7 @@ export {
   PT,
   PW,
   PWS,
-  RF,
   RP,
-  RT,
   SC,
   SDGT,
   SDT,

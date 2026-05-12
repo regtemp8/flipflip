@@ -5,7 +5,6 @@ import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import FolderIcon from "@mui/icons-material/Folder";
 import ListIcon from "@mui/icons-material/List";
 import MovieIcon from "@mui/icons-material/Movie";
-import RedditIcon from "@mui/icons-material/Reddit";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
 
 import { getSourceType } from "../../../common/utils";
@@ -296,13 +295,6 @@ export default class SourceIcon extends React.Component<SourceIconProps> {
         return <SubscriptionsIcon className={this.props.className} />;
       case ST.list:
         return <ListIcon className={this.props.className} />;
-      case ST.reddit:
-        return (
-          <RedditIcon
-            style={{ color: "red" }}
-            className={this.props.className}
-          />
-        );
       case ST.redgifs:
         return <RedGifsIcon className={this.props.className} />;
       case ST.tumblr:

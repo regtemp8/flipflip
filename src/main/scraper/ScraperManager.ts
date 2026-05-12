@@ -21,7 +21,6 @@ import {
   loadImgur,
   loadLuscious,
   loadPiwigo,
-  loadReddit,
   loadRedGifs,
   loadRemoteImageURLList,
   loadSexCom,
@@ -401,8 +400,6 @@ export function loadSources(
     let workerFunction: any;
     if (sourceType == ST.tumblr) {
       workerFunction = loadTumblr;
-    } else if (sourceType == ST.reddit) {
-      workerFunction = loadReddit;
     } else if (sourceType == ST.redgifs) {
       workerFunction = loadRedGifs;
     } else if (sourceType == ST.imagefap) {

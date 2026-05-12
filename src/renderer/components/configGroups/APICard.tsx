@@ -122,7 +122,6 @@ class APICard extends React.Component<APICardProps> {
     const tumblrAuthorized =
       this.props.settings.tumblrOAuthToken != "" &&
       this.props.settings.tumblrOAuthTokenSecret != "";
-    const redditAuthorized = this.props.settings.redditRefreshToken != "";
     const hydrusConfigured = this.props.settings.hydrusAPIKey != "";
     const piwigoConfigured =
       this.props.settings.piwigoProtocol != "" &&
@@ -140,9 +139,6 @@ class APICard extends React.Component<APICardProps> {
     switch (this.state.menuType) {
       case ST.tumblr:
         menuTypeSignOut = this.onFinishClearTumblr.bind(this);
-        break;
-      case ST.reddit:
-        menuTypeSignOut = this.onFinishClearReddit.bind(this);
         break;
       case ST.hydrus:
         menuTypeSignOut = this.onFinishClearHydrus.bind(this);
@@ -184,16 +180,6 @@ class APICard extends React.Component<APICardProps> {
               </Fab>
             </Tooltip>
           </Grid>
-          {/*<Grid item>
-            <Tooltip disableInteractive title={redditAuthorized ? "Authorized: Click to Sign Out of Reddit" : "Unauthorized: Click to Authorize Reddit"}  placement="top-end">
-              <Fab
-                className={clsx(classes.fab, redditAuthorized ? classes.authorized : classes.noAuth)}
-                onClick={redditAuthorized ? this.onClearReddit.bind(this) : this.onAuthReddit.bind(this)}
-                size="large">
-                <SourceIcon className={classes.icon} type={ST.reddit}/>
-              </Fab>
-            </Tooltip>
-          </Grid>*/}
           <Grid item>
             <Tooltip
               disableInteractive
@@ -429,48 +415,6 @@ class APICard extends React.Component<APICardProps> {
 
         <Dialog
           open={
-            this.state.openMenu == MO.signIn && this.state.menuType == ST.reddit
-          }
-          onClose={this.onCloseDialog.bind(this)}
-          aria-labelledby="sign-in-title"
-          aria-describedby="sign-in-description"
-        >
-          <DialogTitle id="sign-in-title">
-            Reddit Sign In
-            <Avatar className={classes.iconAvatar}>
-              <SourceIcon className={classes.icon} type={ST.reddit} />
-            </Avatar>
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="sign-in-description">
-              You are about to be directed to{" "}
-              <Link
-                href="#"
-                onClick={this.openLink.bind(this, "https://www.reddit.com")}
-                underline="hover"
-              >
-                Reddit.com
-              </Link>{" "}
-              to authorize FlipFlip. You should only have to do this once.
-              FlipFlip does not store any user information or make any changes
-              to your account.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
-              Cancel
-            </Button>
-            <Button
-              onClick={this.onFinishAuthReddit.bind(this)}
-              color="primary"
-            >
-              Authorize FlipFlip on Reddit
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        <Dialog
-          open={
             this.state.openMenu == MO.signIn && this.state.menuType == ST.hydrus
           }
           onClose={this.onCloseDialog.bind(this)}
@@ -662,22 +606,6 @@ class APICard extends React.Component<APICardProps> {
     this.onCloseDialog();
   }
 
-  onClearReddit() {
-    this.setState({ openMenu: MO.signOut, menuType: ST.reddit });
-  }
-
-  onFinishClearReddit() {
-    // Update props
-    this.props.onUpdateConfig((c) => {
-      c.remoteSettings.redditRefreshToken = "";
-    });
-    // Update state
-    this.props.onUpdateSettings((s) => {
-      s.redditRefreshToken = "";
-    });
-    this.onCloseDialog();
-  }
-
   onClearHydrus() {
     this.setState({ openMenu: MO.signOut, menuType: ST.hydrus });
   }
@@ -759,10 +687,6 @@ class APICard extends React.Component<APICardProps> {
         input2: this.props.settings.tumblrSecrets[indexOf],
       });
     }
-  }
-
-  onAuthReddit() {
-    this.setState({ openMenu: MO.signIn, menuType: ST.reddit });
   }
 
   onAuthHydrus() {
@@ -872,45 +796,6 @@ class APICard extends React.Component<APICardProps> {
         this.setState({
           snackbarOpen: true,
           snackbar: "Tumblr is now activated",
-          snackbarSeverity: SS.success,
-        });
-      }
-    });
-  }
-
-  onFinishAuthReddit() {
-    this.onCloseDialog();
-    const clientID = this.props.settings.redditClientID;
-    const userAgent = this.props.settings.redditUserAgent;
-
-    let deviceID = this.props.settings.redditDeviceID;
-    if (deviceID == "") {
-      deviceID = uuidv4();
-    }
-
-    window.ipc.redditAuthRequest(userAgent, clientID, deviceID);
-    window.ipc.onRedditAuthResponse((response) => {
-      if (response.error != null) {
-        this.setState({
-          snackbarOpen: true,
-          snackbar: "Error: " + response.error,
-          snackbarSeverity: SS.error,
-        });
-      }
-      if (response.success != null) {
-        this.props.onUpdateConfig((c) => {
-          c.remoteSettings.redditDeviceID = deviceID;
-          c.remoteSettings.redditRefreshToken = response.success.token;
-        });
-        // Update state
-        this.props.onUpdateSettings((s) => {
-          s.redditDeviceID = deviceID;
-          s.redditRefreshToken = response.success.token;
-        });
-
-        this.setState({
-          snackbarOpen: true,
-          snackbar: "Reddit is now activated",
           snackbarSeverity: SS.success,
         });
       }

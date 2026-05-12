@@ -71,28 +71,6 @@ contextBridge.exposeInMainWorld("ipc", {
       limit,
       offset,
     ),
-  redditAuthRequest: (userAgent: string, clientID: string, deviceID: string) =>
-    ipcRenderer.send(IPC.redditAuthRequest, userAgent, clientID, deviceID),
-  onRedditAuthResponse: (callback: (response: AuthResponse) => void) => {
-    // make sure there's only one listener, user might have abandoned auth midway
-    ipcRenderer.removeAllListeners(IPC.redditAuthResponse);
-    ipcRenderer.once(IPC.redditAuthResponse, (_event, response: AuthResponse) =>
-      callback(response),
-    );
-  },
-  redditSubscriptions: (
-    userAgent: string,
-    clientId: string,
-    refreshToken: string,
-    after: string,
-  ) =>
-    ipcRenderer.invoke(
-      IPC.redditSubscriptions,
-      userAgent,
-      clientId,
-      refreshToken,
-      after,
-    ),
   onStartScene: (callback: (sceneName: string) => void) => {
     const channel = IPC.startScene;
     const listener = (event: IpcRendererEvent, sceneName: string) =>

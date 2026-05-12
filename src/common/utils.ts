@@ -148,8 +148,6 @@ export function getSourceType(url: string): string {
     return ST.playlist;
   } else if (/^https?:\/\/([^.]*|(66\.media))\.tumblr\.com/.exec(url) != null) {
     return ST.tumblr;
-  } else if (/^https?:\/\/(www\.)?reddit\.com\//.exec(url) != null) {
-    return ST.reddit;
   } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
     return ST.redgifs;
   } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
@@ -212,14 +210,6 @@ export function getFileGroup(url: string, pathSep: string) {
       let tumblrID = url.replace(/https?:\/\//, "");
       tumblrID = tumblrID.replace(/\.tumblr\.com\/?/, "");
       return tumblrID;
-    case ST.reddit:
-      let redditID = url;
-      if (redditID.endsWith("/"))
-        redditID = redditID.slice(0, url.lastIndexOf("/"));
-      if (redditID.endsWith("/saved"))
-        redditID = redditID.replace("/saved", "");
-      redditID = redditID.substring(redditID.lastIndexOf("/") + 1);
-      return redditID;
     case ST.redgifs:
       let redgifID;
       if (url.includes("/browse?")) {

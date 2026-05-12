@@ -103,7 +103,6 @@ export default new Map<string, string>([
   ["asf.random", "Randomize Order"],
 
   ["st.tumblr", "Tumblr"],
-  ["st.reddit", "Reddit"],
   ["st.redgifs", "RedGifs"],
   ["st.imagefap", "ImageFap"],
   ["st.sexcom", "SexCom"],
