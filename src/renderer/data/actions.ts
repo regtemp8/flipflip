@@ -3443,7 +3443,7 @@ export function importScene(
 
 export function exportLibrary(state: State): Object {
   const libraryExport = JSON.stringify(state.library);
-  const fileName = "library_export-" + new Date().getTime() + ".json";
+  const fileName = "library_export-" + Date.now() + ".json";
   window.ipc.saveExport(fileName, libraryExport);
   return {};
 }
@@ -3540,7 +3540,7 @@ export function markOffline(getState: () => State, setState: Function) {
   const state = getState();
   const actionableLibrary = state.library.filter((ls) => {
     // If this link was checked within the last week, skip
-    return new Date().getTime() - new Date(ls.lastCheck).getTime() >= 604800000;
+    return Date.now() - new Date(ls.lastCheck).getTime() >= 604800000;
   });
   const offlineLoop = () => {
     const state = getState();

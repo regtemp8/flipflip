@@ -1005,7 +1005,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
         this._nextTimestamp =
           this.state.timestamps[this.state.timestampCounter];
       }
-      const passed = new Date().getTime() - this._timeStarted.getTime();
+      const passed = Date.now() - this._timeStarted.getTime();
       if (passed > this._nextTimestamp) {
         const index = doLoop(passed);
         if (index >= this.state.timestamps.length - 1) {

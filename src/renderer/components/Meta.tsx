@@ -106,7 +106,7 @@ export default class Meta extends React.Component {
       this.state != null &&
       this._queueSave &&
       (this._lastSave == null ||
-        new Date().getTime() - this._lastSave.getTime() > 3000)
+        Date.now() - this._lastSave.getTime() > 3000)
     ) {
       window.ipc.saveAppStorage(this.state);
       this._lastSave = new Date();
