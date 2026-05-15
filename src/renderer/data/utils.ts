@@ -784,12 +784,12 @@ export function applyEffects(scene: Scene, base64String: string) {
 
   scene.zoom = Number.parseInt(effects.shift()) == 1;
   scene.zoomRandom = Number.parseInt(effects.shift()) == 1;
-  scene.zoomStart = parseFloat(effects.shift());
-  scene.zoomStartMin = parseFloat(effects.shift());
-  scene.zoomStartMax = parseFloat(effects.shift());
-  scene.zoomEnd = parseFloat(effects.shift());
-  scene.zoomEndMin = parseFloat(effects.shift());
-  scene.zoomEndMax = parseFloat(effects.shift());
+  scene.zoomStart = Number.parseFloat(effects.shift());
+  scene.zoomStartMin = Number.parseFloat(effects.shift());
+  scene.zoomStartMax = Number.parseFloat(effects.shift());
+  scene.zoomEnd = Number.parseFloat(effects.shift());
+  scene.zoomEndMin = Number.parseFloat(effects.shift());
+  scene.zoomEndMax = Number.parseFloat(effects.shift());
   scene.horizTransType = Object.values(HTF)[Number.parseInt(effects.shift())];
   scene.horizTransLevel = Number.parseInt(effects.shift());
   scene.horizTransLevelMin = Number.parseInt(effects.shift());
@@ -844,7 +844,7 @@ export function applyEffects(scene: Scene, base64String: string) {
   scene.strobe = Number.parseInt(effects.shift()) == 1;
   scene.strobePulse = Number.parseInt(effects.shift()) == 1;
   scene.strobeLayer = Object.values(SL)[Number.parseInt(effects.shift())];
-  scene.strobeOpacity = parseFloat(effects.shift());
+  scene.strobeOpacity = Number.parseFloat(effects.shift());
   scene.strobeTF = Object.values(TF)[Number.parseInt(effects.shift())];
   scene.strobeTime = Number.parseInt(effects.shift());
   scene.strobeTimeMin = Number.parseInt(effects.shift());

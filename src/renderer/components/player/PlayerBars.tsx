@@ -354,8 +354,8 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
       this.props.mainVideo.hasAttribute("end")
     ) {
       clipValue = [
-        parseFloat(this.props.mainVideo.getAttribute("start")),
-        parseFloat(this.props.mainVideo.getAttribute("end")),
+        Number.parseFloat(this.props.mainVideo.getAttribute("start")),
+        Number.parseFloat(this.props.mainVideo.getAttribute("end")),
       ];
       clipID = Number.parseInt(this.props.mainVideo.getAttribute("clip"));
       const sourceURL = this.props.mainVideo.getAttribute("source");

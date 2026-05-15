@@ -825,8 +825,8 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           video.setAttribute("speed", speed.toString());
 
           if (video.hasAttribute("start") && video.hasAttribute("end")) {
-            const start = parseFloat(video.getAttribute("start"));
-            const end = parseFloat(video.getAttribute("end"));
+            const start = Number.parseFloat(video.getAttribute("start"));
+            const end = Number.parseFloat(video.getAttribute("end"));
             if (
               this.props.scene.randomVideoStart &&
               (!this.props.scene.continueVideo || !video.currentTime)
@@ -848,8 +848,8 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               if (video.hasAttribute("start") && video.hasAttribute("end")) {
                 const start = video.currentTime
                   ? video.currentTime
-                  : parseFloat(video.getAttribute("start"));
-                const end = parseFloat(video.getAttribute("end"));
+                  : Number.parseFloat(video.getAttribute("start"));
+                const end = Number.parseFloat(video.getAttribute("end"));
                 duration = end - start;
               } else {
                 duration = video.duration - video.currentTime;
@@ -875,8 +875,8 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             case VO.atLeast:
               let partDuration;
               if (video.hasAttribute("start") && video.hasAttribute("end")) {
-                const start = parseFloat(video.getAttribute("start"));
-                const end = parseFloat(video.getAttribute("end"));
+                const start = Number.parseFloat(video.getAttribute("start"));
+                const end = Number.parseFloat(video.getAttribute("end"));
                 partDuration = end - start;
               } else {
                 partDuration = video.duration;
@@ -1427,9 +1427,9 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       if (
         nextImg &&
         nextImg.getAttribute("duration") &&
-        timeToNextFrame < parseFloat(nextImg.getAttribute("duration"))
+        timeToNextFrame < Number.parseFloat(nextImg.getAttribute("duration"))
       ) {
-        timeToNextFrame = parseFloat(nextImg.getAttribute("duration"));
+        timeToNextFrame = Number.parseFloat(nextImg.getAttribute("duration"));
       }
       if (this.props.setTimeToNextFrame) {
         this.props.setTimeToNextFrame(timeToNextFrame);

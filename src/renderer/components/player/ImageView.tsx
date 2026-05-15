@@ -142,7 +142,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       if (
         !el ||
         !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) == 0.99 ||
+        Number.parseFloat(el.parentElement.style.opacity) == 0.99 ||
         v.paused ||
         this._timeouts == null
       )
@@ -165,7 +165,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
           : this.props.scene.videoVolume;
         v.volume =
           (volume / 100) *
-          parseFloat(el.parentElement.parentElement.getAttribute("volume"));
+          Number.parseFloat(el.parentElement.parentElement.getAttribute("volume"));
       }
       if (v.hasAttribute("start") && v.hasAttribute("end")) {
         const start = v.getAttribute("start");
@@ -187,7 +187,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       if (
         !el ||
         !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) == 0.99 ||
+        Number.parseFloat(el.parentElement.style.opacity) == 0.99 ||
         this._timeouts == null
       )
         return;
@@ -199,7 +199,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       if (
         !el ||
         !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) == 0.99 ||
+        Number.parseFloat(el.parentElement.style.opacity) == 0.99 ||
         v.ended ||
         v.paused ||
         this._timeouts == null
@@ -221,7 +221,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       if (
         !el ||
         !el.parentElement ||
-        parseFloat(el.parentElement.style.opacity) == 0.99 ||
+        Number.parseFloat(el.parentElement.style.opacity) == 0.99 ||
         this._timeouts == null
       )
         return;
