@@ -350,7 +350,7 @@ export function cacheImage(
 }
 
 export function goBack(state: State): Object {
-  const newRoute = state.route.slice(0, state.route.length - 1);
+  const newRoute = state.route.slice(0, -1);
   return { route: newRoute, specialMode: null };
 }
 
@@ -722,7 +722,7 @@ export function importScriptToScriptor(
   state: State,
   source: CaptionScript,
 ): Object {
-  const newRoute = state.route.slice(0, state.route.length - 1);
+  const newRoute = state.route.slice(0, -1);
   newRoute[newRoute.length - 1].value = source;
   return { route: newRoute, specialMode: null };
 }
