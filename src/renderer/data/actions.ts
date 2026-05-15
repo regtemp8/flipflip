@@ -1,4 +1,10 @@
-import { removeDuplicatesBy, proxyVideo } from "../../common/utils";
+import {
+  removeDuplicatesBy,
+  proxyVideo,
+  getFileGroup,
+  getFileName,
+  getSourceType,
+} from "../../common/utils";
 import {
   applyEffects,
   areWeightsValid,
@@ -7,7 +13,6 @@ import {
   getRandomIndex,
   randomizeList,
 } from "./utils";
-import { getFileGroup, getFileName, getSourceType } from "../../common/utils";
 import {
   AF,
   ALT,

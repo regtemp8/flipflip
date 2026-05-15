@@ -165,7 +165,9 @@ export default class ImageView extends React.Component<ImageViewProps> {
           : this.props.scene.videoVolume;
         v.volume =
           (volume / 100) *
-          Number.parseFloat(el.parentElement.parentElement.getAttribute("volume"));
+          Number.parseFloat(
+            el.parentElement.parentElement.getAttribute("volume"),
+          );
       }
       if (v.hasAttribute("start") && v.hasAttribute("end")) {
         const start = v.getAttribute("start");
