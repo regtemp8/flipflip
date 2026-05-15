@@ -4,7 +4,6 @@ import { app, protocol, net, Menu, session } from "electron";
 import { initializeIpcEvents, releaseIpcEvents } from "./IPCEvents";
 import { createMainMenu, createMenuTemplate } from "./MainMenu";
 import { createNewWindow, startScene } from "./WindowManager";
-import started from "electron-squirrel-startup";
 import {
   getSourceType,
   isProxiedAudio,
@@ -31,11 +30,6 @@ protocol.registerSchemesAsPrivileged([
     },
   },
 ]);
-
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
-  app.quit();
-}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
