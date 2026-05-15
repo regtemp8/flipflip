@@ -6,7 +6,6 @@ import recursiveReaddir from "recursive-readdir";
 import Config from "../../common/Config";
 import LibrarySource from "../../common/LibrarySource";
 import { IF, ST } from "../../common/const";
-import { urlToPath } from "../../common/utils";
 import {
   filterPathsToJustPlayable,
   loadBDSMlr,
@@ -27,7 +26,12 @@ import {
   loadTumblr,
   processAllURLs,
 } from "./Scrapers";
-import { getFileName, getSourceType, isVideo } from "../../common/utils";
+import {
+  urlToPath,
+  getFileName,
+  getSourceType,
+  isVideo,
+} from "../../common/utils";
 
 const loadNimja = (
   pm: Function,

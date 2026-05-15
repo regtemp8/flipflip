@@ -13,7 +13,7 @@ import {
   powerSaveBlocker,
   webFrame,
 } from "electron";
-import { urlToPath } from "../common/utils";
+import { urlToPath, getFileName, getSourceType } from "../common/utils";
 import getFolderSize from "get-folder-size";
 import { rimrafSync } from "rimraf";
 import gifInfo from "gif-info";
@@ -62,7 +62,6 @@ import {
 } from "./actions";
 import Config from "../common/Config";
 import PlayerMenu from "./PlayerMenu";
-import { getFileName, getSourceType } from "../common/utils";
 import { move, outputFile } from "fs-extra";
 import LibrarySource from "../common/LibrarySource";
 import path from "path";

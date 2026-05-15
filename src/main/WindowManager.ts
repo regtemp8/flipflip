@@ -5,9 +5,9 @@ import windowStateKeeper from "electron-window-state";
 
 import { releaseIpcEvents } from "./IPCEvents";
 import { IPC } from "../common/const";
-import { proxy } from "../common/utils";
 import { getFilesRecursively } from "./utils";
 import {
+  proxy,
   isText,
   isAudio,
   isVideo,
