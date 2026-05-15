@@ -74,7 +74,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       const el = this.contentRef.current;
       if (el && el.firstChild && el.firstChild instanceof HTMLVideoElement) {
         const volume = el.firstChild.hasAttribute("volume")
-          ? parseInt(el.firstChild.getAttribute("volume"))
+          ? Number.parseInt(el.firstChild.getAttribute("volume"))
           : this.props.scene.videoVolume;
         el.firstChild.volume = volume / 100;
       }
@@ -161,7 +161,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         v instanceof HTMLVideoElement
       ) {
         const volume = v.hasAttribute("volume")
-          ? parseInt(v.getAttribute("volume"))
+          ? Number.parseInt(v.getAttribute("volume"))
           : this.props.scene.videoVolume;
         v.volume =
           (volume / 100) *
@@ -385,14 +385,14 @@ export default class ImageView extends React.Component<ImageViewProps> {
     if (!forceBG && img instanceof HTMLVideoElement) {
       if (!this.props.pictureGrid && this.props.hasStarted) {
         const volume = img.hasAttribute("volume")
-          ? parseInt(img.getAttribute("volume"))
+          ? Number.parseInt(img.getAttribute("volume"))
           : this.props.scene.videoVolume;
         img.volume = volume / 100;
       } else {
         img.volume = 0;
       }
       img.playbackRate = img.hasAttribute("speed")
-        ? parseInt(img.getAttribute("speed")) / 10
+        ? Number.parseInt(img.getAttribute("speed")) / 10
         : 1;
       if (!blur) {
         img.onplay = () => {

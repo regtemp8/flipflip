@@ -2176,7 +2176,7 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
             (countRegex = /^count([>=<])(\d*)$/.exec(filter)) != null
           ) {
             const symbol = countRegex[1];
-            const value = parseInt(countRegex[2]);
+            const value = Number.parseInt(countRegex[2]);
             const count = source.playedCount;
             switch (symbol) {
               case "=":

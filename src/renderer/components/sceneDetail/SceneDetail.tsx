@@ -2008,7 +2008,7 @@ class SceneDetail extends React.Component<SceneDetailProps> {
           ) {
             const all = countRegex[1] == "+";
             const symbol = countRegex[2];
-            const value = parseInt(countRegex[3]);
+            const value = Number.parseInt(countRegex[3]);
             const type = getSourceType(source.url);
             const count = type == ST.video ? source.clips.length : source.count;
             const countComplete =
@@ -2032,7 +2032,7 @@ class SceneDetail extends React.Component<SceneDetailProps> {
             if (countRegex[2].includes(":")) {
               value = getTimestampValue(countRegex[2]);
             } else {
-              value = parseInt(countRegex[2]);
+              value = Number.parseInt(countRegex[2]);
             }
             const type = getSourceType(source.url);
             if (type == ST.video) {
@@ -2058,7 +2058,7 @@ class SceneDetail extends React.Component<SceneDetailProps> {
             (countRegex = /^resolution([>=<])(\d*)p?$/.exec(filter)) != null
           ) {
             const symbol = countRegex[1];
-            const value = parseInt(countRegex[2]);
+            const value = Number.parseInt(countRegex[2]);
 
             const type = getSourceType(source.url);
             if (type == ST.video) {

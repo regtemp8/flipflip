@@ -670,7 +670,7 @@ class APICard extends React.Component<APICardProps> {
 
   onTumblrKeyInput(e: MouseEvent) {
     const input = e.target as HTMLInputElement;
-    const value = parseInt(input.value);
+    const value = Number.parseInt(input.value);
     if (value == 0) {
       this.changeKey("tumblrKey", "");
       this.changeKey("tumblrSecret", "");

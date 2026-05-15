@@ -559,10 +559,10 @@ async function checkAutoClean(state: any): Promise<boolean> {
   let epoch;
   do {
     lastBackup = backups.shift();
-    epoch = parseInt(
+    epoch = Number.parseInt(
       lastBackup.url.substring(lastBackup.url.lastIndexOf(".") + 1),
     );
-  } while (isNaN(epoch));
+  } while (Number.isNaN(epoch));
   // If it's been longer than N days since our last backup
   if (
     Date.now() - epoch >
@@ -584,10 +584,10 @@ async function checkAutoBackup(state: any, backup: Function): Promise<boolean> {
     let epoch;
     do {
       lastBackup = backups.shift();
-      epoch = parseInt(
+      epoch = Number.parseInt(
         lastBackup.url.substring(lastBackup.url.lastIndexOf(".") + 1),
       );
-    } while (isNaN(epoch));
+    } while (Number.isNaN(epoch));
     // If it's been longer than N days since our last backup
     if (
       Date.now() - epoch >

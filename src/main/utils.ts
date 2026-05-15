@@ -165,7 +165,7 @@ export function extractMusicMetadata(
       );
     }
     if (metadata.common.track && metadata.common.track.no) {
-      audio.trackNum = parseInt(metadata.common.track.no);
+      audio.trackNum = Number.parseInt(metadata.common.track.no);
     }
     if (metadata.common.bpm) {
       audio.bpm = parseFloat(metadata.common.bpm);

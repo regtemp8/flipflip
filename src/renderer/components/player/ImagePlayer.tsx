@@ -893,7 +893,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           (video as any).key = this.state.nextImageID;
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
-              ? parseInt(
+              ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
                   ].getAttribute("index"),
@@ -942,7 +942,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           }
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
-              ? parseInt(
+              ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
                   ].getAttribute("index"),
@@ -1045,7 +1045,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           (img as any).key = this.state.nextImageID;
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
-              ? parseInt(
+              ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
                   ].getAttribute("index"),
@@ -1095,7 +1095,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           }
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
-              ? parseInt(
+              ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
                   ].getAttribute("index"),

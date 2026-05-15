@@ -326,7 +326,7 @@ export default class Scene {
     }
 
     if (typeof this.timingConstant == "string") {
-      this.timingConstant = parseInt(this.timingConstant);
+      this.timingConstant = Number.parseInt(this.timingConstant);
     }
 
     if (this.timingFunction == "tf.variableFaster") {
@@ -498,7 +498,7 @@ export default class Scene {
     }
     for (let playlist of this.scriptPlaylists) {
       for (let script of playlist.scripts) {
-        if (isNaN(script.opacity)) {
+        if (Number.isNaN(script.opacity)) {
           script.opacity = 100;
         }
       }

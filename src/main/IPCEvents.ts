@@ -225,7 +225,7 @@ async function onInitScenePicker(ev: IpcMainInvokeEvent, version: string) {
       if (betaNumber == "") {
         releaseBetaVersion = 0;
       } else {
-        releaseBetaVersion = parseInt(betaNumber);
+        releaseBetaVersion = Number.parseInt(betaNumber);
       }
     }
     let thisVersion = version.replace(".", "").replace(".", "");
@@ -238,15 +238,17 @@ async function onInitScenePicker(ev: IpcMainInvokeEvent, version: string) {
       if (betaNumber == "") {
         thisBetaVersion = 0;
       } else {
-        thisBetaVersion = parseInt(betaNumber);
+        thisBetaVersion = Number.parseInt(betaNumber);
       }
     }
-    if (parseInt(releaseVersion) > parseInt(thisVersion)) {
+    if (Number.parseInt(releaseVersion) > Number.parseInt(thisVersion)) {
       response.update = {
         releaseTag: newestReleaseTag,
         releaseURL: newestReleaseURL,
       };
-    } else if (parseInt(releaseVersion) == parseInt(thisVersion)) {
+    } else if (
+      Number.parseInt(releaseVersion) == Number.parseInt(thisVersion)
+    ) {
       if (
         (releaseBetaVersion == -1 && thisBetaVersion >= 0) ||
         releaseBetaVersion > thisBetaVersion
