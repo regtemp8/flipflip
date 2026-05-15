@@ -212,7 +212,7 @@ class AudioEdit extends React.Component<AudioEditProps> {
   onEditInt(key: string, e: MouseEvent) {
     const input = e.target as HTMLInputElement;
     const newAudio = new Audio(this.state.audio);
-    (newAudio as any)[key] = parseInt(input.value);
+    (newAudio as any)[key] = Number.parseInt(input.value);
     this.setState({ audio: newAudio });
   }
 

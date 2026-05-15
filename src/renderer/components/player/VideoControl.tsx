@@ -229,7 +229,7 @@ class VideoControl extends React.Component<VideoControlProps> {
                     <Slider
                       value={
                         this.props.volume
-                          ? parseInt(this.props.volume)
+                          ? Number.parseInt(this.props.volume)
                           : this.props.video.volume * 100
                       }
                       onChange={this.onChangeVolume.bind(this)}

@@ -1080,7 +1080,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                   (gr) => gr.id == g.id,
                                 );
                                 group.scenes = group.scenes.concat([
-                                  parseInt(evt.item.id),
+                                  Number.parseInt(evt.item.id),
                                 ]);
                                 this.props.onUpdateGroups(newGroups);
                               }
@@ -1358,7 +1358,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                   (gr) => gr.id == g.id,
                                 );
                                 group.scenes = group.scenes.concat([
-                                  parseInt(evt.item.id),
+                                  Number.parseInt(evt.item.id),
                                 ]);
                                 this.props.onUpdateGroups(newGroups);
                               }
@@ -1480,14 +1480,14 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                         key={grid.id}
                         bounce
                         disable={this.state.deleteScenes?.includes(
-                          parseInt("999" + grid.id),
+                          Number.parseInt("999" + grid.id),
                         )}
                         className={classes.scene}
                       >
                         <Card
                           className={clsx(
                             this.state.deleteScenes?.includes(
-                              parseInt("999" + grid.id),
+                              Number.parseInt("999" + grid.id),
                             ) && classes.deleteScene,
                           )}
                         >
@@ -1497,7 +1497,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                 ? this.props.onOpenGrid.bind(this, grid)
                                 : this.onToggleDelete.bind(
                                     this,
-                                    parseInt("999" + grid.id),
+                                    Number.parseInt("999" + grid.id),
                                   )
                             }
                           >
@@ -1639,7 +1639,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                   (gr) => gr.id == g.id,
                                 );
                                 group.scenes = group.scenes.concat([
-                                  parseInt(evt.item.id),
+                                  Number.parseInt(evt.item.id),
                                 ]);
                                 this.props.onUpdateGroups(newGroups);
                               }
@@ -1671,14 +1671,14 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                 key={grid.id}
                                 bounce
                                 disable={this.state.deleteScenes?.includes(
-                                  parseInt("999" + grid.id),
+                                  Number.parseInt("999" + grid.id),
                                 )}
                                 className={classes.scene}
                               >
                                 <Card
                                   className={clsx(
                                     this.state.deleteScenes?.includes(
-                                      parseInt("999" + grid.id),
+                                      Number.parseInt("999" + grid.id),
                                     ) && classes.deleteScene,
                                   )}
                                 >
@@ -1688,7 +1688,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                         ? this.props.onOpenGrid.bind(this, grid)
                                         : this.onToggleDelete.bind(
                                             this,
-                                            parseInt("999" + grid.id),
+                                            Number.parseInt("999" + grid.id),
                                           )
                                     }
                                   >

@@ -357,7 +357,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
         parseFloat(this.props.mainVideo.getAttribute("start")),
         parseFloat(this.props.mainVideo.getAttribute("end")),
       ];
-      clipID = parseInt(this.props.mainVideo.getAttribute("clip"));
+      clipID = Number.parseInt(this.props.mainVideo.getAttribute("clip"));
       const sourceURL = this.props.mainVideo.getAttribute("source");
       source = this.props.scene.sources.find((s) => s.url == sourceURL);
     }
@@ -1050,7 +1050,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
       return;
     const volumeChange = (e.deltaY / 100) * -5;
     let newVolume =
-      parseInt(this.props.scene.videoVolume as any) + volumeChange;
+      Number.parseInt(this.props.scene.videoVolume as any) + volumeChange;
     if (newVolume < 0) {
       newVolume = 0;
     } else if (newVolume > 100) {

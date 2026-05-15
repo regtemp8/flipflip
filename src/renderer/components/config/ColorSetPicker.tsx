@@ -152,7 +152,7 @@ class ColorSetPicker extends React.Component<ColorSetPickerProps> {
         target: { value: this.props.currentColors.concat(color) },
       });
     } else {
-      index = parseInt(target.id.replace("color-", ""));
+      index = Number.parseInt(target.id.replace("color-", ""));
       color = this.props.currentColors[index];
     }
     this.setState({

@@ -386,13 +386,13 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                 "Error: {" + index + "} '" + line + "' - extra parameter(s)";
               break;
             }
-            let start = parseInt(split[0]);
-            const end = parseInt(split[1]);
+            let start = Number.parseInt(split[0]);
+            const end = Number.parseInt(split[1]);
             if (
               /^\d+\s*$/.exec(split[0]) == null ||
               /^\d+\s*$/.exec(split[1]) == null ||
-              isNaN(start) ||
-              isNaN(end) ||
+              Number.isNaN(start) ||
+              Number.isNaN(end) ||
               start < 0 ||
               end < 0
             ) {
@@ -432,7 +432,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               if (rrE[1] == "$RANDOM_PHRASE") {
                 register = 0;
               } else {
-                register = parseInt(rrE[1].substring(1, 2));
+                register = Number.parseInt(rrE[1].substring(1, 2));
               }
               if (!this.state.phrases.has(register)) {
                 error =
@@ -472,7 +472,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             const newPhrases = this.state.phrases;
             const registerRegex = /^\$(\d)\s.*$/.exec(value);
             if (registerRegex != null) {
-              const register = parseInt(registerRegex[1]);
+              const register = Number.parseInt(registerRegex[1]);
               if (register != 0) {
                 value = value.replace("$" + register + " ", "");
                 if (!newPhrases.has(register)) {
@@ -629,7 +629,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             }
             let volume = 100;
             if (pSplit.length > 1) {
-              volume = parseInt(pSplit[1]);
+              volume = Number.parseInt(pSplit[1]);
               if (
                 /^\d+$/.exec(pSplit[1]) == null ||
                 volume < 0 ||
@@ -680,8 +680,8 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             const numbers: Array<any> = value.split(" ");
             let invalid = false;
             for (let n = 0; n < numbers.length; n++) {
-              ms = parseInt(numbers[n]);
-              if (isNaN(ms)) {
+              ms = Number.parseInt(numbers[n]);
+              if (Number.isNaN(ms)) {
                 error =
                   "Error: {" + index + "} '" + line + "' - invalid command";
                 invalid = true;
@@ -742,8 +742,8 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               error = "Error: {" + index + "} '" + line + "' - invalid command";
               break;
             }
-            ms = parseInt(value);
-            if (isNaN(ms)) {
+            ms = Number.parseInt(value);
+            if (Number.isNaN(ms)) {
               error = "Error: {" + index + "} '" + line + "' - invalid command";
               break;
             }
@@ -836,8 +836,8 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               break;
             }
             const args: Array<any> = value.split(" ");
-            ms = parseInt(args[0]);
-            if (isNaN(ms)) {
+            ms = Number.parseInt(args[0]);
+            if (Number.isNaN(ms)) {
               error = "Error: {" + index + "} '" + line + "' - invalid command";
               break;
             }
@@ -1059,7 +1059,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
     if (value == "$RANDOM_PHRASE") {
       return getRandomListItem(this.state.phrases.get(0));
     } else if (registerRegex != null) {
-      const register = parseInt(registerRegex[1]);
+      const register = Number.parseInt(registerRegex[1]);
       return getRandomListItem(this.state.phrases.get(register));
     } else if (value == "$TAG_PHRASE") {
       if (this.props.currentImage) {

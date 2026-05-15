@@ -476,7 +476,7 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
   const deleteGrids = Array<number>();
   for (let sceneID of sceneIDs) {
     if (sceneID.toString().startsWith("999")) {
-      const gridID = parseInt(sceneID.toString().replace("999", ""));
+      const gridID = Number.parseInt(sceneID.toString().replace("999", ""));
       deleteGrids.push(gridID);
     } else {
       deleteScenes.push(sceneID);
@@ -498,7 +498,7 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
         !deleteScenes.includes(o.sceneID) &&
         (!o.sceneID.toString().startsWith("999") ||
           !deleteGrids.includes(
-            parseInt(o.sceneID.toString().replace("999", "")),
+            Number.parseInt(o.sceneID.toString().replace("999", "")),
           )),
     );
   }
@@ -556,7 +556,7 @@ export function deleteGrid(state: State, grid: SceneGrid): Object {
   const newScenes = state.scenes;
   for (let s of newScenes) {
     s.overlays = s.overlays.filter(
-      (o) => o.sceneID != parseInt("999" + grid.id.toString()),
+      (o) => o.sceneID != Number.parseInt("999" + grid.id.toString()),
     );
   }
   return {
@@ -797,7 +797,11 @@ export function playGrid(state: State, grid: SceneGrid): Object {
     gridScene: true,
   });
   tempScene.overlays = [
-    new Overlay({ id: 1, sceneID: parseInt("999" + grid.id), opacity: 100 }),
+    new Overlay({
+      id: 1,
+      sceneID: Number.parseInt("999" + grid.id),
+      opacity: 100,
+    }),
   ];
   return {
     scenes: state.scenes.concat([tempScene]),
@@ -2769,8 +2773,8 @@ function audioSortFunction(
         bValue = b.id;
         break;
       case ASF.trackNum:
-        aValue = parseInt(a.trackNum as any);
-        bValue = parseInt(b.trackNum as any);
+        aValue = Number.parseInt(a.trackNum as any);
+        bValue = Number.parseInt(b.trackNum as any);
         secondary = ASF.name;
         break;
       case ASF.duration:
@@ -3129,7 +3133,7 @@ export function exportScene(state: State, scene: Scene): Object {
     for (let o of sceneCopy.overlays) {
       // If overlay is a grid, add grid scenes and their immediate overlays
       if (o.sceneID.toString().startsWith("999")) {
-        const gridID = parseInt(o.sceneID.toString().replace("999", ""));
+        const gridID = Number.parseInt(o.sceneID.toString().replace("999", ""));
         const grid = state.grids.find((s) => s.id == gridID);
         if (grid && !gridsToExport.find((s) => s.id == gridID)) {
           const gridCopy = JSON.parse(JSON.stringify(grid)); // Make a copy
@@ -3245,15 +3249,15 @@ export function importScene(
   if (scene.overlays) {
     for (let o of scene.overlays) {
       if (o.sceneID.toString().startsWith("999")) {
-        const sID = parseInt(o.sceneID.toString().replace("999", ""));
+        const sID = Number.parseInt(o.sceneID.toString().replace("999", ""));
         if (newGridMap.has(sID)) {
-          o.sceneID = parseInt("999" + newGridMap.get(sID));
+          o.sceneID = Number.parseInt("999" + newGridMap.get(sID));
         } else {
-          o.sceneID = parseInt("999" + gid);
+          o.sceneID = Number.parseInt("999" + gid);
           newGridMap.set(sID, gid++);
         }
       } else {
-        const sID = parseInt(o.sceneID as any);
+        const sID = Number.parseInt(o.sceneID as any);
         if (newSceneMap.has(sID)) {
           o.sceneID = newSceneMap.get(sID);
         } else {
@@ -3271,7 +3275,7 @@ export function importScene(
         grid.id = newGridMap.get(grid.id);
         for (let r = 0; r < grid.grid.length; r++) {
           for (let c = 0; c < grid.grid[r].length; c++) {
-            const cellID = parseInt(grid.grid[r][c].sceneID as any);
+            const cellID = Number.parseInt(grid.grid[r][c].sceneID as any);
             if (cellID != -1) {
               if (!newSceneMap.has(cellID)) {
                 newSceneMap.set(cellID, id++);
@@ -3293,15 +3297,17 @@ export function importScene(
         scene.id = newSceneMap.get(scene.id);
         for (let o of scene.overlays) {
           if (o.sceneID.toString().startsWith("999")) {
-            const sID = parseInt(o.sceneID.toString().replace("999", ""));
+            const sID = Number.parseInt(
+              o.sceneID.toString().replace("999", ""),
+            );
             if (newGridMap.has(sID)) {
-              o.sceneID = parseInt("999" + newGridMap.get(sID));
+              o.sceneID = Number.parseInt("999" + newGridMap.get(sID));
             } else {
-              o.sceneID = parseInt("999" + gid);
+              o.sceneID = Number.parseInt("999" + gid);
               newGridMap.set(sID, gid++);
             }
           } else {
-            const sID = parseInt(o.sceneID as any);
+            const sID = Number.parseInt(o.sceneID as any);
             if (newSceneMap.has(sID)) {
               o.sceneID = newSceneMap.get(sID);
             } else {
@@ -3754,10 +3760,10 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
       getSourceType(ls.url) == ST.video &&
       (ls.duration == null ||
         ls.resolution == null ||
-        isNaN(ls.resolution) ||
+        Number.isNaN(ls.resolution) ||
         ls.resolution <= 0 ||
         ls.fileSize == null ||
-        isNaN(ls.fileSize)),
+        Number.isNaN(ls.fileSize)),
   );
   const videoMetadataLoop = () => {
     const state = getState();

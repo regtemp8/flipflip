@@ -256,7 +256,7 @@ export const timestampRegex =
           } else {
             const registerRegex = /^\$(\d)$/.exec(cur);
             if (registerRegex != null) {
-              if (!state.storedPhrases.has(parseInt(registerRegex[1]))) {
+              if (!state.storedPhrases.has(Number.parseInt(registerRegex[1]))) {
                 return rt("error", state, stream);
               } else {
                 return rt("variable", state, stream);
@@ -279,7 +279,7 @@ export const timestampRegex =
           } else {
             const registerRegex = /^\$(\d)$/.exec(cur);
             if (registerRegex != null) {
-              if (!state.storedPhrases.has(parseInt(registerRegex[1]))) {
+              if (!state.storedPhrases.has(Number.parseInt(registerRegex[1]))) {
                 return rt("error", state, stream);
               } else {
                 return rt("variable", state, stream);
@@ -348,7 +348,7 @@ export const timestampRegex =
           const registerRegex = /^\$(\d)$/.exec(state.tokens[1]);
           if (registerRegex != null) {
             if (state.tokens.length > 1) {
-              state.storedPhrases.set(parseInt(registerRegex[1]), true);
+              state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
               state.storedPhrases.set(0, true);
             }
           } else {

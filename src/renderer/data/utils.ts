@@ -181,7 +181,7 @@ export function getTimestamp(secs: number): string {
 }
 
 export function getMsRemainder(sec: number): string {
-  if (isNaN(sec) || sec < 0) {
+  if (Number.isNaN(sec) || sec < 0) {
     return null;
   }
 
@@ -207,15 +207,15 @@ export function getMsTimestampValue(value: string): number {
     while (milli.length < 3) {
       milli += "0";
     }
-    milli = parseInt(milli);
-    if (isNaN(milli)) return null;
+    milli = Number.parseInt(milli);
+    if (Number.isNaN(milli)) return null;
   }
   for (let n = 0; n < split.length; n++) {
     if (n != 0) {
       if (split[n].length != 2) return null;
     }
-    const int = parseInt(split[n]);
-    if (isNaN(int)) return null;
+    const int = Number.parseInt(split[n]);
+    if (Number.isNaN(int)) return null;
     splitInt.push(int);
   }
 
@@ -242,8 +242,8 @@ export function getTimestampValue(value: string): number {
     if (n != 0) {
       if (split[n].length != 2) return null;
     }
-    const int = parseInt(split[n]);
-    if (isNaN(int)) return null;
+    const int = Number.parseInt(split[n]);
+    if (Number.isNaN(int)) return null;
     splitInt.push(int);
   }
 
@@ -438,7 +438,7 @@ export function filterSource(
   } else if ((countRegex = /^count(\+?)([>=<])(\d*)$/.exec(filter)) != null) {
     const all = countRegex[1] == "+";
     const symbol = countRegex[2];
-    const value = parseInt(countRegex[3]);
+    const value = Number.parseInt(countRegex[3]);
     const type = getSourceType(source.url);
     const count = type == ST.video ? source.clips.length : source.count;
     const countComplete = type == ST.video ? true : source.countComplete;
@@ -459,7 +459,7 @@ export function filterSource(
     if (countRegex[2].includes(":")) {
       value = getTimestampValue(countRegex[2]);
     } else {
-      value = parseInt(countRegex[2]);
+      value = Number.parseInt(countRegex[2]);
     }
     const type = getSourceType(source.url);
     if (type == ST.video) {
@@ -484,7 +484,7 @@ export function filterSource(
     }
   } else if ((countRegex = /^resolution([>=<])(\d*)p?$/.exec(filter)) != null) {
     const symbol = countRegex[1];
-    const value = parseInt(countRegex[2]);
+    const value = Number.parseInt(countRegex[2]);
 
     const type = getSourceType(source.url);
     if (type == ST.video) {
@@ -734,191 +734,193 @@ export function applyEffects(scene: Scene, base64String: string) {
   const effectsString = atob(base64String);
   const effects = effectsString.split(",");
 
-  scene.timingFunction = Object.values(TF)[parseInt(effects.shift())];
-  scene.timingConstant = parseInt(effects.shift());
-  scene.timingMin = parseInt(effects.shift());
-  scene.timingMax = parseInt(effects.shift());
-  scene.timingSinRate = parseInt(effects.shift());
-  scene.timingBPMMulti = parseInt(effects.shift());
-  scene.backForth = parseInt(effects.shift()) == 1;
-  scene.backForthTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.backForthConstant = parseInt(effects.shift());
-  scene.backForthMin = parseInt(effects.shift());
-  scene.backForthMax = parseInt(effects.shift());
-  scene.backForthSinRate = parseInt(effects.shift());
-  scene.backForthBPMMulti = parseInt(effects.shift());
-  scene.imageType = Object.values(IT)[parseInt(effects.shift())];
-  scene.backgroundType = Object.values(BT)[parseInt(effects.shift())];
+  scene.timingFunction = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.timingConstant = Number.parseInt(effects.shift());
+  scene.timingMin = Number.parseInt(effects.shift());
+  scene.timingMax = Number.parseInt(effects.shift());
+  scene.timingSinRate = Number.parseInt(effects.shift());
+  scene.timingBPMMulti = Number.parseInt(effects.shift());
+  scene.backForth = Number.parseInt(effects.shift()) == 1;
+  scene.backForthTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.backForthConstant = Number.parseInt(effects.shift());
+  scene.backForthMin = Number.parseInt(effects.shift());
+  scene.backForthMax = Number.parseInt(effects.shift());
+  scene.backForthSinRate = Number.parseInt(effects.shift());
+  scene.backForthBPMMulti = Number.parseInt(effects.shift());
+  scene.imageType = Object.values(IT)[Number.parseInt(effects.shift())];
+  scene.backgroundType = Object.values(BT)[Number.parseInt(effects.shift())];
   scene.backgroundColor = effects.shift();
   scene.backgroundColorSet = effects.shift().split("|");
-  scene.backgroundBlur = parseInt(effects.shift());
+  scene.backgroundBlur = Number.parseInt(effects.shift());
 
-  scene.imageTypeFilter = Object.values(IF)[parseInt(effects.shift())];
-  scene.fullSource = parseInt(effects.shift()) == 1;
-  scene.imageOrientation = Object.values(OT)[parseInt(effects.shift())];
-  scene.gifOption = Object.values(GO)[parseInt(effects.shift())];
-  scene.gifTimingConstant = parseInt(effects.shift());
-  scene.gifTimingMin = parseInt(effects.shift());
-  scene.gifTimingMax = parseInt(effects.shift());
-  scene.videoOrientation = Object.values(OT)[parseInt(effects.shift())];
-  scene.videoOption = Object.values(VO)[parseInt(effects.shift())];
-  scene.videoTimingConstant = parseInt(effects.shift());
-  scene.videoTimingMin = parseInt(effects.shift());
-  scene.videoTimingMax = parseInt(effects.shift());
-  scene.videoSpeed = parseInt(effects.shift());
-  scene.videoRandomSpeed = parseInt(effects.shift()) == 1;
-  scene.videoSpeedMin = parseInt(effects.shift());
-  scene.videoSpeedMax = parseInt(effects.shift());
-  scene.randomVideoStart = parseInt(effects.shift()) == 1;
-  scene.continueVideo = parseInt(effects.shift()) == 1;
-  scene.playVideoClips = parseInt(effects.shift()) == 1;
-  scene.skipVideoStart = parseInt(effects.shift());
-  scene.skipVideoEnd = parseInt(effects.shift());
-  scene.videoVolume = parseInt(effects.shift());
-  scene.weightFunction = Object.values(WF)[parseInt(effects.shift())];
-  scene.sourceOrderFunction = Object.values(SOF)[parseInt(effects.shift())];
-  scene.forceAllSource = parseInt(effects.shift()) == 1;
-  scene.orderFunction = Object.values(OF)[parseInt(effects.shift())];
-  scene.forceAll = parseInt(effects.shift()) == 1;
+  scene.imageTypeFilter = Object.values(IF)[Number.parseInt(effects.shift())];
+  scene.fullSource = Number.parseInt(effects.shift()) == 1;
+  scene.imageOrientation = Object.values(OT)[Number.parseInt(effects.shift())];
+  scene.gifOption = Object.values(GO)[Number.parseInt(effects.shift())];
+  scene.gifTimingConstant = Number.parseInt(effects.shift());
+  scene.gifTimingMin = Number.parseInt(effects.shift());
+  scene.gifTimingMax = Number.parseInt(effects.shift());
+  scene.videoOrientation = Object.values(OT)[Number.parseInt(effects.shift())];
+  scene.videoOption = Object.values(VO)[Number.parseInt(effects.shift())];
+  scene.videoTimingConstant = Number.parseInt(effects.shift());
+  scene.videoTimingMin = Number.parseInt(effects.shift());
+  scene.videoTimingMax = Number.parseInt(effects.shift());
+  scene.videoSpeed = Number.parseInt(effects.shift());
+  scene.videoRandomSpeed = Number.parseInt(effects.shift()) == 1;
+  scene.videoSpeedMin = Number.parseInt(effects.shift());
+  scene.videoSpeedMax = Number.parseInt(effects.shift());
+  scene.randomVideoStart = Number.parseInt(effects.shift()) == 1;
+  scene.continueVideo = Number.parseInt(effects.shift()) == 1;
+  scene.playVideoClips = Number.parseInt(effects.shift()) == 1;
+  scene.skipVideoStart = Number.parseInt(effects.shift());
+  scene.skipVideoEnd = Number.parseInt(effects.shift());
+  scene.videoVolume = Number.parseInt(effects.shift());
+  scene.weightFunction = Object.values(WF)[Number.parseInt(effects.shift())];
+  scene.sourceOrderFunction =
+    Object.values(SOF)[Number.parseInt(effects.shift())];
+  scene.forceAllSource = Number.parseInt(effects.shift()) == 1;
+  scene.orderFunction = Object.values(OF)[Number.parseInt(effects.shift())];
+  scene.forceAll = Number.parseInt(effects.shift()) == 1;
 
-  scene.zoom = parseInt(effects.shift()) == 1;
-  scene.zoomRandom = parseInt(effects.shift()) == 1;
+  scene.zoom = Number.parseInt(effects.shift()) == 1;
+  scene.zoomRandom = Number.parseInt(effects.shift()) == 1;
   scene.zoomStart = parseFloat(effects.shift());
   scene.zoomStartMin = parseFloat(effects.shift());
   scene.zoomStartMax = parseFloat(effects.shift());
   scene.zoomEnd = parseFloat(effects.shift());
   scene.zoomEndMin = parseFloat(effects.shift());
   scene.zoomEndMax = parseFloat(effects.shift());
-  scene.horizTransType = Object.values(HTF)[parseInt(effects.shift())];
-  scene.horizTransLevel = parseInt(effects.shift());
-  scene.horizTransLevelMin = parseInt(effects.shift());
-  scene.horizTransLevelMax = parseInt(effects.shift());
-  scene.horizTransRandom = parseInt(effects.shift()) == 1;
-  scene.vertTransType = Object.values(VTF)[parseInt(effects.shift())];
-  scene.vertTransLevel = parseInt(effects.shift());
-  scene.vertTransLevelMin = parseInt(effects.shift());
-  scene.vertTransLevelMax = parseInt(effects.shift());
-  scene.vertTransRandom = parseInt(effects.shift()) == 1;
-  scene.transTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.transDuration = parseInt(effects.shift());
-  scene.transDurationMin = parseInt(effects.shift());
-  scene.transDurationMax = parseInt(effects.shift());
-  scene.transSinRate = parseInt(effects.shift());
-  scene.transBPMMulti = parseInt(effects.shift());
-  scene.transEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.transExp = parseInt(effects.shift());
-  scene.transAmp = parseInt(effects.shift());
-  scene.transPer = parseInt(effects.shift());
-  scene.transOv = parseInt(effects.shift());
+  scene.horizTransType = Object.values(HTF)[Number.parseInt(effects.shift())];
+  scene.horizTransLevel = Number.parseInt(effects.shift());
+  scene.horizTransLevelMin = Number.parseInt(effects.shift());
+  scene.horizTransLevelMax = Number.parseInt(effects.shift());
+  scene.horizTransRandom = Number.parseInt(effects.shift()) == 1;
+  scene.vertTransType = Object.values(VTF)[Number.parseInt(effects.shift())];
+  scene.vertTransLevel = Number.parseInt(effects.shift());
+  scene.vertTransLevelMin = Number.parseInt(effects.shift());
+  scene.vertTransLevelMax = Number.parseInt(effects.shift());
+  scene.vertTransRandom = Number.parseInt(effects.shift()) == 1;
+  scene.transTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.transDuration = Number.parseInt(effects.shift());
+  scene.transDurationMin = Number.parseInt(effects.shift());
+  scene.transDurationMax = Number.parseInt(effects.shift());
+  scene.transSinRate = Number.parseInt(effects.shift());
+  scene.transBPMMulti = Number.parseInt(effects.shift());
+  scene.transEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.transExp = Number.parseInt(effects.shift());
+  scene.transAmp = Number.parseInt(effects.shift());
+  scene.transPer = Number.parseInt(effects.shift());
+  scene.transOv = Number.parseInt(effects.shift());
 
-  scene.crossFade = parseInt(effects.shift()) == 1;
-  scene.crossFadeAudio = parseInt(effects.shift()) == 1;
-  scene.fadeTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.fadeDuration = parseInt(effects.shift());
-  scene.fadeDurationMin = parseInt(effects.shift());
-  scene.fadeDurationMax = parseInt(effects.shift());
-  scene.fadeSinRate = parseInt(effects.shift());
-  scene.fadeBPMMulti = parseInt(effects.shift());
-  scene.fadeEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.fadeExp = parseInt(effects.shift());
-  scene.fadeAmp = parseInt(effects.shift());
-  scene.fadePer = parseInt(effects.shift());
-  scene.fadeOv = parseInt(effects.shift());
+  scene.crossFade = Number.parseInt(effects.shift()) == 1;
+  scene.crossFadeAudio = Number.parseInt(effects.shift()) == 1;
+  scene.fadeTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.fadeDuration = Number.parseInt(effects.shift());
+  scene.fadeDurationMin = Number.parseInt(effects.shift());
+  scene.fadeDurationMax = Number.parseInt(effects.shift());
+  scene.fadeSinRate = Number.parseInt(effects.shift());
+  scene.fadeBPMMulti = Number.parseInt(effects.shift());
+  scene.fadeEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.fadeExp = Number.parseInt(effects.shift());
+  scene.fadeAmp = Number.parseInt(effects.shift());
+  scene.fadePer = Number.parseInt(effects.shift());
+  scene.fadeOv = Number.parseInt(effects.shift());
 
-  scene.slide = parseInt(effects.shift()) == 1;
-  scene.slideTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.slideType = Object.values(STF)[parseInt(effects.shift())];
-  scene.slideDistance = parseInt(effects.shift());
-  scene.slideDuration = parseInt(effects.shift());
-  scene.slideDurationMin = parseInt(effects.shift());
-  scene.slideDurationMax = parseInt(effects.shift());
-  scene.slideSinRate = parseInt(effects.shift());
-  scene.slideBPMMulti = parseInt(effects.shift());
-  scene.slideEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.slideExp = parseInt(effects.shift());
-  scene.slideAmp = parseInt(effects.shift());
-  scene.slidePer = parseInt(effects.shift());
-  scene.slideOv = parseInt(effects.shift());
+  scene.slide = Number.parseInt(effects.shift()) == 1;
+  scene.slideTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.slideType = Object.values(STF)[Number.parseInt(effects.shift())];
+  scene.slideDistance = Number.parseInt(effects.shift());
+  scene.slideDuration = Number.parseInt(effects.shift());
+  scene.slideDurationMin = Number.parseInt(effects.shift());
+  scene.slideDurationMax = Number.parseInt(effects.shift());
+  scene.slideSinRate = Number.parseInt(effects.shift());
+  scene.slideBPMMulti = Number.parseInt(effects.shift());
+  scene.slideEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.slideExp = Number.parseInt(effects.shift());
+  scene.slideAmp = Number.parseInt(effects.shift());
+  scene.slidePer = Number.parseInt(effects.shift());
+  scene.slideOv = Number.parseInt(effects.shift());
 
-  scene.strobe = parseInt(effects.shift()) == 1;
-  scene.strobePulse = parseInt(effects.shift()) == 1;
-  scene.strobeLayer = Object.values(SL)[parseInt(effects.shift())];
+  scene.strobe = Number.parseInt(effects.shift()) == 1;
+  scene.strobePulse = Number.parseInt(effects.shift()) == 1;
+  scene.strobeLayer = Object.values(SL)[Number.parseInt(effects.shift())];
   scene.strobeOpacity = parseFloat(effects.shift());
-  scene.strobeTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.strobeTime = parseInt(effects.shift());
-  scene.strobeTimeMin = parseInt(effects.shift());
-  scene.strobeTimeMax = parseInt(effects.shift());
-  scene.strobeSinRate = parseInt(effects.shift());
-  scene.strobeBPMMulti = parseInt(effects.shift());
-  scene.strobeDelayTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.strobeDelay = parseInt(effects.shift());
-  scene.strobeDelayMin = parseInt(effects.shift());
-  scene.strobeDelayMax = parseInt(effects.shift());
-  scene.strobeDelaySinRate = parseInt(effects.shift());
-  scene.strobeDelayBPMMulti = parseInt(effects.shift());
-  scene.strobeColorType = Object.values(SC)[parseInt(effects.shift())];
+  scene.strobeTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.strobeTime = Number.parseInt(effects.shift());
+  scene.strobeTimeMin = Number.parseInt(effects.shift());
+  scene.strobeTimeMax = Number.parseInt(effects.shift());
+  scene.strobeSinRate = Number.parseInt(effects.shift());
+  scene.strobeBPMMulti = Number.parseInt(effects.shift());
+  scene.strobeDelayTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.strobeDelay = Number.parseInt(effects.shift());
+  scene.strobeDelayMin = Number.parseInt(effects.shift());
+  scene.strobeDelayMax = Number.parseInt(effects.shift());
+  scene.strobeDelaySinRate = Number.parseInt(effects.shift());
+  scene.strobeDelayBPMMulti = Number.parseInt(effects.shift());
+  scene.strobeColorType = Object.values(SC)[Number.parseInt(effects.shift())];
   scene.strobeColor = effects.shift();
   scene.strobeColorSet = effects.shift().split("|");
-  scene.strobeEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.strobeExp = parseInt(effects.shift());
-  scene.strobeAmp = parseInt(effects.shift());
-  scene.strobePer = parseInt(effects.shift());
-  scene.strobeOv = parseInt(effects.shift());
+  scene.strobeEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.strobeExp = Number.parseInt(effects.shift());
+  scene.strobeAmp = Number.parseInt(effects.shift());
+  scene.strobePer = Number.parseInt(effects.shift());
+  scene.strobeOv = Number.parseInt(effects.shift());
 
-  scene.fadeInOut = parseInt(effects.shift()) == 1;
-  scene.fadeIOPulse = parseInt(effects.shift()) == 1;
-  scene.fadeIOTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.fadeIODuration = parseInt(effects.shift());
-  scene.fadeIODurationMin = parseInt(effects.shift());
-  scene.fadeIODurationMax = parseInt(effects.shift());
-  scene.fadeIOSinRate = parseInt(effects.shift());
-  scene.fadeIOBPMMulti = parseInt(effects.shift());
-  scene.fadeIODelayTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.fadeIODelay = parseInt(effects.shift());
-  scene.fadeIODelayMin = parseInt(effects.shift());
-  scene.fadeIODelayMax = parseInt(effects.shift());
-  scene.fadeIODelaySinRate = parseInt(effects.shift());
-  scene.fadeIODelayBPMMulti = parseInt(effects.shift());
-  scene.fadeIOStartEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.fadeIOStartExp = parseInt(effects.shift());
-  scene.fadeIOStartAmp = parseInt(effects.shift());
-  scene.fadeIOStartPer = parseInt(effects.shift());
-  scene.fadeIOStartOv = parseInt(effects.shift());
-  scene.fadeIOEndEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.fadeIOEndExp = parseInt(effects.shift());
-  scene.fadeIOEndAmp = parseInt(effects.shift());
-  scene.fadeIOEndPer = parseInt(effects.shift());
-  scene.fadeIOEndOv = parseInt(effects.shift());
+  scene.fadeInOut = Number.parseInt(effects.shift()) == 1;
+  scene.fadeIOPulse = Number.parseInt(effects.shift()) == 1;
+  scene.fadeIOTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.fadeIODuration = Number.parseInt(effects.shift());
+  scene.fadeIODurationMin = Number.parseInt(effects.shift());
+  scene.fadeIODurationMax = Number.parseInt(effects.shift());
+  scene.fadeIOSinRate = Number.parseInt(effects.shift());
+  scene.fadeIOBPMMulti = Number.parseInt(effects.shift());
+  scene.fadeIODelayTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.fadeIODelay = Number.parseInt(effects.shift());
+  scene.fadeIODelayMin = Number.parseInt(effects.shift());
+  scene.fadeIODelayMax = Number.parseInt(effects.shift());
+  scene.fadeIODelaySinRate = Number.parseInt(effects.shift());
+  scene.fadeIODelayBPMMulti = Number.parseInt(effects.shift());
+  scene.fadeIOStartEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.fadeIOStartExp = Number.parseInt(effects.shift());
+  scene.fadeIOStartAmp = Number.parseInt(effects.shift());
+  scene.fadeIOStartPer = Number.parseInt(effects.shift());
+  scene.fadeIOStartOv = Number.parseInt(effects.shift());
+  scene.fadeIOEndEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.fadeIOEndExp = Number.parseInt(effects.shift());
+  scene.fadeIOEndAmp = Number.parseInt(effects.shift());
+  scene.fadeIOEndPer = Number.parseInt(effects.shift());
+  scene.fadeIOEndOv = Number.parseInt(effects.shift());
 
-  scene.panning = parseInt(effects.shift()) == 1;
-  scene.panTF = Object.values(TF)[parseInt(effects.shift())];
-  scene.panDuration = parseInt(effects.shift());
-  scene.panDurationMin = parseInt(effects.shift());
-  scene.panDurationMax = parseInt(effects.shift());
-  scene.panSinRate = parseInt(effects.shift());
-  scene.panBPMMulti = parseInt(effects.shift());
-  scene.panHorizTransType = Object.values(HTF)[parseInt(effects.shift())];
-  scene.panHorizTransImg = parseInt(effects.shift()) == 1;
-  scene.panHorizTransLevel = parseInt(effects.shift());
-  scene.panHorizTransLevelMax = parseInt(effects.shift());
-  scene.panHorizTransLevelMin = parseInt(effects.shift());
-  scene.panHorizTransRandom = parseInt(effects.shift()) == 1;
-  scene.panVertTransType = Object.values(VTF)[parseInt(effects.shift())];
-  scene.panVertTransImg = parseInt(effects.shift()) == 1;
-  scene.panVertTransLevel = parseInt(effects.shift());
-  scene.panVertTransLevelMax = parseInt(effects.shift());
-  scene.panVertTransLevelMin = parseInt(effects.shift());
-  scene.panVertTransRandom = parseInt(effects.shift()) == 1;
-  scene.panStartEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.panStartExp = parseInt(effects.shift());
-  scene.panStartAmp = parseInt(effects.shift());
-  scene.panStartPer = parseInt(effects.shift());
-  scene.panStartOv = parseInt(effects.shift());
-  scene.panEndEase = Object.values(EA)[parseInt(effects.shift())];
-  scene.panEndExp = parseInt(effects.shift());
-  scene.panEndAmp = parseInt(effects.shift());
-  scene.panEndPer = parseInt(effects.shift());
-  scene.panEndOv = parseInt(effects.shift());
+  scene.panning = Number.parseInt(effects.shift()) == 1;
+  scene.panTF = Object.values(TF)[Number.parseInt(effects.shift())];
+  scene.panDuration = Number.parseInt(effects.shift());
+  scene.panDurationMin = Number.parseInt(effects.shift());
+  scene.panDurationMax = Number.parseInt(effects.shift());
+  scene.panSinRate = Number.parseInt(effects.shift());
+  scene.panBPMMulti = Number.parseInt(effects.shift());
+  scene.panHorizTransType =
+    Object.values(HTF)[Number.parseInt(effects.shift())];
+  scene.panHorizTransImg = Number.parseInt(effects.shift()) == 1;
+  scene.panHorizTransLevel = Number.parseInt(effects.shift());
+  scene.panHorizTransLevelMax = Number.parseInt(effects.shift());
+  scene.panHorizTransLevelMin = Number.parseInt(effects.shift());
+  scene.panHorizTransRandom = Number.parseInt(effects.shift()) == 1;
+  scene.panVertTransType = Object.values(VTF)[Number.parseInt(effects.shift())];
+  scene.panVertTransImg = Number.parseInt(effects.shift()) == 1;
+  scene.panVertTransLevel = Number.parseInt(effects.shift());
+  scene.panVertTransLevelMax = Number.parseInt(effects.shift());
+  scene.panVertTransLevelMin = Number.parseInt(effects.shift());
+  scene.panVertTransRandom = Number.parseInt(effects.shift()) == 1;
+  scene.panStartEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.panStartExp = Number.parseInt(effects.shift());
+  scene.panStartAmp = Number.parseInt(effects.shift());
+  scene.panStartPer = Number.parseInt(effects.shift());
+  scene.panStartOv = Number.parseInt(effects.shift());
+  scene.panEndEase = Object.values(EA)[Number.parseInt(effects.shift())];
+  scene.panEndExp = Number.parseInt(effects.shift());
+  scene.panEndAmp = Number.parseInt(effects.shift());
+  scene.panEndPer = Number.parseInt(effects.shift());
+  scene.panEndOv = Number.parseInt(effects.shift());
 
   if (effects.length != 0) {
     // Add future items here

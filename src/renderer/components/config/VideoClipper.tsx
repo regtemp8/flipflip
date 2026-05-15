@@ -852,7 +852,7 @@ class VideoClipper extends React.Component<VideoClipperProps> {
   onSetVolume() {
     const source = this.props.source;
     let fn = (c: Clip): Clip => {
-      c.volume = parseInt(this.state.scene.videoVolume as any);
+      c.volume = Number.parseInt(this.state.scene.videoVolume as any);
       return c;
     };
     this.setState({ isEditing: fn(this.state.isEditing) });
