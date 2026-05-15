@@ -46,7 +46,7 @@ export default class CaptionProgramPlaylist extends React.Component<CaptionProgr
 
     this.state = {
       currentIndex: props.playlistIndex == 0 ? props.scene.scriptStartIndex : 0,
-      playingScripts: Array<CaptionScript>(),
+      playingScripts: new Array<CaptionScript>(),
     };
   }
 

@@ -224,9 +224,9 @@ class GridSetup extends React.Component<GridSetupProps> {
     }
 
     let count = 0;
-    let colors = Array<Array<string>>();
+    let colors = new Array<Array<string>>();
     for (let r = 0; r < this.state.height; r++) {
-      let row = Array<string>();
+      let row = new Array<string>();
       for (let c = 0; c < this.state.width; c++) {
         row.push("");
       }

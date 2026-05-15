@@ -362,11 +362,11 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
     super(props);
 
     this.state = {
-      displaySources: Array<CaptionScript>(),
+      displaySources: new Array<CaptionScript>(),
       drawerOpen: false,
       filters: props.filters,
       selected: props.selected,
-      selectedTags: Array<string>(),
+      selectedTags: new Array<string>(),
       menuAnchorEl: null as any,
       openMenu: null as string,
     };
@@ -1232,7 +1232,7 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
 
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
-    let commonTags = Array<Tag>();
+    let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL);
       const tags = source.tags;

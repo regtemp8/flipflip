@@ -505,8 +505,8 @@ class SceneDetail extends React.Component<SceneDetailProps> {
       snackbarSeverity: null as string,
       sceneEffects: "",
       confirmCopy: false,
-      displaySources: Array<LibrarySource>(),
-      filters: Array<string>(),
+      displaySources: new Array<LibrarySource>(),
+      filters: new Array<string>(),
     };
   }
 

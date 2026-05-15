@@ -113,39 +113,39 @@ export function restoreFromBackup(backupFile: string): AppStorageState {
     version: data.version,
     specialMode: data.specialMode ? data.specialMode : null,
     openTab: data.openTab ? data.openTab : 0,
-    displayedSources: Array<LibrarySource>(),
+    displayedSources: new Array<LibrarySource>(),
     config: new Config(data.config),
     scenes: data.scenes.map(
       (s: any) => new Scene(path.sep, process.platform, s),
     ),
     sceneGroups: data.sceneGroups
       ? data.sceneGroups.map((g: any) => new SceneGroup(g))
-      : Array<SceneGroup>(),
+      : new Array<SceneGroup>(),
     grids: data.grids
       ? data.grids.map((g: any) => new SceneGrid(g))
-      : Array<SceneGrid>(),
+      : new Array<SceneGrid>(),
     audios: data.audios
       ? data.audios.map((a: any) => new Audio(a))
-      : Array<Audio>(),
+      : new Array<Audio>(),
     scripts: data.scripts
       ? data.scripts.map((a: any) => new CaptionScript(a))
-      : Array<CaptionScript>(),
+      : new Array<CaptionScript>(),
     playlists: data.playlists
       ? data.playlists.map((p: any) => new Playlist(p))
-      : Array<Playlist>(),
+      : new Array<Playlist>(),
     library: data.library.map((s: any) => new LibrarySource(s)),
     tags: data.tags.map((t: any) => new Tag(t)),
     route: data.route.map((s: any) => new Route(s)),
     libraryYOffset: 0,
-    libraryFilters: Array<string>(),
-    librarySelected: Array<string>(),
+    libraryFilters: new Array<string>(),
+    librarySelected: new Array<string>(),
     audioOpenTab: data.audioOpenTab ? data.audioOpenTab : 3,
     audioYOffset: 0,
-    audioFilters: Array<string>(),
-    audioSelected: Array<string>(),
+    audioFilters: new Array<string>(),
+    audioSelected: new Array<string>(),
     scriptYOffset: 0,
-    scriptFilters: Array<string>(),
-    scriptSelected: Array<string>(),
+    scriptFilters: new Array<string>(),
+    scriptSelected: new Array<string>(),
     progressMode: null as string,
     progressTitle: null as string,
     progressCurrent: 0,

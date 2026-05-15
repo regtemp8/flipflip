@@ -464,9 +464,9 @@ class ScenePicker extends React.Component<ScenePickerProps> {
       isFirstWindow: false,
       menuAnchorEl: null as any,
       openMenu: null as string,
-      displayScenes: Array<Scene>(),
-      displayGrids: Array<SceneGrid>(),
-      filters: Array<string>(),
+      displayScenes: new Array<Scene>(),
+      displayGrids: new Array<SceneGrid>(),
+      filters: new Array<string>(),
       deleteScenes: null as Array<number>,
       importFile: "",
       importSources: false,
@@ -2069,7 +2069,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
   }
 
   onDeleteScenes() {
-    this.setState({ openMenu: null, deleteScenes: Array<number>() });
+    this.setState({ openMenu: null, deleteScenes: new Array<number>() });
   }
 
   onCancelDelete() {

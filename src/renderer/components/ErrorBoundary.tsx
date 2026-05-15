@@ -53,7 +53,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
       resetCheck: false,
       backupCheck: false,
       backup: null as { url: string; size: number },
-      backups: Array<{ url: string; size: number }>(),
+      backups: new Array<{ url: string; size: number }>(),
     };
   }
 
@@ -258,7 +258,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
       resetCheck: false,
       backupCheck: false,
       backup: null,
-      backups: Array<{ url: string; size: number }>(),
+      backups: new Array<{ url: string; size: number }>(),
     });
   }
 

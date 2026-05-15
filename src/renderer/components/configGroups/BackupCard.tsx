@@ -98,7 +98,7 @@ class BackupCard extends React.Component<BackupCardProps> {
     super(props);
 
     this.state = {
-      backups: Array<{ url: string; size: number }>(),
+      backups: new Array<{ url: string; size: number }>(),
       backup: null as { url: string; size: number },
       openMenu: null as string,
       snackbarOpen: false,

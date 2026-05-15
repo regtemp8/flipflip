@@ -1407,7 +1407,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
   }
 
   count(start: number, end: number, timestamp = false) {
-    let values = Array<number>();
+    let values = new Array<number>();
     const origStart = start;
     const origEnd = end;
     do {

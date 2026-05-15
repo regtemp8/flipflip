@@ -472,8 +472,8 @@ export function deleteSceneGroup(state: State, group: SceneGroup): Object {
 }
 
 export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
-  const deleteScenes = Array<number>();
-  const deleteGrids = Array<number>();
+  const deleteScenes = new Array<number>();
+  const deleteGrids = new Array<number>();
   for (let sceneID of sceneIDs) {
     if (sceneID.toString().startsWith("999")) {
       const gridID = Number.parseInt(sceneID.toString().replace("999", ""));
@@ -517,7 +517,7 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
   return {
     scenes: newScenes,
     grids: newGrids,
-    route: Array<Route>(),
+    route: new Array<Route>(),
     specialMode: null,
   };
 }
@@ -546,7 +546,7 @@ export function deleteScene(state: State, scene: Scene): Object {
   return {
     scenes: newScenes,
     grids: newGrids,
-    route: Array<Route>(),
+    route: new Array<Route>(),
     specialMode: null,
   };
 }
@@ -562,7 +562,7 @@ export function deleteGrid(state: State, grid: SceneGrid): Object {
   return {
     scenes: newScenes,
     grids: newGrids,
-    route: Array<Route>(),
+    route: new Array<Route>(),
     specialMode: null,
   };
 }
@@ -1875,7 +1875,7 @@ export function updateScene(
   scene: Scene,
   fn: (scene: Scene) => void,
 ): Object {
-  const newScenes = Array<Scene>();
+  const newScenes = new Array<Scene>();
   for (let s of state.scenes) {
     if (s.id == scene.id) {
       const sceneCopy = JSON.parse(JSON.stringify(s));
@@ -1893,7 +1893,7 @@ export function updateGrid(
   grid: SceneGrid,
   fn: (grid: SceneGrid) => void,
 ): Object {
-  const newGrids = Array<SceneGrid>();
+  const newGrids = new Array<SceneGrid>();
   for (let g of state.grids) {
     if (g.id == grid.id) {
       const gridCopy = JSON.parse(JSON.stringify(g));
@@ -3118,8 +3118,8 @@ export function downloadSource(state: State, source: LibrarySource): Object {
 }
 
 export function exportScene(state: State, scene: Scene): Object {
-  const scenesToExport = Array<Scene>();
-  const gridsToExport = Array<SceneGrid>();
+  const scenesToExport = new Array<Scene>();
+  const gridsToExport = new Array<SceneGrid>();
   const sceneCopy = JSON.parse(JSON.stringify(scene)); // Make a copy
   sceneCopy.generatorWeights = null;
   sceneCopy.openTab = 3;
@@ -3212,9 +3212,9 @@ export function importScene(
   }
   let newScenes = state.scenes;
   let newGrids = state.grids;
-  let sources = Array<LibrarySource>();
-  let audios = Array<Audio>();
-  let scripts = Array<CaptionScript>();
+  let sources = new Array<LibrarySource>();
+  let audios = new Array<Audio>();
+  let scripts = new Array<CaptionScript>();
 
   const scene = new Scene(
     window.constants.pathSep,

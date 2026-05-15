@@ -65,8 +65,8 @@ class LibrarySearch extends React.Component<LibrarySearchProps> {
 
     this.state = {
       searchInput: "",
-      options: Array<{ label: string; value: string }>(),
-      defaultValues: Array<{ label: string; value: string }>(),
+      options: new Array<{ label: string; value: string }>(),
+      defaultValues: new Array<{ label: string; value: string }>(),
     };
   }
 
@@ -164,8 +164,8 @@ class LibrarySearch extends React.Component<LibrarySearchProps> {
     let untaggedCount = 0;
     let offlineCount = 0;
     let markedCount = 0;
-    const options = Array<{ label: string; value: string }>();
-    const defaultValues = Array<{ label: string; value: string }>();
+    const options = new Array<{ label: string; value: string }>();
+    const defaultValues = new Array<{ label: string; value: string }>();
     for (let source of this.props.displaySources) {
       if (!!(source as any).offline) {
         offlineCount++;
@@ -316,7 +316,7 @@ class LibrarySearch extends React.Component<LibrarySearchProps> {
     if (search == null) {
       this.props.onUpdateFilters([]);
     } else {
-      let filters = Array<string>();
+      let filters = new Array<string>();
       for (let s of search) {
         if (
           !this.props.isCreatable ||

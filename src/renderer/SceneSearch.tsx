@@ -44,8 +44,8 @@ class SceneSearch extends React.Component<SceneSearchProps> {
 
     this.state = {
       searchInput: "",
-      options: Array<{ label: string; value: string }>(),
-      defaultValues: Array<{ label: string; value: string }>(),
+      options: new Array<{ label: string; value: string }>(),
+      defaultValues: new Array<{ label: string; value: string }>(),
     };
   }
 
@@ -85,8 +85,8 @@ class SceneSearch extends React.Component<SceneSearchProps> {
   }
 
   update() {
-    const options = Array<{ label: string; value: string }>();
-    const defaultValues = Array<{ label: string; value: string }>();
+    const options = new Array<{ label: string; value: string }>();
+    const defaultValues = new Array<{ label: string; value: string }>();
     for (let filter of this.props.filters) {
       const opt = { label: filter, value: filter };
       options.push(opt);
@@ -99,7 +99,7 @@ class SceneSearch extends React.Component<SceneSearchProps> {
     if (search == null) {
       this.props.onUpdateFilters([]);
     } else {
-      let filters = Array<string>();
+      let filters = new Array<string>();
       for (let s of search) {
         if (
           ((s.value.startsWith('"') || s.value.startsWith('-"')) &&

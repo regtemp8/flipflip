@@ -76,7 +76,7 @@ export default class Jiggle extends React.Component<JiggleProps> {
     super(props);
 
     this.state = {
-      jiggling: Array<string>(),
+      jiggling: new Array<string>(),
       hasStarted: false,
     };
   }
