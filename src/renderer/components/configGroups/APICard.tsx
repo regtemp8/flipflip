@@ -852,33 +852,34 @@ class APICard extends React.Component<APICardProps> {
         this.state.input4,
       )
       .then((error) => {
-        if (!error) {
-          this.props.onUpdateConfig((c) => {
-            c.remoteSettings.piwigoProtocol = this.state.input1;
-            c.remoteSettings.piwigoHost = this.state.input2;
-            c.remoteSettings.piwigoUsername = this.state.input3;
-            c.remoteSettings.piwigoPassword = this.state.input4;
-          });
-          // Update state
-          this.props.onUpdateSettings((s) => {
-            s.piwigoProtocol = this.state.input1;
-            s.piwigoHost = this.state.input2;
-            s.piwigoUsername = this.state.input3;
-            s.piwigoPassword = this.state.input4;
-          });
-          this.setState({
-            snackbarOpen: true,
-            snackbar: "Piwigo is configured",
-            snackbarSeverity: SS.success,
-          });
-          this.onCloseDialog();
-        } else {
+        if (error) {
           this.setState({
             snackbarOpen: true,
             snackbar: error,
             snackbarSeverity: SS.error,
           });
+          return;
         }
+
+        this.props.onUpdateConfig((c) => {
+          c.remoteSettings.piwigoProtocol = this.state.input1;
+          c.remoteSettings.piwigoHost = this.state.input2;
+          c.remoteSettings.piwigoUsername = this.state.input3;
+          c.remoteSettings.piwigoPassword = this.state.input4;
+        });
+        // Update state
+        this.props.onUpdateSettings((s) => {
+          s.piwigoProtocol = this.state.input1;
+          s.piwigoHost = this.state.input2;
+          s.piwigoUsername = this.state.input3;
+          s.piwigoPassword = this.state.input4;
+        });
+        this.setState({
+          snackbarOpen: true,
+          snackbar: "Piwigo is configured",
+          snackbarSeverity: SS.success,
+        });
+        this.onCloseDialog();
       });
   }
 }

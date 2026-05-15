@@ -234,7 +234,7 @@ class VideoClipper extends React.Component<VideoClipperProps> {
   render() {
     const classes = this.props.classes;
     let tagNames: Array<string> = [];
-    if (!!this.state.isEditing && this.state.isEditing.tags) {
+    if (this.state.isEditing && this.state.isEditing.tags) {
       tagNames = this.state.isEditing.tags.map((t) => t.name);
     }
 
@@ -394,9 +394,9 @@ class VideoClipper extends React.Component<VideoClipperProps> {
                     <VideoControl
                       video={this.state.video}
                       volume={this.state.scene.videoVolume}
-                      clip={!this.state.isEditing ? null : this.state.isEditing}
+                      clip={this.state.isEditing || null}
                       clipValue={
-                        !this.state.isEditing ? null : this.state.isEditingValue
+                        this.state.isEditing ? this.state.isEditingValue : null
                       }
                       useHotkeys
                       onChangeVolume={this.onChangeVolume.bind(this)}
@@ -690,9 +690,9 @@ class VideoClipper extends React.Component<VideoClipperProps> {
                     <VideoControl
                       video={this.state.video}
                       volume={this.state.scene.videoVolume}
-                      clip={!this.state.isEditing ? null : this.state.isEditing}
+                      clip={this.state.isEditing || null}
                       clipValue={
-                        !this.state.isEditing ? null : this.state.isEditingValue
+                        this.state.isEditing ? this.state.isEditingValue : null
                       }
                       clips={this.props.source.clips}
                       useHotkeys
@@ -1045,7 +1045,7 @@ class VideoClipper extends React.Component<VideoClipperProps> {
         e.preventDefault();
         if (this.state.isTagging) {
           this.onTag();
-        } else if (!!this.state.isEditing) {
+        } else if (this.state.isEditing) {
           const clip = this.props.source.clips.find(
             (c) => c.id == this.state.isEditing.id,
           );

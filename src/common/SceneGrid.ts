@@ -9,13 +9,11 @@ export default class SceneGrid {
     Object.assign(this, init);
 
     this.grid = this.grid.map((r) =>
-      r.map((c) => {
-        if (!c.sceneID) {
-          return new SceneGridCell({ sceneID: Number.parseInt(c as any) });
-        } else {
-          return c;
-        }
-      }),
+      r.map((c) =>
+        c.sceneID
+          ? c
+          : new SceneGridCell({ sceneID: Number.parseInt(c as any) }),
+      ),
     );
   }
 }

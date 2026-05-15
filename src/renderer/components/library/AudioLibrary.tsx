@@ -1633,20 +1633,21 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
     const url = this.state.importURL;
     this.setState({ loadingMetadata: true });
     window.ipc.addAudioSource(url, id, this.props.config).then((newAudio) => {
-      if (newAudio != null) {
-        originalSources.unshift(newAudio);
-        this.props.onUpdateLibrary((l) => {
-          l.splice(0, l.length);
-          l.push(...originalSources);
-        });
-        this.setState({ loadingMetadata: false });
-        this.onCloseDialog();
-      } else {
+      if (newAudio == null) {
         this.setState({ loadingMetadata: false, error: true });
         setTimeout(() => {
           this.setState({ error: false });
         }, 3000);
+        return;
       }
+
+      originalSources.unshift(newAudio);
+      this.props.onUpdateLibrary((l) => {
+        l.splice(0, l.length);
+        l.push(...originalSources);
+      });
+      this.setState({ loadingMetadata: false });
+      this.onCloseDialog();
     });
   }
 

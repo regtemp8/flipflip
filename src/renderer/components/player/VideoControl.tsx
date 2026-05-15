@@ -358,7 +358,7 @@ class VideoControl extends React.Component<VideoControlProps> {
   }
 
   onBack() {
-    let skip = !!this.props.skip ? this.props.skip : 10;
+    let skip = this.props.skip || 10;
     let position = this.props.video.currentTime - skip;
     if (position < 0) {
       position = 0;
@@ -367,7 +367,7 @@ class VideoControl extends React.Component<VideoControlProps> {
   }
 
   onForward() {
-    let skip = !!this.props.skip ? this.props.skip : 10;
+    let skip = this.props.skip || 10;
     let position = this.props.video.currentTime + skip;
     if (position > this.props.video.duration) {
       position = this.props.video.duration;

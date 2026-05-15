@@ -396,9 +396,7 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
       const newSources = new Array<CaptionScript>();
       for (let source of l) {
         if (/^\s*$/.exec(source.url) == null) {
-          if (!newSources.map((s) => s.url).includes(source.url)) {
-            newSources.push(source);
-          } else {
+          if (newSources.map((s) => s.url).includes(source.url)) {
             for (let existingSource of newSources) {
               if (existingSource.url == source.url) {
                 if (existingSource.id > source.id) {
@@ -407,6 +405,8 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
                 break;
               }
             }
+          } else {
+            newSources.push(source);
           }
         }
       }
@@ -481,9 +481,7 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
         <ScriptSourceListItem
           key={index}
           checked={
-            !!this.props.specialMode
-              ? this.props.selected.includes(source.url)
-              : false
+            this.props.specialMode && this.props.selected.includes(source.url)
           }
           index={index}
           isEditing={this.state.isEditing}

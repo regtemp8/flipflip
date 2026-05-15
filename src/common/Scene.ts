@@ -310,7 +310,7 @@ export default class Scene {
       this.transDuration = this.effectLevel * 1000;
       this.effectLevel = 0;
     }
-    if (!!this.overlaySceneID && this.overlaySceneID != 0) {
+    if (this.overlaySceneID && this.overlaySceneID != 0) {
       this.overlays.push(
         new Overlay({
           sceneID: this.overlaySceneID,
@@ -509,7 +509,7 @@ export default class Scene {
       this.rotatePortrait = false;
     }
 
-    if (!!this.generatorWeights) {
+    if (this.generatorWeights) {
       for (let wg of this.generatorWeights as Array<any>) {
         if (wg.tag != null) {
           if (wg.tag.typeTag) {
@@ -519,7 +519,7 @@ export default class Scene {
           }
           wg.tag = null;
         }
-        if (!!wg.rules) {
+        if (wg.rules) {
           for (let wgr of wg.rules) {
             if (wgr.tag != null) {
               if (wgr.tag.typeTag) {

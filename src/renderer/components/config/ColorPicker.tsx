@@ -90,11 +90,10 @@ class ColorPicker extends React.Component<ColorPickerProps> {
             <Fab
               className={classes.colorButton}
               style={{
-                backgroundColor: !!this.state.pickerColor
-                  ? !!this.state.pickerColor.hex
-                    ? this.state.pickerColor.hex
-                    : this.state.pickerColor
-                  : this.props.currentColor,
+                backgroundColor:
+                  this.state?.pickerColor?.hex ??
+                  this.state?.pickerColor ??
+                  this.props.currentColor,
               }}
               onClick={this.onToggleColorPicker.bind(this)}
               size="medium"
@@ -107,11 +106,9 @@ class ColorPicker extends React.Component<ColorPickerProps> {
             className={classes.colorField}
             label="Color"
             value={
-              !!this.state.pickerColor
-                ? !!this.state.pickerColor.hex
-                  ? this.state.pickerColor.hex
-                  : this.state.pickerColor
-                : this.props.currentColor
+              this.state?.pickerColor?.hex ??
+              this.state?.pickerColor ??
+              this.props.currentColor
             }
             onChange={this.props.onChangeColor.bind(this)}
           />
@@ -132,11 +129,7 @@ class ColorPicker extends React.Component<ColorPickerProps> {
             onClose={this.onToggleColorPicker.bind(this)}
           >
             <SketchPicker
-              color={
-                !!this.state.pickerColor
-                  ? this.state.pickerColor
-                  : this.props.currentColor
-              }
+              color={this.state?.pickerColor ?? this.props.currentColor}
               disableAlpha={false}
               presetColors={[]}
               onChange={this.onChangePickerColor.bind(this)}
@@ -165,7 +158,7 @@ class ColorPicker extends React.Component<ColorPickerProps> {
   }
 
   onToggleColorPicker(e: MouseEvent) {
-    if (!!this.state.pickerColor) {
+    if (this.state.pickerColor) {
       this.onChangeColor(this.state.pickerColor);
       this.setState({ pickerColor: null, pickerAnchorEl: null });
     } else {

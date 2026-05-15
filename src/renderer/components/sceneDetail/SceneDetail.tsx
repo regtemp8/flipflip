@@ -1554,9 +1554,9 @@ class SceneDetail extends React.Component<SceneDetailProps> {
                   this.props.tutorial == SDGT.generate && classes.backdropTop,
                 )}
                 style={
-                  !areWeightsValid(this.props.scene)
-                    ? { pointerEvents: "none" }
-                    : {}
+                  areWeightsValid(this.props.scene)
+                    ? {}
+                    : { pointerEvents: "none" }
                 }
               >
                 <Fab

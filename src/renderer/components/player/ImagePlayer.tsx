@@ -409,10 +409,10 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     let newHistoryPaths = [];
     let newHistoryOffset = this.props.historyOffset;
     for (let image of this.state.historyPaths) {
-      if (image.src != url) {
-        newHistoryPaths.push(image);
-      } else {
+      if (image.src == url) {
         newHistoryOffset += 1;
+      } else {
+        newHistoryPaths.push(image);
       }
     }
     if (newHistoryOffset > 0) {
@@ -703,7 +703,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       if (fileType == ST.nimja) {
         let iframe = document.createElement("iframe");
         iframe.setAttribute("source", source);
-        if (!!post) {
+        if (post) {
           iframe.setAttribute("post", post);
         }
         if (this.props.scene.orderFunction == OF.strict) {
@@ -743,7 +743,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       } else if (isVideo(url, false)) {
         let video = document.createElement("video");
         video.setAttribute("source", source);
-        if (!!post) {
+        if (post) {
           video.setAttribute("post", post);
         }
         if (this.props.scene.orderFunction == OF.strict) {
@@ -1012,7 +1012,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       } else {
         const img = new Image();
         img.setAttribute("source", source);
-        if (!!post) {
+        if (post) {
           img.setAttribute("post", post);
         }
         if (this.props.scene.orderFunction == OF.strict) {
@@ -1157,10 +1157,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               case GO.full:
                 img.setAttribute(
                   "duration",
-                  (!!info.durationChrome
-                    ? info.durationChrome
-                    : info.duration
-                  ).toString(),
+                  (info.durationChrome || info.duration).toString(),
                 );
                 break;
               case GO.part:
@@ -1181,9 +1178,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               case GO.atLeast:
                 let duration = 0;
                 do {
-                  duration += !!info.durationChrome
-                    ? info.durationChrome
-                    : info.duration;
+                  duration += info.durationChrome || info.duration;
                   if (duration == 0) {
                     break;
                   }
@@ -1381,12 +1376,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       this.props.setHistoryOffset(newOffset);
     }
 
-    if (!schedule) {
-      this.setState({
-        historyPaths: nextHistoryPaths,
-      });
-      this.props.setHistoryPaths(nextHistoryPaths);
-    } else {
+    if (schedule) {
       let timeToNextFrame: number = 0;
       switch (this.props.scene.timingFunction) {
         case TF.random:
@@ -1461,6 +1451,11 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           timeToNextFrame,
         );
       }
+    } else {
+      this.setState({
+        historyPaths: nextHistoryPaths,
+      });
+      this.props.setHistoryPaths(nextHistoryPaths);
     }
   }
 }

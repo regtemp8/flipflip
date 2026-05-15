@@ -146,15 +146,12 @@ export function getTimeout(
       timeout = c;
       break;
     case TF.bpm:
-      if (!audio) {
-        timeout = 1000;
-      } else {
+      if (audio) {
         timeout = 60000 / (audio.bpm * bpmMulti);
-        // If we cannot parse this, default to 1s
-        if (!timeout) {
-          timeout = 1000;
-        }
       }
+
+      // If we cannot parse this, default to 1s
+      timeout = timeout || 1000;
       break;
     case TF.scene:
       timeout = timeToNextFrame ? timeToNextFrame : 1000;

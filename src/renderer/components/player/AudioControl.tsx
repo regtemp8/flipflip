@@ -411,15 +411,16 @@ class AudioControl extends React.Component<AudioControlProps> {
       } else if (this.props.repeat == RP.one) {
         this.setState({ position: 1 });
       } else if (this.props.repeat == RP.none) {
-        if (!this.props.lastTrack) {
-          if (this.props.audio.tick) {
-            this._queueNextTrack = true;
-          } else {
-            this.props.nextTrack();
-            this.setState({ position: 0, duration: 0 });
-          }
-        } else {
+        if (this.props.lastTrack) {
           this.setState({ playing: false });
+          return;
+        }
+
+        if (this.props.audio.tick) {
+          this._queueNextTrack = true;
+        } else {
+          this.props.nextTrack();
+          this.setState({ position: 0, duration: 0 });
         }
       }
     }

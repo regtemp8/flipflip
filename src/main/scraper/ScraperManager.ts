@@ -160,7 +160,7 @@ const loadVideo = (
             ":::" +
             clip.id +
             ":" +
-            (clip.volume != null ? clip.volume : "-") +
+            (clip?.volume ?? "-") +
             ":::" +
             clip.start +
             ":" +
