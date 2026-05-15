@@ -537,194 +537,194 @@ export function filterSource(
 }
 
 export function getEffects(scene: Scene) {
-  const effects = [];
-  effects.push(Object.values(TF).indexOf(scene.timingFunction));
-  effects.push(scene.timingConstant);
-  effects.push(scene.timingMin);
-  effects.push(scene.timingMax);
-  effects.push(scene.timingSinRate);
-  effects.push(scene.timingBPMMulti);
-  effects.push(scene.backForth ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.backForthTF));
-  effects.push(scene.backForthConstant);
-  effects.push(scene.backForthMin);
-  effects.push(scene.backForthMax);
-  effects.push(scene.backForthSinRate);
-  effects.push(scene.backForthBPMMulti);
-  effects.push(Object.values(IT).indexOf(scene.imageType));
-  effects.push(Object.values(BT).indexOf(scene.backgroundType));
-  effects.push(scene.backgroundColor);
-  effects.push(scene.backgroundColorSet.join("|"));
-  effects.push(scene.backgroundBlur);
-
-  effects.push(Object.values(IF).indexOf(scene.imageTypeFilter));
-  effects.push(scene.fullSource ? 1 : 0);
-  effects.push(Object.values(OT).indexOf(scene.imageOrientation));
-  effects.push(Object.values(GO).indexOf(scene.gifOption));
-  effects.push(scene.gifTimingConstant);
-  effects.push(scene.gifTimingMin);
-  effects.push(scene.gifTimingMax);
-  effects.push(Object.values(OT).indexOf(scene.videoOrientation));
-  effects.push(Object.values(VO).indexOf(scene.videoOption));
-  effects.push(scene.videoTimingConstant);
-  effects.push(scene.videoTimingMin);
-  effects.push(scene.videoTimingMax);
-  effects.push(scene.videoSpeed);
-  effects.push(scene.videoRandomSpeed ? 1 : 0);
-  effects.push(scene.videoSpeedMin);
-  effects.push(scene.videoSpeedMax);
-  effects.push(scene.randomVideoStart ? 1 : 0);
-  effects.push(scene.continueVideo ? 1 : 0);
-  effects.push(scene.playVideoClips ? 1 : 0);
-  effects.push(scene.skipVideoStart);
-  effects.push(scene.skipVideoEnd);
-  effects.push(scene.videoVolume);
-  effects.push(Object.values(WF).indexOf(scene.weightFunction));
-  effects.push(Object.values(SOF).indexOf(scene.sourceOrderFunction));
-  effects.push(scene.forceAllSource ? 1 : 0);
-  effects.push(Object.values(OF).indexOf(scene.orderFunction));
-  effects.push(scene.forceAll ? 1 : 0);
-
-  effects.push(scene.zoom ? 1 : 0);
-  effects.push(scene.zoomRandom ? 1 : 0);
-  effects.push(scene.zoomStart);
-  effects.push(scene.zoomStartMin);
-  effects.push(scene.zoomStartMax);
-  effects.push(scene.zoomEnd);
-  effects.push(scene.zoomEndMin);
-  effects.push(scene.zoomEndMax);
-  effects.push(Object.values(HTF).indexOf(scene.horizTransType));
-  effects.push(scene.horizTransLevel);
-  effects.push(scene.horizTransLevelMin);
-  effects.push(scene.horizTransLevelMax);
-  effects.push(scene.horizTransRandom ? 1 : 0);
-  effects.push(Object.values(VTF).indexOf(scene.vertTransType));
-  effects.push(scene.vertTransLevel);
-  effects.push(scene.vertTransLevelMin);
-  effects.push(scene.vertTransLevelMax);
-  effects.push(scene.vertTransRandom ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.transTF));
-  effects.push(scene.transDuration);
-  effects.push(scene.transDurationMin);
-  effects.push(scene.transDurationMax);
-  effects.push(scene.transSinRate);
-  effects.push(scene.transBPMMulti);
-  effects.push(Object.values(EA).indexOf(scene.transEase));
-  effects.push(scene.transExp);
-  effects.push(scene.transAmp);
-  effects.push(scene.transPer);
-  effects.push(scene.transOv);
-
-  effects.push(scene.crossFade ? 1 : 0);
-  effects.push(scene.crossFadeAudio ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.fadeTF));
-  effects.push(scene.fadeDuration);
-  effects.push(scene.fadeDurationMin);
-  effects.push(scene.fadeDurationMax);
-  effects.push(scene.fadeSinRate);
-  effects.push(scene.fadeBPMMulti);
-  effects.push(Object.values(EA).indexOf(scene.fadeEase));
-  effects.push(scene.fadeExp);
-  effects.push(scene.fadeAmp);
-  effects.push(scene.fadePer);
-  effects.push(scene.fadeOv);
-
-  effects.push(scene.slide ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.slideTF));
-  effects.push(Object.values(STF).indexOf(scene.slideType));
-  effects.push(scene.slideDistance);
-  effects.push(scene.slideDuration);
-  effects.push(scene.slideDurationMin);
-  effects.push(scene.slideDurationMax);
-  effects.push(scene.slideSinRate);
-  effects.push(scene.slideBPMMulti);
-  effects.push(Object.values(EA).indexOf(scene.slideEase));
-  effects.push(scene.slideExp);
-  effects.push(scene.slideAmp);
-  effects.push(scene.slidePer);
-  effects.push(scene.slideOv);
-
-  effects.push(scene.strobe ? 1 : 0);
-  effects.push(scene.strobePulse ? 1 : 0);
-  effects.push(Object.values(SL).indexOf(scene.strobeLayer));
-  effects.push(scene.strobeOpacity);
-  effects.push(Object.values(TF).indexOf(scene.strobeTF));
-  effects.push(scene.strobeTime);
-  effects.push(scene.strobeTimeMin);
-  effects.push(scene.strobeTimeMax);
-  effects.push(scene.strobeSinRate);
-  effects.push(scene.strobeBPMMulti);
-  effects.push(Object.values(TF).indexOf(scene.strobeDelayTF));
-  effects.push(scene.strobeDelay);
-  effects.push(scene.strobeDelayMin);
-  effects.push(scene.strobeDelayMax);
-  effects.push(scene.strobeDelaySinRate);
-  effects.push(scene.strobeDelayBPMMulti);
-  effects.push(Object.values(SC).indexOf(scene.strobeColorType));
-  effects.push(scene.strobeColor);
-  effects.push(scene.strobeColorSet.join("|"));
-  effects.push(Object.values(EA).indexOf(scene.strobeEase));
-  effects.push(scene.strobeExp);
-  effects.push(scene.strobeAmp);
-  effects.push(scene.strobePer);
-  effects.push(scene.strobeOv);
-
-  effects.push(scene.fadeInOut ? 1 : 0);
-  effects.push(scene.fadeIOPulse ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.fadeIOTF));
-  effects.push(scene.fadeIODuration);
-  effects.push(scene.fadeIODurationMin);
-  effects.push(scene.fadeIODurationMax);
-  effects.push(scene.fadeIOSinRate);
-  effects.push(scene.fadeIOBPMMulti);
-  effects.push(Object.values(TF).indexOf(scene.fadeIODelayTF));
-  effects.push(scene.fadeIODelay);
-  effects.push(scene.fadeIODelayMin);
-  effects.push(scene.fadeIODelayMax);
-  effects.push(scene.fadeIODelaySinRate);
-  effects.push(scene.fadeIODelayBPMMulti);
-  effects.push(Object.values(EA).indexOf(scene.fadeIOStartEase));
-  effects.push(scene.fadeIOStartExp);
-  effects.push(scene.fadeIOStartAmp);
-  effects.push(scene.fadeIOStartPer);
-  effects.push(scene.fadeIOStartOv);
-  effects.push(Object.values(EA).indexOf(scene.fadeIOEndEase));
-  effects.push(scene.fadeIOEndExp);
-  effects.push(scene.fadeIOEndAmp);
-  effects.push(scene.fadeIOEndPer);
-  effects.push(scene.fadeIOEndOv);
-
-  effects.push(scene.panning ? 1 : 0);
-  effects.push(Object.values(TF).indexOf(scene.panTF));
-  effects.push(scene.panDuration);
-  effects.push(scene.panDurationMin);
-  effects.push(scene.panDurationMax);
-  effects.push(scene.panSinRate);
-  effects.push(scene.panBPMMulti);
-  effects.push(Object.values(HTF).indexOf(scene.panHorizTransType));
-  effects.push(scene.panHorizTransImg ? 1 : 0);
-  effects.push(scene.panHorizTransLevel);
-  effects.push(scene.panHorizTransLevelMax);
-  effects.push(scene.panHorizTransLevelMin);
-  effects.push(scene.panHorizTransRandom ? 1 : 0);
-  effects.push(Object.values(VTF).indexOf(scene.panVertTransType));
-  effects.push(scene.panVertTransImg ? 1 : 0);
-  effects.push(scene.panVertTransLevel);
-  effects.push(scene.panVertTransLevelMax);
-  effects.push(scene.panVertTransLevelMin);
-  effects.push(scene.panVertTransRandom ? 1 : 0);
-  effects.push(Object.values(EA).indexOf(scene.panStartEase));
-  effects.push(scene.panStartExp);
-  effects.push(scene.panStartAmp);
-  effects.push(scene.panStartPer);
-  effects.push(scene.panStartOv);
-  effects.push(Object.values(EA).indexOf(scene.panEndEase));
-  effects.push(scene.panEndExp);
-  effects.push(scene.panEndAmp);
-  effects.push(scene.panEndPer);
-  effects.push(scene.panEndOv);
-
-  // Add future items here
+  const effects = [
+    Object.values(TF).indexOf(scene.timingFunction),
+    scene.timingConstant,
+    scene.timingMin,
+    scene.timingMax,
+    scene.timingSinRate,
+    scene.timingBPMMulti,
+    scene.backForth ? 1 : 0,
+    Object.values(TF).indexOf(scene.backForthTF),
+    scene.backForthConstant,
+    scene.backForthMin,
+    scene.backForthMax,
+    scene.backForthSinRate,
+    scene.backForthBPMMulti,
+    Object.values(IT).indexOf(scene.imageType),
+    Object.values(BT).indexOf(scene.backgroundType),
+    scene.backgroundColor,
+    scene.backgroundColorSet.join("|"),
+    scene.backgroundBlur,
+    // timing
+    Object.values(IF).indexOf(scene.imageTypeFilter),
+    scene.fullSource ? 1 : 0,
+    Object.values(OT).indexOf(scene.imageOrientation),
+    Object.values(GO).indexOf(scene.gifOption),
+    scene.gifTimingConstant,
+    scene.gifTimingMin,
+    scene.gifTimingMax,
+    Object.values(OT).indexOf(scene.videoOrientation),
+    Object.values(VO).indexOf(scene.videoOption),
+    scene.videoTimingConstant,
+    scene.videoTimingMin,
+    scene.videoTimingMax,
+    scene.videoSpeed,
+    scene.videoRandomSpeed ? 1 : 0,
+    scene.videoSpeedMin,
+    scene.videoSpeedMax,
+    scene.randomVideoStart ? 1 : 0,
+    scene.continueVideo ? 1 : 0,
+    scene.playVideoClips ? 1 : 0,
+    scene.skipVideoStart,
+    scene.skipVideoEnd,
+    scene.videoVolume,
+    Object.values(WF).indexOf(scene.weightFunction),
+    Object.values(SOF).indexOf(scene.sourceOrderFunction),
+    scene.forceAllSource ? 1 : 0,
+    Object.values(OF).indexOf(scene.orderFunction),
+    scene.forceAll ? 1 : 0,
+    // zoom move
+    scene.zoom ? 1 : 0,
+    scene.zoomRandom ? 1 : 0,
+    scene.zoomStart,
+    scene.zoomStartMin,
+    scene.zoomStartMax,
+    scene.zoomEnd,
+    scene.zoomEndMin,
+    scene.zoomEndMax,
+    Object.values(HTF).indexOf(scene.horizTransType),
+    scene.horizTransLevel,
+    scene.horizTransLevelMin,
+    scene.horizTransLevelMax,
+    scene.horizTransRandom ? 1 : 0,
+    Object.values(VTF).indexOf(scene.vertTransType),
+    scene.vertTransLevel,
+    scene.vertTransLevelMin,
+    scene.vertTransLevelMax,
+    scene.vertTransRandom ? 1 : 0,
+    Object.values(TF).indexOf(scene.transTF),
+    scene.transDuration,
+    scene.transDurationMin,
+    scene.transDurationMax,
+    scene.transSinRate,
+    scene.transBPMMulti,
+    Object.values(EA).indexOf(scene.transEase),
+    scene.transExp,
+    scene.transAmp,
+    scene.transPer,
+    scene.transOv,
+    // crossfade
+    scene.crossFade ? 1 : 0,
+    scene.crossFadeAudio ? 1 : 0,
+    Object.values(TF).indexOf(scene.fadeTF),
+    scene.fadeDuration,
+    scene.fadeDurationMin,
+    scene.fadeDurationMax,
+    scene.fadeSinRate,
+    scene.fadeBPMMulti,
+    Object.values(EA).indexOf(scene.fadeEase),
+    scene.fadeExp,
+    scene.fadeAmp,
+    scene.fadePer,
+    scene.fadeOv,
+    // slide
+    scene.slide ? 1 : 0,
+    Object.values(TF).indexOf(scene.slideTF),
+    Object.values(STF).indexOf(scene.slideType),
+    scene.slideDistance,
+    scene.slideDuration,
+    scene.slideDurationMin,
+    scene.slideDurationMax,
+    scene.slideSinRate,
+    scene.slideBPMMulti,
+    Object.values(EA).indexOf(scene.slideEase),
+    scene.slideExp,
+    scene.slideAmp,
+    scene.slidePer,
+    scene.slideOv,
+    // strobe
+    scene.strobe ? 1 : 0,
+    scene.strobePulse ? 1 : 0,
+    Object.values(SL).indexOf(scene.strobeLayer),
+    scene.strobeOpacity,
+    Object.values(TF).indexOf(scene.strobeTF),
+    scene.strobeTime,
+    scene.strobeTimeMin,
+    scene.strobeTimeMax,
+    scene.strobeSinRate,
+    scene.strobeBPMMulti,
+    Object.values(TF).indexOf(scene.strobeDelayTF),
+    scene.strobeDelay,
+    scene.strobeDelayMin,
+    scene.strobeDelayMax,
+    scene.strobeDelaySinRate,
+    scene.strobeDelayBPMMulti,
+    Object.values(SC).indexOf(scene.strobeColorType),
+    scene.strobeColor,
+    scene.strobeColorSet.join("|"),
+    Object.values(EA).indexOf(scene.strobeEase),
+    scene.strobeExp,
+    scene.strobeAmp,
+    scene.strobePer,
+    scene.strobeOv,
+    // fade in/out
+    scene.fadeInOut ? 1 : 0,
+    scene.fadeIOPulse ? 1 : 0,
+    Object.values(TF).indexOf(scene.fadeIOTF),
+    scene.fadeIODuration,
+    scene.fadeIODurationMin,
+    scene.fadeIODurationMax,
+    scene.fadeIOSinRate,
+    scene.fadeIOBPMMulti,
+    Object.values(TF).indexOf(scene.fadeIODelayTF),
+    scene.fadeIODelay,
+    scene.fadeIODelayMin,
+    scene.fadeIODelayMax,
+    scene.fadeIODelaySinRate,
+    scene.fadeIODelayBPMMulti,
+    Object.values(EA).indexOf(scene.fadeIOStartEase),
+    scene.fadeIOStartExp,
+    scene.fadeIOStartAmp,
+    scene.fadeIOStartPer,
+    scene.fadeIOStartOv,
+    Object.values(EA).indexOf(scene.fadeIOEndEase),
+    scene.fadeIOEndExp,
+    scene.fadeIOEndAmp,
+    scene.fadeIOEndPer,
+    scene.fadeIOEndOv,
+    // panning
+    scene.panning ? 1 : 0,
+    Object.values(TF).indexOf(scene.panTF),
+    scene.panDuration,
+    scene.panDurationMin,
+    scene.panDurationMax,
+    scene.panSinRate,
+    scene.panBPMMulti,
+    Object.values(HTF).indexOf(scene.panHorizTransType),
+    scene.panHorizTransImg ? 1 : 0,
+    scene.panHorizTransLevel,
+    scene.panHorizTransLevelMax,
+    scene.panHorizTransLevelMin,
+    scene.panHorizTransRandom ? 1 : 0,
+    Object.values(VTF).indexOf(scene.panVertTransType),
+    scene.panVertTransImg ? 1 : 0,
+    scene.panVertTransLevel,
+    scene.panVertTransLevelMax,
+    scene.panVertTransLevelMin,
+    scene.panVertTransRandom ? 1 : 0,
+    Object.values(EA).indexOf(scene.panStartEase),
+    scene.panStartExp,
+    scene.panStartAmp,
+    scene.panStartPer,
+    scene.panStartOv,
+    Object.values(EA).indexOf(scene.panEndEase),
+    scene.panEndExp,
+    scene.panEndAmp,
+    scene.panEndPer,
+    scene.panEndOv,
+    // Add future items here
+  ];
 
   return Buffer.from(effects.join(",")).toString("base64").slice(0, -1);
 }

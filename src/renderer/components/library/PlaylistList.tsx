@@ -126,8 +126,7 @@ class PlaylistList extends React.Component<PlaylistListProps> {
             .get(p)
             .map((thumb) => thumb.replace(/\\/g, "/"));
           if (thumbs.length == 2) {
-            thumbs.push("");
-            thumbs.push("");
+            thumbs.push("", "");
             thumbs[3] = thumbs[1];
             thumbs[1] = "";
           }
