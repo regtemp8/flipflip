@@ -128,7 +128,7 @@ export default class Player extends React.Component<PlayerProps> {
         props.scene.sources.length > 0 ? [props.scene.sources[0].url] : [""],
       startTime: null as Date,
       historyOffset: 0,
-      historyPaths: Array<any>(),
+      historyPaths: new Array<any>(),
       imagePlayerAdvanceHacks: new Array<Array<ChildCallbackHack>>(
         props.scene.overlays.length + 1,
       )
@@ -1194,7 +1194,7 @@ export default class Player extends React.Component<PlayerProps> {
       isMainLoaded: false,
       isEmpty: false,
       historyOffset: 0,
-      historyPaths: Array<any>(),
+      historyPaths: new Array<any>(),
       total: 0,
       progress: 0,
       progressMessage:

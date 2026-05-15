@@ -166,7 +166,7 @@ class TagManager extends React.Component<TagManagerProps> {
     this.state = {
       openMenu: null as string,
       menuAnchorEl: null as any,
-      tags: Array<Tag>(),
+      tags: new Array<Tag>(),
       isEditing: -1,
       tagName: "",
       tagPhrase: "",
@@ -411,7 +411,7 @@ class TagManager extends React.Component<TagManagerProps> {
   componentDidMount() {
     // Make a deep copy of Tags
     // For some reason, shallow copy was still modifying props' Tags
-    let newTags = Array<Tag>();
+    let newTags = new Array<Tag>();
     for (let tag of this.props.tags) {
       newTags.push(JSON.parse(JSON.stringify(tag)));
     }

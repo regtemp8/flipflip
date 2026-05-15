@@ -80,7 +80,7 @@ class VideoControl extends React.Component<VideoControlProps> {
     this.state = {
       playing: true,
       update: true,
-      marks: Array<{ value: number; label: string }>(),
+      marks: new Array<{ value: number; label: string }>(),
       showSpeed: false,
     };
   }

@@ -930,9 +930,9 @@ export function applyEffects(scene: Scene, base64String: string) {
 }
 
 let captionProgramDefaults = {
-  program: Array<Function>(),
+  program: new Array<Function>(),
   programCounter: 0,
-  timestamps: Array<number>(),
+  timestamps: new Array<number>(),
   timestampFn: new Map<number, Array<Function>>(),
   timestampCounter: 0,
   audios: new Array<{

@@ -78,7 +78,7 @@ export default class AppStorage {
         // This should fail safe and self heal.
         case undefined:
           // Create Library from aggregate of previous scenes' directories
-          let sources = Array<string>();
+          let sources = new Array<string>();
           for (let scene of data.scenes) {
             sources = sources.concat(scene.directories);
           }
@@ -88,27 +88,27 @@ export default class AppStorage {
             version: process.env.APP_VERSION,
             specialMode: data.specialMode ? data.specialMode : null,
             openTab: data.openTab ? data.openTab : 0,
-            displayedSources: Array<LibrarySource>(),
+            displayedSources: new Array<LibrarySource>(),
             config: data.config ? new Config(data.config) : new Config(),
-            scenes: Array<Scene>(),
-            sceneGroups: Array<SceneGroup>(),
-            grids: Array<SceneGrid>(),
-            audios: Array<Audio>(),
-            scripts: Array<CaptionScript>(),
-            playlists: Array<Playlist>(),
-            library: Array<LibrarySource>(),
-            tags: Array<Tag>(),
+            scenes: new Array<Scene>(),
+            sceneGroups: new Array<SceneGroup>(),
+            grids: new Array<SceneGrid>(),
+            audios: new Array<Audio>(),
+            scripts: new Array<CaptionScript>(),
+            playlists: new Array<Playlist>(),
+            library: new Array<LibrarySource>(),
+            tags: new Array<Tag>(),
             route: data.route.map((s: any) => new Route(s)),
             libraryYOffset: 0,
-            libraryFilters: Array<string>(),
-            librarySelected: Array<string>(),
+            libraryFilters: new Array<string>(),
+            librarySelected: new Array<string>(),
             audioOpenTab: data.audioOpenTab ? data.audioOpenTab : 3,
             audioYOffset: 0,
-            audioFilters: Array<string>(),
-            audioSelected: Array<string>(),
+            audioFilters: new Array<string>(),
+            audioSelected: new Array<string>(),
             scriptYOffset: 0,
-            scriptFilters: Array<string>(),
-            scriptSelected: Array<string>(),
+            scriptFilters: new Array<string>(),
+            scriptSelected: new Array<string>(),
             progressMode: null as string,
             progressTitle: null as string,
             progressCurrent: 0,
@@ -123,30 +123,30 @@ export default class AppStorage {
           };
           // Hydrate and add the library ! Yay!!! :)
           let libraryID = 0;
-          const newLibrarySources = Array<LibrarySource>();
+          const newLibrarySources = new Array<LibrarySource>();
           for (let url of sources) {
             newLibrarySources.push(
               new LibrarySource({
                 url: url,
                 id: libraryID,
-                tags: Array<Tag>(),
+                tags: new Array<Tag>(),
               }),
             );
             libraryID += 1;
           }
           this.initialState.library = newLibrarySources;
           // Convert and add old scenes
-          const newScenes = Array<Scene>();
+          const newScenes = new Array<Scene>();
           for (let oldScene of data.scenes) {
             const newScene = new Scene(path.sep, process.platform, oldScene);
             let sourceID = 0;
-            const newSources = Array<LibrarySource>();
+            const newSources = new Array<LibrarySource>();
             for (let oldDirectory of oldScene.directories) {
               newSources.push(
                 new LibrarySource({
                   url: oldDirectory,
                   id: sourceID,
-                  tags: Array<Tag>(),
+                  tags: new Array<Tag>(),
                 }),
               );
               sourceID += 1;
@@ -170,29 +170,29 @@ export default class AppStorage {
             version: process.env.APP_VERSION,
             specialMode: data.specialMode,
             openTab: 0,
-            displayedSources: Array<LibrarySource>(),
+            displayedSources: new Array<LibrarySource>(),
             config: new Config(data.config),
             scenes: data.scenes.map(
               (s: any) => new Scene(path.sep, process.platform, s),
             ),
-            sceneGroups: Array<SceneGroup>(),
-            grids: Array<SceneGrid>(),
-            audios: Array<Audio>(),
-            scripts: Array<CaptionScript>(),
-            playlists: Array<Playlist>(),
+            sceneGroups: new Array<SceneGroup>(),
+            grids: new Array<SceneGrid>(),
+            audios: new Array<Audio>(),
+            scripts: new Array<CaptionScript>(),
+            playlists: new Array<Playlist>(),
             library: data.library.map((s: any) => new LibrarySource(s)),
             tags: data.tags.map((t: any) => new Tag(t)),
             route: [],
             libraryYOffset: 0,
-            libraryFilters: Array<string>(),
-            librarySelected: Array<string>(),
+            libraryFilters: new Array<string>(),
+            librarySelected: new Array<string>(),
             audioOpenTab: 3,
             audioYOffset: 0,
-            audioFilters: Array<string>(),
-            audioSelected: Array<string>(),
+            audioFilters: new Array<string>(),
+            audioSelected: new Array<string>(),
             scriptYOffset: 0,
-            scriptFilters: Array<string>(),
-            scriptSelected: Array<string>(),
+            scriptFilters: new Array<string>(),
+            scriptSelected: new Array<string>(),
             progressMode: null as string,
             progressTitle: null as string,
             progressCurrent: 0,
@@ -367,7 +367,7 @@ export default class AppStorage {
             version: process.env.APP_VERSION,
             specialMode: data.specialMode,
             openTab: data.openTab,
-            displayedSources: Array<LibrarySource>(),
+            displayedSources: new Array<LibrarySource>(),
             config: new Config(data.config),
             scenes: data.scenes.map(
               (s: any) => new Scene(path.sep, process.platform, s),
@@ -389,15 +389,15 @@ export default class AppStorage {
             tags: data.tags.map((t: any) => new Tag(t)),
             route: data.route.map((s: any) => new Route(s)),
             libraryYOffset: 0,
-            libraryFilters: Array<string>(),
-            librarySelected: Array<string>(),
+            libraryFilters: new Array<string>(),
+            librarySelected: new Array<string>(),
             audioOpenTab: data.audioOpenTab ? data.audioOpenTab : 3,
             audioYOffset: 0,
-            audioFilters: Array<string>(),
-            audioSelected: Array<string>(),
+            audioFilters: new Array<string>(),
+            audioSelected: new Array<string>(),
             scriptYOffset: 0,
-            scriptFilters: Array<string>(),
-            scriptSelected: Array<string>(),
+            scriptFilters: new Array<string>(),
+            scriptSelected: new Array<string>(),
             progressMode: null as string,
             progressTitle: null as string,
             progressCurrent: 0,
@@ -429,7 +429,7 @@ export default class AppStorage {
             version: process.env.APP_VERSION,
             specialMode: data.specialMode,
             openTab: data.openTab,
-            displayedSources: Array<LibrarySource>(),
+            displayedSources: new Array<LibrarySource>(),
             config: new Config(data.config),
             scenes: data.scenes.map(
               (s: any) => new Scene(path.sep, process.platform, s),
@@ -451,15 +451,15 @@ export default class AppStorage {
             tags: data.tags.map((t: any) => new Tag(t)),
             route: data.route.map((s: any) => new Route(s)),
             libraryYOffset: 0,
-            libraryFilters: Array<string>(),
-            librarySelected: Array<string>(),
+            libraryFilters: new Array<string>(),
+            librarySelected: new Array<string>(),
             audioOpenTab: data.audioOpenTab ? data.audioOpenTab : 3,
             audioYOffset: 0,
-            audioFilters: Array<string>(),
-            audioSelected: Array<string>(),
+            audioFilters: new Array<string>(),
+            audioSelected: new Array<string>(),
             scriptYOffset: 0,
-            scriptFilters: Array<string>(),
-            scriptSelected: Array<string>(),
+            scriptFilters: new Array<string>(),
+            scriptSelected: new Array<string>(),
             progressMode: null as string,
             progressTitle: null as string,
             progressCurrent: 0,

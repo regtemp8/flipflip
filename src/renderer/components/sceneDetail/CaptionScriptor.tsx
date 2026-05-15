@@ -287,7 +287,7 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
       captionProgramJumpToHack: new ChildCallbackHack(),
       codeMirrorAddHack: new ChildCallbackHack(),
       codeMirrorOverwriteHack: new ChildCallbackHack(),
-      systemFonts: Array<string>(),
+      systemFonts: new Array<string>(),
     };
   }
 

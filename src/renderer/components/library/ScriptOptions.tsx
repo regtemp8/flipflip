@@ -96,7 +96,7 @@ class ScriptOptions extends React.Component<ScriptOptionsProps> {
     this.state = {
       script: props.script,
       loadingFonts: true,
-      systemFonts: Array<string>(),
+      systemFonts: new Array<string>(),
     };
   }
 

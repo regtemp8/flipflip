@@ -23,7 +23,7 @@ export const portablePath = path.join(
 
 export function getBackups(): Array<Backup> {
   const files = fs.readdirSync(saveDir);
-  const backups = Array<Backup>();
+  const backups = new Array<Backup>();
   for (let file of files) {
     if (file.startsWith("data.json.") && file != "data.json.new") {
       const stats = fs.statSync(path.join(saveDir, file));

@@ -180,7 +180,7 @@ class SceneGenerator extends React.Component<SceneGeneratorProps> {
         : this.props.scene.generatorWeights[this.state.isEditing];
 
     const weights = Array.from(this.props.scene.generatorWeights);
-    let grid = Array<Array<any>>();
+    let grid = new Array<Array<any>>();
     for (let w = 0; w < weights.length; w++) {
       if (!grid[w % 4]) {
         grid[w % 4] = [];

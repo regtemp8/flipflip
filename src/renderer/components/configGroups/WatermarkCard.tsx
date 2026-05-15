@@ -49,7 +49,7 @@ class WatermarkCard extends React.Component<WatermarkCardProps> {
     super(props);
 
     this.state = {
-      systemFonts: Array<string>(),
+      systemFonts: new Array<string>(),
     };
   }
 

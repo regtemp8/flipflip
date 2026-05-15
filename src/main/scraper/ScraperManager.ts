@@ -148,7 +148,7 @@ const loadVideo = (
 
     let paths;
     if (source.clips && source.clips.length > 0) {
-      const clipPaths = Array<string>();
+      const clipPaths = new Array<string>();
       for (let clip of source.clips) {
         if (!source.disabledClips || !source.disabledClips.includes(clip.id)) {
           let clipPath =

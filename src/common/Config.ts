@@ -577,7 +577,7 @@ export class DisplaySettings implements DisplaySettingsI {
   maxInHistory = 120;
   maxLoadingAtOnce = 5;
 
-  ignoredTags = Array<string>();
+  ignoredTags = new Array<string>();
 }
 
 export class GeneralSettings implements GeneralSettingsI {

@@ -393,7 +393,7 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
       const editSource = l.find((s) => s.id == this.state.isEditing);
       editSource.url = newURL;
 
-      const newSources = Array<CaptionScript>();
+      const newSources = new Array<CaptionScript>();
       for (let source of l) {
         if (/^\s*$/.exec(source.url) == null) {
           if (!newSources.map((s) => s.url).includes(source.url)) {

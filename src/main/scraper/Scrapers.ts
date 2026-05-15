@@ -98,7 +98,7 @@ export const loadRemoteImageURLList = (
             line.startsWith("file:///"),
         );
       if (lines.length > 0) {
-        let convertedSource = Array<string>();
+        let convertedSource = new Array<string>();
         let convertedCount = 0;
         for (let url of lines) {
           convertURL(url, pm)
@@ -274,7 +274,7 @@ export const loadTumblr = (
         }
       }
       if (images.length > 0) {
-        let convertedSource = Array<string>();
+        let convertedSource = new Array<string>();
         let convertedCount = 0;
         for (let url of images) {
           convertURL(url, pm)
@@ -629,7 +629,7 @@ export const loadImageFap = (
   const timeout = 8000;
   const url = source.url;
   if (url.includes("/gallery/") || url.includes("/pictures/")) {
-    let images = Array<string>();
+    let images = new Array<string>();
     const gid = getFileGroup(url, path.sep);
     const baseGalleryURL = "https://www.imagefap.com/gallery/" + gid;
     loadImageFapGallery(
@@ -693,7 +693,7 @@ export const loadImageFap = (
           let albumID = albumEl
             .getAttribute("href")
             .substring(albumEl.getAttribute("href").lastIndexOf("/") + 1);
-          let images = Array<string>();
+          let images = new Array<string>();
           const baseGalleryURL = "https://www.imagefap.com/gallery/" + albumID;
           loadImageFapGallery(
             baseGalleryURL + "?gid=" + albumID + "&view=0",
@@ -710,7 +710,7 @@ export const loadImageFap = (
             pm,
           );
         } else {
-          let images = Array<string>();
+          let images = new Array<string>();
           let captcha = undefined;
           if (html.includes("Enter the captcha")) {
             helpers.count = source.count;
@@ -895,8 +895,8 @@ export const loadSexCom = (
     .text((html) => {
       let imageEls = domino.createWindow(html).document.querySelectorAll(".small_pin_box > .image_wrapper > img");
       if (imageEls.length > 0) {
-        let videos = Array<string>();
-        let images = Array<string>();
+        let videos = new Array<string>();
+        let images = new Array<string>();
         for (let i = 0; i < imageEls.length; i++) {
           const image = imageEls.item(i);
           if (image.nextElementSibling || image.previousElementSibling) {
@@ -1072,7 +1072,7 @@ export const loadDeviantArt = (
       for (let l = 0; l < pages.length; l++) {
         if (pages[l].getAttribute("rel") == "next") hasNextPage = true;
       }
-      let images = Array<string>();
+      let images = new Array<string>();
       const items = xml.getElementsByTagName("item");
       for (let i = 0; i < items.length; i++) {
         helpers.next += 1;
@@ -1179,7 +1179,7 @@ export const loadE621 = (
         }
 
         const count = json[0].post_count;
-        const images = Array<string>();
+        const images = new Array<string>();
         for (let postID of json[0].post_ids) {
           suffix = "/posts/" + postID + ".json";
           wretch(thisHost + suffix)
@@ -1334,7 +1334,7 @@ export const loadE621 = (
         }
 
         let list = json.posts;
-        const images = Array<string>();
+        const images = new Array<string>();
         for (let p of list) {
           if (p.file.url) {
             let fileURL = p.file.url;
@@ -1481,7 +1481,7 @@ export const loadDanbooru = (
           return;
         }
 
-        const images = Array<string>();
+        const images = new Array<string>();
         const postIDs = json.post_ids;
         const limit = 10;
         let current = helpers.next;
@@ -1564,7 +1564,7 @@ export const loadDanbooru = (
         };
         setTimeout(getPost, 200);
       } else {
-        const images = Array<string>();
+        const images = new Array<string>();
         for (let p of json) {
           if (p.file_url) {
             let fileURL = p.file_url;
@@ -1647,7 +1647,7 @@ export const loadGelbooru1 = (
       }).window.document.querySelectorAll("span.thumb > a");
       if (imageEls.length > 0) {
         let imageCount = 0;
-        let images = Array<string>();
+        let images = new Array<string>();
         const getImage = (index: number) => {
           let link = imageEls.item(index).getAttribute("href");
           if (!link.startsWith("http")) {
@@ -1819,7 +1819,7 @@ export const loadGelbooru2 = (
         });
       }
 
-      const images = Array<string>();
+      const images = new Array<string>();
       for (let p of json.post) {
         if (p.file_url) {
           images.push(p.file_url);
@@ -1888,7 +1888,7 @@ export const loadEHentai = (
       }).window.document.querySelectorAll("#gdt > .gdtm > div > a");
       if (imageEls.length > 0) {
         let imageCount = 0;
-        let images = Array<string>();
+        let images = new Array<string>();
         for (let i = 0; i < imageEls.length; i++) {
           const image = imageEls.item(i);
           wretch(image.getAttribute("href"))
@@ -2323,7 +2323,7 @@ export const loadBDSMlr = (
       }).window.document.querySelectorAll("item");
       if (itemEls.length > 0) {
         let imageCount = 0;
-        let images = Array<string>();
+        let images = new Array<string>();
         for (let i = 0; i < itemEls.length; i++) {
           const item = itemEls.item(i);
           const embeddedImages = item.querySelectorAll("description > img");
@@ -2481,7 +2481,7 @@ export const loadPiwigo = (
             return;
           }
 
-          const images = Array<string>();
+          const images = new Array<string>();
           if (json?.result?.images) {
             for (let o = 0; o < json.result.images.length; o++) {
               const image = json.result.images[o];
@@ -2609,7 +2609,7 @@ export const loadHydrus = (
         );
     };
 
-    let images = Array<string>();
+    let images = new Array<string>();
     const getFileMetadata = (fileIDs: Array<number>, page: number) => {
       const pageIDs = fileIDs.slice(page * chunk, (page + 1) * chunk);
       wretch(

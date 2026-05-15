@@ -685,7 +685,7 @@ class SourceList extends React.Component<SourceListProps> {
             ? null
             : editSource.resolution;
 
-        const newSources = Array<LibrarySource>();
+        const newSources = new Array<LibrarySource>();
         for (let source of s.sources) {
           if (/^\s*$/.exec(source.url) == null) {
             if (!newSources.map((s) => s.url).includes(source.url)) {
@@ -718,7 +718,7 @@ class SourceList extends React.Component<SourceListProps> {
         editSource.duration = sourceChanged ? null : editSource.duration;
         editSource.resolution = sourceChanged ? null : editSource.resolution;
 
-        const newSources = Array<LibrarySource>();
+        const newSources = new Array<LibrarySource>();
         for (let source of l) {
           if (/^\s*$/.exec(source.url) == null) {
             if (!newSources.map((s) => s.url).includes(source.url)) {
