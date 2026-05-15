@@ -289,7 +289,7 @@ export function tumblrAuth(
 }
 
 export function printMemoryReport() {
-  function format(x: any) {
+  const format = (x: any) => {
     let f = x.toString();
     while (f.length < 15) {
       f = " " + f;
@@ -297,17 +297,17 @@ export function printMemoryReport() {
     f = f.substr(0, 15);
     return f;
   }
-  function logB(x: any) {
+  const logB = (x: any) => {
     console.log(
       format(x[0]),
       format((x[1] / (1000.0 * 1000)).toFixed(2)),
       "MB",
     );
   }
-  function logKB(x: any) {
+  const logKB = (x: any) => {
     console.log(format(x[0]), format((x[1] / 1000.0).toFixed(2)), "MB");
   }
-  function logCount(x: any) {
+  const logCount = (x: any) => {
     console.log(
       format(x[0]),
       format(x[1].count),

@@ -109,6 +109,27 @@ export const timestampRegex =
     define("variable-3", storers);
     define("builtin", actions);
 
+    function rt(type: string, state: any, stream: any) {
+      if (stream.eol()) {
+        if (
+          state.tokens.length > 0 &&
+          state.tokens[0].toLowerCase() == "storephrase"
+        ) {
+          const registerRegex = /^\$(\d)$/.exec(state.tokens[1]);
+          if (registerRegex == null) {
+            state.storedPhrases.set(0, true);
+          } else {
+            if (state.tokens.length > 1) {
+              state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
+              state.storedPhrases.set(0, true);
+            }
+          }
+        }
+        state.tokens = new Array<string>();
+      }
+      return type;
+    }
+
     function parse(stream: any, state: any) {
       if (stream.eatSpace()) return rt(null, state, stream);
 
@@ -334,27 +355,6 @@ export const timestampRegex =
       } else {
         return rt("error", state, stream);
       }
-    }
-
-    function rt(type: string, state: any, stream: any) {
-      if (stream.eol()) {
-        if (
-          state.tokens.length > 0 &&
-          state.tokens[0].toLowerCase() == "storephrase"
-        ) {
-          const registerRegex = /^\$(\d)$/.exec(state.tokens[1]);
-          if (registerRegex == null) {
-            state.storedPhrases.set(0, true);
-          } else {
-            if (state.tokens.length > 1) {
-              state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
-              state.storedPhrases.set(0, true);
-            }
-          }
-        }
-        state.tokens = new Array<string>();
-      }
-      return type;
     }
 
     return {
