@@ -111,8 +111,8 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                   otherVideo.hasAttribute("end")
                 ) {
                   clipValue = [
-                    parseFloat(otherVideo.getAttribute("start")),
-                    parseFloat(otherVideo.getAttribute("end")),
+                    Number.parseFloat(otherVideo.getAttribute("start")),
+                    Number.parseFloat(otherVideo.getAttribute("end")),
                   ];
                   clipID = Number.parseInt(otherVideo.getAttribute("clip"));
                   if (this.props.otherScenes[listIndex] instanceof Scene) {
