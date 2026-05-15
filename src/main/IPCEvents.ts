@@ -900,15 +900,15 @@ function onGetScraperSources(ev: IpcMainInvokeEvent, sources: LibrarySource[]) {
   for (const source of sources) {
     if (source.dirOfSources && getSourceType(source.url) == ST.local) {
       try {
-        const directories = fs
+        const dirSources = fs
           .readdirSync(source.url, { withFileTypes: true })
           .filter((dirent) => dirent.isDirectory())
-          .map((dirent) => dirent.name);
-        for (let d of directories) {
-          sceneSources.push(
-            new LibrarySource({ url: path.join(source.url, d) }),
+          .map(
+            (dirent) =>
+              new LibrarySource({ url: path.join(source.url, dirent.name) }),
           );
-        }
+
+        sceneSources.push(...dirSources);
       } catch (e) {
         sceneSources.push(new LibrarySource({ url: source.url }));
         console.error(e);
