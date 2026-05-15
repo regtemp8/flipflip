@@ -466,7 +466,7 @@ export function addScene(state: State): Object {
     scenes: state.scenes.concat([scene]),
     tutorial: newTutorial,
     route: [new Route({ kind: "scene", value: scene.id })],
-    specialMode: !tutorial ? SP.autoEdit : null,
+    specialMode: tutorial ? null : SP.autoEdit,
   };
 }
 
@@ -935,55 +935,7 @@ export function playSceneFromLibrary(
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
   let librarySource = state.library.find((s) => s.url == sourceURL);
-  if (librarySource != null) {
-    librarySource.disabledClips = [];
-    let id = state.scenes.length + 1;
-    state.scenes.forEach((s: Scene) => {
-      id = Math.max(s.id + 1, id);
-    });
-    const sourceType = getSourceType(source.url);
-    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
-      id: id,
-      name: "library_scene_temp",
-      sources: [librarySource],
-      libraryID: librarySource.id,
-      forceAll: state.config.defaultScene.forceAll,
-      backgroundType: state.config.defaultScene.backgroundType,
-      backgroundColor: state.config.defaultScene.backgroundColor,
-      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
-      backgroundBlur: state.config.defaultScene.backgroundBlur,
-      imageOrientation: state.config.defaultScene.imageOrientation,
-      videoOrientation: state.config.defaultScene.videoOrientation,
-      randomVideoStart: state.config.defaultScene.randomVideoStart,
-      videoOption:
-        sourceType == ST.video
-          ? VO.full
-          : state.config.defaultScene.videoOption,
-      continueVideo:
-        sourceType == ST.video || state.config.defaultScene.continueVideo,
-      playVideoClips: state.config.defaultScene.playVideoClips,
-      videoVolume: state.config.defaultScene.videoVolume,
-      videoSkip: state.config.defaultScene.videoSkip,
-      orderFunction: state.config.defaultScene.orderFunction,
-    });
-    if (getLibrarySource(state) != null) {
-      const activeScene = getActiveScene(state);
-      applyEffects(tempScene, getEffects(activeScene));
-      tempScene.overlayEnabled = activeScene.overlayEnabled;
-      tempScene.overlays = activeScene.overlays;
-      state.route.pop();
-      state.route.pop();
-      state.scenes.pop();
-    }
-    return {
-      displayedSources: displayed,
-      scenes: state.scenes.concat([tempScene]),
-      route: state.route.concat([
-        new Route({ kind: "scene", value: tempScene.id }),
-        new Route({ kind: "libraryplay", value: tempScene.id }),
-      ]),
-    };
-  } else {
+  if (librarySource == null) {
     source.disabledClips = [];
     let id = state.scenes.length + 1;
     state.scenes.forEach((s: Scene) => {
@@ -1031,6 +983,52 @@ export function playSceneFromLibrary(
       ]),
     };
   }
+
+  librarySource.disabledClips = [];
+  let id = state.scenes.length + 1;
+  state.scenes.forEach((s: Scene) => {
+    id = Math.max(s.id + 1, id);
+  });
+  const sourceType = getSourceType(source.url);
+  let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    id: id,
+    name: "library_scene_temp",
+    sources: [librarySource],
+    libraryID: librarySource.id,
+    forceAll: state.config.defaultScene.forceAll,
+    backgroundType: state.config.defaultScene.backgroundType,
+    backgroundColor: state.config.defaultScene.backgroundColor,
+    backgroundColorSet: state.config.defaultScene.backgroundColorSet,
+    backgroundBlur: state.config.defaultScene.backgroundBlur,
+    imageOrientation: state.config.defaultScene.imageOrientation,
+    videoOrientation: state.config.defaultScene.videoOrientation,
+    randomVideoStart: state.config.defaultScene.randomVideoStart,
+    videoOption:
+      sourceType == ST.video ? VO.full : state.config.defaultScene.videoOption,
+    continueVideo:
+      sourceType == ST.video || state.config.defaultScene.continueVideo,
+    playVideoClips: state.config.defaultScene.playVideoClips,
+    videoVolume: state.config.defaultScene.videoVolume,
+    videoSkip: state.config.defaultScene.videoSkip,
+    orderFunction: state.config.defaultScene.orderFunction,
+  });
+  if (getLibrarySource(state) != null) {
+    const activeScene = getActiveScene(state);
+    applyEffects(tempScene, getEffects(activeScene));
+    tempScene.overlayEnabled = activeScene.overlayEnabled;
+    tempScene.overlays = activeScene.overlays;
+    state.route.pop();
+    state.route.pop();
+    state.scenes.pop();
+  }
+  return {
+    displayedSources: displayed,
+    scenes: state.scenes.concat([tempScene]),
+    route: state.route.concat([
+      new Route({ kind: "scene", value: tempScene.id }),
+      new Route({ kind: "libraryplay", value: tempScene.id }),
+    ]),
+  };
 }
 
 export function onUpdateClips(
@@ -1440,8 +1438,11 @@ export function generateScenes(
             }
           }
 
-          // If we're not already adding a clip, check the source
-          if (!addedClip) {
+          if (addedClip) {
+            // If we're adding a clip, mark invalid ones
+            s.disabledClips = invalidClips;
+          } else {
+            // If we're not already adding a clip, check the source
             let b = false;
 
             // Filter out sources which don't have ruleAllSearches/allSearches
@@ -1487,9 +1488,6 @@ export function generateScenes(
               }
             }
             if (b) continue;
-          } else {
-            // If we're adding a clip, mark invalid ones
-            s.disabledClips = invalidClips;
           }
           sources.push(s);
         }
@@ -1573,8 +1571,11 @@ export function generateScenes(
                 }
               }
 
-              // If we've not already added a clip, check the source
-              if (!addedClip) {
+              if (addedClip) {
+                // If we're adding a clip, mark invalid ones
+                s.disabledClips = invalidClips;
+              } else {
+                // If we've not already added a clip, check the source
                 let b = false;
 
                 // Filter out sources which don't match this search
@@ -1625,9 +1626,6 @@ export function generateScenes(
                   }
                 }
                 if (b) continue;
-              } else {
-                // If we're adding a clip, mark invalid ones
-                s.disabledClips = invalidClips;
               }
               sources.push(s);
             }
@@ -1649,20 +1647,20 @@ export function generateScenes(
           break;
         // If this adv rule is all, add the sources to the require list
         case TT.all:
-          if (!reqAdvSources) {
-            reqAdvSources = rulesSources;
-          } else {
+          if (reqAdvSources) {
             reqAdvSources = reqAdvSources.filter(
               (s) => !!rulesSources.find((source) => source.url == s.url),
             );
+          } else {
+            reqAdvSources = rulesSources;
           }
           break;
         // If this adv rule is none, add the sources to the excl list
         case TT.none:
-          if (!excAdvSources) {
-            excAdvSources = rulesSources;
-          } else {
+          if (excAdvSources) {
             excAdvSources = excAdvSources.concat(rulesSources);
+          } else {
+            excAdvSources = rulesSources;
           }
           break;
       }
@@ -1727,8 +1725,11 @@ export function generateScenes(
           }
         }
 
-        // If we're not already adding a clip, check the source
-        if (!addedClip) {
+        if (addedClip) {
+          // If we're adding a clip, mark invalid ones
+          s.disabledClips = invalidClips;
+        } else {
+          // If we're not already adding a clip, check the source
           let b = false;
 
           // Filter out sources which don't have allSearches
@@ -1748,9 +1749,6 @@ export function generateScenes(
             }
           }
           if (b) continue;
-        } else {
-          // If we're adding a clip, mark invalid ones
-          s.disabledClips = invalidClips;
         }
         sources.push(s);
       }
@@ -1821,8 +1819,11 @@ export function generateScenes(
             }
           }
 
-          // If we're not already adding a clip, check the source tags
-          if (!addedClip) {
+          if (addedClip) {
+            // If we're adding a clip, mark invalid ones
+            s.disabledClips = invalidClips;
+          } else {
+            // If we're not already adding a clip, check the source tags
             let b = false;
 
             // Filter out sources which don't match this search
@@ -1847,9 +1848,6 @@ export function generateScenes(
               }
             }
             if (b) continue;
-          } else {
-            // If we're adding a clip, mark invalid ones
-            s.disabledClips = invalidClips;
           }
           sources.push(s);
         }
@@ -2460,26 +2458,26 @@ export function addSource(
 
     case AF.url:
       if (!args || args.length != 1) {
-        if (scene != null) {
+        if (scene == null) {
+          return updateLibrary(state, (l) => {
+            addSources(l, [""], state.library);
+          });
+        } else {
           return updateScene(state, scene, (s) => {
             addSources(s.sources, [""], state.library);
             handleArgs(s);
           });
-        } else {
-          return updateLibrary(state, (l) => {
-            addSources(l, [""], state.library);
-          });
         }
       } else {
-        if (scene != null) {
+        if (scene == null) {
+          return updateLibrary(state, (l) =>
+            addSources(l, args[0], state.library),
+          );
+        } else {
           return updateScene(state, scene, (s) => {
             addSources(s.sources, args[0], state.library);
             handleArgs(s);
           });
-        } else {
-          return updateLibrary(state, (l) =>
-            addSources(l, args[0], state.library),
-          );
         }
       }
 
@@ -2487,15 +2485,15 @@ export function addSource(
       let newSources = Array.from(args[0].trim().split("\n")).filter(
         (s: string) => s.length > 0,
       ) as Array<string>;
-      if (scene != null) {
+      if (scene == null) {
+        return updateLibrary(state, (l) =>
+          addSources(l, newSources, state.library),
+        );
+      } else {
         return updateScene(state, scene, (s) => {
           addSources(s.sources, newSources, state.library);
           handleArgs(s);
         });
-      } else {
-        return updateLibrary(state, (l) =>
-          addSources(l, newSources, state.library),
-        );
       }
 
     case AF.directory:
@@ -2504,15 +2502,15 @@ export function addSource(
           return;
         }
 
-        if (scene != null) {
+        if (scene == null) {
+          return updateLibrary(state, (l) =>
+            addSources(l, result, state.library),
+          );
+        } else {
           return updateScene(state, scene, (s) => {
             addSources(s.sources, result, state.library);
             handleArgs(s);
           });
-        } else {
-          return updateLibrary(state, (l) =>
-            addSources(l, result, state.library),
-          );
         }
       });
     case AF.videos:
@@ -2520,15 +2518,15 @@ export function addSource(
         if (result.length === 0) {
           return;
         }
-        if (scene != null) {
+        if (scene == null) {
+          return updateLibrary(state, (l) =>
+            addSources(l, result, state.library),
+          );
+        } else {
           return updateScene(state, scene, (s) => {
             addSources(s.sources, result, state.library);
             handleArgs(s);
           });
-        } else {
-          return updateLibrary(state, (l) =>
-            addSources(l, result, state.library),
-          );
         }
       });
     case AF.videoDir:
@@ -2537,15 +2535,15 @@ export function addSource(
           return;
         }
 
-        if (scene != null) {
+        if (scene == null) {
+          return updateLibrary(state, (l) =>
+            addSources(l, result, state.library),
+          );
+        } else {
           return updateScene(state, scene, (s) => {
             addSources(s.sources, result, state.library);
             handleArgs(s);
           });
-        } else {
-          return updateLibrary(state, (l) =>
-            addSources(l, result, state.library),
-          );
         }
       });
     case GT.local:
@@ -2556,30 +2554,30 @@ export function addSource(
       if (!rootDir.endsWith(window.constants.pathSep)) {
         rootDir += window.constants.pathSep;
       }
-      if (scene != null) {
+      if (scene == null) {
+        return updateLibrary(state, (l) =>
+          addSources(l, getImportURLs(args[0], rootDir), state.library),
+        );
+      } else {
         return updateScene(state, scene, (s) => {
           addSources(s.sources, getImportURLs(args[0], rootDir), state.library);
           handleArgs(s);
         });
-      } else {
-        return updateLibrary(state, (l) =>
-          addSources(l, getImportURLs(args[0], rootDir), state.library),
-        );
       }
 
     case GT.tumblr:
       if (!args || args.length < 1) {
         return;
       }
-      if (scene != null) {
+      if (scene == null) {
+        return updateLibrary(state, (l) =>
+          addSources(l, getImportURLs(args[0]), state.library),
+        );
+      } else {
         return updateScene(state, scene, (s) => {
           addSources(s.sources, getImportURLs(args[0]), state.library);
           handleArgs(s);
         });
-      } else {
-        return updateLibrary(state, (l) =>
-          addSources(l, getImportURLs(args[0]), state.library),
-        );
       }
   }
 }
@@ -2800,7 +2798,7 @@ function audioSortFunction(
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
     } else {
-      if (!!secondary) {
+      if (secondary) {
         return audioSortFunction(secondary, true)(a, b);
       } else {
         return 0;
@@ -2863,15 +2861,15 @@ export function sortSources(
   ascending: boolean,
 ): Object {
   if (algorithm == SF.random) {
-    if (scene != null) {
+    if (scene == null) {
+      const newLibrary = randomizeList(state.library.concat());
+      return { library: newLibrary };
+    } else {
       return updateScene(
         state,
         scene,
         (s) => (s.sources = randomizeList(s.sources.concat())),
       );
-    } else {
-      const newLibrary = randomizeList(state.library.concat());
-      return { library: newLibrary };
     }
   }
   const getName = (a: LibrarySource) => {
@@ -2901,7 +2899,22 @@ export function sortSources(
   if (algorithm == SF.type) {
     secondary = SF.alpha;
   }
-  if (scene != null) {
+  if (scene == null) {
+    const newLibrary = state.library
+      .concat()
+      .sort(
+        sortFunction(
+          algorithm,
+          ascending,
+          getName,
+          getFullName,
+          getCount,
+          getType,
+          secondary,
+        ),
+      );
+    return { library: newLibrary };
+  } else {
     return updateScene(
       state,
       scene,
@@ -2918,21 +2931,6 @@ export function sortSources(
           ),
         )),
     );
-  } else {
-    const newLibrary = state.library
-      .concat()
-      .sort(
-        sortFunction(
-          algorithm,
-          ascending,
-          getName,
-          getFullName,
-          getCount,
-          getType,
-          secondary,
-        ),
-      );
-    return { library: newLibrary };
   }
 }
 
@@ -3017,7 +3015,7 @@ function sortFunction(
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
     } else {
-      if (!!secondary) {
+      if (secondary) {
         return sortFunction(
           secondary,
           true,
@@ -3039,47 +3037,7 @@ export function downloadSource(state: State, source: LibrarySource): Object {
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
   let librarySource = state.library.find((s) => s.url == sourceURL);
-  if (librarySource != null) {
-    librarySource.disabledClips = [];
-    let id = state.scenes.length + 1;
-    state.scenes.forEach((s: Scene) => {
-      id = Math.max(s.id + 1, id);
-    });
-    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
-      id: id,
-      name: "download_scene_temp",
-      sources: [librarySource],
-      libraryID: librarySource.id,
-      timingFunction: TF.constant,
-      timingConstant: 1,
-      backgroundType: state.config.defaultScene.backgroundType,
-      backgroundColor: state.config.defaultScene.backgroundColor,
-      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
-      backgroundBlur: state.config.defaultScene.backgroundBlur,
-      imageOrientation: state.config.defaultScene.imageOrientation,
-      videoOrientation: state.config.defaultScene.videoOrientation,
-      playVideoClips: false,
-      videoVolume: 0,
-      orderFunction: OF.strict,
-      downloadScene: true,
-    });
-    if (getLibrarySource(state) != null) {
-      const activeScene = getActiveScene(state);
-      applyEffects(tempScene, getEffects(activeScene));
-      tempScene.overlayEnabled = activeScene.overlayEnabled;
-      tempScene.overlays = activeScene.overlays;
-      state.route.pop();
-      state.route.pop();
-      state.scenes.pop();
-    }
-    return {
-      scenes: state.scenes.concat([tempScene]),
-      route: state.route.concat([
-        new Route({ kind: "scene", value: tempScene.id }),
-        new Route({ kind: "libraryplay", value: tempScene.id }),
-      ]),
-    };
-  } else {
+  if (librarySource == null) {
     source.disabledClips = [];
     let id = state.scenes.length + 1;
     state.scenes.forEach((s: Scene) => {
@@ -3104,6 +3062,46 @@ export function downloadSource(state: State, source: LibrarySource): Object {
       downloadScene: true,
     });
     if (getActiveScene(state)?.libraryID != -1) {
+      const activeScene = getActiveScene(state);
+      applyEffects(tempScene, getEffects(activeScene));
+      tempScene.overlayEnabled = activeScene.overlayEnabled;
+      tempScene.overlays = activeScene.overlays;
+      state.route.pop();
+      state.route.pop();
+      state.scenes.pop();
+    }
+    return {
+      scenes: state.scenes.concat([tempScene]),
+      route: state.route.concat([
+        new Route({ kind: "scene", value: tempScene.id }),
+        new Route({ kind: "libraryplay", value: tempScene.id }),
+      ]),
+    };
+  } else {
+    librarySource.disabledClips = [];
+    let id = state.scenes.length + 1;
+    state.scenes.forEach((s: Scene) => {
+      id = Math.max(s.id + 1, id);
+    });
+    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+      id: id,
+      name: "download_scene_temp",
+      sources: [librarySource],
+      libraryID: librarySource.id,
+      timingFunction: TF.constant,
+      timingConstant: 1,
+      backgroundType: state.config.defaultScene.backgroundType,
+      backgroundColor: state.config.defaultScene.backgroundColor,
+      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
+      backgroundBlur: state.config.defaultScene.backgroundBlur,
+      imageOrientation: state.config.defaultScene.imageOrientation,
+      videoOrientation: state.config.defaultScene.videoOrientation,
+      playVideoClips: false,
+      videoVolume: 0,
+      orderFunction: OF.strict,
+      downloadScene: true,
+    });
+    if (getLibrarySource(state) != null) {
       const activeScene = getActiveScene(state);
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
@@ -3473,13 +3471,13 @@ export function importLibrary(
     if (source.tags) {
       for (let tag of source.tags) {
         // Make sure we have all of these tags
-        if (!myTags.includes(tag.name)) {
+        if (myTags.includes(tag.name)) {
+          tag.id = newTags.find((t) => t.name == tag.name).id; // Map tags we already have
+        } else {
           // Add tags we don't have yet
           tag.id = tagID++;
           newTags.push(tag);
           myTags.push(tag.name);
-        } else {
-          tag.id = newTags.find((t) => t.name == tag.name).id; // Map tags we already have
         }
       }
     } else {
@@ -3644,15 +3642,16 @@ export function detectBPMs(getState: () => State, setState: Function) {
   const readMetadata = (audio: Audio, offset: number) => {
     const state = getState();
     window.ipc.getAudioBPMMetadata(audio.url).then((bpm) => {
-      if (bpm != -1) {
-        audio.bpm = bpm;
-        state.progressCurrent = offset + 1;
-        setState({ progressCurrent: state.progressCurrent });
-        window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-        setTimeout(detectBPMLoop, 100);
-      } else {
+      if (bpm == -1) {
         detectBPM(audio, offset);
+        return;
       }
+
+      audio.bpm = bpm;
+      state.progressCurrent = offset + 1;
+      setState({ progressCurrent: state.progressCurrent });
+      window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
+      setTimeout(detectBPMLoop, 100);
     });
   };
 
@@ -3694,10 +3693,10 @@ export function detectBPMs(getState: () => State, setState: Function) {
     };
 
     window.ipc.getAudioBuffer(audio.url).then((response) => {
-      if (response.arrayBuffer != null) {
-        detectBPM(response.arrayBuffer);
-      } else {
+      if (response.arrayBuffer == null) {
         bpmError(response.error);
+      } else {
+        detectBPM(response.arrayBuffer);
       }
     });
   };

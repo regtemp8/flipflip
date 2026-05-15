@@ -615,18 +615,19 @@ class AudioOptions extends React.Component<AudioOptionsProps> {
     if (this.state.audio.url && !this.state.loadingTag) {
       this.setState({ loadingTag: true });
       window.ipc.getAudioBPMMetadata(this.state.audio.url).then((bpm) => {
-        if (bpm != -1) {
-          this.changeKey("bpm", bpm);
-          this.setState({ loadingTag: false, successTag: true });
-          setTimeout(() => {
-            this.setState({ successTag: false });
-          }, 3000);
-        } else {
+        if (bpm === -1) {
           this.setState({ loadingTag: false, errorTag: true });
           setTimeout(() => {
             this.setState({ errorTag: false });
           }, 3000);
+          return;
         }
+
+        this.changeKey("bpm", bpm);
+        this.setState({ loadingTag: false, successTag: true });
+        setTimeout(() => {
+          this.setState({ successTag: false });
+        }, 3000);
       });
     }
   }

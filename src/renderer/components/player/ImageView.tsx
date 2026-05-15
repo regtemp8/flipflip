@@ -933,14 +933,12 @@ export default class ImageView extends React.Component<ImageViewProps> {
         <Panning
           image={this.props.image}
           parentHeight={
-            !!this._parentHeight
-              ? this._parentHeight
-              : this.contentRef.current?.parentElement.offsetHeight
+            this._parentHeight ||
+            this.contentRef.current?.parentElement.offsetHeight
           }
           parentWidth={
-            !!this._parentWidth
-              ? this._parentWidth
-              : this.contentRef.current.parentElement.offsetWidth
+            this._parentWidth ||
+            this.contentRef.current.parentElement.offsetWidth
           }
           togglePan={this.props.toggleStrobe}
           currentAudio={this.props.currentAudio}

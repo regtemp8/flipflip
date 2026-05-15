@@ -1072,7 +1072,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                 );
                                 if (oldIndex < newIndex) newIndex--;
                               }
-                              if (!!evt.item.id) {
+                              if (evt.item.id) {
                                 let newGroups = Array.from(
                                   this.props.sceneGroups,
                                 );
@@ -1350,7 +1350,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                 );
                                 if (oldIndex < newIndex) newIndex--;
                               }
-                              if (!!evt.item.id) {
+                              if (evt.item.id) {
                                 let newGroups = Array.from(
                                   this.props.sceneGroups,
                                 );
@@ -1631,7 +1631,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                                 );
                                 if (oldIndex < newIndex) newIndex--;
                               }
-                              if (!!evt.item.id) {
+                              if (evt.item.id) {
                                 let newGroups = Array.from(
                                   this.props.sceneGroups,
                                 );
@@ -1796,7 +1796,7 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                   <span
                     className={classes.generateTooltip}
                     style={
-                      !this.props.canGenerate ? { pointerEvents: "none" } : {}
+                      this.props.canGenerate ? {} : { pointerEvents: "none" }
                     }
                   >
                     <Fab
@@ -1820,7 +1820,9 @@ class ScenePicker extends React.Component<ScenePickerProps> {
                 >
                   <span
                     className={classes.gridTooltip}
-                    style={!this.props.canGrid ? { pointerEvents: "none" } : {}}
+                    style={
+                      this.props.canGrid ? undefined : { pointerEvents: "none" }
+                    }
                   >
                     <Fab
                       className={clsx(
@@ -2094,16 +2096,17 @@ class ScenePicker extends React.Component<ScenePickerProps> {
   onFinishImportScene() {
     if (this.state.importFile.startsWith("http")) {
       window.ipc.getTextFromURL(this.state.importFile).then((text) => {
-        if (text != null) {
-          try {
-            const json = JSON.parse(text);
-            this.props.onImportScene(json, this.state.importSources);
-            this.onCloseDialog();
-          } catch (e) {
-            this.props.systemMessage("This is not a valid JSON file");
-          }
-        } else {
+        if (text == null) {
           this.props.systemMessage("Error accessing URL");
+          return;
+        }
+
+        try {
+          const json = JSON.parse(text);
+          this.props.onImportScene(json, this.state.importSources);
+          this.onCloseDialog();
+        } catch (e) {
+          this.props.systemMessage("This is not a valid JSON file");
         }
       });
     } else {
@@ -2115,10 +2118,10 @@ class ScenePicker extends React.Component<ScenePickerProps> {
   }
 
   onNewWindow() {
-    if (!this.props.config.newWindowAlerted) {
-      this.setState({ openMenu: MO.newWindowAlert });
-    } else {
+    if (this.props.config.newWindowAlerted) {
       this.newWindow(false);
+    } else {
+      this.setState({ openMenu: MO.newWindowAlert });
     }
   }
 

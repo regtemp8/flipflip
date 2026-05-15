@@ -453,7 +453,7 @@ export default class Meta extends React.Component {
                       ? actions.getAudioSource(this.state)?.tags
                       : scene.scriptScene
                         ? actions.getScriptSource(this.state)?.tags
-                        : actions.getLibrarySource(this.state)?.id != -1
+                        : actions.getLibrarySource(this.state)?.id > -1
                           ? actions.getLibrarySource(this.state)?.tags
                           : null
                   }
@@ -575,7 +575,7 @@ export default class Meta extends React.Component {
                 <Tutorial
                   config={this.state.config}
                   route={this.state.route}
-                  scene={!!scene ? scene : grid}
+                  scene={scene ?? grid}
                   tutorial={this.state.tutorial}
                   onSetTutorial={a(actions.setTutorial)}
                   onDoneTutorial={a(actions.doneTutorial)}

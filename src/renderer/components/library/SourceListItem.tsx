@@ -340,11 +340,7 @@ class SourceListItem extends React.Component<SourceListItemProps> {
                   <Chip
                     className={classes.countChip}
                     clickable
-                    label={
-                      !!this.props.source.weight
-                        ? this.props.source.weight
-                        : "1"
-                    }
+                    label={this.props?.source?.weight || "1"}
                     color="default"
                     size="small"
                     onClick={this.props.onOpenWeightMenu.bind(

@@ -114,8 +114,7 @@ export default class Player extends React.Component<PlayerProps> {
 
     this.state = {
       canStart: props.scene.gridScene || props.scene.audioScene,
-      hasStarted:
-        props.hasStarted != null ? props.hasStarted : props.scene.audioScene,
+      hasStarted: props.hasStarted ?? props.scene.audioScene,
       isMainLoaded: props.scene.gridScene || props.scene.audioScene,
       areOverlaysLoaded: Array<boolean>(props.scene.overlays.length).fill(
         false,
@@ -915,7 +914,7 @@ export default class Player extends React.Component<PlayerProps> {
   }
 
   componentDidMount() {
-    if (!!this.props.nextScene) {
+    if (this.props.nextScene) {
       this._interval = window.setInterval(() => this.nextSceneLoop(), 1000);
     }
     if (this.props.preventSleep) {
@@ -1113,8 +1112,7 @@ export default class Player extends React.Component<PlayerProps> {
           this.props.config.displaySettings.startImmediately))
     ) {
       this.setState({
-        hasStarted:
-          this.props.hasStarted != null ? this.props.hasStarted : true,
+        hasStarted: this.props.hasStarted ?? true,
         isLoaded: true,
         startTime: this.state.startTime ? this.state.startTime : new Date(),
       });

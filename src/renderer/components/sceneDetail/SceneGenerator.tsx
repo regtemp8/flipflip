@@ -669,7 +669,7 @@ class SceneGenerator extends React.Component<SceneGeneratorProps> {
 
   getRuleName(wg: WeightGroup) {
     if (!wg) return "ERROR";
-    if (!!wg.rules) {
+    if (wg.rules) {
       if (wg.rules.length == 0) return "New Adv Rule";
       if (!this.areRulesValid(wg)) return "ERROR";
 

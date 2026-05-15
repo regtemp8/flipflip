@@ -124,15 +124,15 @@ export const timestampRegex =
       let timestamp = false;
 
       if (state.tokens.length > 0) {
-        if (timestampRegex.exec(state.tokens[0]) != null) {
+        if (timestampRegex.exec(state.tokens[0]) == null) {
+          command = state.tokens[0];
+        } else {
           timestamp = true;
           if (state.tokens.length > 1) {
             command = state.tokens[1];
           } else {
             sol = true;
           }
-        } else {
-          command = state.tokens[0];
         }
       }
 
@@ -170,11 +170,9 @@ export const timestampRegex =
         if (stream.eol() || !/\w/.test(stream.peek())) {
           const timestamp = stream.current();
           state.tokens.push(timestamp);
-          if (timestampRegex.exec(timestamp) != null) {
-            return rt("number", state, stream);
-          } else {
-            return rt("error", state, stream);
-          }
+          const type =
+            timestampRegex.exec(timestamp) == null ? "error" : "number";
+          return rt(type, state, stream);
         }
       }
 
@@ -256,11 +254,12 @@ export const timestampRegex =
           } else {
             const registerRegex = /^\$(\d)$/.exec(cur);
             if (registerRegex != null) {
-              if (!state.storedPhrases.has(Number.parseInt(registerRegex[1]))) {
-                return rt("error", state, stream);
-              } else {
-                return rt("variable", state, stream);
-              }
+              const type = state.storedPhrases.has(
+                Number.parseInt(registerRegex[1]),
+              )
+                ? "variable"
+                : "error";
+              return rt(type, state, stream);
             }
           }
           return rt(words[cur], state, stream);
@@ -279,11 +278,12 @@ export const timestampRegex =
           } else {
             const registerRegex = /^\$(\d)$/.exec(cur);
             if (registerRegex != null) {
-              if (!state.storedPhrases.has(Number.parseInt(registerRegex[1]))) {
-                return rt("error", state, stream);
-              } else {
-                return rt("variable", state, stream);
-              }
+              const type = state.storedPhrases.has(
+                Number.parseInt(registerRegex[1]),
+              )
+                ? "variable"
+                : "error";
+              return rt(type, state, stream);
             }
           }
           return rt(words[cur], state, stream);
@@ -317,11 +317,8 @@ export const timestampRegex =
           }
         } else if (colorSetters.includes(command)) {
           const colorRegex = /^#([a-f0-9]{3}){1,2}$/i.exec(cur);
-          if (colorRegex != null) {
-            return rt("variable-3", state, stream);
-          } else {
-            return rt("error", state, stream);
-          }
+          const type = colorRegex == null ? "error" : "variable-3";
+          return rt(type, state, stream);
         } else if (
           command == "playAudio" &&
           state.tokens.length > (timestamp ? 3 : 2)
@@ -346,13 +343,13 @@ export const timestampRegex =
           state.tokens[0].toLowerCase() == "storephrase"
         ) {
           const registerRegex = /^\$(\d)$/.exec(state.tokens[1]);
-          if (registerRegex != null) {
+          if (registerRegex == null) {
+            state.storedPhrases.set(0, true);
+          } else {
             if (state.tokens.length > 1) {
               state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
               state.storedPhrases.set(0, true);
             }
-          } else {
-            state.storedPhrases.set(0, true);
           }
         }
         state.tokens = new Array<string>();

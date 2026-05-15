@@ -155,10 +155,10 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
   }
 
   onIFrameLoad() {
-    if (!this.state.load) {
-      this.setState({ load: true });
-    } else {
+    if (this.state.load) {
       this.onCloseDialog();
+    } else {
+      this.setState({ load: true });
     }
   }
 
@@ -288,7 +288,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
             }
 
             if (n < sources.length) {
-              const timeout = object?.timeout != null ? object.timeout : 1000;
+              const timeout = object?.timeout ?? 1000;
               window.setTimeout(sourceLoop, timeout);
             } else {
               const values = flatten(Array.from(newAllURLs.values()));
@@ -378,10 +378,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
             }
 
             if (n < nextSources.length) {
-              window.setTimeout(
-                nextSourceLoop,
-                object.timeout != null ? object.timeout : 1000,
-              );
+              window.setTimeout(nextSourceLoop, object.timeout ?? 1000);
             }
           }
         },
@@ -469,10 +466,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               );
             }
 
-            window.setTimeout(
-              promiseLoop,
-              object?.timeout != null ? object.timeout : 1000,
-            );
+            window.setTimeout(promiseLoop, object?.timeout ?? 1000);
           }
         },
       );

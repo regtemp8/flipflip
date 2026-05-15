@@ -123,12 +123,7 @@ export function isAudio(path: string, strict: boolean): boolean {
 }
 
 export function getFileName(url: string, pathSep: string, extension = true) {
-  let sep;
-  if (/^(https?:\/\/)|(file:\/\/)/g.exec(url) != null) {
-    sep = "/";
-  } else {
-    sep = pathSep;
-  }
+  const sep = /^(https?:\/\/)|(file:\/\/)/g.exec(url) == null ? pathSep : "/";
   url = url.substring(url.lastIndexOf(sep) + 1);
   if (url.includes("?")) {
     url = url.substring(0, url.indexOf("?"));
@@ -313,10 +308,10 @@ export function getFileGroup(url: string, pathSep: string) {
       const gallery = galleryRegex.exec(url);
       return gallery[1];
     case ST.list:
-      if (/^https?:\/\//g.exec(url) != null) {
-        sep = "/";
-      } else {
+      if (/^https?:\/\//g.exec(url) == null) {
         sep = pathSep;
+      } else {
+        sep = "/";
       }
       return url.substring(url.lastIndexOf(sep) + 1).replace(".txt", "");
     case ST.local:
@@ -329,10 +324,10 @@ export function getFileGroup(url: string, pathSep: string) {
     case ST.video:
     case ST.playlist:
     case ST.nimja:
-      if (/^https?:\/\//g.exec(url) != null) {
-        sep = "/";
-      } else {
+      if (/^https?:\/\//g.exec(url) == null) {
         sep = pathSep;
+      } else {
+        sep = "/";
       }
       let name = url.substring(0, url.lastIndexOf(sep));
       return name.substring(name.lastIndexOf(sep) + 1);

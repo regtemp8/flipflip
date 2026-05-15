@@ -372,43 +372,43 @@ export const loadRedGifs = (
   let orderRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*order=([^&]*)/.exec(url);
   let order = null;
-  if (!!orderRegex) {
+  if (orderRegex) {
     order = orderRegex[1];
   }
   let typeRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*type=(\w)/.exec(url);
   let type = null;
-  if (!!typeRegex) {
+  if (typeRegex) {
     type = typeRegex[1];
   }
   let tagsRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(url);
   let tags = null;
-  if (!!tagsRegex) {
+  if (tagsRegex) {
     tags = tagsRegex[1];
   }
   let ratioRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*ratio=(\w)/.exec(url);
   let ratio = null;
-  if (!!ratioRegex) {
+  if (ratioRegex) {
     ratio = ratioRegex[1];
   }
   let verifiedRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*verified=(\w)/.exec(url);
   let verified = null;
-  if (!!verifiedRegex) {
+  if (verifiedRegex) {
     verified = verifiedRegex[1];
   }
   let longRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*long=(\w)/.exec(url);
   let long = null;
-  if (!!longRegex) {
+  if (longRegex) {
     long = longRegex[1];
   }
   let soundRegex =
     /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*sound=(\w)/.exec(url);
   let sound = null;
-  if (!!soundRegex) {
+  if (soundRegex) {
     sound = soundRegex[1];
   }
 
@@ -424,19 +424,19 @@ export const loadRedGifs = (
     }
   }
   let page = helpers.next + 1;
-  if (!!type) {
+  if (type) {
     apiURL += "type=" + type + "&";
   }
-  if (!!ratio) {
+  if (ratio) {
     apiURL += "ratio=" + ratio + "&";
   }
-  if (!!verified) {
+  if (verified) {
     apiURL += "verified=" + verified + "&";
   }
-  if (!!long) {
+  if (long) {
     apiURL += "long=" + long + "&";
   }
-  if (!!sound) {
+  if (sound) {
     apiURL += "sound=" + sound + "&";
   }
   apiURL += "order=" + order + "&page=" + page + "";
@@ -1045,7 +1045,7 @@ export const loadDeviantArt = (
     "https://backend.deviantart.com/rss.xml?type=deviation&q=by%3A" +
       getFileGroup(url, path.sep) +
       "+sort%3Atime+meta%3Aall" +
-      (helpers.next != 0 ? "&offset=" + helpers.next : ""),
+      (helpers.next > 0 ? "&offset=" + helpers.next : ""),
   )
     .get()
     .setTimeout(5000)
@@ -2512,10 +2512,10 @@ export const loadPiwigo = (
         });
     };
 
-    if (!piwigoLoggedIn) {
-      login();
-    } else {
+    if (piwigoLoggedIn) {
       search();
+    } else {
+      login();
     }
   } else {
     let systemMessage = undefined;

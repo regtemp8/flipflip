@@ -1731,16 +1731,17 @@ class Library extends React.Component<LibraryProps> {
   onFinishImportLibrary() {
     if (this.state.importFile.startsWith("http")) {
       window.ipc.getTextFromURL(this.state.importFile).then((text) => {
-        if (text != null) {
-          try {
-            const json = JSON.parse(text);
-            this.props.onImportLibrary(json);
-            this.onCloseDialog();
-          } catch (e) {
-            this.props.systemMessage("This is not a valid JSON file");
-          }
-        } else {
+        if (text == null) {
           this.props.systemMessage("Error accessing URL");
+          return;
+        }
+
+        try {
+          const json = JSON.parse(text);
+          this.props.onImportLibrary(json);
+          this.onCloseDialog();
+        } catch (e) {
+          this.props.systemMessage("This is not a valid JSON file");
         }
       });
     } else {

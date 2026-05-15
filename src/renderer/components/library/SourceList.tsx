@@ -308,13 +308,7 @@ class SourceList extends React.Component<SourceListProps> {
             <TextField
               variant="standard"
               margin="dense"
-              value={
-                !!this.state.weightMenu
-                  ? !!this.state.weightMenu.weight
-                    ? this.state.weightMenu.weight
-                    : 1
-                  : 1
-              }
+              value={this.state?.weightMenu?.weight || 1}
               onChange={this.onWeightInput.bind(this)}
               onBlur={this.blurWeight.bind(this)}
               inputProps={{
@@ -688,9 +682,7 @@ class SourceList extends React.Component<SourceListProps> {
         const newSources = new Array<LibrarySource>();
         for (let source of s.sources) {
           if (/^\s*$/.exec(source.url) == null) {
-            if (!newSources.map((s) => s.url).includes(source.url)) {
-              newSources.push(source);
-            } else {
+            if (newSources.map((s) => s.url).includes(source.url)) {
               for (let existingSource of newSources) {
                 if (existingSource.url == source.url) {
                   if (existingSource.id > source.id) {
@@ -699,6 +691,8 @@ class SourceList extends React.Component<SourceListProps> {
                   break;
                 }
               }
+            } else {
+              newSources.push(source);
             }
           }
         }
@@ -722,8 +716,6 @@ class SourceList extends React.Component<SourceListProps> {
         for (let source of l) {
           if (/^\s*$/.exec(source.url) == null) {
             if (!newSources.map((s) => s.url).includes(source.url)) {
-              newSources.push(source);
-            } else {
               for (let existingSource of newSources) {
                 if (existingSource.url == source.url) {
                   if (existingSource.id > source.id) {
@@ -732,6 +724,8 @@ class SourceList extends React.Component<SourceListProps> {
                   break;
                 }
               }
+            } else {
+              newSources.push(source);
             }
           }
         }

@@ -46,11 +46,11 @@ export default class AppStorage {
       let portableMode = false;
       if (!fs.existsSync(savePath) && fs.existsSync(portablePath)) {
         data = JSON.parse(fs.readFileSync(portablePath, "utf-8"));
-        if (!data.config.generalSettings.portableMode) {
-          data = JSON.parse(fs.readFileSync(savePath, "utf-8"));
-        } else {
+        if (data.config.generalSettings.portableMode) {
           portableMode = true;
           console.log("Portable: " + portablePath);
+        } else {
+          data = JSON.parse(fs.readFileSync(savePath, "utf-8"));
         }
       } else {
         data = JSON.parse(fs.readFileSync(savePath, "utf-8"));

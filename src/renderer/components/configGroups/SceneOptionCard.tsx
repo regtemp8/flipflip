@@ -791,9 +791,8 @@ class SceneOptionCard extends React.Component<SceneOptionCardProps> {
                         scene={this.props.scene}
                         allScenes={this.props.allScenes}
                         values={
-                          this.state.randomSceneList != null
-                            ? this.state.randomSceneList
-                            : this.props.scene.nextSceneRandoms
+                          this.state?.randomSceneList ??
+                          this.props.scene.nextSceneRandoms
                         }
                         getSceneName={this.getSceneName.bind(this)}
                         onChange={this.changeRandomScenes.bind(this)}
@@ -1188,11 +1187,9 @@ class SceneOptionCard extends React.Component<SceneOptionCardProps> {
   }
 
   onRandomSceneDialog() {
-    if (this.state.randomSceneList != null) {
-      this.setState({ randomSceneList: null });
-    } else {
-      this.setState({ randomSceneList: this.props.scene.nextSceneRandoms });
-    }
+    const randomSceneList =
+      this.state?.randomSceneList ?? this.props.scene.nextSceneRandoms;
+    this.setState({ randomSceneList });
   }
 
   changeRandomScenes(sceneIDs: Array<number>) {

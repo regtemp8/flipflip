@@ -54,27 +54,7 @@ export function getCachePath(source: string, config: Config) {
 }
 
 function cachePath(source: string, typeDir: string, config: Config) {
-  if (config.caching.directory != "") {
-    let baseDir = config.caching.directory;
-    if (!baseDir.endsWith(path.sep)) {
-      baseDir += path.sep;
-    }
-    if (source) {
-      if (source != ST.video && source != ST.playlist) {
-        return (
-          baseDir +
-          typeDir +
-          path.sep +
-          getFileGroup(source, path.sep) +
-          path.sep
-        );
-      } else {
-        return baseDir + typeDir + path.sep;
-      }
-    } else {
-      return baseDir;
-    }
-  } else {
+  if (config.caching.directory === "") {
     if (source) {
       if (source != ST.video && source != ST.playlist) {
         return (
@@ -94,6 +74,26 @@ function cachePath(source: string, typeDir: string, config: Config) {
       }
     } else {
       return saveDir + path.sep + "ImageCache" + path.sep;
+    }
+  } else {
+    let baseDir = config.caching.directory;
+    if (!baseDir.endsWith(path.sep)) {
+      baseDir += path.sep;
+    }
+    if (source) {
+      if (source != ST.video && source != ST.playlist) {
+        return (
+          baseDir +
+          typeDir +
+          path.sep +
+          getFileGroup(source, path.sep) +
+          path.sep
+        );
+      } else {
+        return baseDir + typeDir + path.sep;
+      }
+    } else {
+      return baseDir;
     }
   }
 }

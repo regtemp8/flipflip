@@ -1420,11 +1420,8 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
   }
 
   onFullscreen() {
-    if (this.state.scene != null) {
-      this.setState({ fullscreen: !this.state.fullscreen });
-    } else {
-      this.setState({ fullscreen: false });
-    }
+    const fullscreen = this.state.scene != null && !this.state.fullscreen;
+    this.setState({ fullscreen });
   }
 
   onError(e: string) {

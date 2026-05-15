@@ -73,9 +73,9 @@ class ColorSetPicker extends React.Component<ColorSetPickerProps> {
               id="add-color"
               className={classes.colorButton}
               style={
-                this.state.pickerIndex != null
-                  ? { backgroundColor: this.state.pickerColor }
-                  : {}
+                this.state.pickerIndex == null
+                  ? {}
+                  : { backgroundColor: this.state.pickerColor }
               }
               onClick={this.onOpenColorPicker.bind(this)}
               size="medium"

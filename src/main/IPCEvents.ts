@@ -377,7 +377,7 @@ function onShowPlayerContextMenu(
       },
     }),
   );
-  if (!!post) {
+  if (post) {
     contextMenu.append(
       new MenuItem({
         label: post,
@@ -417,7 +417,7 @@ function onShowPlayerContextMenu(
       },
     }),
   );
-  if (!!post) {
+  if (post) {
     contextMenu.append(
       new MenuItem({
         label: "Open Post",
@@ -1025,8 +1025,7 @@ async function onGetAudioBuffer(
     try {
       const { headers } = await wretch(url).head().res();
       const length = headers.get("content-length");
-      const size = length != null ? Number(length) : 0;
-      if (size >= maxByteSize) {
+      if (Number(length) >= maxByteSize) {
         return { error };
       }
     } catch (err) {
@@ -1138,12 +1137,12 @@ async function onPiwigoAuth(
   try {
     const json = await req.post().setTimeout(5000).json();
 
-    if (json.stat !== "ok") {
+    if (json.stat === "ok") {
+      return undefined;
+    } else {
       const error = "Invalid response from Piwigo server";
       console.error(error);
       return error;
-    } else {
-      return undefined;
     }
   } catch (err) {
     console.error(err);

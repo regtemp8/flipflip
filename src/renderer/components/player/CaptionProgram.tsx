@@ -312,14 +312,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
   start() {
     const url = this.props.captionScript.url;
     this._runningPromise = new CancelablePromise((resolve, reject) => {
-      if (this.props.captionScript.script != null) {
-        resolve({ data: [this.props.captionScript.script], helpers: null });
-      } else {
+      if (this.props.captionScript.script == null) {
         window.ipc.getTextFromURL(url).then((text) => {
           if (text != null) {
             resolve({ data: [text], helpers: null });
           }
         });
+      } else {
+        resolve({ data: [this.props.captionScript.script], helpers: null });
       }
     });
     this._runningPromise.then(async (data) => {
@@ -353,16 +353,16 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                 "Error: {" + index + "} '" + line + "' - extra parameter(s)";
               break;
             }
-            if (timestamp != null) {
+            if (timestamp == null) {
+              containsAction = true;
+              newProgram.push(this.advance());
+            } else {
               containsTimestampAction = true;
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(this.advance());
               } else {
                 newTimestamps.set(timestamp, [this.advance()]);
               }
-            } else {
-              containsAction = true;
-              newProgram.push(this.advance());
             }
             break;
           case "count":
@@ -400,16 +400,16 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                 "Error: {" + index + "} '" + line + "' - invalid count command";
               break;
             }
-            if (timestamp != null) {
+            if (timestamp == null) {
+              containsAction = true;
+              newProgram.push(this.count(start, end));
+            } else {
               containsTimestampAction = true;
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(this.count(start, end, true));
               } else {
                 newTimestamps.set(timestamp, [this.count(start, end, true)]);
               }
-            } else {
-              containsAction = true;
-              newProgram.push(this.count(start, end));
             }
             break;
           case "blink":
@@ -446,7 +446,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               }
             }
             if (error != null) break;
-            if (timestamp != null) {
+            if (timestamp == null) {
+              containsAction = true;
+              newProgram.push((this as any)[command](value));
+            } else {
               containsTimestampAction = true;
               if (newTimestamps.has(timestamp)) {
                 newTimestamps
@@ -457,9 +460,6 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                   (this as any)[command](value, true),
                 ]);
               }
-            } else {
-              containsAction = true;
-              newProgram.push((this as any)[command](value));
             }
             break;
           case "storephrase":
@@ -645,16 +645,16 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               }
             }
             fn = (this as any)[command](pSplit[0], volume);
-            if (timestamp != null) {
+            if (timestamp == null) {
+              containsAction = true;
+              newProgram.push(fn);
+            } else {
               containsTimestampAction = true;
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              containsAction = true;
-              newProgram.push(fn);
             }
             break;
           case "setBlinkDuration":
@@ -691,14 +691,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             }
             if (invalid) break;
             fn = (this as any)[command](numbers);
-            if (timestamp != null) {
+            if (timestamp == null) {
+              newProgram.push(fn);
+            } else {
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              newProgram.push(fn);
             }
             break;
           case "setBlinkWaveRate":
@@ -748,14 +748,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               break;
             }
             fn = (this as any)[command](ms);
-            if (timestamp != null) {
+            if (timestamp == null) {
+              newProgram.push(fn);
+            } else {
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              newProgram.push(fn);
             }
             break;
           case "setBlinkTF":
@@ -782,14 +782,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               break;
             }
             fn = (this as any)[command](tf);
-            if (timestamp != null) {
+            if (timestamp == null) {
+              newProgram.push(fn);
+            } else {
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              newProgram.push(fn);
             }
             break;
           case "setShowCountProgress":
@@ -812,14 +812,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               break;
             }
             fn = (this as any)[command](value == "true" || value == "t");
-            if (timestamp != null) {
+            if (timestamp == null) {
+              newProgram.push(fn);
+            } else {
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              newProgram.push(fn);
             }
             break;
           case "setCountProgressColor":
@@ -843,14 +843,14 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             }
             args[0] = ms;
             fn = (this as any)[command](args);
-            if (timestamp != null) {
+            if (timestamp == null) {
+              newProgram.push(fn);
+            } else {
               if (newTimestamps.has(timestamp)) {
                 newTimestamps.get(timestamp).push(fn);
               } else {
                 newTimestamps.set(timestamp, [fn]);
               }
-            } else {
-              newProgram.push(fn);
             }
             break;
           default:
