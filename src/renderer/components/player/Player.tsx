@@ -135,9 +135,11 @@ export default class Player extends React.Component<PlayerProps> {
         .map((c) => [new ChildCallbackHack()]),
       imagePlayerDeleteHack: new ChildCallbackHack(),
       mainVideo: null as HTMLVideoElement,
-      overlayVideos: Array<Array<HTMLVideoElement>>(props.scene.overlays.length)
+      overlayVideos: new Array<Array<HTMLVideoElement>>(
+        props.scene.overlays.length,
+      )
         .fill(null)
-        .map((n) => [null]),
+        .map((n) => [null as HTMLVideoElement]),
       currentAudio: null as Audio,
       timeToNextFrame: null as number,
       recentPictureGrid: false,
@@ -874,11 +876,11 @@ export default class Player extends React.Component<PlayerProps> {
     }
     if (this.props.scene.overlayEnabled != props.scene.overlayEnabled) {
       this.setState({
-        overlayVideos: Array<Array<HTMLVideoElement>>(
+        overlayVideos: new Array<Array<HTMLVideoElement>>(
           this.props.scene.overlays.length,
         )
           .fill(null)
-          .map((n) => [null]),
+          .map((n) => [null as HTMLVideoElement]),
       });
     } else if (this.props.scene.overlays != props.scene.overlays) {
       if (this.props.scene.overlays.length == props.scene.overlays.length) {
