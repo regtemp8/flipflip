@@ -30,13 +30,7 @@ import Scene from "../../common/Scene";
 import Clip from "../../common/Clip";
 
 export function flatten(array: Array<any>) {
-  let values;
-  try {
-    values = values = [].concat([], array);
-  } catch (e) {
-    values = (array as any).flat(1);
-  }
-  return values;
+  return array.flat(1);
 }
 
 export function getEaseFunction(
