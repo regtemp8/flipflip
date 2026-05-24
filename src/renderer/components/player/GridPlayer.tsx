@@ -115,7 +115,7 @@ class GridPlayer extends React.Component<GridPlayerProps> {
       sceneCopyGrid: props.scene.grid.map((r) => r.map((c) => null)) as Array<
         Array<React.ReactNode>
       >,
-      isLoaded: new Array<Array<boolean>>(),
+      isLoaded: props.scene.grid.map((r) => Array.from({ length: r.length }, () => false)),
       hideCursor: false,
     };
   }
@@ -167,27 +167,6 @@ class GridPlayer extends React.Component<GridPlayerProps> {
                       (s) => s.id == cell.sceneID,
                     );
                     const newLoaded = this.state.isLoaded;
-                    let changed = false;
-                    while (newLoaded.length <= rowIndex) {
-                      newLoaded.push([]);
-                      changed = true;
-                    }
-                    while (newLoaded[rowIndex].length <= colIndex) {
-                      newLoaded[rowIndex].push(false);
-                      changed = true;
-                    }
-                    if (changed) {
-                      setTimeout(
-                        () => this.setState({ isLoaded: newLoaded }),
-                        200,
-                      );
-                    }
-                    if (!scene && !newLoaded[rowIndex][colIndex]) {
-                      setTimeout(
-                        () => this.setCellLoaded(rowIndex, colIndex),
-                        200,
-                      );
-                    }
                     const allLoaded =
                       flatten(this.state.isLoaded).find((l: boolean) => !l) ==
                       null;
