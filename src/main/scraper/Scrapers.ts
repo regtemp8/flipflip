@@ -1885,7 +1885,7 @@ export const loadEHentai = (
     .text((html) => {
       const imageEls = new JSDOM(html, {
         contentType: "text/html",
-      }).window.document.querySelectorAll("#gdt > .gdtm > div > a");
+      }).window.document.querySelectorAll("#gdt > a");
       if (imageEls.length > 0) {
         let imageCount = 0;
         let images = new Array<string>();
