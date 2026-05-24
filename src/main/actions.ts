@@ -296,17 +296,17 @@ export function printMemoryReport() {
     }
     f = f.substr(0, 15);
     return f;
-  }
+  };
   const logB = (x: any) => {
     console.log(
       format(x[0]),
       format((x[1] / (1000.0 * 1000)).toFixed(2)),
       "MB",
     );
-  }
+  };
   const logKB = (x: any) => {
     console.log(format(x[0]), format((x[1] / 1000.0).toFixed(2)), "MB");
-  }
+  };
   const logCount = (x: any) => {
     console.log(
       format(x[0]),
@@ -316,7 +316,7 @@ export function printMemoryReport() {
       format((x[1].liveSize / (1000.0 * 1000)).toFixed(2)),
       "MB",
     );
-  }
+  };
 
   Object.entries(process.memoryUsage()).map(logB);
   Object.entries(process.getProcessMemoryInfo()).map(logKB);

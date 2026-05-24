@@ -243,10 +243,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           delay = 200;
         }
       }
-      if (
-        this._lastAdvance == null ||
-        Date.now() - this._lastAdvance > delay
-      ) {
+      if (this._lastAdvance == null || Date.now() - this._lastAdvance > delay) {
         this._lastAdvance = Date.now();
         window.clearTimeout(this._timeout);
         this.advance(true, true);
