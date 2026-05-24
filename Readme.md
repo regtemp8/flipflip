@@ -13,7 +13,7 @@
 
 ## Links
 
-* **[Download Latest Release (Mac/Windows/Linux)](https://github.com/regtemp8/flipflip/releases/latest)**
+* **[Download Latest Release (Mac/Windows/Linux)](https://github.com/regtemp8/flipflip/releases)**
 * **[User manual](https://regtemp8.github.io/flipflip/)**
 * **[Subreddit](https://www.reddit.com/r/flipflip/)**
 

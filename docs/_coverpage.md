@@ -1,6 +1,6 @@
-![logo](doc_images/flipflip_logo.png)
+<img src="doc_images/flipflip_logo.png" alt="FlipFlip logo"/>
 
-# FlipFlip <small>3.2</small>
+# FlipFlip <small>v3</small>
 
 > A glorified slideshow, with _lots_ of bells and whistles
 
