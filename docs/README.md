@@ -3,7 +3,7 @@
 <img src="doc_images/flipflip_home.png" alt="FlipFlip" class="col-xs-10 col-xl-7">
 
 ## [Releases](https://github.com/regtemp8/flipflip/releases)
-#### [Latest Release](https://github.com/regtemp8/flipflip/releases/tag/v4.0.0-beta4)
+#### [Latest Release](https://github.com/regtemp8/flipflip/releases/tag/v4.0.0-beta10)
 
 ## Features
 * Local files as well as Tumblr, ~~Reddit~~, Instagram, Imgur, DeviantArt, Booru & More
