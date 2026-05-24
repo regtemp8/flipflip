@@ -1,6 +1,6 @@
 <img src="doc_images/flipflip_logo.png" alt="FlipFlip logo"/>
 
-# FlipFlip
+# FlipFlip <small>v4</small>
 
 > A glorified slideshow, with _lots_ of bells and whistles
 
