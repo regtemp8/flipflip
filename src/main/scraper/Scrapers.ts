@@ -2614,7 +2614,7 @@ export const loadHydrus = (
       const pageIDs = fileIDs.slice(page * chunk, (page + 1) * chunk);
       wretch(
         hydrusURL +
-          "/get_files/file_metadata?file_ids=[" +
+          "/get_files/file_metadata?only_return_basic_information=true&include_services_object=false&file_ids=[" +
           pageIDs.toString() +
           "]",
       )
