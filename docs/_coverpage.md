@@ -1,4 +1,4 @@
-![logo](doc_images/flipflip_logo.png)
+<img src="doc_images/flipflip_logo.png" alt="FlipFlip logo"/>
 
 # FlipFlip <small>v5</small>
 
