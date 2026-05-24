@@ -1,4 +1,11 @@
 # Changelog
+#### v5.1.0 <small>(05/24/2026)</small>
+- Add Hydrus source dialog
+- Upgrade Electron to 42.2.0
+- Upgrade 3rd party libraries
+- Fix e-hentai
+- Remove Reddit
+
 #### v5.0.0 <small>(04/23/2026)</small>
 - Fix grid mirror
 - Fix ImageFap
