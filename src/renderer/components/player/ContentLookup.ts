@@ -16,21 +16,25 @@ class ContentLookup {
     this.lookup = new Map<string, Content>();
   }
 
-  public delete(key: string) {
+  public delete(key?: string) {
+    if(key == null) {
+      return
+    }
+
     this.lookup.delete(key);
   }
 
-  public hasURLs(key: string) {
-    return (this.lookup.get(key)?.allURLs?.size ?? 0) > 0;
+  public hasURLs(key?: string) {
+    return key != null && (this.lookup.get(key)?.allURLs?.size ?? 0) > 0;
   }
 
-  public isEmpty(key: string) {
-    const content = this.lookup.get(key);
+  public isEmpty(key?: string) {
+    const content = key != null ? this.lookup.get(key) : undefined
     return content?.empty ?? true;
   }
 
-  public isSingleImage(key: string) {
-    const content = this.lookup.get(key);
+  public isSingleImage(key?: string) {
+    const content = key != null ? this.lookup.get(key) : undefined;
     return content?.singleImage ?? true;
   }
 
