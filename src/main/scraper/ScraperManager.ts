@@ -43,11 +43,9 @@ const loadNimja = (
   cachePath: string,
 ) => {
   let sources = [source.url];
-  const allURLs = processAllURLs(sources, source, weight, helpers);
   helpers.next = null;
   pm({
     data: sources,
-    allURLs: allURLs,
     allPosts: new Map<string, string>(),
     weight: weight,
     helpers: helpers,
@@ -93,7 +91,6 @@ const loadLocalDirectory = (
         );
       }
 
-      const allURLs = processAllURLs(sources, source, weight, helpers);
       // If this is a local source (not a cacheDir call)
       if (helpers.next == -1) {
         helpers.count = filterPathsToJustPlayable(
@@ -106,7 +103,6 @@ const loadLocalDirectory = (
 
       pm({
         data: sources,
-        allURLs: allURLs,
         allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
@@ -177,12 +173,10 @@ const loadVideo = (
     if (source.blacklist && source.blacklist.length > 0) {
       paths = paths.filter((url: string) => !source.blacklist.includes(url));
     }
-    const allURLs = processAllURLs(paths, source, weight, helpers);
     helpers.next = null;
 
     pm({
       data: paths,
-      allURLs: allURLs,
       allPosts: new Map<string, string>(),
       weight: weight,
       helpers: helpers,
@@ -266,12 +260,10 @@ const loadPlaylist = (
       if (source.blacklist && source.blacklist.length > 0) {
         urls = urls.filter((url: string) => !source.blacklist.includes(url));
       }
-      const allURLs = processAllURLs(urls, source, weight, helpers);
       helpers.next = null;
 
       pm({
         data: urls,
-        allURLs: allURLs,
         allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
@@ -306,15 +298,8 @@ export function loadSources(
           (url: string) => !source.blacklist.includes(url),
         );
       }
-      object.allURLs = processAllURLs(
-        object.data,
-        object.source,
-        object.weight,
-        object.helpers,
-      );
     }
 
-    delete object.data;
     onLoaded(object);
   };
 

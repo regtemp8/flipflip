@@ -74,6 +74,7 @@ import { loadSources } from "./scraper/ScraperManager";
 import ScenePickerInitResponse from "../common/ScenePickerInitResponse";
 import HydrusAuthResponse from "../common/HydrusAuthResponse";
 import OpenScriptResponse from "../common/OpenScriptResponse";
+import { processAllURLs } from "./scraper/Scrapers";
 
 // Define functions
 function onRequestCreateNewWindow() {
@@ -630,41 +631,36 @@ function onScrapeFiles(
   const [replyPort] = ev.ports;
   const { source, config, filter, weight, helpers } = request;
   const cacheDir = getCachePath(source.url, config);
-  loadSources(config, source, filter, weight, helpers, cacheDir, (message) => {
-    const maxChunkSize = 5000;
-    const allURLs = message.allURLs as Map<string, string[]>;
-    const keys = Array.from(allURLs.keys());
-    let hasMore = true;
-    let keyIndex = 0;
-    let valueOffset = 0;
-    let chunkSize = maxChunkSize;
-    let messageChunk = { ...message, allURLs: new Map<string, string[]>() };
-    while (hasMore) {
-      const key = keys[keyIndex];
-      const value = allURLs.get(key) as string[];
-      const valueSize = Math.min(chunkSize, value.length - valueOffset);
-      messageChunk.allURLs.set(key, value.slice(valueOffset, valueSize));
-
-      valueOffset += valueSize;
-      if (valueOffset === value.length) {
-        keyIndex++;
-        valueOffset = 0;
+  loadSources(config, source, filter, weight, helpers, cacheDir, (object) => {
+    if (object?.data) {
+      const maxChunkSize = 5000;
+      let message: any = {
+        source: object.source,
+        helpers: { ...object.helpers },
+        captcha: object.captcha,
+        warning: object.warning,
+        error: object.error,
+        systemMessage: object.systemMessage,
+        allPosts: object.allPosts
       }
-      if (keyIndex === keys.length) {
-        hasMore = false;
-      }
+      for (let i = 0; i < object.data.length; i += maxChunkSize) {
+        const end = Math.min(object.data.length, i + maxChunkSize)
+        const data = object.data.slice(i, end)
+        message.allURLs = processAllURLs(
+          data,
+          source,
+          weight,
+          helpers,
+        );
 
-      chunkSize -= valueSize;
-      if (chunkSize <= 0 || !hasMore) {
-        messageChunk.helpers.complete = !hasMore
-        if (hasMore) {
-          messageChunk.helpers.next = null
+        message.helpers.complete = true //i + maxChunkSize >= object.data.length
+        replyPort.postMessage(message)
+        message = {
+          source: object.source, helpers: { ...object.helpers }
         }
-
-        replyPort.postMessage(messageChunk);
-        messageChunk = { source: { ...message.source }, helpers: { ...message.helpers }, allURLs: new Map<string, string[]>() };
-        chunkSize = maxChunkSize;
       }
+    } else {
+      replyPort.postMessage(object);
     }
   });
 }
