@@ -623,15 +623,21 @@ function onScrapeFiles(
   request: {
     config: Config;
     source: LibrarySource;
-    filter: string;
-    weight: string;
+    imageTypeFilter: string;
+    weightFunction: string;
     helpers: { next: any; count: number; retries: number };
   },
 ) {
   const [replyPort] = ev.ports;
-  const { source, config, filter, weight, helpers } = request;
+  const {
+    config,
+    source,
+    imageTypeFilter,
+    weightFunction,
+    helpers,
+  } = request;
   const cacheDir = getCachePath(source.url, config);
-  loadSources(config, source, filter, weight, helpers, cacheDir, (object) => {
+  loadSources(config, source, imageTypeFilter, weightFunction, helpers, cacheDir, (object) => {
     if (object?.data) {
       const maxChunkSize = 5000;
       let message: any = {
@@ -648,9 +654,9 @@ function onScrapeFiles(
         const data = object.data.slice(i, end)
         message.allURLs = processAllURLs(
           data,
-          source,
-          weight,
-          helpers,
+          object.source,
+          object.weight,
+          object.helpers,
         );
 
         message.helpers.complete = true //i + maxChunkSize >= object.data.length
