@@ -10,6 +10,7 @@ import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 import ChildCallbackHack from "./ChildCallbackHack";
 import ImagePlayer from "./ImagePlayer";
+import content from "./ContentLookup";
 
 // Returns true if array is empty, or only contains empty arrays
 function isEmpty(allURLs: any[]): boolean {
@@ -50,28 +51,23 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
   readonly props: SourceScraperProps;
 
   readonly state: {
-    allURLs: Map<string, Array<string>>;
-    allPosts: Map<string, string>;
+    contentLookupKey?: string;
     restart: boolean;
     preload: boolean;
     videoVolume: number;
     captcha: any;
     load: boolean;
-    singleImage: number;
   };
 
   constructor(props: SourceScraperProps) {
     super(props);
 
     this.state = {
-      allURLs: new Map<string, Array<string>>(),
-      allPosts: new Map<string, string>(),
       restart: false,
       preload: false,
       videoVolume: props.scene.videoVolume,
       captcha: null as any,
       load: false,
-      singleImage: null as number,
     };
   }
 
@@ -79,17 +75,13 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
   _backForth: number = null;
   _promiseQueue: Array<{
     source: LibrarySource;
-    helpers: { next: any; count: number; retries: number; uuid: string };
+    helpers: { next: any; count: number; retries: number };
   }> = null;
   _nextPromiseQueue: Array<{
     source: LibrarySource;
-    helpers: { next: any; count: number; retries: number; uuid: string };
+    helpers: { next: any; count: number; retries: number };
   }> = null;
-  _nextAllURLs: Map<string, Array<string>> = null;
-  _nextAllPosts: Map<string, string> = null;
-  _removeOnSourceResponse: () => void = null;
-  _removeOnNextSourceResponse: () => void = null;
-  _removeOnPromiseResponse: () => void = null;
+  _nextContentLookupKey: string = null;
 
   render() {
     let style: any = { opacity: this.props.opacity };
@@ -106,38 +98,33 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
     }
     return (
       <div style={style}>
-        {this.state.allURLs.size > 0 && this.state.restart == false && (
-          <ImagePlayer
-            config={this.props.config}
-            scene={this.props.scene}
-            currentAudio={this.props.currentAudio}
-            isOverlay={this.props.isOverlay}
-            isPlaying={this.props.isPlaying}
-            gridView={this.props.gridView}
-            historyOffset={this.props.historyOffset}
-            setHistoryOffset={this.props.setHistoryOffset}
-            setHistoryPaths={this.props.setHistoryPaths}
-            advanceHack={this.props.advanceHack}
-            deleteHack={this.props.deleteHack}
-            strobeLayer={this.props.strobeLayer}
-            hasStarted={this.props.hasStarted}
-            singleImage={this.state.singleImage}
-            allURLs={
-              isEmpty(Array.from(this.state.allURLs.values()))
-                ? null
-                : this.state.allURLs
-            }
-            allPosts={this.state.allPosts}
-            onLoaded={this.props.firstImageLoaded.bind(this)}
-            setVideo={this.props.setVideo}
-            cache={this.props.cache}
-            onEndScene={this.props.onEndScene}
-            playNextScene={this.props.playNextScene}
-            gridCoordinates={this.props.gridCoordinates}
-            setSceneCopy={this.props.setSceneCopy}
-            setTimeToNextFrame={this.props.setTimeToNextFrame}
-          />
-        )}
+        {content().hasURLs(this.state.contentLookupKey) &&
+          this.state.restart == false && (
+            <ImagePlayer
+              config={this.props.config}
+              scene={this.props.scene}
+              currentAudio={this.props.currentAudio}
+              isOverlay={this.props.isOverlay}
+              isPlaying={this.props.isPlaying}
+              gridView={this.props.gridView}
+              historyOffset={this.props.historyOffset}
+              setHistoryOffset={this.props.setHistoryOffset}
+              setHistoryPaths={this.props.setHistoryPaths}
+              advanceHack={this.props.advanceHack}
+              deleteHack={this.props.deleteHack}
+              strobeLayer={this.props.strobeLayer}
+              hasStarted={this.props.hasStarted}
+              onLoaded={this.props.firstImageLoaded.bind(this)}
+              setVideo={this.props.setVideo}
+              cache={this.props.cache}
+              onEndScene={this.props.onEndScene}
+              playNextScene={this.props.playNextScene}
+              gridCoordinates={this.props.gridCoordinates}
+              setSceneCopy={this.props.setSceneCopy}
+              setTimeToNextFrame={this.props.setTimeToNextFrame}
+              contentLookupKey={this.state.contentLookupKey}
+            />
+          )}
         {this.state.captcha != null && (
           <Dialog open={true} onClose={this.onCloseDialog.bind(this)}>
             <DialogContent style={{ height: 600 }}>
@@ -169,28 +156,19 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
   async componentDidMount(restart = false) {
     this._isMounted = true;
     // Create an instance of your worker
-    const uuid = uuidv4();
     if (!restart) {
       this._promiseQueue = new Array<{
         source: LibrarySource;
-        helpers: { next: any; count: number; retries: number; uuid: string };
+        helpers: { next: any; count: number; retries: number };
       }>();
       this._nextPromiseQueue = new Array<{
         source: LibrarySource;
-        helpers: { next: any; count: number; retries: number; uuid: string };
+        helpers: { next: any; count: number; retries: number };
       }>();
-      this._nextAllURLs = new Map<string, Array<string>>();
-      this._nextAllPosts = new Map<string, string>();
+      this._nextContentLookupKey = uuidv4();
+      content().initContent(this._nextContentLookupKey);
     }
     let n = 0;
-    let newAllURLs = new Map<string, Array<string>>();
-    if (this.state.allURLs.size > 0) {
-      newAllURLs = this.state.allURLs;
-    }
-    let newAllPosts = new Map<string, string>();
-    if (this.state.allPosts.size > 0) {
-      newAllPosts = this.state.allPosts;
-    }
 
     let sources = await window.ipc.getScraperSources(this.props.scene.sources);
     if (this.props.scene.sourceOrderFunction === SOF.random) {
@@ -223,16 +201,13 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
         d.clips = [];
       }
 
-      this._removeOnSourceResponse = window.ipc.onScrapeFilesResponse(
+      window.ipc.scrapeFiles(
+        this.props.config,
+        d,
+        this.props.scene.imageTypeFilter,
+        this.props.scene.weightFunction,
+        { next: -1, count: 0, retries: 0 },
         (object: any) => {
-          if (
-            object?.type == "RPC" ||
-            (object?.helpers != null && object.helpers.uuid != uuid)
-          ) {
-            return;
-          }
-
-          this._removeOnSourceResponse();
           if (object?.captcha != null && this.state.captcha == null) {
             this.setState({
               captcha: {
@@ -263,15 +238,24 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           }
 
           if (object?.source) {
-            n += 1;
+            if (object.helpers.complete) {
+              n += 1;
+            }
 
             // Just add the new urls to the end of the list
-            if (object?.data && object?.allURLs) {
+            if (object?.allURLs) {
               const source = object.source;
-              newAllURLs = object.allURLs;
-              this.setState({ allURLs: newAllURLs });
-              newAllPosts = object.allPosts;
-              this.setState({ allPosts: newAllPosts });
+              let contentLookupKey = this.state.contentLookupKey;
+              if (contentLookupKey == null) {
+                contentLookupKey = uuidv4();
+                content().initContent(contentLookupKey);
+              }
+
+              content().addURLs(contentLookupKey, object.allURLs);
+              content().addPosts(contentLookupKey, object.allPosts);
+              if (this.state.contentLookupKey == null) {
+                this.setState({ contentLookupKey });
+              }
 
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
@@ -291,29 +275,20 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               const timeout = object?.timeout ?? 1000;
               window.setTimeout(sourceLoop, timeout);
             } else {
-              const values = flatten(Array.from(newAllURLs.values()));
               if (this._promiseQueue.length == 0) {
-                this.setState({ singleImage: values.length == 1 });
+                content().setSingleImage(this.state.contentLookupKey);
               }
-              this.props.finishedLoading(isEmpty(values));
-              promiseLoop();
+              this.props.finishedLoading(
+                content().isEmpty(this.state.contentLookupKey),
+              );
+              window.setTimeout(promiseLoop, 1000);
               if (this.props.nextScene && this.props.playNextScene) {
                 n = 0;
-                nextSourceLoop();
+                window.setTimeout(nextSourceLoop, 1000);
               }
             }
           }
         },
-      );
-
-      window.ipc.scrapeFiles(
-        this.state.allURLs,
-        this.state.allPosts,
-        this.props.config,
-        d,
-        this.props.scene.imageTypeFilter,
-        this.props.scene.weightFunction,
-        { next: -1, count: 0, retries: 0, uuid: uuid },
       );
     };
 
@@ -325,16 +300,13 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
         d.clips = [];
       }
 
-      this._removeOnNextSourceResponse = window.ipc.onScrapeFilesResponse(
+      window.ipc.scrapeFiles(
+        this.props.config,
+        d,
+        this.props.nextScene.imageTypeFilter,
+        this.props.nextScene.weightFunction,
+        { next: -1, count: 0, retries: 0 },
         (object: any) => {
-          if (
-            object?.type == "RPC" ||
-            (object?.helpers != null && object.helpers.uuid != uuid)
-          ) {
-            return;
-          }
-
-          this._removeOnNextSourceResponse();
           if (object?.error != null) {
             console.error(
               "Error retrieving " +
@@ -355,13 +327,15 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           }
 
           if (object?.source) {
-            n += 1;
+            if (object.helpers.complete) {
+              n += 1;
+            }
 
             // Just add the new urls to the end of the list
-            if (object?.data != null) {
+            if (object?.allURLs != null) {
               const source = object.source;
-              this._nextAllURLs = object.allURLs;
-              this._nextAllPosts = object.allPosts;
+              content().addURLs(this._nextContentLookupKey, object.allURLs);
+              content().addPosts(this._nextContentLookupKey, object.allPosts);
 
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
@@ -383,16 +357,6 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           }
         },
       );
-
-      window.ipc.scrapeFiles(
-        this._nextAllURLs,
-        this._nextAllPosts,
-        this.props.config,
-        d,
-        this.props.nextScene.imageTypeFilter,
-        this.props.nextScene.weightFunction,
-        { next: -1, count: 0, retries: 0, uuid: uuid },
-      );
     };
 
     let promiseLoop = () => {
@@ -404,16 +368,14 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
         return;
       }
 
-      this._removeOnPromiseResponse = window.ipc.onScrapeFilesResponse(
+      const promiseData = this._promiseQueue.shift();
+      window.ipc.scrapeFiles(
+        this.props.config,
+        promiseData.source,
+        this.props.scene.imageTypeFilter,
+        this.props.scene.weightFunction,
+        promiseData.helpers,
         (object: any) => {
-          if (
-            object?.type == "RPC" ||
-            (object?.helpers != null && object.helpers.uuid != uuid)
-          ) {
-            return;
-          }
-
-          this._removeOnPromiseResponse();
           if (object?.captcha != null && this.state.captcha == null) {
             this.setState({
               captcha: {
@@ -445,12 +407,10 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
 
           // If we are not at the end of a source
           if (object?.source) {
-            if (object?.data) {
+            if (object?.allURLs) {
               const source = object.source;
-              let newAllURLs = object.allURLs;
-              this.setState({ allURLs: newAllURLs });
-              let newAllPosts = object.allPosts;
-              this.setState({ allPosts: newAllPosts });
+              content().addURLs(this.state.contentLookupKey, object.allURLs);
+              content().addPosts(this.state.contentLookupKey, object.allPosts);
 
               // Add the next promise to the queue
               if (object.helpers.next != null) {
@@ -470,17 +430,6 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           }
         },
       );
-
-      const promiseData = this._promiseQueue.shift();
-      window.ipc.scrapeFiles(
-        this.state.allURLs,
-        this.state.allPosts,
-        this.props.config,
-        promiseData.source,
-        this.props.scene.imageTypeFilter,
-        this.props.scene.weightFunction,
-        promiseData.helpers,
-      );
     };
 
     if (this.state.preload) {
@@ -488,7 +437,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
       promiseLoop();
       if (
         this.props.nextScene &&
-        isEmpty(Array.from(this._nextAllURLs.values()))
+        content().isEmpty(this._nextContentLookupKey)
       ) {
         n = 0;
         nextSourceLoop();
@@ -511,9 +460,8 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
       props.hasStarted !== this.props.hasStarted ||
       props.gridView !== this.props.gridView ||
       state.captcha !== this.state.captcha ||
-      state.restart !== this.state.restart ||
-      state.allURLs != this.state.allURLs ||
-      state.allPosts != this.state.allPosts
+      state.contentLookupKey !== this.state.contentLookupKey ||
+      state.restart !== this.state.restart
     );
   }
 
@@ -532,29 +480,23 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           this.props.nextScene.id === props.scene.id
         ) {
           // Just swap values if we're coming back to this scene again
-          const newAllURLs = this._nextAllURLs;
-          const newAllPosts = this._nextAllPosts;
+          const newContentLookupKey = this._nextContentLookupKey;
           const temp = this._nextPromiseQueue;
           this._nextPromiseQueue = this._promiseQueue;
           this._promiseQueue = temp;
-          this._nextAllURLs = state.allURLs;
-          this._nextAllPosts = state.allPosts;
+          this._nextContentLookupKey = state.contentLookupKey;
           this.setState({
-            allURLs: newAllURLs,
-            allPosts: newAllPosts,
+            contentLookupKey: newContentLookupKey,
             preload: true,
             restart: true,
-            singleImage: null,
           });
         } else {
           // Replace values
           this._promiseQueue = this._nextPromiseQueue;
           this.setState({
-            allURLs: this._nextAllURLs,
-            allPosts: this._nextAllPosts,
+            contentLookupKey: this._nextContentLookupKey,
             preload: true,
             restart: true,
-            singleImage: null,
           });
           this._nextPromiseQueue = Array<{
             source: LibrarySource;
@@ -562,16 +504,15 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               next: any;
               count: number;
               retries: number;
-              uuid: string;
             };
           }>();
-          this._nextAllURLs = new Map<string, Array<string>>();
-          this._nextAllPosts = new Map<string, string>();
+          this._nextContentLookupKey = uuidv4();
+          content().initContent(this._nextContentLookupKey);
         }
       } else {
         this._promiseQueue = Array<{
           source: LibrarySource;
-          helpers: { next: any; count: number; retries: number; uuid: string };
+          helpers: { next: any; count: number; retries: number };
         }>();
         this.setState({
           allURLs: new Map<string, Array<string>>(),
@@ -592,20 +533,10 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
     this._isMounted = false;
     this._promiseQueue = null;
     this._nextPromiseQueue = null;
-    this._nextAllURLs = null;
-    this._nextAllPosts = null;
+    content().delete(this.state.contentLookupKey);
+    content().delete(this._nextContentLookupKey);
     window.clearTimeout(this._backForth);
     this._backForth = null;
-
-    if (this._removeOnSourceResponse != null) {
-      this._removeOnSourceResponse();
-    }
-    if (this._removeOnNextSourceResponse != null) {
-      this._removeOnNextSourceResponse();
-    }
-    if (this._removeOnPromiseResponse != null) {
-      this._removeOnPromiseResponse();
-    }
   }
 }
 

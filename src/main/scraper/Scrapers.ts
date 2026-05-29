@@ -18,12 +18,11 @@ import {
 
 export const processAllURLs = (
   data: string[],
-  allURLs: Map<string, string[]>,
   source: LibrarySource,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
 ): Map<string, string[]> => {
-  let newAllURLs = new Map(allURLs);
+  let newAllURLs = new Map();
   if (helpers.next != null && helpers.next <= 0) {
     if (weight == WF.sources) {
       newAllURLs.set(source.url, data);
@@ -76,13 +75,11 @@ export const reset = () => {
 };
 
 export const loadRemoteImageURLList = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const url = source.url;
@@ -117,8 +114,7 @@ export const loadRemoteImageURLList = (
                     convertedSource,
                     true,
                   ),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -141,8 +137,7 @@ export const loadRemoteImageURLList = (
                     convertedSource,
                     true,
                   ),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -171,13 +166,11 @@ export const loadRemoteImageURLList = (
 };
 
 export const loadTumblr = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 3000;
@@ -231,8 +224,7 @@ export const loadTumblr = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -293,8 +285,7 @@ export const loadTumblr = (
                     convertedSource,
                     false,
                   ),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -317,8 +308,7 @@ export const loadTumblr = (
                     convertedSource,
                     false,
                   ),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -331,8 +321,7 @@ export const loadTumblr = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -357,13 +346,11 @@ export const loadTumblr = (
 };
 
 export const loadRedGifs = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 10000;
@@ -468,8 +455,7 @@ export const loadRedGifs = (
         helpers.count + filterPathsToJustPlayable(IF.any, images, false).length;
       pm({
         data: filterPathsToJustPlayable(filter, images, false),
-        allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -488,12 +474,10 @@ export const loadRedGifs = (
 
 const loadImageFapGallery = (
   galleryURL: string,
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   timeout: number,
   images: Array<string>,
   baseGalleryURL: string,
@@ -501,7 +485,6 @@ const loadImageFapGallery = (
     next: any;
     count: number;
     retries: number;
-    uuid: string;
   }) => void,
   pm: (object: any) => void,
 ) => {
@@ -544,8 +527,7 @@ const loadImageFapGallery = (
               pm({
                 captcha: captcha,
                 data: images,
-                allURLs: allURLs,
-                allPosts: allPosts,
+                allPosts: new Map<string, string>(),
                 weight: weight,
                 helpers: helpers,
                 source: source,
@@ -558,7 +540,7 @@ const loadImageFapGallery = (
         if (html.includes("Enter the captcha")) {
           helpers.count = source.count;
           captcha = galleryURL;
-          images = allURLs.get(source.url);
+          images = [];
           pm({ warning: source.url + " - blocked due to captcha" });
         } else {
           onFinishedLoading(helpers);
@@ -566,8 +548,7 @@ const loadImageFapGallery = (
         pm({
           captcha: captcha,
           data: images,
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -587,8 +568,6 @@ const loadImageFapGallery = (
           () =>
             loadImageFapGallery(
               baseGalleryURL + href,
-              allURLs,
-              allPosts,
               source,
               filter,
               weight,
@@ -605,8 +584,7 @@ const loadImageFapGallery = (
         onFinishedLoading(helpers);
         pm({
           data: filterPathsToJustPlayable(filter, images, false),
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -617,13 +595,11 @@ const loadImageFapGallery = (
 };
 
 export const loadImageFap = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -634,8 +610,6 @@ export const loadImageFap = (
     const baseGalleryURL = "https://www.imagefap.com/gallery/" + gid;
     loadImageFapGallery(
       baseGalleryURL + "?gid=" + gid + "&view=0",
-      allURLs,
-      allPosts,
       source,
       filter,
       weight,
@@ -681,8 +655,7 @@ export const loadImageFap = (
           pm({
             captcha: captcha,
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -697,8 +670,6 @@ export const loadImageFap = (
           const baseGalleryURL = "https://www.imagefap.com/gallery/" + albumID;
           loadImageFapGallery(
             baseGalleryURL + "?gid=" + albumID + "&view=0",
-            allURLs,
-            allPosts,
             source,
             filter,
             weight,
@@ -718,7 +689,7 @@ export const loadImageFap = (
               "https://www.imagefap.com/gallery/" +
               getFileGroup(url, path.sep) +
               "?view=0";
-            images = allURLs.get(url);
+            images = [];
             pm({ warning: source.url + " - blocked due to captcha" });
           } else {
             helpers.next[0] += 1;
@@ -727,8 +698,7 @@ export const loadImageFap = (
           pm({
             captcha: captcha,
             data: images,
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -748,8 +718,7 @@ export const loadImageFap = (
     helpers.next = null;
     pm({
       data: [],
-      allURLs: allURLs,
-      allPosts: allPosts,
+      allPosts: new Map<string, string>(),
       weight: weight,
       helpers: helpers,
       source: source,
@@ -813,8 +782,7 @@ export const loadImageFap = (
               helpers.next = null;
               pm({
                 data,
-                allURLs: allURLs,
-                allPosts: allPosts,
+                allPosts: new Map<string, string>(),
                 weight: weight,
                 helpers: helpers,
                 source: source,
@@ -825,8 +793,7 @@ export const loadImageFap = (
           helpers.next = null;
           pm({
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -838,8 +805,7 @@ export const loadImageFap = (
     helpers.next = null;
     pm({
       data: [],
-      allURLs: allURLs,
-      allPosts: allPosts,
+      allPosts: new Map<string, string>(),
       weight: weight,
       helpers: helpers,
       source: source,
@@ -849,13 +815,11 @@ export const loadImageFap = (
 };
 
 export const loadSexCom = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -864,8 +828,7 @@ export const loadSexCom = (
   helpers.next = null;
   pm({
     data: [],
-    allURLs: allURLs,
-    allPosts: allPosts,
+    allPosts: new Map<string, string>(),
     weight: weight,
     helpers: helpers,
     source: source,
@@ -910,8 +873,7 @@ export const loadSexCom = (
           helpers.count = helpers.count + filterPathsToJustPlayable(IF.any, images, false).length;
           pm({
             data: filterPathsToJustPlayable(filter, images, false),
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -964,8 +926,7 @@ export const loadSexCom = (
                   helpers.count = helpers.count + filePaths.length;
                   pm({
                     data: filePaths,
-                    allURLs: allURLs,
-                    allPosts: allPosts,
+                    allPosts: new Map<string, string>(),
                     weight: weight,
                     helpers: helpers,
                     source: source,
@@ -979,8 +940,7 @@ export const loadSexCom = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -991,13 +951,11 @@ export const loadSexCom = (
 };
 
 export const loadImgur = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 3000;
@@ -1011,8 +969,7 @@ export const loadImgur = (
         helpers.count + filterPathsToJustPlayable(IF.any, images, true).length;
       pm({
         data: filterPathsToJustPlayable(filter, images, true),
-        allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -1030,13 +987,11 @@ export const loadImgur = (
 };
 
 export const loadDeviantArt = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 3000;
@@ -1091,8 +1046,7 @@ export const loadDeviantArt = (
         helpers.count + filterPathsToJustPlayable(IF.any, images, false).length;
       pm({
         data: filterPathsToJustPlayable(filter, images, false),
-        allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -1102,13 +1056,11 @@ export const loadDeviantArt = (
 };
 
 export const loadE621 = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -1168,8 +1120,7 @@ export const loadE621 = (
           helpers.next = null;
           pm({
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -1241,8 +1192,7 @@ export const loadE621 = (
                   filterPathsToJustPlayable(IF.any, images, true).length;
                 pm({
                   data: filterPathsToJustPlayable(filter, images, true),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -1324,8 +1274,7 @@ export const loadE621 = (
           helpers.next = null;
           pm({
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -1351,8 +1300,7 @@ export const loadE621 = (
           filterPathsToJustPlayable(IF.any, images, true).length;
         pm({
           data: filterPathsToJustPlayable(filter, images, true),
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1371,13 +1319,11 @@ export const loadE621 = (
 };
 
 export const loadDanbooru = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -1456,8 +1402,7 @@ export const loadDanbooru = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1471,8 +1416,7 @@ export const loadDanbooru = (
           helpers.next = null;
           pm({
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -1542,8 +1486,7 @@ export const loadDanbooru = (
                   filterPathsToJustPlayable(IF.any, images, true).length;
                 pm({
                   data: filterPathsToJustPlayable(filter, images, true),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -1581,8 +1524,7 @@ export const loadDanbooru = (
           filterPathsToJustPlayable(IF.any, images, true).length;
         pm({
           data: filterPathsToJustPlayable(filter, images, true),
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1601,13 +1543,11 @@ export const loadDanbooru = (
 };
 
 export const loadGelbooru1 = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -1711,8 +1651,7 @@ export const loadGelbooru1 = (
                   filterPathsToJustPlayable(IF.any, images, false).length;
                 pm({
                   data: filterPathsToJustPlayable(filter, images, false),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -1729,8 +1668,7 @@ export const loadGelbooru1 = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1741,13 +1679,11 @@ export const loadGelbooru1 = (
 };
 
 export const loadGelbooru2 = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -1810,8 +1746,7 @@ export const loadGelbooru2 = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1833,8 +1768,7 @@ export const loadGelbooru2 = (
         helpers.count + filterPathsToJustPlayable(IF.any, images, true).length;
       pm({
         data: filterPathsToJustPlayable(filter, images, true),
-        allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -1852,13 +1786,11 @@ export const loadGelbooru2 = (
 };
 
 export const loadEHentai = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -1923,8 +1855,7 @@ export const loadEHentai = (
                   filterPathsToJustPlayable(IF.any, images, true).length;
                 pm({
                   data: filterPathsToJustPlayable(filter, images, true),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -1937,8 +1868,7 @@ export const loadEHentai = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -1949,13 +1879,11 @@ export const loadEHentai = (
 };
 
 export const loadLuscious = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 5000;
@@ -2035,8 +1963,7 @@ export const loadLuscious = (
           // If cdnio image server goes down, use this: filterPathsToJustPlayable(filter, images, true).map((s) => s.replace('cdnio.', 'w1680.')),
           pm({
             data: filterPathsToJustPlayable(filter, images, true),
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -2046,8 +1973,7 @@ export const loadLuscious = (
           helpers.next = null;
           pm({
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -2216,8 +2142,7 @@ export const loadLuscious = (
                   filterPathsToJustPlayable(IF.any, images, true).length;
                 pm({
                   data: filterPathsToJustPlayable(filter, images, true),
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -2226,8 +2151,7 @@ export const loadLuscious = (
               } else {
                 pm({
                   data: [],
-                  allURLs: allURLs,
-                  allPosts: allPosts,
+                  allPosts: new Map<string, string>(),
                   weight: weight,
                   helpers: helpers,
                   source: source,
@@ -2248,8 +2172,7 @@ export const loadLuscious = (
           pm({
             warning: json,
             data: [],
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -2269,13 +2192,11 @@ export const loadLuscious = (
 };
 
 export const loadBDSMlr = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -2288,8 +2209,7 @@ export const loadBDSMlr = (
       helpers.retries += 1;
       pm({
         data: [],
-        allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -2340,8 +2260,7 @@ export const loadBDSMlr = (
           filterPathsToJustPlayable(IF.any, images, true).length;
         pm({
           data: filterPathsToJustPlayable(filter, images, true),
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -2351,8 +2270,7 @@ export const loadBDSMlr = (
         helpers.next = null;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -2364,13 +2282,11 @@ export const loadBDSMlr = (
 
 let piwigoLoggedIn: boolean = false;
 export const loadPiwigo = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -2436,8 +2352,7 @@ export const loadPiwigo = (
         helpers.retries += 1;
         pm({
           data: [],
-          allURLs: allURLs,
-          allPosts: allPosts,
+          allPosts: new Map<string, string>(),
           weight: weight,
           helpers: helpers,
           source: source,
@@ -2471,8 +2386,7 @@ export const loadPiwigo = (
             helpers.next = null;
             pm({
               data: [],
-              allURLs: allURLs,
-              allPosts: allPosts,
+              allPosts: new Map<string, string>(),
               weight: weight,
               helpers: helpers,
               source: source,
@@ -2502,8 +2416,7 @@ export const loadPiwigo = (
 
           pm({
             data: filterPathsToJustPlayable(filter, images, true),
-            allURLs: allURLs,
-            allPosts: allPosts,
+            allPosts: new Map<string, string>(),
             weight: weight,
             helpers: helpers,
             source: source,
@@ -2534,13 +2447,11 @@ export const loadPiwigo = (
 };
 
 export const loadHydrus = (
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
   const timeout = 8000;
@@ -2664,8 +2575,7 @@ export const loadHydrus = (
           if (page == pages) {
             pm({
               data: images,
-              allURLs: allURLs,
-              allPosts: allPosts,
+              allPosts: new Map<string, string>(),
               weight: weight,
               helpers: helpers,
               source: source,

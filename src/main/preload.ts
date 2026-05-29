@@ -239,32 +239,31 @@ contextBridge.exposeInMainWorld("ipc", {
     ipcRenderer.send(IPC.cacheImage, config, url, source),
   getCacheSize: (config: Config) =>
     ipcRenderer.invoke(IPC.getCacheSize, config),
-  onScrapeFilesResponse: (callback: (message: any) => void) => {
-    const channel = IPC.scrapeFilesResponse;
-    const listener = (event: IpcRendererEvent, message: any) =>
-      callback(message);
-    ipcRenderer.on(channel, listener);
-    return () => ipcRenderer.off(channel, listener);
-  },
   scrapeFiles: (
-    allURLs: Map<string, string[]>,
-    allPosts: Map<string, string>,
     config: Config,
     source: LibrarySource,
     imageTypeFilter: string,
     weightFunction: string,
-    helpers: { next: any; count: number; retries: number; uuid: string },
-  ) =>
-    ipcRenderer.send(
+    helpers: { next: any; count: number; retries: number },
+    onReply: (object: any) => void,
+  ) => {
+    const { port1, port2 } = new MessageChannel();
+    ipcRenderer.postMessage(
       IPC.scrapeFilesRequest,
-      allURLs,
-      allPosts,
-      config,
-      source,
-      imageTypeFilter,
-      weightFunction,
-      helpers,
-    ),
+      {
+        config,
+        source,
+        imageTypeFilter,
+        weightFunction,
+        helpers,
+      },
+      [port2],
+    );
+
+    port1.onmessage = (event) => {
+      onReply(event.data);
+    };
+  },
   deleteLibrarySource: (sourceURL: string, config: Config) =>
     ipcRenderer.invoke(IPC.deleteLibrarySource, sourceURL, config),
   clearCache: (config: Config) => ipcRenderer.invoke(IPC.clearCache, config),

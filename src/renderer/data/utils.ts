@@ -1006,7 +1006,7 @@ export default captionProgramDefaults;
  */
 export class CancelablePromise extends Promise<{
   data: Array<string>;
-  helpers: { next: any; count: number; retries: number; uuid: string };
+  helpers: { next: any; count: number; retries: number };
 }> {
   hasCanceled: boolean;
   source: LibrarySource;
@@ -1022,7 +1022,6 @@ export class CancelablePromise extends Promise<{
                 next: any;
                 count: number;
                 retries: number;
-                uuid: string;
               };
             }>
           | {
@@ -1031,7 +1030,6 @@ export class CancelablePromise extends Promise<{
                 next: any;
                 count: number;
                 retries: number;
-                uuid: string;
               };
             },
       ) => void,
@@ -1046,7 +1044,7 @@ export class CancelablePromise extends Promise<{
 
   getPromise(): Promise<{
     data: Array<string>;
-    helpers: { next: any; count: number; retries: number; uuid: string };
+    helpers: { next: any; count: number; retries: number };
   }> {
     return new Promise((resolve, reject) => {
       this.then(

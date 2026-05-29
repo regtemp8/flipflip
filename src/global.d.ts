@@ -110,15 +110,13 @@ declare global {
       readTextFile: (path: string) => Promise<string>;
       cacheImage: (config: Config, url: string, source: string) => void;
       getCacheSize: (config: Config) => Promise<number>;
-      onScrapeFilesResponse: (callback: (message: any) => void) => () => void;
       scrapeFiles: (
-        allURLs: Map<string, string[]>,
-        allPosts: Map<string, string>,
         config: Config,
         source: LibrarySource,
         imageTypeFilter: string,
         weightFunction: string,
-        helpers: { next: any; count: number; retries: number; uuid: string },
+        helpers: { next: any; count: number; retries: number },
+        onReply: (object: any) => void,
       ) => void;
       deleteLibrarySource: (sourceURL: string, config: Config) => Promise<void>;
       clearCache: (config: Config) => Promise<void>;

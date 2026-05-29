@@ -268,7 +268,6 @@ const IPC = {
   cacheImage: "ipc.cacheImage",
   getCacheSize: "ipc.getCacheSize",
   scrapeFilesRequest: "ipc.scrapeFilesRequest",
-  scrapeFilesResponse: "ipc.scrapeFilesResponse",
   deleteLibrarySource: "ipc.deleteLibrarySource",
   clearCache: "ipc.clearCache",
   libraryMove: "ipc.libraryMove",

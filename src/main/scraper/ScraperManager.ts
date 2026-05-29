@@ -35,22 +35,20 @@ import {
 
 const loadNimja = (
   pm: Function,
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   cachePath: string,
 ) => {
   let sources = [source.url];
-  allURLs = processAllURLs(sources, allURLs, source, weight, helpers);
+  const allURLs = processAllURLs(sources, source, weight, helpers);
   helpers.next = null;
   pm({
     data: sources,
     allURLs: allURLs,
-    allPosts: allPosts,
+    allPosts: new Map<string, string>(),
     weight: weight,
     helpers: helpers,
     source: source,
@@ -60,13 +58,11 @@ const loadNimja = (
 
 const loadLocalDirectory = (
   pm: Function,
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   cachePath: string,
 ) => {
   const blacklist = ["*.css", "*.html", "avatar.png", "*.txt"];
@@ -96,7 +92,8 @@ const loadLocalDirectory = (
             !source.blacklist.includes(urlToPath(url, process.platform)),
         );
       }
-      allURLs = processAllURLs(sources, allURLs, source, weight, helpers);
+
+      const allURLs = processAllURLs(sources, source, weight, helpers);
       // If this is a local source (not a cacheDir call)
       if (helpers.next == -1) {
         helpers.count = filterPathsToJustPlayable(
@@ -110,7 +107,7 @@ const loadLocalDirectory = (
       pm({
         data: sources,
         allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -122,13 +119,11 @@ const loadLocalDirectory = (
 
 const loadVideo = (
   pm: Function,
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   cachePath: string,
 ) => {
   const url = cachePath ? cachePath : source.url;
@@ -136,8 +131,8 @@ const loadVideo = (
     pm({
       error: "Could not find " + source.url,
       data: [],
-      allURLs: allURLs,
-      allPosts: allPosts,
+      allURLs: new Map<string, string[]>(),
+      allPosts: new Map<string, string>(),
       weight: weight,
       helpers: helpers,
       source: source,
@@ -182,13 +177,13 @@ const loadVideo = (
     if (source.blacklist && source.blacklist.length > 0) {
       paths = paths.filter((url: string) => !source.blacklist.includes(url));
     }
-    allURLs = processAllURLs(paths, allURLs, source, weight, helpers);
+    const allURLs = processAllURLs(paths, source, weight, helpers);
     helpers.next = null;
 
     pm({
       data: paths,
       allURLs: allURLs,
-      allPosts: allPosts,
+      allPosts: new Map<string, string>(),
       weight: weight,
       helpers: helpers,
       source: source,
@@ -220,13 +215,11 @@ const loadVideo = (
 
 const loadPlaylist = (
   pm: Function,
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   cachePath: string,
 ) => {
   const url = cachePath ? cachePath : source.url;
@@ -273,13 +266,13 @@ const loadPlaylist = (
       if (source.blacklist && source.blacklist.length > 0) {
         urls = urls.filter((url: string) => !source.blacklist.includes(url));
       }
-      allURLs = processAllURLs(urls, allURLs, source, weight, helpers);
+      const allURLs = processAllURLs(urls, source, weight, helpers);
       helpers.next = null;
 
       pm({
         data: urls,
         allURLs: allURLs,
-        allPosts: allPosts,
+        allPosts: new Map<string, string>(),
         weight: weight,
         helpers: helpers,
         source: source,
@@ -297,24 +290,16 @@ const loadPlaylist = (
 };
 
 export function loadSources(
-  allURLs: Map<string, Array<string>>,
-  allPosts: Map<string, string>,
   config: Config,
   source: LibrarySource,
   filter: string,
   weight: string,
-  helpers: { next: any; count: number; retries: number; uuid: string },
+  helpers: { next: any; count: number; retries: number },
   cacheDir: string,
   onLoaded: (object: any) => void,
 ) {
   const pm = (object: any) => {
-    if (
-      object?.source &&
-      object?.data &&
-      object?.allURLs &&
-      object?.weight &&
-      object?.helpers
-    ) {
+    if (object?.source && object?.data && object?.weight && object?.helpers) {
       const source = object.source;
       if (source.blacklist && source.blacklist.length > 0) {
         object.data = object.data.filter(
@@ -323,13 +308,13 @@ export function loadSources(
       }
       object.allURLs = processAllURLs(
         object.data,
-        object.allURLs,
         object.source,
         object.weight,
         object.helpers,
       );
     }
 
+    delete object.data;
     onLoaded(object);
   };
 
@@ -337,36 +322,15 @@ export function loadSources(
   const sourceType = getSourceType(source.url);
   if (sourceType == ST.local) {
     // Local files
-    loadLocalDirectory(
-      pm,
-      allURLs,
-      allPosts,
-      config,
-      source,
-      filter,
-      weight,
-      helpers,
-      null,
-    );
+    loadLocalDirectory(pm, config, source, filter, weight, helpers, null);
   } else if (sourceType == ST.list) {
     // Image List
     helpers.next = null;
-    loadRemoteImageURLList(
-      allURLs,
-      allPosts,
-      config,
-      source,
-      filter,
-      weight,
-      helpers,
-      pm,
-    );
+    loadRemoteImageURLList(config, source, filter, weight, helpers, pm);
   } else if (sourceType == ST.video) {
     const cachePath = cacheDir + getFileName(source.url, path.sep);
     loadVideo(
       pm,
-      allURLs,
-      allPosts,
       config,
       source,
       filter,
@@ -378,8 +342,6 @@ export function loadSources(
     const cachePath = cacheDir + getFileName(source.url, path.sep);
     loadPlaylist(
       pm,
-      allURLs,
-      allPosts,
       config,
       source,
       filter,
@@ -388,17 +350,7 @@ export function loadSources(
       config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null,
     );
   } else if (sourceType == ST.nimja) {
-    loadNimja(
-      pm,
-      allURLs,
-      allPosts,
-      config,
-      source,
-      filter,
-      weight,
-      helpers,
-      null,
-    );
+    loadNimja(pm, config, source, filter, weight, helpers, null);
   } else {
     // Paging sources
     let workerFunction: any;
@@ -444,8 +396,6 @@ export function loadSources(
         // If the cache directory exists, use it
         loadLocalDirectory(
           pm,
-          allURLs,
-          allPosts,
           config,
           source,
           filter,
@@ -454,28 +404,10 @@ export function loadSources(
           cachePath,
         );
       } else {
-        workerFunction(
-          allURLs,
-          allPosts,
-          config,
-          source,
-          filter,
-          weight,
-          helpers,
-          pm,
-        );
+        workerFunction(config, source, filter, weight, helpers, pm);
       }
     } else {
-      workerFunction(
-        allURLs,
-        allPosts,
-        config,
-        source,
-        filter,
-        weight,
-        helpers,
-        pm,
-      );
+      workerFunction(config, source, filter, weight, helpers, pm);
     }
   }
 }

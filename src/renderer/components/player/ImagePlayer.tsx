@@ -18,6 +18,7 @@ import ImageView from "./ImageView";
 import Strobe from "./Strobe";
 import Audio from "../../../common/Audio";
 import GifInfo from "../../../common/GifInfo";
+import content from "./ContentLookup";
 
 interface ImagePlayerProps {
   config: Config;
@@ -25,12 +26,10 @@ interface ImagePlayerProps {
   currentAudio: Audio;
   gridView: boolean;
   advanceHack: ChildCallbackHack;
-  allURLs: Map<string, Array<string>>;
-  allPosts: Map<string, string>;
+  contentLookupKey: string;
   isPlaying: boolean;
   historyOffset: number;
   hasStarted: boolean;
-  singleImage: number;
   deleteHack?: ChildCallbackHack;
   gridCoordinates?: Array<number>;
   isOverlay?: boolean;
@@ -297,7 +296,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       props.scene !== this.props.scene ||
       props.isPlaying !== this.props.isPlaying ||
       props.hasStarted !== this.props.hasStarted ||
-      props.allURLs !== this.props.allURLs ||
+      props.contentLookupKey !== this.props.contentLookupKey ||
       props.historyOffset !== this.props.historyOffset ||
       state.historyOffset !== this.state.historyOffset ||
       props.gridView !== this.props.gridView ||
@@ -308,7 +307,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
   componentDidUpdate(props: any, state: any) {
     if (
       ((!props.isPlaying && this.props.isPlaying) ||
-        (!props.allURLs && this.props.allURLs) ||
+        (!props.contentLookupKey && this.props.contentLookupKey) ||
         (!props.hasStarted && this.props.hasStarted)) &&
       !this._isLooping
     ) {
@@ -425,7 +424,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
   }
 
   start() {
-    if (this.props.allURLs == null) {
+    if (this.props.contentLookupKey == null) {
       return;
     }
 
@@ -444,7 +443,10 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
   }
 
   animationFrame = () => {
-    if (!this._isMounted || this.props.singleImage) {
+    if (
+      !this._isMounted ||
+      content().isSingleImage(this.props.contentLookupKey)
+    ) {
       cancelAnimationFrame(this._animationFrameHandle);
       return;
     }
@@ -452,7 +454,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     if (
       this.state.readyToDisplay.length <
         this.props.config.displaySettings.maxLoadingAtOnce &&
-      this.props.allURLs
+      this.props.contentLookupKey
     ) {
       while (this._runFetchLoopCallRequests.length > 0) {
         requestAnimation = true;
@@ -476,7 +478,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     if (
       this.state.readyToDisplay.length >=
         this.props.config.displaySettings.maxInMemory ||
-      !this.props.allURLs
+      !this.props.contentLookupKey
     ) {
       // Wait for the display loop to use an image
       this._waitTimeouts[i] = window.setTimeout(
@@ -497,7 +499,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     if (this.props.scene.weightFunction == WF.sources) {
       let keys;
       if (this.props.scene.useWeights) {
-        const validKeys = Array.from(this.props.allURLs.keys());
+        const validKeys = content().getURLKeys(this.props.contentLookupKey);
         keys = [];
         for (let source of this.props.scene.sources) {
           if (validKeys.includes(source.url)) {
@@ -507,7 +509,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           }
         }
       } else {
-        keys = Array.from(this.props.allURLs.keys());
+        keys = content().getURLKeys(this.props.contentLookupKey);
       }
 
       // If sorting randomly, get a random source
@@ -522,13 +524,13 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               // If there are no remaining urls for this source
               if (!(keys && keys.length)) {
                 this._loadedSources = new Array<string>();
-                keys = Array.from(this.props.allURLs.keys());
+                keys = content().getURLKeys(this.props.contentLookupKey);
               }
             }
             source = getRandomListItem(keys);
-            this._nextIndex = Array.from(this.props.allURLs.keys()).indexOf(
-              source,
-            );
+            this._nextIndex = content()
+              .getURLKeys(this.props.contentLookupKey)
+              .indexOf(source);
             this._sourceComplete = false;
             this._loadedSources.push(source);
           } else {
@@ -557,7 +559,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
         sourceIndex = this._nextIndex % keys.length;
       }
       // Get the urls from the source
-      collection = this.props.allURLs.get(source);
+      collection = content().getURLValues(this.props.contentLookupKey, source);
 
       // If we have no urls, loop again
       if (!(collection && collection.length)) {
@@ -582,12 +584,15 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           } else {
             // Make sure all the other sources are also extinguished
             const remainingLibrary = flatten(
-              Array.from(this.props.allURLs.values()),
+              content().getAllURLValues(this.props.contentLookupKey),
             ).filter((u: string) => !this._loadedURLs.includes(u));
             // If they are, clear loadedURLs
             if (remainingLibrary.length === 0) {
               this._loadedURLs = new Array<string>();
-              collection = this.props.allURLs.get(source);
+              collection = content().getURLValues(
+                this.props.contentLookupKey,
+                source,
+              );
             } else {
               // Else loop again
               this.queueRunFetchLoop(i);
@@ -627,7 +632,9 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       // For image weighted
 
       // Concat all images together
-      const urlKeys = flatten(Array.from(this.props.allURLs.keys()));
+      const urlKeys = flatten(
+        content().getURLKeys(this.props.contentLookupKey),
+      );
       collection = urlKeys;
       // If there are none, loop again
       if (!(collection && collection.length)) {
@@ -664,12 +671,10 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       }
 
       // Get the source of this image from the map
-      source = this.props.allURLs.get(url)[0];
+      source = content().getURLValues(this.props.contentLookupKey, url)[0];
     }
 
-    let post = this.props.allPosts.has(url)
-      ? this.props.allPosts.get(url)
-      : null;
+    let post = content().getPost(this.props.contentLookupKey, url);
 
     if (
       this.props.scene.orderFunction == OF.random &&
@@ -1265,11 +1270,11 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
         let remainingLibrary;
         if (this.props.scene.weightFunction == WF.sources) {
           remainingLibrary = flatten(
-            Array.from(this.props.allURLs.values()),
+            content().getAllURLValues(this.props.contentLookupKey),
           ).filter((u: string) => !this._playedURLs.includes(u));
         } else {
           remainingLibrary = flatten(
-            Array.from(this.props.allURLs.keys()),
+            content().getURLKeys(this.props.contentLookupKey),
           ).filter((u: string) => !this._playedURLs.includes(u));
         }
         if (remainingLibrary.length === 0) {
@@ -1434,7 +1439,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           this.props.scene.videoOption == VO.full
         ) &&
         !(
-          this.props.singleImage &&
+          content().isSingleImage(this.props.contentLookupKey) &&
           this.state.historyPaths.length > 0 &&
           getSourceType(
             this.state.historyPaths[
