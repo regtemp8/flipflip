@@ -1948,11 +1948,11 @@ class SceneDetail extends React.Component<SceneDetailProps> {
   }
 
   onFinishRemoveVisible() {
-    const displayIDs = this.state.displaySources.map((s) => s.id);
+    const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
     this.update(
       (s) =>
         (s.sources = s.sources.filter(
-          (s: LibrarySource) => !displayIDs.includes(s.id),
+          (s: LibrarySource) => !displayIDs.has(s.id),
         )),
     );
     this.onCloseDialog();

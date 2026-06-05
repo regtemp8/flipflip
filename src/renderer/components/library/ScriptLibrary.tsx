@@ -1000,8 +1000,8 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
   addScriptSources(newSources: Array<string>) {
     const originalSources = Array.from(this.props.library);
     // dedup
-    let sourceURLs = originalSources.map((s) => s.url);
-    newSources = newSources.filter((s) => !sourceURLs.includes(s));
+    const sourceURLs = new Set(originalSources.map((s) => s.url));
+    newSources = newSources.filter((s) => !sourceURLs.has(s));
 
     let id = originalSources.length + 1;
     originalSources.forEach((s) => {
@@ -1073,9 +1073,9 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
 
   onFinishRemoveVisible() {
     this.props.onUpdateLibrary((l) => {
-      const displayIDs = this.state.displaySources.map((s) => s.id);
+      const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
-        if (displayIDs.includes(l[i].id)) {
+        if (displayIDs.has(l[i].id)) {
           l.splice(i, 1);
         }
       }
@@ -1197,9 +1197,9 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
-        const sourceTags = source.tags.map((t) => t.name);
+        const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
-          if (!sourceTags.includes(tag)) {
+          if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
                 name: tag,
@@ -1219,8 +1219,8 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
         const source = l.find((s) => s.url === sourceURL);
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
-          if (sourceTags.includes(tag)) {
-            const indexOf = sourceTags.indexOf(tag);
+          const indexOf = sourceTags.indexOf(tag);
+          if (indexOf !== -1) {
             source.tags.splice(indexOf, 1);
             sourceTags.splice(indexOf, 1);
           }
@@ -1239,8 +1239,8 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
       if (commonTags.length == 0) {
         commonTags = tags;
       } else {
-        const tagNames = tags.map((t) => t.name);
-        commonTags = commonTags.filter((t) => tagNames.includes(t.name));
+        const tagNames = new Set(tags.map((t) => t.name));
+        commonTags = commonTags.filter((t) => tagNames.has(t.name));
       }
 
       if (commonTags.length == 0) break;
@@ -1259,7 +1259,6 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
     if (filtering) {
       for (let source of this.props.library) {
         let matchesFilter = true;
-        let countRegex;
         for (let filter of this.state.filters) {
           if (filter == "<Marked>") {
             // This is a marked filter

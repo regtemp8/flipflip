@@ -782,11 +782,9 @@ export function saveScriptPosition(
 
 export function resetScene(state: State, scene: Scene): Object {
   return updateScene(state, scene, (scene) => {
-    const ignoreProps = ["sources"];
-    for (const property in state.config.defaultScene) {
-      if (ignoreProps.includes(property)) continue;
-      (scene as any)[property] = (state.config.defaultScene as any)[property];
-    }
+    const sources = scene.sources;
+    Object.assign(scene, state.config.defaultScene);
+    scene.sources = sources;
   });
 }
 
@@ -2625,8 +2623,8 @@ function mergeSources(
   newSources: Array<LibrarySource>,
 ): Array<LibrarySource> {
   // dedup
-  const sourceURLs = originalSources.map((s) => s.url);
-  newSources = newSources.filter((s) => !sourceURLs.includes(s.url));
+  const sourceURLs = new Set(originalSources.map((s) => s.url));
+  newSources = newSources.filter((s) => !sourceURLs.has(s.url));
 
   let id = originalSources.length + 1;
   originalSources.forEach((s) => {
@@ -2650,8 +2648,8 @@ function addSources(
 ) {
   // dedup
   newSources = [...new Set(newSources)];
-  const sourceURLs = originalSources.map((s) => s.url);
-  newSources = newSources.filter((s) => !sourceURLs.includes(s));
+  const sourceURLs = new Set(originalSources.map((s) => s.url));
+  newSources = newSources.filter((s) => !sourceURLs.has(s));
 
   let id = originalSources.length + 1;
   originalSources.forEach((s) => {
@@ -3903,8 +3901,8 @@ export function importTumblr(getState: () => State, setState: Function) {
         }
         // dedup
         const newestState = getState();
-        const sourceURLs = newestState.library.map((s) => s.url);
-        following = following.filter((b) => !sourceURLs.includes(b));
+        const sourceURLs = new Set(newestState.library.map((s) => s.url));
+        following = following.filter((b) => !sourceURLs.has(b));
         let id = newestState.library.length + 1;
         newestState.library.forEach((s) => {
           id = Math.max(s.id + 1, id);

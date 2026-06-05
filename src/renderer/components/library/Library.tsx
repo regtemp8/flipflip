@@ -1547,6 +1547,7 @@ class Library extends React.Component<LibraryProps> {
     while (remainingLibrary.length > 0) {
       // Grab the first source in the list
       const source = remainingLibrary.splice(0, 1)[0];
+      const tagNames = new Set(source.tags.map((t) => t.name));
       let matches = [source];
 
       // For the rest of the sources
@@ -1554,9 +1555,8 @@ class Library extends React.Component<LibraryProps> {
         // Compare tags
         if (rs.tags.length == source.tags.length) {
           let hasAllTags = true;
-          const tagNames = source.tags.map((t) => t.name);
           for (let tag of rs.tags) {
-            if (!tagNames.includes(tag.name)) {
+            if (!tagNames.has(tag.name)) {
               hasAllTags = false;
             }
           }
@@ -1675,9 +1675,9 @@ class Library extends React.Component<LibraryProps> {
 
   onFinishRemoveVisible() {
     this.props.onUpdateLibrary((l) => {
-      const displayIDs = this.state.displaySources.map((s) => s.id);
+      const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
-        if (displayIDs.includes(l[i].id)) {
+        if (displayIDs.has(l[i].id)) {
           l.splice(i, 1);
         }
       }
@@ -1698,9 +1698,9 @@ class Library extends React.Component<LibraryProps> {
 
   onFinishDeleteVisible() {
     this.props.onUpdateLibrary(async (l) => {
-      const displayIDs = this.state.displaySources.map((s) => s.id);
+      const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
-        if (displayIDs.includes(l[i].id)) {
+        if (displayIDs.has(l[i].id)) {
           const sourceURL = l[i].url;
           await window.ipc.deleteLibrarySource(sourceURL, this.props.config);
           l.splice(i, 1);
@@ -1855,9 +1855,9 @@ class Library extends React.Component<LibraryProps> {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
-        const sourceTags = source.tags.map((t) => t.name);
+        const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
-          if (!sourceTags.includes(tag)) {
+          if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
                 name: tag,
@@ -1897,8 +1897,8 @@ class Library extends React.Component<LibraryProps> {
       if (commonTags.length == 0) {
         commonTags = tags;
       } else {
-        const tagNames = tags.map((t) => t.name);
-        commonTags = commonTags.filter((t) => tagNames.includes(t.name));
+        const tagNames = new Set(tags.map((t) => t.name));
+        commonTags = commonTags.filter((t) => tagNames.has(t.name));
       }
 
       if (commonTags.length == 0) break;
