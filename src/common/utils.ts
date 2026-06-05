@@ -34,17 +34,8 @@ export function removeDuplicatesBy(keyFn: Function, array: any[]): any[] {
 }
 
 export function isText(path: string, strict: boolean): boolean {
-  if (path == null) return false;
-  const p = path.toLowerCase();
   const acceptableExtensions = [".txt"];
-  for (const ext of acceptableExtensions) {
-    if (strict) {
-      if (p.endsWith(ext)) return true;
-    } else {
-      if (p.includes(ext)) return true;
-    }
-  }
-  return false;
+  return hasExtension(path, strict, acceptableExtensions);
 }
 
 export const isImageOrVideo = (path: string, strict: boolean): boolean => {
@@ -52,8 +43,6 @@ export const isImageOrVideo = (path: string, strict: boolean): boolean => {
 };
 
 export function isImage(path: string, strict: boolean): boolean {
-  if (path == null) return false;
-  const p = path.toLowerCase();
   const acceptableExtensions = [
     ".gif",
     ".png",
@@ -63,19 +52,10 @@ export function isImage(path: string, strict: boolean): boolean {
     ".tiff",
     ".svg",
   ];
-  for (const ext of acceptableExtensions) {
-    if (strict) {
-      if (p.endsWith(ext)) return true;
-    } else {
-      if (p.includes(ext)) return true;
-    }
-  }
-  return false;
+  return hasExtension(path, strict, acceptableExtensions);
 }
 
 export function isVideo(path: string, strict: boolean): boolean {
-  if (path == null) return false;
-  const p = path.toLowerCase();
   const acceptableExtensions = [
     ".mp4",
     ".mkv",
@@ -84,42 +64,31 @@ export function isVideo(path: string, strict: boolean): boolean {
     ".mov",
     ".m4v",
   ];
-  for (const ext of acceptableExtensions) {
-    if (strict) {
-      if (p.endsWith(ext)) return true;
-    } else {
-      if (p.includes(ext)) return true;
-    }
-  }
-  return false;
+  return hasExtension(path, strict, acceptableExtensions);
 }
 
 export function isVideoPlaylist(path: string, strict: boolean): boolean {
-  if (path == null) return false;
-  const p = path.toLowerCase();
   const acceptableExtensions = [".asx", ".m3u8", ".pls", ".xspf"];
-  for (const ext of acceptableExtensions) {
-    if (strict) {
-      if (p.endsWith(ext)) return true;
-    } else {
-      if (p.includes(ext)) return true;
-    }
-  }
-  return false;
+  return hasExtension(path, strict, acceptableExtensions);
 }
 
 export function isAudio(path: string, strict: boolean): boolean {
+  const acceptableExtensions = [".mp3", ".m4a", ".wav", ".ogg"];
+  return hasExtension(path, strict, acceptableExtensions);
+}
+
+function hasExtension(
+  path: string,
+  strict: boolean,
+  acceptableExtensions: string[],
+) {
   if (path == null) return false;
   const p = path.toLowerCase();
-  const acceptableExtensions = [".mp3", ".m4a", ".wav", ".ogg"];
-  for (const ext of acceptableExtensions) {
-    if (strict) {
-      if (p.endsWith(ext)) return true;
-    } else {
-      if (p.includes(ext)) return true;
-    }
-  }
-  return false;
+  const predicate = strict
+    ? (ext: string) => p.endsWith(ext)
+    : (ext: string) => p.includes(ext);
+
+  return acceptableExtensions.some(predicate);
 }
 
 export function getFileName(url: string, pathSep: string, extension = true) {
