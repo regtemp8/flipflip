@@ -446,24 +446,25 @@ interface AudioLibraryProps {
   systemMessage(message: string): void;
 }
 
-class AudioLibrary extends React.Component<AudioLibraryProps> {
-  readonly props: AudioLibraryProps;
+interface AudioLibraryState {
+  displaySources: Array<Audio>;
+  drawerOpen: boolean;
+  filters: Array<string>;
+  selected: Array<string>;
+  selectedTags: Array<string>;
+  menuAnchorEl: any;
+  openMenu: string;
+  playlistID: number;
+  importURL: string;
+  loadingMetadata: boolean;
+  loadingSources: boolean;
+  error: boolean;
+}
 
-  readonly state: {
-    displaySources: Array<Audio>;
-    drawerOpen: boolean;
-    filters: Array<string>;
-    selected: Array<string>;
-    selectedTags: Array<string>;
-    menuAnchorEl: any;
-    openMenu: string;
-    playlistID: number;
-    importURL: string;
-    loadingMetadata: boolean;
-    loadingSources: boolean;
-    error: boolean;
-  };
-
+class AudioLibrary extends React.Component<
+  AudioLibraryProps,
+  AudioLibraryState
+> {
   constructor(props: AudioLibraryProps) {
     super(props);
 

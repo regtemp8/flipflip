@@ -62,8 +62,6 @@ interface ThemeColorPickerProps {
 }
 
 class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
-  readonly props: ThemeColorPickerProps;
-
   constructor(props: ThemeColorPickerProps) {
     super(props);
   }

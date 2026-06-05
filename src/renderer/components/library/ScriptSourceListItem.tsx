@@ -132,13 +132,14 @@ interface ScriptSourceListItemProps {
   systemMessage(message: string): void;
 }
 
-class ScriptSourceListItem extends React.Component<ScriptSourceListItemProps> {
-  readonly props: ScriptSourceListItemProps;
+interface ScriptSourceListItemState {
+  urlInput: string;
+}
 
-  readonly state: {
-    urlInput: string;
-  };
-
+class ScriptSourceListItem extends React.Component<
+  ScriptSourceListItemProps,
+  ScriptSourceListItemState
+> {
   constructor(props: ScriptSourceListItemProps) {
     super(props);
 

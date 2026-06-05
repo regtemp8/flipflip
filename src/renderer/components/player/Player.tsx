@@ -76,40 +76,38 @@ interface PlayerProps {
   onGenerate?(scene: Scene | SceneGrid, children?: boolean): void;
 }
 
-export default class Player extends React.Component<PlayerProps> {
-  readonly props: PlayerProps;
+interface PlayerState {
+  canStart: boolean;
+  hasStarted: boolean;
+  isMainLoaded: boolean;
+  areOverlaysLoaded: Array<boolean>;
+  isEmpty: boolean;
+  isPlaying: boolean;
+  total: number;
+  progress: number;
+  progressMessage: string[];
+  startTime: Date;
+  historyOffset: number;
+  historyPaths: Array<any>;
+  imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
+  imagePlayerDeleteHack: ChildCallbackHack;
+  mainVideo: HTMLVideoElement;
+  overlayVideos: Array<Array<HTMLVideoElement>>;
+  currentAudio: Audio;
+  timeToNextFrame: number;
+  recentPictureGrid: boolean;
+  thumbImage: HTMLImageElement;
+  persistAudio: boolean;
+  persistText: boolean;
+  scriptPlaylists: {
+    scripts: CaptionScript[];
+    shuffle: boolean;
+    repeat: string;
+  }[];
+  hideCursor: boolean;
+}
 
-  readonly state: {
-    canStart: boolean;
-    hasStarted: boolean;
-    isMainLoaded: boolean;
-    areOverlaysLoaded: Array<boolean>;
-    isEmpty: boolean;
-    isPlaying: boolean;
-    total: number;
-    progress: number;
-    progressMessage: string[];
-    startTime: Date;
-    historyOffset: number;
-    historyPaths: Array<any>;
-    imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
-    imagePlayerDeleteHack: ChildCallbackHack;
-    mainVideo: HTMLVideoElement;
-    overlayVideos: Array<Array<HTMLVideoElement>>;
-    currentAudio: Audio;
-    timeToNextFrame: number;
-    recentPictureGrid: boolean;
-    thumbImage: HTMLImageElement;
-    persistAudio: boolean;
-    persistText: boolean;
-    scriptPlaylists: {
-      scripts: CaptionScript[];
-      shuffle: boolean;
-      repeat: string;
-    }[];
-    hideCursor: boolean;
-  };
-
+export default class Player extends React.Component<PlayerProps, PlayerState> {
   constructor(props: PlayerProps) {
     super(props);
 
@@ -1117,7 +1115,6 @@ export default class Player extends React.Component<PlayerProps> {
     ) {
       this.setState({
         hasStarted: this.props.hasStarted ?? true,
-        isLoaded: true,
         startTime: this.state.startTime ? this.state.startTime : new Date(),
       });
       setTimeout(() => {
@@ -1129,8 +1126,6 @@ export default class Player extends React.Component<PlayerProps> {
           }
         }
       }, 200);
-    } else {
-      this.setState({ isLoaded: isLoaded });
     }
   }
 

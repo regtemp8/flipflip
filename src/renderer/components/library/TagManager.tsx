@@ -148,18 +148,16 @@ interface TagManagerProps {
   onUpdateTags(tags: Array<Tag>): void;
 }
 
-class TagManager extends React.Component<TagManagerProps> {
-  readonly props: TagManagerProps;
+interface TagManagerState {
+  openMenu: string;
+  menuAnchorEl: any;
+  tags: Array<Tag>;
+  isEditing: number;
+  tagName: string;
+  tagPhrase: string;
+}
 
-  readonly state: {
-    openMenu: string;
-    menuAnchorEl: any;
-    tags: Array<Tag>;
-    isEditing: number;
-    tagName: string;
-    tagPhrase: string;
-  };
-
+class TagManager extends React.Component<TagManagerProps, TagManagerState> {
   constructor(props: TagManagerProps) {
     super(props);
 

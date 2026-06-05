@@ -30,8 +30,6 @@ interface PlaylistSelectProps {
 }
 
 class PlaylistSelect extends React.Component<PlaylistSelectProps> {
-  readonly props: PlaylistSelectProps;
-
   constructor(props: PlaylistSelectProps) {
     super(props);
   }

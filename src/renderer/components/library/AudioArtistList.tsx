@@ -61,14 +61,15 @@ interface AudioArtistListProps {
   onClickArtist(artist: string): void;
 }
 
-class AudioArtistList extends React.Component<AudioArtistListProps> {
-  readonly props: AudioArtistListProps;
+interface AudioArtistListState {
+  artists: Map<string, string>;
+  hover: any;
+}
 
-  readonly state: {
-    artists: Map<string, string>;
-    hover: any;
-  };
-
+class AudioArtistList extends React.Component<
+  AudioArtistListProps,
+  AudioArtistListState
+> {
   constructor(props: AudioArtistListProps) {
     super(props);
 

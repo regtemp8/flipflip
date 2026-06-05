@@ -157,18 +157,16 @@ interface GridSetupProps {
   onUpdateGrid(grid: SceneGrid, fn: (grid: SceneGrid) => void): void;
 }
 
-class GridSetup extends React.Component<GridSetupProps> {
-  readonly props: GridSetupProps;
+interface GridSetupState {
+  isEditingName: string;
+  isEditing: Array<number>;
+  menuAnchorEl: any;
+  height: number;
+  width: number;
+  dragging: boolean;
+}
 
-  readonly state: {
-    isEditingName: string;
-    isEditing: Array<number>;
-    menuAnchorEl: any;
-    height: number;
-    width: number;
-    dragging: boolean;
-  };
-
+class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   constructor(props: GridSetupProps) {
     super(props);
 
@@ -704,7 +702,6 @@ class GridSetup extends React.Component<GridSetupProps> {
       this.setState({
         menuAnchorEl: e.target,
         isEditing: [rowIndex, colIndex],
-        reset: null,
       });
     }
   }

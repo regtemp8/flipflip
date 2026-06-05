@@ -76,8 +76,6 @@ interface ZoomMoveCardProps {
 }
 
 class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
-  readonly props: ZoomMoveCardProps;
-
   readonly horizInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   readonly vertInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();

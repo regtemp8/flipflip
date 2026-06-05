@@ -25,8 +25,6 @@ interface MultiSceneSelectProps {
 }
 
 class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
-  readonly props: MultiSceneSelectProps;
-
   constructor(props: MultiSceneSelectProps) {
     super(props);
   }

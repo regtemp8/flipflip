@@ -16,8 +16,6 @@ interface PlayerBoolCardProps {
 }
 
 export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps> {
-  readonly props: PlayerBoolCardProps;
-
   constructor(props: PlayerBoolCardProps) {
     super(props);
   }

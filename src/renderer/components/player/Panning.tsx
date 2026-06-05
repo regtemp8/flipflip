@@ -18,14 +18,15 @@ interface PanningProps {
   children?: React.ReactNode;
 }
 
-export default class Panning extends React.Component<PanningProps> {
-  readonly props: PanningProps;
+interface PanningState {
+  togglePan: boolean;
+  duration: number;
+}
 
-  readonly state: {
-    togglePan: boolean;
-    duration: number;
-  };
-
+export default class Panning extends React.Component<
+  PanningProps,
+  PanningState
+> {
   constructor(props: PanningProps) {
     super(props);
 

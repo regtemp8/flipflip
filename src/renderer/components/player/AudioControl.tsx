@@ -70,16 +70,17 @@ interface AudioControlProps {
   playNextScene?(): void;
 }
 
-class AudioControl extends React.Component<AudioControlProps> {
-  readonly props: AudioControlProps;
+interface AudioControlState {
+  playing: boolean;
+  position: number;
+  duration: number;
+  tick: boolean;
+}
 
-  readonly state: {
-    playing: boolean;
-    position: number;
-    duration: number;
-    tick: boolean;
-  };
-
+class AudioControl extends React.Component<
+  AudioControlProps,
+  AudioControlState
+> {
   constructor(props: AudioControlProps) {
     super(props);
 

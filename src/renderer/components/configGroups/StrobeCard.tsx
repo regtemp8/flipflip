@@ -66,8 +66,6 @@ interface StrobeCardProps {
 }
 
 class StrobeCard extends React.Component<StrobeCardProps> {
-  readonly props: StrobeCardProps;
-
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   readonly delaySinInputRef: React.RefObject<HTMLInputElement> =
     React.createRef();

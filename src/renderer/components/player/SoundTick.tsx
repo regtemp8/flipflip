@@ -13,8 +13,6 @@ interface SoundTickProps {
 }
 
 export default class SoundTick extends React.Component<SoundTickProps> {
-  readonly props: SoundTickProps;
-
   constructor(props: SoundTickProps) {
     super(props);
   }

@@ -32,8 +32,6 @@ interface PlayerNumCardProps {
 }
 
 class PlayerNumCard extends React.Component<PlayerNumCardProps> {
-  readonly props: PlayerNumCardProps;
-
   constructor(props: PlayerNumCardProps) {
     super(props);
   }

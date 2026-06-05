@@ -202,20 +202,21 @@ interface VideoClipperProps {
   onUpdateClips(url: string, clips: Array<Clip>): void;
 }
 
-class VideoClipper extends React.Component<VideoClipperProps> {
-  readonly props: VideoClipperProps;
+interface VideoClipperState {
+  scene: Scene;
+  video: HTMLVideoElement;
+  empty: boolean;
+  isEditing: Clip;
+  isEditingValue: number[];
+  isEditingStartText: string;
+  isEditingEndText: string;
+  isTagging: boolean;
+}
 
-  readonly state: {
-    scene: Scene;
-    video: HTMLVideoElement;
-    empty: boolean;
-    isEditing: Clip;
-    isEditingValue: number[];
-    isEditingStartText: string;
-    isEditingEndText: string;
-    isTagging: boolean;
-  };
-
+class VideoClipper extends React.Component<
+  VideoClipperProps,
+  VideoClipperState
+> {
   constructor(props: VideoClipperProps) {
     super(props);
 

@@ -77,20 +77,21 @@ interface ScriptSourceListProps {
   savePosition?(): void;
 }
 
-class ScriptSourceList extends React.Component<ScriptSourceListProps> {
-  readonly props: ScriptSourceListProps;
+interface ScriptSourceListState {
+  sourceOptions: CaptionScript;
+  lastSelected: number;
+  isEditing: number;
+  mouseX: any;
+  mouseY: any;
+  deleteDialog: CaptionScript;
+  beginPlay: CaptionScript;
+  playWithScene: number;
+}
 
-  readonly state: {
-    sourceOptions: CaptionScript;
-    lastSelected: number;
-    isEditing: number;
-    mouseX: any;
-    mouseY: any;
-    deleteDialog: CaptionScript;
-    beginPlay: CaptionScript;
-    playWithScene: number;
-  };
-
+class ScriptSourceList extends React.Component<
+  ScriptSourceListProps,
+  ScriptSourceListState
+> {
   constructor(props: ScriptSourceListProps) {
     super(props);
 
@@ -271,7 +272,7 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
       this.props.sources.length > 0 &&
       this.props.sources[0].url == ""
     ) {
-      this.setState({ isEditing: this.props.sources[0].id, urlInput: "" });
+      this.setState({ isEditing: this.props.sources[0].id });
     }
   }
 
@@ -416,10 +417,6 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
     this.setState({ isEditing: -1 });
   }
 
-  onCloseDialog() {
-    this.setState({ menuAnchorEl: null, clipMenu: null });
-  }
-
   onPlay(source: CaptionScript) {
     this.setState({ beginPlay: source, playWithScene: 0 });
   }
@@ -444,7 +441,7 @@ class ScriptSourceList extends React.Component<ScriptSourceListProps> {
   }
 
   onChangeScene(sceneID: string) {
-    this.setState({ playWithScene: sceneID });
+    this.setState({ playWithScene: Number(sceneID) });
   }
 
   getSceneName(id: string): string {

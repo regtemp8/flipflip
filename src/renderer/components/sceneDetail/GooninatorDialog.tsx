@@ -39,15 +39,16 @@ interface GooninatorDialogProps {
   onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
 }
 
-class GooninatorDialog extends React.Component<GooninatorDialogProps> {
-  readonly props: GooninatorDialogProps;
+interface GooninatorDialogState {
+  importType: string;
+  importURL: string;
+  rootDir: string;
+}
 
-  readonly state: {
-    importType: string;
-    importURL: string;
-    rootDir: string;
-  };
-
+class GooninatorDialog extends React.Component<
+  GooninatorDialogProps,
+  GooninatorDialogState
+> {
   constructor(props: GooninatorDialogProps) {
     super(props);
 

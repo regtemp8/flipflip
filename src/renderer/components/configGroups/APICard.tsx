@@ -86,21 +86,19 @@ interface APICardProps {
   onUpdateConfig(fn: (config: Config) => void): void;
 }
 
-class APICard extends React.Component<APICardProps> {
-  readonly props: APICardProps;
+interface APICardState {
+  openMenu: string;
+  menuType: string;
+  snackbarOpen: boolean;
+  snackbar: string;
+  snackbarSeverity: string;
+  input1: string;
+  input2: string;
+  input3: string;
+  input4: string;
+}
 
-  readonly state: {
-    openMenu: string;
-    menuType: string;
-    snackbarOpen: boolean;
-    snackbar: string;
-    snackbarSeverity: string;
-    input1: string;
-    input2: string;
-    input3: string;
-    input4: string;
-  };
-
+class APICard extends React.Component<APICardProps, APICardState> {
   constructor(props: APICardProps) {
     super(props);
 

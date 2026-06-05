@@ -385,21 +385,19 @@ interface LibraryProps {
   systemMessage(message: string): void;
 }
 
-class Library extends React.Component<LibraryProps> {
-  readonly props: LibraryProps;
+interface LibraryState {
+  displaySources: Array<LibrarySource>;
+  drawerOpen: boolean;
+  filters: Array<string>;
+  selected: Array<string>;
+  selectedTags: Array<string>;
+  menuAnchorEl: any;
+  openMenu: string;
+  moveDialog: boolean;
+  importFile: string;
+}
 
-  readonly state: {
-    displaySources: Array<LibrarySource>;
-    drawerOpen: false;
-    filters: Array<string>;
-    selected: Array<string>;
-    selectedTags: Array<string>;
-    menuAnchorEl: any;
-    openMenu: string;
-    moveDialog: boolean;
-    importFile: string;
-  };
-
+class Library extends React.Component<LibraryProps, LibraryState> {
   constructor(props: LibraryProps) {
     super(props);
 
@@ -1586,7 +1584,7 @@ class Library extends React.Component<LibraryProps> {
       this.setState({ selected: [], selectedTags: [] });
       this.props.onBatchTag();
     } else if (this.props.specialMode == SP.batchClip) {
-      this.setState({ selected: [], clipOffset: [0, 0] });
+      this.setState({ selected: [] });
       this.props.onBatchClip();
     } else {
       this.props.goBack();
@@ -1613,9 +1611,9 @@ class Library extends React.Component<LibraryProps> {
 
   onToggleBatchClipModal() {
     if (this.state.openMenu == MO.batchClip) {
-      this.setState({ openMenu: null, clipOffset: [0, 0] });
+      this.setState({ openMenu: null });
     } else {
-      this.setState({ openMenu: MO.batchClip, clipOffset: [0, 0] });
+      this.setState({ openMenu: MO.batchClip });
     }
   }
 

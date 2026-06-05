@@ -33,8 +33,6 @@ interface ImageViewProps {
 }
 
 export default class ImageView extends React.Component<ImageViewProps> {
-  readonly props: ImageViewProps;
-
   constructor(props: ImageViewProps) {
     super(props);
   }

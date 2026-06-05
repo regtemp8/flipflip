@@ -116,14 +116,15 @@ interface AudioPlaylistProps {
   systemMessage?(message: string): void;
 }
 
-class AudioPlaylist extends React.Component<AudioPlaylistProps> {
-  readonly props: AudioPlaylistProps;
+interface AudioPlaylistState {
+  currentIndex: number;
+  playingAudios: Array<Audio>;
+}
 
-  readonly state: {
-    currentIndex: number;
-    playingAudios: Array<Audio>;
-  };
-
+class AudioPlaylist extends React.Component<
+  AudioPlaylistProps,
+  AudioPlaylistState
+> {
   constructor(props: AudioPlaylistProps) {
     super(props);
 

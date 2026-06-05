@@ -30,19 +30,20 @@ interface ErrorBoundaryProps {
   onRestore(backupFile: string): void;
 }
 
-export default class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
-  readonly props: ErrorBoundaryProps;
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error;
+  info: React.ErrorInfo;
+  resetCheck: boolean;
+  backupCheck: boolean;
+  backup: { url: string; size: number };
+  backups: Array<{ url: string; size: number }>;
+}
 
-  readonly state: {
-    hasError: boolean;
-    error: Error;
-    info: React.ErrorInfo;
-    resetCheck: boolean;
-    backupCheck: boolean;
-    backup: { url: string; size: number };
-    backups: Array<{ url: string; size: number }>;
-  };
-
+export default class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
 

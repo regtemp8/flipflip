@@ -15,15 +15,16 @@ interface FadeInOutProps {
   children?: React.ReactNode;
 }
 
-export default class FadeInOut extends React.Component<FadeInOutProps> {
-  readonly props: FadeInOutProps;
+interface FadeInOutState {
+  toggleFade: boolean;
+  duration: number;
+  delay: number;
+}
 
-  readonly state: {
-    toggleFade: boolean;
-    duration: number;
-    delay: number;
-  };
-
+export default class FadeInOut extends React.Component<
+  FadeInOutProps,
+  FadeInOutState
+> {
   constructor(props: FadeInOutProps) {
     super(props);
 

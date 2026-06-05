@@ -63,14 +63,12 @@ interface ColorPickerProps {
   onChangeColor(e: any): void;
 }
 
-class ColorPicker extends React.Component<ColorPickerProps> {
-  readonly props: ColorPickerProps;
+interface ColorPickerState {
+  pickerColor: any;
+  pickerAnchorEl: any;
+}
 
-  readonly state: {
-    pickerColor: any;
-    pickerAnchorEl: any;
-  };
-
+class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
   constructor(props: ColorPickerProps) {
     super(props);
 

@@ -48,15 +48,13 @@ interface CacheCardProps {
   onUpdateSettings(fn: (settings: CacheSettings) => void): void;
 }
 
-class CacheCard extends React.Component<CacheCardProps> {
-  readonly props: CacheCardProps;
+interface CacheCardState {
+  cacheSize: string;
+  clearCacheAlert: boolean;
+  cachePath: string;
+}
 
-  readonly state: {
-    cacheSize: string;
-    clearCacheAlert: boolean;
-    cachePath: string;
-  };
-
+class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   constructor(props: CacheCardProps) {
     super(props);
 

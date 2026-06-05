@@ -64,14 +64,15 @@ interface AudioAlbumListProps {
   onClickArtist(artist: string): void;
 }
 
-class AudioAlbumList extends React.Component<AudioAlbumListProps> {
-  readonly props: AudioAlbumListProps;
+interface AudioAlbumListState {
+  albums: Map<string, { artist: string; thumb: string; count: number }>;
+  hover: any;
+}
 
-  readonly state: {
-    albums: Map<string, { artist: string; thumb: string; count: number }>;
-    hover: any;
-  };
-
+class AudioAlbumList extends React.Component<
+  AudioAlbumListProps,
+  AudioAlbumListState
+> {
   constructor(props: AudioAlbumListProps) {
     super(props);
 

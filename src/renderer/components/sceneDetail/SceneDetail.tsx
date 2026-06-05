@@ -475,23 +475,21 @@ interface SceneDetailProps {
   systemMessage(message: string): void;
 }
 
-class SceneDetail extends React.Component<SceneDetailProps> {
-  readonly props: SceneDetailProps;
+interface SceneDetailState {
+  isEditingName: string;
+  drawerOpen: boolean;
+  menuAnchorEl: any;
+  openMenu: string;
+  snackbarOpen: boolean;
+  snackbar: string;
+  snackbarSeverity: string;
+  sceneEffects: string;
+  confirmCopy: boolean;
+  displaySources: Array<LibrarySource>;
+  filters: Array<string>;
+}
 
-  readonly state: {
-    isEditingName: string;
-    drawerOpen: boolean;
-    menuAnchorEl: any;
-    openMenu: string;
-    snackbarOpen: boolean;
-    snackbar: string;
-    snackbarSeverity: string;
-    sceneEffects: string;
-    confirmCopy: boolean;
-    displaySources: Array<LibrarySource>;
-    filters: Array<string>;
-  };
-
+class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
   constructor(props: SceneDetailProps) {
     super(props);
 

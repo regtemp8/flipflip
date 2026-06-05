@@ -45,8 +45,6 @@ interface SceneOptionsProps {
 }
 
 class SceneOptions extends React.Component<SceneOptionsProps> {
-  readonly props: SceneOptionsProps;
-
   constructor(props: SceneOptionsProps) {
     super(props);
   }

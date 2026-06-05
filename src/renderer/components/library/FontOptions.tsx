@@ -50,8 +50,6 @@ interface FontOptionsProps {
 }
 
 class FontOptions extends React.Component<FontOptionsProps> {
-  readonly props: FontOptionsProps;
-
   constructor(props: FontOptionsProps) {
     super(props);
   }

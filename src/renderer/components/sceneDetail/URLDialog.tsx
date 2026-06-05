@@ -41,13 +41,11 @@ interface URLDialogProps {
   onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
 }
 
-class URLDialog extends React.Component<URLDialogProps> {
-  readonly props: URLDialogProps;
+interface URLDialogState {
+  importURLs: string;
+}
 
-  readonly state: {
-    importURLs: string;
-  };
-
+class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
   constructor(props: URLDialogProps) {
     super(props);
 

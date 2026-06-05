@@ -73,8 +73,6 @@ interface SlideCardProps {
 }
 
 class SlideCard extends React.Component<SlideCardProps> {
-  readonly props: SlideCardProps;
-
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   constructor(props: SlideCardProps) {

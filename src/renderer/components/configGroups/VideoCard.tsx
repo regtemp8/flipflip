@@ -23,8 +23,6 @@ interface VideoCardProps {
 }
 
 export default class VideoCard extends React.Component<VideoCardProps> {
-  readonly props: VideoCardProps;
-
   constructor(props: VideoCardProps) {
     super(props);
   }

@@ -51,15 +51,16 @@ interface LibrarySearchProps {
   onUpdateFilters(filter: Array<string>): void;
 }
 
-class LibrarySearch extends React.Component<LibrarySearchProps> {
-  readonly props: LibrarySearchProps;
+interface LibrarySearchState {
+  searchInput: string;
+  options: Array<{ label: string; value: string }>;
+  defaultValues: Array<{ label: string; value: string }>;
+}
 
-  readonly state: {
-    searchInput: string;
-    options: Array<{ label: string; value: string }>;
-    defaultValues: Array<{ label: string; value: string }>;
-  };
-
+class LibrarySearch extends React.Component<
+  LibrarySearchProps,
+  LibrarySearchState
+> {
   constructor(props: LibrarySearchProps) {
     super(props);
 

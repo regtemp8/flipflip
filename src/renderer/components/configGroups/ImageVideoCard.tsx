@@ -80,8 +80,6 @@ interface ImageVideoCardProps {
 }
 
 class ImageVideoCard extends React.Component<ImageVideoCardProps> {
-  readonly props: ImageVideoCardProps;
-
   constructor(props: ImageVideoCardProps) {
     super(props);
   }

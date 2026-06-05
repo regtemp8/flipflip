@@ -38,8 +38,6 @@ interface SceneSelectProps {
 }
 
 class SceneSelect extends React.Component<SceneSelectProps> {
-  readonly props: SceneSelectProps;
-
   constructor(props: SceneSelectProps) {
     super(props);
   }

@@ -50,14 +50,12 @@ interface AudioCardProps {
   systemMessage?(message: string): void;
 }
 
-class AudioCard extends React.Component<AudioCardProps> {
-  readonly props: AudioCardProps;
+interface AudioCardState {
+  sourceOptionsPlaylist: number;
+  sourceOptions: Audio;
+}
 
-  readonly state: {
-    sourceOptionsPlaylist: number;
-    sourceOptions: Audio;
-  };
-
+class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
   constructor(props: AudioCardProps) {
     super(props);
 

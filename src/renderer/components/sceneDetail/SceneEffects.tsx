@@ -43,8 +43,6 @@ interface SceneEffectsProps {
 }
 
 class SceneEffects extends React.Component<SceneEffectsProps> {
-  readonly props: SceneEffectsProps;
-
   constructor(props: SceneEffectsProps) {
     super(props);
   }

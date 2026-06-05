@@ -71,16 +71,17 @@ interface AudioSourceListProps {
   systemMessage(message: string): void;
 }
 
-class AudioSourceList extends React.Component<AudioSourceListProps> {
-  readonly props: AudioSourceListProps;
+interface AudioSourceListState {
+  sourceOptions: Audio;
+  deleteDialog: Audio;
+  sourceEdit: Audio;
+  lastSelected: number;
+}
 
-  readonly state: {
-    sourceOptions: Audio;
-    deleteDialog: Audio;
-    sourceEdit: Audio;
-    lastSelected: number;
-  };
-
+class AudioSourceList extends React.Component<
+  AudioSourceListProps,
+  AudioSourceListState
+> {
   constructor(props: AudioSourceListProps) {
     super(props);
 
@@ -372,10 +373,6 @@ class AudioSourceList extends React.Component<AudioSourceListProps> {
 
   onCloseSourceOptions() {
     this.setState({ sourceOptions: null });
-  }
-
-  onCloseDialog() {
-    this.setState({ menuAnchorEl: null, clipMenu: null });
   }
 
   onFinishSourceEdit(newAudio: Audio) {

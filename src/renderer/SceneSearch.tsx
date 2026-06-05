@@ -30,15 +30,13 @@ interface SceneSearchProps {
   onUpdateFilters(filter: Array<string>): void;
 }
 
-class SceneSearch extends React.Component<SceneSearchProps> {
-  readonly props: SceneSearchProps;
+interface SceneSearchState {
+  searchInput: string;
+  options: Array<{ label: string; value: string }>;
+  defaultValues: Array<{ label: string; value: string }>;
+}
 
-  readonly state: {
-    searchInput: string;
-    options: Array<{ label: string; value: string }>;
-    defaultValues: Array<{ label: string; value: string }>;
-  };
-
+class SceneSearch extends React.Component<SceneSearchProps, SceneSearchState> {
   constructor(props: SceneSearchProps) {
     super(props);
 

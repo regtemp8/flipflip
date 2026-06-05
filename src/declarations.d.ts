@@ -69,7 +69,6 @@ declare module "react-sound" {
 
   export default class Sound extends React.Component<ReactSoundProps> {
     // This line fixes the JSX error
-    readonly props: ReactSoundProps;
   }
 }
 

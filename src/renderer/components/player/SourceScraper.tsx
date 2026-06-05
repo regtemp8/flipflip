@@ -42,16 +42,19 @@ interface SourceScraperProps {
   playNextScene?(): void;
 }
 
-export default class SourceScraper extends React.Component<SourceScraperProps> {
-  readonly state: {
-    contentLookupKey?: string;
-    restart: boolean;
-    preload: boolean;
-    videoVolume: number;
-    captcha: any;
-    load: boolean;
-  };
+interface SourceScraperState {
+  contentLookupKey?: string;
+  restart: boolean;
+  preload: boolean;
+  videoVolume: number;
+  captcha: any;
+  load: boolean;
+}
 
+export default class SourceScraper extends React.Component<
+  SourceScraperProps,
+  SourceScraperState
+> {
   constructor(props: SourceScraperProps) {
     super(props);
 
@@ -508,11 +511,8 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
           helpers: { next: any; count: number; retries: number };
         }>();
         this.setState({
-          allURLs: new Map<string, Array<string>>(),
-          allPosts: new Map<string, string>(),
           preload: false,
           restart: true,
-          singleImage: null,
         });
       }
     }

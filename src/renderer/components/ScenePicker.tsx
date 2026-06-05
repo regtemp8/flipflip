@@ -434,26 +434,24 @@ interface ScenePickerProps {
   systemMessage(message: string): void;
 }
 
-class ScenePicker extends React.Component<ScenePickerProps> {
-  readonly props: ScenePickerProps;
+interface ScenePickerState {
+  drawerOpen: boolean;
+  newVersion: string;
+  newVersionLink: string;
+  isFirstWindow: boolean;
+  menuAnchorEl: any;
+  openMenu: string;
+  displayScenes: Array<Scene>;
+  displayGrids: Array<SceneGrid>;
+  filters: Array<string>;
+  deleteScenes: Array<number>;
+  importFile: string;
+  importSources: boolean;
+  isEditing: number;
+  isEditingName: string;
+}
 
-  readonly state: {
-    drawerOpen: boolean;
-    newVersion: string;
-    newVersionLink: string;
-    isFirstWindow: boolean;
-    menuAnchorEl: any;
-    openMenu: string;
-    displayScenes: Array<Scene>;
-    displayGrids: Array<SceneGrid>;
-    filters: Array<string>;
-    deleteScenes: Array<number>;
-    importFile: string;
-    importSources: boolean;
-    isEditing: number;
-    isEditingName: string;
-  };
-
+class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
   constructor(props: ScenePickerProps) {
     super(props);
 

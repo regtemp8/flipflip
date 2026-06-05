@@ -248,27 +248,28 @@ interface CaptionScriptorProps {
   onUpdateLibrary(fn: (library: Array<CaptionScript>) => void): void;
 }
 
-class CaptionScriptor extends React.Component<CaptionScriptorProps> {
-  readonly props: CaptionScriptorProps;
+interface CaptionScriptorState {
+  captionScript: CaptionScript;
+  sceneScripts: Array<CaptionScript>;
+  selectScript: string;
+  scene: Scene;
+  error: string;
+  fullscreen: boolean;
+  sceneChanged: boolean;
+  scriptChanged: boolean;
+  loadFromSceneError: boolean;
+  openMenu: string;
+  menuAnchorEl: any;
+  captionProgramJumpToHack: ChildCallbackHack;
+  codeMirrorAddHack: ChildCallbackHack;
+  codeMirrorOverwriteHack: ChildCallbackHack;
+  systemFonts: Array<string>;
+}
 
-  readonly state: {
-    captionScript: CaptionScript;
-    sceneScripts: Array<CaptionScript>;
-    selectScript: string;
-    scene: Scene;
-    error: string;
-    fullscreen: boolean;
-    sceneChanged: boolean;
-    scriptChanged: boolean;
-    loadFromSceneError: boolean;
-    openMenu: string;
-    menuAnchorEl: any;
-    captionProgramJumpToHack: ChildCallbackHack;
-    codeMirrorAddHack: ChildCallbackHack;
-    codeMirrorOverwriteHack: ChildCallbackHack;
-    systemFonts: Array<string>;
-  };
-
+class CaptionScriptor extends React.Component<
+  CaptionScriptorProps,
+  CaptionScriptorState
+> {
   constructor(props: CaptionScriptorProps) {
     super(props);
 
@@ -1171,7 +1172,6 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
     this.setState({
       openMenu: null,
       menuAnchorEl: null,
-      drawerOpen: false,
       selectScript: "",
     });
   }

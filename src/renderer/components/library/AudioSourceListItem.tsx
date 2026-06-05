@@ -191,13 +191,14 @@ interface AudioSourceListItemProps {
   systemMessage(message: string): void;
 }
 
-class AudioSourceListItem extends React.Component<AudioSourceListItemProps> {
-  readonly props: AudioSourceListItemProps;
+interface AudioSourceListItemState {
+  urlInput: string;
+}
 
-  readonly state: {
-    urlInput: string;
-  };
-
+class AudioSourceListItem extends React.Component<
+  AudioSourceListItemProps,
+  AudioSourceListItemState
+> {
   constructor(props: AudioSourceListItemProps) {
     super(props);
 

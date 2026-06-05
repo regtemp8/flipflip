@@ -81,18 +81,16 @@ interface GridPlayerProps {
   setVideo?(index: number, video: HTMLVideoElement): void;
 }
 
-class GridPlayer extends React.Component<GridPlayerProps> {
-  readonly props: GridPlayerProps;
+interface GridPlayerState {
+  scene: SceneGrid;
+  height: number;
+  width: number;
+  sceneCopyGrid: Array<Array<React.ReactNode>>;
+  isLoaded: Array<Array<boolean>>;
+  hideCursor: boolean;
+}
 
-  readonly state: {
-    scene: SceneGrid;
-    height: number;
-    width: number;
-    sceneCopyGrid: Array<Array<React.ReactNode>>;
-    isLoaded: Array<Array<boolean>>;
-    hideCursor: boolean;
-  };
-
+class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
   readonly idleTimerRef: React.RefObject<HTMLDivElement> = React.createRef();
 
   constructor(props: GridPlayerProps) {
@@ -332,13 +330,13 @@ class GridPlayer extends React.Component<GridPlayerProps> {
   nextScene(rowIndex: number, colIndex: number) {
     const cell = this.state.scene.grid[rowIndex][colIndex];
     const scene = this.props.allScenes.find((s) => s.id == cell.sceneID);
-    const newGrid = this.state.scene;
+    const newSceneGrid = this.state.scene;
     if (scene.nextSceneID == -1) {
-      newGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneRandomID;
+      newSceneGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneRandomID;
     } else {
-      newGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneID;
+      newSceneGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneID;
     }
-    this.setState({ grid: newGrid });
+    this.setState({ scene: newSceneGrid });
   }
 
   onActive() {

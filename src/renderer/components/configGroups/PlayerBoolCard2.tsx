@@ -20,13 +20,14 @@ interface PlayerBoolCard2Props {
   onUpdateGeneralSettings(fn: (settings: GeneralSettings) => void): void;
 }
 
-export default class PlayerBoolCard2 extends React.Component<PlayerBoolCard2Props> {
-  readonly props: PlayerBoolCard2Props;
+interface PlayerBoolCard2State {
+  portableDialog: boolean;
+}
 
-  readonly state: {
-    portableDialog: boolean;
-  };
-
+export default class PlayerBoolCard2 extends React.Component<
+  PlayerBoolCard2Props,
+  PlayerBoolCard2State
+> {
   constructor(props: PlayerBoolCard2Props) {
     super(props);
 

@@ -12,8 +12,6 @@ interface TemplateProps {
 }
 
 class Template extends React.Component<TemplateProps> {
-  readonly props: TemplateProps;
-
   constructor(props: TemplateProps) {
     super(props);
   }

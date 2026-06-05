@@ -124,13 +124,14 @@ interface SceneOptionCardProps {
   onGenerate?(scene: Scene | SceneGrid, children?: boolean): void;
 }
 
-class SceneOptionCard extends React.Component<SceneOptionCardProps> {
-  readonly props: SceneOptionCardProps;
+interface SceneOptionCardState {
+  randomSceneList: Array<number>;
+}
 
-  readonly state: {
-    randomSceneList: Array<number>;
-  };
-
+class SceneOptionCard extends React.Component<
+  SceneOptionCardProps,
+  SceneOptionCardState
+> {
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   constructor(props: SceneOptionCardProps) {

@@ -45,22 +45,21 @@ interface ImagePlayerProps {
   playNextScene?(): void;
 }
 
-export default class ImagePlayer extends React.Component<ImagePlayerProps> {
-  readonly props: ImagePlayerProps;
+interface ImagePlayerState {
+  readyToDisplay: Array<
+    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+  >;
+  historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>;
+  timeToNextFrame: number;
+  timeoutID: number;
+  nextImageID: number;
+  historyOffset: number;
+}
 
-  readonly state: {
-    readyToDisplay: Array<
-      HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-    >;
-    historyPaths: Array<
-      HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
-    >;
-    timeToNextFrame: number;
-    timeoutID: number;
-    nextImageID: number;
-    historyOffset: number;
-  };
-
+export default class ImagePlayer extends React.Component<
+  ImagePlayerProps,
+  ImagePlayerState
+> {
   constructor(props: ImagePlayerProps) {
     super(props);
 

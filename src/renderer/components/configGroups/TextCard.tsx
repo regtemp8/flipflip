@@ -56,14 +56,12 @@ interface TextCardProps {
   systemMessage(message: string): void;
 }
 
-class TextCard extends React.Component<TextCardProps> {
-  readonly props: TextCardProps;
+interface TextCardState {
+  sourceOptionsPlaylist: number;
+  sourceOptions: CaptionScript;
+}
 
-  readonly state: {
-    sourceOptionsPlaylist: number;
-    sourceOptions: CaptionScript;
-  };
-
+class TextCard extends React.Component<TextCardProps, TextCardState> {
   constructor(props: TextCardProps) {
     super(props);
 

@@ -42,14 +42,15 @@ interface BatchClipDialogProps {
   onUpdateLibrary(fn: (library: Array<LibrarySource>) => void): void;
 }
 
-class BatchClipDialog extends React.Component<BatchClipDialogProps> {
-  readonly props: BatchClipDialogProps;
+interface BatchClipDialogState {
+  clipOffset: number[];
+  creatingClips: boolean;
+}
 
-  readonly state: {
-    clipOffset: number[];
-    creatingClips: boolean;
-  };
-
+class BatchClipDialog extends React.Component<
+  BatchClipDialogProps,
+  BatchClipDialogState
+> {
   constructor(props: BatchClipDialogProps) {
     super(props);
 

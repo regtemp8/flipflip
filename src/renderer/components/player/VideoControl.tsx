@@ -64,16 +64,17 @@ interface VideoControlProps {
   nextTrack?(): void;
 }
 
-class VideoControl extends React.Component<VideoControlProps> {
-  readonly props: VideoControlProps;
+interface VideoControlState {
+  playing: boolean;
+  update: boolean;
+  marks: Array<{ value: number; label: string }>;
+  showSpeed: boolean;
+}
 
-  readonly state: {
-    playing: boolean;
-    update: boolean;
-    marks: Array<{ value: number; label: string }>;
-    showSpeed: boolean;
-  };
-
+class VideoControl extends React.Component<
+  VideoControlProps,
+  VideoControlState
+> {
   constructor(props: VideoControlProps) {
     super(props);
 

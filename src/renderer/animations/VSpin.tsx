@@ -9,13 +9,11 @@ interface VSpinProps {
   children?: React.ReactNode;
 }
 
-export default class VSpin extends React.Component<VSpinProps> {
-  readonly props: VSpinProps;
+interface VSpinState {
+  toggle: boolean;
+}
 
-  readonly state: {
-    toggle: boolean;
-  };
-
+export default class VSpin extends React.Component<VSpinProps, VSpinState> {
   constructor(props: VSpinProps) {
     super(props);
 

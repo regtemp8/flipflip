@@ -33,14 +33,15 @@ interface CaptionProgramPlaylistProps {
   systemMessage?(message: string): void;
 }
 
-export default class CaptionProgramPlaylist extends React.Component<CaptionProgramPlaylistProps> {
-  readonly props: CaptionProgramPlaylistProps;
+interface CaptionProgramPlaylistState {
+  currentIndex: number;
+  playingScripts: Array<CaptionScript>;
+}
 
-  readonly state: {
-    currentIndex: number;
-    playingScripts: Array<CaptionScript>;
-  };
-
+export default class CaptionProgramPlaylist extends React.Component<
+  CaptionProgramPlaylistProps,
+  CaptionProgramPlaylistState
+> {
   constructor(props: CaptionProgramPlaylistProps) {
     super(props);
 

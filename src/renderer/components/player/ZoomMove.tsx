@@ -15,8 +15,6 @@ interface ZoomMoveProps {
 }
 
 export default class ZoomMove extends React.Component<ZoomMoveProps> {
-  readonly props: ZoomMoveProps;
-
   constructor(props: ZoomMoveProps) {
     super(props);
   }

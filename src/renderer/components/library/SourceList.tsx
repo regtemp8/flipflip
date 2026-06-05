@@ -111,23 +111,21 @@ interface SourceListProps {
   savePosition?(): void;
 }
 
-class SourceList extends React.Component<SourceListProps> {
-  readonly props: SourceListProps;
+interface SourceListState {
+  cachePath: string;
+  isEditing: number;
+  mouseX: any;
+  mouseY: any;
+  clipMenu: LibrarySource;
+  weightMenu: LibrarySource;
+  blacklistSource: string;
+  editBlacklist: string;
+  sourceOptionsType: string;
+  sourceOptions: LibrarySource;
+  deleteDialog: LibrarySource;
+}
 
-  readonly state: {
-    cachePath: string;
-    isEditing: number;
-    mouseX: any;
-    mouseY: any;
-    clipMenu: LibrarySource;
-    weightMenu: LibrarySource;
-    blacklistSource: string;
-    editBlacklist: string;
-    sourceOptionsType: string;
-    sourceOptions: LibrarySource;
-    deleteDialog: LibrarySource;
-  };
-
+class SourceList extends React.Component<SourceListProps, SourceListState> {
   constructor(props: SourceListProps) {
     super(props);
 
@@ -493,7 +491,7 @@ class SourceList extends React.Component<SourceListProps> {
       this.props.sources.length > 0 &&
       this.props.sources[0].url == ""
     ) {
-      this.setState({ isEditing: this.props.sources[0].id, urlInput: "" });
+      this.setState({ isEditing: this.props.sources[0].id });
     }
   }
 
@@ -778,7 +776,7 @@ class SourceList extends React.Component<SourceListProps> {
   }
 
   onCloseDialog() {
-    this.setState({ menuAnchorEl: null, clipMenu: null, weightMenu: null });
+    this.setState({ clipMenu: null, weightMenu: null });
   }
 
   onCloseBlacklist() {

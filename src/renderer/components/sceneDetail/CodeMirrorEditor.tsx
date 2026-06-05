@@ -377,14 +377,15 @@ interface CodeMirrorEditorProps {
   overwriteHack?: ChildCallbackHack;
 }
 
-export default class CodeMirrorEditor extends React.Component<CodeMirrorEditorProps> {
-  readonly props: CodeMirrorEditorProps;
+interface CodeMirrorEditorState {
+  scriptText: string;
+  cursor: { line: number; ch: number };
+}
 
-  readonly state: {
-    scriptText: string;
-    cursor: { line: number; ch: number };
-  };
-
+export default class CodeMirrorEditor extends React.Component<
+  CodeMirrorEditorProps,
+  CodeMirrorEditorState
+> {
   constructor(props: CodeMirrorEditorProps) {
     super(props);
 

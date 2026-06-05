@@ -104,13 +104,14 @@ interface AlbumListItemProps {
   onSelect(albumID: number, selected: boolean): void;
 }
 
-class AlbumListItem extends React.Component<AlbumListItemProps> {
-  readonly props: AlbumListItemProps;
+interface AlbumListItemState {
+  foldersOpen: boolean;
+}
 
-  readonly state: {
-    foldersOpen: boolean;
-  };
-
+class AlbumListItem extends React.Component<
+  AlbumListItemProps,
+  AlbumListItemState
+> {
   constructor(props: AlbumListItemProps) {
     super(props);
 
@@ -178,22 +179,23 @@ interface PiwigoDialogProps {
   onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
 }
 
-class PiwigoDialog extends React.Component<PiwigoDialogProps> {
-  readonly props: PiwigoDialogProps;
+interface PiwigoDialogState {
+  listType: string;
+  albums: Album[];
+  tags: Tag[];
+  loggedIn: boolean;
+  selectedAlbums: number[];
+  selectedTags: number[];
+  tagModeAnd: boolean;
+  sortRandom: boolean;
+  recursiveMode: boolean;
+  sortOrder: Column[];
+}
 
-  readonly state: {
-    listType: string;
-    albums: Album[];
-    tags: Tag[];
-    loggedIn: boolean;
-    selectedAlbums: number[];
-    selectedTags: number[];
-    tagModeAnd: boolean;
-    sortRandom: boolean;
-    recursiveMode: boolean;
-    sortOrder: Column[];
-  };
-
+class PiwigoDialog extends React.Component<
+  PiwigoDialogProps,
+  PiwigoDialogState
+> {
   constructor(props: PiwigoDialogProps) {
     super(props);
 

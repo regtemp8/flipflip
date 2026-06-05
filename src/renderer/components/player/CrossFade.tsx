@@ -15,8 +15,6 @@ interface CrossFadeProps {
 }
 
 export default class CrossFade extends React.Component<CrossFadeProps> {
-  readonly props: CrossFadeProps;
-
   constructor(props: CrossFadeProps) {
     super(props);
   }

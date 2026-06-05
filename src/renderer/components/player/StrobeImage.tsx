@@ -14,8 +14,6 @@ interface StrobeImageProps {
 }
 
 export default class StrobeImage extends React.Component<StrobeImageProps> {
-  readonly props: StrobeImageProps;
-
   constructor(props: StrobeImageProps) {
     super(props);
   }

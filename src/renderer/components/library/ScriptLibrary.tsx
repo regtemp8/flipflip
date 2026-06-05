@@ -345,19 +345,20 @@ interface ScriptLibraryProps {
   systemMessage(message: string): void;
 }
 
-class ScriptLibrary extends React.Component<ScriptLibraryProps> {
-  readonly props: ScriptLibraryProps;
+interface ScriptLibraryState {
+  displaySources: Array<CaptionScript>;
+  drawerOpen: boolean;
+  filters: Array<string>;
+  selected: Array<string>;
+  selectedTags: Array<string>;
+  menuAnchorEl: any;
+  openMenu: string;
+}
 
-  readonly state: {
-    displaySources: Array<CaptionScript>;
-    drawerOpen: boolean;
-    filters: Array<string>;
-    selected: Array<string>;
-    selectedTags: Array<string>;
-    menuAnchorEl: any;
-    openMenu: string;
-  };
-
+class ScriptLibrary extends React.Component<
+  ScriptLibraryProps,
+  ScriptLibraryState
+> {
   constructor(props: ScriptLibraryProps) {
     super(props);
 
@@ -990,7 +991,6 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
             return;
           }
 
-          this.setState({ loadingSources: true });
           this.addScriptSources(result);
         });
         break;

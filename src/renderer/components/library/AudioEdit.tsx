@@ -77,13 +77,11 @@ interface AudioEditProps {
   onFinishEdit(common: Audio): void;
 }
 
-class AudioEdit extends React.Component<AudioEditProps> {
-  readonly props: AudioEditProps;
+interface AudioEditState {
+  audio: Audio;
+}
 
-  readonly state: {
-    audio: Audio;
-  };
-
+class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
   constructor(props: AudioEditProps) {
     super(props);
 

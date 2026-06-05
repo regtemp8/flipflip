@@ -64,14 +64,12 @@ interface JiggleProps {
   children?: React.ReactNode;
 }
 
-export default class Jiggle extends React.Component<JiggleProps> {
-  readonly props: JiggleProps;
+interface JiggleState {
+  jiggling: Array<string>;
+  hasStarted: boolean;
+}
 
-  readonly state: {
-    jiggling: Array<string>;
-    hasStarted: boolean;
-  };
-
+export default class Jiggle extends React.Component<JiggleProps, JiggleState> {
   constructor(props: JiggleProps) {
     super(props);
 

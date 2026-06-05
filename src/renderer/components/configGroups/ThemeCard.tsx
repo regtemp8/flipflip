@@ -28,8 +28,6 @@ interface ThemeCardProps {
 }
 
 class ThemeCard extends React.Component<ThemeCardProps> {
-  readonly props: ThemeCardProps;
-
   constructor(props: ThemeCardProps) {
     super(props);
   }

@@ -9,13 +9,11 @@ interface SpinProps {
   children?: React.ReactNode;
 }
 
-export default class Spin extends React.Component<SpinProps> {
-  readonly props: SpinProps;
+interface SpinState {
+  toggle: boolean;
+}
 
-  readonly state: {
-    toggle: boolean;
-  };
-
+export default class Spin extends React.Component<SpinProps, SpinState> {
   constructor(props: SpinProps) {
     super(props);
 

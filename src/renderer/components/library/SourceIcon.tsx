@@ -271,8 +271,6 @@ interface SourceIconProps {
 }
 
 export default class SourceIcon extends React.Component<SourceIconProps> {
-  readonly props: SourceIconProps;
-
   constructor(props: SourceIconProps) {
     super(props);
   }

@@ -24,8 +24,6 @@ interface AudioTextEffectsProps {
 }
 
 export default class AudioTextEffects extends React.Component<AudioTextEffectsProps> {
-  readonly props: AudioTextEffectsProps;
-
   constructor(props: AudioTextEffectsProps) {
     super(props);
   }

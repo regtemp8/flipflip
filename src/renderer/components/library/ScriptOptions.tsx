@@ -81,15 +81,16 @@ interface ScriptOptionsProps {
   onFinishEdit(common: CaptionScript): void;
 }
 
-class ScriptOptions extends React.Component<ScriptOptionsProps> {
-  readonly props: ScriptOptionsProps;
+interface ScriptOptionsState {
+  script: CaptionScript;
+  loadingFonts: boolean;
+  systemFonts: Array<string>;
+}
 
-  readonly state: {
-    script: CaptionScript;
-    loadingFonts: boolean;
-    systemFonts: Array<string>;
-  };
-
+class ScriptOptions extends React.Component<
+  ScriptOptionsProps,
+  ScriptOptionsState
+> {
   constructor(props: ScriptOptionsProps) {
     super(props);
 

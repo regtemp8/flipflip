@@ -92,8 +92,6 @@ interface ScriptPlaylistProps {
 }
 
 class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
-  readonly props: ScriptPlaylistProps;
-
   constructor(props: ScriptPlaylistProps) {
     super(props);
   }

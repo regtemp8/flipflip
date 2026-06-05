@@ -169,13 +169,14 @@ interface SourceListItemProps {
   systemMessage(message: string): void;
 }
 
-class SourceListItem extends React.Component<SourceListItemProps> {
-  readonly props: SourceListItemProps;
+interface SourceListItemState {
+  urlInput: string;
+}
 
-  readonly state: {
-    urlInput: string;
-  };
-
+class SourceListItem extends React.Component<
+  SourceListItemProps,
+  SourceListItemState
+> {
   constructor(props: SourceListItemProps) {
     super(props);
 

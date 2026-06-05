@@ -217,19 +217,17 @@ interface ConfigFormProps {
   onUpdateConfig(config: Config): void;
 }
 
-class ConfigForm extends React.Component<ConfigFormProps> {
-  readonly props: ConfigFormProps;
+interface ConfigFormState {
+  changeMade: boolean;
+  config: Config;
+  drawerOpen: boolean;
+  openMenu: string;
+  openTab: number;
+  errorSnackOpen: boolean;
+  errorSnack: string;
+}
 
-  readonly state: {
-    changeMade: boolean;
-    config: Config;
-    drawerOpen: boolean;
-    openMenu: string;
-    openTab: number;
-    errorSnackOpen: boolean;
-    errorSnack: string;
-  };
-
+class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
   constructor(props: ConfigFormProps) {
     super(props);
 

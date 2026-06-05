@@ -141,17 +141,18 @@ interface SceneGeneratorProps {
   onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
 }
 
-class SceneGenerator extends React.Component<SceneGeneratorProps> {
-  readonly props: SceneGeneratorProps;
+interface SceneGeneratorState {
+  isWeighing: number;
+  isEditing: number;
+  addRule: boolean;
+  advRule: boolean;
+  menuAnchorEl: any;
+}
 
-  readonly state: {
-    isWeighing: number;
-    isEditing: number;
-    addRule: boolean;
-    advRule: boolean;
-    menuAnchorEl: any;
-  };
-
+class SceneGenerator extends React.Component<
+  SceneGeneratorProps,
+  SceneGeneratorState
+> {
   constructor(props: SceneGeneratorProps) {
     super(props);
 

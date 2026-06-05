@@ -39,8 +39,6 @@ interface GeneralConfigProps {
 }
 
 export default class GeneralConfig extends React.Component<GeneralConfigProps> {
-  readonly props: GeneralConfigProps;
-
   constructor(props: GeneralConfigProps) {
     super(props);
   }

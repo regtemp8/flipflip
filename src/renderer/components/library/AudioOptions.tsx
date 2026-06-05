@@ -88,19 +88,20 @@ interface AudioOptionsProps {
   onFinishEdit(common: Audio): void;
 }
 
-class AudioOptions extends React.Component<AudioOptionsProps> {
-  readonly props: AudioOptionsProps;
+interface AudioOptionsState {
+  audio: Audio;
+  loadingBPM: boolean;
+  successBPM: boolean;
+  errorBPM: boolean;
+  loadingTag: boolean;
+  successTag: boolean;
+  errorTag: boolean;
+}
 
-  readonly state: {
-    audio: Audio;
-    loadingBPM: boolean;
-    successBPM: boolean;
-    errorBPM: boolean;
-    loadingTag: boolean;
-    successTag: boolean;
-    errorTag: boolean;
-  };
-
+class AudioOptions extends React.Component<
+  AudioOptionsProps,
+  AudioOptionsState
+> {
   constructor(props: AudioOptionsProps) {
     super(props);
 

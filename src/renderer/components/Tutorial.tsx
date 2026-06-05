@@ -80,8 +80,6 @@ interface TutorialProps {
 }
 
 class Tutorial extends React.Component<TutorialProps> {
-  readonly props: TutorialProps;
-
   constructor(props: TutorialProps) {
     super(props);
   }

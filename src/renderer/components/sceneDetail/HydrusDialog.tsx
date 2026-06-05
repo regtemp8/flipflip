@@ -41,12 +41,14 @@ interface HydrusDialogProps {
   onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
 }
 
+type FileSortOrder = "asc" | "desc";
+
 interface HydrusDialogState {
   selectedTags: string[];
   includeCurrentTags: boolean;
   includePendingTags: boolean;
   fileSortType: number;
-  fileSortOrder: "asc" | "desc";
+  fileSortOrder: FileSortOrder;
 }
 
 const sortTypes = [
@@ -86,11 +88,10 @@ const defaultState: HydrusDialogState = {
   fileSortType: 2,
   fileSortOrder: "asc",
 };
-class HydrusDialog extends React.Component<HydrusDialogProps> {
-  readonly props: HydrusDialogProps;
-
-  readonly state: HydrusDialogState;
-
+class HydrusDialog extends React.Component<
+  HydrusDialogProps,
+  HydrusDialogState
+> {
   constructor(props: HydrusDialogProps) {
     super(props);
     this.state = defaultState;
@@ -237,7 +238,7 @@ class HydrusDialog extends React.Component<HydrusDialogProps> {
 
   onFileSortOrder(e: MouseEvent) {
     const input = e.target as HTMLInputElement;
-    this.setState({ fileSortOrder: input.value });
+    this.setState({ fileSortOrder: input.value as FileSortOrder });
   }
 
   onSelectTags(selectedTags: Array<string>) {

@@ -63,14 +63,15 @@ interface PlaylistListProps {
   onClickPlaylist(playlist: string): void;
 }
 
-class PlaylistList extends React.Component<PlaylistListProps> {
-  readonly props: PlaylistListProps;
+interface PlaylistListState {
+  playlists: Map<string, string[]>;
+  hover: any;
+}
 
-  readonly state: {
-    playlists: Map<string, string[]>;
-    hover: any;
-  };
-
+class PlaylistList extends React.Component<
+  PlaylistListProps,
+  PlaylistListState
+> {
   constructor(props: PlaylistListProps) {
     super(props);
 

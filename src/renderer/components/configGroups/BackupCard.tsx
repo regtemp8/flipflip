@@ -82,18 +82,16 @@ interface BackupCardProps {
   onUpdateSettings(fn: (settings: GeneralSettings) => void): void;
 }
 
-class BackupCard extends React.Component<BackupCardProps> {
-  readonly props: BackupCardProps;
+interface BackupCardState {
+  backups: Array<{ url: string; size: number }>;
+  backup: { url: string; size: number };
+  openMenu: string;
+  snackbarOpen: boolean;
+  snackbar: string;
+  snackbarSeverity: string;
+}
 
-  readonly state: {
-    backups: Array<{ url: string; size: number }>;
-    backup: { url: string; size: number };
-    openMenu: string;
-    snackbarOpen: boolean;
-    snackbar: string;
-    snackbarSeverity: string;
-  };
-
+class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
   constructor(props: BackupCardProps) {
     super(props);
 

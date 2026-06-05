@@ -41,10 +41,8 @@ function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />;
 }
 
-export default class Meta extends React.Component {
-  readonly state: AppStorageState;
-
-  constructor(props: {}) {
+export default class Meta extends React.Component<unknown, AppStorageState> {
+  constructor(props: unknown) {
     super(props);
 
     this.state = defaultInitialState;

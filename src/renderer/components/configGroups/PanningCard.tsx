@@ -76,8 +76,6 @@ interface PanningCardProps {
 }
 
 class PanningCard extends React.Component<PanningCardProps> {
-  readonly props: PanningCardProps;
-
   readonly horizInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   readonly vertInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();

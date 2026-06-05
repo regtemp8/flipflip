@@ -290,19 +290,17 @@ interface PlayerBarsProps {
   inheritTags?(sourceID: number): void;
 }
 
-class PlayerBars extends React.Component<PlayerBarsProps> {
-  readonly props: PlayerBarsProps;
+interface PlayerBarsState {
+  appBarHover: boolean;
+  drawerHover: boolean;
+  tagDrawerHover: boolean;
+  blacklistSource: string;
+  blacklistFile: string;
+  deletePath: string;
+  deleteError: string;
+}
 
-  readonly state: {
-    appBarHover: boolean;
-    drawerHover: boolean;
-    tagDrawerHover: boolean;
-    blacklistSource: string;
-    blacklistFile: string;
-    deletePath: string;
-    deleteError: string;
-  };
-
+class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   constructor(props: PlayerBarsProps) {
     super(props);
 

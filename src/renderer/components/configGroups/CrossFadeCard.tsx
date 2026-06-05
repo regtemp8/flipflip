@@ -73,8 +73,6 @@ interface CrossFadeCardProps {
 }
 
 class CrossFadeCard extends React.Component<CrossFadeCardProps> {
-  readonly props: CrossFadeCardProps;
-
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   constructor(props: CrossFadeCardProps) {

@@ -38,13 +38,14 @@ interface WatermarkCardProps {
   onUpdateSettings(fn: (settings: GeneralSettings) => void): void;
 }
 
-class WatermarkCard extends React.Component<WatermarkCardProps> {
-  readonly props: WatermarkCardProps;
+interface WatermarkCardState {
+  systemFonts: Array<string>;
+}
 
-  readonly state: {
-    systemFonts: Array<string>;
-  };
-
+class WatermarkCard extends React.Component<
+  WatermarkCardProps,
+  WatermarkCardState
+> {
   constructor(props: WatermarkCardProps) {
     super(props);
 

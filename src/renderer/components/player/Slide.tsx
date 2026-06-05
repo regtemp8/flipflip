@@ -15,8 +15,6 @@ interface SlideProps {
 }
 
 export default class Slide extends React.Component<SlideProps> {
-  readonly props: SlideProps;
-
   constructor(props: SlideProps) {
     super(props);
   }

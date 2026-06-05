@@ -55,18 +55,19 @@ interface CaptionProgramProps {
   onError?(e: string): void;
 }
 
-export default class CaptionProgram extends React.Component<CaptionProgramProps> {
-  readonly props: CaptionProgramProps;
+type CaptionProgramState = typeof captionProgramDefaults & {
+  countColors: Map<number, string>;
+  countColor: string;
+  countProgress: boolean;
+  countCurrent: number;
+  countTotal: number;
+  countChild: number;
+};
 
-  readonly state: typeof captionProgramDefaults & {
-    countColors: Map<number, string>;
-    countColor: string;
-    countProgress: boolean;
-    countCurrent: number;
-    countTotal: number;
-    countChild: number;
-  };
-
+export default class CaptionProgram extends React.Component<
+  CaptionProgramProps,
+  CaptionProgramState
+> {
   readonly el = React.createRef<HTMLDivElement>();
 
   constructor(props: CaptionProgramProps) {

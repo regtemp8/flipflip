@@ -37,8 +37,6 @@ interface PictureGridProps {
 }
 
 class PictureGrid extends React.Component<PictureGridProps> {
-  readonly props: PictureGridProps;
-
   constructor(props: PictureGridProps) {
     super(props);
   }

@@ -20,15 +20,13 @@ interface StrobeProps {
   children?: React.ReactNode;
 }
 
-export default class Strobe extends React.Component<StrobeProps> {
-  readonly props: StrobeProps;
+interface StrobeState {
+  toggleStrobe: boolean;
+  duration: number;
+  delay: number;
+}
 
-  readonly state: {
-    toggleStrobe: boolean;
-    duration: number;
-    delay: number;
-  };
-
+export default class Strobe extends React.Component<StrobeProps, StrobeState> {
   constructor(props: StrobeProps) {
     super(props);
 

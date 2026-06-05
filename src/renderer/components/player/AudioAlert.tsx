@@ -50,13 +50,11 @@ interface AudioAlertProps {
   audio: Audio;
 }
 
-class AudioAlert extends React.Component<AudioAlertProps> {
-  readonly props: AudioAlertProps;
+interface AudioAlertState {
+  visible: boolean;
+}
 
-  readonly state: {
-    visible: boolean;
-  };
-
+class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
   constructor(props: AudioAlertProps) {
     super(props);
 

@@ -73,8 +73,6 @@ interface FadeIOCardProps {
 }
 
 class FadeIOCard extends React.Component<FadeIOCardProps> {
-  readonly props: FadeIOCardProps;
-
   readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   constructor(props: FadeIOCardProps) {
