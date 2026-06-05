@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { getBackups, portablePath, saveDir, savePath } from "../utils";
 import { cleanBackups } from "../actions";
 import { Route } from "../../common/Route";

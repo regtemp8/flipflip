@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 import wretch from "wretch";
 import fileUrl from "file-url";
 import {
@@ -64,7 +64,7 @@ import Config from "../common/Config";
 import PlayerMenu from "./PlayerMenu";
 import { move, outputFile } from "fs-extra";
 import LibrarySource from "../common/LibrarySource";
-import path from "path";
+import path from "node:path";
 import LibraryMoveResult from "../common/LibraryMoveResult";
 import GifInfo from "../common/GifInfo";
 import { Constants } from "../common/constants";

@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import moment from "moment";
 import { rimrafSync } from "rimraf";
 import { BrowserWindow, shell, webFrame } from "electron";
@@ -21,7 +21,7 @@ import { reloadWindow } from "./WindowManager";
 import fontList from "font-list";
 import SystemFonts from "system-font-families";
 import { OAuth } from "oauth";
-import http from "http";
+import http from "node:http";
 import { IPC } from "../common/const";
 import TumblrFollowingResponse from "../common/TumblrFollowingResponse";
 import tumblr from "tumblr.js";

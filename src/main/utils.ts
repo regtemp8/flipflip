@@ -1,10 +1,10 @@
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
 import wretch from "wretch";
 import Audio from "../common/Audio";
 import { parseBuffer, parseFile } from "music-metadata";
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 import FileType from "file-type";
 import { app } from "electron";
 import Backup from "../common/Backup";

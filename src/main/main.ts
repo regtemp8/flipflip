@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { app, protocol, net, Menu, session } from "electron";
 import { initializeIpcEvents, releaseIpcEvents } from "./IPCEvents";
 import { createMainMenu, createMenuTemplate } from "./MainMenu";
@@ -13,7 +13,7 @@ import {
 } from "../common/utils";
 import { ST } from "../common/const";
 import { localFileResponse } from "./utils";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
