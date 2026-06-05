@@ -76,7 +76,7 @@ export function isRoute(state: State, kind: string): Boolean {
 
 // Returns the active scene, or null if the current route isn't a scene
 export function getActiveScene(state: State): Scene | null {
-  for (let r of state.route.slice().reverse()) {
+  for (const r of state.route.slice().reverse()) {
     if (r.kind == "scene") {
       return state.scenes.find((s: Scene) => s.id === r.value);
     }
@@ -85,7 +85,7 @@ export function getActiveScene(state: State): Scene | null {
 }
 
 export function getActiveGrid(state: State): SceneGrid | null {
-  for (let r of state.route.slice().reverse()) {
+  for (const r of state.route.slice().reverse()) {
     if (r.kind == "grid") {
       return state.grids.find((g: SceneGrid) => g.id === r.value);
     }
@@ -94,7 +94,7 @@ export function getActiveGrid(state: State): SceneGrid | null {
 }
 
 export function getActiveSource(state: State): LibrarySource | null {
-  for (let r of state.route.slice().reverse()) {
+  for (const r of state.route.slice().reverse()) {
     if (r.kind == "clip") {
       return r.value;
     }
@@ -419,7 +419,7 @@ export function addSceneGroup(state: State, type: string): Object {
   state.sceneGroups.forEach((s: SceneGroup) => {
     id = Math.max(s.id + 1, id);
   });
-  let sceneGroup = new SceneGroup({
+  const sceneGroup = new SceneGroup({
     id: id,
     type: type,
   });
@@ -435,7 +435,7 @@ export function addScene(state: State): Object {
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  let scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+  const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
     id: id,
     name: "New scene",
     sources: new Array<LibrarySource>(),
@@ -481,7 +481,7 @@ export function deleteSceneGroup(state: State, group: SceneGroup): Object {
 export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
   const deleteScenes = new Array<number>();
   const deleteGrids = new Array<number>();
-  for (let sceneID of sceneIDs) {
+  for (const sceneID of sceneIDs) {
     if (sceneID.toString().startsWith("999")) {
       const gridID = Number.parseInt(sceneID.toString().replace("999", ""));
       deleteGrids.push(gridID);
@@ -493,7 +493,7 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
   const newScenes = state.scenes.filter(
     (s: Scene) => !deleteScenes.includes(s.id),
   );
-  for (let s of newScenes) {
+  for (const s of newScenes) {
     if (deleteScenes.includes(s.nextSceneID)) {
       s.nextSceneID = 0;
     }
@@ -512,8 +512,8 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
   const newGrids = state.grids.filter(
     (g: SceneGrid) => !deleteGrids.includes(g.id),
   );
-  for (let g of newGrids) {
-    for (let row of g.grid) {
+  for (const g of newGrids) {
+    for (const row of g.grid) {
       row.forEach((cell) => {
         if (deleteScenes.includes(cell.sceneID)) {
           cell.sceneID = -1;
@@ -531,7 +531,7 @@ export function deleteScenes(state: State, sceneIDs: Array<number>): Object {
 
 export function deleteScene(state: State, scene: Scene): Object {
   const newScenes = state.scenes.filter((s: Scene) => s.id != scene.id);
-  for (let s of newScenes) {
+  for (const s of newScenes) {
     if (s.nextSceneID == scene.id) {
       s.nextSceneID = 0;
     }
@@ -539,7 +539,7 @@ export function deleteScene(state: State, scene: Scene): Object {
     s.overlays = s.overlays.filter((o) => o.sceneID != scene.id);
   }
   const newGrids = state.grids;
-  for (let g of newGrids) {
+  for (const g of newGrids) {
     for (let row of g.grid) {
       row = row.map((cell) => {
         if (cell.sceneID == scene.id) {
@@ -561,7 +561,7 @@ export function deleteScene(state: State, scene: Scene): Object {
 export function deleteGrid(state: State, grid: SceneGrid): Object {
   const newGrids = state.grids.filter((g: SceneGrid) => g.id != grid.id);
   const newScenes = state.scenes;
-  for (let s of newScenes) {
+  for (const s of newScenes) {
     s.overlays = s.overlays.filter(
       (o) => o.sceneID != Number.parseInt("999" + grid.id.toString()),
     );
@@ -785,7 +785,7 @@ export function saveScriptPosition(
 export function resetScene(state: State, scene: Scene): Object {
   return updateScene(state, scene, (scene) => {
     const ignoreProps = ["sources"];
-    for (let property in state.config.defaultScene) {
+    for (const property in state.config.defaultScene) {
       if (ignoreProps.includes(property)) continue;
       (scene as any)[property] = (state.config.defaultScene as any)[property];
     }
@@ -828,7 +828,7 @@ export function playScene(state: State, scene: Scene): Object {
 
 export function playTrack(state: State, url: string) {
   return updateAudioLibrary(state, (l) => {
-    for (let a of l) {
+    for (const a of l) {
       if (a.url == url) {
         a.playedCount++;
         break;
@@ -845,7 +845,7 @@ export function playAudio(
   const sourceURL = source.url.startsWith("http")
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
-  let librarySource = state.audios.find((s) => s.url == sourceURL);
+  const librarySource = state.audios.find((s) => s.url == sourceURL);
   if (librarySource == null) {
     throw new Error("Source not found in Library");
   }
@@ -897,7 +897,7 @@ export function playScript(
   const sourceURL = source.url.startsWith("http")
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
-  let librarySource = state.scripts.find((s) => s.url == sourceURL);
+  const librarySource = state.scripts.find((s) => s.url == sourceURL);
   if (librarySource == null) {
     throw new Error("Script not found in Library");
   }
@@ -936,7 +936,7 @@ export function playSceneFromLibrary(
   const sourceURL = source.url.startsWith("http")
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
-  let librarySource = state.library.find((s) => s.url == sourceURL);
+  const librarySource = state.library.find((s) => s.url == sourceURL);
   if (librarySource == null) {
     source.disabledClips = [];
     let id = state.scenes.length + 1;
@@ -944,7 +944,7 @@ export function playSceneFromLibrary(
       id = Math.max(s.id + 1, id);
     });
     const sourceType = getSourceType(source.url);
-    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
       id: id,
       name: "library_scene_temp",
       sources: [source],
@@ -992,7 +992,7 @@ export function playSceneFromLibrary(
     id = Math.max(s.id + 1, id);
   });
   const sourceType = getSourceType(source.url);
-  let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+  const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
     id: id,
     name: "library_scene_temp",
     sources: [librarySource],
@@ -1044,7 +1044,7 @@ export function onUpdateClips(
   if (source) {
     source.clips = clips;
   }
-  for (let scene of newScenes) {
+  for (const scene of newScenes) {
     const sceneSource = scene.sources.find((s) => s.url == sourceURL);
     if (sceneSource) {
       sceneSource.clips = clips;
@@ -1066,7 +1066,7 @@ export function clipVideo(
   const sourceURL = source.url.startsWith("http")
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
-  let librarySource = state.library.find((s) => s.url == sourceURL);
+  const librarySource = state.library.find((s) => s.url == sourceURL);
   if (getActiveSource(state) != null) {
     state.route.pop();
   }
@@ -1192,7 +1192,7 @@ export function addGrid(state: State): Object {
   state.grids.forEach((g: SceneGrid) => {
     id = Math.max(g.id + 1, id);
   });
-  let grid = new SceneGrid({
+  const grid = new SceneGrid({
     id: id,
     name: "New Grid",
     grid: [[new SceneGridCell()]],
@@ -1210,7 +1210,7 @@ export function addGenerator(state: State): Object {
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  let scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+  const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
     id: id,
     name: "New Generator",
     sources: new Array<LibrarySource>(),
@@ -1245,8 +1245,8 @@ export function generateScenes(
 ): Object {
   const generateScenes: Array<Scene> = [];
   if (s instanceof SceneGrid) {
-    for (let row of s.grid) {
-      for (let cell of row) {
+    for (const row of s.grid) {
+      for (const cell of row) {
         const gScene = state.scenes.find((s) => s.id == cell.sceneID);
         if (
           gScene &&
@@ -1257,7 +1257,7 @@ export function generateScenes(
           generateScenes.push(gScene);
         }
         if (gScene && gScene.overlayEnabled) {
-          for (let overlay of gScene.overlays) {
+          for (const overlay of gScene.overlays) {
             if (overlay.sceneID.toString().startsWith("999")) {
               // No grid overlays within a grid
             } else {
@@ -1280,12 +1280,12 @@ export function generateScenes(
       generateScenes.push(s);
     }
     if (s.overlayEnabled && children) {
-      for (let overlay of s.overlays) {
+      for (const overlay of s.overlays) {
         if (overlay.sceneID.toString().startsWith("999")) {
           const id = overlay.sceneID.toString().replace("999", "");
           const oScene = state.grids.find((s) => s.id.toString() == id);
-          for (let row of oScene.grid) {
-            for (let cell of row) {
+          for (const row of oScene.grid) {
+            for (const cell of row) {
               const gScene = state.scenes.find((s) => s.id == cell.sceneID);
               if (
                 gScene &&
@@ -1312,13 +1312,13 @@ export function generateScenes(
     }
   }
   const newScenes = Array.from(state.scenes);
-  for (let scene of generateScenes) {
+  for (const scene of generateScenes) {
     const newScene = state.scenes.find((s) => s.id == scene.id);
     let generatorWeights = newScene.generatorWeights;
 
     // Add globally ignored tags/types if not overridden by generator
     if (!newScene.overrideIgnore) {
-      for (let ignored of state.config.displaySettings.ignoredTags) {
+      for (const ignored of state.config.displaySettings.ignoredTags) {
         generatorWeights = generatorWeights.concat([
           new WeightGroup({ type: TT.none, search: ignored }),
         ]);
@@ -1348,7 +1348,7 @@ export function generateScenes(
     let genSources = new Array<LibrarySource>();
 
     // First, build all our adv rules
-    for (let wg of generatorWeights.filter((wg) => !!wg.rules)) {
+    for (const wg of generatorWeights.filter((wg) => !!wg.rules)) {
       // Build each adv rule like a regular set of simple rules
       // First get tags to require/exclude
       const ruleAllSearches = wg.rules
@@ -1371,11 +1371,11 @@ export function generateScenes(
           ruleNoneSearches.length ==
         wg.rules.length
       ) {
-        let sources = [];
+        const sources = [];
         // For each source in the library
-        for (let s of state.library) {
+        for (const s of state.library) {
           let addedClip = false;
-          let invalidClips = [];
+          const invalidClips = [];
           // If this is a video with clips
           if (
             getSourceType(s.url) == ST.video &&
@@ -1383,11 +1383,11 @@ export function generateScenes(
             s.clips.length > 0
           ) {
             // Weight each clip first
-            for (let c of s.clips) {
+            for (const c of s.clips) {
               let b = false;
 
               // Filter out clips which don't have ruleAllSearches/allSearches
-              for (let as of ruleAllSearches) {
+              for (const as of ruleAllSearches) {
                 if (!filterSource(as, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1395,7 +1395,7 @@ export function generateScenes(
                 }
               }
               if (b) continue;
-              for (let as of allSearches) {
+              for (const as of allSearches) {
                 if (!filterSource(as, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1406,7 +1406,7 @@ export function generateScenes(
 
               // Filter out clips which don't have any ruleOrSearches
               let anyRos = ruleOrSearches.length == 0;
-              for (let os of ruleOrSearches) {
+              for (const os of ruleOrSearches) {
                 if (filterSource(os, s, c)) {
                   anyRos = true;
                   break;
@@ -1418,7 +1418,7 @@ export function generateScenes(
               }
 
               // Filter out clips which have ruleNoneSearches/noneSearches
-              for (let ns of ruleNoneSearches) {
+              for (const ns of ruleNoneSearches) {
                 if (filterSource(ns, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1426,7 +1426,7 @@ export function generateScenes(
                 }
               }
               if (b) continue;
-              for (let ns of noneSearches) {
+              for (const ns of noneSearches) {
                 if (filterSource(ns, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1448,14 +1448,14 @@ export function generateScenes(
             let b = false;
 
             // Filter out sources which don't have ruleAllSearches/allSearches
-            for (let as of ruleAllSearches) {
+            for (const as of ruleAllSearches) {
               if (!filterSource(as, s, null)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
-            for (let as of allSearches) {
+            for (const as of allSearches) {
               if (!filterSource(as, s, null)) {
                 b = true;
                 break;
@@ -1465,7 +1465,7 @@ export function generateScenes(
 
             // Filter out sources which don't have any ruleOrSearches
             let anyRos = ruleOrSearches.length == 0;
-            for (let os of ruleOrSearches) {
+            for (const os of ruleOrSearches) {
               if (filterSource(os, s, null)) {
                 anyRos = true;
                 break;
@@ -1476,14 +1476,14 @@ export function generateScenes(
             }
 
             // Filter out sources which have ruleNoneSearches/noneSearches
-            for (let ns of ruleNoneSearches) {
+            for (const ns of ruleNoneSearches) {
               if (filterSource(ns, s, null)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
-            for (let ns of noneSearches) {
+            for (const ns of noneSearches) {
               if (filterSource(ns, s, null)) {
                 b = true;
                 break;
@@ -1496,13 +1496,13 @@ export function generateScenes(
         rulesSources = sources;
       } else {
         // Otherwise, generate sources for each weighted rule
-        for (let rule of wg.rules) {
+        for (const rule of wg.rules) {
           if (rule.type == TT.weight) {
-            let sources = [];
+            const sources = [];
             // For each source in the library
-            for (let s of state.library) {
+            for (const s of state.library) {
               let addedClip = false;
-              let invalidClips = [];
+              const invalidClips = [];
               // If this is a video with clips
               if (
                 getSourceType(s.url) == ST.video &&
@@ -1510,7 +1510,7 @@ export function generateScenes(
                 s.clips.length > 0
               ) {
                 // Weight each clip first
-                for (let c of s.clips) {
+                for (const c of s.clips) {
                   let b = false;
 
                   // Filter out clips which don't match this search
@@ -1520,7 +1520,7 @@ export function generateScenes(
                   }
 
                   // Filter out clips which don't have ruleAllSearches/allSearches
-                  for (let as of ruleAllSearches) {
+                  for (const as of ruleAllSearches) {
                     if (!filterSource(as, s, c)) {
                       invalidClips.push(c.id);
                       b = true;
@@ -1528,7 +1528,7 @@ export function generateScenes(
                     }
                   }
                   if (b) continue;
-                  for (let as of allSearches) {
+                  for (const as of allSearches) {
                     if (!filterSource(as, s, c)) {
                       invalidClips.push(c.id);
                       b = true;
@@ -1539,7 +1539,7 @@ export function generateScenes(
 
                   // Filter out clips which don't have any ruleOrSearches
                   let anyRos = ruleOrSearches.length == 0;
-                  for (let os of ruleOrSearches) {
+                  for (const os of ruleOrSearches) {
                     if (filterSource(os, s, c)) {
                       anyRos = true;
                       break;
@@ -1551,7 +1551,7 @@ export function generateScenes(
                   }
 
                   // Filter out clips which have ruleNonSearches/noneSearches
-                  for (let ns of ruleNoneSearches) {
+                  for (const ns of ruleNoneSearches) {
                     if (filterSource(ns, s, c)) {
                       invalidClips.push(c.id);
                       b = true;
@@ -1559,7 +1559,7 @@ export function generateScenes(
                     }
                   }
                   if (b) continue;
-                  for (let ns of noneSearches) {
+                  for (const ns of noneSearches) {
                     if (filterSource(ns, s, c)) {
                       invalidClips.push(c.id);
                       b = true;
@@ -1586,14 +1586,14 @@ export function generateScenes(
                 }
 
                 // Filter out sources which don't have ruleAllSearches/allSearches
-                for (let as of ruleAllSearches) {
+                for (const as of ruleAllSearches) {
                   if (!filterSource(as, s, null)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
-                for (let as of allSearches) {
+                for (const as of allSearches) {
                   if (!filterSource(as, s, null)) {
                     b = true;
                     break;
@@ -1603,7 +1603,7 @@ export function generateScenes(
 
                 // Filter out sources which don't have any ruleOrSearches
                 let anyRos = ruleOrSearches.length == 0;
-                for (let os of ruleOrSearches) {
+                for (const os of ruleOrSearches) {
                   if (filterSource(os, s, null)) {
                     anyRos = true;
                     break;
@@ -1614,14 +1614,14 @@ export function generateScenes(
                 }
 
                 // Filter out sources which have ruleNoneSearches/noneSearches
-                for (let ns of ruleNoneSearches) {
+                for (const ns of ruleNoneSearches) {
                   if (filterSource(ns, s, null)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
-                for (let ns of noneSearches) {
+                for (const ns of noneSearches) {
                   if (filterSource(ns, s, null)) {
                     b = true;
                     break;
@@ -1640,7 +1640,7 @@ export function generateScenes(
         // If this adv rule is weighted, add the percentage of sources to the master list
         case TT.weight:
           wg.max = rulesSources.length;
-          let chosenSources = reduceList(
+          const chosenSources = reduceList(
             randomizeList(rulesSources),
             Math.round(newScene.generatorMax * (wg.percent / 100)),
           );
@@ -1677,8 +1677,8 @@ export function generateScenes(
         noneAdvRules.length ==
       generatorWeights.length
     ) {
-      let sources = [];
-      for (let s of state.library) {
+      const sources = [];
+      for (const s of state.library) {
         // Filter out sources which are not in required list
         if (
           reqAdvSources &&
@@ -1695,15 +1695,15 @@ export function generateScenes(
         }
 
         let addedClip = false;
-        let invalidClips = [];
+        const invalidClips = [];
         // If this is a video with clips
         if (getSourceType(s.url) == ST.video && s.clips && s.clips.length > 0) {
           // Weight each clip first
-          for (let c of s.clips) {
+          for (const c of s.clips) {
             let b = false;
 
             // Filter out clips which don't have allSearches
-            for (let as of allSearches) {
+            for (const as of allSearches) {
               if (!filterSource(as, s, c)) {
                 invalidClips.push(c.id);
                 b = true;
@@ -1713,7 +1713,7 @@ export function generateScenes(
             if (b) continue;
 
             // Filter out clips which have noneSearches
-            for (let ns of noneSearches) {
+            for (const ns of noneSearches) {
               if (filterSource(ns, s, c)) {
                 invalidClips.push(c.id);
                 b = true;
@@ -1735,7 +1735,7 @@ export function generateScenes(
           let b = false;
 
           // Filter out sources which don't have allSearches
-          for (let as of allSearches) {
+          for (const as of allSearches) {
             if (!filterSource(as, s, null)) {
               b = true;
               break;
@@ -1744,7 +1744,7 @@ export function generateScenes(
           if (b) continue;
 
           // Filter out sources which have noneSearches
-          for (let ns of noneSearches) {
+          for (const ns of noneSearches) {
             if (filterSource(ns, s, null)) {
               b = true;
               break;
@@ -1757,12 +1757,12 @@ export function generateScenes(
       genSources = sources;
     } else {
       // Otherwise, generate sources for each weight
-      for (let wg of generatorWeights.filter(
+      for (const wg of generatorWeights.filter(
         (wg) => !wg.rules && wg.type == TT.weight,
       )) {
-        let sources = [];
+        const sources = [];
         // For each source in the library
-        for (let s of state.library) {
+        for (const s of state.library) {
           // Filter out sources which are not in required list
           if (
             reqAdvSources &&
@@ -1779,7 +1779,7 @@ export function generateScenes(
           }
 
           let addedClip = false;
-          let invalidClips = [];
+          const invalidClips = [];
           // If this is a video with clips
           if (
             getSourceType(s.url) == ST.video &&
@@ -1787,7 +1787,7 @@ export function generateScenes(
             s.clips.length > 0
           ) {
             // Weight each clip first
-            for (let c of s.clips) {
+            for (const c of s.clips) {
               let b = false;
 
               // Filter out clips which don't match this search
@@ -1797,7 +1797,7 @@ export function generateScenes(
               }
 
               // Filter out clips which don't have allSearches
-              for (let as of allSearches) {
+              for (const as of allSearches) {
                 if (!filterSource(as, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1807,7 +1807,7 @@ export function generateScenes(
               if (b) continue;
 
               // Filter out clips which have noneSearches
-              for (let ns of noneSearches) {
+              for (const ns of noneSearches) {
                 if (filterSource(ns, s, c)) {
                   invalidClips.push(c.id);
                   b = true;
@@ -1834,7 +1834,7 @@ export function generateScenes(
             }
 
             // Filter out sources which don't have allSearches
-            for (let as of allSearches) {
+            for (const as of allSearches) {
               if (!filterSource(as, s, null)) {
                 b = true;
                 break;
@@ -1843,7 +1843,7 @@ export function generateScenes(
             if (b) continue;
 
             // Filter out sources which have noneSearches
-            for (let ns of noneSearches) {
+            for (const ns of noneSearches) {
               if (filterSource(ns, s, null)) {
                 b = true;
                 break;
@@ -1854,7 +1854,7 @@ export function generateScenes(
           sources.push(s);
         }
         wg.max = sources.length;
-        let chosenSources = reduceList(
+        const chosenSources = reduceList(
           sources,
           Math.round(newScene.generatorMax * (wg.percent / 100)),
         );
@@ -1881,7 +1881,7 @@ export function updateScene(
   fn: (scene: Scene) => void,
 ): Object {
   const newScenes = new Array<Scene>();
-  for (let s of state.scenes) {
+  for (const s of state.scenes) {
     if (s.id == scene.id) {
       const sceneCopy = JSON.parse(JSON.stringify(s));
       fn(sceneCopy);
@@ -1899,7 +1899,7 @@ export function updateGrid(
   fn: (grid: SceneGrid) => void,
 ): Object {
   const newGrids = new Array<SceneGrid>();
-  for (let g of state.grids) {
+  for (const g of state.grids) {
     if (g.id == grid.id) {
       const gridCopy = JSON.parse(JSON.stringify(g));
       fn(gridCopy);
@@ -1942,7 +1942,7 @@ export function updateAudioLibrary(
   const audiosCopy = JSON.parse(JSON.stringify(state.audios));
   fn(audiosCopy);
   let audioSelected = JSON.parse(JSON.stringify(state.audioSelected));
-  for (let url of audioSelected) {
+  for (const url of audioSelected) {
     if (audiosCopy.find((s: LibrarySource) => s.url == url) == null) {
       audioSelected = audioSelected.filter((s: LibrarySource) => s.url != url);
     }
@@ -1952,8 +1952,8 @@ export function updateAudioLibrary(
 
 export function updateScript(state: State, script: CaptionScript): Object {
   const scenesCopy = JSON.parse(JSON.stringify(state.scenes));
-  for (let scene of scenesCopy) {
-    for (let playlist of scene.scriptPlaylists) {
+  for (const scene of scenesCopy) {
+    for (const playlist of scene.scriptPlaylists) {
       for (let s = 0; s < playlist.scripts.length; s++) {
         if (playlist.scripts[s].url == script.url) {
           playlist.scripts.splice(s, 1, script);
@@ -1971,7 +1971,7 @@ export function updateScriptLibrary(
   const scriptsCopy = JSON.parse(JSON.stringify(state.scripts));
   fn(scriptsCopy);
   let scriptSelected = JSON.parse(JSON.stringify(state.scriptSelected));
-  for (let url of scriptSelected) {
+  for (const url of scriptSelected) {
     if (scriptsCopy.find((s: LibrarySource) => s.url == url) == null) {
       scriptSelected = scriptSelected.filter(
         (s: LibrarySource) => s.url != url,
@@ -1988,7 +1988,7 @@ export function updateLibrary(
   const libraryCopy = JSON.parse(JSON.stringify(state.library));
   fn(libraryCopy);
   let librarySelected = JSON.parse(JSON.stringify(state.librarySelected));
-  for (let url of librarySelected) {
+  for (const url of librarySelected) {
     if (libraryCopy.find((s: LibrarySource) => s.url == url) == null) {
       librarySelected = librarySelected.filter(
         (s: LibrarySource) => s.url != url,
@@ -2016,7 +2016,7 @@ export function editBlacklist(
   if (source) {
     source.blacklist = newBlacklist;
   }
-  for (let scene of newScenes) {
+  for (const scene of newScenes) {
     const sceneSource = scene.sources.find((s) => s.url == sourceURL);
     if (sceneSource) {
       sceneSource.blacklist = newBlacklist;
@@ -2040,7 +2040,7 @@ export function blacklistFile(
       source.blacklist.push(fileToBlacklist);
     }
   }
-  for (let scene of newScenes) {
+  for (const scene of newScenes) {
     const sceneSource = scene.sources.find((s) => s.url == sourceURL);
     if (sceneSource) {
       if (sceneSource.blacklist === undefined || fileToBlacklist == null)
@@ -2077,7 +2077,7 @@ export function setCount(
       source.count = count;
     }
   }
-  for (let scene of newScenes) {
+  for (const scene of newScenes) {
     const sceneSource = scene.sources.find((s) => s.url == sourceURL);
     if (sceneSource) {
       if (sceneSource.count === undefined) sceneSource.count = 0;
@@ -2096,16 +2096,16 @@ export function setCount(
 
 export function updateTags(state: State, tags: Array<Tag>): Object {
   // Go through each scene in the library
-  let newLibrary = state.library;
-  let newAudios = state.audios;
-  let newScripts = state.scripts;
-  let newScenes = state.scenes;
+  const newLibrary = state.library;
+  const newAudios = state.audios;
+  const newScripts = state.scripts;
+  const newScenes = state.scenes;
   const tagIDs = tags.map((t) => t.id);
-  for (let source of newLibrary) {
+  for (const source of newLibrary) {
     // Remove deleted tags, update any edited tags, and order the same as tags
     source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
     source.tags = source.tags.map((t: Tag) => {
-      for (let tag of tags) {
+      for (const tag of tags) {
         if (t.id == tag.id) {
           t.name = tag.name;
           t.phraseString = tag.phraseString;
@@ -2125,7 +2125,7 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
       }
     });
     if (source.clips) {
-      for (let clip of source.clips) {
+      for (const clip of source.clips) {
         // Remove deleted tags, update any edited tags, and order the same as tags
         if (clip.tags) {
           clip.tags = clip.tags.filter((t: Tag) => tagIDs.includes(t.id));
@@ -2133,7 +2133,7 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
           clip.tags = [];
         }
         clip.tags = clip.tags.map((t: Tag) => {
-          for (let tag of tags) {
+          for (const tag of tags) {
             if (t.id == tag.id) {
               t.name = tag.name;
               t.phraseString = tag.phraseString;
@@ -2155,11 +2155,11 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
       }
     }
   }
-  for (let source of newAudios) {
+  for (const source of newAudios) {
     // Remove deleted tags, update any edited tags, and order the same as tags
     source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
     source.tags = source.tags.map((t: Tag) => {
-      for (let tag of tags) {
+      for (const tag of tags) {
         if (t.id == tag.id) {
           t.name = tag.name;
           t.phraseString = tag.phraseString;
@@ -2179,11 +2179,11 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
       }
     });
   }
-  for (let source of newScripts) {
+  for (const source of newScripts) {
     // Remove deleted tags, update any edited tags, and order the same as tags
     source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
     source.tags = source.tags.map((t: Tag) => {
-      for (let tag of tags) {
+      for (const tag of tags) {
         if (t.id == tag.id) {
           t.name = tag.name;
           t.phraseString = tag.phraseString;
@@ -2203,12 +2203,12 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
       }
     });
   }
-  for (let scene of newScenes) {
-    for (let source of scene.sources) {
+  for (const scene of newScenes) {
+    for (const source of scene.sources) {
       // Remove deleted tags, update any edited tags, and order the same as tags
       source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
       source.tags = source.tags.map((t: Tag) => {
-        for (let tag of tags) {
+        for (const tag of tags) {
           if (t.id == tag.id) {
             t.name = tag.name;
             t.phraseString = tag.phraseString;
@@ -2228,7 +2228,7 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
         }
       });
       if (source.clips) {
-        for (let clip of source.clips) {
+        for (const clip of source.clips) {
           // Remove deleted tags, update any edited tags, and order the same as tags
           if (clip.tags) {
             clip.tags = clip.tags.filter((t: Tag) => tagIDs.includes(t.id));
@@ -2236,7 +2236,7 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
             clip.tags = [];
           }
           clip.tags = clip.tags.map((t: Tag) => {
-            for (let tag of tags) {
+            for (const tag of tags) {
               if (t.id == tag.id) {
                 t.name = tag.name;
                 t.phraseString = tag.phraseString;
@@ -2338,7 +2338,7 @@ export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
     } else {
       source.tags.push(tag);
     }
-    for (let scene of newScenes) {
+    for (const scene of newScenes) {
       const sceneSource = scene.sources.find((s) => s.url == source.url);
       if (sceneSource) {
         sceneSource.tags = source.tags;
@@ -2354,15 +2354,15 @@ export function inheritTags(state: State, sourceID: number): Object {
   const source = newLibrary.find((s) => s.id == sourceID);
   if (source) {
     const clipTags = new Array<Tag>();
-    for (let clip of source.clips) {
-      for (let tag of clip.tags) {
+    for (const clip of source.clips) {
+      for (const tag of clip.tags) {
         if (!clipTags.map((c) => c.id).includes(tag.id)) {
           clipTags.push(tag);
         }
       }
     }
     source.tags = clipTags;
-    for (let scene of newScenes) {
+    for (const scene of newScenes) {
       const sceneSource = scene.sources.find((s) => s.url == source.url);
       if (sceneSource) {
         sceneSource.tags = source.tags;
@@ -2437,7 +2437,7 @@ export function addSource(
           id = Math.max(s.id + 1, id);
         });
 
-        let combinedSources = Array.from(s.sources);
+        const combinedSources = Array.from(s.sources);
         const cuteTag = new Tag();
         cuteTag.id = 1000000;
         cuteTag.name = "Cute";
@@ -2484,7 +2484,7 @@ export function addSource(
       }
 
     case AF.list:
-      let newSources = Array.from(args[0].trim().split("\n")).filter(
+      const newSources = Array.from(args[0].trim().split("\n")).filter(
         (s: string) => s.length > 0,
       ) as Array<string>;
       if (scene == null) {
@@ -2595,7 +2595,7 @@ function getImportURLs(importURL: string, rootDir?: string): string[] {
     }
 
     // Split into blog names
-    let importURLs = importURL.split("%20");
+    const importURLs = importURL.split("%20");
     for (let u = 0; u < importURLs.length; u++) {
       let fullPath;
       if (rootDir) {
@@ -2625,7 +2625,7 @@ function mergeSources(
   newSources: Array<LibrarySource>,
 ): Array<LibrarySource> {
   // dedup
-  let sourceURLs = originalSources.map((s) => s.url);
+  const sourceURLs = originalSources.map((s) => s.url);
   newSources = newSources.filter((s) => !sourceURLs.includes(s.url));
 
   let id = originalSources.length + 1;
@@ -2633,8 +2633,8 @@ function mergeSources(
     id = Math.max(s.id + 1, id);
   });
 
-  let combinedSources = Array.from(originalSources);
-  for (let source of newSources) {
+  const combinedSources = Array.from(originalSources);
+  for (const source of newSources) {
     const newSource = new LibrarySource(source);
     newSource.id = id;
     combinedSources.unshift(newSource);
@@ -2650,7 +2650,7 @@ function addSources(
 ) {
   // dedup
   newSources = [...new Set(newSources)];
-  let sourceURLs = originalSources.map((s) => s.url);
+  const sourceURLs = originalSources.map((s) => s.url);
   newSources = newSources.filter((s) => !sourceURLs.includes(s));
 
   let id = originalSources.length + 1;
@@ -2658,7 +2658,7 @@ function addSources(
     id = Math.max(s.id + 1, id);
   });
 
-  for (let url of newSources) {
+  for (const url of newSources) {
     const librarySource = library.find((s) => s.url === url);
     originalSources.unshift(
       new LibrarySource({
@@ -3038,14 +3038,14 @@ export function downloadSource(state: State, source: LibrarySource): Object {
   const sourceURL = source.url.startsWith("http")
     ? source.url
     : source.url.replace(/\//g, window.constants.pathSep);
-  let librarySource = state.library.find((s) => s.url == sourceURL);
+  const librarySource = state.library.find((s) => s.url == sourceURL);
   if (librarySource == null) {
     source.disabledClips = [];
     let id = state.scenes.length + 1;
     state.scenes.forEach((s: Scene) => {
       id = Math.max(s.id + 1, id);
     });
-    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
       id: id,
       name: "download_scene_temp",
       sources: [source],
@@ -3085,7 +3085,7 @@ export function downloadSource(state: State, source: LibrarySource): Object {
     state.scenes.forEach((s: Scene) => {
       id = Math.max(s.id + 1, id);
     });
-    let tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
       id: id,
       name: "download_scene_temp",
       sources: [librarySource],
@@ -3135,7 +3135,7 @@ export function exportScene(state: State, scene: Scene): Object {
 
   // Add overlays
   if (sceneCopy.overlayEnabled) {
-    for (let o of sceneCopy.overlays) {
+    for (const o of sceneCopy.overlays) {
       // If overlay is a grid, add grid scenes and their immediate overlays
       if (o.sceneID.toString().startsWith("999")) {
         const gridID = Number.parseInt(o.sceneID.toString().replace("999", ""));
@@ -3143,8 +3143,8 @@ export function exportScene(state: State, scene: Scene): Object {
         if (grid && !gridsToExport.find((s) => s.id == gridID)) {
           const gridCopy = JSON.parse(JSON.stringify(grid)); // Make a copy
           gridsToExport.push(gridCopy);
-          for (let r of grid.grid) {
-            for (let c of r) {
+          for (const r of grid.grid) {
+            for (const c of r) {
               if (c.sceneID != -1) {
                 const cell = state.scenes.find((s) => s.id == c.sceneID);
                 if (cell && !scenesToExport.find((s) => s.id == c.sceneID)) {
@@ -3153,7 +3153,7 @@ export function exportScene(state: State, scene: Scene): Object {
                   cellCopy.openTab = 3;
                   scenesToExport.push(cellCopy);
                   if (cell.overlayEnabled) {
-                    for (let co of cell.overlays) {
+                    for (const co of cell.overlays) {
                       if (!co.sceneID.toString().startsWith("999")) {
                         const overlay = state.scenes.find(
                           (s) => s.id == co.sceneID,
@@ -3243,16 +3243,16 @@ export function importScene(
   newScenes = newScenes.concat([scene]);
   if (addToLibrary) {
     sources = sources.concat(scene.sources);
-    for (let playlist of scene.audioPlaylists) {
+    for (const playlist of scene.audioPlaylists) {
       audios = audios.concat(playlist.audios);
     }
-    for (let playlist of scene.scriptPlaylists) {
+    for (const playlist of scene.scriptPlaylists) {
       scripts = scripts.concat(playlist.scripts);
     }
   }
 
   if (scene.overlays) {
-    for (let o of scene.overlays) {
+    for (const o of scene.overlays) {
       if (o.sceneID.toString().startsWith("999")) {
         const sID = Number.parseInt(o.sceneID.toString().replace("999", ""));
         if (newGridMap.has(sID)) {
@@ -3300,7 +3300,7 @@ export function importScene(
           newSceneMap.set(scene.id, id++);
         }
         scene.id = newSceneMap.get(scene.id);
-        for (let o of scene.overlays) {
+        for (const o of scene.overlays) {
           if (o.sceneID.toString().startsWith("999")) {
             const sID = Number.parseInt(
               o.sceneID.toString().replace("999", ""),
@@ -3324,10 +3324,10 @@ export function importScene(
         newScenes = newScenes.concat([scene]);
         if (addToLibrary) {
           sources = sources.concat(scene.sources);
-          for (let playlist of scene.audioPlaylists) {
+          for (const playlist of scene.audioPlaylists) {
             audios = audios.concat(playlist.audios);
           }
-          for (let playlist of scene.scriptPlaylists) {
+          for (const playlist of scene.scriptPlaylists) {
             scripts = scripts.concat(playlist.scripts);
           }
         }
@@ -3339,7 +3339,7 @@ export function importScene(
     // Don't add sources which are already in the library
     let lid = state.library.length + 1;
     const sourceURLs = sources.map((s) => s.url);
-    for (let source of state.library) {
+    for (const source of state.library) {
       lid = Math.max(source.id + 1, lid);
       let indexOf = sourceURLs.indexOf(source.url);
       if (indexOf >= 0) {
@@ -3350,14 +3350,14 @@ export function importScene(
         }
       }
     }
-    for (let source of sources) {
+    for (const source of sources) {
       source.id = lid++;
     }
 
     // Don't add sources which are already in the audio library
     let aid = state.audios.length + 1;
     const audioURLs = audios.map((s) => s.url);
-    for (let audio of state.audios) {
+    for (const audio of state.audios) {
       aid = Math.max(audio.id + 1, aid);
       let indexOf = audioURLs.indexOf(audio.url);
       if (indexOf >= 0) {
@@ -3368,14 +3368,14 @@ export function importScene(
         }
       }
     }
-    for (let audio of audios) {
+    for (const audio of audios) {
       audio.id = aid++;
     }
 
     // Don't add sources which are already in the script library
     let sid = state.scripts.length + 1;
     const scriptURLs = scripts.map((s) => s.url);
-    for (let script of state.scripts) {
+    for (const script of state.scripts) {
       sid = Math.max(script.id + 1, sid);
       let indexOf = scriptURLs.indexOf(script.url);
       if (indexOf >= 0) {
@@ -3386,7 +3386,7 @@ export function importScene(
         }
       }
     }
-    for (let script of scripts) {
+    for (const script of scripts) {
       script.id = sid++;
     }
 
@@ -3469,9 +3469,9 @@ export function importLibrary(
   newLibrary.forEach((s) => {
     sourceID = Math.max(s.id + 1, sourceID);
   });
-  for (let source of libraryImport) {
+  for (const source of libraryImport) {
     if (source.tags) {
-      for (let tag of source.tags) {
+      for (const tag of source.tags) {
         // Make sure we have all of these tags
         if (myTags.includes(tag.name)) {
           tag.id = newTags.find((t) => t.name == tag.name).id; // Map tags we already have
@@ -3507,10 +3507,10 @@ export function importLibrary(
       // Add new clips
       if (source.clips) {
         let newID = source.clips.length + 1;
-        for (let clip of source.clips) {
+        for (const clip of source.clips) {
           let found = false;
           if (librarySource.clips) {
-            for (let lClip of librarySource.clips) {
+            for (const lClip of librarySource.clips) {
               if (clip.start == lClip.start && clip.end == lClip.end) {
                 found = true;
                 break;
@@ -3670,7 +3670,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
 
     const detectBPM = (data: ArrayBuffer) => {
       const state = getState();
-      let context = new AudioContext();
+      const context = new AudioContext();
       context.decodeAudioData(
         data,
         (buffer) => {
@@ -3800,7 +3800,7 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
         (s) => s.url == actionSource.url,
       );
       if (librarySource) {
-        let video = document.createElement("video");
+        const video = document.createElement("video");
         video.preload = "metadata";
         video.onloadedmetadata = () => {
           const height = video.videoHeight;
@@ -3892,13 +3892,13 @@ export function importTumblr(getState: () => State, setState: Function) {
         }
         // Get the next 20 blogs
         let following = [];
-        for (let blog of blogs) {
+        for (const blog of blogs) {
           const blogURL = "http://" + blog + ".tumblr.com/";
           following.push(blogURL);
         }
         // dedup
         const newestState = getState();
-        let sourceURLs = newestState.library.map((s) => s.url);
+        const sourceURLs = newestState.library.map((s) => s.url);
         following = following.filter((b) => !sourceURLs.includes(b));
         let id = newestState.library.length + 1;
         newestState.library.forEach((s) => {
@@ -3906,7 +3906,7 @@ export function importTumblr(getState: () => State, setState: Function) {
         });
         // Add to Library
         let newLibrary = newestState.library;
-        for (let url of following) {
+        for (const url of following) {
           newLibrary = newLibrary.concat([
             new LibrarySource({
               url: url,

@@ -263,10 +263,10 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     cancelAnimationFrame(this._animationFrameHandle);
     window.clearTimeout(this._backForth);
     window.clearTimeout(this._timeout);
-    for (let timeout of this._waitTimeouts) {
+    for (const timeout of this._waitTimeouts) {
       window.clearTimeout(timeout);
     }
-    for (let timeout of this._imgLoadTimeouts) {
+    for (const timeout of this._imgLoadTimeouts) {
       window.clearTimeout(timeout);
     }
     this._backForth = null;
@@ -402,9 +402,9 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
         this.state.historyPaths.length - 1 + this.getHistoryOffset()
       ];
     const url = img.src;
-    let newHistoryPaths = [];
+    const newHistoryPaths = [];
     let newHistoryOffset = this.props.historyOffset;
-    for (let image of this.state.historyPaths) {
+    for (const image of this.state.historyPaths) {
       if (image.src == url) {
         newHistoryOffset += 1;
       } else {
@@ -501,7 +501,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       if (this.props.scene.useWeights) {
         const validKeys = content().getURLKeys(this.props.contentLookupKey);
         keys = [];
-        for (let source of this.props.scene.sources) {
+        for (const source of this.props.scene.sources) {
           if (validKeys.includes(source.url)) {
             for (let w = source.weight; w > 0; w--) {
               keys.push(source.url);
@@ -674,7 +674,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
       source = content().getURLValues(this.props.contentLookupKey, url)[0];
     }
 
-    let post = content().getPost(this.props.contentLookupKey, url);
+    const post = content().getPost(this.props.contentLookupKey, url);
 
     if (
       this.props.scene.orderFunction == OF.random &&
@@ -703,7 +703,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
 
     getURL.then((url) => {
       if (fileType == ST.nimja) {
-        let iframe = document.createElement("iframe");
+        const iframe = document.createElement("iframe");
         iframe.setAttribute("source", source);
         if (post) {
           iframe.setAttribute("post", post);
@@ -743,7 +743,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
         window.clearTimeout(this._imgLoadTimeouts[i]);
         successCallback();
       } else if (isVideo(url, false)) {
-        let video = document.createElement("video");
+        const video = document.createElement("video");
         video.setAttribute("source", source);
         if (post) {
           video.setAttribute("post", post);
@@ -755,12 +755,12 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             video.setAttribute("sindex", sourceIndex.toString());
           }
         }
-        let subtitleSplit = url.split("|||");
+        const subtitleSplit = url.split("|||");
         if (subtitleSplit.length > 1) {
           url = subtitleSplit[0];
           video.setAttribute("subtitles", subtitleSplit[1]);
         }
-        let clipRegex =
+        const clipRegex =
           /(.*):::(\d+):([\d-]+):::(\d+\.?\d*):(\d+\.?\d*)$/g.exec(url);
         if (clipRegex != null) {
           url = clipRegex[1];

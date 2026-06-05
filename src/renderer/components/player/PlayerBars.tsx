@@ -1317,8 +1317,8 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
           this.props.historyPaths.length - 1 + this.props.historyOffset
         ];
     const url = unproxy(img.src);
-    let source = img.getAttribute("source");
-    let post = img.hasAttribute("post") ? img.getAttribute("post") : null;
+    const source = img.getAttribute("source");
+    const post = img.hasAttribute("post") ? img.getAttribute("post") : null;
     window.ipc.showPlayerContextMenu(
       this.props.config,
       doShowGotoTagSource,

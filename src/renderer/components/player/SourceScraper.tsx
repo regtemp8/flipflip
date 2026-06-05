@@ -185,7 +185,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
       }
     }
 
-    let sourceLoop = () => {
+    const sourceLoop = () => {
       if (!this._isMounted || sources.length == 0 || n >= sources.length)
         return;
 
@@ -292,7 +292,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
       );
     };
 
-    let nextSourceLoop = () => {
+    const nextSourceLoop = () => {
       if (!this._isMounted) return;
 
       const d = nextSources[n];
@@ -359,7 +359,7 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
       );
     };
 
-    let promiseLoop = () => {
+    const promiseLoop = () => {
       if (this.state.captcha != null && this._promiseQueue.length == 0) {
         window.setTimeout(promiseLoop, 2000);
       }

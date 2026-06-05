@@ -669,7 +669,7 @@ export default class Player extends React.Component<PlayerProps> {
                 overlayScene = this.getScene(overlay.sceneID);
               }
               if (overlayScene) {
-                let advanceHacks = this.state.imagePlayerAdvanceHacks;
+                const advanceHacks = this.state.imagePlayerAdvanceHacks;
                 let changed = false;
                 while (advanceHacks.length <= index + 1) {
                   advanceHacks.push([new ChildCallbackHack()]);
@@ -717,7 +717,7 @@ export default class Player extends React.Component<PlayerProps> {
               } else if (overlayGrid && !this.props.gridView) {
                 const gridSize =
                   overlayGrid.grid[0].length * overlayGrid.grid.length;
-                let advanceHacks = this.state.imagePlayerAdvanceHacks;
+                const advanceHacks = this.state.imagePlayerAdvanceHacks;
                 let changed = false;
                 while (advanceHacks.length <= index + 1) {
                   advanceHacks.push([new ChildCallbackHack()]);
@@ -848,7 +848,7 @@ export default class Player extends React.Component<PlayerProps> {
       this.state.currentAudio &&
       state.currentAudio != this.state.currentAudio
     ) {
-      let thumbImage = new Image();
+      const thumbImage = new Image();
       if (this.state.currentAudio.thumb) {
         thumbImage.src = proxy(this.state.currentAudio.thumb);
       } else {
@@ -936,7 +936,7 @@ export default class Player extends React.Component<PlayerProps> {
       });
     }
     if (this.state.currentAudio) {
-      let thumbImage = new Image();
+      const thumbImage = new Image();
       if (this.state.currentAudio.thumb) {
         thumbImage.src = proxy(this.state.currentAudio.thumb);
       } else {
@@ -1122,8 +1122,8 @@ export default class Player extends React.Component<PlayerProps> {
       });
       setTimeout(() => {
         if (this.props.scene.gridScene) {
-          for (let r of this.state.imagePlayerAdvanceHacks) {
-            for (let hack of r) {
+          for (const r of this.state.imagePlayerAdvanceHacks) {
+            for (const hack of r) {
               hack.fire();
             }
           }

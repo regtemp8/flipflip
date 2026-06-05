@@ -634,32 +634,32 @@ export default class Config {
     Object.assign(this, init);
 
     // Add any missing keys (keeps config up-to-date)
-    for (let key of Object.keys(new SceneSettings())) {
+    for (const key of Object.keys(new SceneSettings())) {
       if (this.defaultScene[key] == null) {
         this.defaultScene[key] = new SceneSettings()[key];
       }
     }
-    for (let key of Object.keys(new RemoteSettings())) {
+    for (const key of Object.keys(new RemoteSettings())) {
       if (this.remoteSettings[key] == null) {
         this.remoteSettings[key] = new RemoteSettings()[key];
       }
     }
-    for (let key of Object.keys(new CacheSettings())) {
+    for (const key of Object.keys(new CacheSettings())) {
       if (this.caching[key] == null) {
         this.caching[key] = new CacheSettings()[key];
       }
     }
-    for (let key of Object.keys(new DisplaySettings())) {
+    for (const key of Object.keys(new DisplaySettings())) {
       if (this.displaySettings[key] == null) {
         this.displaySettings[key] = new DisplaySettings()[key];
       }
     }
-    for (let key of Object.keys(new GeneralSettings())) {
+    for (const key of Object.keys(new GeneralSettings())) {
       if (this.generalSettings[key] == null) {
         this.generalSettings[key] = new GeneralSettings()[key];
       }
     }
-    for (let key of Object.keys(new Tutorials())) {
+    for (const key of Object.keys(new Tutorials())) {
       if (this.tutorials[key] == null) {
         this.tutorials[key] = new Tutorials()[key];
       }

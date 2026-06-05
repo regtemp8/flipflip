@@ -24,10 +24,10 @@ export function unproxy(proxied: string) {
 }
 
 export function removeDuplicatesBy(keyFn: Function, array: any[]): any[] {
-  let mySet = new Set();
+  const mySet = new Set();
   return array.filter(function (x: any) {
-    let key = keyFn(x);
-    let isNew = !mySet.has(key);
+    const key = keyFn(x);
+    const isNew = !mySet.has(key);
     if (isNew) mySet.add(key);
     return isNew;
   });
@@ -37,7 +37,7 @@ export function isText(path: string, strict: boolean): boolean {
   if (path == null) return false;
   const p = path.toLowerCase();
   const acceptableExtensions = [".txt"];
-  for (let ext of acceptableExtensions) {
+  for (const ext of acceptableExtensions) {
     if (strict) {
       if (p.endsWith(ext)) return true;
     } else {
@@ -63,7 +63,7 @@ export function isImage(path: string, strict: boolean): boolean {
     ".tiff",
     ".svg",
   ];
-  for (let ext of acceptableExtensions) {
+  for (const ext of acceptableExtensions) {
     if (strict) {
       if (p.endsWith(ext)) return true;
     } else {
@@ -84,7 +84,7 @@ export function isVideo(path: string, strict: boolean): boolean {
     ".mov",
     ".m4v",
   ];
-  for (let ext of acceptableExtensions) {
+  for (const ext of acceptableExtensions) {
     if (strict) {
       if (p.endsWith(ext)) return true;
     } else {
@@ -98,7 +98,7 @@ export function isVideoPlaylist(path: string, strict: boolean): boolean {
   if (path == null) return false;
   const p = path.toLowerCase();
   const acceptableExtensions = [".asx", ".m3u8", ".pls", ".xspf"];
-  for (let ext of acceptableExtensions) {
+  for (const ext of acceptableExtensions) {
     if (strict) {
       if (p.endsWith(ext)) return true;
     } else {
@@ -112,7 +112,7 @@ export function isAudio(path: string, strict: boolean): boolean {
   if (path == null) return false;
   const p = path.toLowerCase();
   const acceptableExtensions = [".mp3", ".m4a", ".wav", ".ogg"];
-  for (let ext of acceptableExtensions) {
+  for (const ext of acceptableExtensions) {
     if (strict) {
       if (p.endsWith(ext)) return true;
     } else {
@@ -208,7 +208,7 @@ export function getFileGroup(url: string, pathSep: string) {
     case ST.redgifs:
       let redgifID;
       if (url.includes("/browse?")) {
-        let redgifRegex =
+        const redgifRegex =
           /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(
             url,
           );
@@ -329,7 +329,7 @@ export function getFileGroup(url: string, pathSep: string) {
       } else {
         sep = "/";
       }
-      let name = url.substring(0, url.lastIndexOf(sep));
+      const name = url.substring(0, url.lastIndexOf(sep));
       return name.substring(name.lastIndexOf(sep) + 1);
     case ST.bdsmlr:
       let bdsmlrID = url.replace(/https?:\/\//, "");
