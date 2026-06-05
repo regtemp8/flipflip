@@ -221,17 +221,15 @@ class AudioAlbumList extends React.Component<AudioAlbumListProps> {
         return 1;
       } else if (a.album < b.album) {
         return -1;
+      } else if (a.trackNum > b.trackNum) {
+        return 1;
+      } else if (a.trackNum < b.trackNum) {
+        return -1;
       } else {
-        if (a.trackNum > b.trackNum) {
-          return 1;
-        } else if (a.trackNum < b.trackNum) {
-          return -1;
-        } else {
-          const reA = /^(A\s|a\s|The\s|the\s)/g;
-          const aValue = a.name.replace(reA, "");
-          const bValue = b.name.replace(reA, "");
-          return aValue.localeCompare(bValue, "en", { numeric: true });
-        }
+        const reA = /^(A\s|a\s|The\s|the\s)/g;
+        const aValue = a.name.replace(reA, "");
+        const bValue = b.name.replace(reA, "");
+        return aValue.localeCompare(bValue, "en", { numeric: true });
       }
     });
     for (let song of songs) {

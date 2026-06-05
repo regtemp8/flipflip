@@ -260,13 +260,11 @@ export function doneTutorial(state: State, tutorial: string): Object {
       } else {
         state.config.tutorials.sceneGenerator = tutorial;
       }
+    } else if (tutorial == SDT.play) {
+      newTutorial = null;
+      state.config.tutorials.sceneDetail = DONE;
     } else {
-      if (tutorial == SDT.play) {
-        newTutorial = null;
-        state.config.tutorials.sceneDetail = DONE;
-      } else {
-        state.config.tutorials.sceneDetail = tutorial;
-      }
+      state.config.tutorials.sceneDetail = tutorial;
     }
   } else if (isRoute(state, "play")) {
     if (tutorial == PT.final) {
@@ -2475,19 +2473,16 @@ export function addSource(
             handleArgs(s);
           });
         }
+      } else if (scene == null) {
+        return updateLibrary(state, (l) =>
+          addSources(l, args[0], state.library),
+        );
       } else {
-        if (scene == null) {
-          return updateLibrary(state, (l) =>
-            addSources(l, args[0], state.library),
-          );
-        } else {
-          return updateScene(state, scene, (s) => {
-            addSources(s.sources, args[0], state.library);
-            handleArgs(s);
-          });
-        }
+        return updateScene(state, scene, (s) => {
+          addSources(s.sources, args[0], state.library);
+          handleArgs(s);
+        });
       }
-
     case AF.list: {
       const newSources = Array.from(args[0].trim().split("\n")).filter(
         (s: string) => s.length > 0,
@@ -2805,12 +2800,10 @@ function audioSortFunction(
       return ascending ? -1 : 1;
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
+    } else if (secondary) {
+      return audioSortFunction(secondary, true)(a, b);
     } else {
-      if (secondary) {
-        return audioSortFunction(secondary, true)(a, b);
-      } else {
-        return 0;
-      }
+      return 0;
     }
   };
 }
@@ -3022,20 +3015,18 @@ function sortFunction(
       return ascending ? -1 : 1;
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
+    } else if (secondary) {
+      return sortFunction(
+        secondary,
+        true,
+        getName,
+        getFullName,
+        getCount,
+        getType,
+        null,
+      )(a, b);
     } else {
-      if (secondary) {
-        return sortFunction(
-          secondary,
-          true,
-          getName,
-          getFullName,
-          getCount,
-          getType,
-          null,
-        )(a, b);
-      } else {
-        return 0;
-      }
+      return 0;
     }
   };
 }

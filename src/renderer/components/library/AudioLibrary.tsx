@@ -2118,12 +2118,10 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
               } else {
                 matchesFilter = filter != source.artist;
               }
+            } else if (filter.length == 0) {
+              matchesFilter = !source.artist || source.artist.length == 0;
             } else {
-              if (filter.length == 0) {
-                matchesFilter = !source.artist || source.artist.length == 0;
-              } else {
-                matchesFilter = filter == source.artist;
-              }
+              matchesFilter = filter == source.artist;
             }
           } else if (
             filter.startsWith("album:") ||
@@ -2137,12 +2135,10 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
               } else {
                 matchesFilter = filter != source.album;
               }
+            } else if (filter.length == 0) {
+              matchesFilter = !source.album || source.album.length == 0;
             } else {
-              if (filter.length == 0) {
-                matchesFilter = !source.album || source.album.length == 0;
-              } else {
-                matchesFilter = filter == source.album;
-              }
+              matchesFilter = filter == source.album;
             }
           } else if (filter.startsWith("playlist:")) {
             filter = filter.replace("playlist:", "");
@@ -2165,13 +2161,11 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
                 const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
                 matchesFilter = !regex.test(source.comment);
               }
+            } else if (filter.length == 0) {
+              matchesFilter = !source.comment || source.comment.length == 0;
             } else {
-              if (filter.length == 0) {
-                matchesFilter = !source.comment || source.comment.length == 0;
-              } else {
-                const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
-                matchesFilter = regex.test(source.comment);
-              }
+              const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
+              matchesFilter = regex.test(source.comment);
             }
           } else if (
             (countRegex = /^count([>=<])(\d*)$/.exec(filter)) != null

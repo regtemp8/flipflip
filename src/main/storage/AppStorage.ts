@@ -61,11 +61,10 @@ export default class AppStorage {
         }
       }
 
-      if (portableMode) {
-        if (fs.existsSync(`${portablePath}.new`))
-          console.warn("FOUND OLD SAVE");
-      } else {
-        if (fs.existsSync(`${savePath}.new`)) console.warn("FOUND OLD SAVE");
+      if (portableMode && fs.existsSync(`${portablePath}.new`)) {
+        console.warn("FOUND OLD SAVE");
+      } else if (fs.existsSync(`${savePath}.new`)) {
+        console.warn("FOUND OLD SAVE");
       }
 
       if (data.version != process.env.APP_VERSION) {

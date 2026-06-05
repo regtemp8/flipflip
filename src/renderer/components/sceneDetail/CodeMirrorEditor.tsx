@@ -118,11 +118,9 @@ export const timestampRegex =
           const registerRegex = /^\$(\d)$/.exec(state.tokens[1]);
           if (registerRegex == null) {
             state.storedPhrases.set(0, true);
-          } else {
-            if (state.tokens.length > 1) {
-              state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
-              state.storedPhrases.set(0, true);
-            }
+          } else if (state.tokens.length > 1) {
+            state.storedPhrases.set(Number.parseInt(registerRegex[1]), true);
+            state.storedPhrases.set(0, true);
           }
         }
         state.tokens = new Array<string>();

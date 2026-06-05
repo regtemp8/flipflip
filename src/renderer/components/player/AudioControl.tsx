@@ -396,32 +396,28 @@ class AudioControl extends React.Component<AudioControlProps> {
     } else if (this.props.audio.nextSceneAtEnd && this.props.playNextScene) {
       this.props.playNextScene();
       this.setState({ position: 0, duration: 0 });
-    } else {
-      if (this.props.repeat == RP.all) {
-        if (this.props.audio.tick) {
-          this._queueNextTrack = true;
-        } else {
-          if (this.props.singleTrack) {
-            this.setState({ position: 1 });
-          } else {
-            this.props.nextTrack();
-            this.setState({ position: 0, duration: 0 });
-          }
-        }
-      } else if (this.props.repeat == RP.one) {
+    } else if (this.props.repeat == RP.all) {
+      if (this.props.audio.tick) {
+        this._queueNextTrack = true;
+      } else if (this.props.singleTrack) {
         this.setState({ position: 1 });
-      } else if (this.props.repeat == RP.none) {
-        if (this.props.lastTrack) {
-          this.setState({ playing: false });
-          return;
-        }
+      } else {
+        this.props.nextTrack();
+        this.setState({ position: 0, duration: 0 });
+      }
+    } else if (this.props.repeat == RP.one) {
+      this.setState({ position: 1 });
+    } else if (this.props.repeat == RP.none) {
+      if (this.props.lastTrack) {
+        this.setState({ playing: false });
+        return;
+      }
 
-        if (this.props.audio.tick) {
-          this._queueNextTrack = true;
-        } else {
-          this.props.nextTrack();
-          this.setState({ position: 0, duration: 0 });
-        }
+      if (this.props.audio.tick) {
+        this._queueNextTrack = true;
+      } else {
+        this.props.nextTrack();
+        this.setState({ position: 0, duration: 0 });
       }
     }
   }

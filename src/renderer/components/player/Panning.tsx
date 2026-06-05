@@ -99,12 +99,10 @@ export default class Panning extends React.Component<PanningProps> {
             // Already set
           }
           this._lastHorizRandom = type;
+        } else if (this._lastHorizRandom == 0) {
+          // Already set
         } else {
-          if (this._lastHorizRandom == 0) {
-            // Already set
-          } else {
-            horizTransLevel = -horizTransLevel;
-          }
+          horizTransLevel = -horizTransLevel;
         }
       }
     }
@@ -154,12 +152,10 @@ export default class Panning extends React.Component<PanningProps> {
             // Already set
           }
           this._lastVertRandom = type;
+        } else if (this._lastVertRandom == 0) {
+          // Already set
         } else {
-          if (this._lastVertRandom == 0) {
-            // Already set
-          } else {
-            vertTransLevel = -vertTransLevel;
-          }
+          vertTransLevel = -vertTransLevel;
         }
       }
     }

@@ -954,12 +954,10 @@ class VideoClipper extends React.Component<VideoClipperProps> {
       } else if (forceEnd || values[1] != this.state.isEditingValue[1]) {
         this.state.video.currentTime = max;
       }
-    } else {
-      if (this.state.video.currentTime < min) {
-        this.state.video.currentTime = min;
-      } else if (this.state.video.currentTime > max) {
-        this.state.video.currentTime = max;
-      }
+    } else if (this.state.video.currentTime < min) {
+      this.state.video.currentTime = min;
+    } else if (this.state.video.currentTime > max) {
+      this.state.video.currentTime = max;
     }
 
     this.setState({

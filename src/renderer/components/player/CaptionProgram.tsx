@@ -693,12 +693,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             fn = (this as any)[command](numbers);
             if (timestamp == null) {
               newProgram.push(fn);
+            } else if (newTimestamps.has(timestamp)) {
+              newTimestamps.get(timestamp).push(fn);
             } else {
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
-              }
+              newTimestamps.set(timestamp, [fn]);
             }
             break;
           case "setBlinkWaveRate":
@@ -750,12 +748,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             fn = (this as any)[command](ms);
             if (timestamp == null) {
               newProgram.push(fn);
+            } else if (newTimestamps.has(timestamp)) {
+              newTimestamps.get(timestamp).push(fn);
             } else {
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
-              }
+              newTimestamps.set(timestamp, [fn]);
             }
             break;
           case "setBlinkTF":
@@ -784,12 +780,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             fn = (this as any)[command](tf);
             if (timestamp == null) {
               newProgram.push(fn);
+            } else if (newTimestamps.has(timestamp)) {
+              newTimestamps.get(timestamp).push(fn);
             } else {
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
-              }
+              newTimestamps.set(timestamp, [fn]);
             }
             break;
           case "setShowCountProgress":
@@ -814,12 +808,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             fn = (this as any)[command](value == "true" || value == "t");
             if (timestamp == null) {
               newProgram.push(fn);
+            } else if (newTimestamps.has(timestamp)) {
+              newTimestamps.get(timestamp).push(fn);
             } else {
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
-              }
+              newTimestamps.set(timestamp, [fn]);
             }
             break;
           case "setCountProgressColor":
@@ -845,12 +837,10 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
             fn = (this as any)[command](args);
             if (timestamp == null) {
               newProgram.push(fn);
+            } else if (newTimestamps.has(timestamp)) {
+              newTimestamps.get(timestamp).push(fn);
             } else {
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
-              }
+              newTimestamps.set(timestamp, [fn]);
             }
             break;
           default:
@@ -1466,10 +1456,8 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
               } else {
                 this.setState({ countCurrent: val - offset });
               }
-            } else {
-              if (this.state.countColorMatch) {
-                this.el.current.style.color = this.state.countColors.get(val);
-              }
+            } else if (this.state.countColorMatch) {
+              this.el.current.style.color = this.state.countColors.get(val);
             }
             const showText = this.showText(
               val.toString(),

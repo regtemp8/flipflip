@@ -31,34 +31,34 @@ export const processAllURLs = (
         newAllURLs.set(d, [source.url]);
       }
     }
+  } else if (weight == WF.sources) {
+    let sourceURLs = newAllURLs.get(source.url);
+    if (!sourceURLs) sourceURLs = [];
+    newAllURLs.set(
+      source.url,
+      sourceURLs.concat(
+        data.filter((u: string) => {
+          const fileName = getFileName(u, path.sep);
+          const found = sourceURLs
+            .map((u: string) => getFileName(u, path.sep))
+            .includes(fileName);
+          return !found;
+        }),
+      ),
+    );
   } else {
-    if (weight == WF.sources) {
-      let sourceURLs = newAllURLs.get(source.url);
-      if (!sourceURLs) sourceURLs = [];
-      newAllURLs.set(
-        source.url,
-        sourceURLs.concat(
-          data.filter((u: string) => {
-            const fileName = getFileName(u, path.sep);
-            const found = sourceURLs
-              .map((u: string) => getFileName(u, path.sep))
-              .includes(fileName);
-            return !found;
-          }),
-        ),
-      );
-    } else {
-      for (let d of data.filter((u: string) => {
-        const fileName = getFileName(u, path.sep);
-        const found = Array.from(newAllURLs.keys())
-          .map((u: string) => getFileName(u, path.sep))
-          .includes(fileName);
-        return !found;
-      })) {
-        newAllURLs.set(d, [source.url]);
-      }
+    data = data.filter((u: string) => {
+      const fileName = getFileName(u, path.sep);
+      const found = Array.from(newAllURLs.keys())
+        .map((u: string) => getFileName(u, path.sep))
+        .includes(fileName);
+      return !found;
+    });
+    for (let d of data) {
+      newAllURLs.set(d, [source.url]);
     }
   }
+
   return newAllURLs;
 };
 
@@ -2117,19 +2117,15 @@ export const loadLuscious = (
               const hasNextPage = json.data.picture.list.info.has_next_page;
               if (hasNextPage) {
                 helpers.next[2] = helpers.next[2] + 1;
+              } else if (helpers.next[1] < albums.length - 1) {
+                helpers.next[1] = helpers.next[1] + 1;
+                helpers.next[2] = 0;
+              } else if (userHasNextPage) {
+                helpers.next[0] = helpers.next[0] + 1;
+                helpers.next[1] = 0;
+                helpers.next[2] = 0;
               } else {
-                if (helpers.next[1] < albums.length - 1) {
-                  helpers.next[1] = helpers.next[1] + 1;
-                  helpers.next[2] = 0;
-                } else {
-                  if (userHasNextPage) {
-                    helpers.next[0] = helpers.next[0] + 1;
-                    helpers.next[1] = 0;
-                    helpers.next[2] = 0;
-                  } else {
-                    helpers.next = null;
-                  }
-                }
+                helpers.next = null;
               }
               const items = json.data.picture.list.items;
               if (items.length > 0) {
