@@ -17,8 +17,8 @@ class ContentLookup {
   }
 
   public delete(key?: string) {
-    if(key == null) {
-      return
+    if (key == null) {
+      return;
     }
 
     this.lookup.delete(key);
@@ -29,7 +29,7 @@ class ContentLookup {
   }
 
   public isEmpty(key?: string) {
-    const content = key != null ? this.lookup.get(key) : undefined
+    const content = key != null ? this.lookup.get(key) : undefined;
     return content?.empty ?? true;
   }
 

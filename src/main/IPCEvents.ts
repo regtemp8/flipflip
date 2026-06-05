@@ -629,46 +629,49 @@ function onScrapeFiles(
   },
 ) {
   const [replyPort] = ev.ports;
-  const {
+  const { config, source, imageTypeFilter, weightFunction, helpers } = request;
+  const cacheDir = getCachePath(source.url, config);
+  loadSources(
     config,
     source,
     imageTypeFilter,
     weightFunction,
     helpers,
-  } = request;
-  const cacheDir = getCachePath(source.url, config);
-  loadSources(config, source, imageTypeFilter, weightFunction, helpers, cacheDir, (object) => {
-    if (object?.data) {
-      const maxChunkSize = 5000;
-      let message: any = {
-        source: object.source,
-        helpers: { ...object.helpers },
-        captcha: object.captcha,
-        warning: object.warning,
-        error: object.error,
-        systemMessage: object.systemMessage,
-        allPosts: object.allPosts
-      }
-      for (let i = 0; i < object.data.length; i += maxChunkSize) {
-        const end = Math.min(object.data.length, i + maxChunkSize)
-        const data = object.data.slice(i, end)
-        message.allURLs = processAllURLs(
-          data,
-          object.source,
-          object.weight,
-          object.helpers,
-        );
+    cacheDir,
+    (object) => {
+      if (object?.data) {
+        const maxChunkSize = 5000;
+        let message: any = {
+          source: object.source,
+          helpers: { ...object.helpers },
+          captcha: object.captcha,
+          warning: object.warning,
+          error: object.error,
+          systemMessage: object.systemMessage,
+          allPosts: object.allPosts,
+        };
+        for (let i = 0; i < object.data.length; i += maxChunkSize) {
+          const end = Math.min(object.data.length, i + maxChunkSize);
+          const data = object.data.slice(i, end);
+          message.allURLs = processAllURLs(
+            data,
+            object.source,
+            object.weight,
+            object.helpers,
+          );
 
-        message.helpers.complete = true //i + maxChunkSize >= object.data.length
-        replyPort.postMessage(message)
-        message = {
-          source: object.source, helpers: { ...object.helpers }
+          message.helpers.complete = true; //i + maxChunkSize >= object.data.length
+          replyPort.postMessage(message);
+          message = {
+            source: object.source,
+            helpers: { ...object.helpers },
+          };
         }
+      } else {
+        replyPort.postMessage(object);
       }
-    } else {
-      replyPort.postMessage(object);
-    }
-  });
+    },
+  );
 }
 
 function onDeleteLibrarySource(
