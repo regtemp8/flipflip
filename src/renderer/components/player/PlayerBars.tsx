@@ -39,7 +39,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 
 import { PT, ST } from "../../../common/const";
-import { getSourceType, urlToPath } from "../../../common/utils";
+import { getSourceType, unproxy, urlToPath } from "../../../common/utils";
 import Config from "../../../common/Config";
 import LibrarySource from "../../../common/LibrarySource";
 import Scene from "../../../common/Scene";
@@ -1316,7 +1316,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
       : this.props.historyPaths[
           this.props.historyPaths.length - 1 + this.props.historyOffset
         ];
-    const url = img.src;
+    const url = unproxy(img.src);
     let source = img.getAttribute("source");
     let post = img.hasAttribute("post") ? img.getAttribute("post") : null;
     window.ipc.showPlayerContextMenu(
@@ -1357,7 +1357,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
       case "c":
         if (e.ctrlKey) {
           e.preventDefault();
-          this.copyImageToClipboard(null);
+          this.copyImageToClipboard();
         }
         break;
       case "f":
@@ -1454,15 +1454,13 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
     this.props.goBack();
   }
 
-  copyImageToClipboard(sourceURL: string) {
-    let url = sourceURL;
-    if (!url) {
-      url =
-        this.props.historyPaths[
-          this.props.historyPaths.length - 1 + this.props.historyOffset
-        ].src;
-    }
+  copyImageToClipboard() {
+    const { src } =
+      this.props.historyPaths[
+        this.props.historyPaths.length - 1 + this.props.historyOffset
+      ];
 
+    const url = unproxy(src);
     window.ipc.copyImageToClipboard(url);
   }
 
@@ -1477,7 +1475,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
         this.props.historyPaths[
           this.props.historyPaths.length - 1 + this.props.historyOffset
         ];
-      const url = img.src;
+      const url = unproxy(img.src);
       const isFile = url.startsWith("file://");
       const path = urlToPath(url, window.ipc.platform());
       if (isFile) {
@@ -1493,7 +1491,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
       ];
     if (img == null) return;
     const source = img.getAttribute("source");
-    const url = img.src;
+    const url = unproxy(img.src);
     const isFile = url.startsWith("file://");
     const path = urlToPath(url, window.ipc.platform());
     const type = getSourceType(source);

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Grid, Typography } from "@mui/material";
 
-import { getSourceType } from "../../../common/utils";
+import { getSourceType, unproxy } from "../../../common/utils";
 import { ST } from "../../../common/const";
 import Clip from "../../../common/Clip";
 import Scene from "../../../common/Scene";
@@ -41,7 +41,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
           mainVideoTitle = source.substring(source.lastIndexOf("\\") + 1);
         }
       } else {
-        mainVideoTitle = this.props.mainVideo.src;
+        mainVideoTitle = unproxy(this.props.mainVideo.src);
         mainVideoTitle = mainVideoTitle.substring(
           mainVideoTitle.lastIndexOf("/") + 1,
         );
@@ -98,7 +98,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                     );
                   }
                 } else {
-                  otherVideoTitle = otherVideo.src;
+                  otherVideoTitle = unproxy(otherVideo.src);
                   otherVideoTitle = otherVideoTitle.substring(
                     otherVideoTitle.lastIndexOf("/") + 1,
                   );

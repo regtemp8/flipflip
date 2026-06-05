@@ -982,7 +982,8 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             video.videoHeight < this.props.config.displaySettings.minVideoSize
           ) {
             console.warn(
-              "Video skipped due to minimum width/height: " + video.src,
+              "Video skipped due to minimum width/height: " +
+                unproxy(video.src),
             );
             errorCallback();
           } else {
@@ -1135,7 +1136,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             img.height < this.props.config.displaySettings.minImageSize
           ) {
             console.warn(
-              "Image skipped due to minimum width/height: " + img.src,
+              "Image skipped due to minimum width/height: " + unproxy(img.src),
             );
             errorCallback();
           } else {

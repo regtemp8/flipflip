@@ -16,6 +16,7 @@ import {
   getFileName,
   urlToPath,
   proxy,
+  unproxy,
 } from "../../../common/utils";
 import Audio from "../../../common/Audio";
 import CaptionScript from "../../../common/CaptionScript";
@@ -299,15 +300,16 @@ export default class Player extends React.Component<PlayerProps> {
         } else {
           watermarkText = watermarkText.replace(/\{post_url\}\s*/g, "");
         }
+        const imgURL = unproxy(img.src);
         watermarkText = watermarkText.replace(
           "{file_url}",
-          img.src.startsWith("file")
-            ? urlToPath(img.src, window.ipc.platform())
-            : img.src,
+          imgURL.startsWith("file")
+            ? urlToPath(imgURL, window.ipc.platform())
+            : imgURL,
         );
         watermarkText = watermarkText.replace(
           "{file_name}",
-          decodeURIComponent(getFileName(img.src, window.constants.pathSep)),
+          decodeURIComponent(getFileName(imgURL, window.constants.pathSep)),
         );
       } else {
         watermarkText = watermarkText.replace(/\s*\{source_url\}\s*/g, "");

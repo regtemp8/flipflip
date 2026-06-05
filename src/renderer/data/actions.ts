@@ -4,6 +4,7 @@ import {
   getFileGroup,
   getFileName,
   getSourceType,
+  unproxy,
 } from "../../common/utils";
 import {
   applyEffects,
@@ -343,8 +344,9 @@ export function cacheImage(
     const fileType = getSourceType(i.getAttribute("source"));
     if (fileType == ST.hydrus || fileType == ST.piwigo) return;
 
-    if (fileType != ST.local && i.src.startsWith("http")) {
-      window.ipc.cacheImage(state.config, i.src, i.getAttribute("source"));
+    const url = unproxy(i.src);
+    if (fileType != ST.local && url.startsWith("http")) {
+      window.ipc.cacheImage(state.config, url, i.getAttribute("source"));
     }
   }
 }
