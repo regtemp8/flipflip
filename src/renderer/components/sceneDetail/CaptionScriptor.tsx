@@ -1195,10 +1195,7 @@ class CaptionScriptor extends React.Component<
     });
     if (this.props.openScript) {
       if (this.props.openScript.script) {
-        this.state.codeMirrorOverwriteHack.args = [
-          this.props.openScript.script,
-        ];
-        this.state.codeMirrorOverwriteHack.fire();
+        this.state.codeMirrorOverwriteHack.fire(this.props.openScript.script);
         this.setState({
           captionScript: this.props.openScript,
           scriptChanged: false,
@@ -1209,8 +1206,7 @@ class CaptionScriptor extends React.Component<
             return;
           }
 
-          this.state.codeMirrorOverwriteHack.args = [data];
-          this.state.codeMirrorOverwriteHack.fire();
+          this.state.codeMirrorOverwriteHack.fire(data);
           this.setState({
             captionScript: this.props.openScript,
             scriptChanged: false,
@@ -1249,8 +1245,7 @@ class CaptionScriptor extends React.Component<
       error: null,
       scriptChanged: false,
     });
-    this.state.codeMirrorOverwriteHack.args = [""];
-    this.state.codeMirrorOverwriteHack.fire();
+    this.state.codeMirrorOverwriteHack.fire("");
   }
 
   onOpenMenu(e: MouseEvent) {
@@ -1274,8 +1269,7 @@ class CaptionScriptor extends React.Component<
       }
 
       const { data, url } = response;
-      this.state.codeMirrorOverwriteHack.args = [data];
-      this.state.codeMirrorOverwriteHack.fire();
+      this.state.codeMirrorOverwriteHack.fire(data);
       this.setState({
         captionScript: new CaptionScript({ url }),
         scriptChanged: false,
@@ -1409,8 +1403,7 @@ class CaptionScriptor extends React.Component<
         return;
       }
 
-      this.state.codeMirrorOverwriteHack.args = [data];
-      this.state.codeMirrorOverwriteHack.fire();
+      this.state.codeMirrorOverwriteHack.fire(data);
       this.setState({ captionScript: script, scriptChanged: false });
     });
   }
@@ -1466,8 +1459,7 @@ class CaptionScriptor extends React.Component<
         lineNum--;
     }
     lineNum = Math.max(lineNum, 0);
-    this.state.captionProgramJumpToHack.args = [lineNum];
-    this.state.captionProgramJumpToHack.fire();
+    this.state.captionProgramJumpToHack.fire(lineNum);
   }
 
   onChangeScene(sceneID: number) {
@@ -1631,8 +1623,7 @@ class CaptionScriptor extends React.Component<
   }
 
   onAddString(string: string, newLine = false) {
-    this.state.codeMirrorAddHack.args = [string, newLine];
-    this.state.codeMirrorAddHack.fire();
+    this.state.codeMirrorAddHack.fire(string, newLine);
   }
 
   onUpdateOptions(property: string, fn: (options: FontSettingsI) => void) {
