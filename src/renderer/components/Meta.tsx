@@ -93,7 +93,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
     (window as any).soundManager.setup({ debugMode: false });
   }
 
-  componentWillUnMount() {
+  componentWillUnmount() {
     this._removeOnStartScene();
   }
 
