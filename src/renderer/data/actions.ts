@@ -944,29 +944,33 @@ export function playSceneFromLibrary(
       id = Math.max(s.id + 1, id);
     });
     const sourceType = getSourceType(source.url);
-    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
-      id: id,
-      name: "library_scene_temp",
-      sources: [source],
-      libraryID: null,
-      forceAll: state.config.defaultScene.forceAll,
-      backgroundType: state.config.defaultScene.backgroundType,
-      backgroundColor: state.config.defaultScene.backgroundColor,
-      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
-      backgroundBlur: state.config.defaultScene.backgroundBlur,
-      imageOrientation: state.config.defaultScene.imageOrientation,
-      videoOrientation: state.config.defaultScene.videoOrientation,
-      randomVideoStart: state.config.defaultScene.randomVideoStart,
-      videoOption:
-        sourceType == ST.video
-          ? VO.full
-          : state.config.defaultScene.videoOption,
-      continueVideo:
-        sourceType == ST.video || state.config.defaultScene.continueVideo,
-      playVideoClips: state.config.defaultScene.playVideoClips,
-      videoVolume: state.config.defaultScene.videoVolume,
-      videoSkip: state.config.defaultScene.videoSkip,
-    });
+    const tempScene = new Scene(
+      window.constants.pathSep,
+      window.ipc.platform(),
+      {
+        id: id,
+        name: "library_scene_temp",
+        sources: [source],
+        libraryID: null,
+        forceAll: state.config.defaultScene.forceAll,
+        backgroundType: state.config.defaultScene.backgroundType,
+        backgroundColor: state.config.defaultScene.backgroundColor,
+        backgroundColorSet: state.config.defaultScene.backgroundColorSet,
+        backgroundBlur: state.config.defaultScene.backgroundBlur,
+        imageOrientation: state.config.defaultScene.imageOrientation,
+        videoOrientation: state.config.defaultScene.videoOrientation,
+        randomVideoStart: state.config.defaultScene.randomVideoStart,
+        videoOption:
+          sourceType == ST.video
+            ? VO.full
+            : state.config.defaultScene.videoOption,
+        continueVideo:
+          sourceType == ST.video || state.config.defaultScene.continueVideo,
+        playVideoClips: state.config.defaultScene.playVideoClips,
+        videoVolume: state.config.defaultScene.videoVolume,
+        videoSkip: state.config.defaultScene.videoSkip,
+      },
+    );
     if (getActiveScene(state)?.libraryID != -1) {
       const activeScene = getActiveScene(state);
       applyEffects(tempScene, getEffects(activeScene));
@@ -1638,7 +1642,7 @@ export function generateScenes(
       }
       switch (wg.type) {
         // If this adv rule is weighted, add the percentage of sources to the master list
-        case TT.weight:
+        case TT.weight: {
           wg.max = rulesSources.length;
           const chosenSources = reduceList(
             randomizeList(rulesSources),
@@ -1647,6 +1651,7 @@ export function generateScenes(
           genSources = genSources.concat(chosenSources);
           wg.chosen = chosenSources.length;
           break;
+        }
         // If this adv rule is all, add the sources to the require list
         case TT.all:
           if (reqAdvSources) {
@@ -2483,7 +2488,7 @@ export function addSource(
         }
       }
 
-    case AF.list:
+    case AF.list: {
       const newSources = Array.from(args[0].trim().split("\n")).filter(
         (s: string) => s.length > 0,
       ) as Array<string>;
@@ -2497,7 +2502,7 @@ export function addSource(
           handleArgs(s);
         });
       }
-
+    }
     case AF.directory:
       return window.ipc.openDirectory(true).then((result) => {
         if (result.length === 0) {
@@ -2548,7 +2553,7 @@ export function addSource(
           });
         }
       });
-    case GT.local:
+    case GT.local: {
       if (!args || args.length < 2) {
         return;
       }
@@ -2566,7 +2571,7 @@ export function addSource(
           handleArgs(s);
         });
       }
-
+    }
     case GT.tumblr:
       if (!args || args.length < 1) {
         return;
@@ -2756,13 +2761,14 @@ function audioSortFunction(
         aValue = a.url;
         bValue = b.url;
         break;
-      case ASF.name:
+      case ASF.name: {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
         aValue = a.name.replace(reA, "");
         bValue = b.name.replace(reA, "");
 
         const compare = aValue.localeCompare(bValue, "en", { numeric: true });
         return ascending ? compare : compare * -1;
+      }
       case ASF.artist:
         aValue = a.artist;
         bValue = b.artist;
@@ -3045,24 +3051,28 @@ export function downloadSource(state: State, source: LibrarySource): Object {
     state.scenes.forEach((s: Scene) => {
       id = Math.max(s.id + 1, id);
     });
-    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
-      id: id,
-      name: "download_scene_temp",
-      sources: [source],
-      libraryID: null,
-      timingFunction: TF.constant,
-      timingConstant: 1,
-      backgroundType: state.config.defaultScene.backgroundType,
-      backgroundColor: state.config.defaultScene.backgroundColor,
-      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
-      backgroundBlur: state.config.defaultScene.backgroundBlur,
-      imageOrientation: state.config.defaultScene.imageOrientation,
-      videoOrientation: state.config.defaultScene.videoOrientation,
-      playVideoClips: false,
-      videoVolume: 0,
-      orderFunction: OF.strict,
-      downloadScene: true,
-    });
+    const tempScene = new Scene(
+      window.constants.pathSep,
+      window.ipc.platform(),
+      {
+        id: id,
+        name: "download_scene_temp",
+        sources: [source],
+        libraryID: null,
+        timingFunction: TF.constant,
+        timingConstant: 1,
+        backgroundType: state.config.defaultScene.backgroundType,
+        backgroundColor: state.config.defaultScene.backgroundColor,
+        backgroundColorSet: state.config.defaultScene.backgroundColorSet,
+        backgroundBlur: state.config.defaultScene.backgroundBlur,
+        imageOrientation: state.config.defaultScene.imageOrientation,
+        videoOrientation: state.config.defaultScene.videoOrientation,
+        playVideoClips: false,
+        videoVolume: 0,
+        orderFunction: OF.strict,
+        downloadScene: true,
+      },
+    );
     if (getActiveScene(state)?.libraryID != -1) {
       const activeScene = getActiveScene(state);
       applyEffects(tempScene, getEffects(activeScene));
@@ -3085,24 +3095,28 @@ export function downloadSource(state: State, source: LibrarySource): Object {
     state.scenes.forEach((s: Scene) => {
       id = Math.max(s.id + 1, id);
     });
-    const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
-      id: id,
-      name: "download_scene_temp",
-      sources: [librarySource],
-      libraryID: librarySource.id,
-      timingFunction: TF.constant,
-      timingConstant: 1,
-      backgroundType: state.config.defaultScene.backgroundType,
-      backgroundColor: state.config.defaultScene.backgroundColor,
-      backgroundColorSet: state.config.defaultScene.backgroundColorSet,
-      backgroundBlur: state.config.defaultScene.backgroundBlur,
-      imageOrientation: state.config.defaultScene.imageOrientation,
-      videoOrientation: state.config.defaultScene.videoOrientation,
-      playVideoClips: false,
-      videoVolume: 0,
-      orderFunction: OF.strict,
-      downloadScene: true,
-    });
+    const tempScene = new Scene(
+      window.constants.pathSep,
+      window.ipc.platform(),
+      {
+        id: id,
+        name: "download_scene_temp",
+        sources: [librarySource],
+        libraryID: librarySource.id,
+        timingFunction: TF.constant,
+        timingConstant: 1,
+        backgroundType: state.config.defaultScene.backgroundType,
+        backgroundColor: state.config.defaultScene.backgroundColor,
+        backgroundColorSet: state.config.defaultScene.backgroundColorSet,
+        backgroundBlur: state.config.defaultScene.backgroundBlur,
+        imageOrientation: state.config.defaultScene.imageOrientation,
+        videoOrientation: state.config.defaultScene.videoOrientation,
+        playVideoClips: false,
+        videoVolume: 0,
+        orderFunction: OF.strict,
+        downloadScene: true,
+      },
+    );
     if (getLibrarySource(state) != null) {
       const activeScene = getActiveScene(state);
       applyEffects(tempScene, getEffects(activeScene));

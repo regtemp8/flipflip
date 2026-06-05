@@ -202,10 +202,8 @@ export function getFileGroup(url: string, pathSep: string) {
   let sep;
   switch (getSourceType(url)) {
     case ST.tumblr:
-      let tumblrID = url.replace(/https?:\/\//, "");
-      tumblrID = tumblrID.replace(/\.tumblr\.com\/?/, "");
-      return tumblrID;
-    case ST.redgifs:
+      return url.replace(/https?:\/\//, "").replace(/\.tumblr\.com\/?/, "");
+    case ST.redgifs: {
       let redgifID;
       if (url.includes("/browse?")) {
         const redgifRegex =
@@ -220,15 +218,16 @@ export function getFileGroup(url: string, pathSep: string) {
         }
       }
       return redgifID;
+    }
     case ST.imagefap:
-      let imagefapID = url.replace(/https?:\/\/www\.imagefap\.com\//, "");
-      imagefapID = imagefapID.replace(/pictures\//, "");
-      imagefapID = imagefapID.replace(/gallery\//, "");
-      imagefapID = imagefapID.replace(/organizer\//, "");
-      imagefapID = imagefapID.replace(/video\.php\?vid=/, "");
-      imagefapID = imagefapID.split("/")[0];
-      return imagefapID;
-    case ST.sexcom:
+      return url
+        .replace(/https?:\/\/www\.imagefap\.com\//, "")
+        .replace(/pictures\//, "")
+        .replace(/gallery\//, "")
+        .replace(/organizer\//, "")
+        .replace(/video\.php\?vid=/, "")
+        .split("/")[0];
+    case ST.sexcom: {
       let sexcomID = url.replace(/https?:\/\/www\.sex\.com\//, "");
       sexcomID = sexcomID.replace(/user\//, "");
       sexcomID = sexcomID.split("?")[0];
@@ -236,17 +235,17 @@ export function getFileGroup(url: string, pathSep: string) {
         sexcomID = sexcomID.substring(0, sexcomID.length - 1);
       }
       return sexcomID;
+    }
     case ST.imgur:
-      let imgurID = url.replace(/https?:\/\/imgur\.com\//, "");
-      imgurID = imgurID.replace(/a\//, "");
-      return imgurID;
-    case ST.deviantart:
+      return url.replace(/https?:\/\/imgur\.com\//, "").replace(/a\//, "");
+    case ST.deviantart: {
       let authorID = url.replace(/https?:\/\/www\.deviantart\.com\//, "");
       if (authorID.includes("/")) {
         authorID = authorID.substring(0, authorID.indexOf("/"));
       }
       return authorID;
-    case ST.e621:
+    }
+    case ST.e621: {
       const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g;
       const hostE621 = hostRegexE621.exec(url)[1];
       let E621ID = "";
@@ -263,7 +262,8 @@ export function getFileGroup(url: string, pathSep: string) {
         }
       }
       return hostE621 + "/" + decodeURIComponent(E621ID);
-    case ST.luscious:
+    }
+    case ST.luscious: {
       let albumID = url.replace(
         /^https?:\/\/(www\.|members\.)?luscious\.net\/(albums|users)\//,
         "",
@@ -272,9 +272,10 @@ export function getFileGroup(url: string, pathSep: string) {
         albumID = albumID.substring(0, albumID.indexOf("/"));
       }
       return albumID;
+    }
     case ST.danbooru:
     case ST.gelbooru1:
-    case ST.gelbooru2:
+    case ST.gelbooru2: {
       const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g;
       const host = hostRegex.exec(url)[1];
       let danbooruID = "";
@@ -303,10 +304,12 @@ export function getFileGroup(url: string, pathSep: string) {
         }
       }
       return host + "/" + decodeURIComponent(danbooruID);
-    case ST.ehentai:
+    }
+    case ST.ehentai: {
       const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^\/]*)/g;
       const gallery = galleryRegex.exec(url);
       return gallery[1];
+    }
     case ST.list:
       if (/^https?:\/\//g.exec(url) == null) {
         sep = pathSep;
@@ -323,7 +326,7 @@ export function getFileGroup(url: string, pathSep: string) {
       }
     case ST.video:
     case ST.playlist:
-    case ST.nimja:
+    case ST.nimja: {
       if (/^https?:\/\//g.exec(url) == null) {
         sep = pathSep;
       } else {
@@ -331,12 +334,13 @@ export function getFileGroup(url: string, pathSep: string) {
       }
       const name = url.substring(0, url.lastIndexOf(sep));
       return name.substring(name.lastIndexOf(sep) + 1);
+    }
     case ST.bdsmlr:
-      let bdsmlrID = url.replace(/https?:\/\//, "");
-      bdsmlrID = bdsmlrID.replace(/\/rss/, "");
-      bdsmlrID = bdsmlrID.replace(/\.bdsmlr\.com\/?/, "");
-      return bdsmlrID;
-    case ST.hydrus:
+      return url
+        .replace(/https?:\/\//, "")
+        .replace(/\/rss/, "")
+        .replace(/\.bdsmlr\.com\/?/, "");
+    case ST.hydrus: {
       const tagsRegex = /tags=([^&]*)&?.*$/.exec(url);
       if (tagsRegex == null) return "hydrus";
       let tags = tagsRegex[1];
@@ -346,7 +350,8 @@ export function getFileGroup(url: string, pathSep: string) {
       tags = tags.substring(1, tags.length - 1);
       tags = tags.replace(/"/g, "");
       return tags;
-    case ST.piwigo:
+    }
+    case ST.piwigo: {
       const catRegex = /cat_id\[]=(\d*)/.exec(url);
       if (catRegex != null) return catRegex[1];
 
@@ -354,6 +359,7 @@ export function getFileGroup(url: string, pathSep: string) {
       if (tagRegex != null) return tagRegex[1];
 
       return "piwigo";
+    }
   }
 }
 

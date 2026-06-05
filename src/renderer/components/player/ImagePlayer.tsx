@@ -356,7 +356,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 1),
           ) + this.props.scene.backForthMin;
         break;
-      case TF.sin:
+      case TF.sin: {
         const sinRate =
           (Math.abs(this.props.scene.backForthSinRate - 100) + 2) * 1000;
         delay =
@@ -367,7 +367,8 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 1),
           ) + this.props.scene.backForthMin;
         break;
-      case TF.bpm:
+      }
+      case TF.bpm: {
         const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
         const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
         delay = 60000 / (bpm * bpmMulti);
@@ -376,6 +377,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           delay = 1000;
         }
         break;
+      }
     }
     return delay;
   }
@@ -845,7 +847,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
           }
 
           switch (this.props.scene.videoOption) {
-            case VO.full:
+            case VO.full: {
               let duration;
               if (video.hasAttribute("start") && video.hasAttribute("end")) {
                 const start = video.currentTime
@@ -859,6 +861,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               duration = (duration * 1000) / (speed / 10);
               video.setAttribute("duration", duration.toString());
               break;
+            }
             case VO.part:
               video.setAttribute(
                 "duration",
@@ -874,7 +877,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 ).toString(),
               );
               break;
-            case VO.atLeast:
+            case VO.atLeast: {
               let partDuration;
               if (video.hasAttribute("start") && video.hasAttribute("end")) {
                 const start = Number.parseFloat(video.getAttribute("start"));
@@ -890,6 +893,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               } while (atLeastDuration < this.props.scene.videoTimingConstant);
               video.setAttribute("duration", atLeastDuration.toString());
               break;
+            }
           }
 
           (video as any).key = this.state.nextImageID;
@@ -1178,7 +1182,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                   ).toString(),
                 );
                 break;
-              case GO.atLeast:
+              case GO.atLeast: {
                 let duration = 0;
                 do {
                   duration += info.durationChrome || info.duration;
@@ -1188,6 +1192,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 } while (duration < this.props.scene.gifTimingConstant);
                 img.setAttribute("duration", duration.toString());
                 break;
+              }
             }
           }
 
@@ -1389,7 +1394,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 (this.props.scene.timingMax - this.props.scene.timingMin + 1),
             ) + this.props.scene.timingMin;
           break;
-        case TF.sin:
+        case TF.sin: {
           const sinRate =
             (Math.abs(this.props.scene.timingSinRate - 100) + 2) * 1000;
           timeToNextFrame =
@@ -1398,6 +1403,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 (this.props.scene.timingMax - this.props.scene.timingMin + 1),
             ) + this.props.scene.timingMin;
           break;
+        }
         case TF.constant:
           timeToNextFrame = this.props.scene.timingConstant;
           // If we cannot parse this, default to 1s
@@ -1405,7 +1411,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             timeToNextFrame = 1000;
           }
           break;
-        case TF.bpm:
+        case TF.bpm: {
           const bpmMulti = this.props.scene.timingBPMMulti / 10;
           const bpm = this.props.currentAudio
             ? this.props.currentAudio.bpm
@@ -1416,6 +1422,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
             timeToNextFrame = 1000;
           }
           break;
+        }
       }
       if (
         nextImg &&
