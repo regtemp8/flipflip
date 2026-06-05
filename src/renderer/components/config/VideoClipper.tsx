@@ -881,19 +881,19 @@ class VideoClipper extends React.Component<VideoClipperProps> {
     const source = this.props.source;
     let clip = source.clips.find((c) => c.id === this.state.isEditing.id);
     if (clip) {
-      if (clip.tags.find((t) => t.name === tag.name)) {
-        clip.tags = clip.tags.filter((t) => t.name !== tag.name);
-      } else {
-        clip.tags = clip.tags.concat([tag]);
-      }
+      const tagIndex = clip.tags.findIndex((t) => t.name === tag.name);
+      clip.tags =
+        tagIndex === -1
+          ? clip.tags.concat([tag])
+          : clip.tags.toSpliced(tagIndex, 1);
       this.props.onUpdateClips(source.url, source.clips);
     } else {
       const isEditing = this.state.isEditing;
-      if (isEditing.tags.find((t) => t.name === tag.name)) {
-        isEditing.tags = isEditing.tags.filter((t) => t.name !== tag.name);
-      } else {
-        isEditing.tags = isEditing.tags.concat([tag]);
-      }
+      const tagIndex = isEditing.tags.findIndex((t) => t.name === tag.name);
+      isEditing.tags =
+        tagIndex === -1
+          ? isEditing.tags.concat([tag])
+          : isEditing.tags.toSpliced(tagIndex, 1);
       this.setState({ isEditing: isEditing });
     }
   }

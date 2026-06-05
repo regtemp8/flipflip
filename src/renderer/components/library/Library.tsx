@@ -1805,7 +1805,7 @@ class Library extends React.Component<LibraryProps> {
 
   toggleMarked(taggingMode?: boolean) {
     if (taggingMode == null) {
-      taggingMode = this.props.library.find((s) => s.marked) == null;
+      taggingMode = this.props.library.every((s) => !s.marked);
     }
 
     if (taggingMode) {

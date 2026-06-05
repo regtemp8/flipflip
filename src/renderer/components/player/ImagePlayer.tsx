@@ -1322,11 +1322,11 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
         nextImg?.src ==
           this.state.historyPaths[this.state.historyPaths.length - 1].src &&
         (this.state.readyToDisplay.length > 0 ||
-          this.state.historyPaths.filter(
+          this.state.historyPaths.some(
             (s) =>
               s.src !=
               this.state.historyPaths[this.state.historyPaths.length - 1]?.src,
-          ).length > 0)
+          ))
       );
 
       if (nextImg) {

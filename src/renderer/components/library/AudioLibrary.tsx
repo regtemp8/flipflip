@@ -1931,7 +1931,7 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
 
   toggleMarked(taggingMode?: boolean) {
     if (taggingMode == null) {
-      taggingMode = this.props.library.find((s) => s.marked) == null;
+      taggingMode = this.props.library.every((s) => !s.marked);
     }
     if (taggingMode) {
       // We're marking sources
@@ -2100,11 +2100,11 @@ class AudioLibrary extends React.Component<AudioLibraryProps> {
           ) {
             // This is a tag filter
             if (filter.startsWith("-")) {
-              let tag = filter.substring(2, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) == null;
+              const tag = filter.substring(2, filter.length - 1);
+              matchesFilter = source.tags.every((t) => t.name != tag);
             } else {
-              let tag = filter.substring(1, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) != null;
+              const tag = filter.substring(1, filter.length - 1);
+              matchesFilter = source.tags.some((t) => t.name == tag);
             }
           } else if (
             filter.startsWith("artist:") ||

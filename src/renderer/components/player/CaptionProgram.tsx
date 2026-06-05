@@ -593,7 +593,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                 break;
               }
             }
-            if (this.state.audios.find((a) => a.alias == alias) != null) {
+            if (this.state.audios.some((a) => a.alias == alias)) {
               error =
                 "Error: {" + index + "} '" + line + "' - alias already used";
               break;
@@ -616,7 +616,7 @@ export default class CaptionProgram extends React.Component<CaptionProgramProps>
                 "Error: {" + index + "} '" + line + "' - extra parameter(s)";
               break;
             }
-            if (this.state.audios.find((a) => a.alias == pSplit[0]) == null) {
+            if (this.state.audios.every((a) => a.alias != pSplit[0])) {
               error =
                 "Error: {" +
                 index +

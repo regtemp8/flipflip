@@ -169,9 +169,9 @@ class GridPlayer extends React.Component<GridPlayerProps> {
                       (s) => s.id == cell.sceneID,
                     );
                     const newLoaded = this.state.isLoaded;
-                    const allLoaded =
-                      flatten(this.state.isLoaded).find((l: boolean) => !l) ==
-                      null;
+                    const allLoaded = flatten(this.state.isLoaded).every(
+                      (l: boolean) => l,
+                    );
                     if (cell.sceneCopy.length > 0) {
                       const sceneCopyGridCell =
                         this.state.sceneCopyGrid[cell.sceneCopy[0]][
@@ -256,8 +256,8 @@ class GridPlayer extends React.Component<GridPlayerProps> {
                               )}
                               gridView
                               gridCoordinates={
-                                this.state.scene.grid.find((r) =>
-                                  r.find(
+                                this.state.scene.grid.some((r) =>
+                                  r.some(
                                     (c) =>
                                       JSON.stringify(c.sceneCopy) ==
                                       JSON.stringify([rowIndex, colIndex]),
@@ -354,7 +354,7 @@ class GridPlayer extends React.Component<GridPlayerProps> {
     newLoaded[rowIndex][colIndex] = true;
     if (
       this.props.finishedLoading &&
-      flatten(newLoaded).find((l: boolean) => !l) == null
+      flatten(newLoaded).every((l: boolean) => l)
     ) {
       this.props.finishedLoading(false);
     }

@@ -365,7 +365,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
     if (!this._showVideoControls) {
       this._showVideoControls =
         this.props.mainVideo != null ||
-        this.props.overlayVideos.find((a) => a != null) != null;
+        this.props.overlayVideos.some((a) => a != null);
     }
 
     return (
@@ -803,9 +803,9 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
                       {this.props.inheritTags &&
                         (!tagNames || tagNames.length == 0) &&
                         this.props.scene.sources[0].clips &&
-                        this.props.scene.sources[0].clips.find(
+                        this.props.scene.sources[0].clips.some(
                           (c) => c.tags && c.tags.length > 0,
-                        ) != null && (
+                        ) && (
                           <Grid item className={classes.tagButtons}>
                             <Tooltip
                               disableInteractive

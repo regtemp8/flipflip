@@ -408,11 +408,11 @@ export function filterSource(
     let tags =
       clip && clip.tags && clip.tags.length > 0 ? clip.tags : source.tags;
     if (filter.startsWith("-")) {
-      let tag = filter.substring(2, filter.length - 1);
-      matchesFilter = tags.find((t) => t.name == tag) == null;
+      const tag = filter.substring(2, filter.length - 1);
+      matchesFilter = tags.every((t) => t.name != tag);
     } else {
-      let tag = filter.substring(1, filter.length - 1);
-      matchesFilter = tags.find((t) => t.name == tag) != null;
+      const tag = filter.substring(1, filter.length - 1);
+      matchesFilter = tags.some((t) => t.name == tag);
     }
   } else if (
     (filter.startsWith("{") || filter.startsWith("-{")) &&

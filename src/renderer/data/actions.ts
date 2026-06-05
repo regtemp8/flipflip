@@ -1651,8 +1651,8 @@ export function generateScenes(
         // If this adv rule is all, add the sources to the require list
         case TT.all:
           if (reqAdvSources) {
-            reqAdvSources = reqAdvSources.filter(
-              (s) => !!rulesSources.find((source) => source.url == s.url),
+            reqAdvSources = reqAdvSources.filter((s) =>
+              rulesSources.some((source) => source.url == s.url),
             );
           } else {
             reqAdvSources = rulesSources;
@@ -1683,14 +1683,14 @@ export function generateScenes(
         // Filter out sources which are not in required list
         if (
           reqAdvSources &&
-          !reqAdvSources.find((source) => source.id == s.id)
+          !reqAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
         }
         // Filter out sources which are in exclude list
         if (
           excAdvSources &&
-          excAdvSources.find((source) => source.id == s.id)
+          excAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
         }
@@ -1767,14 +1767,14 @@ export function generateScenes(
           // Filter out sources which are not in required list
           if (
             reqAdvSources &&
-            !reqAdvSources.find((source) => source.id == s.id)
+            !reqAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
           }
           // Filter out sources which are in exclude list
           if (
             excAdvSources &&
-            excAdvSources.find((source) => source.id == s.id)
+            excAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
           }
@@ -1944,7 +1944,7 @@ export function updateAudioLibrary(
   fn(audiosCopy);
   let audioSelected = JSON.parse(JSON.stringify(state.audioSelected));
   for (const url of audioSelected) {
-    if (audiosCopy.find((s: LibrarySource) => s.url == url) == null) {
+    if (audiosCopy.every((s: LibrarySource) => s.url != url)) {
       audioSelected = audioSelected.filter((s: LibrarySource) => s.url != url);
     }
   }
@@ -1973,7 +1973,7 @@ export function updateScriptLibrary(
   fn(scriptsCopy);
   let scriptSelected = JSON.parse(JSON.stringify(state.scriptSelected));
   for (const url of scriptSelected) {
-    if (scriptsCopy.find((s: LibrarySource) => s.url == url) == null) {
+    if (scriptsCopy.every((s: LibrarySource) => s.url != url)) {
       scriptSelected = scriptSelected.filter(
         (s: LibrarySource) => s.url != url,
       );
@@ -1990,7 +1990,7 @@ export function updateLibrary(
   fn(libraryCopy);
   let librarySelected = JSON.parse(JSON.stringify(state.librarySelected));
   for (const url of librarySelected) {
-    if (libraryCopy.find((s: LibrarySource) => s.url == url) == null) {
+    if (libraryCopy.every((s: LibrarySource) => s.url != url)) {
       librarySelected = librarySelected.filter(
         (s: LibrarySource) => s.url != url,
       );
@@ -2303,11 +2303,11 @@ export function toggleAudioTag(
   const newAudios = state.audios;
   const source = newAudios.find((s) => s.id == sourceID);
   if (source) {
-    if (source.tags.find((t: Tag) => t.name == tag.name)) {
-      source.tags = source.tags.filter((t: Tag) => t.name != tag.name);
-    } else {
-      source.tags.push(tag);
-    }
+    const tagIndex = source.tags.findIndex((t: Tag) => t.name == tag.name);
+    source.tags =
+      tagIndex == -1
+        ? source.tags.concat([tag])
+        : source.tags.toSpliced(tagIndex, 1);
   }
   return { audios: newAudios };
 }
@@ -2320,11 +2320,11 @@ export function toggleScriptTag(
   const newScripts = state.scripts;
   const source = newScripts.find((s) => s.id == sourceID);
   if (source) {
-    if (source.tags.find((t: Tag) => t.name == tag.name)) {
-      source.tags = source.tags.filter((t: Tag) => t.name != tag.name);
-    } else {
-      source.tags.push(tag);
-    }
+    const tagIndex = source.tags.findIndex((t: Tag) => t.name == tag.name);
+    source.tags =
+      tagIndex == -1
+        ? source.tags.concat([tag])
+        : source.tags.toSpliced(tagIndex, 1);
   }
   return { scripts: newScripts };
 }
@@ -2334,11 +2334,11 @@ export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
   const newScenes = state.scenes;
   const source = newLibrary.find((s) => s.id == sourceID);
   if (source) {
-    if (source.tags.find((t: Tag) => t.name == tag.name)) {
-      source.tags = source.tags.filter((t: Tag) => t.name != tag.name);
-    } else {
-      source.tags.push(tag);
-    }
+    const tagIndex = source.tags.findIndex((t: Tag) => t.name == tag.name);
+    source.tags =
+      tagIndex == -1
+        ? source.tags.concat([tag])
+        : source.tags.toSpliced(tagIndex, 1);
     for (const scene of newScenes) {
       const sceneSource = scene.sources.find((s) => s.url == source.url);
       if (sceneSource) {
@@ -3143,14 +3143,14 @@ export function exportScene(state: State, scene: Scene): Object {
       if (o.sceneID.toString().startsWith("999")) {
         const gridID = Number.parseInt(o.sceneID.toString().replace("999", ""));
         const grid = state.grids.find((s) => s.id == gridID);
-        if (grid && !gridsToExport.find((s) => s.id == gridID)) {
+        if (grid && gridsToExport.every((s) => s.id != gridID)) {
           const gridCopy = JSON.parse(JSON.stringify(grid)); // Make a copy
           gridsToExport.push(gridCopy);
           for (const r of grid.grid) {
             for (const c of r) {
               if (c.sceneID != -1) {
                 const cell = state.scenes.find((s) => s.id == c.sceneID);
-                if (cell && !scenesToExport.find((s) => s.id == c.sceneID)) {
+                if (cell && scenesToExport.every((s) => s.id != c.sceneID)) {
                   const cellCopy = JSON.parse(JSON.stringify(cell)); // Make a copy
                   cellCopy.generatorWeights = null;
                   cellCopy.openTab = 3;
@@ -3163,7 +3163,7 @@ export function exportScene(state: State, scene: Scene): Object {
                         );
                         if (
                           overlay &&
-                          !scenesToExport.find((s) => s.id == co.sceneID)
+                          scenesToExport.every((s) => s.id != co.sceneID)
                         ) {
                           const overlayCopy = JSON.parse(
                             JSON.stringify(overlay),
@@ -3186,7 +3186,7 @@ export function exportScene(state: State, scene: Scene): Object {
       } else {
         // Otherwise, just add the overlay
         const overlay = state.scenes.find((s) => s.id == o.sceneID);
-        if (overlay && !scenesToExport.find((s) => s.id == o.sceneID)) {
+        if (overlay && scenesToExport.every((s) => s.id != o.sceneID)) {
           const overlayCopy = JSON.parse(JSON.stringify(overlay)); // Make a copy
           overlayCopy.generatorWeights = null;
           overlayCopy.openTab = 3;

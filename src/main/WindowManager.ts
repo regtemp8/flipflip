@@ -86,11 +86,9 @@ export function createNewWindow() {
   newWindow.loadURL(proxy(MAIN_WINDOW_WEBPACK_ENTRY));
 
   // Open the DevTools.
-  const isDevToolsDisabled = Boolean(
-    process.argv.find((el, i, arr) => {
-      return el == "--no-dev-tools";
-    }),
-  );
+  const isDevToolsDisabled = process.argv.some((el) => {
+    return el == "--no-dev-tools";
+  });
   if (process.defaultApp && windowId == 1 && !isDevToolsDisabled) {
     // Comment the following line out to enable attachment of a remote debugger
     newWindow.webContents.openDevTools();

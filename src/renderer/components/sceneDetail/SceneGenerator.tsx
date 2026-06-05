@@ -620,10 +620,7 @@ class SceneGenerator extends React.Component<SceneGeneratorProps> {
     let generatorWeights = this.props.scene.generatorWeights;
     let wg = generatorWeights[this.state.isEditing];
     for (let search of filters) {
-      if (
-        search.length > 0 &&
-        wg.rules.find((wg) => wg.search == search) == null
-      ) {
+      if (search.length > 0 && wg.rules.every((wg) => wg.search != search)) {
         const newWG = new WeightGroup();
         newWG.percent = 0;
         newWG.type = TT.weight;
@@ -765,7 +762,7 @@ class SceneGenerator extends React.Component<SceneGeneratorProps> {
       (rule as any)[key] = input.value;
     }
     if (this.props.tutorial == SDGT.edit2) {
-      if (generatorWeights.find((wg) => wg.type != TT.all) == null) {
+      if (generatorWeights.every((wg) => wg.type == TT.all)) {
         this.props.onTutorial(SDGT.edit2);
         this.onCloseDialog();
       }

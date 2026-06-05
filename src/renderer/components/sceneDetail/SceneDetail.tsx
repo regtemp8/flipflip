@@ -1772,7 +1772,7 @@ class SceneDetail extends React.Component<SceneDetailProps> {
     for (let search of filters) {
       if (
         search.length > 0 &&
-        generatorWeights.find((wg) => wg.search == search) == null
+        generatorWeights.every((wg) => wg.search != search)
       ) {
         const wg = new WeightGroup();
         wg.percent = 0;
@@ -1986,10 +1986,10 @@ class SceneDetail extends React.Component<SceneDetailProps> {
             // This is a tag filter
             if (filter.startsWith("-")) {
               let tag = filter.substring(2, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) == null;
+              matchesFilter = source.tags.every((t) => t.name != tag);
             } else {
               let tag = filter.substring(1, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) != null;
+              matchesFilter = source.tags.some((t) => t.name == tag);
             }
           } else if (
             (filter.startsWith("{") || filter.startsWith("-{")) &&

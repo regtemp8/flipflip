@@ -1104,7 +1104,7 @@ export default class Player extends React.Component<PlayerProps> {
       this.state.isMainLoaded &&
       (!this.props.scene.overlayEnabled ||
         this.props.scene.overlays.length == 0 ||
-        this.state.areOverlaysLoaded.find((b) => !b) == null);
+        this.state.areOverlaysLoaded.every((b) => b));
     if (this.props.onLoaded && isLoaded) {
       this.props.onLoaded();
     }

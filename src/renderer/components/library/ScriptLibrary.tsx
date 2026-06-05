@@ -1147,7 +1147,7 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
 
   toggleMarked(taggingMode?: boolean) {
     if (taggingMode == null) {
-      taggingMode = this.props.library.find((s) => s.marked) == null;
+      taggingMode = this.props.library.every((s) => !s.marked);
     }
 
     if (taggingMode) {
@@ -1272,11 +1272,11 @@ class ScriptLibrary extends React.Component<ScriptLibraryProps> {
           ) {
             // This is a tag filter
             if (filter.startsWith("-")) {
-              let tag = filter.substring(2, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) == null;
+              const tag = filter.substring(2, filter.length - 1);
+              matchesFilter = source.tags.every((t) => t.name != tag);
             } else {
-              let tag = filter.substring(1, filter.length - 1);
-              matchesFilter = source.tags.find((t) => t.name == tag) != null;
+              const tag = filter.substring(1, filter.length - 1);
+              matchesFilter = source.tags.some((t) => t.name == tag);
             }
           } else if (
             ((filter.startsWith('"') || filter.startsWith('-"')) &&
