@@ -178,7 +178,7 @@ function onSaveScript(ev: IpcMainEvent, url: string, script: string) {
   fs.writeFileSync(url, script);
 }
 
-async function onGetFonts(ev: IpcMainEvent) {
+async function onGetFonts() {
   return await getFonts();
 }
 
@@ -554,7 +554,7 @@ async function onClearBrowserCaches(ev: IpcMainEvent) {
 function onGetFileSize(ev: IpcMainEvent, path: string) {
   try {
     return fs.statSync(path)?.size ?? -1;
-  } catch (e) {
+  } catch {
     return -1;
   }
 }
@@ -1056,7 +1056,7 @@ async function onGetAudioBuffer(
       if (Number(length) >= maxByteSize) {
         return { error };
       }
-    } catch (err) {
+    } catch {
       // not all servers implement head requests
     }
 
@@ -1248,10 +1248,10 @@ function onMarkOffline(ev: IpcMainInvokeEvent, url: string) {
   return new Promise((resolve) => {
     wretch(url)
       .get()
-      .notFound((res) => {
+      .notFound(() => {
         resolve(MOR.notFound);
       })
-      .res((res) => {
+      .res(() => {
         resolve(MOR.found);
       })
       .catch((e) => {
@@ -1263,7 +1263,7 @@ function onMarkOffline(ev: IpcMainInvokeEvent, url: string) {
 
 async function onGetTextFromURL(ev: IpcMainInvokeEvent, url: string) {
   try {
-    return await wretch(this.state.importFile).get().text();
+    return await wretch(url).get().text();
   } catch (err) {
     console.error(err);
   }

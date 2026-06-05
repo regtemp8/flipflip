@@ -1160,7 +1160,7 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
   }
 
   _currentTimestamp: number = null;
-  onPlaying(position: number, duration: number) {
+  onPlaying(position: number) {
     this._currentTimestamp = position;
   }
   getTimestamp() {
@@ -1181,7 +1181,7 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
     this._currentTimestamp = 0;
     window.addEventListener("keydown", this.onKeyDown, false);
     // Define system fonts
-    this._promise = new CancelablePromise((resolve, reject) => {
+    this._promise = new CancelablePromise(() => {
       window.ipc.getFonts().then(
         (res: Array<string>) => {
           if (!this._promise.hasCanceled) {
@@ -1393,10 +1393,6 @@ class CaptionScriptor extends React.Component<CaptionScriptorProps> {
   }
 
   onConfirmLoadFromScene() {
-    const error = (error: any) => {
-      console.error(error);
-    };
-
     const script = JSON.parse(
       JSON.stringify(
         this.state.sceneScripts.find((s) => s.url == this.state.selectScript),

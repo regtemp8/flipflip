@@ -390,7 +390,7 @@ export function saveScene(state: State, scene: Scene): Object {
   };
 }
 
-export function closeMessage(state: State): Object {
+export function closeMessage(): Object {
   return { systemMessage: null, systemSnack: null, systemSnackSeverity: null };
 }
 
@@ -618,11 +618,11 @@ export function updateConfig(state: State, newConfig: Config): Object {
   return { config: newConfig };
 }
 
-export function openConfig(state: State): Object {
+export function openConfig(): Object {
   return { route: [new Route({ kind: "config", value: null })] };
 }
 
-export function setDefaultConfig(state: State): Object {
+export function setDefaultConfig(): Object {
   return { config: new Config() };
 }
 

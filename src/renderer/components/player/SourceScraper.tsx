@@ -2,7 +2,7 @@ import * as React from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Dialog, DialogContent } from "@mui/material";
 
-import { flatten, randomizeList } from "../../data/utils";
+import { randomizeList } from "../../data/utils";
 import Config from "../../../common/Config";
 import { SOF } from "../../../common/const";
 import LibrarySource from "../../../common/LibrarySource";
@@ -11,11 +11,6 @@ import Audio from "../../../common/Audio";
 import ChildCallbackHack from "./ChildCallbackHack";
 import ImagePlayer from "./ImagePlayer";
 import content from "./ContentLookup";
-
-// Returns true if array is empty, or only contains empty arrays
-function isEmpty(allURLs: any[]): boolean {
-  return Array.isArray(allURLs) && allURLs.every(isEmpty);
-}
 
 interface SourceScraperProps {
   config: Config;

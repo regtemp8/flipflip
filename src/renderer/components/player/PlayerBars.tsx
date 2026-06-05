@@ -1017,7 +1017,7 @@ class PlayerBars extends React.Component<PlayerBarsProps> {
     }
   }
 
-  onClick = (e: MouseEvent) => {
+  onClick = () => {
     if (
       this.props.scene.audioScene ||
       this.props.recentPictureGrid ||

@@ -304,7 +304,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: any) {
     if (
       ((!props.isPlaying && this.props.isPlaying) ||
         (!props.contentLookupKey && this.props.contentLookupKey) ||
@@ -906,9 +906,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
                 )
               : -1;
             let readyToDisplay = this.state.readyToDisplay;
-            let count = 0;
             while (readyToDisplay.length < urlIndex - lastIndex) {
-              count++;
               readyToDisplay = readyToDisplay.concat([null]);
             }
             readyToDisplay[urlIndex - lastIndex - 1] = video;
@@ -956,9 +954,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               : -1;
 
             let readyToDisplay = this.state.readyToDisplay;
-            let count = 0;
             while (readyToDisplay.length < urlIndex - lastIndex) {
-              count++;
               readyToDisplay = readyToDisplay.concat([null]);
             }
             const errImage = new Image();
@@ -1060,9 +1056,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               : -1;
 
             let readyToDisplay = this.state.readyToDisplay;
-            let count = 0;
             while (readyToDisplay.length < urlIndex - lastIndex) {
-              count++;
               readyToDisplay = readyToDisplay.concat([null]);
             }
             readyToDisplay[urlIndex - lastIndex - 1] = img;
@@ -1110,9 +1104,7 @@ export default class ImagePlayer extends React.Component<ImagePlayerProps> {
               : -1;
 
             let readyToDisplay = this.state.readyToDisplay;
-            let count = 0;
             while (readyToDisplay.length < urlIndex - lastIndex) {
-              count++;
               readyToDisplay = readyToDisplay.concat([null]);
             }
             const errImage = new Image();

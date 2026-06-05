@@ -133,14 +133,14 @@ export default class Player extends React.Component<PlayerProps> {
         props.scene.overlays.length + 1,
       )
         .fill(null)
-        .map((c) => [new ChildCallbackHack()]),
+        .map(() => [new ChildCallbackHack()]),
       imagePlayerDeleteHack: new ChildCallbackHack(),
       mainVideo: null as HTMLVideoElement,
       overlayVideos: new Array<Array<HTMLVideoElement>>(
         props.scene.overlays.length,
       )
         .fill(null)
-        .map((n) => [null as HTMLVideoElement]),
+        .map(() => [null as HTMLVideoElement]),
       currentAudio: null as Audio,
       timeToNextFrame: null as number,
       recentPictureGrid: false,
@@ -385,7 +385,7 @@ export default class Player extends React.Component<PlayerProps> {
               ref={this.idleTimerRef}
             >
               <IdleTimer
-                ref={(ref) => {
+                ref={() => {
                   return this.idleTimerRef;
                 }}
                 onActive={this.onActive.bind(this)}
@@ -728,7 +728,7 @@ export default class Player extends React.Component<PlayerProps> {
                     gridSize,
                   )
                     .fill(null)
-                    .map((c) => new ChildCallbackHack());
+                    .map(() => new ChildCallbackHack());
                   setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
@@ -882,7 +882,7 @@ export default class Player extends React.Component<PlayerProps> {
           this.props.scene.overlays.length,
         )
           .fill(null)
-          .map((n) => [null as HTMLVideoElement]),
+          .map(() => [null as HTMLVideoElement]),
       });
     } else if (this.props.scene.overlays != props.scene.overlays) {
       if (this.props.scene.overlays.length == props.scene.overlays.length) {
@@ -998,7 +998,7 @@ export default class Player extends React.Component<PlayerProps> {
   nop() {}
 
   _currentTimestamp: number = null;
-  onPlaying(position: number, duration: number) {
+  onPlaying(position: number) {
     this._currentTimestamp = position;
   }
   getTimestamp() {
@@ -1039,7 +1039,7 @@ export default class Player extends React.Component<PlayerProps> {
     }
   }
 
-  setOverlayLoaded(index: number, empty: boolean) {
+  setOverlayLoaded(index: number) {
     const newAOL = this.state.areOverlaysLoaded;
     newAOL[index] = true;
     this.setState({ areOverlaysLoaded: newAOL });
