@@ -333,9 +333,12 @@ class VideoControl extends React.Component<
     if (volume < 0) {
       volume = 0;
     }
-    this.props.onChangeVolume(volume);
     if (this.props.video) {
       this.props.video.volume = volume / 100;
+    }
+
+    this.props.onChangeVolume(volume);
+    if (this.props.video) {
       this.triggerUpdate();
     }
   }
