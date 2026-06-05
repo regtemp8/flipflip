@@ -3,6 +3,7 @@ import path from "node:path";
 import wretch from "wretch";
 import fileUrl from "file-url";
 import recursiveReaddir from "recursive-readdir";
+import { DOMParser } from "@xmldom/xmldom";
 import Config from "../../common/Config";
 import LibrarySource from "../../common/LibrarySource";
 import { IF, ST } from "../../common/const";
@@ -24,7 +25,6 @@ import {
   loadRemoteImageURLList,
   loadSexCom,
   loadTumblr,
-  processAllURLs,
 } from "./Scrapers";
 import {
   urlToPath,
@@ -217,9 +217,11 @@ const loadPlaylist = (
   cachePath: string,
 ) => {
   const url = cachePath ? cachePath : source.url;
-  wretch(url)
-    .get()
-    .text((data) => {
+  const promise = url.startsWith("http")
+    ? wretch(url).get().text()
+    : fs.promises.readFile(url, "utf-8");
+  promise
+    .then((data) => {
       let urls = [];
       if (url.endsWith(".asx")) {
         const refs = new DOMParser()

@@ -639,7 +639,7 @@ function onScrapeFiles(
     helpers,
     cacheDir,
     (object) => {
-      if (object?.data) {
+      if ((object?.data?.length ?? 0) > 0) {
         const maxChunkSize = 5000;
         let message: any = {
           source: object.source,
@@ -660,7 +660,7 @@ function onScrapeFiles(
             object.helpers,
           );
 
-          message.helpers.complete = true; //i + maxChunkSize >= object.data.length
+          message.helpers.complete = end === object.data.length;
           replyPort.postMessage(message);
           message = {
             source: object.source,
@@ -668,6 +668,7 @@ function onScrapeFiles(
           };
         }
       } else {
+        object.helpers.complete = true;
         replyPort.postMessage(object);
       }
     },

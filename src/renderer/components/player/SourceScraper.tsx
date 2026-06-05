@@ -43,8 +43,6 @@ interface SourceScraperProps {
 }
 
 export default class SourceScraper extends React.Component<SourceScraperProps> {
-  readonly props: SourceScraperProps;
-
   readonly state: {
     contentLookupKey?: string;
     restart: boolean;
@@ -237,9 +235,14 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               n += 1;
             }
 
+            this.props.setCount(
+              object.source.url,
+              object.helpers.count,
+              object.helpers.next == null,
+            );
+
             // Just add the new urls to the end of the list
             if (object?.allURLs) {
-              const source = object.source;
               let contentLookupKey = this.state.contentLookupKey;
               if (contentLookupKey == null) {
                 contentLookupKey = uuidv4();
@@ -255,15 +258,10 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
                 this._promiseQueue.push({
-                  source: source,
+                  source: object.source,
                   helpers: object.helpers,
                 });
               }
-              this.props.setCount(
-                source.url,
-                object.helpers.count,
-                object.helpers.next == null,
-              );
             }
 
             if (n < sources.length) {
@@ -326,24 +324,24 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
               n += 1;
             }
 
+            this.props.setCount(
+              object.source.url,
+              object.helpers.count,
+              object.helpers.next == null,
+            );
+
             // Just add the new urls to the end of the list
             if (object?.allURLs != null) {
-              const source = object.source;
               content().addURLs(this._nextContentLookupKey, object.allURLs);
               content().addPosts(this._nextContentLookupKey, object.allPosts);
 
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
                 this._nextPromiseQueue.push({
-                  source: source,
+                  source: object.source,
                   helpers: object.helpers,
                 });
               }
-              this.props.setCount(
-                source.url,
-                object.helpers.count,
-                object.helpers.next == null,
-              );
             }
 
             if (n < nextSources.length) {
@@ -402,23 +400,23 @@ export default class SourceScraper extends React.Component<SourceScraperProps> {
 
           // If we are not at the end of a source
           if (object?.source) {
+            this.props.setCount(
+              object.source.url,
+              object.helpers.count,
+              object.helpers.next == null,
+            );
+
             if (object?.allURLs) {
-              const source = object.source;
               content().addURLs(this.state.contentLookupKey, object.allURLs);
               content().addPosts(this.state.contentLookupKey, object.allPosts);
 
               // Add the next promise to the queue
               if (object.helpers.next != null) {
                 this._promiseQueue.push({
-                  source: source,
+                  source: object.source,
                   helpers: object.helpers,
                 });
               }
-              this.props.setCount(
-                source.url,
-                object.helpers.count,
-                object.helpers.next == null,
-              );
             }
 
             window.setTimeout(promiseLoop, object?.timeout ?? 1000);
