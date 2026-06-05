@@ -779,7 +779,7 @@ export default class Player extends React.Component<PlayerProps> {
                 );
               } else {
                 if (!this.state.areOverlaysLoaded[index]) {
-                  setTimeout(() => this.setOverlayLoaded(index, true), 200);
+                  setTimeout(() => this.setOverlayLoaded(index), 200);
                 }
                 return <div key={overlay.id} />;
               }
