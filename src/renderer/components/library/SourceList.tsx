@@ -852,7 +852,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     }
   }
 
-  SortableVirtualList = SortableContainer<{ height: number, width: number }>(this.VirtualList.bind(this));
+  SortableVirtualList = SortableContainer<{ height: number; width: number }>(
+    this.VirtualList.bind(this),
+  );
 
   VirtualList(props: any) {
     const { height, width } = props;

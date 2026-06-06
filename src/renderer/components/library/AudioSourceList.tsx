@@ -391,7 +391,9 @@ class AudioSourceList extends React.Component<
     this.onCloseSourceOptions();
   }
 
-  SortableVirtualList = SortableContainer<{ height: number, width: number}>(this.VirtualList.bind(this));
+  SortableVirtualList = SortableContainer<{ height: number; width: number }>(
+    this.VirtualList.bind(this),
+  );
 
   VirtualList(props: any) {
     const { height, width } = props;
