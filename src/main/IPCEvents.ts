@@ -1264,7 +1264,9 @@ function onMarkOffline(ev: IpcMainInvokeEvent, url: string) {
 
 async function onGetTextFromURL(ev: IpcMainInvokeEvent, url: string) {
   try {
-    return await wretch(url).get().text();
+    return url.startsWith("http")
+      ? await wretch(url).get().text()
+      : fs.readFileSync(url, "utf-8");
   } catch (err) {
     console.error(err);
   }
