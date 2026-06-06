@@ -6,6 +6,7 @@ import "codemirror/theme/material.css";
 
 import {
   AppBar,
+  Box,
   Button,
   Card,
   CardContent,
@@ -41,6 +42,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SaveIcon from "@mui/icons-material/Save";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 import { CST, MO, RP } from "../../../common/const";
 import captionProgramDefaults, { CancelablePromise } from "../../data/utils";
@@ -431,17 +433,25 @@ class CaptionScriptor extends React.Component<
                     </Typography>
                   </div>
                 )}
-                <CodeMirrorEditor
-                  className={
-                    this.props.tutorial == CST.code
-                      ? classes.backdropTopHighlight
-                      : classes.codeMirrorWrapper
-                  }
-                  onGutterClick={this.onGutterClick.bind(this)}
-                  onUpdateScript={this.onUpdateScript.bind(this)}
-                  addHack={this.state.codeMirrorAddHack}
-                  overwriteHack={this.state.codeMirrorOverwriteHack}
-                />
+                <Box sx={{ flex: 1 }}>
+                  <AutoSizer>
+                    {({ height, width }: { height: number; width: number }) => (
+                      <Box sx={{ width, height }}>
+                        <CodeMirrorEditor
+                          className={
+                            this.props.tutorial == CST.code
+                              ? classes.backdropTopHighlight
+                              : classes.codeMirrorWrapper
+                          }
+                          onGutterClick={this.onGutterClick.bind(this)}
+                          onUpdateScript={this.onUpdateScript.bind(this)}
+                          addHack={this.state.codeMirrorAddHack}
+                          overwriteHack={this.state.codeMirrorOverwriteHack}
+                        />
+                      </Box>
+                    )}
+                  </AutoSizer>
+                </Box>
               </div>
               <div
                 className={clsx(
