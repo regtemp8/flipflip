@@ -1,5 +1,5 @@
 import * as React from "react";
-import { sortableContainer, sortableElement } from "react-sortable-hoc";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 
@@ -391,7 +391,7 @@ class AudioSourceList extends React.Component<
     this.onCloseSourceOptions();
   }
 
-  SortableVirtualList = sortableContainer(this.VirtualList.bind(this));
+  SortableVirtualList = SortableContainer<{ height: number, width: number}>(this.VirtualList.bind(this));
 
   VirtualList(props: any) {
     const { height, width } = props;
@@ -412,7 +412,7 @@ class AudioSourceList extends React.Component<
     );
   }
 
-  SortableItem = sortableElement(
+  SortableItem = SortableElement(
     ({ value }: { value: { index: number; style: any; data: Array<any> } }) => {
       const index = value.index;
       const source: Audio = value.data[index];
