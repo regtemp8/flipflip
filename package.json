@@ -104,7 +104,8 @@
   "resolutions": {
     "@types/node": "24",
     "@electron/rebuild": "^4.0.0",
-    "@xmldom/xmldom@^0.8.8": "^0.8.13"
+    "@xmldom/xmldom@^0.8.8": "^0.8.13",
+    "tmp": "^0.2.6"
   },
   "packageManager": "yarn@4.17.0"
 }
