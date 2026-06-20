@@ -111,10 +111,10 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
           ? props.scene.grid[0].length
           : 1,
       sceneCopyGrid: props.scene.grid.map((r) =>
-        r.map((c) => null as React.ReactNode),
+        r.map(() => null as React.ReactNode),
       ),
       isLoaded: props.scene.grid.map((r) =>
-        Array.from({ length: r.length }, () => false),
+        r.map((c) => c.sceneCopy && c.sceneCopy.length > 0),
       ),
       hideCursor: false,
     };
@@ -145,7 +145,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
         >
           <div className={classes.appBarSpacer} />
           <IdleTimer
-            ref={(ref) => {
+            ref={() => {
               return this.idleTimerRef;
             }}
             onActive={this.onActive.bind(this)}
@@ -166,7 +166,6 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                     const scene = this.props.allScenes.find(
                       (s) => s.id == cell.sceneID,
                     );
-                    const newLoaded = this.state.isLoaded;
                     const allLoaded = flatten(this.state.isLoaded).every(
                       (l: boolean) => l,
                     );
@@ -222,7 +221,9 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                         </div>
                       );
                     } else {
-                      const loadingIndex = flatten(newLoaded).indexOf(false);
+                      const loadingIndex = flatten(this.state.isLoaded).indexOf(
+                        false,
+                      );
                       const showProgress =
                         loadingIndex >= 0 &&
                         loadingIndex == rowIndex * row.length + colIndex;
