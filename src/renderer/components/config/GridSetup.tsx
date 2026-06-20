@@ -322,7 +322,6 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                 inputProps={{
                   className: classes.dimensionInput,
                   min: 1,
-                  max: 5,
                   type: "number",
                 }}
               />
@@ -340,7 +339,6 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                 inputProps={{
                   className: classes.dimensionInput,
                   min: 1,
-                  max: 5,
                   type: "number",
                 }}
               />
