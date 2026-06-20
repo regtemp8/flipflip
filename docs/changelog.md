@@ -1,4 +1,15 @@
 # Changelog
+#### v5.1.1 <small>(06/20/2026)</small>
+- Improve large sources loading time
+- Fix playlist file playback
+- Fix filename display
+- Fix caption scriptor text loading
+- Fix caption scriptor layout issues
+- Remove grid width and height cap
+- Fix grid loading for grid with copied cells
+- Upgrade Electron to 42.4.1
+- Upgrade 3rd party libraries
+
 #### v5.1.0 <small>(05/24/2026)</small>
 - Add Hydrus source dialog
 - Upgrade Electron to 42.2.0
