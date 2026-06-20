@@ -67,7 +67,7 @@
     "d3-ease": "^3.0.1",
     "electron-default-menu": "^1.0.2",
     "electron-window-state": "^5.0.3",
-    "file-type": "^16.5.4",
+    "file-type": "^21.3.2",
     "file-url": "^3.0.0",
     "font-list": "^1.6.0",
     "fs-extra": "^9.1.0",
