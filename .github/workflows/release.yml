@@ -35,15 +35,6 @@ jobs:
       uses: stevenbenitez/get-package-version-action@v1
     - name: Make Release
       run: yarn make --platform ${{ env.PLATFORM }} --arch ${{ matrix.arch }}
-    - name: Debug Release Asset
-      run: |
-        pwd
-        ls -al
-        ls -al ./out
-        ls -al ./out/make
-        ls -al ./out/make/zip
-        ls -al ./out/make/zip/${{ env.PLATFORM }}
-        ls -al ./out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
