@@ -120,6 +120,18 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
     };
   }
 
+  componentDidMount(): void {
+    for (let r = 0; r < this.props.scene.grid.length; r++) {
+      const row = this.props.scene.grid[r];
+      for (let c = 0; c < row.length; c++) {
+        const cell = row[c];
+        if (cell.sceneID == -1) {
+          this.setCellLoaded(r, c);
+        }
+      }
+    }
+  }
+
   render() {
     const classes = this.props.classes;
 
@@ -349,6 +361,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
   }
 
   setCellLoaded(rowIndex: number, colIndex: number) {
+    console.log('LOADED', rowIndex, colIndex)
     const newLoaded = this.state.isLoaded;
     newLoaded[rowIndex][colIndex] = true;
     if (
