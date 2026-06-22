@@ -3862,7 +3862,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^2.20.0, commander@npm:^2.3.0":
+"commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
   checksum: 10c0/74c781a5248c2402a0a3e966a0a2bba3c054aad144f5c023364be83265e796b20565aa9feff624132ff629aa64e16999fa40a743c10c12f7c61e96a794b99288
@@ -3873,6 +3873,13 @@ __metadata:
   version: 5.1.0
   resolution: "commander@npm:5.1.0"
   checksum: 10c0/da9d71dbe4ce039faf1fe9eac3771dca8c11d66963341f62602f7b66e36d2a3f8883407af4f9a37b1db1a55c59c0c1325f186425764c2e963dc1d67aec2a4b6d
+  languageName: node
+  linkType: hard
+
+"commander@npm:^7.1.0":
+  version: 7.2.0
+  resolution: "commander@npm:7.2.0"
+  checksum: 10c0/8d690ff13b0356df7e0ebbe6c59b4712f754f4b724d4f473d3cc5b3fdcf978e3a5dc3078717858a2ceb50b0f84d0660a7f22a96cdc50fb877d0c9bb31593d23a
   languageName: node
   linkType: hard
 
@@ -5483,7 +5490,7 @@ __metadata:
     get-folder-size: "npm:^2.0.1"
     gif-info: "npm:^1.0.1"
     globals: "npm:^17.6.0"
-    imgur: "npm:^0.3.2"
+    imgur: "npm:^1.0.2"
     jsdom: "npm:^29.1.1"
     moment: "npm:^2.30.1"
     music-metadata: "npm:^7.14.0"
@@ -5885,7 +5892,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.1.2, glob@npm:^7.1.3, glob@npm:^7.1.6":
+"glob@npm:^7.1.3, glob@npm:^7.1.6":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -6316,18 +6323,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"imgur@npm:^0.3.2":
-  version: 0.3.2
-  resolution: "imgur@npm:0.3.2"
+"imgur@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "imgur@npm:1.0.2"
   dependencies:
-    commander: "npm:^2.3.0"
+    commander: "npm:^7.1.0"
     form-data: "npm:^4.0.0"
-    glob: "npm:^7.1.2"
     got: "npm:^11.8.1"
-    q: "npm:^1.0.1"
   bin:
     imgur: cli.js
-  checksum: 10c0/5826174b52f416cf7a5094d549f247329291a786db1aacf98cd9cbb1e360c9794bedaf8c8e466c3d1a4137968574c24322dd64bb7dedcd57391c0f70ff5f2bca
+  checksum: 10c0/f27ce8ba616a3bb24fc13e3f975c6969c9775b21adc257965a1bd13ed993e0ef2d92dc829f08c78ba8a006288c66dc1dbbe30e65365e820b1d4053ba7c29b66e
   languageName: node
   linkType: hard
 
@@ -8725,13 +8730,6 @@ __metadata:
   version: 1.1.5
   resolution: "pvutils@npm:1.1.5"
   checksum: 10c0/e968b07b78a58fec9377fe7aa6342c8cfa21c8fb4afc4e51e1489bd42bec6dc71b8a52541d0aede0aea17adec7ca3f89f29f56efdc31d0083cc02e9bb5721bcf
-  languageName: node
-  linkType: hard
-
-"q@npm:^1.0.1":
-  version: 1.5.1
-  resolution: "q@npm:1.5.1"
-  checksum: 10c0/7855fbdba126cb7e92ef3a16b47ba998c0786ec7fface236e3eb0135b65df36429d91a86b1fff3ab0927b4ac4ee88a2c44527c7c3b8e2a37efbec9fe34803df4
   languageName: node
   linkType: hard
 
