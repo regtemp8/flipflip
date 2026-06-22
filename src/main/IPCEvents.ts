@@ -1,6 +1,6 @@
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 import wretch from "wretch";
-import fileUrl from "file-url";
 import {
   ipcMain,
   IpcMainEvent,
@@ -365,7 +365,7 @@ function onShowPlayerContextMenu(
   let contextMenu = new Menu();
   const literalSource = source;
   if (/^https?:\/\//g.exec(source) == null) {
-    source = urlToPath(fileUrl(source), process.platform);
+    source = urlToPath(pathToFileURL(source).toString(), process.platform);
   }
   const isFile = url.startsWith("file://");
   const path = urlToPath(url, process.platform);

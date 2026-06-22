@@ -25,7 +25,6 @@ declare module "electron-default-menu";
 declare module "get-folder-size";
 declare module "gif-info";
 declare module "fs-extra";
-declare module "file-url";
 declare module "font-list";
 declare module "imgur";
 declare module "music-metadata";

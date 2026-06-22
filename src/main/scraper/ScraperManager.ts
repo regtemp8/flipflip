@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import {pathToFileURL} from "node:url";
 import wretch from "wretch";
-import fileUrl from "file-url";
 import recursiveReaddir from "recursive-readdir";
 import { DOMParser } from "@xmldom/xmldom";
 import Config from "../../common/Config";
@@ -80,7 +80,7 @@ const loadLocalDirectory = (
         sensitivity: "base",
       });
       let sources = filterPathsToJustPlayable(filter, rawFiles, true)
-        .map((p) => fileUrl(p))
+        .map((p) => pathToFileURL(p).toString())
         .sort(collator.compare);
 
       if (source.blacklist && source.blacklist.length > 0) {
@@ -137,7 +137,7 @@ const loadVideo = (
   };
   const ifExists = (url: string) => {
     if (!url.startsWith("http")) {
-      url = fileUrl(url);
+      url = pathToFileURL(url).toString();
     }
     helpers.count = 1;
 
