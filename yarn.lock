@@ -5484,7 +5484,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-react: "npm:^7.37.5"
     file-type: "npm:^16.5.4"
-    font-list: "npm:^1.6.0"
+    font-list: "npm:^2.1.0"
     fork-ts-checker-webpack-plugin: "npm:^7.3.0"
     fs-extra: "npm:^9.1.0"
     get-folder-size: "npm:^2.0.1"
@@ -5549,10 +5549,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"font-list@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "font-list@npm:1.6.0"
-  checksum: 10c0/5f32e8d8a60c53d48a414abc6ff8fe149f19d3d54402fb98b7bf444c8dd735ede89eed206905ab9da9cf9543eb0650c521090aa4102e37021fade81aee1efabf
+"font-list@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "font-list@npm:2.1.0"
+  checksum: 10c0/1a4a12cff725fce3140b511fd0269d50d5689824663fbd53e98172a9703fded790d18b405236db687fba91c7c87adc3d98a6a98b8fab33e6e339676dde48b3de
   languageName: node
   linkType: hard
 
