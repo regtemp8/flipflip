@@ -926,6 +926,7 @@ function onGetCachedFileURL(
 function onGetScraperSources(ev: IpcMainInvokeEvent, sources: LibrarySource[]) {
   const sceneSources = new Array<LibrarySource>();
   for (const source of sources) {
+    let addSelf = true;
     if (source.dirOfSources && getSourceType(source.url) == ST.local) {
       try {
         const dirSources = fs
@@ -936,12 +937,15 @@ function onGetScraperSources(ev: IpcMainInvokeEvent, sources: LibrarySource[]) {
               new LibrarySource({ url: path.join(source.url, dirent.name) }),
           );
 
-        sceneSources.push(...dirSources);
+        if (dirSources.length > 0) {
+          sceneSources.push(...dirSources);
+          addSelf = false;
+        }
       } catch (e) {
-        sceneSources.push(new LibrarySource({ url: source.url }));
         console.error(e);
       }
-    } else {
+    }
+    if (addSelf) {
       sceneSources.push(source);
     }
   }
