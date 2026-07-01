@@ -1,5 +1,11 @@
 # Troubleshooting
 
+## MacOS: "FlipFlip" is damaged and can't be opened.
+
+**Cause:** When an application gets downloaded from unofficial sources (e.g. GitHub), MacOS puts it in quarantaine.<br/>
+**Solution:** Run `xattr -d com.apple.quarantine /FlipFlip.app` in the unzipped directory.<br/>
+**More info:** [Apple Support Community](https://discussions.apple.com/thread/253714860)
+
 ## Video/Images corrupted and complete white-out
 <img src="doc_images/video_images_white_out.png" alt="Scene Detail Sources" class="col-xs-10 col-xl-7"/>
 
