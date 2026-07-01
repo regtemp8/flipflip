@@ -913,6 +913,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     ) {
       this.start(true);
     }
+    if (!props.hasStarted && this.props.hasStarted && !this.state.hasStarted) {
+      this.setState({ canStart: true });
+      this.start(true, true);
+    }
   }
 
   componentDidMount() {
