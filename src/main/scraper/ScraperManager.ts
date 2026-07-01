@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import {pathToFileURL} from "node:url";
+import { pathToFileURL } from "node:url";
 import wretch from "wretch";
 import recursiveReaddir from "recursive-readdir";
 import { DOMParser } from "@xmldom/xmldom";

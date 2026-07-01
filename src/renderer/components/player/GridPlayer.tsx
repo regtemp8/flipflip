@@ -361,7 +361,6 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
   }
 
   setCellLoaded(rowIndex: number, colIndex: number) {
-    console.log('LOADED', rowIndex, colIndex)
     const newLoaded = this.state.isLoaded;
     newLoaded[rowIndex][colIndex] = true;
     if (
