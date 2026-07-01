@@ -1189,7 +1189,9 @@ class SceneOptionCard extends React.Component<
 
   onRandomSceneDialog() {
     const randomSceneList =
-      this.state?.randomSceneList ?? this.props.scene.nextSceneRandoms;
+      this.state.randomSceneList == null
+        ? this.props.scene.nextSceneRandoms
+        : null;
     this.setState({ randomSceneList });
   }
 
