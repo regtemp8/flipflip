@@ -78,6 +78,9 @@ export default class SourceScraper extends React.Component<
     helpers: { next: any; count: number; retries: number };
   }> = null;
   _nextContentLookupKey: string = null;
+  _sourceTimeoutID: number = null;
+  _promiseTimeoutID: number = null;
+  _nextSourceTimeoutID: number = null;
 
   render() {
     let style: any = { opacity: this.props.opacity };
@@ -263,7 +266,7 @@ export default class SourceScraper extends React.Component<
 
             if (n < sources.length) {
               const timeout = object?.timeout ?? 1000;
-              window.setTimeout(sourceLoop, timeout);
+              this._sourceTimeoutID = window.setTimeout(sourceLoop, timeout);
             } else {
               if (this._promiseQueue.length == 0) {
                 content().setSingleImage(this.state.contentLookupKey);
@@ -271,10 +274,12 @@ export default class SourceScraper extends React.Component<
               this.props.finishedLoading(
                 content().isEmpty(this.state.contentLookupKey),
               );
-              window.setTimeout(promiseLoop, 1000);
+              this._promiseTimeoutID = window.setTimeout(promiseLoop, 1000);
               if (this.props.nextScene && this.props.playNextScene) {
-                n = 0;
-                window.setTimeout(nextSourceLoop, 1000);
+                this._nextSourceTimeoutID = window.setTimeout(
+                  nextSourceLoop,
+                  1000,
+                );
               }
             }
           }
@@ -342,9 +347,10 @@ export default class SourceScraper extends React.Component<
               }
             }
 
-            if (n < nextSources.length) {
-              window.setTimeout(nextSourceLoop, object.timeout ?? 1000);
-            }
+            this._nextSourceTimeoutID = window.setTimeout(
+              nextSourceLoop,
+              object.timeout ?? 1000,
+            );
           }
         },
       );
@@ -352,7 +358,7 @@ export default class SourceScraper extends React.Component<
 
     const promiseLoop = () => {
       if (this.state.captcha != null && this._promiseQueue.length == 0) {
-        window.setTimeout(promiseLoop, 2000);
+        this._promiseTimeoutID = window.setTimeout(promiseLoop, 2000);
       }
       // Process until queue is empty or player has been stopped
       if (!this._isMounted || this._promiseQueue.length == 0) {
@@ -418,12 +424,24 @@ export default class SourceScraper extends React.Component<
               }
             }
 
-            window.setTimeout(promiseLoop, object?.timeout ?? 1000);
+            this._promiseTimeoutID = window.setTimeout(
+              promiseLoop,
+              object?.timeout ?? 1000,
+            );
           }
         },
       );
     };
 
+    if (this._sourceTimeoutID != null) {
+      window.clearTimeout(this._sourceTimeoutID);
+    }
+    if (this._promiseTimeoutID != null) {
+      window.clearTimeout(this._promiseTimeoutID);
+    }
+    if (this._nextSourceTimeoutID != null) {
+      window.clearTimeout(this._nextSourceTimeoutID);
+    }
     if (this.state.preload) {
       this.setState({ preload: false });
       promiseLoop();
