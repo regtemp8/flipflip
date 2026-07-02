@@ -35,7 +35,7 @@ class ContentLookup {
 
   public isSingleImage(key?: string) {
     const content = key != null ? this.lookup.get(key) : undefined;
-    return content?.singleImage ?? true;
+    return content?.singleImage ?? false;
   }
 
   public setSingleImage(key: string) {
