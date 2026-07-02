@@ -245,6 +245,7 @@ contextBridge.exposeInMainWorld("ipc", {
     imageTypeFilter: string,
     weightFunction: string,
     helpers: { next: any; count: number; retries: number },
+    uuid: string,
     onReply: (object: any) => void,
   ) => {
     const { port1, port2 } = new MessageChannel();
@@ -256,6 +257,7 @@ contextBridge.exposeInMainWorld("ipc", {
         imageTypeFilter,
         weightFunction,
         helpers,
+        uuid,
       },
       [port2],
     );

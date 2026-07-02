@@ -116,6 +116,7 @@ declare global {
         imageTypeFilter: string,
         weightFunction: string,
         helpers: { next: any; count: number; retries: number },
+        uuid: string,
         onReply: (object: any) => void,
       ) => void;
       deleteLibrarySource: (sourceURL: string, config: Config) => Promise<void>;

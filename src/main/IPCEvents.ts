@@ -626,6 +626,7 @@ function onScrapeFiles(
     imageTypeFilter: string;
     weightFunction: string;
     helpers: { next: any; count: number; retries: number };
+    uuid: string;
   },
 ) {
   const [replyPort] = ev.ports;
@@ -661,6 +662,7 @@ function onScrapeFiles(
           );
 
           message.helpers.complete = end === object.data.length;
+          message.uuid = request.uuid;
           replyPort.postMessage(message);
           message = {
             source: object.source,
@@ -669,6 +671,7 @@ function onScrapeFiles(
         }
       } else {
         object.helpers.complete = true;
+        object.uuid = request.uuid;
         replyPort.postMessage(object);
       }
     },

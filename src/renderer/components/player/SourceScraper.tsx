@@ -202,7 +202,8 @@ export default class SourceScraper extends React.Component<
         d,
         this.props.scene.imageTypeFilter,
         this.props.scene.weightFunction,
-        { next: -1, count: 0, retries: 0 },
+        d.helpers,
+        this.state.contentLookupKey,
         (object: any) => {
           if (object?.captcha != null && this.state.captcha == null) {
             this.setState({
@@ -246,14 +247,8 @@ export default class SourceScraper extends React.Component<
 
             // Just add the new urls to the end of the list
             if (object?.allURLs) {
-              let contentLookupKey = this.state.contentLookupKey;
-              if (contentLookupKey == null) {
-                contentLookupKey = uuidv4();
-                content().initContent(contentLookupKey);
-              }
-
-              content().addURLs(contentLookupKey, object.allURLs);
-              content().addPosts(contentLookupKey, object.allPosts);
+              content().addURLs(object.uuid, object.allURLs);
+              content().addPosts(object.uuid, object.allPosts);
               if (this.state.contentLookupKey == null) {
                 this.setState({ contentLookupKey });
               }
@@ -301,7 +296,8 @@ export default class SourceScraper extends React.Component<
         d,
         this.props.nextScene.imageTypeFilter,
         this.props.nextScene.weightFunction,
-        { next: -1, count: 0, retries: 0 },
+        promiseData.helpers,
+        this._nextContentLookupKey,
         (object: any) => {
           if (object?.error != null) {
             console.error(
@@ -335,8 +331,8 @@ export default class SourceScraper extends React.Component<
 
             // Just add the new urls to the end of the list
             if (object?.allURLs != null) {
-              content().addURLs(this._nextContentLookupKey, object.allURLs);
-              content().addPosts(this._nextContentLookupKey, object.allPosts);
+              content().addURLs(object.uuid, object.allURLs);
+              content().addPosts(object.uuid, object.allPosts);
 
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
@@ -371,6 +367,7 @@ export default class SourceScraper extends React.Component<
         this.props.scene.imageTypeFilter,
         this.props.scene.weightFunction,
         promiseData.helpers,
+        this.state.contentLookupKey,
         (object: any) => {
           if (object?.captcha != null && this.state.captcha == null) {
             this.setState({
@@ -410,8 +407,8 @@ export default class SourceScraper extends React.Component<
             );
 
             if (object?.allURLs) {
-              content().addURLs(this.state.contentLookupKey, object.allURLs);
-              content().addPosts(this.state.contentLookupKey, object.allPosts);
+              content().addURLs(object.uuid, object.allURLs);
+              content().addPosts(object.uuid, object.allPosts);
 
               // Add the next promise to the queue
               if (object.helpers.next != null) {
