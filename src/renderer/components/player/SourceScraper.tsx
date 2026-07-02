@@ -508,7 +508,10 @@ export default class SourceScraper extends React.Component<
           // Just swap values if we're coming back to this scene again
           const newContentLookupKey = this._nextContentLookupKey;
           const temp = this._nextPromiseQueue;
-          this._nextPromiseQueue = this._promiseQueue;
+          this._nextPromiseQueue = [
+            ...this._sourceQueue,
+            ...this._promiseQueue,
+          ];
           this._promiseQueue = temp;
           this._nextContentLookupKey = state.contentLookupKey;
           this.setState({
