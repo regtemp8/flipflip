@@ -246,9 +246,6 @@ export default class SourceScraper extends React.Component<
             if (object?.allURLs) {
               content().addURLs(object.uuid, object.allURLs);
               content().addPosts(object.uuid, object.allPosts);
-              if (this.state.contentLookupKey == null) {
-                this.setState({ contentLookupKey });
-              }
 
               // If this is a remote URL, queue up the next promise
               if (object.helpers.next != null) {
@@ -264,10 +261,10 @@ export default class SourceScraper extends React.Component<
               this._sourceTimeoutID = window.setTimeout(sourceLoop, timeout);
             } else {
               if (this._promiseQueue.length == 0) {
-                content().setSingleImage(this.state.contentLookupKey);
+                content().setSingleImage(object.uuid);
               }
               this.props.finishedLoading(
-                content().isEmpty(this.state.contentLookupKey),
+                content().isEmpty(object.uuid),
               );
               this._promiseTimeoutID = window.setTimeout(promiseLoop, 1000);
               if (this.props.nextScene && this.props.playNextScene) {
