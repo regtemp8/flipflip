@@ -479,7 +479,8 @@ export default class ImagePlayer extends React.Component<
     if (
       this.state.readyToDisplay.length >=
         this.props.config.displaySettings.maxInMemory ||
-      !this.props.contentLookupKey
+      !this.props.contentLookupKey ||
+      !content().hasURLs(this.props.contentLookupKey)
     ) {
       // Wait for the display loop to use an image
       this._waitTimeouts[i] = window.setTimeout(

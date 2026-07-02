@@ -94,33 +94,32 @@ export default class SourceScraper extends React.Component<
     }
     return (
       <div style={style}>
-        {content().hasURLs(this.state.contentLookupKey) &&
-          this.state.restart == false && (
-            <ImagePlayer
-              config={this.props.config}
-              scene={this.props.scene}
-              currentAudio={this.props.currentAudio}
-              isOverlay={this.props.isOverlay}
-              isPlaying={this.props.isPlaying}
-              gridView={this.props.gridView}
-              historyOffset={this.props.historyOffset}
-              setHistoryOffset={this.props.setHistoryOffset}
-              setHistoryPaths={this.props.setHistoryPaths}
-              advanceHack={this.props.advanceHack}
-              deleteHack={this.props.deleteHack}
-              strobeLayer={this.props.strobeLayer}
-              hasStarted={this.props.hasStarted}
-              onLoaded={this.props.firstImageLoaded.bind(this)}
-              setVideo={this.props.setVideo}
-              cache={this.props.cache}
-              onEndScene={this.props.onEndScene}
-              playNextScene={this.props.playNextScene}
-              gridCoordinates={this.props.gridCoordinates}
-              setSceneCopy={this.props.setSceneCopy}
-              setTimeToNextFrame={this.props.setTimeToNextFrame}
-              contentLookupKey={this.state.contentLookupKey}
-            />
-          )}
+        {this.state.restart == false && (
+          <ImagePlayer
+            config={this.props.config}
+            scene={this.props.scene}
+            currentAudio={this.props.currentAudio}
+            isOverlay={this.props.isOverlay}
+            isPlaying={this.props.isPlaying}
+            gridView={this.props.gridView}
+            historyOffset={this.props.historyOffset}
+            setHistoryOffset={this.props.setHistoryOffset}
+            setHistoryPaths={this.props.setHistoryPaths}
+            advanceHack={this.props.advanceHack}
+            deleteHack={this.props.deleteHack}
+            strobeLayer={this.props.strobeLayer}
+            hasStarted={this.props.hasStarted}
+            onLoaded={this.props.firstImageLoaded.bind(this)}
+            setVideo={this.props.setVideo}
+            cache={this.props.cache}
+            onEndScene={this.props.onEndScene}
+            playNextScene={this.props.playNextScene}
+            gridCoordinates={this.props.gridCoordinates}
+            setSceneCopy={this.props.setSceneCopy}
+            setTimeToNextFrame={this.props.setTimeToNextFrame}
+            contentLookupKey={this.state.contentLookupKey}
+          />
+        )}
         {this.state.captcha != null && (
           <Dialog open={true} onClose={this.onCloseDialog.bind(this)}>
             <DialogContent style={{ height: 600 }}>
