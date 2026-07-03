@@ -289,7 +289,7 @@ export default class CaptionProgram extends React.Component<
     }>();
     captionProgramDefaults.timestampFn = new Map<number, Array<Function>>();
     this.setState({ countProgress: false });
-    if (this.el) {
+    if (this.el.current) {
       this.el.current.style.opacity = "0";
     }
     if (this._runningPromise) {
@@ -1075,6 +1075,10 @@ export default class CaptionProgram extends React.Component<
 
   showText(value: string, ms: number, opacity: number) {
     return (nextCommand: Function) => {
+      if(!this.el.current) {
+        return
+      }
+      
       this.el.current.style.opacity = (opacity / 100).toString();
       this.el.current.innerHTML = htmlEntities(value);
       const wait = this.wait(ms);

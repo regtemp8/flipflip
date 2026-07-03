@@ -294,21 +294,6 @@ interface GeneralSettingsI {
   watermarkColor: string;
 }
 
-interface TutorialsI {
-  [key: string]: string;
-
-  scenePicker: string;
-  sceneDetail: string;
-  sceneGenerator: string;
-  sceneGrid: string;
-  library: string;
-  audios: string;
-  scripts: string;
-  player: string;
-  scriptor: string;
-  videoClipper: string;
-}
-
 export class SceneSettings implements SceneSettingsI {
   [key: string]: string | number | boolean | Array<any>;
 
@@ -605,19 +590,19 @@ export class GeneralSettings implements GeneralSettingsI {
   watermarkColor = "#FFFFFF";
 }
 
-export class Tutorials implements TutorialsI {
-  [key: string]: string;
+export class Tutorials {
+  [key: string]: string | null;
 
-  scenePicker = null as string;
-  sceneDetail = null as string;
-  player = null as string;
-  library = null as string;
-  audios = null as string;
-  scripts = null as string;
-  scriptor = null as string;
-  sceneGenerator = null as string;
-  sceneGrid = null as string;
-  videoClipper = null as string;
+  scenePicker: string | null = null
+  sceneDetail: string | null = null
+  player: string | null = null
+  library: string | null = null
+  audios: string | null = null
+  scripts: string | null = null
+  scriptor: string | null = null
+  sceneGenerator: string | null = null
+  sceneGrid: string | null = null
+  videoClipper: string | null = null
 }
 
 export default class Config {

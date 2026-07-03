@@ -244,7 +244,7 @@ export function resetTutorials(state: State): Object {
 
 export function doneTutorial(state: State, tutorial: string): Object {
   const newConfig = state.config;
-  let newTutorial = state.tutorial;
+  let newTutorial: string | null = state.tutorial;
   if (state.route.length == 0) {
     if (tutorial == SPT.add2) {
       newTutorial = null;
@@ -2188,9 +2188,11 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
         if (t.id == tag.id) {
           t.name = tag.name;
           t.phraseString = tag.phraseString;
-          return t;
+          break;
         }
       }
+
+      return t;
     });
     source.tags = source.tags.sort((a: Tag, b: Tag) => {
       const aIndex = tagIDs.indexOf(a.id);
@@ -3285,10 +3287,12 @@ export function importScene(
           for (let c = 0; c < grid.grid[r].length; c++) {
             const cellID = Number.parseInt(grid.grid[r][c].sceneID as any);
             if (cellID != -1) {
-              if (!newSceneMap.has(cellID)) {
-                newSceneMap.set(cellID, id++);
+              let newSceneID = newSceneMap.get(cellID);
+              if (newSceneID == null) {
+                newSceneID = id++;
+                newSceneMap.set(cellID, newSceneID);
               }
-              grid.grid[r][c].sceneID = newSceneMap.get(cellID);
+              grid.grid[r][c].sceneID = newSceneID;
             }
           }
         }
@@ -3299,10 +3303,13 @@ export function importScene(
           window.ipc.platform(),
           importScenes[i],
         );
-        if (!newSceneMap.has(scene.id)) {
-          newSceneMap.set(scene.id, id++);
+
+        let newSceneId = newSceneMap.get(scene.id);
+        if (newSceneId == null) {
+          newSceneId = id++;
+          newSceneMap.set(scene.id, newSceneId);
         }
-        scene.id = newSceneMap.get(scene.id);
+        scene.id = newSceneId;
         for (const o of scene.overlays) {
           if (o.sceneID.toString().startsWith("999")) {
             const sID = Number.parseInt(
@@ -3316,8 +3323,9 @@ export function importScene(
             }
           } else {
             const sID = Number.parseInt(o.sceneID as any);
-            if (newSceneMap.has(sID)) {
-              o.sceneID = newSceneMap.get(sID);
+            const existingSceneID = newSceneMap.get(sID);
+            if (existingSceneID != null) {
+              o.sceneID = existingSceneID;
             } else {
               o.sceneID = id++;
               newSceneMap.set(sID, o.sceneID);
@@ -3463,7 +3471,6 @@ export function importLibrary(
   const newLibrary = Array.from(state.library);
   const newTags = Array.from(state.tags);
   const myLibrary = newLibrary.map((s) => s.url);
-  const myTags = newTags.map((t) => t.name);
   let tagID = newTags.length + 1;
   newTags.forEach((t) => {
     tagID = Math.max(t.id + 1, tagID);
@@ -3476,13 +3483,13 @@ export function importLibrary(
     if (source.tags) {
       for (const tag of source.tags) {
         // Make sure we have all of these tags
-        if (myTags.includes(tag.name)) {
-          tag.id = newTags.find((t) => t.name == tag.name).id; // Map tags we already have
+        const myTag = newTags.find((t) => t.name == tag.name);
+        if (myTag != null) {
+          tag.id = myTag.id; // Map tags we already have
         } else {
           // Add tags we don't have yet
           tag.id = tagID++;
           newTags.push(tag);
-          myTags.push(tag.name);
         }
       }
     } else {

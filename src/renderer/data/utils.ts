@@ -94,7 +94,7 @@ export function convertFromEpoch(backupFile: string) {
   return date.toLocaleString();
 }
 
-export function getTimingFromString(tf: string): string {
+export function getTimingFromString(tf: string): string | null {
   switch (tf) {
     case "constant":
     case "const":
@@ -124,7 +124,7 @@ export function getTimeout(
   audio: Audio,
   bpmMulti: number,
   timeToNextFrame: number,
-): number {
+): number | null {
   let timeout = null;
   switch (tf) {
     case TF.random:
@@ -171,7 +171,7 @@ export function getTimestamp(secs: number): string {
   }
 }
 
-export function getMsRemainder(sec: number): string {
+export function getMsRemainder(sec: number): string | null {
   if (Number.isNaN(sec) || sec < 0) {
     return null;
   }
@@ -184,7 +184,7 @@ export function getMsRemainder(sec: number): string {
   return "." + remainder;
 }
 
-export function getMsTimestampValue(value: string): number {
+export function getMsTimestampValue(value: string): number | null {
   const split = value.split(":");
   const splitInt = [];
   let milli = null;
@@ -210,7 +210,7 @@ export function getMsTimestampValue(value: string): number {
     splitInt.push(int);
   }
 
-  let ms;
+  let ms = null;
   if (split.length == 3) {
     ms = splitInt[0] * 60 * 60 + splitInt[1] * 60 + splitInt[2];
   } else if (split.length == 2) {
@@ -218,14 +218,17 @@ export function getMsTimestampValue(value: string): number {
   } else if (split.length == 1) {
     ms = splitInt[0];
   }
-  ms *= 1000;
-  if (milli != null) {
-    ms += milli;
+  if (ms != null) {
+    ms *= 1000;
+    if (milli != null) {
+      ms += milli;
+    }
   }
+
   return ms;
 }
 
-export function getTimestampValue(value: string): number {
+export function getTimestampValue(value: string): number | null {
   const split = value.split(":");
   const splitInt = [];
   if (split.length > 3 || split.length == 0) return null;
@@ -244,6 +247,8 @@ export function getTimestampValue(value: string): number {
     return splitInt[0] * 60 + splitInt[1];
   } else if (split.length == 1) {
     return splitInt[0];
+  } else {
+    return null;
   }
 }
 
@@ -446,12 +451,9 @@ export function filterSource(
     }
   } else if ((countRegex = /^duration([>=<])([\d:]*)$/.exec(filter)) != null) {
     const symbol = countRegex[1];
-    let value;
-    if (countRegex[2].includes(":")) {
-      value = getTimestampValue(countRegex[2]);
-    } else {
-      value = Number.parseInt(countRegex[2]);
-    }
+    const value = countRegex[2].includes(":")
+      ? getTimestampValue(countRegex[2])
+      : Number.parseInt(countRegex[2]);
     const type = getSourceType(source.url);
     if (type == ST.video) {
       let duration = clip ? clip.end - clip.start : source.duration;
@@ -725,7 +727,7 @@ export function applyEffects(scene: Scene, base64String: string) {
   const effectsString = atob(base64String);
   const effects = effectsString.split(",");
 
-  let index = 0
+  let index = 0;
   scene.timingFunction = Object.values(TF)[Number.parseInt(effects[index++])];
   scene.timingConstant = Number.parseInt(effects[index++]);
   scene.timingMin = Number.parseInt(effects[index++]);
@@ -897,7 +899,8 @@ export function applyEffects(scene: Scene, base64String: string) {
   scene.panHorizTransLevelMax = Number.parseInt(effects[index++]);
   scene.panHorizTransLevelMin = Number.parseInt(effects[index++]);
   scene.panHorizTransRandom = Number.parseInt(effects[index++]) == 1;
-  scene.panVertTransType = Object.values(VTF)[Number.parseInt(effects[index++])];
+  scene.panVertTransType =
+    Object.values(VTF)[Number.parseInt(effects[index++])];
   scene.panVertTransImg = Number.parseInt(effects[index++]) == 1;
   scene.panVertTransLevel = Number.parseInt(effects[index++]);
   scene.panVertTransLevelMax = Number.parseInt(effects[index++]);
