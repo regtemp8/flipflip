@@ -3552,7 +3552,10 @@ export function markOffline(getState: () => State, setState: Function) {
   const state = getState();
   const actionableLibrary = state.library.filter((ls) => {
     // If this link was checked within the last week, skip
-    return Date.now() - new Date(ls.lastCheck).getTime() >= 604800000;
+    return (
+      ls.lastCheck != null &&
+      Date.now() - new Date(ls.lastCheck).getTime() >= 604800000
+    );
   });
   const offlineLoop = () => {
     const state = getState();

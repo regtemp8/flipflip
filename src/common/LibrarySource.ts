@@ -6,7 +6,7 @@ export default class LibrarySource {
   url: string;
   offline: boolean = false;
   marked: boolean = false;
-  lastCheck: Date = null;
+  lastCheck: Date | null = null;
   tags: Array<Tag> = [];
   clips: Array<Clip> = [];
   disabledClips: Array<number> = [];
