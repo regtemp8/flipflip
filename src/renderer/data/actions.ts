@@ -3466,7 +3466,7 @@ export function importLibrary(
   backup: Function,
   libraryImport: any,
 ): Object {
-  if (!libraryImport || !libraryImport.length) return;
+  if (!libraryImport || !libraryImport.length) return {};
   backup();
   const newLibrary = Array.from(state.library);
   const newTags = Array.from(state.tags);
