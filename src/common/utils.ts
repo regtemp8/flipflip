@@ -179,7 +179,7 @@ export function getFileGroup(url: string, pathSep: string) {
           /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(
             url,
           );
-        return redgifRegex.length ? redgifRegex[1] : "all";
+        return redgifRegex && redgifRegex.length ? redgifRegex[1] : "all";
       } else if (url.includes("/users/")) {
         redgifID = url.replace(/^https?:\/\/(www\.)?redgifs\.com\/users\//, "");
         if (redgifID.includes("/")) {
@@ -215,8 +215,8 @@ export function getFileGroup(url: string, pathSep: string) {
       return authorID;
     }
     case ST.e621: {
-      const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g;
-      const hostE621 = hostRegexE621.exec(url)[1];
+      const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g.exec(url);
+      const hostE621 = hostRegexE621 && hostRegexE621.length ? hostRegexE621[1] : "";
       let E621ID = "";
       if (url.includes("/pools/")) {
         E621ID = "pool" + url.substring(url.lastIndexOf("/"));
@@ -245,8 +245,8 @@ export function getFileGroup(url: string, pathSep: string) {
     case ST.danbooru:
     case ST.gelbooru1:
     case ST.gelbooru2: {
-      const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g;
-      const host = hostRegex.exec(url)[1];
+      const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g.exec(url);
+      const host = hostRegex && hostRegex.length ? hostRegex[1] : "";
       let danbooruID = "";
       if (url.includes("/pools/")) {
         danbooruID = "pools/" + url.substring(url.lastIndexOf("/"));
@@ -277,7 +277,7 @@ export function getFileGroup(url: string, pathSep: string) {
     case ST.ehentai: {
       const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^/]*)/g;
       const gallery = galleryRegex.exec(url);
-      return gallery[1];
+      return gallery && gallery.length ? gallery[1] : "";
     }
     case ST.list:
       if (/^https?:\/\//g.exec(url) == null) {
