@@ -22,7 +22,7 @@ export default interface AppStorageState {
   playlists: Array<Playlist>;
   tags: Array<Tag>;
   route: Array<Route>;
-  specialMode: string;
+  specialMode: string | null;
   openTab: number;
   displayedSources: Array<LibrarySource>;
   libraryYOffset: number;
@@ -35,16 +35,16 @@ export default interface AppStorageState {
   scriptYOffset: number;
   scriptFilters: Array<string>;
   scriptSelected: Array<string>;
-  progressMode: string;
-  progressTitle: string;
+  progressMode: string | null;
+  progressTitle: string | null;
   progressCurrent: number;
   progressTotal: number;
-  progressNext: string;
-  systemMessage: string;
+  progressNext: string | null;
+  systemMessage: string | null;
   systemSnackOpen: boolean;
-  systemSnack: string;
-  systemSnackSeverity: string;
-  tutorial: string;
+  systemSnack: string | null;
+  systemSnackSeverity: string | null;
+  tutorial: string | null;
   theme: Theme;
 }
 
@@ -60,7 +60,7 @@ export const defaultInitialState: AppStorageState = {
   playlists: new Array<Playlist>(),
   tags: new Array<Tag>(),
   route: new Array<Route>(),
-  specialMode: null as string,
+  specialMode: null,
   openTab: 0,
   displayedSources: new Array<LibrarySource>(),
   libraryYOffset: 0,
@@ -73,15 +73,15 @@ export const defaultInitialState: AppStorageState = {
   scriptYOffset: 0,
   scriptFilters: new Array<string>(),
   scriptSelected: new Array<string>(),
-  progressMode: null as string,
-  progressTitle: null as string,
+  progressMode: null,
+  progressTitle: null,
   progressCurrent: 0,
   progressTotal: 0,
-  progressNext: null as string,
-  systemMessage: null as string,
+  progressNext: null,
+  systemMessage: null,
   systemSnackOpen: false,
-  systemSnack: null as string,
-  systemSnackSeverity: null as string,
-  tutorial: null as string,
+  systemSnack: null,
+  systemSnackSeverity: null,
+  tutorial: null,
   theme: defaultTheme,
 };
