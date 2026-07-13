@@ -988,7 +988,7 @@ export function playSceneFromLibrary(
     );
 
     const activeScene = getActiveScene(state);
-    if (activeScene?.libraryID != -1) {
+    if (activeScene != null && activeScene.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -3093,7 +3093,7 @@ export function downloadSource(state: State, source: LibrarySource): Object {
     );
 
     const activeScene = getActiveScene(state);
-    if (activeScene?.libraryID != -1) {
+    if (activeScene != null && activeScene.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
