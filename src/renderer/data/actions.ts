@@ -2969,8 +2969,10 @@ export function sortTags(
   const getName = (a: Tag) => {
     return a.name.toLowerCase();
   };
+  const noText = () => ''
+  const noNumber = () => -1
   const newTags = state.tags.sort(
-    sortFunction(algorithm, ascending, getName, null, null, null, null),
+    sortFunction(algorithm, ascending, getName, noText, noNumber, noText),
   );
   return { tags: newTags };
 }
@@ -2982,7 +2984,7 @@ function sortFunction(
   getFullName: (a: any) => string,
   getCount: (a: any) => number,
   getType: (a: any) => string,
-  secondary: string,
+  secondary?: string,
 ): (a: any, b: any) => number {
   return (a, b) => {
     let aValue: any, bValue: any;
@@ -3041,15 +3043,14 @@ function sortFunction(
       return ascending ? -1 : 1;
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
-    } else if (secondary) {
+    } else if (secondary != null) {
       return sortFunction(
         secondary,
         true,
         getName,
         getFullName,
         getCount,
-        getType,
-        null,
+        getType
       )(a, b);
     } else {
       return 0;
