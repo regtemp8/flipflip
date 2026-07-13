@@ -2026,7 +2026,7 @@ export function updateLibrary(
 }
 
 export function clearBlacklist(state: State, sourceURL: string): Object {
-  return blacklistFile(state, sourceURL, null);
+  return blacklistFile(state, sourceURL);
 }
 
 export function editBlacklist(
@@ -2055,7 +2055,7 @@ export function editBlacklist(
 export function blacklistFile(
   state: State,
   sourceURL: string,
-  fileToBlacklist: string,
+  fileToBlacklist?: string,
 ): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
