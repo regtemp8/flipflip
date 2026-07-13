@@ -111,21 +111,21 @@ export function getLibrarySource(
     activeScene = getActiveScene(state);
   }
   if (activeScene == null) return null;
-  return state.library.find((s) => s.id == activeScene.libraryID);
+  return state.library.find((s) => s.id == activeScene.libraryID) ?? null;
 }
 
 // Returns the active audio source, or null if the current route isn't a audio source
 export function getAudioSource(state: State): Audio | null {
   const activeScene = getActiveScene(state);
   if (activeScene == null) return null;
-  return state.audios.find((a) => a.id == activeScene.libraryID);
+  return state.audios.find((a) => a.id == activeScene.libraryID) ?? null;
 }
 
 // Returns the active script source, or null if the current route isn't a script source
 export function getScriptSource(state: State): CaptionScript | null {
   const activeScene = getActiveScene(state);
   if (activeScene == null) return null;
-  return state.scripts.find((s) => s.id == activeScene.libraryID);
+  return state.scripts.find((s) => s.id == activeScene.libraryID) ?? null;
 }
 
 export function getSelectScript(state: State): CaptionScript | null {
