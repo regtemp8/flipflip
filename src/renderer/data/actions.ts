@@ -2748,7 +2748,7 @@ export function sortPlaylist(
   if (playlist) {
     playlist.audios = playlist.audios
       .map((aID) => state.audios.find((a) => a.id == aID))
-      .concat()
+      .filter((audio) => audio != null)
       .sort(audioSortFunction(algorithm, ascending))
       .map((a) => a.id);
     return { playlists: newPlaylists };
