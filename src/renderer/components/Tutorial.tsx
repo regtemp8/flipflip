@@ -72,7 +72,7 @@ interface TutorialProps {
   classes: any;
   config: Config;
   route: Route[];
-  scene: Scene | SceneGrid;
+  scene: Scene | SceneGrid | null;
   tutorial: string;
   onDoneTutorial(lastTutorial: string): void;
   onSetTutorial(nextTutorial: string | null): void;
