@@ -3073,7 +3073,7 @@ function sortFunction(
         getName,
         getFullName,
         getCount,
-        getType
+        getType,
       )(a, b);
     } else {
       return 0;
