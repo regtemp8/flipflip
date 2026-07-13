@@ -2,7 +2,7 @@ import SceneGridCell from "./SceneGridCell";
 
 export default class SceneGrid {
   id: number = 0;
-  name: string;
+  name: string | null = null;
   grid: Array<Array<SceneGridCell>> = [[new SceneGridCell()]];
 
   constructor(init?: Partial<SceneGrid>) {
