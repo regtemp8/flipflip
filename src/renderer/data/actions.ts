@@ -1105,11 +1105,10 @@ export function clipVideo(
 
 export function setDisabledClips(state: State, disabled: Array<number>) {
   const activeScene = getActiveScene(state);
-  if (activeScene) {
+  const activeSource = getActiveSource(state);
+  if (activeScene && activeSource) {
     return updateScene(state, activeScene, (s) => {
-      const source = s.sources.find(
-        (ls) => ls.url == getActiveSource(state).url,
-      );
+      const source = s.sources.find((ls) => ls.url == activeSource.url);
       if (source) {
         source.disabledClips = disabled;
       }
@@ -1118,10 +1117,13 @@ export function setDisabledClips(state: State, disabled: Array<number>) {
 }
 
 export function navigateClipping(state: State, offset: number): Object {
+  const activeSourceURL = getActiveSource(state)?.url;
+  if (activeSourceURL == null) {
+    return {};
+  }
+
   const displayed = Array.from(state.displayedSources);
-  let newIndexOf = displayed
-    .map((s) => s.url)
-    .indexOf(getActiveSource(state).url);
+  let newIndexOf = displayed.map((s) => s.url).indexOf(activeSourceURL);
   let newSource;
   do {
     newIndexOf = newIndexOf + offset;

@@ -36,6 +36,7 @@ import ScriptLibrary from "./library/ScriptLibrary";
 import AppStorageState, {
   defaultInitialState,
 } from "../../common/AppStorageState";
+import LibrarySource from "../../common/LibrarySource";
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />;
@@ -379,7 +380,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
               {this.isRoute("clip") && (
                 <VideoClipper
                   allTags={this.state.tags}
-                  source={actions.getActiveSource(this.state)}
+                  source={actions.getActiveSource(this.state) as LibrarySource}
                   isLibrary={!actions.getActiveScene(this.state)}
                   tutorial={this.state.tutorial}
                   videoVolume={this.state.config.defaultScene.videoVolume}
