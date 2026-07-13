@@ -2025,18 +2025,13 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
           } else if (
             (countRegex = /^duration([>=<])([\d:]*)$/.exec(filter)) != null
           ) {
-            const symbol = countRegex[1];
-            let value;
-            if (countRegex[2].includes(":")) {
-              value = getTimestampValue(countRegex[2]);
-            } else {
-              value = Number.parseInt(countRegex[2]);
-            }
             const type = getSourceType(source.url);
             if (type == ST.video) {
-              if (source.duration == null) {
+              const value = countRegex[2].includes(":") ? getTimestampValue(countRegex[2]) : Number.parseInt(countRegex[2]);
+              if (value == null || source.duration == null) {
                 matchesFilter = false;
               } else {
+                const symbol = countRegex[1];
                 switch (symbol) {
                   case "=":
                     matchesFilter = Math.floor(source.duration) == value;

@@ -967,8 +967,10 @@ class VideoClipper extends React.Component<
   onChangeStartText(e: MouseEvent) {
     const input = e.target as HTMLInputElement;
     this.setState({ isEditingStartText: input.value });
-    let timestampValue = getTimestampValue(input.value);
-    this.onChangeStartTextValue(timestampValue);
+    const timestampValue = getTimestampValue(input.value);
+    if (timestampValue != null) {
+      this.onChangeStartTextValue(timestampValue);
+    }
   }
 
   onChangeStartTextValue(timestampValue: number, force = false) {
@@ -995,8 +997,10 @@ class VideoClipper extends React.Component<
   onChangeEndText(e: MouseEvent) {
     const input = e.target as HTMLInputElement;
     this.setState({ isEditingEndText: input.value });
-    let timestampValue = getTimestampValue(input.value);
-    this.onChangeStartTextValue(timestampValue);
+    const timestampValue = getTimestampValue(input.value);
+    if (timestampValue != null) {
+      this.onChangeEndTextValue(timestampValue);
+    }
   }
 
   onChangeEndTextValue(timestampValue: number, force = false) {
@@ -1073,15 +1077,13 @@ class VideoClipper extends React.Component<
         if (focus == "input") {
           e.preventDefault();
           if (start) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingStartText,
-            );
+            const text = this.state.isEditingStartText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const startValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0;
             this.onChangeStartTextValue(startValue, true);
           } else if (end) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingEndText,
-            );
+            const text = this.state.isEditingEndText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const endValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0;
             this.onChangeEndTextValue(endValue, true);
           }
@@ -1091,18 +1093,16 @@ class VideoClipper extends React.Component<
         if (focus == "input") {
           e.preventDefault();
           if (start) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingStartText,
-            );
+            const text = this.state.isEditingStartText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const startValue =
               timestampValue + 1 <= this.video.duration
                 ? timestampValue + 1
                 : Math.floor(this.video.duration);
             this.onChangeStartTextValue(startValue, true);
           } else if (end) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingEndText,
-            );
+            const text = this.state.isEditingEndText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const endValue =
               timestampValue + 1 <= this.video.duration
                 ? timestampValue + 1

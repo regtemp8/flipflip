@@ -450,16 +450,17 @@ export function filterSource(
         break;
     }
   } else if ((countRegex = /^duration([>=<])([\d:]*)$/.exec(filter)) != null) {
-    const symbol = countRegex[1];
-    const value = countRegex[2].includes(":")
-      ? getTimestampValue(countRegex[2])
-      : Number.parseInt(countRegex[2]);
     const type = getSourceType(source.url);
     if (type == ST.video) {
-      let duration = clip ? clip.end - clip.start : source.duration;
-      if (duration == null) {
+      const duration = clip ? clip.end - clip.start : source.duration;
+      const value = countRegex[2].includes(":")
+        ? getTimestampValue(countRegex[2])
+        : Number.parseInt(countRegex[2]);
+
+      if (duration == null || value == null) {
         matchesFilter = false;
       } else {
+        const symbol = countRegex[1];
         switch (symbol) {
           case "=":
             matchesFilter = Math.floor(duration) == value;
