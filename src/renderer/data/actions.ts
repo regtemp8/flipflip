@@ -103,8 +103,13 @@ export function getActiveSource(state: State): LibrarySource | null {
 }
 
 // Returns the active library source, or null if the current route isn't a library source
-export function getLibrarySource(state: State): LibrarySource | null {
-  const activeScene = getActiveScene(state);
+export function getLibrarySource(
+  state: State,
+  activeScene?: Scene,
+): LibrarySource | null {
+  if (activeScene === undefined) {
+    activeScene = getActiveScene(state);
+  }
   if (activeScene == null) return null;
   return state.library.find((s) => s.id == activeScene.libraryID);
 }
@@ -253,7 +258,7 @@ export function doneTutorial(state: State, tutorial: string): Object {
       state.config.tutorials.scenePicker = tutorial;
     }
   } else if (isRoute(state, "scene")) {
-    if (getActiveScene(state).generatorWeights) {
+    if (getActiveScene(state)?.generatorWeights) {
       if (tutorial == SDGT.final || tutorial == SDGT.finalError) {
         newTutorial = null;
         state.config.tutorials.sceneGenerator = DONE;
@@ -694,9 +699,14 @@ export function importAudioFromLibrary(
   state: State,
   sources: Array<Audio>,
 ): Object {
+  const activeScene = getActiveScene(state);
+  if (activeScene == null) {
+    return {};
+  }
+
   const playlistIndex = state.route[state.route.length - 1].value;
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, activeScene, (s: Scene) => {
       s.audioPlaylists[playlistIndex].audios =
         s.audioPlaylists[playlistIndex].audios.concat(sources);
     }),
@@ -708,9 +718,14 @@ export function importScriptFromLibrary(
   state: State,
   sources: Array<CaptionScript>,
 ): Object {
+  const activeScene = getActiveScene(state);
+  if (activeScene == null) {
+    return {};
+  }
+
   const playlistIndex = state.route[state.route.length - 1].value;
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, activeScene, (s: Scene) => {
       s.scriptPlaylists[playlistIndex].scripts =
         s.scriptPlaylists[playlistIndex].scripts.concat(sources);
     }),
@@ -732,9 +747,13 @@ export function importFromLibrary(
   sources: Array<LibrarySource>,
 ): Object {
   const scene = getActiveScene(state);
+  if (scene == null) {
+    return {};
+  }
+
   const sceneSources = mergeSources(scene.sources, sources);
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, scene, (s: Scene) => {
       s.sources = sceneSources;
     }),
     ...goBack(state),
@@ -967,8 +986,9 @@ export function playSceneFromLibrary(
         videoSkip: state.config.defaultScene.videoSkip,
       },
     );
-    if (getActiveScene(state)?.libraryID != -1) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene?.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -1014,8 +1034,9 @@ export function playSceneFromLibrary(
     videoSkip: state.config.defaultScene.videoSkip,
     orderFunction: state.config.defaultScene.orderFunction,
   });
-  if (getLibrarySource(state) != null) {
-    const activeScene = getActiveScene(state);
+
+  const activeScene = getActiveScene(state);
+  if (activeScene != null && getLibrarySource(state, activeScene) != null) {
     applyEffects(tempScene, getEffects(activeScene));
     tempScene.overlayEnabled = activeScene.overlayEnabled;
     tempScene.overlays = activeScene.overlays;
@@ -1023,6 +1044,7 @@ export function playSceneFromLibrary(
     state.route.pop();
     state.scenes.pop();
   }
+
   return {
     displayedSources: displayed,
     scenes: state.scenes.concat([tempScene]),
@@ -1115,7 +1137,11 @@ export function navigateClipping(state: State, offset: number): Object {
 
 export function navigateDisplayedLibrary(state: State, offset: number): Object {
   const activeScene = getActiveScene(state);
-  const librarySource = getLibrarySource(state);
+  if (activeScene == null) {
+    return {};
+  }
+
+  const librarySource = getLibrarySource(state, activeScene);
   if (librarySource != null) {
     const tagNames = state.tags.map((t: Tag) => t.name);
     // Re-order the tags of the source we were playing
@@ -1146,9 +1172,9 @@ export function navigateDisplayedLibrary(state: State, offset: number): Object {
 
 export function endPlaySceneFromLibrary(state: State): Object {
   let librarySource;
-  if (getActiveScene(state).audioScene) {
+  if (getActiveScene(state)?.audioScene) {
     librarySource = getAudioSource(state);
-  } else if (getActiveScene(state).scriptScene) {
+  } else if (getActiveScene(state)?.scriptScene) {
     librarySource = getScriptSource(state);
   } else {
     librarySource = getLibrarySource(state);
@@ -3064,8 +3090,9 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         downloadScene: true,
       },
     );
-    if (getActiveScene(state)?.libraryID != -1) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene?.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -3108,8 +3135,9 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         downloadScene: true,
       },
     );
-    if (getLibrarySource(state) != null) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene != null && getLibrarySource(state, activeScene) != null) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
