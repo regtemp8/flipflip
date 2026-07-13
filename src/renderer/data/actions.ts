@@ -2596,7 +2596,7 @@ export function addSource(
       });
     case GT.local: {
       if (!args || args.length < 2) {
-        return;
+        return {};
       }
       let rootDir = args[1];
       if (!rootDir.endsWith(window.constants.pathSep)) {
@@ -2615,7 +2615,7 @@ export function addSource(
     }
     case GT.tumblr:
       if (!args || args.length < 1) {
-        return;
+        return {};
       }
       if (scene == null) {
         return updateLibrary(state, (l) =>
@@ -2627,6 +2627,8 @@ export function addSource(
           handleArgs(s);
         });
       }
+    default:
+      return {};
   }
 }
 
