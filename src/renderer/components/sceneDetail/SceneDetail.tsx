@@ -2027,7 +2027,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
           ) {
             const type = getSourceType(source.url);
             if (type == ST.video) {
-              const value = countRegex[2].includes(":") ? getTimestampValue(countRegex[2]) : Number.parseInt(countRegex[2]);
+              const value = countRegex[2].includes(":")
+                ? getTimestampValue(countRegex[2])
+                : Number.parseInt(countRegex[2]);
               if (value == null || source.duration == null) {
                 matchesFilter = false;
               } else {

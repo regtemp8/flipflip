@@ -2722,7 +2722,7 @@ export function sortScene(
     }
     return "0";
   };
-  const noText = () => ''
+  const noText = () => "";
   const newScenes = state.scenes.sort(
     sortFunction(
       algorithm,
@@ -2970,8 +2970,8 @@ export function sortTags(
   const getName = (a: Tag) => {
     return a.name.toLowerCase();
   };
-  const noText = () => ''
-  const noNumber = () => -1
+  const noText = () => "";
+  const noNumber = () => -1;
   const newTags = state.tags.sort(
     sortFunction(algorithm, ascending, getName, noText, noNumber, noText),
   );
