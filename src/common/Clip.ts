@@ -2,9 +2,9 @@ import Tag from "./Tag";
 
 export default class Clip {
   id: number = 0;
-  start: number;
-  end: number;
-  volume: number = null;
+  start: number | null = null;
+  end: number | null = null;
+  volume: number | null = null;
   tags: Array<Tag> = [];
 
   constructor(init?: Partial<Clip>) {
