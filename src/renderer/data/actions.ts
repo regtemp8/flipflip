@@ -213,7 +213,7 @@ export function startVCTutorial(state: State): Object {
   }
 }
 
-export function setTutorial(state: State, tutorial: string): Object {
+export function setTutorial(state: State, tutorial: string | null): Object {
   return { tutorial: tutorial };
 }
 

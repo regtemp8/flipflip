@@ -75,7 +75,7 @@ interface TutorialProps {
   scene: Scene | SceneGrid;
   tutorial: string;
   onDoneTutorial(lastTutorial: string): void;
-  onSetTutorial(nextTutorial: string): void;
+  onSetTutorial(nextTutorial: string | null): void;
   onSkipAllTutorials(): void;
 }
 
@@ -2232,7 +2232,7 @@ class Tutorial extends React.Component<TutorialProps> {
     this.showNextTutorial();
   }
 
-  setTutorial(tutorial: string) {
+  setTutorial(tutorial: string | null) {
     if (this.props.tutorial != tutorial) {
       this.props.onSetTutorial(tutorial);
     }
