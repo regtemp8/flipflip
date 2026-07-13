@@ -3,7 +3,7 @@ import Tag from "./Tag";
 
 export default class Audio {
   id: number = 0;
-  url: string;
+  url: string | null = null;
   marked: boolean = false;
   tags: Array<Tag> = [];
 
@@ -20,13 +20,13 @@ export default class Audio {
   tickBPMMulti: number = 10;
   bpm: number = 0;
 
-  thumb: string;
-  name: string;
-  artist: string;
-  album: string;
-  trackNum: number;
-  duration: number;
-  comment: string;
+  thumb: string | null = null;
+  name: string | null = null;
+  artist: string | null = null;
+  album: string | null = null;
+  trackNum: number | null = null;
+  duration: number | null = null;
+  comment: string | null = null;
   playedCount: number = 0;
 
   constructor(init?: Partial<Audio>) {
