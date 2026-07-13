@@ -37,6 +37,8 @@ import AppStorageState, {
   defaultInitialState,
 } from "../../common/AppStorageState";
 import LibrarySource from "../../common/LibrarySource";
+import SceneGrid from "../../common/SceneGrid";
+import Scene from "../../common/Scene";
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />;
@@ -235,7 +237,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   allSceneGrids={this.state.grids}
                   config={this.state.config}
                   library={this.state.library}
-                  scene={scene}
+                  scene={scene as Scene}
                   tags={this.state.tags}
                   tutorial={this.state.tutorial}
                   goBack={a(actions.goBack)}
@@ -398,7 +400,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <GridSetup
                   allScenes={this.state.scenes}
                   autoEdit={this.state.specialMode == SP.autoEdit}
-                  scene={grid}
+                  scene={grid as SceneGrid}
                   tutorial={this.state.tutorial}
                   goBack={a(actions.goBack)}
                   onDelete={a(actions.deleteGrid)}
@@ -413,7 +415,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
@@ -437,7 +439,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
@@ -447,9 +449,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   goBack={a(actions.endPlaySceneFromLibrary)}
                   playTrack={a(actions.playTrack)}
                   tags={
-                    scene.audioScene
+                    (scene as Scene).audioScene
                       ? actions.getAudioSource(this.state)?.tags
-                      : scene.scriptScene
+                      : (scene as Scene).scriptScene
                         ? actions.getScriptSource(this.state)?.tags
                         : actions.getLibrarySource(this.state)?.id > -1
                           ? actions.getLibrarySource(this.state)?.tags
@@ -457,21 +459,21 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   }
                   allTags={this.state.tags}
                   toggleTag={
-                    scene.audioScene
+                    (scene as Scene).audioScene
                       ? a(actions.toggleAudioTag)
-                      : scene.scriptScene
+                      : (scene as Scene).scriptScene
                         ? a(actions.toggleScriptTag)
                         : a(actions.toggleTag)
                   }
                   inheritTags={
-                    scene.audioScene || scene.scriptScene
+                    (scene as Scene).audioScene || (scene as Scene).scriptScene
                       ? undefined
                       : a(actions.inheritTags)
                   }
                   navigateTagging={a(actions.navigateDisplayedLibrary)}
                   getTags={actions.getTags.bind(this, this.state.library)}
                   changeAudioRoute={
-                    scene.audioScene ? a(actions.changeAudioRoute) : undefined
+                    (scene as Scene).audioScene ? a(actions.changeAudioRoute) : undefined
                   }
                   setCount={a(actions.setCount)}
                   cache={a(actions.cacheImage)}
@@ -485,7 +487,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
