@@ -1475,14 +1475,14 @@ export function generateScenes(
 
             // Filter out sources which don't have ruleAllSearches/allSearches
             for (const as of ruleAllSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
             for (const as of allSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
@@ -1492,7 +1492,7 @@ export function generateScenes(
             // Filter out sources which don't have any ruleOrSearches
             let anyRos = ruleOrSearches.length == 0;
             for (const os of ruleOrSearches) {
-              if (filterSource(os, s, null)) {
+              if (filterSource(os, s)) {
                 anyRos = true;
                 break;
               }
@@ -1503,14 +1503,14 @@ export function generateScenes(
 
             // Filter out sources which have ruleNoneSearches/noneSearches
             for (const ns of ruleNoneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
             for (const ns of noneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }
@@ -1607,20 +1607,20 @@ export function generateScenes(
                 let b = false;
 
                 // Filter out sources which don't match this search
-                if (!filterSource(rule.search, s, null)) {
+                if (!filterSource(rule.search, s)) {
                   continue;
                 }
 
                 // Filter out sources which don't have ruleAllSearches/allSearches
                 for (const as of ruleAllSearches) {
-                  if (!filterSource(as, s, null)) {
+                  if (!filterSource(as, s)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
                 for (const as of allSearches) {
-                  if (!filterSource(as, s, null)) {
+                  if (!filterSource(as, s)) {
                     b = true;
                     break;
                   }
@@ -1630,7 +1630,7 @@ export function generateScenes(
                 // Filter out sources which don't have any ruleOrSearches
                 let anyRos = ruleOrSearches.length == 0;
                 for (const os of ruleOrSearches) {
-                  if (filterSource(os, s, null)) {
+                  if (filterSource(os, s)) {
                     anyRos = true;
                     break;
                   }
@@ -1641,14 +1641,14 @@ export function generateScenes(
 
                 // Filter out sources which have ruleNoneSearches/noneSearches
                 for (const ns of ruleNoneSearches) {
-                  if (filterSource(ns, s, null)) {
+                  if (filterSource(ns, s)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
                 for (const ns of noneSearches) {
-                  if (filterSource(ns, s, null)) {
+                  if (filterSource(ns, s)) {
                     b = true;
                     break;
                   }
@@ -1763,7 +1763,7 @@ export function generateScenes(
 
           // Filter out sources which don't have allSearches
           for (const as of allSearches) {
-            if (!filterSource(as, s, null)) {
+            if (!filterSource(as, s)) {
               b = true;
               break;
             }
@@ -1772,7 +1772,7 @@ export function generateScenes(
 
           // Filter out sources which have noneSearches
           for (const ns of noneSearches) {
-            if (filterSource(ns, s, null)) {
+            if (filterSource(ns, s)) {
               b = true;
               break;
             }
@@ -1856,13 +1856,13 @@ export function generateScenes(
             let b = false;
 
             // Filter out sources which don't match this search
-            if (!filterSource(wg.search, s, null)) {
+            if (!filterSource(wg.search, s)) {
               continue;
             }
 
             // Filter out sources which don't have allSearches
             for (const as of allSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
@@ -1871,7 +1871,7 @@ export function generateScenes(
 
             // Filter out sources which have noneSearches
             for (const ns of noneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }

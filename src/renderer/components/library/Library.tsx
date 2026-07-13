@@ -1919,7 +1919,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       for (let source of mergeSources ? mergeSources : this.props.library) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {
-          matchesFilter = filterSource(filter, source, null, mergeSources);
+          matchesFilter = filterSource(filter, source, undefined, mergeSources);
           if (!matchesFilter) break;
         }
         if (matchesFilter) {

@@ -366,7 +366,7 @@ export function areWeightsValid(scene: Scene): boolean {
 export function filterSource(
   filter: string,
   source: LibrarySource,
-  clip: Clip,
+  clip?: Clip,
   mergeSources?: Array<LibrarySource>,
 ): boolean {
   let matchesFilter = true;
