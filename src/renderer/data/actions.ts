@@ -2130,27 +2130,31 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
   const tagIDs = tags.map((t) => t.id);
   for (const source of newLibrary) {
     // Remove deleted tags, update any edited tags, and order the same as tags
-    source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-    source.tags = source.tags.map((t: Tag) => {
-      for (const tag of tags) {
-        if (t.id == tag.id) {
-          t.name = tag.name;
-          t.phraseString = tag.phraseString;
-          return t;
+    source.tags = source.tags
+      .filter((t: Tag) => tagIDs.includes(t.id))
+      .map((t: Tag) => {
+        for (const tag of tags) {
+          if (t.id == tag.id) {
+            t.name = tag.name;
+            t.phraseString = tag.phraseString;
+            return t;
+          }
         }
-      }
-    });
-    source.tags = source.tags.sort((a: Tag, b: Tag) => {
-      const aIndex = tagIDs.indexOf(a.id);
-      const bIndex = tagIDs.indexOf(b.id);
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+
+        return undefined;
+      })
+      .filter((value) => value != null)
+      .sort((a: Tag, b: Tag) => {
+        const aIndex = tagIDs.indexOf(a.id);
+        const bIndex = tagIDs.indexOf(b.id);
+        if (aIndex < bIndex) {
+          return -1;
+        } else if (aIndex > bIndex) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
     if (source.clips) {
       for (const clip of source.clips) {
         // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2159,52 +2163,60 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
         } else {
           clip.tags = [];
         }
-        clip.tags = clip.tags.map((t: Tag) => {
-          for (const tag of tags) {
-            if (t.id == tag.id) {
-              t.name = tag.name;
-              t.phraseString = tag.phraseString;
-              return t;
+        clip.tags = clip.tags
+          .map((t: Tag) => {
+            for (const tag of tags) {
+              if (t.id == tag.id) {
+                t.name = tag.name;
+                t.phraseString = tag.phraseString;
+                return t;
+              }
             }
-          }
-        });
-        clip.tags = clip.tags.sort((a: Tag, b: Tag) => {
-          const aIndex = tagIDs.indexOf(a.id);
-          const bIndex = tagIDs.indexOf(b.id);
-          if (aIndex < bIndex) {
-            return -1;
-          } else if (aIndex > bIndex) {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
+
+            return undefined;
+          })
+          .filter((value) => value != null)
+          .sort((a: Tag, b: Tag) => {
+            const aIndex = tagIDs.indexOf(a.id);
+            const bIndex = tagIDs.indexOf(b.id);
+            if (aIndex < bIndex) {
+              return -1;
+            } else if (aIndex > bIndex) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
       }
     }
   }
   for (const source of newAudios) {
     // Remove deleted tags, update any edited tags, and order the same as tags
-    source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-    source.tags = source.tags.map((t: Tag) => {
-      for (const tag of tags) {
-        if (t.id == tag.id) {
-          t.name = tag.name;
-          t.phraseString = tag.phraseString;
-          return t;
+    source.tags = source.tags
+      .filter((t: Tag) => tagIDs.includes(t.id))
+      .map((t: Tag) => {
+        for (const tag of tags) {
+          if (t.id == tag.id) {
+            t.name = tag.name;
+            t.phraseString = tag.phraseString;
+            return t;
+          }
         }
-      }
-    });
-    source.tags = source.tags.sort((a: Tag, b: Tag) => {
-      const aIndex = tagIDs.indexOf(a.id);
-      const bIndex = tagIDs.indexOf(b.id);
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+
+        return undefined;
+      })
+      .filter((value) => value != null)
+      .sort((a: Tag, b: Tag) => {
+        const aIndex = tagIDs.indexOf(a.id);
+        const bIndex = tagIDs.indexOf(b.id);
+        if (aIndex < bIndex) {
+          return -1;
+        } else if (aIndex > bIndex) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
   }
   for (const source of newScripts) {
     // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2235,27 +2247,31 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
   for (const scene of newScenes) {
     for (const source of scene.sources) {
       // Remove deleted tags, update any edited tags, and order the same as tags
-      source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-      source.tags = source.tags.map((t: Tag) => {
-        for (const tag of tags) {
-          if (t.id == tag.id) {
-            t.name = tag.name;
-            t.phraseString = tag.phraseString;
-            return t;
+      source.tags = source.tags
+        .filter((t: Tag) => tagIDs.includes(t.id))
+        .map((t: Tag) => {
+          for (const tag of tags) {
+            if (t.id == tag.id) {
+              t.name = tag.name;
+              t.phraseString = tag.phraseString;
+              return t;
+            }
           }
-        }
-      });
-      source.tags = source.tags.sort((a: Tag, b: Tag) => {
-        const aIndex = tagIDs.indexOf(a.id);
-        const bIndex = tagIDs.indexOf(b.id);
-        if (aIndex < bIndex) {
-          return -1;
-        } else if (aIndex > bIndex) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
+
+          return undefined;
+        })
+        .filter((value) => value != null)
+        .sort((a: Tag, b: Tag) => {
+          const aIndex = tagIDs.indexOf(a.id);
+          const bIndex = tagIDs.indexOf(b.id);
+          if (aIndex < bIndex) {
+            return -1;
+          } else if (aIndex > bIndex) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
       if (source.clips) {
         for (const clip of source.clips) {
           // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2264,26 +2280,30 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
           } else {
             clip.tags = [];
           }
-          clip.tags = clip.tags.map((t: Tag) => {
-            for (const tag of tags) {
-              if (t.id == tag.id) {
-                t.name = tag.name;
-                t.phraseString = tag.phraseString;
-                return t;
+          clip.tags = clip.tags
+            .map((t: Tag) => {
+              for (const tag of tags) {
+                if (t.id == tag.id) {
+                  t.name = tag.name;
+                  t.phraseString = tag.phraseString;
+                  return t;
+                }
               }
-            }
-          });
-          clip.tags = clip.tags.sort((a: Tag, b: Tag) => {
-            const aIndex = tagIDs.indexOf(a.id);
-            const bIndex = tagIDs.indexOf(b.id);
-            if (aIndex < bIndex) {
-              return -1;
-            } else if (aIndex > bIndex) {
-              return 1;
-            } else {
-              return 0;
-            }
-          });
+
+              return undefined;
+            })
+            .filter((value) => value != null)
+            .sort((a: Tag, b: Tag) => {
+              const aIndex = tagIDs.indexOf(a.id);
+              const bIndex = tagIDs.indexOf(b.id);
+              if (aIndex < bIndex) {
+                return -1;
+              } else if (aIndex > bIndex) {
+                return 1;
+              } else {
+                return 0;
+              }
+            });
         }
       }
     }
