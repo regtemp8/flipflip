@@ -473,7 +473,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   navigateTagging={a(actions.navigateDisplayedLibrary)}
                   getTags={actions.getTags.bind(this, this.state.library)}
                   changeAudioRoute={
-                    (scene as Scene).audioScene ? a(actions.changeAudioRoute) : undefined
+                    (scene as Scene).audioScene
+                      ? a(actions.changeAudioRoute)
+                      : undefined
                   }
                   setCount={a(actions.setCount)}
                   cache={a(actions.cacheImage)}

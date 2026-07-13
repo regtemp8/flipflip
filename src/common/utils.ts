@@ -216,7 +216,8 @@ export function getFileGroup(url: string, pathSep: string) {
     }
     case ST.e621: {
       const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g.exec(url);
-      const hostE621 = hostRegexE621 && hostRegexE621.length ? hostRegexE621[1] : "";
+      const hostE621 =
+        hostRegexE621 && hostRegexE621.length ? hostRegexE621[1] : "";
       let E621ID = "";
       if (url.includes("/pools/")) {
         E621ID = "pool" + url.substring(url.lastIndexOf("/"));

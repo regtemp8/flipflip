@@ -107,7 +107,7 @@ export function getLibrarySource(
   state: State,
   scene?: Scene,
 ): LibrarySource | null {
-  const activeScene = scene ?? getActiveScene(state)
+  const activeScene = scene ?? getActiveScene(state);
   if (activeScene == null) return null;
   return state.library.find((s) => s.id == activeScene.libraryID) ?? null;
 }

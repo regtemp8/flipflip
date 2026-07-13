@@ -321,8 +321,8 @@ export default class Scene {
     }
 
     if (this.audioURL && this.audioURL != "") {
-      if(!this.audios) {
-        this.audios = []
+      if (!this.audios) {
+        this.audios = [];
       }
 
       this.audios.push(new Audio({ url: this.audioURL }));
@@ -408,8 +408,8 @@ export default class Scene {
     if (this.audios) {
       this.audioPlaylists = this.audios
         .map((a) => {
-          if(a.url == null || a.url.length === 0) {
-            return undefined
+          if (a.url == null || a.url.length === 0) {
+            return undefined;
           }
           if (!a.name) {
             if (a.url.startsWith("http")) {
@@ -427,12 +427,13 @@ export default class Scene {
             a.duration = 0;
           }
           return { audios: [a], shuffle: false, repeat: RP.all };
-        }).filter((p) => p != null);
+        })
+        .filter((p) => p != null);
       this.audios = undefined;
     }
 
     if (this.textSource && this.textSource.length > 0) {
-      const {blink, caption, captionBig, count} = new CaptionScript()
+      const { blink, caption, captionBig, count } = new CaptionScript();
       const newScripts = [
         new CaptionScript({
           url: this.textSource,
