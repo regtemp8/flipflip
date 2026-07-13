@@ -2722,15 +2722,16 @@ export function sortScene(
     }
     return "0";
   };
+  const noText = () => ''
   const newScenes = state.scenes.sort(
     sortFunction(
       algorithm,
       ascending,
       getName,
-      null,
+      noText,
       getCount,
       getType,
-      algorithm == SF.type ? SF.alpha : null,
+      algorithm == SF.type ? SF.alpha : undefined,
     ),
   );
   return { scenes: newScenes };
@@ -2919,7 +2920,7 @@ export function sortSources(
   const getType = (a: LibrarySource) => {
     return getSourceType(a.url);
   };
-  let secondary: string = null;
+  let secondary: string | undefined = undefined;
   if (algorithm == SF.alpha) {
     secondary = SF.type;
   }
