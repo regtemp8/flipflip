@@ -593,16 +593,16 @@ export class GeneralSettings implements GeneralSettingsI {
 export class Tutorials {
   [key: string]: string | null;
 
-  scenePicker: string | null = null
-  sceneDetail: string | null = null
-  player: string | null = null
-  library: string | null = null
-  audios: string | null = null
-  scripts: string | null = null
-  scriptor: string | null = null
-  sceneGenerator: string | null = null
-  sceneGrid: string | null = null
-  videoClipper: string | null = null
+  scenePicker: string | null = null;
+  sceneDetail: string | null = null;
+  player: string | null = null;
+  library: string | null = null;
+  audios: string | null = null;
+  scripts: string | null = null;
+  scriptor: string | null = null;
+  sceneGenerator: string | null = null;
+  sceneGrid: string | null = null;
+  videoClipper: string | null = null;
 }
 
 export default class Config {
