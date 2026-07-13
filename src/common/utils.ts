@@ -275,7 +275,7 @@ export function getFileGroup(url: string, pathSep: string) {
       return host + "/" + decodeURIComponent(danbooruID);
     }
     case ST.ehentai: {
-      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^\/]*)/g;
+      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^/]*)/g;
       const gallery = galleryRegex.exec(url);
       return gallery[1];
     }
