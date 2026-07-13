@@ -78,7 +78,7 @@ export function isRoute(state: State, kind: string): Boolean {
 export function getActiveScene(state: State): Scene | null {
   for (const r of state.route.slice().reverse()) {
     if (r.kind == "scene") {
-      return state.scenes.find((s: Scene) => s.id === r.value);
+      return state.scenes.find((s: Scene) => s.id === r.value) ?? null;
     }
   }
   return null;
@@ -87,7 +87,7 @@ export function getActiveScene(state: State): Scene | null {
 export function getActiveGrid(state: State): SceneGrid | null {
   for (const r of state.route.slice().reverse()) {
     if (r.kind == "grid") {
-      return state.grids.find((g: SceneGrid) => g.id === r.value);
+      return state.grids.find((g: SceneGrid) => g.id === r.value) ?? null;
     }
   }
   return null;
