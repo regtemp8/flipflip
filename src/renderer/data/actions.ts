@@ -105,11 +105,9 @@ export function getActiveSource(state: State): LibrarySource | null {
 // Returns the active library source, or null if the current route isn't a library source
 export function getLibrarySource(
   state: State,
-  activeScene?: Scene,
+  scene?: Scene,
 ): LibrarySource | null {
-  if (activeScene === undefined) {
-    activeScene = getActiveScene(state);
-  }
+  const activeScene = scene ?? getActiveScene(state)
   if (activeScene == null) return null;
   return state.library.find((s) => s.id == activeScene.libraryID) ?? null;
 }
