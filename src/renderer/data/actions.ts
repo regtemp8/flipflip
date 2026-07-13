@@ -3077,7 +3077,6 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         id: id,
         name: "download_scene_temp",
         sources: [source],
-        libraryID: null,
         timingFunction: TF.constant,
         timingConstant: 1,
         backgroundType: state.config.defaultScene.backgroundType,
