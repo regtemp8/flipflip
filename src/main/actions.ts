@@ -145,15 +145,15 @@ export function restoreFromBackup(backupFile: string): AppStorageState {
     scriptYOffset: 0,
     scriptFilters: new Array<string>(),
     scriptSelected: new Array<string>(),
-    progressMode: null as string,
-    progressTitle: null as string,
+    progressMode: null,
+    progressTitle: null,
     progressCurrent: 0,
     progressTotal: 0,
-    progressNext: null as string,
-    systemMessage: null as string,
-    systemSnack: null as string,
-    systemSnackSeverity: null as string,
-    tutorial: null as string,
+    progressNext: null,
+    systemMessage: null,
+    systemSnack: null,
+    systemSnackSeverity: null,
+    tutorial: null,
     theme: data.theme ? data.theme : defaultTheme,
     systemSnackOpen: false,
   };
@@ -204,24 +204,19 @@ export function tumblrAuth(
 
   let sharedSecret = "";
 
-  oauth.getOAuthRequestToken(
-    (
-      err: { statusCode: number; data: string },
-      token: string,
-      secret: string,
-    ) => {
-      if (err) {
-        const error = err.statusCode + " - " + err.data;
-        console.error(error);
-        window.webContents.send(IPC.tumblrAuthResponse, { error });
-        server.close();
-        return;
-      }
+  oauth.getOAuthRequestToken((err, token, secret) => {
+    if (err) {
+      const error =
+        err instanceof Error ? err.message : err.statusCode + " - " + err.data;
+      console.error(error);
+      window.webContents.send(IPC.tumblrAuthResponse, { error });
+      server.close();
+      return;
+    }
 
-      sharedSecret = secret;
-      shell.openExternal(authorizeUrl + "?oauth_token=" + token);
-    },
-  );
+    sharedSecret = secret;
+    shell.openExternal(authorizeUrl + "?oauth_token=" + token);
+  });
 
   // Start a server to listen for Tumblr OAuth response
   const server = http.createServer();
@@ -240,12 +235,10 @@ export function tumblrAuth(
         res.writeHead(200, { "Content-Type": "text/html" });
         res.write(html);
 
-        if (!req.url.endsWith("favicon.ico")) {
-          if (
-            req.url.includes("oauth_token") &&
-            req.url.includes("oauth_verifier")
-          ) {
-            const args = req.url.replace("\/?", "").split("&");
+        const url = req.url ?? "";
+        if (!url.endsWith("favicon.ico")) {
+          if (url.includes("oauth_token") && url.includes("oauth_verifier")) {
+            const args = url.replace(/\/?/g, "").split("&");
             const oauthToken = args[0].substring(12);
             const oauthVerifier = args[1].substring(15);
 
@@ -253,7 +246,7 @@ export function tumblrAuth(
               oauthToken,
               sharedSecret,
               oauthVerifier,
-              (err: any, token: string, secret: string) => {
+              (err, token, secret) => {
                 if (err) {
                   console.error("Validation failed with error", err);
                   window.webContents.send(IPC.tumblrAuthResponse, {
@@ -354,7 +347,7 @@ export function getTumblrFollowing(
       const blogs = [];
       if (err) {
         error = String(err);
-      } else {
+      } else if (resp) {
         total = resp.total_blogs;
         for (const blog of resp.blogs) {
           blogs.push(blog.name);
