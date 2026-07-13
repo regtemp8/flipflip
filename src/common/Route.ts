@@ -5,7 +5,7 @@
  * 'Value' is what specific thing of that kind should be shown (e.g. scene ID).
  */
 export class Route {
-  kind: string;
+  kind: string | null = null;
   value: any;
   constructor(init?: Partial<Route>) {
     Object.assign(this, init);
