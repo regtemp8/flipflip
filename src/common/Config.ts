@@ -457,7 +457,7 @@ export class SceneSettings implements SceneSettingsI {
   videoSpeedMax = 20;
   videoSkip = 10;
   generatorMax = 100;
-  overlayEnabled: false;
+  overlayEnabled: boolean = false;
   overlays: Array<Overlay> = [];
   nextSceneID = 0;
   nextSceneTime = 900000;
