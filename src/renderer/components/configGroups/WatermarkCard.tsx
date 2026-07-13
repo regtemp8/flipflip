@@ -23,7 +23,6 @@ import { GeneralSettings } from "../../../common/Config";
 import { WC } from "../../../common/const";
 import en from "../../../common/en";
 import ColorPicker from "../config/ColorPicker";
-import { CancelablePromise } from "../../data/utils";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -237,26 +236,25 @@ class WatermarkCard extends React.Component<
     );
   }
 
-  _promise: CancelablePromise = null;
+  _abortController: AbortController = null;
   componentDidMount() {
     // Define system fonts
-    this._promise = new CancelablePromise((resolve, reject) => {
-      window.ipc.getFonts().then(
-        (res: Array<string>) => {
-          if (!this._promise.hasCanceled) {
-            this.setState({ systemFonts: res });
-          }
-        },
-        (err: string) => {
-          console.error(err);
-        },
-      );
-    });
+    this._abortController = new AbortController();
+    window.ipc.getFonts().then(
+      (res: Array<string>) => {
+        if (!this._abortController.signal.aborted) {
+          this.setState({ systemFonts: res });
+        }
+      },
+      (err: string) => {
+        console.error(err);
+      },
+    );
   }
 
   componentWillUnmount() {
-    if (this._promise != null) {
-      this._promise.cancel();
+    if (this._abortController != null) {
+      this._abortController.abort();
     }
   }
 

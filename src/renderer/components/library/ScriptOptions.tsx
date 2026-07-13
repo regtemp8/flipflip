@@ -20,7 +20,6 @@ import withStyles from "@mui/styles/withStyles";
 
 import { green, red } from "@mui/material/colors";
 
-import { CancelablePromise } from "../../data/utils";
 import CaptionScript, { FontSettingsI } from "../../../common/CaptionScript";
 import FontOptions from "./FontOptions";
 
@@ -226,26 +225,25 @@ class ScriptOptions extends React.Component<
     );
   }
 
-  _promise: CancelablePromise = null;
+  _abortController: AbortController = null;
   componentDidMount() {
     // Define system fonts
-    this._promise = new CancelablePromise((resolve, reject) => {
-      window.ipc.getFonts().then(
-        (res: Array<string>) => {
-          if (!this._promise.hasCanceled) {
-            this.setState({ systemFonts: res });
-          }
-        },
-        (err: string) => {
-          console.error(err);
-        },
-      );
-    });
+    this._abortController = new AbortController();
+    window.ipc.getFonts().then(
+      (res: Array<string>) => {
+        if (!this._abortController.signal.aborted) {
+          this.setState({ systemFonts: res });
+        }
+      },
+      (err: string) => {
+        console.error(err);
+      },
+    );
   }
 
   componentWillUnmount() {
-    if (this._promise != null) {
-      this._promise.cancel();
+    if (this._abortController != null) {
+      this._abortController.abort();
     }
   }
 

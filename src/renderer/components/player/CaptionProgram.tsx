@@ -2,7 +2,6 @@ import * as React from "react";
 import Sound from "react-sound";
 
 import captionProgramDefaults, {
-  CancelablePromise,
   getMsTimestampValue,
   getRandomListItem,
   getTimeout,
@@ -84,7 +83,7 @@ export default class CaptionProgram extends React.Component<
     };
   }
 
-  _runningPromise: CancelablePromise = null;
+  _abortController: AbortController = new AbortController();
   _timeout: number = null;
 
   render() {
@@ -292,10 +291,8 @@ export default class CaptionProgram extends React.Component<
     if (this.el.current) {
       this.el.current.style.opacity = "0";
     }
-    if (this._runningPromise) {
-      this._runningPromise.cancel();
-      this._runningPromise = null;
-    }
+
+    this._abortController.abort();
     if (this._timeout) {
       window.clearTimeout(this._timeout);
       this._timeout = null;
@@ -312,7 +309,7 @@ export default class CaptionProgram extends React.Component<
 
   start() {
     const url = this.props.captionScript.url;
-    this._runningPromise = new CancelablePromise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       if (this.props.captionScript.script == null) {
         window.ipc.getTextFromURL(url).then((text) => {
           if (text != null) {
@@ -323,7 +320,11 @@ export default class CaptionProgram extends React.Component<
         resolve({ data: [this.props.captionScript.script], helpers: null });
       }
     });
-    this._runningPromise.then(async (data) => {
+    promise.then(async (data) => {
+      if (this._abortController.signal.aborted) {
+        return;
+      }
+
       let error = null;
       let newProgram = new Array<Function>();
       let newTimestamps = new Map<number, Array<Function>>();
@@ -1075,10 +1076,10 @@ export default class CaptionProgram extends React.Component<
 
   showText(value: string, ms: number, opacity: number) {
     return (nextCommand: Function) => {
-      if(!this.el.current) {
-        return
+      if (!this.el.current) {
+        return;
       }
-      
+
       this.el.current.style.opacity = (opacity / 100).toString();
       this.el.current.innerHTML = htmlEntities(value);
       const wait = this.wait(ms);

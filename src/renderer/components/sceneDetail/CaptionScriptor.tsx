@@ -45,7 +45,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import AutoSizer from "react-virtualized-auto-sizer";
 
 import { CST, MO, RP } from "../../../common/const";
-import captionProgramDefaults, { CancelablePromise } from "../../data/utils";
+import captionProgramDefaults from "../../data/utils";
 import Scene from "../../../common/Scene";
 import Tag from "../../../common/Tag";
 import Player from "../player/Player";
@@ -1186,23 +1186,23 @@ class CaptionScriptor extends React.Component<
     });
   }
 
-  _promise: CancelablePromise = null;
+  _abortController: AbortController = null;
   componentDidMount() {
     this._currentTimestamp = 0;
     window.addEventListener("keydown", this.onKeyDown, false);
     // Define system fonts
-    this._promise = new CancelablePromise(() => {
-      window.ipc.getFonts().then(
-        (res: Array<string>) => {
-          if (!this._promise.hasCanceled) {
-            this.setState({ systemFonts: res });
-          }
-        },
-        (err: string) => {
-          console.error(err);
-        },
-      );
-    });
+    this._abortController = new AbortController();
+    window.ipc.getFonts().then(
+      (res: Array<string>) => {
+        if (!this._abortController.signal.aborted) {
+          this.setState({ systemFonts: res });
+        }
+      },
+      (err: string) => {
+        console.error(err);
+      },
+    );
+
     if (this.props.openScript) {
       if (this.props.openScript.script) {
         this.state.codeMirrorOverwriteHack.fire(this.props.openScript.script);
@@ -1229,8 +1229,8 @@ class CaptionScriptor extends React.Component<
   componentWillUnmount() {
     this._currentTimestamp = null;
     window.removeEventListener("keydown", this.onKeyDown);
-    if (this._promise != null) {
-      this._promise.cancel();
+    if (this._abortController != null) {
+      this._abortController.abort();
     }
   }
 
