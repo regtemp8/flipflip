@@ -439,10 +439,10 @@ export function addScene(state: State): Object {
     id = Math.max(s.id + 1, id);
   });
   const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    ...state.config.defaultScene,
     id: id,
     name: "New scene",
     sources: new Array<LibrarySource>(),
-    ...state.config.defaultScene,
   });
   if (tutorial) {
     scene.name = "Cute Stuff";
@@ -1237,12 +1237,12 @@ export function addGenerator(state: State): Object {
     id = Math.max(s.id + 1, id);
   });
   const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    ...state.config.defaultScene,
     id: id,
     name: "New Generator",
     sources: new Array<LibrarySource>(),
     generatorWeights: [],
     openTab: 4,
-    ...state.config.defaultScene,
   });
   return {
     scenes: state.scenes.concat([scene]),

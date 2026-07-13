@@ -843,12 +843,12 @@ export default class ImageView extends React.Component<ImageViewProps> {
         ref={this.backgroundRef}
         className={backgroundClassName}
         style={{
+          ...backgroundStyle,
           height: "100%",
           width: "100%",
           zIndex: -1,
           position: "absolute",
           backgroundSize: "cover",
-          ...backgroundStyle,
         }}
       />
     );
