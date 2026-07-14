@@ -207,21 +207,21 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
 
   nop() {}
 
-  onEditInt(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onEditInt(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const newAudio = new Audio(this.state.audio);
     (newAudio as any)[key] = Number.parseInt(input.value);
     this.setState({ audio: newAudio });
   }
 
-  onEdit(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onEdit(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const newAudio = new Audio(this.state.audio);
     (newAudio as any)[key] = input.value;
     this.setState({ audio: newAudio });
   }
 
-  onRemoveThumb(e: MouseEvent) {
+  onRemoveThumb(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     const newAudio = new Audio(this.state.audio);
     newAudio.thumb = null;
