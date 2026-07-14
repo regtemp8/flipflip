@@ -14,6 +14,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Theme,
 } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
@@ -38,7 +39,7 @@ interface HydrusDialogProps {
   classes: any;
   open: boolean;
   onClose(): void;
-  onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
+  onImportURL(type: string, e: React.MouseEvent<HTMLButtonElement>, ...args: any[]): void;
 }
 
 type FileSortOrder = "asc" | "desc";
@@ -231,13 +232,13 @@ class HydrusDialog extends React.Component<
     this.setState({ includePendingTags });
   }
 
-  onFileSortType(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onFileSortType(e: SelectChangeEvent<number>) {
+    const input = e.target;
     this.setState({ fileSortType: Number(input.value) });
   }
 
-  onFileSortOrder(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onFileSortOrder(e: SelectChangeEvent<FileSortOrder>) {
+    const input = e.target;
     this.setState({ fileSortOrder: input.value as FileSortOrder });
   }
 
@@ -258,7 +259,7 @@ class HydrusDialog extends React.Component<
     this.props.onClose();
   }
 
-  createAPICall(e: MouseEvent) {
+  createAPICall(e: React.MouseEvent<HTMLButtonElement>) {
     const { selectedTags } = this.state;
     const tags = encodeURIComponent(JSON.stringify(selectedTags));
     let url = `${this.makeURL()}?tags=${tags}`;
