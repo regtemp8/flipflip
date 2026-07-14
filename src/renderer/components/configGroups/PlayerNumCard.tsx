@@ -177,7 +177,7 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
     this.changeKey("ignoredTags", selectedTags);
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -191,8 +191,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
     }
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
