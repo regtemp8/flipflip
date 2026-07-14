@@ -1598,7 +1598,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
   }
 
-  onAddSource(addFunction: string, e: MouseEvent, ...args: any[]) {
+  onAddSource(addFunction: string, e: React.MouseEvent<HTMLButtonElement>, ...args: any[]) {
     this.onCloseDialog();
     if (addFunction == AF.videos && e.shiftKey) {
       this.props.onAddSource(null, AF.videoDir, ...args);
@@ -1643,7 +1643,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
   }
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
   }
 
@@ -1656,7 +1656,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
   }
 
-  onRemoveAll(e: MouseEvent) {
+  onRemoveAll(e: React.MouseEvent<HTMLButtonElement>) {
     if (e.shiftKey && e.altKey && e.ctrlKey) {
       this.setState({ openMenu: MO.deleteAlert });
     } else {
@@ -1717,8 +1717,8 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
   }
 
-  onChangeImportFile(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ importFile: input.value });
   }
 
