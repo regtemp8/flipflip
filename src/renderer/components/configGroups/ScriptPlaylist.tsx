@@ -225,7 +225,10 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
     );
   }
 
-  onSourceIconClick(script: CaptionScript, e: MouseEvent) {
+  onSourceIconClick(
+    script: CaptionScript,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) {
     const sourceURL = script.url;
     if (e.shiftKey && !e.ctrlKey) {
       this.openExternalURL(sourceURL);
