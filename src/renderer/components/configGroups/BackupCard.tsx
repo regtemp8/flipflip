@@ -18,6 +18,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slide,
   Snackbar,
   Switch,
@@ -434,8 +435,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
     });
   }
 
-  onChangeBackup(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeBackup(e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.setState({
       backup: this.state.backups.find((b) => b.url == input.value),
     });
@@ -513,7 +514,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
     this.setState({ openMenu: null, snackbarOpen: false });
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -527,8 +528,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
     }
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
@@ -536,8 +537,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
