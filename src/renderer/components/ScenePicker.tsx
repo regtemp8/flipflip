@@ -2123,7 +2123,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     }
   }
 
-  onChangeTab(e: React.SyntheticEvent<Element,Event>, tab: number) {
+  onChangeTab(e: React.SyntheticEvent<Element, Event>, tab: number) {
     if (this.props.openTab != tab) {
       this.props.onChangeTab(tab);
     }
