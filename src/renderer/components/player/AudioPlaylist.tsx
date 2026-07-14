@@ -461,7 +461,7 @@ class AudioPlaylist extends React.Component<
     }
   };
 
-  onSourceIconClick(audio: Audio, e: MouseEvent) {
+  onSourceIconClick(audio: Audio, e: React.MouseEvent<HTMLDivElement>) {
     const sourceURL = audio.url;
     if (e.shiftKey && !e.ctrlKey) {
       this.openExternalURL(sourceURL);
@@ -547,7 +547,7 @@ class AudioPlaylist extends React.Component<
     });
   }
 
-  onAudioSliderChange(e: MouseEvent, value: number) {
+  onAudioSliderChange(e: Event, value: number) {
     // TODO this is causing playback to skip to the next track
     //this.props.onUpdateScene(this.props.scene, (s) => s.audioPlaylists[this.props.playlistIndex].audios.find((a: Audio) => a.id == this.state.playingAudios[this.state.currentIndex].id).volume = value);
   }
