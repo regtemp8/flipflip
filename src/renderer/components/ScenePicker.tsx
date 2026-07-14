@@ -2100,7 +2100,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
           const json = JSON.parse(text);
           this.props.onImportScene(json, this.state.importSources);
           this.onCloseDialog();
-        } catch (e) {
+        } catch {
           this.props.systemMessage("This is not a valid JSON file");
         }
       });

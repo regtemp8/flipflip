@@ -544,7 +544,7 @@ class SourceListItem extends React.Component<
       this.props.savePosition();
       try {
         this.props.onPlay(this.props.source, this.props.sources);
-      } catch (e) {
+      } catch {
         this.props.systemMessage(
           "The source " + sourceURL + " isn't in your Library",
         );

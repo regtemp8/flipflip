@@ -1221,8 +1221,8 @@ export default class ImagePlayer extends React.Component<
           window.ipc.getGifInfo(url).then((gifInfo) => {
             try {
               processInfo(gifInfo);
-            } catch (e) {
-              console.error(e);
+            } catch (err) {
+              console.error(err);
             }
           });
         } else {

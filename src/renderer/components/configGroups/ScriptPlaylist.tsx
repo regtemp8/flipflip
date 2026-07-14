@@ -241,7 +241,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           this.props.scene.id,
           this.props.playlist.scripts,
         );
-      } catch (e) {
+      } catch {
         this.props.systemMessage(
           "The source " + sourceURL + " isn't in your Library",
         );

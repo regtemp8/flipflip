@@ -38,7 +38,7 @@ export default class AppStorage {
     this.initialState.version = process.env.APP_VERSION;
     try {
       fs.mkdirSync(saveDir);
-    } catch (e) {
+    } catch {
       // who cares
     }
     try {
@@ -472,12 +472,12 @@ export default class AppStorage {
           };
           break;
       }
-    } catch (e) {
+    } catch (err) {
       // When an error occurs archive potentially incompatible data.json file
       // This essentially renames the data.json file and thus the app is self-healing
       // in that it will recreate an initial (blank) data.json file on restarting
       // - The archived file being available for investigation.
-      console.error(e);
+      console.error(err);
       archiveFile(savePath);
     }
 

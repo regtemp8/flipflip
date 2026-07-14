@@ -305,8 +305,8 @@ export default class ErrorBoundary extends React.Component<
       try {
         this.props.onRestore(backupFile);
         this.clearError();
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     });
   }

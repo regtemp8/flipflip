@@ -426,7 +426,7 @@ class ScriptSourceList extends React.Component<
         this.state.playWithScene,
         this.props.sources,
       );
-    } catch (e) {
+    } catch {
       this.props.systemMessage(
         "The source " + this.state.beginPlay.url + " isn't in your Library",
       );

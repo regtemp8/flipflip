@@ -100,8 +100,8 @@ function unlinkBackups(backups: Array<Backup>) {
   for (let backup of backups) {
     try {
       fs.unlinkSync(path.join(saveDir, backup.url));
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 }

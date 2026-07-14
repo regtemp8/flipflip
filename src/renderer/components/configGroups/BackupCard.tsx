@@ -446,11 +446,11 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
         snackbar: "Backup success!",
         snackbarSeverity: SS.success,
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       this.setState({
         snackbarOpen: true,
-        snackbar: "Error: " + e,
+        snackbar: "Error: " + err,
         snackbarSeverity: SS.error,
       });
     }
@@ -470,11 +470,11 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
         snackbar: "Clean success!",
         snackbarSeverity: SS.success,
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       this.setState({
         snackbarOpen: true,
-        snackbar: "Error: " + e,
+        snackbar: "Error: " + err,
         snackbarSeverity: SS.error,
       });
     }
@@ -495,11 +495,11 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           snackbar: "Restore success!",
           snackbarSeverity: SS.success,
         });
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         this.setState({
           snackbarOpen: true,
-          snackbar: "Error: " + e,
+          snackbar: "Error: " + err,
           snackbarSeverity: SS.error,
         });
       }

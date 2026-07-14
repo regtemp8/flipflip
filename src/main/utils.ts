@@ -239,3 +239,7 @@ export async function localFileResponse(filePath: string, request: Request) {
     });
   }
 }
+
+export function getErrorMessage(err: unknown) {
+  return (err instanceof Error) ? err.message : String(err)
+}

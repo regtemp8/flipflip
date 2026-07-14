@@ -45,6 +45,8 @@ import {
   getCachePath,
   portablePath,
   saveDir,
+  getCacheDir,
+  getErrorMessage,
 } from "./utils";
 import {
   createNewAppStorage,
@@ -710,8 +712,8 @@ function onDeleteLibrarySource(
     } else {
       rimrafSync(getCachePath(sourceURL, config));
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -729,8 +731,8 @@ async function onLibraryMove(
   const cachePath = getCachePath(sourceURL, config);
   try {
     files = await fs.promises.readdir(cachePath);
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     files = [];
   }
 
@@ -786,8 +788,8 @@ function deleteSource(sourceURL: string) {
     ) {
       fs.unlinkSync(sourceURL);
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -875,7 +877,7 @@ function onFinishDelete(ev: IpcMainInvokeEvent, filePath: string) {
     return fs.unlinkSync(filePath);
   } catch (err) {
     console.error(err);
-    return err.message;
+    return getErrorMessage(err);
   }
 }
 
@@ -960,8 +962,8 @@ function onGetScraperSources(ev: IpcMainInvokeEvent, sources: LibrarySource[]) {
           sceneSources.push(...dirSources);
           addSelf = false;
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     }
     if (addSelf) {
@@ -1043,7 +1045,7 @@ async function getAudioMetadata(audio: Audio, config: Config) {
     extractMusicMetadata(newAudio, metadata, getCachePath(null, config));
     return newAudio;
   } catch (err) {
-    console.error("Error reading metadata:", err.message);
+    console.error("Error reading metadata:", getErrorMessage(err));
     return undefined;
   }
 }
@@ -1053,7 +1055,7 @@ async function onGetAudioBPMMetadata(ev: IpcMainInvokeEvent, url: string) {
     const metadata = await parseMusicMetadata(url);
     return metadata?.common?.bpm ?? -1;
   } catch (err) {
-    console.error("Error reading metadata:", err.message);
+    console.error("Error reading metadata:", getErrorMessage(err));
     return -1;
   }
 }
@@ -1092,7 +1094,7 @@ async function onGetAudioBuffer(
 
       return { arrayBuffer };
     } catch (err) {
-      return { error: err.message };
+      return { error: getErrorMessage(err) };
     }
   }
 }
@@ -1155,7 +1157,7 @@ async function onHydrusAuth(
     }
   } catch (err) {
     console.error(err);
-    response.error = `Error: ${err.message}`;
+    response.error = `Error: ${getErrorMessage(err)}`;
   }
 
   return response;
@@ -1198,7 +1200,7 @@ async function onPiwigoAuth(
     }
   } catch (err) {
     console.error(err);
-    return err.message;
+    return getErrorMessage(err);
   }
 }
 

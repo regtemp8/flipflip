@@ -1740,7 +1740,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           const json = JSON.parse(text);
           this.props.onImportLibrary(json);
           this.onCloseDialog();
-        } catch (e) {
+        } catch {
           this.props.systemMessage("This is not a valid JSON file");
         }
       });
