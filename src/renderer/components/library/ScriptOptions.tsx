@@ -255,8 +255,8 @@ class ScriptOptions extends React.Component<
     this.setState({ script: script });
   }
 
-  onSourceBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     switch (key) {
       case "stopAtEnd":
         if (input.checked) {
@@ -283,7 +283,7 @@ class ScriptOptions extends React.Component<
     }
   }
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
     this.changeKey(key, value);
   }
 
