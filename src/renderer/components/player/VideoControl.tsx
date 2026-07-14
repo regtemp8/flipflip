@@ -319,14 +319,14 @@ class VideoControl extends React.Component<
     this.setState({ update: !this.state.update });
   }
 
-  onChangePosition(e: MouseEvent, position: number) {
+  onChangePosition(e: Event, position: number) {
     this.props.video.currentTime = position;
     if (this.props.video.paused) {
       this.triggerUpdate();
     }
   }
 
-  onChangeVolume(e: MouseEvent, volume: number) {
+  onChangeVolume(e: Event, volume: number) {
     if (volume > 100) {
       volume = 100;
     }
@@ -343,7 +343,7 @@ class VideoControl extends React.Component<
     }
   }
 
-  onChangeSpeed(e: MouseEvent, speed: number) {
+  onChangeSpeed(e: Event, speed: number) {
     this.props.onChangeSpeed(speed);
     if (this.props.video) {
       this.props.video.playbackRate = speed / 10;
