@@ -48,43 +48,46 @@ export default class PlayerMenu {
   }
 
   public static setIsPlaying(playing: boolean) {
-    if (PlayerMenu.instance == null) {
-      return;
-    }
-
-    const menu = Menu.getApplicationMenu();
-    const item = menu.getMenuItemById("playPause");
-    item.label = "Play/Pause " + (playing ? "(Playing)" : "(Paused)");
+    PlayerMenu.changeLabel(
+      "playPause",
+      "Play/Pause " + (playing ? "(Playing)" : "(Paused)"),
+    );
   }
 
   public static setAlwaysOnTop(alwaysOnTop: boolean) {
-    if (PlayerMenu.instance == null) {
-      return;
-    }
-
-    const menu = Menu.getApplicationMenu();
-    const item = menu.getMenuItemById("toggleAlwaysOnTop");
-    item.label = "Toggle Always On Top " + (alwaysOnTop ? "(On)" : "(Off)");
+    PlayerMenu.changeLabel(
+      "toggleAlwaysOnTop",
+      "Toggle Always On Top " + (alwaysOnTop ? "(On)" : "(Off)"),
+    );
   }
 
   public static setMenuBarVisibility(showMenu: boolean) {
-    if (PlayerMenu.instance == null) {
-      return;
-    }
-
-    const menu = Menu.getApplicationMenu();
-    const item = menu.getMenuItemById("toggleMenuBarDisplay");
-    item.label = "Toggle Menu Bar " + (showMenu ? "(On)" : "(Off)");
+    PlayerMenu.changeLabel(
+      "toggleMenuBarDisplay",
+      "Toggle Menu Bar " + (showMenu ? "(On)" : "(Off)"),
+    );
   }
 
   public static setFullScreen(fullScreen: boolean) {
+    PlayerMenu.changeLabel(
+      "toggleFullscreen",
+      "Toggle Fullscreen " + (fullScreen ? "(On)" : "(Off)")
+    )
+  }
+
+  private static changeLabel(itemId: string, label: string) {
     if (PlayerMenu.instance == null) {
       return;
     }
 
+    let item;
     const menu = Menu.getApplicationMenu();
-    const item = menu.getMenuItemById("toggleFullscreen");
-    item.label = "Toggle Fullscreen " + (fullScreen ? "(On)" : "(Off)");
+    if (menu != null) {
+      item = menu.getMenuItemById(itemId);
+    }
+    if (item != null) {
+      item.label = label;
+    }
   }
 
   private constructor(
