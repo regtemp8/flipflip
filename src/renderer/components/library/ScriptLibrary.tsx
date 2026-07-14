@@ -964,7 +964,7 @@ class ScriptLibrary extends React.Component<
     });
   }
 
-  onAddSource(type: string, e: MouseEvent) {
+  onAddSource(type: string, e: React.MouseEvent<HTMLButtonElement>) {
     this.onCloseDialog();
     switch (type) {
       case AF.url:
@@ -1052,7 +1052,7 @@ class ScriptLibrary extends React.Component<
     this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
   }
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
   }
 
