@@ -126,8 +126,8 @@ class ColorSetPicker extends React.Component<
     );
   }
 
-  onOpenColorPicker(e: MouseEvent) {
-    const target = e.currentTarget as HTMLElement;
+  onOpenColorPicker(e: React.MouseEvent<HTMLButtonElement>) {
+    const target = e.currentTarget;
     let color, index;
     if (target.id == "add-color") {
       index = this.props.currentColors.length;
