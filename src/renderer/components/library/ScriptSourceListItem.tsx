@@ -314,7 +314,7 @@ class ScriptSourceListItem extends React.Component<
     return tagName;
   }
 
-  onSourceIconClick(e: MouseEvent) {
+  onSourceIconClick(e: React.MouseEvent<HTMLButtonElement>) {
     const sourceURL = this.props.source.url;
     if (e.shiftKey && e.ctrlKey && e.altKey) {
       this.props.onDelete(this.props.source);
@@ -331,8 +331,8 @@ class ScriptSourceListItem extends React.Component<
     this.props.onStartEdit(s.id);
   }
 
-  onEditSource(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onEditSource(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ urlInput: input.value });
   }
 
