@@ -18,6 +18,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   SvgIcon,
   Switch,
@@ -135,7 +136,7 @@ class AudioOptions extends React.Component<
                 value={this.state.audio.url}
                 margin="normal"
                 label="URL"
-                onChange={this.onSourceInput.bind(this, "url")}
+                onChange={this.onSourceTextInput.bind(this, "url")}
               />
             </Grid>
             <Grid item xs={12}>
@@ -540,21 +541,26 @@ class AudioOptions extends React.Component<
     );
   }
 
-  onSourceInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceInput(key: string, e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 
-  onSourceSliderChange(key: string, e: MouseEvent, value: number) {
+  onSourceTextInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    this.changeKey(key, input.value);
+  }
+
+  onSourceSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
     this.changeKey(key, value);
   }
 
-  onSourceIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
-  blurSourceIntKey(key: string, e: MouseEvent) {
+  blurSourceIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -568,8 +574,8 @@ class AudioOptions extends React.Component<
     }
   }
 
-  onSourceBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     switch (key) {
       case "tick":
         if (input.checked) {
