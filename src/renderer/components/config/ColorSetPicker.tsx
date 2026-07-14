@@ -23,9 +23,9 @@ interface ColorSetPickerProps {
 }
 
 interface ColorSetPickerState {
-  pickerIndex: number;
-  pickerColor: string;
-  pickerAnchorEl: any;
+  pickerIndex?: number;
+  pickerColor?: string;
+  pickerAnchorEl?: any;
 }
 
 class ColorSetPicker extends React.Component<
@@ -35,11 +35,7 @@ class ColorSetPicker extends React.Component<
   constructor(props: ColorSetPickerProps) {
     super(props);
 
-    this.state = {
-      pickerIndex: null as number,
-      pickerColor: null as string,
-      pickerAnchorEl: null as any,
-    };
+    this.state = {};
   }
 
   render() {

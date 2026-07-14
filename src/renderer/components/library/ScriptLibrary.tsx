@@ -351,8 +351,8 @@ interface ScriptLibraryState {
   filters: Array<string>;
   selected: Array<string>;
   selectedTags: Array<string>;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
 }
 
 class ScriptLibrary extends React.Component<
@@ -368,8 +368,6 @@ class ScriptLibrary extends React.Component<
       filters: props.filters,
       selected: props.selected,
       selectedTags: new Array<string>(),
-      menuAnchorEl: null as any,
-      openMenu: null as string,
     };
   }
 

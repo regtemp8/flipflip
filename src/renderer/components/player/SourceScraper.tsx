@@ -47,7 +47,7 @@ interface SourceScraperState {
   restart: boolean;
   preload: boolean;
   videoVolume: number;
-  captcha: any;
+  captcha?: any;
   load: boolean;
 }
 
@@ -62,7 +62,6 @@ export default class SourceScraper extends React.Component<
       restart: false,
       preload: false,
       videoVolume: props.scene.videoVolume,
-      captcha: null as any,
       load: false,
     };
   }

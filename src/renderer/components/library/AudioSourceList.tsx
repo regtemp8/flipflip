@@ -72,10 +72,10 @@ interface AudioSourceListProps {
 }
 
 interface AudioSourceListState {
-  sourceOptions: Audio;
-  deleteDialog: Audio;
-  sourceEdit: Audio;
-  lastSelected: number;
+  sourceOptions?: Audio;
+  deleteDialog?: Audio;
+  sourceEdit?: Audio;
+  lastSelected?: number;
 }
 
 class AudioSourceList extends React.Component<
@@ -85,12 +85,7 @@ class AudioSourceList extends React.Component<
   constructor(props: AudioSourceListProps) {
     super(props);
 
-    this.state = {
-      sourceOptions: null as Audio,
-      deleteDialog: null as Audio,
-      sourceEdit: null as Audio,
-      lastSelected: null as number,
-    };
+    this.state = {};
   }
 
   onSortEnd = ({

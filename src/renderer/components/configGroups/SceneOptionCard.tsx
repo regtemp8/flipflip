@@ -126,7 +126,7 @@ interface SceneOptionCardProps {
 }
 
 interface SceneOptionCardState {
-  randomSceneList: Array<number>;
+  randomSceneList?: Array<number>;
 }
 
 class SceneOptionCard extends React.Component<
@@ -138,9 +138,7 @@ class SceneOptionCard extends React.Component<
   constructor(props: SceneOptionCardProps) {
     super(props);
 
-    this.state = {
-      randomSceneList: null as Array<number>,
-    };
+    this.state = {};
   }
 
   render() {

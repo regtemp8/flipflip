@@ -476,13 +476,13 @@ interface SceneDetailProps {
 }
 
 interface SceneDetailState {
-  isEditingName: string;
+  isEditingName?: string;
   drawerOpen: boolean;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
   snackbarOpen: boolean;
-  snackbar: string;
-  snackbarSeverity: string;
+  snackbar?: string;
+  snackbarSeverity?: string;
   sceneEffects: string;
   confirmCopy: boolean;
   displaySources: Array<LibrarySource>;
@@ -494,13 +494,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     super(props);
 
     this.state = {
-      isEditingName: props.autoEdit ? props.scene.name : (null as string),
+      isEditingName: props.autoEdit ? props.scene.name : undefined,
       drawerOpen: false,
-      menuAnchorEl: null as any,
-      openMenu: null as string,
       snackbarOpen: false,
-      snackbar: null as string,
-      snackbarSeverity: null as string,
       sceneEffects: "",
       confirmCopy: false,
       displaySources: new Array<LibrarySource>(),

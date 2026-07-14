@@ -452,10 +452,10 @@ interface AudioLibraryState {
   filters: Array<string>;
   selected: Array<string>;
   selectedTags: Array<string>;
-  menuAnchorEl: any;
-  openMenu: string;
-  playlistID: number;
-  importURL: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
+  playlistID?: number;
+  importURL?: string;
   loadingMetadata: boolean;
   loadingSources: boolean;
   error: boolean;
@@ -474,10 +474,6 @@ class AudioLibrary extends React.Component<
       filters: props.filters,
       selected: props.selected,
       selectedTags: new Array<string>(),
-      menuAnchorEl: null as any,
-      openMenu: null as string,
-      playlistID: null as number,
-      importURL: null as string,
       loadingMetadata: false,
       loadingSources: false,
       error: false,

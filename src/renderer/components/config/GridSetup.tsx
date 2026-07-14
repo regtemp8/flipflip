@@ -158,9 +158,9 @@ interface GridSetupProps {
 }
 
 interface GridSetupState {
-  isEditingName: string;
-  isEditing: Array<number>;
-  menuAnchorEl: any;
+  isEditingName?: string;
+  isEditing?: Array<number>;
+  menuAnchorEl?: any;
   height: number;
   width: number;
   dragging: boolean;
@@ -171,9 +171,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     super(props);
 
     this.state = {
-      isEditingName: props.autoEdit ? props.scene.name : (null as string),
-      isEditing: null as Array<number>,
-      menuAnchorEl: null as any,
+      isEditingName: props.autoEdit ? props.scene.name : undefined,
       height:
         props.scene.grid &&
         props.scene.grid.length > 0 &&

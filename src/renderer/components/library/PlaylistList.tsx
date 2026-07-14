@@ -65,7 +65,7 @@ interface PlaylistListProps {
 
 interface PlaylistListState {
   playlists: Map<string, string[]>;
-  hover: any;
+  hover?: any;
 }
 
 class PlaylistList extends React.Component<
@@ -77,7 +77,6 @@ class PlaylistList extends React.Component<
 
     this.state = {
       playlists: this.getPlaylists(),
-      hover: null as any,
     };
   }
 

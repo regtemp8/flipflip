@@ -33,11 +33,11 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error;
-  info: React.ErrorInfo;
+  error?: Error;
+  info?: React.ErrorInfo;
   resetCheck: boolean;
   backupCheck: boolean;
-  backup: { url: string; size: number };
+  backup?: { url: string; size: number };
   backups: Array<{ url: string; size: number }>;
 }
 
@@ -50,11 +50,8 @@ export default class ErrorBoundary extends React.Component<
 
     this.state = {
       hasError: false,
-      error: null as Error,
-      info: null as React.ErrorInfo,
       resetCheck: false,
       backupCheck: false,
-      backup: null as { url: string; size: number },
       backups: new Array<{ url: string; size: number }>(),
     };
   }

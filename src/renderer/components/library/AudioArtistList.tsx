@@ -63,7 +63,7 @@ interface AudioArtistListProps {
 
 interface AudioArtistListState {
   artists: Map<string, string>;
-  hover: any;
+  hover?: any;
 }
 
 class AudioArtistList extends React.Component<
@@ -75,7 +75,6 @@ class AudioArtistList extends React.Component<
 
     this.state = {
       artists: this.getArtists(),
-      hover: null as any,
     };
   }
 

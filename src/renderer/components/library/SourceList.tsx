@@ -112,17 +112,17 @@ interface SourceListProps {
 }
 
 interface SourceListState {
-  cachePath: string;
+  cachePath?: string;
   isEditing: number;
-  mouseX: any;
-  mouseY: any;
-  clipMenu: LibrarySource;
-  weightMenu: LibrarySource;
-  blacklistSource: string;
-  editBlacklist: string;
-  sourceOptionsType: string;
-  sourceOptions: LibrarySource;
-  deleteDialog: LibrarySource;
+  mouseX?: any;
+  mouseY?: any;
+  clipMenu?: LibrarySource;
+  weightMenu?: LibrarySource;
+  blacklistSource?: string;
+  editBlacklist?: string;
+  sourceOptionsType?: string;
+  sourceOptions?: LibrarySource;
+  deleteDialog?: LibrarySource;
 }
 
 class SourceList extends React.Component<SourceListProps, SourceListState> {
@@ -130,17 +130,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     super(props);
 
     this.state = {
-      cachePath: null as string,
       isEditing: -1,
-      mouseX: null as any,
-      mouseY: null as any,
-      clipMenu: null as LibrarySource,
-      weightMenu: null as LibrarySource,
-      blacklistSource: null as string,
-      editBlacklist: null as string,
-      sourceOptionsType: null as string,
-      sourceOptions: null as LibrarySource,
-      deleteDialog: null as LibrarySource,
     };
   }
 

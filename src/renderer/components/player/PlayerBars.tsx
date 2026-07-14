@@ -276,10 +276,10 @@ interface PlayerBarsState {
   appBarHover: boolean;
   drawerHover: boolean;
   tagDrawerHover: boolean;
-  blacklistSource: string;
-  blacklistFile: string;
-  deletePath: string;
-  deleteError: string;
+  blacklistSource?: string;
+  blacklistFile?: string;
+  deletePath?: string;
+  deleteError?: string;
 }
 
 class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
@@ -290,10 +290,6 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       appBarHover: false,
       drawerHover: false,
       tagDrawerHover: false,
-      blacklistSource: null as string,
-      blacklistFile: null as string,
-      deletePath: null as string,
-      deleteError: null as string,
     };
   }
 

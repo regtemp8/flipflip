@@ -88,11 +88,11 @@ interface APICardProps {
 }
 
 interface APICardState {
-  openMenu: string;
-  menuType: string;
+  openMenu?: string;
+  menuType?: string;
   snackbarOpen: boolean;
-  snackbar: string;
-  snackbarSeverity: string;
+  snackbar?: string;
+  snackbarSeverity?: string;
   input1: string;
   input2: string;
   input3: string;
@@ -104,11 +104,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
     super(props);
 
     this.state = {
-      openMenu: null as string,
-      menuType: null as string,
       snackbarOpen: false,
-      snackbar: null as string,
-      snackbarSeverity: null as string,
       input1: "",
       input2: "",
       input3: "",

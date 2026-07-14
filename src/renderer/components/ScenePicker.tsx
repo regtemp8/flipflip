@@ -439,12 +439,12 @@ interface ScenePickerState {
   newVersion: string;
   newVersionLink: string;
   isFirstWindow: boolean;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
   displayScenes: Array<Scene>;
   displayGrids: Array<SceneGrid>;
   filters: Array<string>;
-  deleteScenes: Array<number>;
+  deleteScenes?: Array<number>;
   importFile: string;
   importSources: boolean;
   isEditing: number;
@@ -460,12 +460,9 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
       newVersion: "",
       newVersionLink: "",
       isFirstWindow: false,
-      menuAnchorEl: null as any,
-      openMenu: null as string,
       displayScenes: new Array<Scene>(),
       displayGrids: new Array<SceneGrid>(),
       filters: new Array<string>(),
-      deleteScenes: null as Array<number>,
       importFile: "",
       importSources: false,
       isEditing: -1,

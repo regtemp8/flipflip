@@ -59,7 +59,7 @@ interface TextCardProps {
 
 interface TextCardState {
   sourceOptionsPlaylist: number;
-  sourceOptions: CaptionScript;
+  sourceOptions?: CaptionScript;
 }
 
 class TextCard extends React.Component<TextCardProps, TextCardState> {
@@ -68,7 +68,6 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
 
     this.state = {
       sourceOptionsPlaylist: -1,
-      sourceOptions: null as CaptionScript,
     };
   }
 

@@ -78,14 +78,14 @@ interface ScriptSourceListProps {
 }
 
 interface ScriptSourceListState {
-  sourceOptions: CaptionScript;
-  lastSelected: number;
+  sourceOptions?: CaptionScript;
+  lastSelected?: number;
   isEditing: number;
-  mouseX: any;
-  mouseY: any;
-  deleteDialog: CaptionScript;
-  beginPlay: CaptionScript;
-  playWithScene: number;
+  mouseX?: any;
+  mouseY?: any;
+  deleteDialog?: CaptionScript;
+  beginPlay?: CaptionScript;
+  playWithScene?: number;
 }
 
 class ScriptSourceList extends React.Component<
@@ -96,14 +96,7 @@ class ScriptSourceList extends React.Component<
     super(props);
 
     this.state = {
-      sourceOptions: null as CaptionScript,
-      lastSelected: null as number,
       isEditing: -1,
-      mouseX: null as any,
-      mouseY: null as any,
-      deleteDialog: null as CaptionScript,
-      beginPlay: null as CaptionScript,
-      playWithScene: null as number,
     };
   }
 

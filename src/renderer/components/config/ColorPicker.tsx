@@ -44,18 +44,15 @@ interface ColorPickerProps {
 }
 
 interface ColorPickerState {
-  pickerColor: any;
-  pickerAnchorEl: any;
+  pickerColor?: any;
+  pickerAnchorEl?: any;
 }
 
 class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
   constructor(props: ColorPickerProps) {
     super(props);
 
-    this.state = {
-      pickerColor: null as any,
-      pickerAnchorEl: null as any,
-    };
+    this.state = {};
   }
 
   render() {

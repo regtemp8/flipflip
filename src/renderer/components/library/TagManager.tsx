@@ -149,8 +149,8 @@ interface TagManagerProps {
 }
 
 interface TagManagerState {
-  openMenu: string;
-  menuAnchorEl: any;
+  openMenu?: string;
+  menuAnchorEl?: any;
   tags: Array<Tag>;
   isEditing: number;
   tagName: string;
@@ -162,8 +162,6 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     super(props);
 
     this.state = {
-      openMenu: null as string,
-      menuAnchorEl: null as any,
       tags: new Array<Tag>(),
       isEditing: -1,
       tagName: "",

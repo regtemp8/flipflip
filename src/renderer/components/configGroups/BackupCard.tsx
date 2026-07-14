@@ -85,11 +85,11 @@ interface BackupCardProps {
 
 interface BackupCardState {
   backups: Array<{ url: string; size: number }>;
-  backup: { url: string; size: number };
-  openMenu: string;
+  backup?: { url: string; size: number };
+  openMenu?: string;
   snackbarOpen: boolean;
-  snackbar: string;
-  snackbarSeverity: string;
+  snackbar?: string;
+  snackbarSeverity?: string;
 }
 
 class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
@@ -98,11 +98,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
 
     this.state = {
       backups: new Array<{ url: string; size: number }>(),
-      backup: null as { url: string; size: number },
-      openMenu: null as string,
       snackbarOpen: false,
-      snackbar: null as string,
-      snackbarSeverity: null as string,
     };
   }
 

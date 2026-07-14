@@ -205,7 +205,7 @@ interface VideoClipperProps {
 interface VideoClipperState {
   scene: Scene;
   empty: boolean;
-  isEditing: Clip;
+  isEditing?: Clip;
   isEditingValue: number[];
   isEditingStartText: string;
   isEditingEndText: string;
@@ -226,7 +226,6 @@ class VideoClipper extends React.Component<
     this.state = {
       scene: new Scene(window.constants.pathSep, window.ipc.platform()),
       empty: false,
-      isEditing: null as Clip,
       isEditingValue: [0, 0],
       isEditingStartText: "",
       isEditingEndText: "",

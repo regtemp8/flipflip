@@ -146,7 +146,7 @@ interface SceneGeneratorState {
   isEditing: number;
   addRule: boolean;
   advRule: boolean;
-  menuAnchorEl: any;
+  menuAnchorEl?: any;
 }
 
 class SceneGenerator extends React.Component<
@@ -161,7 +161,6 @@ class SceneGenerator extends React.Component<
       isEditing: -1,
       addRule: false,
       advRule: false,
-      menuAnchorEl: null as any,
     };
   }
 

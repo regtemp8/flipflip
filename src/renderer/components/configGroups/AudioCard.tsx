@@ -41,7 +41,7 @@ interface AudioCardProps {
 
 interface AudioCardState {
   sourceOptionsPlaylist: number;
-  sourceOptions: Audio;
+  sourceOptions?: Audio;
 }
 
 class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
@@ -50,7 +50,6 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
 
     this.state = {
       sourceOptionsPlaylist: -1,
-      sourceOptions: null as Audio,
     };
   }
 

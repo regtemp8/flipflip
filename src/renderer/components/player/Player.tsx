@@ -86,20 +86,20 @@ interface PlayerState {
   total: number;
   progress: number;
   progressMessage: string[];
-  startTime: Date;
+  startTime?: Date;
   historyOffset: number;
   historyPaths: Array<any>;
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
   imagePlayerDeleteHack: ChildCallbackHack;
-  mainVideo: HTMLVideoElement;
-  overlayVideos: Array<Array<HTMLVideoElement>>;
-  currentAudio: Audio;
-  timeToNextFrame: number;
+  mainVideo?: HTMLVideoElement;
+  overlayVideos: Array<Array<HTMLVideoElement | null>>;
+  currentAudio?: Audio;
+  timeToNextFrame?: number;
   recentPictureGrid: boolean;
-  thumbImage: HTMLImageElement;
+  thumbImage?: HTMLImageElement;
   persistAudio: boolean;
   persistText: boolean;
-  scriptPlaylists: {
+  scriptPlaylists?: {
     scripts: CaptionScript[];
     shuffle: boolean;
     repeat: string;
@@ -124,7 +124,6 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
       progress: 0,
       progressMessage:
         props.scene.sources.length > 0 ? [props.scene.sources[0].url] : [""],
-      startTime: null as Date,
       historyOffset: 0,
       historyPaths: new Array<any>(),
       imagePlayerAdvanceHacks: new Array<Array<ChildCallbackHack>>(
@@ -133,23 +132,16 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         .fill(null)
         .map(() => [new ChildCallbackHack()]),
       imagePlayerDeleteHack: new ChildCallbackHack(),
-      mainVideo: null as HTMLVideoElement,
-      overlayVideos: new Array<Array<HTMLVideoElement>>(
+      overlayVideos: new Array<Array<HTMLVideoElement | null>>(
         props.scene.overlays.length,
       )
         .fill(null)
-        .map(() => [null as HTMLVideoElement]),
-      currentAudio: null as Audio,
-      timeToNextFrame: null as number,
+        .map(() => {
+          return [null];
+        }),
       recentPictureGrid: false,
-      thumbImage: null as HTMLImageElement,
       persistAudio: false,
       persistText: false,
-      scriptPlaylists: null as {
-        scripts: CaptionScript[];
-        shuffle: boolean;
-        repeat: string;
-      }[],
       hideCursor: false,
     };
   }
@@ -876,11 +868,13 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
     if (this.props.scene.overlayEnabled != props.scene.overlayEnabled) {
       this.setState({
-        overlayVideos: new Array<Array<HTMLVideoElement>>(
+        overlayVideos: new Array<Array<HTMLVideoElement | null>>(
           this.props.scene.overlays.length,
         )
           .fill(null)
-          .map(() => [null as HTMLVideoElement]),
+          .map(() => {
+            return [null];
+          }),
       });
     } else if (this.props.scene.overlays != props.scene.overlays) {
       if (this.props.scene.overlays.length == props.scene.overlays.length) {

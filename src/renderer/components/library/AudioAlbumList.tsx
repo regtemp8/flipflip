@@ -66,7 +66,7 @@ interface AudioAlbumListProps {
 
 interface AudioAlbumListState {
   albums: Map<string, { artist: string; thumb: string; count: number }>;
-  hover: any;
+  hover?: any;
 }
 
 class AudioAlbumList extends React.Component<
@@ -78,7 +78,6 @@ class AudioAlbumList extends React.Component<
 
     this.state = {
       albums: this.getAlbums(),
-      hover: null as any,
     };
   }
 

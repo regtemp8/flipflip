@@ -391,8 +391,8 @@ interface LibraryState {
   filters: Array<string>;
   selected: Array<string>;
   selectedTags: Array<string>;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
   moveDialog: boolean;
   importFile: string;
 }
@@ -407,8 +407,6 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       filters: props.filters,
       selected: props.selected,
       selectedTags: new Array<string>(),
-      menuAnchorEl: null as any,
-      openMenu: null as string,
       moveDialog: false,
       importFile: "",
     };

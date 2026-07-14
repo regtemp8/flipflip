@@ -225,10 +225,10 @@ interface ConfigFormState {
   changeMade: boolean;
   config: Config;
   drawerOpen: boolean;
-  openMenu: string;
+  openMenu?: string;
   openTab: number;
   errorSnackOpen: boolean;
-  errorSnack: string;
+  errorSnack?: string;
 }
 
 class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
@@ -239,10 +239,8 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
       changeMade: false,
       config: JSON.parse(JSON.stringify(props.config)), // Make a copy
       drawerOpen: false,
-      openMenu: null as string,
       openTab: 2,
       errorSnackOpen: false,
-      errorSnack: null as string,
     };
   }
 
