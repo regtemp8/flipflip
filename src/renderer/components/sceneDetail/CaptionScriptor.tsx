@@ -897,7 +897,7 @@ class CaptionScriptor extends React.Component<
                                 onClick={this.onAddString.bind(
                                   this,
                                   "$RANDOM_PHRASE",
-                                  false
+                                  false,
                                 )}
                                 variant="outlined"
                               >
@@ -917,7 +917,7 @@ class CaptionScriptor extends React.Component<
                                 onClick={this.onAddString.bind(
                                   this,
                                   "$TAG_PHRASE",
-                                  false
+                                  false,
                                 )}
                                 variant="outlined"
                               >
@@ -1664,7 +1664,11 @@ class CaptionScriptor extends React.Component<
     }
   }
 
-  onSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
+  onSliderChange(
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     const script = JSON.parse(JSON.stringify(this.state.captionScript));
     (script as any)[key] = value;
     if (this.state.scene) {

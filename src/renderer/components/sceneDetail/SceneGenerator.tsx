@@ -751,7 +751,11 @@ class SceneGenerator extends React.Component<
     this.changeGeneratorWeights(generatorWeights);
   }
 
-  onGroupInput(index: number, key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onGroupInput(
+    index: number,
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const generatorWeights = this.props.scene.generatorWeights;
     const input = e.target as HTMLInputElement;
     if (this.state.isEditing == -1) {

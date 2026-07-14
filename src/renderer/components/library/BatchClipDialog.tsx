@@ -204,8 +204,8 @@ class BatchClipDialog extends React.Component<
         const handleError = () => {
           errorCallback("Unable to load video: " + sourceURL);
         };
-        video.onerror = handleError
-        video.onabort = handleError
+        video.onerror = handleError;
+        video.onabort = handleError;
 
         video.src = proxyVideo(sourceURL);
         video.preload = "auto";

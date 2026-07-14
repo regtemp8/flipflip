@@ -283,7 +283,11 @@ class ScriptOptions extends React.Component<
     }
   }
 
-  onSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
+  onSliderChange(
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     this.changeKey(key, value);
   }
 

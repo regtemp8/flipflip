@@ -201,7 +201,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
   }
 
   onInput(key: string, e: SelectChangeEvent<string>) {
-    const input = e.target ;
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 

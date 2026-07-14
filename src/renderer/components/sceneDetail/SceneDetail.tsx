@@ -1790,7 +1790,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.simpleRule });
   }
 
-  onAddSource(addFunction: string, e: React.MouseEvent<HTMLButtonElement>, ...args: any[]) {
+  onAddSource(
+    addFunction: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) {
     this.onCloseDialog();
     if (this.props.tutorial == SDT.add2) {
       this.props.onTutorial(SDT.add2);

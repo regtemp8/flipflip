@@ -1598,7 +1598,11 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
   }
 
-  onAddSource(addFunction: string, e: React.MouseEvent<HTMLButtonElement>, ...args: any[]) {
+  onAddSource(
+    addFunction: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) {
     this.onCloseDialog();
     if (addFunction == AF.videos && e.shiftKey) {
       this.props.onAddSource(null, AF.videoDir, ...args);

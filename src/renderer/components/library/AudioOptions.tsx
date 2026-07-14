@@ -551,7 +551,11 @@ class AudioOptions extends React.Component<
     this.changeKey(key, input.value);
   }
 
-  onSourceSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
+  onSourceSliderChange(
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     this.changeKey(key, value);
   }
 
