@@ -27,6 +27,7 @@ import {
   Divider,
   Chip,
   Rating,
+  SelectChangeEvent,
 } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
@@ -120,7 +121,7 @@ class AlbumListItem extends React.Component<
     };
   }
 
-  setOpen(foldersOpen = false, e: MouseEvent) {
+  setOpen(foldersOpen = false, e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
     e.stopPropagation();
     this.setState({ foldersOpen });
   }
@@ -473,8 +474,8 @@ class PiwigoDialog extends React.Component<
     }
   }
 
-  onListTypeChange(e: MouseEvent) {
-    const type = (e.target as HTMLInputElement).value;
+  onListTypeChange(e: SelectChangeEvent<string>) {
+    const type = e.target.value;
     this.setState({ listType: type });
     if (type === PW.apiTypeCategory) {
       this.getAlbums();
@@ -532,7 +533,7 @@ class PiwigoDialog extends React.Component<
     }
   }
 
-  createAPICall(e: MouseEvent) {
+  createAPICall() {
     const {
       listType,
       sortRandom,
