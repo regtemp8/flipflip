@@ -18,6 +18,7 @@ import {
   Link,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Typography,
 } from "@mui/material";
 
@@ -294,8 +295,8 @@ export default class ErrorBoundary extends React.Component<
     });
   }
 
-  onChangeBackup(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeBackup(e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.setState({
       backup: this.state.backups.find((b) => b.url == input.value),
     });
