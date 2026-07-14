@@ -22,6 +22,7 @@ import {
   Radio,
   RadioGroup,
   Select,
+  SelectChangeEvent,
   Slide,
   Snackbar,
   Switch,
@@ -133,7 +134,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
       ? en.get(this.state.menuType)[0].toUpperCase() +
         en.get(this.state.menuType).slice(1)
       : "";
-    let menuTypeSignOut = null;
+    let menuTypeSignOut = () => {};
     switch (this.state.menuType) {
       case ST.tumblr:
         menuTypeSignOut = this.onFinishClearTumblr.bind(this);
@@ -440,7 +441,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               <Select
                 variant="standard"
                 value={this.state.input1}
-                onChange={this.onInput1.bind(this)}
+                onChange={this.onInput1Select.bind(this)}
               >
                 <MenuItem key="http" value="http">
                   http
@@ -520,7 +521,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               <Select
                 variant="standard"
                 value={this.state.input1}
-                onChange={this.onInput1.bind(this)}
+                onChange={this.onInput1Select.bind(this)}
               >
                 <MenuItem key="http" value="http">
                   http
@@ -670,8 +671,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
     this.setState({ openMenu: MO.signIn, menuType: ST.tumblr });
   }
 
-  onTumblrKeyInput(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onTumblrKeyInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const value = Number.parseInt(input.value);
     if (value == 0) {
       this.changeKey("tumblrKey", "");
@@ -732,28 +733,33 @@ class APICard extends React.Component<APICardProps, APICardState> {
     this.setState({ snackbarOpen: false });
   }
 
-  onInput1(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput1Select(e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.setState({ input1: input.value });
   }
 
-  onInput2(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput1(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    this.setState({ input1: input.value });
+  }
+
+  onInput2(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ input2: input.value });
   }
 
-  onInput3(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput3(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ input3: input.value });
   }
 
-  onInput4(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput4(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ input4: input.value });
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.props.onUpdateSettings((s) => (s[key] = checked));
     this.props.onUpdateConfig((s) => (s.remoteSettings[key] = checked));
