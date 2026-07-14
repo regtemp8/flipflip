@@ -10,6 +10,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Switch,
   TextField,
@@ -504,7 +505,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
     );
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -534,23 +535,27 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
     }
   }
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onSliderChange(
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     this.changeKey(key, value);
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput(key: string, e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 
