@@ -243,7 +243,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     });
   }
 
-  onResetCacheDir(e: MouseEvent) {
+  onResetCacheDir(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     this.changeKey("directory", "");
   }
@@ -256,7 +256,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     });
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -270,8 +270,8 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     }
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
@@ -279,8 +279,8 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
