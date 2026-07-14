@@ -10,6 +10,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Switch,
   TextField,
   Theme,
@@ -165,7 +166,7 @@ class WatermarkCard extends React.Component<
                   label="Watermark Text"
                   value={this.props.settings.watermarkText}
                   margin="dense"
-                  onChange={this.onInput.bind(this, "watermarkText")}
+                  onChange={this.onTextInput.bind(this, "watermarkText")}
                 />
               </Grid>
             </Grid>
@@ -258,17 +259,22 @@ class WatermarkCard extends React.Component<
     }
   }
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput(key: string, e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onTextInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    this.changeKey(key, input.value);
+  }
+
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -286,8 +292,8 @@ class WatermarkCard extends React.Component<
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
