@@ -1,6 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
-import Draggable, { DraggableData } from "react-draggable";
+import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {
   AppBar,
@@ -592,7 +592,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.setState({ width: width });
   }
 
-  onHeightInput(e: MouseEvent) {
+  onHeightInput(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target as HTMLInputElement;
     if (input.value === "") {
       this.onUpdateHeight(1);
@@ -601,7 +601,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     }
   }
 
-  blurHeight(e: MouseEvent) {
+  blurHeight(e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -615,7 +615,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     }
   }
 
-  onWidthInput(e: MouseEvent) {
+  onWidthInput(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target as HTMLInputElement;
     if (input.value === "") {
       this.onUpdateWidth(1);
@@ -624,7 +624,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     }
   }
 
-  blurWidth(e: MouseEvent) {
+  blurWidth(e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -647,7 +647,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   onDragStop(
     rowIndex: number,
     colIndex: number,
-    e: MouseEvent,
+    e: DraggableEvent,
     position: DraggableData,
   ) {
     if (this.state.dragging) {
@@ -661,7 +661,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   onDragDrop(
     rowIndex: number,
     colIndex: number,
-    e: MouseEvent,
+    e: DraggableEvent,
     position: DraggableData,
   ) {
     const path = e.composedPath();
@@ -714,13 +714,13 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.setState({ isEditingName: this.props.scene.name });
   }
 
-  endEditingName(e: Event) {
+  endEditingName(e: React.SyntheticEvent<Element, Event>) {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
     this.setState({ isEditingName: null });
   }
 
-  onChangeName(e: React.FormEvent<HTMLInputElement>) {
+  onChangeName(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ isEditingName: e.currentTarget.value });
   }
 
