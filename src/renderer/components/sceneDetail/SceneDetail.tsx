@@ -1694,7 +1694,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.setState({ snackbarOpen: false });
   }
 
-  onOpenMaxMenu(e: MouseEvent) {
+  onOpenMaxMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.max });
   }
 
@@ -1786,11 +1786,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.changeKey("generatorWeights", []);
   }
 
-  onOpenTagMenu(e: MouseEvent) {
+  onOpenTagMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.simpleRule });
   }
 
-  onAddSource(addFunction: string, e: MouseEvent, ...args: any[]) {
+  onAddSource(addFunction: string, e: React.MouseEvent<HTMLButtonElement>, ...args: any[]) {
     this.onCloseDialog();
     if (this.props.tutorial == SDT.add2) {
       this.props.onTutorial(SDT.add2);
@@ -1815,7 +1815,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
   }
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
   }
 
@@ -1846,8 +1846,8 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     }, 1000);
   }
 
-  onChangeSceneEffects(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeSceneEffects(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ sceneEffects: input.value });
   }
 
@@ -1879,7 +1879,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.changeKey("openTab", newTab);
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -1897,8 +1897,8 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
@@ -1914,13 +1914,13 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.setState({ isEditingName: this.props.scene.name });
   }
 
-  endEditingName(e: Event) {
+  endEditingName(e: React.SyntheticEvent<Element, Event>) {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
     this.setState({ isEditingName: null });
   }
 
-  onChangeName(e: React.FormEvent<HTMLInputElement>) {
+  onChangeName(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ isEditingName: e.currentTarget.value });
   }
 
