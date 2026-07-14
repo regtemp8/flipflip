@@ -18,6 +18,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Switch,
   TextField,
@@ -1099,7 +1100,12 @@ class SceneOptionCard extends React.Component<
     return this.props.allScenes.find((s) => s.id.toString() === id)?.name;
   }
 
-  onOverlaySliderChange(id: number, key: string, e: MouseEvent, value: number) {
+  onOverlaySliderChange(
+    id: number,
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     this.changeOverlayKey(id, key, value);
   }
 
@@ -1125,7 +1131,7 @@ class SceneOptionCard extends React.Component<
     this.changeOverlayKey(id, key, value);
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
+  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -1155,23 +1161,27 @@ class SceneOptionCard extends React.Component<
     }
   }
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onSliderChange(
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
     this.changeKey(key, value);
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
   }
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput(key: string, e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 
