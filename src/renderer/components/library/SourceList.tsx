@@ -586,7 +586,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     this.props.onUpdateSelected(newSelected);
   }
 
-  blurWeight(e: MouseEvent) {
+  blurWeight(e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -600,8 +600,8 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     }
   }
 
-  onWeightInput(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onWeightInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeWeight(input.value === "" ? 1 : Number(input.value));
   }
 
@@ -791,9 +791,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     this.onCloseBlacklist();
   }
 
-  onChangeBlacklist(e: MouseEvent) {
+  onChangeBlacklist(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      editBlacklist: (e.currentTarget as HTMLInputElement).value,
+      editBlacklist: e.currentTarget.value,
     });
   }
 
@@ -823,13 +823,13 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     });
   }
 
-  onSourceInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeKey(key, input.value);
   }
 
-  onSourceBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
