@@ -2177,7 +2177,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     this.setState({ isEditing: group.id, isEditingName: group.name });
   }
 
-  endEditingName(e: React.FocusEvent<HTMLInputElement> | React.FormEvent<HTMLFormElement> | React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  endEditingName(e: React.SyntheticEvent<Element, Event>) {
     e.preventDefault();
     const newGroups = this.props.sceneGroups;
     const editGroup = newGroups.find((g) => g.id == this.state.isEditing);
