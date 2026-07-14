@@ -93,8 +93,8 @@ class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
     );
   }
 
-  onURLChange(e: MouseEvent) {
-    const type = (e.target as HTMLInputElement).value;
+  onURLChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const type = e.target.value;
     this.setState({ importURLs: type });
   }
 
