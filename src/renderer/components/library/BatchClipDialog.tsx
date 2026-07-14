@@ -133,7 +133,7 @@ class BatchClipDialog extends React.Component<
     );
   }
 
-  blurClipOffset(index: number, e: MouseEvent) {
+  blurClipOffset(index: number, e: React.FocusEvent<HTMLInputElement>) {
     const min = (e.currentTarget as any).min
       ? (e.currentTarget as any).min
       : null;
@@ -147,8 +147,8 @@ class BatchClipDialog extends React.Component<
     }
   }
 
-  onClipOffset(index: number, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onClipOffset(index: number, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.changeClipOffset(index, input.value === "" ? "" : input.value);
   }
 
@@ -201,9 +201,11 @@ class BatchClipDialog extends React.Component<
           successCallback(video, sourceURL);
         };
 
-        video.onerror = video.onabort = (e) => {
+        const handleError = () => {
           errorCallback("Unable to load video: " + sourceURL);
         };
+        video.onerror = handleError
+        video.onabort = handleError
 
         video.src = proxyVideo(sourceURL);
         video.preload = "auto";
