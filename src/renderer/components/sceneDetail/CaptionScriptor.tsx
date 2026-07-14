@@ -23,6 +23,7 @@ import {
   Menu,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Theme,
   Toolbar,
@@ -896,6 +897,7 @@ class CaptionScriptor extends React.Component<
                                 onClick={this.onAddString.bind(
                                   this,
                                   "$RANDOM_PHRASE",
+                                  false
                                 )}
                                 variant="outlined"
                               >
@@ -915,6 +917,7 @@ class CaptionScriptor extends React.Component<
                                 onClick={this.onAddString.bind(
                                   this,
                                   "$TAG_PHRASE",
+                                  false
                                 )}
                                 variant="outlined"
                               >
@@ -1258,7 +1261,7 @@ class CaptionScriptor extends React.Component<
     this.state.codeMirrorOverwriteHack.fire("");
   }
 
-  onOpenMenu(e: MouseEvent) {
+  onOpenMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.open });
   }
 
@@ -1305,7 +1308,7 @@ class CaptionScriptor extends React.Component<
     this.onSave(then);
   }
 
-  onSaveMenu(e: MouseEvent) {
+  onSaveMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.save });
   }
 
@@ -1391,8 +1394,8 @@ class CaptionScriptor extends React.Component<
     this.setState({ openMenu: MO.select, selectScript: defScript });
   }
 
-  onChangeSelectScript(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeSelectScript(e: SelectChangeEvent<string>) {
+    const input = e.target;
     this.setState({ selectScript: input.value });
   }
 
@@ -1586,8 +1589,8 @@ class CaptionScriptor extends React.Component<
     this.onAddString(addString, true);
   }
 
-  onAddSetter(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onAddSetter(e: SelectChangeEvent<string>) {
+    const input = e.target;
     if (input.value == "all") {
       this.addAllSetters();
     } else {
@@ -1661,7 +1664,7 @@ class CaptionScriptor extends React.Component<
     }
   }
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onSliderChange(key: string, e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
     const script = JSON.parse(JSON.stringify(this.state.captionScript));
     (script as any)[key] = value;
     if (this.state.scene) {
