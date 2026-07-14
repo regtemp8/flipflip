@@ -378,12 +378,14 @@ class AudioControl extends React.Component<
   }
 
   onChangePosition(e: Event, value: number | number[]) {
-    this.setState({ position: value });
+    const position = value as number;
+    this.setState({ position });
   }
 
-  onAudioSliderChange(e: Event, value: number) {
-    this.props.audio.volume = value;
-    this.props.onAudioSliderChange(e, value);
+  onAudioSliderChange(e: Event, value: number | number[]) {
+    const volume = value as number;
+    this.props.audio.volume = volume;
+    this.props.onAudioSliderChange(e, volume);
   }
 
   onFinishedPlaying() {

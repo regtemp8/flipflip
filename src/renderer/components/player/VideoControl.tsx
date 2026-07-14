@@ -319,14 +319,16 @@ class VideoControl extends React.Component<
     this.setState({ update: !this.state.update });
   }
 
-  onChangePosition(e: Event, position: number) {
+  onChangePosition(e: Event, value: number | number[]) {
+    const position = value as number
     this.props.video.currentTime = position;
     if (this.props.video.paused) {
       this.triggerUpdate();
     }
   }
 
-  onChangeVolume(e: Event, volume: number) {
+  onChangeVolume(e: Event, value: number | number[]) {
+    let volume = value as number
     if (volume > 100) {
       volume = 100;
     }
@@ -343,7 +345,8 @@ class VideoControl extends React.Component<
     }
   }
 
-  onChangeSpeed(e: Event, speed: number) {
+  onChangeSpeed(e: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
+    const speed = value as number
     this.props.onChangeSpeed(speed);
     if (this.props.video) {
       this.props.video.playbackRate = speed / 10;
