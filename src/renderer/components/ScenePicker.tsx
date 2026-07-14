@@ -2123,7 +2123,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     }
   }
 
-  onChangeTab(e: MouseEvent, tab: number) {
+  onChangeTab(e: React.SyntheticEvent<Element,Event>, tab: number) {
     if (this.props.openTab != tab) {
       this.props.onChangeTab(tab);
     }
@@ -2177,7 +2177,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     this.setState({ isEditing: group.id, isEditingName: group.name });
   }
 
-  endEditingName(e: Event) {
+  endEditingName(e: React.FocusEvent<HTMLInputElement> | React.FormEvent<HTMLFormElement> | React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.preventDefault();
     const newGroups = this.props.sceneGroups;
     const editGroup = newGroups.find((g) => g.id == this.state.isEditing);
@@ -2186,15 +2186,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     this.setState({ isEditing: -1, isEditingName: "" });
   }
 
-  onChangeName(e: React.FormEvent<HTMLInputElement>) {
+  onChangeName(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ isEditingName: e.currentTarget.value });
   }
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
   }
 
-  onClickCloseMenu(e: MouseEvent) {
+  onClickCloseMenu(e: React.MouseEvent<HTMLDivElement>) {
     if (this.state.openMenu == MO.new) {
       let parent: any = e.target;
       do {
@@ -2221,13 +2221,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     });
   }
 
-  onChangeImportFile(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ importFile: input.value });
   }
 
-  onChangeImportSources(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeImportSources(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ importSources: input.checked });
   }
 
