@@ -520,7 +520,7 @@ class SourceListItem extends React.Component<
     return tagName;
   }
 
-  onSourceIconClick(e: MouseEvent) {
+  onSourceIconClick(e: React.MouseEvent<HTMLButtonElement>) {
     const sourceURL = this.props.source.url;
     const sourceType = getSourceType(sourceURL);
     if (e.shiftKey && e.ctrlKey && e.altKey) {
@@ -557,7 +557,7 @@ class SourceListItem extends React.Component<
     this.props.onClip(this.props.source, this.props.sources);
   }
 
-  onClickBlacklist(e: MouseEvent) {
+  onClickBlacklist(e: React.MouseEvent<HTMLButtonElement>) {
     if (e.shiftKey) {
       this.props.onClearBlacklist(this.props.source.url);
     } else {
@@ -569,8 +569,8 @@ class SourceListItem extends React.Component<
     this.props.onStartEdit(s.id);
   }
 
-  onEditSource(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onEditSource(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ urlInput: input.value });
   }
 
