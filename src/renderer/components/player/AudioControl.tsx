@@ -61,7 +61,7 @@ interface AudioControlProps {
   startPlaying: boolean;
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
-  onAudioSliderChange(e: MouseEvent, value: number): void;
+  onAudioSliderChange(e: Event, value: number): void;
   nextTrack?(): void;
   prevTrack?(): void;
   goBack?(): void;
@@ -377,11 +377,11 @@ class AudioControl extends React.Component<
     this._timeout = null;
   }
 
-  onChangePosition(e: MouseEvent, value: number) {
+  onChangePosition(e: Event, value: number | number[]) {
     this.setState({ position: value });
   }
 
-  onAudioSliderChange(e: MouseEvent, value: number) {
+  onAudioSliderChange(e: Event, value: number) {
     this.props.audio.volume = value;
     this.props.onAudioSliderChange(e, value);
   }
