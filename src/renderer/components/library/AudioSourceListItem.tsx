@@ -395,7 +395,7 @@ class AudioSourceListItem extends React.Component<
     );
   }
 
-  onSourceIconClick(e: MouseEvent) {
+  onSourceIconClick(e: React.MouseEvent<HTMLDivElement>) {
     const sourceURL = this.props.source.url;
     if (e.shiftKey && e.ctrlKey && e.altKey) {
       this.props.onDelete(this.props.source);
