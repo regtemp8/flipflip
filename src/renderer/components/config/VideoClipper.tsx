@@ -580,7 +580,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.highlight,
                               )}
-                              onClick={this.onSave.bind(this)}
+                              onClick={this.onSave.bind(this, true)}
                             >
                               <SaveIcon />
                             </Fab>
@@ -801,7 +801,7 @@ class VideoClipper extends React.Component<
     this.closeEdit();
   }
 
-  onSave(close: boolean = true) {
+  onSave(close: boolean) {
     if (this.props.tutorial == VCT.clip) {
       this.props.onTutorial(VCT.clip);
     }
@@ -933,11 +933,13 @@ class VideoClipper extends React.Component<
   }
 
   onChangePosition(
-    e: MouseEvent,
-    values: Array<number>,
+    e: Event,
+    value: number | number[],
+    activeThumb: number,
     forceStart = false,
     forceEnd = false,
   ) {
+    const values = value as number[];
     let min = values[0];
     let max = values[1];
     if (min < 0) min = 0;
@@ -964,8 +966,8 @@ class VideoClipper extends React.Component<
     });
   }
 
-  onChangeStartText(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeStartText(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ isEditingStartText: input.value });
     const timestampValue = getTimestampValue(input.value);
     if (timestampValue != null) {
@@ -994,8 +996,8 @@ class VideoClipper extends React.Component<
     ]);
   }
 
-  onChangeEndText(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeEndText(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     this.setState({ isEditingEndText: input.value });
     const timestampValue = getTimestampValue(input.value);
     if (timestampValue != null) {
@@ -1049,7 +1051,7 @@ class VideoClipper extends React.Component<
             (c) => c.id == this.state.isEditing.id,
           );
           if (clip) {
-            this.onSave();
+            this.onSave(true);
           } else {
             this.closeEdit();
           }
