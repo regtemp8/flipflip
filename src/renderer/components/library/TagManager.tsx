@@ -144,7 +144,7 @@ interface TagManagerProps {
   classes: any;
   tags: Array<Tag>;
   goBack(): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
+  onSort(algorithm: string, ascending: boolean): void;
   onUpdateTags(tags: Array<Tag>): void;
 }
 
@@ -459,11 +459,11 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     });
   }
 
-  onChangeTitle(e: MouseEvent) {
+  onChangeTitle(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ tagName: (e.currentTarget as HTMLInputElement).value });
   }
 
-  onChangePhrase(e: MouseEvent) {
+  onChangePhrase(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ tagPhrase: (e.currentTarget as HTMLInputElement).value });
   }
 
@@ -494,7 +494,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     this.setState({ openMenu: MO.removeAllAlert });
   }
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
   }
 
