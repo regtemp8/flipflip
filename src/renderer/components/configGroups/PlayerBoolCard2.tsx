@@ -176,8 +176,8 @@ export default class PlayerBoolCard2 extends React.Component<
     );
   }
 
-  onTogglePortable(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onTogglePortable(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     if (checked) {
       window.ipc.portablePathExists().then((exists) => {
@@ -199,8 +199,8 @@ export default class PlayerBoolCard2 extends React.Component<
     this.onToggleDialog();
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
   }
