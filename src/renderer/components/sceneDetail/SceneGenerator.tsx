@@ -632,7 +632,7 @@ class SceneGenerator extends React.Component<
     this.changeGeneratorWeights(generatorWeights);
   }
 
-  onClickAddRule(e: MouseEvent) {
+  onClickAddRule(e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({ menuAnchorEl: e.currentTarget, addRule: true });
   }
 
@@ -640,7 +640,7 @@ class SceneGenerator extends React.Component<
     this.setState({ addRule: false, menuAnchorEl: null });
   }
 
-  onWeighRule(index: number, e: MouseEvent) {
+  onWeighRule(index: number, e: React.MouseEvent<HTMLButtonElement>) {
     this.setState({
       menuAnchorEl: e.currentTarget,
       isWeighing: index,
@@ -712,7 +712,7 @@ class SceneGenerator extends React.Component<
     }
   }
 
-  onWeighGroup(index: number, e: MouseEvent) {
+  onWeighGroup(index: number, e: React.MouseEvent<HTMLButtonElement>) {
     if (this.props.tutorial == SDGT.edit1) {
       this.props.onTutorial(SDGT.edit1);
     }
@@ -736,8 +736,8 @@ class SceneGenerator extends React.Component<
   onGroupSliderChange(
     index: number,
     key: string,
-    e: MouseEvent,
-    value: number,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
   ) {
     const generatorWeights = this.props.scene.generatorWeights;
     if (this.state.isEditing == -1) {
@@ -751,7 +751,7 @@ class SceneGenerator extends React.Component<
     this.changeGeneratorWeights(generatorWeights);
   }
 
-  onGroupInput(index: number, key: string, e: MouseEvent) {
+  onGroupInput(index: number, key: string, e: React.ChangeEvent<HTMLInputElement>) {
     const generatorWeights = this.props.scene.generatorWeights;
     const input = e.target as HTMLInputElement;
     if (this.state.isEditing == -1) {
