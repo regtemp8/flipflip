@@ -12,6 +12,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   TextField,
   Theme,
 } from "@mui/material";
@@ -129,13 +130,13 @@ class GooninatorDialog extends React.Component<
     );
   }
 
-  onTypeChange(e: MouseEvent) {
-    const type = (e.target as HTMLInputElement).value;
+  onTypeChange(e: SelectChangeEvent<string>) {
+    const type = e.target.value;
     this.setState({ importType: type });
   }
 
-  onURLChange(e: MouseEvent) {
-    const type = (e.target as HTMLInputElement).value;
+  onURLChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const type = e.target.value;
     this.setState({ importURL: type });
   }
 
