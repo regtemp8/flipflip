@@ -23,7 +23,6 @@ import {
   loadPiwigo,
   loadRedGifs,
   loadRemoteImageURLList,
-  loadSexCom,
   loadTumblr,
 } from "./Scrapers";
 import {
@@ -347,8 +346,6 @@ export function loadSources(
       workerFunction = loadRedGifs;
     } else if (sourceType == ST.imagefap) {
       workerFunction = loadImageFap;
-    } else if (sourceType == ST.sexcom) {
-      workerFunction = loadSexCom;
     } else if (sourceType == ST.imgur) {
       workerFunction = loadImgur;
     } else if (sourceType == ST.deviantart) {

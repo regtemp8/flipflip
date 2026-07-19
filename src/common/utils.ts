@@ -118,8 +118,6 @@ export function getSourceType(url: string): string {
     return ST.imagefap;
   } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
     return ST.imgur;
-  } else if (/^https?:\/\/(www\.)?(cdn\.)?sex\.com\//.exec(url) != null) {
-    return ST.sexcom;
   } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
     return ST.deviantart;
   } else if (
@@ -196,15 +194,6 @@ export function getFileGroup(url: string, pathSep: string): string {
         .replace(/organizer\//, "")
         .replace(/video\.php\?vid=/, "")
         .split("/")[0];
-    case ST.sexcom: {
-      let sexcomID = url.replace(/https?:\/\/www\.sex\.com\//, "");
-      sexcomID = sexcomID.replace(/user\//, "");
-      sexcomID = sexcomID.split("?")[0];
-      if (sexcomID.endsWith("/")) {
-        sexcomID = sexcomID.substring(0, sexcomID.length - 1);
-      }
-      return sexcomID;
-    }
     case ST.imgur:
       return url.replace(/https?:\/\/imgur\.com\//, "").replace(/a\//, "");
     case ST.deviantart: {
