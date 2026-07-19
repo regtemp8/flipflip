@@ -866,9 +866,7 @@ export function playAudio(
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  const startIndex = displayed.indexOf(
-    displayed.find((a) => a.url == source.url),
-  );
+  const startIndex = displayed.findIndex((a) => a.url == source.url);
   const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
     id: id,
     name: "audio_scene_temp",
@@ -918,9 +916,7 @@ export function playScript(
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  const startIndex = displayed.indexOf(
-    displayed.find((s) => s.url == source.url),
-  );
+  const startIndex = displayed.findIndex((s) => s.url == source.url);
   const tempScene = JSON.parse(
     JSON.stringify(state.scenes.find((s) => s.id == sceneID)),
   );

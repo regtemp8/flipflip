@@ -98,6 +98,10 @@ class AudioSourceList extends React.Component<
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
+        if(!playlist) {
+          return
+        }
+
         const oldIndexSource = this.props.sources[oldIndex];
         const newIndexSource = this.props.sources[newIndex];
         const oldPlaylistIndex = playlist.audios.indexOf(oldIndexSource.id);
@@ -168,7 +172,7 @@ class AudioSourceList extends React.Component<
               onClick={this.clearLastSelected.bind(this)}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list")}
+                helperContainer={() => document.getElementById("sortable-list") as HTMLElement}
                 distance={5}
                 height={height}
                 width={width}
@@ -226,14 +230,14 @@ class AudioSourceList extends React.Component<
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
     this._shiftDown = false;
-    this._lastChecked = null;
+    this._lastChecked = undefined;
   }
 
   componentWillUnmount() {
     removeEventListener("keydown", this.onKeyDown);
     addEventListener("keyup", this.onKeyUp);
-    this._shiftDown = null;
-    this._lastChecked = null;
+    this._shiftDown = false;
+    this._lastChecked = undefined;
     this.savePosition();
   }
 
@@ -284,6 +288,10 @@ class AudioSourceList extends React.Component<
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
+        if(!playlist) {
+          return
+        }
+
         playlist.audios.forEach((a, index) => {
           if (a == source.id) {
             playlist.audios.splice(index, 1);
@@ -316,7 +324,7 @@ class AudioSourceList extends React.Component<
     }
   }
 
-  _lastChecked: string = null;
+  _lastChecked: string | undefined = undefined;
   onToggleSelect(e: MouseEvent) {
     const source = (e.currentTarget as HTMLInputElement).value;
     let newSelected = Array.from(this.props.selected);

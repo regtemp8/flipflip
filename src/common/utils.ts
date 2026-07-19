@@ -171,7 +171,7 @@ export function getFileGroup(url: string, pathSep: string): string {
     case ST.tumblr:
       return url.replace(/https?:\/\//, "").replace(/\.tumblr\.com\/?/, "");
     case ST.redgifs: {
-      let redgifID;
+      let redgifID = "";
       if (url.includes("/browse?")) {
         const redgifRegex =
           /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(

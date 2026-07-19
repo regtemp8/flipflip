@@ -891,18 +891,18 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         !groupedScenes.includes(s.id),
                     );
                     let newScenes = Array.from(this.props.scenes);
-                    let oldIndex = null,
-                      newIndex = null;
+                    let oldIndex = -1,
+                      newIndex = -1;
                     if (evt.type == "update") {
                       oldIndex = newScenes.indexOf(filteredList[evt.oldIndex]);
                       newIndex = newScenes.indexOf(filteredList[evt.newIndex]);
                     } else if (filteredList.length == order.length) {
-                      oldIndex = newScenes.indexOf(
-                        newScenes.find((s) => s.id == evt.item.id),
+                      oldIndex = newScenes.findIndex(
+                        (s) => s.id == evt.item.id,
                       );
                       newIndex = newScenes.indexOf(filteredList[evt.newIndex]);
                     }
-                    if (oldIndex != null && newIndex != null) {
+                    if (oldIndex != -1 && newIndex != -1) {
                       arrayMove(newScenes, oldIndex, newIndex);
                       this.props.onUpdateScenes(newScenes);
                     }
@@ -968,8 +968,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                     let newIndex = newGroups.indexOf(
                       filteredList[evt.newIndex],
                     );
-                    arrayMove(newGroups, oldIndex, newIndex);
-                    this.props.onUpdateGroups(newGroups);
+                    if (oldIndex !== -1 && newIndex !== -1) {
+                      arrayMove(newGroups, oldIndex, newIndex);
+                      this.props.onUpdateGroups(newGroups);
+                    }
                   }}
                 >
                   {this.props.sceneGroups
@@ -1041,8 +1043,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 g.scenes.includes(s.id),
                             );
                             let newScenes = Array.from(this.props.scenes);
-                            let oldIndex = null,
-                              newIndex = null;
+                            let oldIndex = -1,
+                              newIndex = -1;
                             if (evt.type == "update") {
                               oldIndex = newScenes.indexOf(
                                 filteredList[evt.oldIndex],
@@ -1051,8 +1053,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 filteredList[evt.newIndex],
                               );
                             } else if (order.length > filteredList.length) {
-                              oldIndex = newScenes.indexOf(
-                                newScenes.find((s) => s.id == evt.item.id),
+                              oldIndex = newScenes.findIndex(
+                                (s) => s.id == evt.item.id,
                               );
                               if (evt.newIndex == 0) {
                                 newIndex = 0;
@@ -1074,9 +1076,11 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 let group = newGroups.find(
                                   (gr) => gr.id == g.id,
                                 );
-                                group.scenes = group.scenes.concat([
-                                  Number.parseInt(evt.item.id),
-                                ]);
+                                if (group != null) {
+                                  group.scenes = group.scenes.concat([
+                                    Number.parseInt(evt.item.id),
+                                  ]);
+                                }
                                 this.props.onUpdateGroups(newGroups);
                               }
                             } else if (order.length < filteredList.length) {
@@ -1084,12 +1088,14 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 this.props.sceneGroups,
                               );
                               let group = newGroups.find((gr) => gr.id == g.id);
-                              group.scenes = group.scenes.filter(
-                                (id) => id.toString() != evt.item.id,
-                              );
+                              if (group != null) {
+                                group.scenes = group.scenes.filter(
+                                  (id) => id.toString() != evt.item.id,
+                                );
+                              }
                               this.props.onUpdateGroups(newGroups);
                             }
-                            if (oldIndex != null && newIndex != null) {
+                            if (oldIndex != -1 && newIndex != -1) {
                               arrayMove(newScenes, oldIndex, newIndex);
                               this.props.onUpdateScenes(newScenes);
                             }
@@ -1169,18 +1175,18 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         !groupedGenerators.includes(s.id),
                     );
                     let newScenes = Array.from(this.props.scenes);
-                    let oldIndex = null,
-                      newIndex = null;
+                    let oldIndex = -1,
+                      newIndex = -1;
                     if (evt.type == "update") {
                       oldIndex = newScenes.indexOf(filteredList[evt.oldIndex]);
                       newIndex = newScenes.indexOf(filteredList[evt.newIndex]);
                     } else if (filteredList.length == order.length) {
-                      oldIndex = newScenes.indexOf(
-                        newScenes.find((s) => s.id == evt.item.id),
+                      oldIndex = newScenes.findIndex(
+                        (s) => s.id == evt.item.id,
                       );
                       newIndex = newScenes.indexOf(filteredList[evt.newIndex]);
                     }
-                    if (oldIndex != null && newIndex != null) {
+                    if (oldIndex != -1 && newIndex != -1) {
                       arrayMove(newScenes, oldIndex, newIndex);
                       this.props.onUpdateScenes(newScenes);
                     }
@@ -1246,8 +1252,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                     let newIndex = newGroups.indexOf(
                       filteredList[evt.newIndex],
                     );
-                    arrayMove(newGroups, oldIndex, newIndex);
-                    this.props.onUpdateGroups(newGroups);
+                    if (oldIndex != -1 && newIndex != -1) {
+                      arrayMove(newGroups, oldIndex, newIndex);
+                      this.props.onUpdateGroups(newGroups);
+                    }
                   }}
                 >
                   {this.props.sceneGroups
@@ -1319,8 +1327,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 g.scenes.includes(s.id),
                             );
                             let newScenes = Array.from(this.props.scenes);
-                            let oldIndex = null,
-                              newIndex = null;
+                            let oldIndex = -1,
+                              newIndex = -1;
                             if (evt.type == "update") {
                               oldIndex = newScenes.indexOf(
                                 filteredList[evt.oldIndex],
@@ -1329,8 +1337,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 filteredList[evt.newIndex],
                               );
                             } else if (order.length > filteredList.length) {
-                              oldIndex = newScenes.indexOf(
-                                newScenes.find((s) => s.id == evt.item.id),
+                              oldIndex = newScenes.findIndex(
+                                (s) => s.id == evt.item.id,
                               );
                               if (evt.newIndex == 0) {
                                 newIndex = 0;
@@ -1352,9 +1360,11 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 let group = newGroups.find(
                                   (gr) => gr.id == g.id,
                                 );
-                                group.scenes = group.scenes.concat([
-                                  Number.parseInt(evt.item.id),
-                                ]);
+                                if (group != null) {
+                                  group.scenes = group.scenes.concat([
+                                    Number.parseInt(evt.item.id),
+                                  ]);
+                                }
                                 this.props.onUpdateGroups(newGroups);
                               }
                             } else if (order.length < filteredList.length) {
@@ -1362,12 +1372,14 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 this.props.sceneGroups,
                               );
                               let group = newGroups.find((gr) => gr.id == g.id);
-                              group.scenes = group.scenes.filter(
-                                (id) => id.toString() != evt.item.id,
-                              );
+                              if (group != null) {
+                                group.scenes = group.scenes.filter(
+                                  (id) => id.toString() != evt.item.id,
+                                );
+                              }
                               this.props.onUpdateGroups(newGroups);
                             }
-                            if (oldIndex != null && newIndex != null) {
+                            if (oldIndex != -1 && newIndex != -1) {
                               arrayMove(newScenes, oldIndex, newIndex);
                               this.props.onUpdateScenes(newScenes);
                             }
@@ -1446,18 +1458,16 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         !groupedGrids.includes(g.id),
                     );
                     let newGrids = Array.from(this.props.grids);
-                    let oldIndex = null,
-                      newIndex = null;
+                    let oldIndex = -1,
+                      newIndex = -1;
                     if (evt.type == "update") {
                       oldIndex = newGrids.indexOf(filteredList[evt.oldIndex]);
                       newIndex = newGrids.indexOf(filteredList[evt.newIndex]);
                     } else if (filteredList.length == order.length) {
-                      oldIndex = newGrids.indexOf(
-                        newGrids.find((s) => s.id == evt.item.id),
-                      );
+                      oldIndex = newGrids.findIndex((s) => s.id == evt.item.id);
                       newIndex = newGrids.indexOf(filteredList[evt.newIndex]);
                     }
-                    if (oldIndex != null && newIndex != null) {
+                    if (oldIndex != -1 && newIndex != -1) {
                       arrayMove(newGrids, oldIndex, newIndex);
                       this.props.onUpdateGrids(newGrids);
                     }
@@ -1528,8 +1538,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                     let newIndex = newGroups.indexOf(
                       filteredList[evt.newIndex],
                     );
-                    arrayMove(newGroups, oldIndex, newIndex);
-                    this.props.onUpdateGroups(newGroups);
+                    if (oldIndex != -1 && newIndex != -1) {
+                      arrayMove(newGroups, oldIndex, newIndex);
+                      this.props.onUpdateGroups(newGroups);
+                    }
                   }}
                 >
                   {this.props.sceneGroups
@@ -1600,8 +1612,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 g.scenes.includes(gr.id),
                             );
                             let newGrids = Array.from(this.props.grids);
-                            let oldIndex = null,
-                              newIndex = null;
+                            let oldIndex = -1,
+                              newIndex = -1;
                             if (evt.type == "update") {
                               oldIndex = newGrids.indexOf(
                                 filteredList[evt.oldIndex],
@@ -1610,8 +1622,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 filteredList[evt.newIndex],
                               );
                             } else if (order.length > filteredList.length) {
-                              oldIndex = newGrids.indexOf(
-                                newGrids.find((s) => s.id == evt.item.id),
+                              oldIndex = newGrids.findIndex(
+                                (s) => s.id == evt.item.id,
                               );
                               if (evt.newIndex == 0) {
                                 newIndex = 0;
@@ -1633,9 +1645,11 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 let group = newGroups.find(
                                   (gr) => gr.id == g.id,
                                 );
-                                group.scenes = group.scenes.concat([
-                                  Number.parseInt(evt.item.id),
-                                ]);
+                                if (group != null) {
+                                  group.scenes = group.scenes.concat([
+                                    Number.parseInt(evt.item.id),
+                                  ]);
+                                }
                                 this.props.onUpdateGroups(newGroups);
                               }
                             } else if (order.length < filteredList.length) {
@@ -1643,12 +1657,14 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 this.props.sceneGroups,
                               );
                               let group = newGroups.find((gr) => gr.id == g.id);
-                              group.scenes = group.scenes.filter(
-                                (id) => id.toString() != evt.item.id,
-                              );
+                              if (group != null) {
+                                group.scenes = group.scenes.filter(
+                                  (id) => id.toString() != evt.item.id,
+                                );
+                              }
                               this.props.onUpdateGroups(newGroups);
                             }
-                            if (oldIndex != null && newIndex != null) {
+                            if (oldIndex != -1 && newIndex != -1) {
                               arrayMove(newGrids, oldIndex, newIndex);
                               this.props.onUpdateGrids(newGrids);
                             }
@@ -2150,7 +2166,9 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     if (this.props.tutorial == SPT.add1) {
       this.props.onTutorial(SPT.add1);
     }
-    this.setState({ openMenu: this.state.openMenu == MO.new ? undefined : MO.new });
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
   }
 
   onAddScene() {
@@ -2178,7 +2196,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     e.preventDefault();
     const newGroups = this.props.sceneGroups;
     const editGroup = newGroups.find((g) => g.id == this.state.isEditing);
-    editGroup.name = this.state.isEditingName;
+    if (editGroup != null) {
+      editGroup.name = this.state.isEditingName;
+    }
+
     this.props.onUpdateGroups(newGroups);
     this.setState({ isEditing: -1, isEditingName: "" });
   }

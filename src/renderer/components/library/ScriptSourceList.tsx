@@ -169,7 +169,7 @@ class ScriptSourceList extends React.Component<
               onClick={this.clearLastSelected.bind(this)}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list")}
+                helperContainer={() => document.getElementById("sortable-list") as HTMLElement}
                 distance={5}
                 height={height}
                 width={width}
