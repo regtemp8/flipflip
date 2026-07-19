@@ -477,7 +477,7 @@ class VideoClipper extends React.Component<
                         {!this.props.isLibrary &&
                           this.state.isEditing &&
                           this.props.source.clips.find(
-                            (c) => c.id == this.state.isEditing.id,
+                            (c) => c.id == this.state.isEditing?.id,
                           ) && (
                             <Grid item>
                               <Tooltip
@@ -630,7 +630,7 @@ class VideoClipper extends React.Component<
                         </Grid>
                         {this.state.isEditing &&
                           this.props.source.clips.find(
-                            (c) => c.id == this.state.isEditing.id,
+                            (c) => c.id == this.state.isEditing?.id,
                           ) && (
                             <Grid item>
                               <Tooltip
@@ -806,7 +806,7 @@ class VideoClipper extends React.Component<
       this.props.onTutorial(VCT.clip);
     }
     const source = this.props.source;
-    let clip = source.clips.find((c) => c.id == this.state.isEditing.id);
+    let clip = source.clips.find((c) => c.id == this.state.isEditing?.id);
     if (clip) {
       clip.start = this.state.isEditingValue[0];
       clip.end = this.state.isEditingValue[1];
@@ -814,7 +814,7 @@ class VideoClipper extends React.Component<
       const start = this.state.isEditingValue[0];
       const end = this.state.isEditingValue[1];
       source.clips = source.clips.concat([
-        { ...this.state.isEditing, start, end },
+        { ...(this.state.isEditing as Clip), start, end },
       ]);
     }
     this.props.onUpdateClips(source.url, source.clips);
@@ -824,10 +824,11 @@ class VideoClipper extends React.Component<
   }
 
   onToggleClip() {
+    const isEditing = this.state.isEditing as Clip
     this.props.onSetDisabledClips(
       this.props.source.disabledClips
-        ? this.props.source.disabledClips.concat(this.state.isEditing.id)
-        : [this.state.isEditing.id],
+        ? this.props.source.disabledClips.concat(isEditing.id)
+        : [isEditing.id],
     );
   }
 
@@ -930,6 +931,14 @@ class VideoClipper extends React.Component<
     forceStart = false,
     forceEnd = false,
   ) {
+    this.changePosition(value, forceStart, forceEnd)
+  }
+
+  private changePosition(
+    value: number | number[],
+    forceStart = false,
+    forceEnd = false,
+  ) {
     const video = this.video as HTMLVideoElement;
     const values = value as number[];
     let min = values[0];
@@ -969,8 +978,7 @@ class VideoClipper extends React.Component<
 
   onChangeStartTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
-      this.onChangePosition(
-        null,
+      this.changePosition(
         [timestampValue, this.state.isEditingValue[1]],
         force,
         false,
@@ -983,7 +991,7 @@ class VideoClipper extends React.Component<
     this.setState({
       isEditingStartText: getTimestamp(video.currentTime),
     });
-    this.onChangePosition(null, [
+    this.changePosition([
       video.currentTime,
       this.state.isEditingValue[1],
     ]);
@@ -1000,8 +1008,7 @@ class VideoClipper extends React.Component<
 
   onChangeEndTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
-      this.onChangePosition(
-        null,
+      this.changePosition(
         [this.state.isEditingValue[0], timestampValue],
         false,
         force,
@@ -1014,7 +1021,7 @@ class VideoClipper extends React.Component<
     this.setState({
       isEditingEndText: getTimestamp(video.currentTime),
     });
-    this.onChangePosition(null, [
+    this.changePosition([
       this.state.isEditingValue[0],
       video.currentTime,
     ]);
@@ -1032,9 +1039,10 @@ class VideoClipper extends React.Component<
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
-    const start = document.activeElement.id == "start";
-    const end = document.activeElement.id == "end";
+    const activeElement = document.activeElement as Element
+    const focus = activeElement.tagName.toLocaleLowerCase();
+    const start = activeElement.id == "start";
+    const end = activeElement.id == "end";
     switch (e.key) {
       case "Escape":
         e.preventDefault();
@@ -1042,7 +1050,7 @@ class VideoClipper extends React.Component<
           this.onTag();
         } else if (this.state.isEditing) {
           const clip = this.props.source.clips.find(
-            (c) => c.id == this.state.isEditing.id,
+            (c) => c.id == this.state.isEditing?.id,
           );
           if (clip) {
             this.onSave(true);
