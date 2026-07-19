@@ -31,11 +31,13 @@ function archiveFile(filePath: string): void {
   }
 }
 
+declare const __APP_VERSION__: string;
+
 export default class AppStorage {
   initialState: AppStorageState = defaultInitialState;
 
   constructor(windowId: number) {
-    this.initialState.version = process.env.APP_VERSION;
+    this.initialState.version = __APP_VERSION__;
     try {
       fs.mkdirSync(saveDir);
     } catch {
@@ -67,7 +69,7 @@ export default class AppStorage {
         console.warn("FOUND OLD SAVE");
       }
 
-      if (data.version != process.env.APP_VERSION) {
+      if (data.version != __APP_VERSION__) {
         // Preserve the existing file - so as not to destroy user's data
         archiveFile(portableMode ? portablePath : savePath);
       }
@@ -84,7 +86,7 @@ export default class AppStorage {
           sources = removeDuplicatesBy((s: string) => s, sources);
           // Create our initialState object
           this.initialState = {
-            version: process.env.APP_VERSION,
+            version: __APP_VERSION__,
             specialMode: data.specialMode ? data.specialMode : null,
             openTab: data.openTab ? data.openTab : 0,
             displayedSources: new Array<LibrarySource>(),
@@ -166,7 +168,7 @@ export default class AppStorage {
         case "3.0.0-beta1":
         case "3.0.0-beta2":
           this.initialState = {
-            version: process.env.APP_VERSION,
+            version: __APP_VERSION__,
             specialMode: data.specialMode,
             openTab: 0,
             displayedSources: new Array<LibrarySource>(),
@@ -363,7 +365,7 @@ export default class AppStorage {
         case "3.2.0":
         case "3.2.1":
           this.initialState = {
-            version: process.env.APP_VERSION,
+            version: __APP_VERSION__,
             specialMode: data.specialMode,
             openTab: data.openTab,
             displayedSources: new Array<LibrarySource>(),
@@ -424,7 +426,7 @@ export default class AppStorage {
           break;
         default:
           this.initialState = {
-            version: process.env.APP_VERSION,
+            version: __APP_VERSION__,
             specialMode: data.specialMode,
             openTab: data.openTab,
             displayedSources: new Array<LibrarySource>(),
