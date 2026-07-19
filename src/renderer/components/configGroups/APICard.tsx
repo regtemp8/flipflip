@@ -126,9 +126,11 @@ class APICard extends React.Component<APICardProps, APICardState> {
     const indexOf = this.props.settings.tumblrKeys.indexOf(
       this.props.settings.tumblrKey,
     );
-    const menuType = this.state.menuType
-      ? en.get(this.state.menuType)[0].toUpperCase() +
-        en.get(this.state.menuType).slice(1)
+
+    const menuText = this.state.menuType
+      ? en.get(this.state.menuType) : undefined
+    const menuType = menuText != null
+      ? menuText[0].toUpperCase() + menuText.slice(1)
       : "";
     let menuTypeSignOut = () => {};
     switch (this.state.menuType) {
@@ -712,8 +714,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
   onCloseDialog() {
     this.setState({
-      openMenu: null,
-      menuType: null,
+      openMenu: undefined,
+      menuType: undefined,
       input1: "",
       input2: "",
       input3: "",
