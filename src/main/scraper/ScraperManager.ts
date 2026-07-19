@@ -17,7 +17,6 @@ import {
   loadGelbooru1,
   loadGelbooru2,
   loadHydrus,
-  loadImageFap,
   loadImgur,
   loadLuscious,
   loadPiwigo,
@@ -344,8 +343,6 @@ export function loadSources(
       workerFunction = loadTumblr;
     } else if (sourceType == ST.redgifs) {
       workerFunction = loadRedGifs;
-    } else if (sourceType == ST.imagefap) {
-      workerFunction = loadImageFap;
     } else if (sourceType == ST.imgur) {
       workerFunction = loadImgur;
     } else if (sourceType == ST.deviantart) {

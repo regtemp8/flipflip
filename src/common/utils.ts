@@ -114,8 +114,6 @@ export function getSourceType(url: string): string {
     return ST.tumblr;
   } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
     return ST.redgifs;
-  } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
-    return ST.imagefap;
   } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
     return ST.imgur;
   } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
@@ -186,14 +184,6 @@ export function getFileGroup(url: string, pathSep: string): string {
       }
       return redgifID;
     }
-    case ST.imagefap:
-      return url
-        .replace(/https?:\/\/www\.imagefap\.com\//, "")
-        .replace(/pictures\//, "")
-        .replace(/gallery\//, "")
-        .replace(/organizer\//, "")
-        .replace(/video\.php\?vid=/, "")
-        .split("/")[0];
     case ST.imgur:
       return url.replace(/https?:\/\/imgur\.com\//, "").replace(/a\//, "");
     case ST.deviantart: {
