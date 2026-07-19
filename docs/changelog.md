@@ -1,4 +1,13 @@
 # Changelog
+#### v5.1.2 <small>(07/19/2026)</small>
+- Fix grid loading for empty grid cells
+- Close random scene dialog
+- Add parent directory if directory of sources enabled but doesn't have child directories
+- Fix 'Start Now' for grids
+- Improve scene switching
+- Upgrade Electron to 42.7.0
+- Upgrade 3rd party libraries
+
 #### v5.1.1 <small>(06/20/2026)</small>
 - Improve large sources loading time
 - Fix playlist file playback
