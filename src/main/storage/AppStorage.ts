@@ -209,138 +209,135 @@ export default class AppStorage {
 
           // Port to new generator format
           for (let scene of this.initialState.scenes) {
-            // If this is a generator scene
-            if (scene.tagWeights || scene.sceneWeights) {
-              scene.generatorWeights = [];
-              // Get weights for this scene
-              const tagWeights = new Map<Tag, { type: string; value: number }>(
-                JSON.parse(scene.tagWeights),
-              );
-              let sceneWeights = new Map<
-                number,
-                { type: string; value: number }
-              >();
-              if (scene.sceneWeights != null) {
-                sceneWeights = new Map<number, { type: string; value: number }>(
-                  JSON.parse(scene.sceneWeights),
-                );
+            if(!scene.generatorWeights) {
+              scene.generatorWeights = []
+            }
+
+            // Get weights for this scene
+            const tagWeights =
+              scene.tagWeights != null
+                ? new Map<Tag, { type: string; value: number }>(
+                    JSON.parse(scene.tagWeights),
+                  )
+                : new Map<Tag, { type: string; value: number }>();
+            const sceneWeights =
+              scene.sceneWeights != null
+                ? new Map<number, { type: string; value: number }>(
+                    JSON.parse(scene.sceneWeights),
+                  )
+                : new Map<number, { type: string; value: number }>();
+
+            const weights = Array.from(tagWeights.values()).concat(
+              Array.from(sceneWeights.values()),
+            );
+
+            const sum =
+              weights.length > 0
+                ? weights
+                    .map((w) => w.value)
+                    .reduce((total, value) => Number(total) + Number(value))
+                : 0;
+
+            // For each tag weight
+            for (const [tag, weight] of tagWeights.entries()) {
+              // If this is relevant
+              if (weight.type != TT.weight || weight.value > 0) {
+                // Add as weight group
+                const wg = new WeightGroup();
+                // Convert weight to percentage
+                if (weight.value > 0) {
+                  wg.percent = Math.round((weight.value / sum) * 100);
+                } else {
+                  wg.percent = 0;
+                }
+                wg.type = weight.type;
+                wg.search = "[" + tag.name + "]";
+
+                scene.generatorWeights.push(wg);
               }
-              const weights = Array.from(tagWeights.values()).concat(
-                Array.from(sceneWeights.values()),
-              );
-              const sum =
-                weights.length > 0
-                  ? weights
-                      .map((w) => w.value)
-                      .reduce((total, value) => Number(total) + Number(value))
-                  : 0;
+            }
 
-              // For each tag weight
-              for (let tag of tagWeights.keys()) {
-                const weight = tagWeights.get(tag);
-                // If this is relevant
-                if (weight.type != TT.weight || weight.value > 0) {
-                  // Add as weight group
-                  const wg = new WeightGroup();
-                  // Convert weight to percentage
-                  if (weight.value > 0) {
-                    wg.percent = Math.round((weight.value / sum) * 100);
-                  } else {
-                    wg.percent = 0;
+            // For each scene weight
+            for (const [sceneID, weight] of sceneWeights.entries()) {
+              // If this is relevant
+              if (weight.value > 0) {
+                const wg = new WeightGroup();
+                wg.percent = Math.round((weight.value / sum) * 100);
+                wg.type = TT.weight;
+
+                // Build a set of rules from this scene's weights
+                const tagScene = this.initialState.scenes.find(
+                  (s: Scene) => s.id == sceneID,
+                );
+                if (tagScene?.tagWeights) {
+                  const tagWeights = new Map<
+                    Tag,
+                    { type: string; value: number }
+                  >(JSON.parse(tagScene.tagWeights));
+                  const weights = Array.from(tagWeights.values());
+                  const swSum =
+                    weights.length > 0
+                      ? weights
+                          .map((w) => w.value)
+                          .reduce(
+                            (total, value) => Number(total) + Number(value),
+                          )
+                      : 0;
+                  const rules = new Array<WeightGroup>();
+
+                  // For each tag weight
+                  for (const [tag, weight] of tagWeights.entries()) {
+                    // If this is relevant
+                    if (weight.type != TT.weight || weight.value > 0) {
+                      // Add as weight group
+                      const rule = new WeightGroup();
+                      if (weight.value > 0) {
+                        rule.percent = Math.round((weight.value / swSum) * 100);
+                      } else {
+                        rule.percent = 0;
+                      }
+                      rule.type = weight.type;
+                      rule.search = "[" + tag.name + "]";
+                      rules.push(rule);
+                    }
                   }
-                  wg.type = weight.type;
-                  wg.search = "[" + tag.name + "]";
 
+                  // Ensure weights are valid
+                  let remaining = 100;
+                  for (let rule of rules) {
+                    if (rule.type == TT.weight) {
+                      remaining = remaining - rule.percent;
+                    }
+                  }
+                  if (remaining != 0 && remaining != 100) {
+                    rules[0].percent = rules[0].percent + remaining;
+                  }
+
+                  // Add rules
+                  wg.rules = rules;
                   scene.generatorWeights.push(wg);
                 }
               }
+            }
 
-              // For each scene weight
-              for (let sceneID of sceneWeights.keys()) {
-                const weight = sceneWeights.get(sceneID);
-                // If this is relevant
-                if (weight.value > 0) {
-                  const wg = new WeightGroup();
-                  wg.percent = Math.round((weight.value / sum) * 100);
-                  wg.type = TT.weight;
-
-                  // Build a set of rules from this scene's weights
-                  const tagScene = this.initialState.scenes.find(
-                    (s: Scene) => s.id == sceneID,
-                  );
-                  if (tagScene.tagWeights) {
-                    const tagWeights = new Map<
-                      Tag,
-                      { type: string; value: number }
-                    >(JSON.parse(tagScene.tagWeights));
-                    const weights = Array.from(tagWeights.values());
-                    const swSum =
-                      weights.length > 0
-                        ? weights
-                            .map((w) => w.value)
-                            .reduce(
-                              (total, value) => Number(total) + Number(value),
-                            )
-                        : 0;
-                    const rules = new Array<WeightGroup>();
-
-                    // For each tag weight
-                    for (let tag of tagWeights.keys()) {
-                      const weight = tagWeights.get(tag);
-                      // If this is relevant
-                      if (weight.type != TT.weight || weight.value > 0) {
-                        // Add as weight group
-                        const rule = new WeightGroup();
-                        if (weight.value > 0) {
-                          rule.percent = Math.round(
-                            (weight.value / swSum) * 100,
-                          );
-                        } else {
-                          rule.percent = 0;
-                        }
-                        rule.type = weight.type;
-                        rule.search = "[" + tag.name + "]";
-                        rules.push(rule);
-                      }
-                    }
-
-                    // Ensure weights are valid
-                    let remaining = 100;
-                    for (let rule of rules) {
-                      if (rule.type == TT.weight) {
-                        remaining = remaining - rule.percent;
-                      }
-                    }
-                    if (remaining != 0 && remaining != 100) {
-                      rules[0].percent = rules[0].percent + remaining;
-                    }
-
-                    // Add rules
-                    wg.rules = rules;
-                    scene.generatorWeights.push(wg);
-                  }
-                }
+            // Ensure weights are valid
+            let remaining = 100;
+            for (let wg of scene.generatorWeights) {
+              if (wg.type == TT.weight) {
+                remaining = remaining - wg.percent;
               }
-
-              // Ensure weights are valid
-              let remaining = 100;
+            }
+            if (remaining != 0 && remaining != 100) {
               for (let wg of scene.generatorWeights) {
                 if (wg.type == TT.weight) {
-                  remaining = remaining - wg.percent;
+                  wg.percent = wg.percent + remaining;
+                  break;
                 }
               }
-              if (remaining != 0 && remaining != 100) {
-                for (let wg of scene.generatorWeights) {
-                  if (wg.type == TT.weight) {
-                    wg.percent = wg.percent + remaining;
-                    break;
-                  }
-                }
-              }
-
-              scene.tagWeights = null;
-              scene.sceneWeights = null;
             }
+
+            scene.tagWeights = undefined;
+            scene.sceneWeights = undefined;
           }
 
           for (let i = 0; i < this.initialState.library.length; i++) {
@@ -558,10 +555,12 @@ async function checkAutoClean(state: any): Promise<boolean> {
   let lastBackup;
   let epoch;
   do {
+    let timestamp = "NaN";
     lastBackup = backups.shift();
-    epoch = Number.parseInt(
-      lastBackup.url.substring(lastBackup.url.lastIndexOf(".") + 1),
-    );
+    if (lastBackup != null) {
+      timestamp = lastBackup.url.substring(lastBackup.url.lastIndexOf(".") + 1);
+    }
+    epoch = Number.parseInt(timestamp);
   } while (Number.isNaN(epoch));
   // If it's been longer than N days since our last backup
   if (
@@ -583,10 +582,14 @@ async function checkAutoBackup(state: any, backup: Function): Promise<boolean> {
     let lastBackup;
     let epoch;
     do {
+      let timestamp = "NaN";
       lastBackup = backups.shift();
-      epoch = Number.parseInt(
-        lastBackup.url.substring(lastBackup.url.lastIndexOf(".") + 1),
-      );
+      if (lastBackup != null) {
+        timestamp = lastBackup.url.substring(
+          lastBackup.url.lastIndexOf(".") + 1,
+        );
+      }
+      epoch = Number.parseInt(timestamp);
     } while (Number.isNaN(epoch));
     // If it's been longer than N days since our last backup
     if (
