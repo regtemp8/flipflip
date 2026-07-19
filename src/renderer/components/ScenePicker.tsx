@@ -2066,16 +2066,16 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
   }
 
   onDeleteScenes() {
-    this.setState({ openMenu: null, deleteScenes: new Array<number>() });
+    this.setState({ openMenu: undefined, deleteScenes: new Array<number>() });
   }
 
   onCancelDelete() {
-    this.setState({ deleteScenes: null });
+    this.setState({ deleteScenes: undefined });
   }
 
   onFinishDelete() {
     this.props.onDeleteScenes(this.state.deleteScenes);
-    this.setState({ deleteScenes: null });
+    this.setState({ deleteScenes: undefined });
   }
 
   onToggleDelete(sceneID: number) {
@@ -2128,7 +2128,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
   newWindow(hideFutureWarnings: boolean) {
     if (this.state.openMenu == MO.newWindowAlert) {
-      this.setState({ openMenu: null });
+      this.setState({ openMenu: undefined });
       if (hideFutureWarnings) {
         let newConfig = this.props.config;
         newConfig.newWindowAlerted = true;
@@ -2150,7 +2150,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     if (this.props.tutorial == SPT.add1) {
       this.props.onTutorial(SPT.add1);
     }
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
+    this.setState({ openMenu: this.state.openMenu == MO.new ? undefined : MO.new });
   }
 
   onAddScene() {
@@ -2206,7 +2206,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
           break;
         }
       } while ((parent = parent.parentNode) != null);
-      this.setState({ menuAnchorEl: null, openMenu: null });
+      this.setState({ menuAnchorEl: undefined, openMenu: undefined });
     }
   }
 
@@ -2230,8 +2230,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
   onCloseDialog() {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       importFile: "",
       importSources: false,
     });

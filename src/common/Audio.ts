@@ -3,7 +3,7 @@ import Tag from "./Tag";
 
 export default class Audio {
   id: number = 0;
-  url: string | null = null;
+  url: string = "";
   marked: boolean = false;
   tags: Array<Tag> = [];
 

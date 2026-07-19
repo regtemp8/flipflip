@@ -207,7 +207,7 @@ class AudioAlbumList extends React.Component<
   }
 
   onMouseLeave() {
-    this.setState({ hover: null });
+    this.setState({ hover: undefined });
   }
 
   getAlbums(): Map<string, { artist: string; thumb: string; count: number }> {

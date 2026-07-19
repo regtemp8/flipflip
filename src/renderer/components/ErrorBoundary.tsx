@@ -281,7 +281,7 @@ export default class ErrorBoundary extends React.Component<
   backupCheck() {
     window.ipc.getBackups().then((backups) => {
       if (backups.length == 0) {
-        this.setState({ backupCheck: true, backups: backups, backup: null });
+        this.setState({ backupCheck: true, backups: backups, backup: undefined });
       } else {
         this.setState({
           backupCheck: true,

@@ -1917,7 +1917,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
   endEditingName(e: React.SyntheticEvent<Element, Event>) {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
-    this.setState({ isEditingName: null });
+    this.setState({ isEditingName: undefined });
   }
 
   onChangeName(e: React.ChangeEvent<HTMLInputElement>) {

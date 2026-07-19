@@ -175,7 +175,7 @@ class AudioArtistList extends React.Component<
   }
 
   onMouseLeave() {
-    this.setState({ hover: null });
+    this.setState({ hover: undefined });
   }
 
   getArtists(): Map<string, string> {

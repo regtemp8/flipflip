@@ -663,9 +663,8 @@ export const loadImageFap = (
           });
         } else if (albumEls.length > helpers.next[1]) {
           let albumEl = albumEls[helpers.next[1]];
-          let albumID = albumEl
-            .getAttribute("href")
-            .substring(albumEl.getAttribute("href").lastIndexOf("/") + 1);
+          const albumHref = albumEl.getAttribute("href")
+          let albumID = albumHref.substring(albumHref.lastIndexOf("/") + 1);
           let images = new Array<string>();
           const baseGalleryURL = "https://www.imagefap.com/gallery/" + albumID;
           loadImageFapGallery(
@@ -1034,8 +1033,8 @@ export const loadDeviantArt = (
         const contents = items[i].getElementsByTagName("media:content");
         for (let c = 0; c < contents.length; c++) {
           const content = contents[c];
-          if (content.getAttribute("medium") == "image") {
-            images.push(content.getAttribute("url"));
+          if (content.getAttribute("medium") == "image" && content.hasAttribute("url")) {
+            images.push(content.getAttribute("url") as string);
           }
         }
       }
@@ -2238,14 +2237,12 @@ export const loadBDSMlr = (
         contentType: "application/xml",
       }).window.document.querySelectorAll("item");
       if (itemEls.length > 0) {
-        let imageCount = 0;
         let images = new Array<string>();
         for (let i = 0; i < itemEls.length; i++) {
           const item = itemEls.item(i);
           const embeddedImages = item.querySelectorAll("description > img");
           if (embeddedImages.length > 0) {
             for (let image of embeddedImages) {
-              imageCount++;
               images.push(image.getAttribute("src"));
             }
           }

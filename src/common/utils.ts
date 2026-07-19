@@ -167,7 +167,7 @@ export function getSourceType(url: string): string {
   }
 }
 
-export function getFileGroup(url: string, pathSep: string) {
+export function getFileGroup(url: string, pathSep: string): string {
   let sep;
   switch (getSourceType(url)) {
     case ST.tumblr:
@@ -330,6 +330,8 @@ export function getFileGroup(url: string, pathSep: string) {
 
       return "piwigo";
     }
+    default:
+      return "";
   }
 }
 

@@ -28,7 +28,7 @@ interface GeneralConfigProps {
   theme: Theme;
   onBackup(): void;
   onChangeThemeColor(colorTheme: any, primary: boolean): void;
-  onClean(): void;
+  onClean(config: Config): void;
   onPortableOverride(): void;
   onRestore(backupFile: string): void;
   onToggleDarkMode(): void;

@@ -213,7 +213,7 @@ interface ConfigFormProps {
   goBack(): void;
   onBackup(): void;
   onChangeThemeColor(colorTheme: any, primary: boolean): void;
-  onClean(): void;
+  onClean(config: Config): void;
   onDefault(): void;
   onResetTutorials(): void;
   onRestore(backupFile: string): void;
@@ -618,7 +618,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
   }
 
   onCloseDialog() {
-    this.setState({ openMenu: null, drawerOpen: false });
+    this.setState({ openMenu: undefined, drawerOpen: false });
   }
 
   onCloseErrorSnack() {

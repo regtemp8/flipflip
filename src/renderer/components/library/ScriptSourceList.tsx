@@ -293,7 +293,7 @@ class ScriptSourceList extends React.Component<
 
   clearLastSelected() {
     if (!this.state.sourceOptions) {
-      this.setState({ lastSelected: null });
+      this.setState({ lastSelected: undefined });
     }
   }
 
@@ -303,7 +303,7 @@ class ScriptSourceList extends React.Component<
   }
 
   onCloseSourceOptions() {
-    this.setState({ sourceOptions: null });
+    this.setState({ sourceOptions: undefined });
   }
 
   onFinishSourceOptions(newScript: CaptionScript) {
@@ -320,7 +320,7 @@ class ScriptSourceList extends React.Component<
   }
 
   onCloseDeleteDialog() {
-    this.setState({ deleteDialog: null });
+    this.setState({ deleteDialog: undefined });
   }
 
   onFinishDelete() {
@@ -415,7 +415,7 @@ class ScriptSourceList extends React.Component<
   }
 
   onClosePlayDialog() {
-    this.setState({ beginPlay: null, playWithScene: null });
+    this.setState({ beginPlay: undefined, playWithScene: undefined });
   }
 
   onFinishPlay() {

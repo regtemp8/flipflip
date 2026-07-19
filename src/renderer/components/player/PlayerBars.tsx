@@ -1045,10 +1045,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
   onCloseDialog() {
     this.setState({
-      blacklistSource: null,
-      blacklistFile: null,
-      deletePath: null,
-      deleteError: null,
+      blacklistSource: undefined,
+      blacklistFile: undefined,
+      deletePath: undefined,
+      deleteError: undefined,
     });
   }
 
@@ -1081,7 +1081,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         }
       } else {
         this.setState({
-          deletePath: null,
+          deletePath: undefined,
           deleteError: "This file doesn't exist, cannot delete",
         });
       }
@@ -1092,7 +1092,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     window.ipc.finishDelete(path).then((err) => {
       if (err) {
         this.setState({
-          deletePath: null,
+          deletePath: undefined,
           deleteError: "An error occurred while deleting the file: " + err,
         });
       } else {

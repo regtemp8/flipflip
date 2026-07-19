@@ -136,7 +136,7 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
   onToggleColorPicker(e: React.MouseEvent<HTMLButtonElement>) {
     if (this.state.pickerColor) {
       this.onChangeColor(this.state.pickerColor);
-      this.setState({ pickerColor: null, pickerAnchorEl: null });
+      this.setState({ pickerColor: undefined, pickerAnchorEl: undefined });
     } else {
       this.setState({
         pickerColor: this.props.currentColor,

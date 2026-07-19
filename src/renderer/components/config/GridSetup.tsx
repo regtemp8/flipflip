@@ -537,7 +537,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   }
 
   onCloseMenu() {
-    this.setState({ isEditing: null });
+    this.setState({ isEditing: undefined });
   }
 
   getNewGrid(height: number, width: number) {
@@ -715,7 +715,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   endEditingName(e: React.SyntheticEvent<Element, Event>) {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
-    this.setState({ isEditingName: null });
+    this.setState({ isEditingName: undefined });
   }
 
   onChangeName(e: React.ChangeEvent<HTMLInputElement>) {

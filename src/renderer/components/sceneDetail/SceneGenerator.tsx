@@ -612,7 +612,7 @@ class SceneGenerator extends React.Component<
     if (this.state.isEditing == -1) {
       this.onCloseDialog();
     } else {
-      this.setState({ isWeighing: -1, menuAnchorEl: null });
+      this.setState({ isWeighing: -1, menuAnchorEl: undefined });
     }
   }
 
@@ -636,7 +636,7 @@ class SceneGenerator extends React.Component<
   }
 
   onCloseAddRule() {
-    this.setState({ addRule: false, menuAnchorEl: null });
+    this.setState({ addRule: false, menuAnchorEl: undefined });
   }
 
   onWeighRule(index: number, e: React.MouseEvent<HTMLButtonElement>) {

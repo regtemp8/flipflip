@@ -516,7 +516,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   onCloseDeleteDialog() {
-    this.setState({ deleteDialog: null });
+    this.setState({ deleteDialog: undefined });
   }
 
   onFinishDelete() {
@@ -741,7 +741,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   onCloseClean() {
-    this.setState({ cachePath: null });
+    this.setState({ cachePath: undefined });
   }
 
   openDirectory(cachePath: string) {
@@ -766,11 +766,11 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   onCloseDialog() {
-    this.setState({ clipMenu: null, weightMenu: null });
+    this.setState({ clipMenu: undefined, weightMenu: undefined });
   }
 
   onCloseBlacklist() {
-    this.setState({ blacklistSource: null, editBlacklist: null });
+    this.setState({ blacklistSource: undefined, editBlacklist: undefined });
   }
 
   onFinishBlacklist() {
@@ -795,7 +795,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   onCloseSourceOptions() {
-    this.setState({ sourceOptions: null, sourceOptionsType: null });
+    this.setState({ sourceOptions: undefined, sourceOptionsType: undefined });
   }
 
   onSourceOptions(source: LibrarySource) {

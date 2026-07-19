@@ -3,7 +3,7 @@ import Clip from "./Clip";
 
 export default class LibrarySource {
   id: number = 0;
-  url: string | null = null;
+  url: string = "";
   offline: boolean = false;
   marked: boolean = false;
   lastCheck: Date | null = null;

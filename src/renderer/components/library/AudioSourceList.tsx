@@ -270,7 +270,7 @@ class AudioSourceList extends React.Component<
   }
 
   onCloseDeleteDialog() {
-    this.setState({ deleteDialog: null });
+    this.setState({ deleteDialog: undefined });
   }
 
   onFinishDelete() {
@@ -348,7 +348,7 @@ class AudioSourceList extends React.Component<
 
   clearLastSelected() {
     if (!this.state.sourceEdit && !this.state.sourceOptions) {
-      this.setState({ lastSelected: null });
+      this.setState({ lastSelected: undefined });
     }
   }
 
@@ -358,7 +358,7 @@ class AudioSourceList extends React.Component<
   }
 
   onCloseSourceEditDialog() {
-    this.setState({ sourceEdit: null });
+    this.setState({ sourceEdit: undefined });
   }
 
   onSourceOptions(source: Audio, e: MouseEvent) {
@@ -367,7 +367,7 @@ class AudioSourceList extends React.Component<
   }
 
   onCloseSourceOptions() {
-    this.setState({ sourceOptions: null });
+    this.setState({ sourceOptions: undefined });
   }
 
   onFinishSourceEdit(newAudio: Audio) {

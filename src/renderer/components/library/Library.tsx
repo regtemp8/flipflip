@@ -1613,7 +1613,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   onToggleBatchClipModal() {
     if (this.state.openMenu == MO.batchClip) {
-      this.setState({ openMenu: null });
+      this.setState({ openMenu: undefined });
     } else {
       this.setState({ openMenu: MO.batchClip });
     }

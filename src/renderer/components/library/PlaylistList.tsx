@@ -186,7 +186,7 @@ class PlaylistList extends React.Component<
   }
 
   onMouseLeave() {
-    this.setState({ hover: null });
+    this.setState({ hover: undefined });
   }
 
   getPlaylists(): Map<string, Array<string>> {

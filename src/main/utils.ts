@@ -45,17 +45,23 @@ export function getBackups(): Array<Backup> {
 }
 
 export function getLocalPath(source: string, config: Config) {
-  return cachePath(source, "local", config);
+  return cachePath(config, source, "local");
 }
 
 export function getCachePath(source: string, config: Config) {
-  const typeDir = en.get(getSourceType(source)).toLowerCase();
-  return cachePath(source, typeDir, config);
+  return cachePath(config, source);
 }
 
-function cachePath(source: string, typeDir: string, config: Config) {
+export function getCacheDir(config: Config) {
+  return cachePath(config);
+}
+
+function cachePath(config: Config, source?: string, typeDir?: string) {
   if (config.caching.directory === "") {
     if (source) {
+      if (!typeDir) {
+        typeDir = en.get(getSourceType(source)).toLowerCase();
+      }
       if (source != ST.video && source != ST.playlist) {
         return (
           saveDir +
@@ -81,6 +87,9 @@ function cachePath(source: string, typeDir: string, config: Config) {
       baseDir += path.sep;
     }
     if (source) {
+      if (!typeDir) {
+        typeDir = en.get(getSourceType(source)).toLowerCase();
+      }
       if (source != ST.video && source != ST.playlist) {
         return (
           baseDir +
@@ -175,7 +184,7 @@ export function extractMusicMetadata(
     audio.duration = metadata.format.duration;
   } else {
     const data = toArrayBuffer(fs.readFileSync(audio.url));
-    let context = new AudioContext();
+    let context = new AudioContext(); // FIXME should this be moved back to renderer?
     context.decodeAudioData(data, (buffer) => {
       audio.duration = buffer.duration;
     });

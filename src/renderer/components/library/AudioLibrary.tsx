@@ -1701,7 +1701,7 @@ class AudioLibrary extends React.Component<
 
   onTogglePlaylistDialog(e: React.MouseEvent<HTMLButtonElement>) {
     if (this.state.openMenu == MO.playlist) {
-      this.setState({ menuAnchorEl: null, openMenu: null });
+      this.setState({ menuAnchorEl: undefined, openMenu: undefined });
     } else {
       this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.playlist });
     }

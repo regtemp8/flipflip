@@ -824,7 +824,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
       Math.abs(Date.now() - this.state.startTime.getTime()) >=
         this.props.scene.nextSceneTime
     ) {
-      this.setState({ startTime: null });
+      this.setState({ startTime: undefined });
       this.props.nextScene();
     } else if (!this.state.isPlaying && this.state.startTime) {
       const startTime = this.state.startTime;
