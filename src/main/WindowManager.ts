@@ -108,13 +108,11 @@ export async function saveExport(
   if (window == null) {
     return;
   }
-  if (!fs.existsSync(filePath)) {
-    filePath = undefined;
-  }
 
+  const defaultPath = fs.existsSync(filePath) ? filePath : undefined
   const result = await dialog.showSaveDialog(window, {
     filters: [{ name: "JSON Document", extensions: ["json"] }],
-    defaultPath: filePath,
+    defaultPath,
   });
   if (result.canceled) {
     return;
@@ -331,16 +329,14 @@ export async function openScript(windowId: number) {
 export async function saveScriptAs(
   windowId: number,
   script: string,
-  defaultPath: string,
+  filePath: string,
 ) {
   const window = currentWindows.get(windowId);
   if (window == null) {
     return undefined;
   }
-  if (!fs.existsSync(defaultPath)) {
-    defaultPath = undefined;
-  }
 
+  const defaultPath = fs.existsSync(filePath) ? filePath : undefined
   const result = await dialog.showSaveDialog(window, {
     filters: [{ name: "Text Document", extensions: ["txt"] }],
     defaultPath,
