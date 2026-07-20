@@ -421,8 +421,8 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
 
   onCloseDialog() {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       isEditing: -1,
       tagName: "",
       tagPhrase: "",

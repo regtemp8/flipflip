@@ -1026,7 +1026,7 @@ class ScriptLibrary extends React.Component<
 
   onToggleBatchTagModal() {
     if (this.state.openMenu == MO.batchTag) {
-      this.setState({ openMenu: null, selectedTags: [] });
+      this.setState({ openMenu: undefined, selectedTags: [] });
     } else {
       this.setState({
         openMenu: MO.batchTag,
@@ -1047,7 +1047,9 @@ class ScriptLibrary extends React.Component<
   }
 
   onToggleNewMenu() {
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
   }
 
   onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
@@ -1055,7 +1057,11 @@ class ScriptLibrary extends React.Component<
   }
 
   onCloseDialog() {
-    this.setState({ menuAnchorEl: null, openMenu: null, drawerOpen: false });
+    this.setState({
+      menuAnchorEl: undefined,
+      openMenu: undefined,
+      drawerOpen: false,
+    });
   }
 
   onRemoveAll() {

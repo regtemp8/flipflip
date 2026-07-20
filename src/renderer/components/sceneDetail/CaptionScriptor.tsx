@@ -1178,8 +1178,8 @@ class CaptionScriptor extends React.Component<
 
   onCloseDialog() {
     this.setState({
-      openMenu: null,
-      menuAnchorEl: null,
+      openMenu: undefined,
+      menuAnchorEl: undefined,
       selectScript: "",
     });
   }
@@ -1249,7 +1249,7 @@ class CaptionScriptor extends React.Component<
     this.onCloseDialog();
     this.setState({
       captionScript: new CaptionScript({ script: "" }),
-      error: null,
+      error: undefined,
       scriptChanged: false,
     });
     this.state.codeMirrorOverwriteHack.fire("");
@@ -1439,13 +1439,13 @@ class CaptionScriptor extends React.Component<
       this.setState({
         scene: newScene,
         captionScript: newScript,
-        error: null,
+        error: undefined,
         scriptChanged: changed ? true : this.state.scriptChanged,
       });
     } else {
       this.setState({
         captionScript: newScript,
-        error: null,
+        error: undefined,
         scriptChanged: changed ? true : this.state.scriptChanged,
       });
     }
@@ -1471,7 +1471,11 @@ class CaptionScriptor extends React.Component<
 
   onChangeScene(sceneID: number) {
     if (sceneID == 0) {
-      this.setState({ scene: null, sceneScripts: null, sceneChanged: false });
+      this.setState({
+        scene: undefined,
+        sceneScripts: undefined,
+        sceneChanged: false,
+      });
       return;
     }
     const scene = JSON.parse(
@@ -1646,13 +1650,13 @@ class CaptionScriptor extends React.Component<
       this.setState({
         scene: newScene,
         captionScript: script,
-        error: null,
+        error: undefined,
         scriptChanged: true,
       });
     } else {
       this.setState({
         captionScript: script,
-        error: null,
+        error: undefined,
         scriptChanged: true,
       });
     }
@@ -1673,7 +1677,7 @@ class CaptionScriptor extends React.Component<
       this.setState({
         scene: newScene,
         captionScript: script,
-        error: null,
+        error: undefined,
         scriptChanged: true,
       });
     } else {

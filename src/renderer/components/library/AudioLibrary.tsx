@@ -1686,7 +1686,7 @@ class AudioLibrary extends React.Component<
 
   onToggleBatchTagModal() {
     if (this.state.openMenu == MO.batchTag) {
-      this.setState({ openMenu: null, selectedTags: [] });
+      this.setState({ openMenu: undefined, selectedTags: [] });
     } else {
       this.setState({
         openMenu: MO.batchTag,
@@ -1821,11 +1821,11 @@ class AudioLibrary extends React.Component<
 
   onCloseDialog() {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       drawerOpen: false,
-      importURL: null,
-      playlistID: null,
+      importURL: undefined,
+      playlistID: undefined,
     });
   }
 

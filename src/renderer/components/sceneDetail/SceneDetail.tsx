@@ -1680,7 +1680,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       this.setState({
         openMenu:
           this.state.openMenu == MO.gooninatorImport
-            ? null
+            ? undefined
             : MO.gooninatorImport,
       });
     }
@@ -1812,7 +1812,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     if (this.props.tutorial == SDT.add1) {
       this.props.onTutorial(SDT.add1);
     }
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
   }
 
   onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
@@ -1860,8 +1862,8 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
   onCloseDialog() {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       drawerOpen: false,
       sceneEffects: "",
     });
