@@ -45,18 +45,35 @@ interface FadeIOCardProps {
   ): void;
 }
 
-class FadeIOCard extends React.Component<FadeIOCardProps> {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface FadeIOCardState {
+  fadeIOSinRate: number;
+}
 
+class FadeIOCard extends React.Component<FadeIOCardProps, FadeIOCardState> {
   constructor(props: FadeIOCardProps) {
     super(props);
-  }
 
-  render() {
-    const fadeSinRate =
+    const fadeIOSinRate =
       typeof this.props.scene.fadeIOSinRate === "number"
         ? this.props.scene.fadeIOSinRate
         : 0;
+    this.state = {
+      fadeIOSinRate,
+    };
+  }
+
+  componentDidUpdate(props: FadeIOCardProps) {
+    if (props.scene.fadeIOSinRate != this.props.scene.fadeIOSinRate) {
+      const fadeIOSinRate =
+        typeof this.props.scene.fadeIOSinRate === "number"
+          ? this.props.scene.fadeIOSinRate
+          : 0;
+
+      this.setState({ fadeIOSinRate });
+    }
+  }
+
+  render() {
     const fadeBPMMulti =
       typeof this.props.scene.fadeIOBPMMulti === "number"
         ? this.props.scene.fadeIOBPMMulti
@@ -163,9 +180,10 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={fadeSinRate}
+                        max={100}
+                        value={this.state.fadeIOSinRate}
+                        onChange={this.onFadeIOSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "fadeIOSinRate",
@@ -181,7 +199,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                     >
                       <TextField
                         variant="standard"
-                        value={fadeSinRate}
+                        value={this.state.fadeIOSinRate}
                         onChange={this.onIntInput.bind(this, "fadeIOSinRate")}
                         onBlur={this.blurIntKey.bind(this, "fadeIOSinRate")}
                         InputProps={{
@@ -601,18 +619,17 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update fadeIOSinRate slider
     if (key == "fadeIOSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ fadeIOSinRate: value });
     }
+  }
+
+  onFadeIOSinRateChange(
+    event: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ fadeIOSinRate: value as number });
   }
 
   onSliderChange(
