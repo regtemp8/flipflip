@@ -41,7 +41,7 @@ interface PlayerProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   theme: Theme;
-  tutorial: string;
+  tutorial?: string;
   advanceHack?: ChildCallbackHack;
   allLoaded?: boolean;
   allTags?: Array<Tag>;

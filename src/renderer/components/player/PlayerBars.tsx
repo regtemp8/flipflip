@@ -245,7 +245,7 @@ interface PlayerBarsProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   title: string;
-  tutorial: string;
+  tutorial?: string;
   goBack(): void;
   historyBack(): void;
   historyForward(): void;

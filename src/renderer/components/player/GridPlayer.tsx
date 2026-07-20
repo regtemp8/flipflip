@@ -282,7 +282,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               scenes={this.props.allScenes}
                               sceneGrids={this.props.sceneGrids}
                               theme={this.props.theme}
-                              tutorial={null}
+                              tutorial={undefined}
                               captionScale={
                                 1 /
                                 Math.sqrt(
@@ -345,6 +345,10 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
   nextScene(rowIndex: number, colIndex: number) {
     const cell = this.state.scene.grid[rowIndex][colIndex];
     const scene = this.props.allScenes.find((s) => s.id == cell.sceneID);
+    if(scene == null) {
+      return
+    }
+
     const newSceneGrid = this.state.scene;
     if (scene.nextSceneID == -1) {
       newSceneGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneRandomID;
