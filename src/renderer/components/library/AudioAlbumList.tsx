@@ -56,6 +56,8 @@ const styles = (theme: Theme) =>
     },
   });
 
+interface Album { name: string, artist: string; thumb: string; count: number }
+
 interface AudioAlbumListProps {
   classes: any;
   sources: Array<Audio>;
@@ -65,7 +67,7 @@ interface AudioAlbumListProps {
 }
 
 interface AudioAlbumListState {
-  albums: Map<string, { artist: string; thumb: string; count: number }>;
+  albums: Album[];
   hover?: any;
 }
 
@@ -83,7 +85,7 @@ class AudioAlbumList extends React.Component<
 
   render() {
     const classes = this.props.classes;
-    if (this.state.albums.size == 0) {
+    if (this.state.albums.length == 0) {
       return (
         <React.Fragment>
           <Typography
@@ -120,26 +122,24 @@ class AudioAlbumList extends React.Component<
     }
 
     const va = "Various Artists";
-    const albums = Array.from(this.state.albums.keys());
     return (
       <Grid container spacing={2}>
-        {albums.map((a) => {
-          const data = this.state.albums.get(a);
+        {this.state.albums.map((data) => {
           let thumb: string = data.thumb;
           if (thumb) thumb = thumb.replace(/\\/g, "/");
           const artist = data.artist;
           const count = data.count;
           return (
             <Grid
-              key={a}
+              key={data.name}
               item
               xs={6}
               sm={4}
               md={3}
               lg={2}
               className={classes.pointer}
-              onClick={this.props.onClickAlbum.bind(this, a)}
-              onMouseEnter={this.onMouseEnter.bind(this, a)}
+              onClick={this.props.onClickAlbum.bind(this, data.name)}
+              onMouseEnter={this.onMouseEnter.bind(this, data.name)}
               onMouseLeave={this.onMouseLeave.bind(this)}
             >
               <Card classes={{ root: classes.root }}>
@@ -147,20 +147,20 @@ class AudioAlbumList extends React.Component<
                   <CardMedia
                     className={classes.media}
                     image={thumb}
-                    title={a}
+                    title={data.name}
                   />
                 )}
                 {!thumb && <AudiotrackIcon className={classes.mediaIcon} />}
                 <CardContent classes={{ root: classes.cardContent }}>
-                  <Tooltip disableInteractive title={a} enterDelay={800}>
+                  <Tooltip disableInteractive title={data.name} enterDelay={800}>
                     <Typography
                       className={clsx(
-                        this.state.hover == a && classes.underlineTitle,
+                        this.state.hover == data.name && classes.underlineTitle,
                       )}
                       noWrap
                       variant="body1"
                     >
-                      {a}
+                      {data.name}
                     </Typography>
                   </Tooltip>
                   <Typography
@@ -210,7 +210,7 @@ class AudioAlbumList extends React.Component<
     this.setState({ hover: undefined });
   }
 
-  getAlbums(): Map<string, { artist: string; thumb: string; count: number }> {
+  getAlbums(): Album[] {
     const va = "Various Artists";
     const albumMap = new Map<
       string,
@@ -264,7 +264,12 @@ class AudioAlbumList extends React.Component<
         });
       }
     }
-    return albumMap;
+
+    const albums: Album[] = []
+    for(const [key, value] of albumMap) {
+      albums.push({...value, name: key})
+    }
+    return albums;
   }
 }
 
