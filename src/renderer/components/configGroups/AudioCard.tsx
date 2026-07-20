@@ -141,17 +141,18 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
 
   onFinishSourceOptions(newAudio: Audio) {
     this.props.onUpdateScene(this.props.scene, (s) => {
+      const { id } = this.state.sourceOptions as Audio;
       const playlist = s.audioPlaylists[this.state.sourceOptionsPlaylist];
-      let editSource = playlist.audios.find(
-        (a) => a.id == this.state.sourceOptions.id,
-      );
-      Object.assign(editSource, newAudio);
+      const editSource = playlist.audios.find((a) => a.id == id);
+      if (editSource != null) {
+        Object.assign(editSource, newAudio);
+      }
     });
     this.onCloseSourceOptions();
   }
 
   onCloseSourceOptions() {
-    this.setState({ sourceOptions: null, sourceOptionsPlaylist: -1 });
+    this.setState({ sourceOptions: undefined, sourceOptionsPlaylist: -1 });
   }
 
   onSourceOptions(playlistIndex: number, audio: Audio) {
