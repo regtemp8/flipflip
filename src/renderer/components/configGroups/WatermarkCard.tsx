@@ -237,13 +237,13 @@ class WatermarkCard extends React.Component<
     );
   }
 
-  _abortController: AbortController = null;
+  _abortController?: AbortController = undefined;
   componentDidMount() {
     // Define system fonts
     this._abortController = new AbortController();
     window.ipc.getFonts().then(
       (res: Array<string>) => {
-        if (!this._abortController.signal.aborted) {
+        if (this._abortController != null && !this._abortController.signal.aborted) {
           this.setState({ systemFonts: res });
         }
       },
