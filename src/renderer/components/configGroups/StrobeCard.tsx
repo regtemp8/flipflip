@@ -66,13 +66,46 @@ interface StrobeCardProps {
   ): void;
 }
 
-class StrobeCard extends React.Component<StrobeCardProps> {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly delaySinInputRef: React.RefObject<HTMLInputElement> =
-    React.createRef();
+interface StrobeCardState {
+  strobeSinRate: number;
+  strobeDelaySinRate: number;
+}
+
+class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
 
   constructor(props: StrobeCardProps) {
     super(props);
+
+    const strobeSinRate =
+      typeof this.props.scene.strobeSinRate === "number"
+        ? this.props.scene.strobeSinRate
+        : 0;
+
+    const strobeDelaySinRate =
+      typeof this.props.scene.strobeDelaySinRate === "number"
+        ? this.props.scene.strobeDelaySinRate
+        : 0;
+
+    this.state = { strobeSinRate, strobeDelaySinRate };
+  }
+
+  componentDidUpdate(props: StrobeCardProps) {
+    if (props.scene.strobeSinRate != this.props.scene.strobeSinRate) {
+      const strobeSinRate =
+        typeof this.props.scene.strobeSinRate === "number"
+          ? this.props.scene.strobeSinRate
+          : 0;
+
+      this.setState({ strobeSinRate });
+    }
+    if (props.scene.strobeDelaySinRate != this.props.scene.strobeDelaySinRate) {
+      const strobeDelaySinRate =
+        typeof this.props.scene.strobeDelaySinRate === "number"
+          ? this.props.scene.strobeDelaySinRate
+          : 0;
+
+      this.setState({ strobeDelaySinRate });
+    }
   }
 
   render() {
@@ -81,10 +114,6 @@ class StrobeCard extends React.Component<StrobeCardProps> {
     const strobeOpacity =
       typeof this.props.scene.strobeOpacity === "number"
         ? this.props.scene.strobeOpacity
-        : 0;
-    const strobeSinRate =
-      typeof this.props.scene.strobeSinRate === "number"
-        ? this.props.scene.strobeSinRate
         : 0;
     const strobeBPMMulti =
       typeof this.props.scene.strobeBPMMulti === "number"
@@ -101,10 +130,6 @@ class StrobeCard extends React.Component<StrobeCardProps> {
     const strobeTimeMax =
       typeof this.props.scene.strobeTimeMax === "number"
         ? this.props.scene.strobeTimeMax
-        : 0;
-    const strobeDelaySinRate =
-      typeof this.props.scene.strobeDelaySinRate === "number"
-        ? this.props.scene.strobeDelaySinRate
         : 0;
     const strobeDelayBPMMulti =
       typeof this.props.scene.strobeDelayBPMMulti === "number"
@@ -418,9 +443,9 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={strobeSinRate}
+                        value={this.state.strobeSinRate}
+                        onChange={this.onStrobeSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "strobeSinRate",
@@ -432,7 +457,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={strobeSinRate}
+                        value={this.state.strobeSinRate}
                         onChange={this.onIntInput.bind(this, "strobeSinRate")}
                         onBlur={this.blurIntKey.bind(this, "strobeSinRate")}
                         inputProps={{
@@ -619,9 +644,9 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.delaySinInputRef}
                         min={1}
-                        defaultValue={strobeDelaySinRate}
+                        value={this.state.strobeDelaySinRate}
+                        onChange={this.onStrobeDelaySinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "strobeDelaySinRate",
@@ -633,7 +658,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={strobeDelaySinRate}
+                        value={this.state.strobeDelaySinRate}
                         onChange={this.onIntInput.bind(
                           this,
                           "strobeDelaySinRate",
@@ -979,28 +1004,26 @@ class StrobeCard extends React.Component<StrobeCardProps> {
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled sliders
+    // Update sliders
     if (key == "strobeSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ strobeSinRate: value });
     } else if (key == "strobeDelaySinRate") {
-      (this.delaySinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.delaySinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.delaySinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ strobeDelaySinRate: value });
     }
+  }
+
+  onStrobeSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ strobeSinRate: value as number });
+  }
+
+  onStrobeDelaySinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ strobeDelaySinRate: value as number });
   }
 
   onSliderChange(
