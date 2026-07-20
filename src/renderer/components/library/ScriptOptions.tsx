@@ -225,10 +225,9 @@ class ScriptOptions extends React.Component<
     );
   }
 
-  _abortController: AbortController = null;
+  _abortController: AbortController = new AbortController();
   componentDidMount() {
     // Define system fonts
-    this._abortController = new AbortController();
     window.ipc.getFonts().then(
       (res: Array<string>) => {
         if (!this._abortController.signal.aborted) {
@@ -242,9 +241,7 @@ class ScriptOptions extends React.Component<
   }
 
   componentWillUnmount() {
-    if (this._abortController != null) {
-      this._abortController.abort();
-    }
+    this._abortController.abort();
   }
 
   onUpdateOptions(property: string, fn: (options: FontSettingsI) => void) {

@@ -1184,12 +1184,11 @@ class CaptionScriptor extends React.Component<
     });
   }
 
-  _abortController: AbortController = null;
+  _abortController: AbortController = new AbortController();
   componentDidMount() {
     this._currentTimestamp = 0;
     window.addEventListener("keydown", this.onKeyDown, false);
     // Define system fonts
-    this._abortController = new AbortController();
     window.ipc.getFonts().then(
       (res: Array<string>) => {
         if (!this._abortController.signal.aborted) {

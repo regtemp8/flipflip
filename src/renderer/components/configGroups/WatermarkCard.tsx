@@ -237,13 +237,12 @@ class WatermarkCard extends React.Component<
     );
   }
 
-  _abortController?: AbortController = undefined;
+  _abortController: AbortController = new AbortController();
   componentDidMount() {
     // Define system fonts
-    this._abortController = new AbortController();
     window.ipc.getFonts().then(
       (res: Array<string>) => {
-        if (this._abortController != null && !this._abortController.signal.aborted) {
+        if (!this._abortController.signal.aborted) {
           this.setState({ systemFonts: res });
         }
       },
@@ -254,9 +253,7 @@ class WatermarkCard extends React.Component<
   }
 
   componentWillUnmount() {
-    if (this._abortController != null) {
-      this._abortController.abort();
-    }
+    this._abortController.abort();
   }
 
   onInput(key: string, e: SelectChangeEvent<string>) {
