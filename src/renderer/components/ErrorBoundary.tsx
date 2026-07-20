@@ -32,9 +32,10 @@ interface ErrorBoundaryProps {
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-  info?: React.ErrorInfo;
+  catch?: {
+    error: Error;
+    info: React.ErrorInfo;
+  };
   resetCheck: boolean;
   backupCheck: boolean;
   backup?: { url: string; size: number };
@@ -49,7 +50,6 @@ export default class ErrorBoundary extends React.Component<
     super(props);
 
     this.state = {
-      hasError: false,
       resetCheck: false,
       backupCheck: false,
       backups: new Array<{ url: string; size: number }>(),
@@ -58,11 +58,11 @@ export default class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     // Display fallback UI
-    this.setState({ hasError: true, error: error, info: info });
+    this.setState({ catch: { error, info } });
   }
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.catch) {
       return (
         <Box
           style={{
@@ -86,7 +86,7 @@ export default class ErrorBoundary extends React.Component<
             variant="h5"
             color="error"
           >
-            {this.state.error.name}: {this.state.error.message}
+            {this.state.catch.error.name}: {this.state.catch.error.message}
           </Typography>
           <Typography
             style={{ whiteSpace: "pre", marginBottom: 20 }}
@@ -94,7 +94,7 @@ export default class ErrorBoundary extends React.Component<
             variant="body2"
             color="error"
           >
-            {this.state.info.componentStack
+            {this.state.catch.info.componentStack
               .trim()
               .replace(/\s*in (ForwardRef|div)/g, "")}
           </Typography>
@@ -251,12 +251,10 @@ export default class ErrorBoundary extends React.Component<
 
   clearError() {
     this.setState({
-      hasError: false,
-      error: null,
-      info: null,
+      catch: undefined,
       resetCheck: false,
       backupCheck: false,
-      backup: null,
+      backup: undefined,
       backups: new Array<{ url: string; size: number }>(),
     });
   }
@@ -281,7 +279,11 @@ export default class ErrorBoundary extends React.Component<
   backupCheck() {
     window.ipc.getBackups().then((backups) => {
       if (backups.length == 0) {
-        this.setState({ backupCheck: true, backups: backups, backup: undefined });
+        this.setState({
+          backupCheck: true,
+          backups: backups,
+          backup: undefined,
+        });
       } else {
         this.setState({
           backupCheck: true,
@@ -300,6 +302,10 @@ export default class ErrorBoundary extends React.Component<
   }
 
   onFinishRestore() {
+    if (!this.state.backup) {
+      return;
+    }
+
     this.onCloseDialog();
     window.ipc.getBackupFile(this.state.backup.url).then((backupFile) => {
       try {
@@ -312,17 +318,22 @@ export default class ErrorBoundary extends React.Component<
   }
 
   onSubmitIssue() {
-    const componentStack = this.state.info.componentStack
+    if (!this.state.catch) {
+      return;
+    }
+
+    const { error, info } = this.state.catch;
+    const componentStack = info.componentStack
       .trim()
       .replace(/\s*in (ForwardRef|div)/g, "");
-    let title = this.state.error.name + ": " + this.state.error.message;
+    let title = error.name + ": " + error.message;
     let body =
       "[[Please describe the bug and how to reproduce it]]%0D%0A%0D%0A%0D%0AFlipFlip Version: " +
       this.props.version +
       "%0D%0A```%0D%0A" +
-      this.state.error.name +
+      error.name +
       ": " +
-      this.state.error.message +
+      error.message +
       "%0D%0A" +
       componentStack.replace(/(\r\n|\r|\n)/g, "%0D%0A") +
       "%0D%0A```";
