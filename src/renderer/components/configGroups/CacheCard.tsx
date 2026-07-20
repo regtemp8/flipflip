@@ -257,15 +257,10 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   }
 
   blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.props.config.caching as any)[key] < min) {
+    const { min, max } = e.currentTarget;
+    if (min && (this.props.config.caching as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
-    } else if (max && (this.props.config.caching as any)[key] > max) {
+    } else if (max && (this.props.config.caching as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
   }

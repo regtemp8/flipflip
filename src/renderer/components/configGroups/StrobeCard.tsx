@@ -961,15 +961,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
   }
 
   blurPercentIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.props.scene as any)[key] * 100 < min) {
+    const { min, max } = e.currentTarget;
+    if (min && (this.props.scene as any)[key] * 100 < Number(min)) {
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] * 100 > max) {
+    } else if (max && (this.props.scene as any)[key] * 100 > Number(max)) {
       this.changeIntKey(key, max);
     }
   }
@@ -988,26 +983,21 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
   }
 
   blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    let value = (e.currentTarget as any).value;
-    if (min && (this.props.scene as any)[key] < min) {
+    const { min, max } = e.currentTarget;
+    let value = e.currentTarget.value;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       value = max;
       this.changeIntKey(key, max);
     }
 
     // Update sliders
     if (key == "strobeSinRate") {
-      this.setState({ strobeSinRate: value });
+      this.setState({ strobeSinRate: Number(value) });
     } else if (key == "strobeDelaySinRate") {
-      this.setState({ strobeDelaySinRate: value });
+      this.setState({ strobeDelaySinRate: Number(value) });
     }
   }
 

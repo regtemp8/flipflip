@@ -599,16 +599,11 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   }
 
   blurHeight(e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.height < min) {
-      this.onUpdateHeight(min);
-    } else if (max && this.state.height > max) {
-      this.onUpdateHeight(max);
+    const { min, max } = e.currentTarget;
+    if (min && this.state.height < Number(min)) {
+      this.onUpdateHeight(Number(min));
+    } else if (max && this.state.height > Number(max)) {
+      this.onUpdateHeight(Number(max));
     }
   }
 
@@ -622,16 +617,11 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   }
 
   blurWidth(e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.width < min) {
-      this.onUpdateWidth(min);
-    } else if (max && this.state.width > max) {
-      this.onUpdateWidth(max);
+    const { min, max } = e.currentTarget;
+    if (min && this.state.width < Number(min)) {
+      this.onUpdateWidth(Number(min));
+    } else if (max && this.state.width > Number(max)) {
+      this.onUpdateWidth(Number(max));
     }
   }
 

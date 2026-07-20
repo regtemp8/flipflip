@@ -565,15 +565,10 @@ class AudioOptions extends React.Component<
   }
 
   blurSourceIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.state.audio as any)[key] < min) {
+    const { min, max } = e.currentTarget;
+    if (min && (this.state.audio as any)[key] < Number(min)) {
       this.changeKey(key, min === "" ? "" : Number(min));
-    } else if (max && (this.state.audio as any)[key] > max) {
+    } else if (max && (this.state.audio as any)[key] > Number(max)) {
       this.changeKey(key, max === "" ? "" : Number(max));
     }
   }

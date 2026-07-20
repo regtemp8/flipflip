@@ -176,15 +176,10 @@ class FontOptions extends React.Component<FontOptionsProps> {
   }
 
   blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.props.options as any)[key] < min) {
+    const { min, max } = e.currentTarget;
+    if (min && (this.props.options as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
-    } else if (max && (this.props.options as any)[key] > max) {
+    } else if (max && (this.props.options as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
   }

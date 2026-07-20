@@ -579,16 +579,11 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   blurWeight(e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.weightMenu.weight < min) {
-      this.changeWeight(min);
-    } else if (max && this.state.weightMenu.weight > max) {
-      this.changeWeight(max);
+    const { min, max } = e.currentTarget;
+    if (min && this.state.weightMenu.weight < Number(min)) {
+      this.changeWeight(Number(min));
+    } else if (max && this.state.weightMenu.weight > Number(max)) {
+      this.changeWeight(Number(max));
     }
   }
 

@@ -134,15 +134,10 @@ class BatchClipDialog extends React.Component<
   }
 
   blurClipOffset(index: number, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.clipOffset[index] < min) {
+    const { min, max } = e.currentTarget;
+    if (min && this.state.clipOffset[index] < Number(min)) {
       this.changeClipOffset(index, min);
-    } else if (max && this.state.clipOffset[index] > max) {
+    } else if (max && this.state.clipOffset[index] > Number(max)) {
       this.changeClipOffset(index, max);
     }
   }
