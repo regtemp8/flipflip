@@ -76,13 +76,64 @@ interface ZoomMoveCardProps {
   ): void;
 }
 
-class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
-  readonly horizInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly vertInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface ZoomMoveCardState {
+  horizTransLevel: number;
+  vertTransLevel: number;
+  transSinRate: number;
+}
+
+class ZoomMoveCard extends React.Component<ZoomMoveCardProps, ZoomMoveCardState> {
 
   constructor(props: ZoomMoveCardProps) {
     super(props);
+
+    const horizTransLevel =
+      typeof this.props.scene.horizTransLevel === "number"
+        ? this.props.scene.horizTransLevel
+        : 0;
+
+    const vertTransLevel =
+      typeof this.props.scene.vertTransLevel === "number"
+        ? this.props.scene.vertTransLevel
+        : 0;
+
+    const transSinRate =
+      typeof this.props.scene.transSinRate === "number"
+        ? this.props.scene.transSinRate
+        : 0;
+
+    this.state = {
+      horizTransLevel,
+      vertTransLevel,
+      transSinRate,
+    };
+  }
+
+  componentDidUpdate(props: ZoomMoveCardProps) {
+    if (props.scene.horizTransLevel != this.props.scene.horizTransLevel) {
+      const horizTransLevel =
+        typeof this.props.scene.horizTransLevel === "number"
+          ? this.props.scene.horizTransLevel
+          : 0;
+
+      this.setState({ horizTransLevel });
+    }
+    if (props.scene.vertTransLevel != this.props.scene.vertTransLevel) {
+      const vertTransLevel =
+        typeof this.props.scene.vertTransLevel === "number"
+          ? this.props.scene.vertTransLevel
+          : 0;
+
+      this.setState({ vertTransLevel });
+    }
+    if (props.scene.transSinRate != this.props.scene.transSinRate) {
+      const transSinRate =
+        typeof this.props.scene.transSinRate === "number"
+          ? this.props.scene.transSinRate
+          : 0;
+
+      this.setState({ transSinRate });
+    }
   }
 
   render() {
@@ -116,10 +167,6 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
       typeof this.props.scene.zoomEndMin === "number"
         ? this.props.scene.zoomEndMin
         : 0;
-    const horizTransLevel =
-      typeof this.props.scene.horizTransLevel === "number"
-        ? this.props.scene.horizTransLevel
-        : 0;
     const horizTransLevelMax =
       typeof this.props.scene.horizTransLevelMax === "number"
         ? this.props.scene.horizTransLevelMax
@@ -128,10 +175,6 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
       typeof this.props.scene.horizTransLevelMin === "number"
         ? this.props.scene.horizTransLevelMin
         : 0;
-    const vertTransLevel =
-      typeof this.props.scene.vertTransLevel === "number"
-        ? this.props.scene.vertTransLevel
-        : 0;
     const vertTransLevelMax =
       typeof this.props.scene.vertTransLevelMax === "number"
         ? this.props.scene.vertTransLevelMax
@@ -139,10 +182,6 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
     const vertTransLevelMin =
       typeof this.props.scene.vertTransLevelMin === "number"
         ? this.props.scene.vertTransLevelMin
-        : 0;
-    const transSinRate =
-      typeof this.props.scene.transSinRate === "number"
-        ? this.props.scene.transSinRate
         : 0;
     const transBPMMulti =
       typeof this.props.scene.transBPMMulti === "number"
@@ -426,8 +465,8 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.horizInputRef}
-                      defaultValue={horizTransLevel}
+                      value={this.state.horizTransLevel}
+                      onChange={this.onHorizTransLevelChange.bind(this)}
                       onChangeCommitted={this.onSliderChange.bind(
                         this,
                         "horizTransLevel",
@@ -440,7 +479,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                   <Grid item xs={3} className={classes.percentInput}>
                     <TextField
                       variant="standard"
-                      value={horizTransLevel}
+                      value={this.state.horizTransLevel}
                       margin="dense"
                       onChange={this.onIntInput.bind(this, "horizTransLevel")}
                       onBlur={this.blurIntKey.bind(this, "horizTransLevel")}
@@ -582,8 +621,8 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.vertInputRef}
-                      defaultValue={vertTransLevel}
+                      value={this.state.vertTransLevel}
+                      onChange={this.onVertTransLevelChange.bind(this)}
                       onChangeCommitted={this.onSliderChange.bind(
                         this,
                         "vertTransLevel",
@@ -596,7 +635,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                   <Grid item xs={3} className={classes.percentInput}>
                     <TextField
                       variant="standard"
-                      value={vertTransLevel}
+                      value={this.state.vertTransLevel}
                       margin="dense"
                       onChange={this.onIntInput.bind(this, "vertTransLevel")}
                       onBlur={this.blurIntKey.bind(this, "vertTransLevel")}
@@ -734,9 +773,9 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={transSinRate}
+                        value={this.state.transSinRate}
+                        onChange={this.onTransSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "transSinRate",
@@ -748,7 +787,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={transSinRate}
+                        value={this.state.transSinRate}
                         onChange={this.onIntInput.bind(this, "transSinRate")}
                         onBlur={this.blurIntKey.bind(this, "transSinRate")}
                         inputProps={{
@@ -1047,38 +1086,35 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled sliders
+    // Update sliders
     if (key == "horizTransLevel") {
-      (this.horizInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.horizInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.horizInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ horizTransLevel: value });
     } else if (key == "vertTransLevel") {
-      (this.vertInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.vertInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.vertInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ vertTransLevel: value });
     } else if (key == "transSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ transSinRate: value });
     }
+  }
+
+  onHorizTransLevelChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ horizTransLevel: value as number });
+  }
+
+  onVertTransLevelChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ vertTransLevel: value as number });
+  }
+
+  onTransSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ transSinRate: value as number });
   }
 
   onZoomSliderChange(
