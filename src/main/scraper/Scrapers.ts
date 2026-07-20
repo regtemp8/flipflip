@@ -86,14 +86,13 @@ export const loadRemoteImageURLList = (
   wretch(url)
     .get()
     .text((data) => {
-      const lines = data
-        .match(/[^\r\n]+/g)
-        .filter(
-          (line) =>
-            line.startsWith("http://") ||
-            line.startsWith("https://") ||
-            line.startsWith("file:///"),
-        );
+      const matches = data.match(/[^\r\n]+/g) ?? [];
+      const lines = matches.filter(
+        (line) =>
+          line.startsWith("http://") ||
+          line.startsWith("https://") ||
+          line.startsWith("file:///"),
+      );
       if (lines.length > 0) {
         let convertedSource = new Array<string>();
         let convertedCount = 0;
@@ -220,7 +219,7 @@ export const loadTumblr = (
         return;
       }
       // End loop if we're at end of posts
-      if (data.posts.length == 0) {
+      if (!data || data.posts.length == 0) {
         helpers.next = null;
         pm({
           data: [],
@@ -556,7 +555,10 @@ export const loadDeviantArt = (
         const contents = items[i].getElementsByTagName("media:content");
         for (let c = 0; c < contents.length; c++) {
           const content = contents[c];
-          if (content.getAttribute("medium") == "image" && content.hasAttribute("url")) {
+          if (
+            content.getAttribute("medium") == "image" &&
+            content.hasAttribute("url")
+          ) {
             images.push(content.getAttribute("url") as string);
           }
         }
@@ -588,8 +590,19 @@ export const loadE621 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
   let suffix = "";
+  const thisHost = matches[1];
   if (url.includes("/pools/")) {
     suffix =
       "/pools.json?search[id]=" + url.substring(url.lastIndexOf("/") + 1);
@@ -851,8 +864,19 @@ export const loadDanbooru = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
   let suffix = "";
+  const thisHost = matches[1];
   if (url.includes("/pools/")) {
     suffix = "/pools/" + url.substring(url.lastIndexOf("/") + 1) + ".json";
   } else if (url.includes("favorite_groups")) {
@@ -1075,7 +1099,18 @@ export const loadGelbooru1 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
+  const thisHost = matches[1];
   wretch(url + "&pid=" + helpers.next * 10)
     .get()
     .setTimeout(5000)
@@ -1112,6 +1147,15 @@ export const loadGelbooru1 = (
         let images = new Array<string>();
         const getImage = (index: number) => {
           let link = imageEls.item(index).getAttribute("href");
+          if (!link) {
+            pm({
+              error: "No host found. Source URL: " + url,
+              helpers: helpers,
+              source: source,
+              timeout: timeout,
+            });
+            return;
+          }
           if (!link.startsWith("http")) {
             link = thisHost + "/" + link;
           }
@@ -1211,7 +1255,18 @@ export const loadGelbooru2 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
+  const thisHost = matches[1];
   let suffix =
     "/index.php?page=dapi&s=post&q=index&limit=20&json=1&pid=" +
     (helpers.next + 1);
@@ -1345,7 +1400,12 @@ export const loadEHentai = (
         let images = new Array<string>();
         for (let i = 0; i < imageEls.length; i++) {
           const image = imageEls.item(i);
-          wretch(image.getAttribute("href"))
+          const href = image.getAttribute("href");
+          if (!href) {
+            continue;
+          }
+
+          wretch(href)
             .get()
             .setTimeout(5000)
             .onAbort((e) =>
@@ -1766,7 +1826,10 @@ export const loadBDSMlr = (
           const embeddedImages = item.querySelectorAll("description > img");
           if (embeddedImages.length > 0) {
             for (let image of embeddedImages) {
-              images.push(image.getAttribute("src"));
+              const src = image.getAttribute("src");
+              if (src) {
+                images.push(src);
+              }
             }
           }
         }
