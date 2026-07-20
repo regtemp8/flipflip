@@ -76,22 +76,67 @@ interface PanningCardProps {
   ): void;
 }
 
-class PanningCard extends React.Component<PanningCardProps> {
-  readonly horizInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly vertInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface PanningCardState {
+  panHorizTransLevel: number;
+  panVertTransLevel: number;
+  panSinRate: number;
+}
 
+class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
   constructor(props: PanningCardProps) {
     super(props);
-  }
 
-  render() {
-    const classes = this.props.classes;
+    const panHorizTransLevel =
+      typeof this.props.scene.panHorizTransLevel === "number"
+        ? this.props.scene.panHorizTransLevel
+        : 0;
+
+    const panVertTransLevel =
+      typeof this.props.scene.panVertTransLevel === "number"
+        ? this.props.scene.panVertTransLevel
+        : 0;
 
     const panSinRate =
       typeof this.props.scene.panSinRate === "number"
         ? this.props.scene.panSinRate
         : 0;
+
+    this.state = {
+      panHorizTransLevel,
+      panVertTransLevel,
+      panSinRate,
+    };
+  }
+
+  componentDidUpdate(props: PanningCardProps) {
+    if (props.scene.panHorizTransLevel != this.props.scene.panHorizTransLevel) {
+      const panHorizTransLevel =
+        typeof this.props.scene.panHorizTransLevel === "number"
+          ? this.props.scene.panHorizTransLevel
+          : 0;
+
+      this.setState({ panHorizTransLevel });
+    }
+    if (props.scene.panVertTransLevel != this.props.scene.panVertTransLevel) {
+      const panVertTransLevel =
+        typeof this.props.scene.panVertTransLevel === "number"
+          ? this.props.scene.panVertTransLevel
+          : 0;
+
+      this.setState({ panVertTransLevel });
+    }
+    if (props.scene.panSinRate != this.props.scene.panSinRate) {
+      const panSinRate =
+        typeof this.props.scene.panSinRate === "number"
+          ? this.props.scene.panSinRate
+          : 0;
+
+      this.setState({ panSinRate });
+    }
+  }
+
+  render() {
+    const classes = this.props.classes;
     const panBPMMulti =
       typeof this.props.scene.panBPMMulti === "number"
         ? this.props.scene.panBPMMulti
@@ -108,10 +153,6 @@ class PanningCard extends React.Component<PanningCardProps> {
       typeof this.props.scene.panDurationMax === "number"
         ? this.props.scene.panDurationMax
         : 0;
-    const horizTransLevel =
-      typeof this.props.scene.panHorizTransLevel === "number"
-        ? this.props.scene.panHorizTransLevel
-        : 0;
     const horizTransLevelMax =
       typeof this.props.scene.panHorizTransLevelMax === "number"
         ? this.props.scene.panHorizTransLevelMax
@@ -119,10 +160,6 @@ class PanningCard extends React.Component<PanningCardProps> {
     const horizTransLevelMin =
       typeof this.props.scene.panHorizTransLevelMin === "number"
         ? this.props.scene.panHorizTransLevelMin
-        : 0;
-    const vertTransLevel =
-      typeof this.props.scene.panVertTransLevel === "number"
-        ? this.props.scene.panVertTransLevel
         : 0;
     const vertTransLevelMax =
       typeof this.props.scene.panVertTransLevelMax === "number"
@@ -298,8 +335,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.horizInputRef}
-                      defaultValue={horizTransLevel}
+                      value={this.state.panHorizTransLevel}
+                      onChange={this.onPanHorizTransLevelChange.bind(this)}
                       onChangeCommitted={this.onSliderChange.bind(
                         this,
                         "panHorizTransLevel",
@@ -312,7 +349,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                   <Grid item xs={3} className={classes.percentInput}>
                     <TextField
                       variant="standard"
-                      value={horizTransLevel}
+                      value={this.state.panHorizTransLevel}
                       margin="dense"
                       onChange={this.onIntInput.bind(
                         this,
@@ -519,8 +556,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.vertInputRef}
-                      defaultValue={vertTransLevel}
+                      value={this.state.panVertTransLevel}
+                      onChange={this.onPanVertTransLevelChange.bind(this)}
                       onChangeCommitted={this.onSliderChange.bind(
                         this,
                         "panVertTransLevel",
@@ -533,7 +570,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                   <Grid item xs={3} className={classes.percentInput}>
                     <TextField
                       variant="standard"
-                      value={vertTransLevel}
+                      value={this.state.panVertTransLevel}
                       margin="dense"
                       onChange={this.onIntInput.bind(this, "panVertTransLevel")}
                       onBlur={this.blurIntKey.bind(this, "panVertTransLevel")}
@@ -663,9 +700,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
-                        min={1}
-                        defaultValue={panSinRate}
+                        value={this.state.panSinRate}
+                        onChange={this.onPanSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "panSinRate",
@@ -677,7 +713,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={panSinRate}
+                        value={this.state.panSinRate}
                         onChange={this.onIntInput.bind(this, "panSinRate")}
                         onBlur={this.blurIntKey.bind(this, "panSinRate")}
                         inputProps={{
@@ -1120,38 +1156,35 @@ class PanningCard extends React.Component<PanningCardProps> {
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update sliders
     if (key == "panHorizTransLevel") {
-      (this.horizInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.horizInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.horizInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panHorizTransLevel: value });
     } else if (key == "panVertTransLevel") {
-      (this.vertInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.vertInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.vertInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panVertTransLevel: value });
     } else if (key == "panSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panSinRate: value });
     }
+  }
+
+  onPanHorizTransLevelChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ panHorizTransLevel: value as number });
+  }
+
+  onPanVertTransLevelChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ panVertTransLevel: value as number });
+  }
+
+  onPanSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ panSinRate: value as number });
   }
 
   onSliderChange(
