@@ -73,20 +73,36 @@ interface SlideCardProps {
   ): void;
 }
 
-class SlideCard extends React.Component<SlideCardProps> {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface SlideCardState {
+  slideSinRate: number;
+}
 
+class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
   constructor(props: SlideCardProps) {
     super(props);
-  }
-
-  render() {
-    const classes = this.props.classes;
 
     const slideSinRate =
       typeof this.props.scene.slideSinRate === "number"
         ? this.props.scene.slideSinRate
         : 0;
+
+    this.state = { slideSinRate };
+  }
+
+  componentDidUpdate(props: SlideCardProps) {
+    if (props.scene.slideSinRate != this.props.scene.slideSinRate) {
+      const slideSinRate =
+        typeof this.props.scene.slideSinRate === "number"
+          ? this.props.scene.slideSinRate
+          : 0;
+
+      this.setState({ slideSinRate });
+    }
+  }
+
+  render() {
+    const classes = this.props.classes;
+
     const slideBPMMulti =
       typeof this.props.scene.slideBPMMulti === "number"
         ? this.props.scene.slideBPMMulti
@@ -234,9 +250,9 @@ class SlideCard extends React.Component<SlideCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={slideSinRate}
+                        value={this.state.slideSinRate}
+                        onChange={this.onSlideSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "slideSinRate",
@@ -248,7 +264,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={slideSinRate}
+                        value={this.state.slideSinRate}
                         onChange={this.onIntInput.bind(this, "slideSinRate")}
                         onBlur={this.blurIntKey.bind(this, "slideSinRate")}
                         inputProps={{
@@ -549,18 +565,17 @@ class SlideCard extends React.Component<SlideCardProps> {
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update slideSinRate slider
     if (key == "slideSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ slideSinRate: value });
     }
+  }
+
+  onSlideSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ slideSinRate: value as number });
   }
 
   onSliderChange(
