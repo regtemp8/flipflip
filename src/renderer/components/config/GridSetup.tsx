@@ -515,8 +515,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   }
 
   onChooseScene(sceneID: number) {
-    const row = this.state.isEditing[0];
-    const col = this.state.isEditing[1];
+    const [row, col] = this.state.isEditing as number[]
     let newGrid = this.props.scene.grid;
     newGrid[row][col].sceneID = sceneID;
     newGrid[row][col].sceneCopy = [];
@@ -662,7 +661,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     e: DraggableEvent,
     position: DraggableData,
   ) {
-    const path = e.composedPath();
+    const nativeEvent = "nativeEvent" in e ? e.nativeEvent : e
+    const path = nativeEvent.composedPath();
     if (!path || path.length == 0) {
       return;
     }
@@ -691,7 +691,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.changeKey("grid", newGrid);
   }
 
-  onClickCell(rowIndex: number, colIndex: number, e: MouseEvent) {
+  onClickCell(rowIndex: number, colIndex: number, e: DraggableEvent) {
     if ((e.target as Element).className?.includes("MuiSwitch-input")) {
       this.onToggleMirror(rowIndex, colIndex);
     } else {
