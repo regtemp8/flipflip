@@ -126,6 +126,8 @@ interface SceneOptionCardProps {
 }
 
 interface SceneOptionCardState {
+  timingSinRate: number;
+  backForthSinRate: number;
   randomSceneList?: Array<number>;
 }
 
@@ -133,21 +135,44 @@ class SceneOptionCard extends React.Component<
   SceneOptionCardProps,
   SceneOptionCardState
 > {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-
   constructor(props: SceneOptionCardProps) {
     super(props);
-
-    this.state = {};
-  }
-
-  render() {
-    const classes = this.props.classes;
 
     const timingSinRate =
       typeof this.props.scene.timingSinRate === "number"
         ? this.props.scene.timingSinRate
         : 0;
+
+    const backForthSinRate =
+      typeof this.props.scene.backForthSinRate === "number"
+        ? this.props.scene.backForthSinRate
+        : 0;
+
+    this.state = { timingSinRate, backForthSinRate };
+  }
+
+  componentDidUpdate(props: SceneOptionCardProps) {
+    if (props.scene.timingSinRate != this.props.scene.timingSinRate) {
+      const timingSinRate =
+        typeof this.props.scene.timingSinRate === "number"
+          ? this.props.scene.timingSinRate
+          : 0;
+
+      this.setState({ timingSinRate });
+    }
+    if (props.scene.backForthSinRate != this.props.scene.backForthSinRate) {
+      const backForthSinRate =
+        typeof this.props.scene.backForthSinRate === "number"
+          ? this.props.scene.backForthSinRate
+          : 0;
+
+      this.setState({ backForthSinRate });
+    }
+  }
+
+  render() {
+    const classes = this.props.classes;
+
     const timingBPMMulti =
       typeof this.props.scene.timingBPMMulti === "number"
         ? this.props.scene.timingBPMMulti
@@ -270,9 +295,9 @@ class SceneOptionCard extends React.Component<
                 <Grid container alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.sinInputRef}
                       min={1}
-                      defaultValue={timingSinRate}
+                      value={this.state.timingSinRate}
+                      onChange={this.onTimingSinRateChange.bind(this)}
                       onChangeCommitted={this.onSliderChange.bind(
                         this,
                         "timingSinRate",
@@ -284,7 +309,7 @@ class SceneOptionCard extends React.Component<
                   <Grid item xs={3} className={classes.percentInput}>
                     <TextField
                       variant="standard"
-                      value={timingSinRate}
+                      value={this.state.timingSinRate}
                       onChange={this.onIntInput.bind(this, "timingSinRate")}
                       onBlur={this.blurIntKey.bind(this, "timingSinRate")}
                       inputProps={{
@@ -488,9 +513,9 @@ class SceneOptionCard extends React.Component<
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={backForthSinRate}
+                        value={this.state.backForthSinRate}
+                        onChange={this.onBackForthSinRateChange.bind(this)}
                         onChangeCommitted={this.onSliderChange.bind(
                           this,
                           "backForthSinRate",
@@ -502,7 +527,7 @@ class SceneOptionCard extends React.Component<
                     <Grid item xs={3} className={classes.percentInput}>
                       <TextField
                         variant="standard"
-                        value={backForthSinRate}
+                        value={this.state.backForthSinRate}
                         onChange={this.onIntInput.bind(
                           this,
                           "backForthSinRate",
@@ -1090,12 +1115,20 @@ class SceneOptionCard extends React.Component<
   getSceneName(id: string): string {
     if (id === "0") return "None";
     if (id === "-1") return "Random";
+
+    let sceneName;
     if (id.startsWith("999")) {
-      return this.props.allSceneGrids.find(
-        (s) => s.id.toString() == id.replace("999", ""),
+      const gridID = id.replace("999", "");
+      sceneName = this.props.allSceneGrids.find(
+        (s) => s.id.toString() == gridID,
+      )?.name;
+    } else {
+      sceneName = this.props.allScenes.find(
+        (s) => s.id.toString() === id,
       )?.name;
     }
-    return this.props.allScenes.find((s) => s.id.toString() === id)?.name;
+
+    return sceneName ?? "";
   }
 
   onOverlaySliderChange(
@@ -1116,14 +1149,16 @@ class SceneOptionCard extends React.Component<
   changeOverlayIntKey(id: number, key: string, intString: string) {
     const value = intString === "" ? "" : Number(intString);
     if (this.props.sidebar && this.props.onGenerate) {
+      let overlay
       if (intString.startsWith("999")) {
         intString = intString.replace("999", "");
         const gValue = intString === "" ? "" : Number(intString);
-        this.props.onGenerate(
-          this.props.allSceneGrids.find((s) => s.id == gValue),
-        );
+        overlay = this.props.allSceneGrids.find((s) => s.id == gValue)
       } else {
-        this.props.onGenerate(this.props.allScenes.find((s) => s.id == value));
+        overlay = this.props.allScenes.find((s) => s.id == value);
+      }
+      if(overlay != null) {
+        this.props.onGenerate(overlay)
       }
     }
     this.changeOverlayKey(id, key, value);
@@ -1145,18 +1180,27 @@ class SceneOptionCard extends React.Component<
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update sliders
     if (key == "timingSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ timingSinRate: value });
     }
+    if (key == "backForthSinRate") {
+      this.setState({ backForthSinRate: value });
+    }
+  }
+
+  onTimingSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ timingSinRate: value as number });
+  }
+
+  onBackForthSinRateChange(
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ backForthSinRate: value as number });
   }
 
   onSliderChange(
@@ -1199,7 +1243,7 @@ class SceneOptionCard extends React.Component<
     const randomSceneList =
       this.state.randomSceneList == null
         ? this.props.scene.nextSceneRandoms
-        : null;
+        : undefined;
     this.setState({ randomSceneList });
   }
 
