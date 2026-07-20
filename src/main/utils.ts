@@ -60,7 +60,7 @@ function cachePath(config: Config, source?: string, typeDir?: string) {
   if (config.caching.directory === "") {
     if (source) {
       if (!typeDir) {
-        typeDir = en.get(getSourceType(source)).toLowerCase();
+        typeDir = en.get(getSourceType(source))?.toLowerCase();
       }
       if (source != ST.video && source != ST.playlist) {
         return (
@@ -88,7 +88,7 @@ function cachePath(config: Config, source?: string, typeDir?: string) {
     }
     if (source) {
       if (!typeDir) {
-        typeDir = en.get(getSourceType(source)).toLowerCase();
+        typeDir = en.get(getSourceType(source))?.toLowerCase();
       }
       if (source != ST.video && source != ST.playlist) {
         return (
