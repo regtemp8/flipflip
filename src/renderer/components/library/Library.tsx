@@ -358,7 +358,7 @@ interface LibraryProps {
   tutorial: string;
   yOffset: number;
   goBack(): void;
-  onAddSource(scene: Scene, type: string, ...args: any[]): void;
+  onAddSource(scene: Scene | null, type: string, ...args: any[]): void;
   onBatchClip(): void;
   onBatchTag(): void;
   onClearBlacklist(sourceURL: string): void;
@@ -372,7 +372,7 @@ interface LibraryProps {
   onManageTags(): void;
   onMarkOffline(): void;
   onPlay(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
+  onSort(algorithm: string, ascending: boolean, scene?: Scene): void;
   onTutorial(tutorial: string): void;
   onUpdateLibrary(fn: (library: Array<LibrarySource>) => void): void;
   onUpdateMode(mode: string): void;
@@ -410,6 +410,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       moveDialog: false,
       importFile: "",
     };
+  }
+
+  onSort(algorithm: string, ascending: boolean) {
+    this.props.onSort(algorithm, ascending);
   }
 
   render() {
@@ -964,10 +968,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 <Button
                   color="primary"
                   disabled={this.state.importFile.length == 0}
-                  onClick={this.onFinishImportLibrary.bind(
-                    this,
-                    this.state.importFile,
-                  )}
+                  onClick={this.onFinishImportLibrary.bind(this)}
                 >
                   Import
                 </Button>
@@ -1273,14 +1274,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 <ListItemSecondaryAction>
                   <IconButton
                     edge="end"
-                    onClick={this.props.onSort.bind(this, null, sf, true)}
+                    onClick={this.onSort.bind(this, sf, true)}
                     size="large"
                   >
                     <ArrowUpwardIcon />
                   </IconButton>
                   <IconButton
                     edge="end"
-                    onClick={this.props.onSort.bind(this, null, sf, false)}
+                    onClick={this.onSort.bind(this, sf, false)}
                     size="large"
                   >
                     <ArrowDownwardIcon />
@@ -1293,7 +1294,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             <ListItemSecondaryAction>
               <IconButton
                 edge="end"
-                onClick={this.props.onSort.bind(this, null, SF.random, true)}
+                onClick={this.onSort.bind(this, SF.random, true)}
                 size="large"
               >
                 <ShuffleIcon />
@@ -1433,7 +1434,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       this.setState({
         openMenu:
           this.state.openMenu == MO.gooninatorImport
-            ? null
+            ? undefined
             : MO.gooninatorImport,
       });
     } else if (
@@ -1621,7 +1622,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   onToggleBatchTagModal() {
     if (this.state.openMenu == MO.batchTag) {
-      this.setState({ openMenu: null, selectedTags: [] });
+      this.setState({ openMenu: undefined, selectedTags: [] });
     } else {
       this.setState({
         openMenu: MO.batchTag,
@@ -1642,7 +1643,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   }
 
   onToggleNewMenu() {
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
   }
 
   onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
@@ -1651,8 +1654,8 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   onCloseDialog() {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       drawerOpen: false,
       importFile: "",
     });
@@ -1812,7 +1815,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
         for (let source of this.state.displaySources) {
-          l.find((s) => s.id == source.id).marked = true;
+          const librarySource = l.find((s) => s.id == source.id);
+          if (librarySource != null) {
+            librarySource.marked = true;
+          }
         }
       });
     } else {
@@ -1837,14 +1843,21 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
         source.tags = new Array<Tag>();
         for (let tag of this.state.selectedTags) {
-          source.tags.push(
-            new Tag({
-              name: tag,
-              id: this.props.tags.find((t) => t.name == tag).id,
-            }),
-          );
+          const tagID = this.props.tags.find((t) => t.name == tag)?.id;
+          if (tagID != null) {
+            source.tags.push(
+              new Tag({
+                name: tag,
+                id: tagID,
+              }),
+            );
+          }
         }
       }
     });
@@ -1855,15 +1868,22 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
         const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
-            source.tags.push(
-              new Tag({
-                name: tag,
-                id: this.props.tags.find((t) => t.name == tag).id,
-              }),
-            );
+            const tagID = this.props.tags.find((t) => t.name == tag)?.id;
+            if (tagID != null) {
+              source.tags.push(
+                new Tag({
+                  name: tag,
+                  id: tagID,
+                }),
+              );
+            }
           }
         }
       }
@@ -1875,6 +1895,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
           if (sourceTags.includes(tag)) {
@@ -1893,6 +1917,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL);
+      if (source == null) {
+        continue;
+      }
+
       const tags = source.tags;
       if (commonTags.length == 0) {
         commonTags = tags;
@@ -1917,7 +1945,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     if (filtering) {
       const mergeSources = this.state.filters.includes("<Mergeable>")
         ? this.getMerges()
-        : null;
+        : undefined;
       for (let source of mergeSources ? mergeSources : this.props.library) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {

@@ -469,7 +469,7 @@ interface SceneDetailProps {
   ): void;
   onResetScene(scene: Scene): void;
   onSaveAsScene(scene: Scene): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
+  onSort(algorithm: string, ascending: boolean, scene?: Scene): void;
   onTutorial(tutorial: string): void;
   onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
   systemMessage(message: string): void;
@@ -1346,9 +1346,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                             edge="end"
                             onClick={this.props.onSort.bind(
                               this,
-                              this.props.scene,
                               sf,
                               true,
+                              this.props.scene,
                             )}
                             size="large"
                           >
@@ -1358,9 +1358,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                             edge="end"
                             onClick={this.props.onSort.bind(
                               this,
-                              this.props.scene,
                               sf,
                               false,
+                              this.props.scene,
                             )}
                             size="large"
                           >
@@ -1376,9 +1376,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                         edge="end"
                         onClick={this.props.onSort.bind(
                           this,
-                          this.props.scene,
                           SF.random,
                           true,
+                          this.props.scene,
                         )}
                         size="large"
                       >

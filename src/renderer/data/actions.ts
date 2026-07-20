@@ -2448,7 +2448,7 @@ export function addScriptSingle(state: State) {
 
 export function addSource(
   state: State,
-  scene: Scene,
+  scene: Scene | null,
   type: string,
   ...args: any[]
 ): Object {
@@ -2902,9 +2902,9 @@ function scriptSortFunction(
 
 export function sortSources(
   state: State,
-  scene: Scene,
   algorithm: string,
   ascending: boolean,
+  scene?: Scene,
 ): Object {
   if (algorithm == SF.random) {
     if (scene == null) {
