@@ -38,7 +38,7 @@ interface URLDialogProps {
   classes: any;
   open: boolean;
   onClose(): void;
-  onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
+  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
 }
 
 interface URLDialogState {
@@ -99,7 +99,7 @@ class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
   }
 
   onImportURL() {
-    this.props.onImportURL(AF.list, null, this.state.importURLs);
+    this.props.onImportURL(AF.list, false, this.state.importURLs);
     this.setState({ importURLs: "" });
     this.props.onClose();
   }

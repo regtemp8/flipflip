@@ -177,7 +177,7 @@ interface PiwigoDialogProps {
   classes: any;
   open: boolean;
   onClose(): void;
-  onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
+  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
 }
 
 interface PiwigoDialogState {
@@ -569,7 +569,7 @@ class PiwigoDialog extends React.Component<
       }
     }
 
-    this.props.onImportURL(AF.url, null, [url]);
+    this.props.onImportURL(AF.url, false, [url]);
   }
 
   makeURL() {

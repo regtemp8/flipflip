@@ -1228,14 +1228,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           config={this.props.config}
           open={this.state.openMenu == MO.piwigo}
           onClose={this.onCloseDialog.bind(this)}
-          onImportURL={this.onAddSource.bind(this)}
+          onImportURL={this.addSource.bind(this)}
         />
         <HydrusDialog
           config={this.props.config}
           tags={this.props.tags}
           open={this.state.openMenu == MO.hydrus}
           onClose={this.onCloseDialog.bind(this)}
-          onImportURL={this.onAddSource.bind(this)}
+          onImportURL={this.addSource.bind(this)}
         />
 
         <Fab
@@ -1305,12 +1305,12 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
         <GooninatorDialog
           open={this.state.openMenu == MO.gooninatorImport}
-          onImportURL={this.onAddSource.bind(this)}
+          onImportURL={this.addSource.bind(this)}
           onClose={this.onCloseDialog.bind(this)}
         />
         <URLDialog
           open={this.state.openMenu == MO.urlImport}
-          onImportURL={this.onAddSource.bind(this)}
+          onImportURL={this.addSource.bind(this)}
           onClose={this.onCloseDialog.bind(this)}
         />
         <Dialog
@@ -1602,10 +1602,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     e: React.MouseEvent<HTMLButtonElement>,
     ...args: any[]
   ) {
+    this.addSource(addFunction, e.shiftKey, args);
+  }
+
+  addSource(addFunction: string, shiftKey: boolean, ...args: any[]) {
     this.onCloseDialog();
-    if (addFunction == AF.videos && e.shiftKey) {
+    if (addFunction == AF.videos && shiftKey) {
       this.props.onAddSource(null, AF.videoDir, ...args);
-    } else if (addFunction == AF.url && e.shiftKey) {
+    } else if (addFunction == AF.url && shiftKey) {
       this.setState({ openMenu: MO.urlImport });
     } else {
       this.props.onAddSource(null, addFunction, ...args);

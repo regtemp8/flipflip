@@ -37,7 +37,7 @@ interface GooninatorDialogProps {
   classes: any;
   open: boolean;
   onClose(): void;
-  onImportURL(type: string, e: MouseEvent, ...args: any[]): void;
+  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
 }
 
 interface GooninatorDialogState {
@@ -151,7 +151,7 @@ class GooninatorDialog extends React.Component<
   onImportURL() {
     this.props.onImportURL(
       this.state.importType,
-      null,
+      false,
       this.state.importURL,
       this.state.rootDir,
     );
