@@ -29,8 +29,8 @@ export default class VideoCard extends React.Component<VideoCardProps> {
 
   render() {
     let mainVideoTitle = "";
-    if (this.props.mainVideo) {
-      const source = this.props.mainVideo.getAttribute("source");
+    const source = this.props.mainVideo?.getAttribute("source");
+    if (source) {
       const sourceType = getSourceType(source);
       if (sourceType == ST.video) {
         if (source.startsWith("http")) {
@@ -82,7 +82,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                 if (otherVideo == null) return <React.Fragment key={index} />;
                 if (this.props.otherScenes[listIndex] == null)
                   return <React.Fragment key={index} />;
-                const sourceURL = otherVideo.getAttribute("source");
+                const sourceURL = otherVideo.getAttribute("source") ?? "";
                 let otherVideoTitle;
                 const sourceType = getSourceType(sourceURL);
                 if (sourceType == ST.video) {
@@ -102,17 +102,16 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                   );
                 }
                 let clipValue = null;
-                let clipID: number = null;
+                let clipID = -1;
                 let source = null;
-                if (
-                  otherVideo.hasAttribute("start") &&
-                  otherVideo.hasAttribute("end")
-                ) {
+                const start = otherVideo.getAttribute("start");
+                const end = otherVideo.getAttribute("end");
+                if (start && end) {
                   clipValue = [
-                    Number.parseFloat(otherVideo.getAttribute("start")),
-                    Number.parseFloat(otherVideo.getAttribute("end")),
+                    Number.parseFloat(start),
+                    Number.parseFloat(end),
                   ];
-                  clipID = Number.parseInt(otherVideo.getAttribute("clip"));
+                  clipID = Number.parseInt(otherVideo.getAttribute("clip") ?? "-1");
                   if (this.props.otherScenes[listIndex] instanceof Scene) {
                     source = (
                       this.props.otherScenes[listIndex] as Scene
@@ -135,7 +134,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                       clip={
                         source ? source.clips.find((c) => c.id == clipID) : null
                       }
-                      clipValue={clipValue ? clipValue : null}
+                      clipValue={clipValue}
                       player
                       nextTrack={() => {
                         this.props.imagePlayerAdvanceHacks[listIndex + 1][
