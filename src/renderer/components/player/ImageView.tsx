@@ -253,8 +253,8 @@ export default class ImageView extends React.Component<ImageViewProps> {
       this._parentWidth = parentWidth;
     }
     let parentAspect = parentWidth / parentHeight;
-    let imgWidth: number;
-    let imgHeight: number;
+    let imgWidth = 0;
+    let imgHeight = 0;
     let scale = 1;
     let bgscale = 1;
     let type = null;
