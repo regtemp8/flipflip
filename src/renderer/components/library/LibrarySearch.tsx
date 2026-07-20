@@ -29,6 +29,11 @@ const styles = (theme: Theme) =>
     },
   });
 
+interface SearchEntry {
+  name: string;
+  count: number;
+}
+
 interface LibrarySearchProps {
   classes: any;
   displaySources: Array<LibrarySource | Audio>;
@@ -179,11 +184,8 @@ class LibrarySearch extends React.Component<
       if (source.tags.length > 0) {
         untagged = false;
         for (let tag of source.tags) {
-          if (tags.has(tag.name)) {
-            tags.set(tag.name, tags.get(tag.name) + 1);
-          } else {
-            tags.set(tag.name, 1);
-          }
+          const count = tags.get(tag.name) ?? 0;
+          tags.set(tag.name, count + 1);
         }
       }
 
@@ -192,11 +194,8 @@ class LibrarySearch extends React.Component<
           for (let tag of clip.tags) {
             untagged = false;
             if (!source.tags.includes(tag)) {
-              if (tags.has(tag.name)) {
-                tags.set(tag.name, tags.get(tag.name) + 1);
-              } else {
-                tags.set(tag.name, 1);
-              }
+              const count = tags.get(tag.name) ?? 0;
+              tags.set(tag.name, count + 1);
             }
           }
         }
@@ -207,29 +206,33 @@ class LibrarySearch extends React.Component<
       }
 
       const type = en.get(getSourceType(source.url));
-      if (types.has(type)) {
-        types.set(type, types.get(type) + 1);
-      } else {
-        types.set(type, 1);
+      if (type != null) {
+        const count = types.get(type) ?? 0;
+        types.set(type, count + 1);
       }
     }
-    const tagKeys = Array.from(tags.keys()).sort((a, b) => {
-      const aCount = tags.get(a);
-      const bCount = tags.get(b);
-      if (aCount > bCount) {
+
+    const tagEntries: SearchEntry[] = [];
+    for (const [key, value] of tags.entries()) {
+      tagEntries.push({ name: key, count: value });
+    }
+    tagEntries.sort((a, b) => {
+      if (a.count > b.count) {
         return -1;
-      } else if (aCount < bCount) {
+      } else if (a.count < b.count) {
         return 1;
       } else {
         return 0;
       }
     });
-    const typeKeys = Array.from(types.keys()).sort((a, b) => {
-      const aCount = types.get(a);
-      const bCount = types.get(b);
-      if (aCount > bCount) {
+    const typeEntries: SearchEntry[] = [];
+    for (const [key, value] of types.entries()) {
+      typeEntries.push({ name: key, count: value });
+    }
+    typeEntries.sort((a, b) => {
+      if (a.count > b.count) {
         return -1;
-      } else if (aCount < bCount) {
+      } else if (a.count < b.count) {
         return 1;
       } else {
         return 0;
@@ -261,50 +264,50 @@ class LibrarySearch extends React.Component<
         });
       }
     }
-    for (let tag of tagKeys) {
+    for (const tag of tagEntries) {
       const opt =
         this.props.isCreatable || this.props.withBrackets
-          ? "[" + tag + "]"
-          : tag;
+          ? "[" + tag.name + "]"
+          : tag.name;
       if (!this.props.filters.includes(opt)) {
-        options.push({ label: tag + " (" + tags.get(tag) + ")", value: opt });
+        options.push({ label: tag.name + " (" + tag.count + ")", value: opt });
       }
     }
     if (!this.props.onlyTags && !this.props.noTypes) {
-      for (let type of typeKeys) {
+      for (const type of typeEntries) {
         const opt =
           this.props.isCreatable || this.props.withBrackets
-            ? "{" + type + "}"
-            : type;
+            ? "{" + type.name + "}"
+            : type.name;
         if (!this.props.filters.includes(opt)) {
           options.push({
-            label: type + " (" + types.get(type) + ")",
+            label: type.name + " (" + type.count + ")",
             value: opt,
           });
         }
       }
     }
     if (this.state.searchInput.startsWith("-")) {
-      for (let tag of tagKeys) {
+      for (const tag of tagEntries) {
         const opt =
           this.props.isCreatable || this.props.withBrackets
-            ? "[" + tag + "]"
-            : tag;
+            ? "[" + tag.name + "]"
+            : tag.name;
         if (!this.props.filters.includes(opt)) {
           options.push({
-            label: "-" + tag + " (" + tags.get(tag) + ")",
+            label: "-" + tag.name + " (" + tag.count + ")",
             value: "-" + opt,
           });
         }
       }
-      for (let type of typeKeys) {
+      for (const type of typeEntries) {
         const opt =
           this.props.isCreatable || this.props.withBrackets
-            ? "{" + type + "}"
-            : type;
+            ? "{" + type.name + "}"
+            : type.name;
         if (!this.props.filters.includes(opt)) {
           options.push({
-            label: "-" + type + " (" + types.get(type) + ")",
+            label: "-" + type.name + " (" + type.count + ")",
             value: "-" + opt,
           });
         }
