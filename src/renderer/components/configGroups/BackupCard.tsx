@@ -487,6 +487,15 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
 
   onFinishRestore() {
     this.onCloseDialog();
+    if (this.state.backup?.url == null) {
+      this.setState({
+        snackbarOpen: true,
+        snackbar: "Error: backup is undefined",
+        snackbarSeverity: SS.error,
+      });
+      return;
+    }
+
     window.ipc.getBackupFile(this.state.backup.url).then((backupFile) => {
       try {
         this.props.onRestore(backupFile);
@@ -507,7 +516,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
   }
 
   onCloseDialog() {
-    this.setState({ openMenu: null, snackbarOpen: false });
+    this.setState({ openMenu: undefined, snackbarOpen: false });
   }
 
   blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
