@@ -320,6 +320,10 @@ class VideoControl extends React.Component<
   }
 
   onChangePosition(e: Event, value: number | number[]) {
+    this.changePosition(value as number)
+  }
+
+  private changePosition(value: number) {
     const position = value as number;
     this.props.video.currentTime = position;
     if (this.props.video.paused) {
@@ -328,6 +332,10 @@ class VideoControl extends React.Component<
   }
 
   onChangeVolume(e: Event, value: number | number[]) {
+    this.changeVolume(value as number);
+  }
+
+  private changeVolume(value: number) {
     let volume = value as number;
     if (volume > 100) {
       volume = 100;
@@ -373,7 +381,7 @@ class VideoControl extends React.Component<
     if (position < 0) {
       position = 0;
     }
-    this.onChangePosition(null, position);
+    this.changePosition(position);
   }
 
   onForward() {
@@ -382,7 +390,7 @@ class VideoControl extends React.Component<
     if (position > this.props.video.duration) {
       position = this.props.video.duration;
     }
-    this.onChangePosition(null, position);
+    this.changePosition(position);
   }
 
   getMarks(): Array<{ value: number; label: string }> {
@@ -413,13 +421,13 @@ class VideoControl extends React.Component<
       case "ArrowUp":
         if (e.ctrlKey) {
           e.preventDefault();
-          this.onChangeVolume(null, this.props.video.volume * 100 + 5);
+          this.changeVolume(this.props.video.volume * 100 + 5);
         }
         break;
       case "ArrowDown":
         if (e.ctrlKey) {
           e.preventDefault();
-          this.onChangeVolume(null, this.props.video.volume * 100 - 5);
+          this.changeVolume(this.props.video.volume * 100 - 5);
         }
         break;
       case "ArrowLeft":
@@ -448,13 +456,13 @@ class VideoControl extends React.Component<
         case "ArrowUp":
           if (e.ctrlKey) {
             e.preventDefault();
-            this.onChangeVolume(null, this.props.video.volume * 100 + 5);
+            this.changeVolume(this.props.video.volume * 100 + 5);
           }
           break;
         case "ArrowDown":
           if (e.ctrlKey) {
             e.preventDefault();
-            this.onChangeVolume(null, this.props.video.volume * 100 - 5);
+            this.changeVolume(this.props.video.volume * 100 - 5);
           }
           break;
         case "ArrowLeft":
