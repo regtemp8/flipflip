@@ -82,8 +82,10 @@ interface ZoomMoveCardState {
   transSinRate: number;
 }
 
-class ZoomMoveCard extends React.Component<ZoomMoveCardProps, ZoomMoveCardState> {
-
+class ZoomMoveCard extends React.Component<
+  ZoomMoveCardProps,
+  ZoomMoveCardState
+> {
   constructor(props: ZoomMoveCardProps) {
     super(props);
 

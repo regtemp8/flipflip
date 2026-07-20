@@ -2,7 +2,7 @@ import Tag from "./Tag";
 
 export default class CaptionScript {
   id: number = 0;
-  url: string = '';
+  url: string = "";
   script: string | null = null;
   marked: boolean = false;
   tags: Array<Tag> = [];

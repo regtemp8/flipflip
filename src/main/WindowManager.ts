@@ -109,7 +109,7 @@ export async function saveExport(
     return;
   }
 
-  const defaultPath = fs.existsSync(filePath) ? filePath : undefined
+  const defaultPath = fs.existsSync(filePath) ? filePath : undefined;
   const result = await dialog.showSaveDialog(window, {
     filters: [{ name: "JSON Document", extensions: ["json"] }],
     defaultPath,
@@ -336,7 +336,7 @@ export async function saveScriptAs(
     return undefined;
   }
 
-  const defaultPath = fs.existsSync(filePath) ? filePath : undefined
+  const defaultPath = fs.existsSync(filePath) ? filePath : undefined;
   const result = await dialog.showSaveDialog(window, {
     filters: [{ name: "Text Document", extensions: ["txt"] }],
     defaultPath,

@@ -209,8 +209,8 @@ export default class AppStorage {
 
           // Port to new generator format
           for (let scene of this.initialState.scenes) {
-            if(!scene.generatorWeights) {
-              scene.generatorWeights = []
+            if (!scene.generatorWeights) {
+              scene.generatorWeights = [];
             }
 
             // Get weights for this scene

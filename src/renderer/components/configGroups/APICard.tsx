@@ -128,10 +128,10 @@ class APICard extends React.Component<APICardProps, APICardState> {
     );
 
     const menuText = this.state.menuType
-      ? en.get(this.state.menuType) : undefined
-    const menuType = menuText != null
-      ? menuText[0].toUpperCase() + menuText.slice(1)
-      : "";
+      ? en.get(this.state.menuType)
+      : undefined;
+    const menuType =
+      menuText != null ? menuText[0].toUpperCase() + menuText.slice(1) : "";
     let menuTypeSignOut = () => {};
     switch (this.state.menuType) {
       case ST.tumblr:

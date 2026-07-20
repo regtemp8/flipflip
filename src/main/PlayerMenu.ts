@@ -71,8 +71,8 @@ export default class PlayerMenu {
   public static setFullScreen(fullScreen: boolean) {
     PlayerMenu.changeLabel(
       "toggleFullscreen",
-      "Toggle Fullscreen " + (fullScreen ? "(On)" : "(Off)")
-    )
+      "Toggle Fullscreen " + (fullScreen ? "(On)" : "(Off)"),
+    );
   }
 
   private static changeLabel(itemId: string, label: string) {

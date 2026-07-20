@@ -345,8 +345,8 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
   nextScene(rowIndex: number, colIndex: number) {
     const cell = this.state.scene.grid[rowIndex][colIndex];
     const scene = this.props.allScenes.find((s) => s.id == cell.sceneID);
-    if(scene == null) {
-      return
+    if (scene == null) {
+      return;
     }
 
     const newSceneGrid = this.state.scene;

@@ -824,7 +824,7 @@ class VideoClipper extends React.Component<
   }
 
   onToggleClip() {
-    const isEditing = this.state.isEditing as Clip
+    const isEditing = this.state.isEditing as Clip;
     this.props.onSetDisabledClips(
       this.props.source.disabledClips
         ? this.props.source.disabledClips.concat(isEditing.id)
@@ -931,7 +931,7 @@ class VideoClipper extends React.Component<
     forceStart = false,
     forceEnd = false,
   ) {
-    this.changePosition(value, forceStart, forceEnd)
+    this.changePosition(value, forceStart, forceEnd);
   }
 
   private changePosition(
@@ -991,10 +991,7 @@ class VideoClipper extends React.Component<
     this.setState({
       isEditingStartText: getTimestamp(video.currentTime),
     });
-    this.changePosition([
-      video.currentTime,
-      this.state.isEditingValue[1],
-    ]);
+    this.changePosition([video.currentTime, this.state.isEditingValue[1]]);
   }
 
   onChangeEndText(e: React.ChangeEvent<HTMLInputElement>) {
@@ -1021,10 +1018,7 @@ class VideoClipper extends React.Component<
     this.setState({
       isEditingEndText: getTimestamp(video.currentTime),
     });
-    this.changePosition([
-      this.state.isEditingValue[0],
-      video.currentTime,
-    ]);
+    this.changePosition([this.state.isEditingValue[0], video.currentTime]);
   }
 
   onScroll = (e: WheelEvent) => {
@@ -1039,7 +1033,7 @@ class VideoClipper extends React.Component<
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const activeElement = document.activeElement as Element
+    const activeElement = document.activeElement as Element;
     const focus = activeElement.tagName.toLocaleLowerCase();
     const start = activeElement.id == "start";
     const end = activeElement.id == "end";

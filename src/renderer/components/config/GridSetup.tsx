@@ -515,7 +515,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
   }
 
   onChooseScene(sceneID: number) {
-    const [row, col] = this.state.isEditing as number[]
+    const [row, col] = this.state.isEditing as number[];
     let newGrid = this.props.scene.grid;
     newGrid[row][col].sceneID = sceneID;
     newGrid[row][col].sceneCopy = [];
@@ -661,7 +661,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     e: DraggableEvent,
     position: DraggableData,
   ) {
-    const nativeEvent = "nativeEvent" in e ? e.nativeEvent : e
+    const nativeEvent = "nativeEvent" in e ? e.nativeEvent : e;
     const path = nativeEvent.composedPath();
     if (!path || path.length == 0) {
       return;

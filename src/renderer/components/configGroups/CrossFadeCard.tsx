@@ -547,8 +547,11 @@ class CrossFadeCard extends React.Component<
     }
   }
 
-  onFadeSinRateChange(event: Event | React.SyntheticEvent<Element, Event>, value: number | number[]) {
-    this.setState({fadeSinRate: value as number})
+  onFadeSinRateChange(
+    event: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) {
+    this.setState({ fadeSinRate: value as number });
   }
 
   onSliderChange(

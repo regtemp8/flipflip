@@ -326,7 +326,9 @@ export function loadSources(
       filter,
       weight,
       helpers,
-      config.caching.enabled && fs.existsSync(cachePath) ? cachePath : undefined,
+      config.caching.enabled && fs.existsSync(cachePath)
+        ? cachePath
+        : undefined,
     );
   } else if (sourceType == ST.playlist) {
     const cachePath = cacheDir + getFileName(source.url, path.sep);
@@ -337,7 +339,9 @@ export function loadSources(
       filter,
       weight,
       helpers,
-      config.caching.enabled && fs.existsSync(cachePath) ? cachePath : undefined,
+      config.caching.enabled && fs.existsSync(cachePath)
+        ? cachePath
+        : undefined,
     );
   } else if (sourceType == ST.nimja) {
     loadNimja(pm, config, source, filter, weight, helpers);

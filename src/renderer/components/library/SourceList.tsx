@@ -217,7 +217,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               )}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list") as HTMLElement}
+                helperContainer={() =>
+                  document.getElementById("sortable-list") as HTMLElement
+                }
                 distance={5}
                 height={height}
                 width={width}

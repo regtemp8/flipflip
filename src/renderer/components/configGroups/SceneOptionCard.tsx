@@ -1149,43 +1149,38 @@ class SceneOptionCard extends React.Component<
   changeOverlayIntKey(id: number, key: string, intString: string) {
     const value = intString === "" ? "" : Number(intString);
     if (this.props.sidebar && this.props.onGenerate) {
-      let overlay
+      let overlay;
       if (intString.startsWith("999")) {
         intString = intString.replace("999", "");
         const gValue = intString === "" ? "" : Number(intString);
-        overlay = this.props.allSceneGrids.find((s) => s.id == gValue)
+        overlay = this.props.allSceneGrids.find((s) => s.id == gValue);
       } else {
         overlay = this.props.allScenes.find((s) => s.id == value);
       }
-      if(overlay != null) {
-        this.props.onGenerate(overlay)
+      if (overlay != null) {
+        this.props.onGenerate(overlay);
       }
     }
     this.changeOverlayKey(id, key, value);
   }
 
   blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    let value = (e.currentTarget as any).value;
-    if (min && (this.props.scene as any)[key] < min) {
+    const { min, max } = e.currentTarget;
+    let value = e.currentTarget.value;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       value = max;
       this.changeIntKey(key, max);
     }
 
     // Update sliders
     if (key == "timingSinRate") {
-      this.setState({ timingSinRate: value });
+      this.setState({ timingSinRate: Number(value) });
     }
     if (key == "backForthSinRate") {
-      this.setState({ backForthSinRate: value });
+      this.setState({ backForthSinRate: Number(value) });
     }
   }
 

@@ -98,8 +98,8 @@ class AudioSourceList extends React.Component<
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
-        if(!playlist) {
-          return
+        if (!playlist) {
+          return;
         }
 
         const oldIndexSource = this.props.sources[oldIndex];
@@ -172,7 +172,9 @@ class AudioSourceList extends React.Component<
               onClick={this.clearLastSelected.bind(this)}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list") as HTMLElement}
+                helperContainer={() =>
+                  document.getElementById("sortable-list") as HTMLElement
+                }
                 distance={5}
                 height={height}
                 width={width}
@@ -288,8 +290,8 @@ class AudioSourceList extends React.Component<
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
-        if(!playlist) {
-          return
+        if (!playlist) {
+          return;
         }
 
         playlist.audios.forEach((a, index) => {

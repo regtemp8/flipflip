@@ -144,7 +144,8 @@ class ColorSetPicker extends React.Component<
 
   onCloseColorPicker() {
     const newColors = this.props.currentColors;
-    newColors[this.state.pickerIndex as number] = this.state.pickerColor as string;
+    newColors[this.state.pickerIndex as number] = this.state
+      .pickerColor as string;
     this.props.onChangeColors({ target: { value: newColors } });
     this.setState({
       pickerIndex: undefined,

@@ -72,7 +72,6 @@ interface StrobeCardState {
 }
 
 class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
-
   constructor(props: StrobeCardProps) {
     super(props);
 
