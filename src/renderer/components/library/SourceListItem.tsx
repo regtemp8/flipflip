@@ -151,6 +151,7 @@ interface SourceListItemProps {
   style: any;
   tutorial: string;
   useWeights?: boolean;
+  canClip: boolean
   onClean(source: LibrarySource): void;
   onClearBlacklist(sourceURL: string): void;
   onClip(source: LibrarySource, displaySources: Array<LibrarySource>): void;
@@ -436,7 +437,7 @@ class SourceListItem extends React.Component<
                   <BuildIcon />
                 </IconButton>
               )}
-              {sourceType == ST.video && (
+              {this.props.canClip && sourceType == ST.video && (
                 <IconButton
                   onClick={this.onClip.bind(this)}
                   className={classes.actionButton}

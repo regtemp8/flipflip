@@ -828,6 +828,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     ({ value }: { value: { index: number; style: any; data: Array<any> } }) => {
       const index = value.index;
       const source: LibrarySource = value.data[index];
+      const canClip = this.props.library.some((s) => s.url === source.url)
       return (
         <SourceListItem
           key={source.id}
@@ -848,6 +849,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           useWeights={this.props.useWeights}
           onClean={this.onClean.bind(this)}
           onClearBlacklist={this.props.onClearBlacklist.bind(this)}
+          canClip={canClip}
           onClip={this.props.onClip.bind(this)}
           onDelete={this.onDelete.bind(this)}
           onDownload={this.props.onDownload.bind(this)}
