@@ -42,6 +42,7 @@ import LibrarySource from "../../../common/LibrarySource";
 import SourceListItem from "./SourceListItem";
 import Clip from "../../../common/Clip";
 import Scene from "../../../common/Scene";
+import SourceListClipMenu from "./SourceListClipMenu";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -228,54 +229,13 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
             </List>
           )}
         </AutoSizer>
-        <Menu
-          id="clip-menu"
-          elevation={1}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            this.state.mouseY !== null && this.state.mouseX !== null
-              ? { top: this.state.mouseY, left: this.state.mouseX }
-              : undefined
-          }
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          keepMounted
-          open={!!this.state.clipMenu}
-          onClose={this.onCloseDialog.bind(this)}
-        >
-          {!!this.state.clipMenu &&
-            this.state.clipMenu.clips.map((c, index) => (
-              <MenuItem key={c.id}>
-                <ListItemText
-                  primary={
-                    "(" +
-                    (index + 1) +
-                    ") " +
-                    getTimestamp(c.start) +
-                    " - " +
-                    getTimestamp(c.end)
-                  }
-                  className={classes.marginRight}
-                />
-                <ListItemSecondaryAction>
-                  <Switch
-                    size="small"
-                    checked={
-                      !this.state.clipMenu.disabledClips ||
-                      !this.state.clipMenu.disabledClips.includes(c.id)
-                    }
-                    onChange={this.onToggleClip.bind(
-                      this,
-                      this.state.clipMenu,
-                      c,
-                    )}
-                  />
-                </ListItemSecondaryAction>
-              </MenuItem>
-            ))}
-        </Menu>
+        <SourceListClipMenu
+          mouseX={this.state.mouseX}
+          mouseY={this.state.mouseY}
+          clipMenu={this.state.clipMenu}
+          onCloseDialog={this.onCloseDialog.bind(this)}
+          onToggleClip={this.onToggleClip.bind(this)}
+        />
         <Menu
           id="weight-menu"
           classes={{ paper: classes.weightMenu }}
