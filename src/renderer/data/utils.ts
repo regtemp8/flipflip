@@ -121,9 +121,9 @@ export function getTimeout(
   min: number,
   max: number,
   sinRate: number,
-  audio: Audio,
   bpmMulti: number,
-  timeToNextFrame: number,
+  audio?: Audio,
+  timeToNextFrame?: number,
 ): number | null {
   let timeout = null;
   switch (tf) {
@@ -148,7 +148,7 @@ export function getTimeout(
       timeout = timeout || 1000;
       break;
     case TF.scene:
-      timeout = timeToNextFrame ? timeToNextFrame : 1000;
+      timeout = timeToNextFrame ?? 1000;
       break;
   }
   return timeout;

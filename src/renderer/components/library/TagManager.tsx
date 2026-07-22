@@ -177,7 +177,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
         <AppBar
           enableColorOnDark
           position="absolute"
-          className={clsx(classes.appBar, open && classes.appBarShift)}
+          className={clsx(classes.appBar, classes.appBarShift)}
         >
           <Toolbar className={classes.headerBar}>
             <div className={classes.headerLeft}>

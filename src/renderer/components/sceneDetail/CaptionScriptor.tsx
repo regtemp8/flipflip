@@ -293,7 +293,8 @@ class CaptionScriptor extends React.Component<
   render() {
     const classes = this.props.classes;
 
-    let menuName, menuThen;
+    let menuName: string = "";
+    let menuThen: () => void = () => {};
     switch (this.state.openMenu) {
       case MO.error:
         menuName = "Back";
@@ -327,7 +328,7 @@ class CaptionScriptor extends React.Component<
         <AppBar
           enableColorOnDark
           position="absolute"
-          className={clsx(classes.appBar, open && classes.appBarShift)}
+          className={clsx(classes.appBar, classes.appBarShift)}
         >
           <Toolbar className={classes.headerBar}>
             <div className={classes.headerLeft}>
@@ -534,14 +535,15 @@ class CaptionScriptor extends React.Component<
                           <MenuItem
                             disabled={
                               !this.state.scriptChanged ||
-                              (this.state.captionScript.url &&
-                                this.state.captionScript.url.startsWith("http"))
+                              this.state.captionScript.url.startsWith("http")
                             }
-                            onClick={this.onSave.bind(this, null)}
+                            onClick={this.onSave.bind(this, undefined)}
                           >
                             Save
                           </MenuItem>
-                          <MenuItem onClick={this.onSaveAs.bind(this, null)}>
+                          <MenuItem
+                            onClick={this.onSaveAs.bind(this, undefined)}
+                          >
                             Save As
                           </MenuItem>
                           <MenuItem
@@ -999,7 +1001,6 @@ class CaptionScriptor extends React.Component<
                     captionProgramJumpToHack={
                       this.state.captionProgramJumpToHack
                     }
-                    tutorial={null}
                     getCurrentTimestamp={
                       this.state.fullscreen ? undefined : getTimestamp
                     }
@@ -1031,9 +1032,6 @@ class CaptionScriptor extends React.Component<
                         getTags={this.props.getTags.bind(this)}
                         goBack={this.props.goBack.bind(this)}
                         playNextScene={() => {}}
-                        timeToNextFrame={null}
-                        currentAudio={null}
-                        currentImage={null}
                         jumpToHack={this.state.captionProgramJumpToHack}
                         onError={this.onError.bind(this)}
                       />
@@ -1168,7 +1166,7 @@ class CaptionScriptor extends React.Component<
     );
   }
 
-  _currentTimestamp: number = null;
+  _currentTimestamp: number = 0;
   onPlaying(position: number) {
     this._currentTimestamp = position;
   }
@@ -1224,7 +1222,7 @@ class CaptionScriptor extends React.Component<
   }
 
   componentWillUnmount() {
-    this._currentTimestamp = null;
+    this._currentTimestamp = 0;
     window.removeEventListener("keydown", this.onKeyDown);
     if (this._abortController != null) {
       this._abortController.abort();
@@ -1312,7 +1310,7 @@ class CaptionScriptor extends React.Component<
       this.onSaveAs(callback);
     } else if (!this.state.captionScript.url.startsWith("http")) {
       const { url, script } = this.state.captionScript;
-      window.ipc.saveScript(url, script).then(() => {
+      window.ipc.saveScript(url, script ?? "").then(() => {
         this.setState({ scriptChanged: false });
         if (callback != null) {
           callback();
@@ -1325,7 +1323,7 @@ class CaptionScriptor extends React.Component<
     this.onCloseDialog();
     window.ipc
       .saveScriptAs(
-        this.state.captionScript.script,
+        this.state.captionScript.script ?? "",
         this.state.captionScript.url,
       )
       .then((filePath) => {
@@ -1371,7 +1369,11 @@ class CaptionScriptor extends React.Component<
   }
 
   onLoadFromScene() {
-    if (!this.state.sceneScripts.length || this.state.loadFromSceneError)
+    if (
+      this.state.sceneScripts == null ||
+      !this.state.sceneScripts.length ||
+      this.state.loadFromSceneError
+    )
       return;
     if (this.state.scriptChanged) {
       this.setState({ openMenu: MO.load });
@@ -1394,12 +1396,14 @@ class CaptionScriptor extends React.Component<
   }
 
   onConfirmLoadFromScene() {
-    const script = JSON.parse(
-      JSON.stringify(
-        this.state.sceneScripts.find((s) => s.url == this.state.selectScript),
-      ),
+    const sceneScript = this.state.sceneScripts?.find(
+      (s) => s.url == this.state.selectScript,
     );
+    if(sceneScript ==null) {
+      return
+    }
 
+    const script = JSON.parse(JSON.stringify(sceneScript));
     this.onCloseDialog();
     window.ipc.getTextFromURL(script.url).then((data) => {
       if (data == null) {
@@ -1453,7 +1457,7 @@ class CaptionScriptor extends React.Component<
 
   onGutterClick(editor: any, clickedLine: number) {
     let lineNum = clickedLine - 1;
-    const lines = this.state.captionScript.script.split("\n");
+    const lines = this.state.captionScript.script?.split("\n") ?? [];
     for (let l = 0; l < clickedLine; l++) {
       const line = lines[l];
       if (
@@ -1503,7 +1507,7 @@ class CaptionScriptor extends React.Component<
 
   getSceneName(id: string): string {
     if (id === "0") return "None";
-    return this.props.scenes.find((s) => s.id.toString() === id).name;
+    return this.props.scenes.find((s) => s.id.toString() === id)?.name ?? "";
   }
 
   onUpdateScene(scene: Scene, fn: (scene: Scene) => void) {

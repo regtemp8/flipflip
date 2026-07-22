@@ -37,13 +37,13 @@ const getRest = function (s: string) {
 
 interface CaptionProgramProps {
   captionScript: CaptionScript;
-  currentAudio: Audio;
-  currentImage: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
+  currentAudio?: Audio;
+  currentImage?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
   persist: boolean;
   repeat: string;
   scale: number;
   singleTrack: boolean;
-  timeToNextFrame: number;
+  timeToNextFrame?: number;
   getTags(source: string, clipID?: string): Array<Tag>;
   goBack(): void;
   playNextScene(): void;
@@ -1121,8 +1121,8 @@ export default class CaptionProgram extends React.Component<
           this.state.captionDuration[0],
           this.state.captionDuration[1],
           this.state.captionWaveRate,
-          this.props.currentAudio,
           this.state.captionBPMMulti,
+          this.props.currentAudio,
           this.props.timeToNextFrame,
         );
         const showText = this.showText(
@@ -1138,8 +1138,8 @@ export default class CaptionProgram extends React.Component<
               this.state.captionDelay[0],
               this.state.captionDelay[1],
               this.state.captionDelayWaveRate,
-              this.props.currentAudio,
               this.state.captionDelayBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
@@ -1206,8 +1206,8 @@ export default class CaptionProgram extends React.Component<
           this.state.captionDuration[0],
           this.state.captionDuration[1],
           this.state.captionWaveRate,
-          this.props.currentAudio,
           this.state.captionBPMMulti,
+          this.props.currentAudio,
           this.props.timeToNextFrame,
         );
         const showText = this.showText(
@@ -1223,8 +1223,8 @@ export default class CaptionProgram extends React.Component<
               this.state.captionDelay[0],
               this.state.captionDelay[1],
               this.state.captionDelayWaveRate,
-              this.props.currentAudio,
               this.state.captionDelayBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
@@ -1301,8 +1301,8 @@ export default class CaptionProgram extends React.Component<
               this.state.blinkDuration[0],
               this.state.blinkDuration[1],
               this.state.blinkWaveRate,
-              this.props.currentAudio,
               this.state.blinkBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
             const showText = this.showText(
@@ -1326,8 +1326,8 @@ export default class CaptionProgram extends React.Component<
                 this.state.blinkDelay[0],
                 this.state.blinkDelay[1],
                 this.state.blinkDelayWaveRate,
-                this.props.currentAudio,
                 this.state.blinkDelayBPMMulti,
+                this.props.currentAudio,
                 this.props.timeToNextFrame,
               );
               const wait = this.wait(delay);
@@ -1347,8 +1347,8 @@ export default class CaptionProgram extends React.Component<
             this.state.blinkGroupDelay[0],
             this.state.blinkGroupDelay[1],
             this.state.blinkGroupDelayWaveRate,
-            this.props.currentAudio,
             this.state.blinkGroupDelayBPMMulti,
+            this.props.currentAudio,
             this.props.timeToNextFrame,
           );
           const lastWait = this.wait(delay);
@@ -1446,8 +1446,8 @@ export default class CaptionProgram extends React.Component<
               this.state.countDuration[0],
               this.state.countDuration[1],
               this.state.countWaveRate,
-              this.props.currentAudio,
               this.state.countBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
             if (this.state.showCountProgress) {
@@ -1486,8 +1486,8 @@ export default class CaptionProgram extends React.Component<
                 this.state.countDelay[0],
                 this.state.countDelay[1],
                 this.state.countDelayWaveRate,
-                this.props.currentAudio,
                 this.state.countDelayBPMMulti,
+                this.props.currentAudio,
                 this.props.timeToNextFrame,
               );
               const wait = this.wait(delay);
@@ -1507,8 +1507,8 @@ export default class CaptionProgram extends React.Component<
             this.state.countGroupDelay[0],
             this.state.countGroupDelay[1],
             this.state.countGroupDelayWaveRate,
-            this.props.currentAudio,
             this.state.countGroupDelayBPMMulti,
+            this.props.currentAudio,
             this.props.timeToNextFrame,
           );
           const lastWait = this.wait(delay);
