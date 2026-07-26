@@ -254,11 +254,14 @@ class ScriptSourceList extends React.Component<
     );
   }
 
+  _shiftDown = false;
+  _lastChecked?: string = undefined;
+
   componentDidMount() {
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
     this._shiftDown = false;
-    this._lastChecked = null;
+    this._lastChecked = undefined;
   }
 
   componentDidUpdate(props: any) {
@@ -274,12 +277,11 @@ class ScriptSourceList extends React.Component<
   componentWillUnmount() {
     removeEventListener("keydown", this.onKeyDown);
     addEventListener("keyup", this.onKeyUp);
-    this._shiftDown = null;
-    this._lastChecked = null;
+    this._shiftDown = false;
+    this._lastChecked = undefined;
     this.savePosition();
   }
 
-  _shiftDown = false;
   onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = true;
   };
@@ -346,7 +348,6 @@ class ScriptSourceList extends React.Component<
     });
   }
 
-  _lastChecked: string = null;
   onToggleSelect(e: MouseEvent) {
     const source = (e.currentTarget as HTMLInputElement).value;
     if (this.props.specialMode == SP.selectSingle) {
@@ -357,6 +358,7 @@ class ScriptSourceList extends React.Component<
         newSelected.splice(newSelected.indexOf(source), 1);
       } else {
         if (
+          this._lastChecked != null &&
           this.props.sources.map((s) => s.url).includes(this._lastChecked) &&
           this._shiftDown
         ) {

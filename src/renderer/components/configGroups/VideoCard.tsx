@@ -12,12 +12,12 @@ import SceneGrid from "../../../common/SceneGrid";
 
 interface VideoCardProps {
   scene: Scene;
-  otherScenes: Array<Scene | SceneGrid>;
+  otherScenes: Array<Scene | SceneGrid | undefined>;
   isPlaying: boolean;
   mainVideo: HTMLVideoElement;
-  mainClip: Clip;
-  mainClipValue: Array<number>;
-  otherVideos: Array<Array<HTMLVideoElement>>;
+  mainClip?: Clip;
+  mainClipValue?: Array<number>;
+  otherVideos: Array<Array<HTMLVideoElement | undefined>>;
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
   onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
 }
@@ -75,8 +75,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
             </React.Fragment>
           )}
         </Grid>
-        {this.props.otherVideos &&
-          this.props.otherVideos.map((otherVideoList, listIndex) => (
+        {this.props.otherVideos?.map((otherVideoList, listIndex) => (
             <React.Fragment key={listIndex}>
               {otherVideoList.map((otherVideo, index) => {
                 if (otherVideo == null) return <React.Fragment key={index} />;

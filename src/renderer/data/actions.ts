@@ -3658,14 +3658,14 @@ export function markOffline(getState: () => State, setState: Function) {
           window.ipc.setProgressBar(
             state.progressCurrent / state.progressTotal,
           );
-          setTimeout(offlineLoop, timeout);
+          window.setTimeout(offlineLoop, timeout);
         });
       } else {
         // Skip if removed from library during check
         state.progressCurrent = offset + 1;
         setState({ progressCurrent: state.progressCurrent });
         window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-        setTimeout(offlineLoop, 100);
+        window.setTimeout(offlineLoop, 100);
       }
     } else {
       const actionSource = actionableLibrary[offset];
@@ -3681,7 +3681,7 @@ export function markOffline(getState: () => State, setState: Function) {
         if (!exists) {
           actionSource.offline = true;
         }
-        setTimeout(offlineLoop, 10);
+        window.setTimeout(offlineLoop, 10);
       });
     }
   };
@@ -3713,7 +3713,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
       state.progressCurrent = offset + 1;
       setState({ progressCurrent: state.progressCurrent });
       window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-      setTimeout(detectBPMLoop, 100);
+      window.setTimeout(detectBPMLoop, 100);
     });
   };
 
@@ -3725,7 +3725,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
       state.progressCurrent = offset + 1;
       setState({ progressCurrent: state.progressCurrent });
       window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-      setTimeout(detectBPMLoop, 100);
+      window.setTimeout(detectBPMLoop, 100);
     };
 
     const detectBPM = (data: ArrayBuffer) => {
@@ -3742,7 +3742,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
               window.ipc.setProgressBar(
                 state.progressCurrent / state.progressTotal,
               );
-              setTimeout(detectBPMLoop, 100);
+              window.setTimeout(detectBPMLoop, 100);
             })
             .catch((e: any) => {
               bpmError(e);
@@ -3875,7 +3875,7 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
             window.ipc.setProgressBar(
               state.progressCurrent / state.progressTotal,
             );
-            setTimeout(videoMetadataLoop, 100);
+            window.setTimeout(videoMetadataLoop, 100);
           });
         };
         video.onerror = () => {
@@ -3885,7 +3885,7 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
           window.ipc.setProgressBar(
             state.progressCurrent / state.progressTotal,
           );
-          setTimeout(videoMetadataLoop, 100);
+          window.setTimeout(videoMetadataLoop, 100);
         };
         video.src = proxyVideo(librarySource.url);
       } else {
@@ -3986,7 +3986,7 @@ export function importTumblr(getState: () => State, setState: Function) {
         window.ipc.setProgressBar(nextOffset / state.progressTotal);
         // Loop until we run out of blogs
         if (nextOffset < state.progressTotal) {
-          setTimeout(tumblrImportLoop, 1500);
+          window.setTimeout(tumblrImportLoop, 1500);
         } else {
           window.ipc.setProgressBar(-1);
           setState({

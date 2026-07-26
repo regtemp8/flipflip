@@ -228,6 +228,9 @@ class AudioSourceList extends React.Component<
     );
   }
 
+  _shiftDown = false;
+  _lastChecked: string | undefined = undefined;
+
   componentDidMount() {
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
@@ -257,7 +260,6 @@ class AudioSourceList extends React.Component<
     );
   }
 
-  _shiftDown = false;
   onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = true;
   };
@@ -326,7 +328,6 @@ class AudioSourceList extends React.Component<
     }
   }
 
-  _lastChecked: string | undefined = undefined;
   onToggleSelect(e: MouseEvent) {
     const source = (e.currentTarget as HTMLInputElement).value;
     let newSelected = Array.from(this.props.selected);
@@ -334,6 +335,7 @@ class AudioSourceList extends React.Component<
       newSelected.splice(newSelected.indexOf(source), 1);
     } else {
       if (
+        this._lastChecked != null &&
         this.props.sources.map((s) => s.url).includes(this._lastChecked) &&
         this._shiftDown
       ) {

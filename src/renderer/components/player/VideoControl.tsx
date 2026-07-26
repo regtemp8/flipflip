@@ -255,7 +255,7 @@ class VideoControl extends React.Component<
 
   _interval: any = null;
   componentDidMount() {
-    this._interval = setInterval(() => {
+    this._interval = window.setInterval(() => {
       if (!this.props.video) return;
       if (!this.props.video.paused) {
         this.triggerUpdate();
@@ -301,7 +301,7 @@ class VideoControl extends React.Component<
   }
 
   componentWillUnmount() {
-    clearInterval(this._interval);
+    window.clearInterval(this._interval);
     if (this.props.useHotkeys) {
       if (this.props.player) {
         window.removeEventListener("keydown", this.onPlayerKeyDown);

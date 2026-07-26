@@ -36,17 +36,17 @@ export default class Panning extends React.Component<
     };
   }
 
-  _panTimeout: number = null;
+  _panTimeout?: number = undefined;
   _panOut = false;
+  _lastToggle = false;
+  _lastHorizRandom: number = 0;
+  _lastVertRandom: number = 0;
 
   render() {
     // TODO Fix with TF.scene
     return <this.PanningLayer>{this.props.children}</this.PanningLayer>;
   }
 
-  _lastToggle: any = null;
-  _lastHorizRandom: number = 0;
-  _lastVertRandom: number = 0;
   PanningLayer = (data: { children: React.ReactNode }) => {
     const sceneTiming = this.props.scene.panTF == TF.scene;
     if (this.props.togglePan != this._lastToggle) {
@@ -243,12 +243,13 @@ export default class Panning extends React.Component<
           },
         },
       );
-      window.clearTimeout(this._panTimeout);
+      if (this._panTimeout != null) {
+        window.clearTimeout(this._panTimeout);
+      }
       if (this._panOut) {
         this.props.panFunction();
         this._panTimeout = window.setTimeout(() => {
           this._panOut = false;
-          1;
         }, this.getDuration());
       } else {
         this._panTimeout = window.setTimeout(() => {
@@ -383,9 +384,6 @@ export default class Panning extends React.Component<
   }
 
   componentDidMount() {
-    this._panOut = false;
-    this._lastHorizRandom = 0;
-    this._lastVertRandom = 0;
     if (this.props.scene.panning && this.props.scene.panTF != TF.scene) {
       this.panLoop(true);
     }
@@ -396,7 +394,10 @@ export default class Panning extends React.Component<
       this.props.scene.panning &&
       this.props.scene.panTF != props.scene.panTF
     ) {
-      window.clearTimeout(this._panTimeout);
+      if (this._panTimeout != null) {
+        window.clearTimeout(this._panTimeout);
+        this._panTimeout = undefined;
+      }
       if (this.props.scene.panTF != TF.scene) {
         this.panLoop(true);
       }
@@ -414,12 +415,15 @@ export default class Panning extends React.Component<
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._panTimeout);
-    this._panTimeout = null;
-    this._panOut = null;
-    this._lastToggle = null;
-    this._lastHorizRandom = null;
-    this._lastVertRandom = null;
+    if (this._panTimeout != null) {
+      window.clearTimeout(this._panTimeout);
+      this._panTimeout = undefined;
+    }
+
+    this._panOut = false;
+    this._lastToggle = false;
+    this._lastHorizRandom = 0;
+    this._lastVertRandom = 0;
   }
 
   getDuration() {

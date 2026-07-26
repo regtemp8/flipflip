@@ -84,7 +84,11 @@ export default class CaptionProgram extends React.Component<
   }
 
   _abortController: AbortController = new AbortController();
-  _timeout: number = null;
+  _timeout?: number = undefined;
+  _sceneCommand?: Function = undefined;
+  _nextTimestamp?: number = undefined;
+  _lastTimestamp?: number = undefined;
+  _timestampTimeout?: number = undefined;
 
   render() {
     const countXPos = this.state.countX * this.props.scale;
@@ -238,14 +242,13 @@ export default class CaptionProgram extends React.Component<
     );
   }
 
-  _sceneCommand: Function = null;
   componentDidUpdate(props: any, state: any) {
     if (
       this.props.currentImage !== props.currentImage &&
       this._sceneCommand != null
     ) {
       const command = this._sceneCommand;
-      this._sceneCommand = null;
+      this._sceneCommand = undefined;
       command();
     }
     if (
@@ -293,17 +296,16 @@ export default class CaptionProgram extends React.Component<
     }
 
     this._abortController.abort();
-    if (this._timeout) {
+    if (this._timeout != null) {
       window.clearTimeout(this._timeout);
-      this._timeout = null;
+      this._timeout = undefined;
     }
-    this._sceneCommand = null;
-    this._timeStarted = null;
-    this._lastTimestamp = null;
-    this._nextTimestamp = null;
-    if (this._timestampTimeout) {
+    this._sceneCommand = undefined;
+    this._lastTimestamp = undefined;
+    this._nextTimestamp = undefined;
+    if (this._timestampTimeout != null) {
       window.clearTimeout(this._timestampTimeout);
-      this._timestampTimeout = null;
+      this._timestampTimeout = undefined;
     }
   }
 
@@ -872,7 +874,6 @@ export default class CaptionProgram extends React.Component<
               }
             }),
           });
-          this._timeStarted = new Date();
           this.timestampLoop();
           this.captionLoop();
         } else if (newTimestamps.size > 0 && containsTimestampAction) {
@@ -888,7 +889,6 @@ export default class CaptionProgram extends React.Component<
               }
             }),
           });
-          this._timeStarted = new Date();
           this.timestampLoop();
         } else if (containsAction) {
           this.setState({ program: newProgram });
@@ -904,11 +904,8 @@ export default class CaptionProgram extends React.Component<
     });
   }
 
-  _timeStarted: Date = null;
-  _nextTimestamp: number = null;
-  _lastTimestamp: number = null;
-  _timestampTimeout: number = null;
   timestampLoop() {
+    const timeStarted = new Date().getTime()
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
       let fns;
@@ -981,7 +978,7 @@ export default class CaptionProgram extends React.Component<
           this._nextTimestamp = this.state.timestamps[index];
         }
         this.setState({ timestampCounter: index });
-      } else if (passed > this._nextTimestamp) {
+      } else if (this._nextTimestamp != null && passed > this._nextTimestamp) {
         const index = doLoop(passed);
         if (index >= this.state.timestamps.length - 1) {
           this._nextTimestamp = 99999999;
@@ -993,12 +990,10 @@ export default class CaptionProgram extends React.Component<
         100,
       );
     } else {
-      if (this._nextTimestamp == null) {
-        this._nextTimestamp =
-          this.state.timestamps[this.state.timestampCounter];
-      }
-      const passed = Date.now() - this._timeStarted.getTime();
-      if (passed > this._nextTimestamp) {
+      const nextTimestamp = this._nextTimestamp ?? this.state.timestamps[this.state.timestampCounter]
+      this._nextTimestamp = nextTimestamp
+      const passed = Date.now() - timeStarted;
+      if (passed > nextTimestamp) {
         const index = doLoop(passed);
         if (index >= this.state.timestamps.length - 1) {
           return;
@@ -1092,7 +1087,9 @@ export default class CaptionProgram extends React.Component<
 
   wait(ms: number) {
     return (nextCommand: Function) => {
-      window.clearTimeout(this._timeout);
+      if (this._timeout != null) {
+        window.clearTimeout(this._timeout);
+      }
       this._timeout = window.setTimeout(nextCommand, ms);
     };
   }

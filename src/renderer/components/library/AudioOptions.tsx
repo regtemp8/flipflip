@@ -623,7 +623,7 @@ class AudioOptions extends React.Component<
       window.ipc.getAudioBPMMetadata(this.state.audio.url).then((bpm) => {
         if (bpm === -1) {
           this.setState({ loadingTag: false, errorTag: true });
-          setTimeout(() => {
+          window.setTimeout(() => {
             this.setState({ errorTag: false });
           }, 3000);
           return;
@@ -631,7 +631,7 @@ class AudioOptions extends React.Component<
 
         this.changeKey("bpm", bpm);
         this.setState({ loadingTag: false, successTag: true });
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.setState({ successTag: false });
         }, 3000);
       });
@@ -641,7 +641,7 @@ class AudioOptions extends React.Component<
   onDetectBPM() {
     const bpmError = () => {
       this.setState({ loadingBPM: false, errorBPM: true });
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.setState({ errorBPM: false });
       }, 3000);
     };
@@ -655,7 +655,7 @@ class AudioOptions extends React.Component<
             .then((tempo: number) => {
               this.changeKey("bpm", tempo.toFixed(2));
               this.setState({ loadingBPM: false, successBPM: true });
-              setTimeout(() => {
+              window.setTimeout(() => {
                 this.setState({ successBPM: false });
               }, 3000);
             })

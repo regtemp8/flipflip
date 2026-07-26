@@ -268,7 +268,7 @@ class AudioControl extends React.Component<
     );
   }
 
-  _timeout: number = null;
+  _timeout?: number = undefined;
   _queueNextTrack = false;
   componentDidMount() {
     if (this.state.playing) {
@@ -296,8 +296,9 @@ class AudioControl extends React.Component<
         this.props.audio.tickMode != TF.scene
       ) {
         this.tickLoop(true);
-      } else {
+      } else if (this._timeout != null) {
         window.clearTimeout(this._timeout);
+        this._timeout = undefined;
       }
     }
     if (
@@ -320,11 +321,13 @@ class AudioControl extends React.Component<
   componentWillUnmount() {
     if (this._timeout != null) {
       window.clearTimeout(this._timeout);
+      this._timeout = undefined;
     }
-    this._queueNextTrack = null;
+    this._queueNextTrack = false;
   }
 
   tickLoop(starting: boolean = false) {
+    this._timeout = undefined;
     if (!starting) {
       if (this._queueNextTrack) {
         this._queueNextTrack = false;
@@ -335,7 +338,7 @@ class AudioControl extends React.Component<
       }
     }
     if (this.props.audio.tick) {
-      let timeout: number = null;
+      let timeout: number | undefined = undefined;
       switch (this.props.audio.tickMode) {
         case TF.random:
           timeout =
@@ -374,7 +377,6 @@ class AudioControl extends React.Component<
         return;
       }
     }
-    this._timeout = null;
   }
 
   onChangePosition(e: Event, value: number | number[]) {

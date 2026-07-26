@@ -246,7 +246,7 @@ class AudioSourceListItem extends React.Component<
                   classes={
                     this.props.source.comment
                       ? { tooltip: classes.bigTooltip }
-                      : null
+                      : undefined
                   }
                   arrow={
                     !!this.props.source.comment ||

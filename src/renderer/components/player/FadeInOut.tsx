@@ -35,15 +35,15 @@ export default class FadeInOut extends React.Component<
     };
   }
 
-  _fadeTimeout: number = null;
+  _fadeTimeout?: number = undefined;
   _fadeOut = false;
+  _lastToggle = false;
 
   render() {
     // TODO Fix with TF.scene
     return <this.FadeInOutLayer>{this.props.children}</this.FadeInOutLayer>;
   }
 
-  _lastToggle: any = null;
   FadeInOutLayer = (data: { children: React.ReactNode }) => {
     const sceneTiming = this.props.scene.fadeIOTF == TF.scene;
     if (this.props.toggleFade != this._lastToggle) {
@@ -88,7 +88,9 @@ export default class FadeInOut extends React.Component<
           },
         },
       );
-      window.clearTimeout(this._fadeTimeout);
+      if (this._fadeTimeout != null) {
+        window.clearTimeout(this._fadeTimeout);
+      }
       if (this._fadeOut) {
         this.props.fadeFunction();
         this._fadeTimeout = window.setTimeout(() => {
@@ -200,7 +202,10 @@ export default class FadeInOut extends React.Component<
         this.props.scene.fadeIODelayTF != props.scene.fadeIODelayTF ||
         this.props.scene.fadeIOPulse != props.scene.fadeIOPulse
       ) {
-        window.clearTimeout(this._fadeTimeout);
+        if (this._fadeTimeout != null) {
+          window.clearTimeout(this._fadeTimeout);
+          this._fadeTimeout = undefined
+        }
         if (
           this.props.scene.fadeIOPulse
             ? this.props.scene.fadeIODelayTF != TF.scene
@@ -221,9 +226,12 @@ export default class FadeInOut extends React.Component<
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._fadeTimeout);
-    this._fadeTimeout = null;
-    this._fadeOut = null;
+    if (this._fadeTimeout != null) {
+      window.clearTimeout(this._fadeTimeout);
+      this._fadeTimeout = undefined;
+    }
+
+    this._fadeOut = false;
   }
 
   getDuration() {

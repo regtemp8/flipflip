@@ -1612,7 +1612,7 @@ class AudioLibrary extends React.Component<
     ) {
       console.error("File is not valid");
       this.setState({ loadingMetadata: false, error: true });
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.setState({ error: false });
       }, 3000);
       return;
@@ -1628,7 +1628,7 @@ class AudioLibrary extends React.Component<
     window.ipc.addAudioSource(url, id, this.props.config).then((newAudio) => {
       if (newAudio == null) {
         this.setState({ loadingMetadata: false, error: true });
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.setState({ error: false });
         }, 3000);
         return;

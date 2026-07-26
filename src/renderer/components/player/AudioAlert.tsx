@@ -94,16 +94,23 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     );
   }
 
+  _timeout?: number = undefined;
+
   show() {
     this.setState({ visible: true });
+    if (this._timeout != null) {
+      window.clearTimeout(this._timeout);
+      this._timeout = undefined
+    }
+
     this._timeout = window.setTimeout(this.hide.bind(this), 6000);
   }
 
   hide() {
     this.setState({ visible: false });
+    this._timeout = undefined;
   }
 
-  _timeout: number = null;
   componentDidMount() {
     if (this.props.audio) {
       this.show();
@@ -112,14 +119,15 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
 
   componentDidUpdate(props: any, state: any) {
     if (this.props.audio != props.audio) {
-      window.clearTimeout(this._timeout);
       this.show();
     }
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._timeout);
-    this._timeout = null;
+    if (this._timeout != null) {
+      window.clearTimeout(this._timeout);
+      this._timeout = undefined;
+    }
   }
 
   AudioAlertLayer = (data: { children: React.ReactNode }) => {

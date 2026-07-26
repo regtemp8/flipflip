@@ -10,18 +10,13 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  FormControl,
   FormControlLabel,
   IconButton,
   InputAdornment,
-  InputLabel,
   Link,
   List,
-  ListItemSecondaryAction,
-  ListItemText,
   Menu,
   MenuItem,
-  Select,
   Switch,
   TextField,
   Theme,
@@ -34,7 +29,7 @@ import withStyles from "@mui/styles/withStyles";
 
 import FolderIcon from "@mui/icons-material/Folder";
 
-import { arrayMove, getTimestamp } from "../../data/utils";
+import { arrayMove } from "../../data/utils";
 import { getSourceType, urlToPath } from "../../../common/utils";
 import { SDT, ST } from "../../../common/const";
 import Config from "../../../common/Config";
@@ -89,6 +84,11 @@ const styles = (theme: Theme) =>
     },
   });
 
+interface SourceOptions {
+  source: LibrarySource;
+  type: string;
+}
+
 interface SourceListProps {
   classes: any;
   config: Config;
@@ -121,8 +121,7 @@ interface SourceListState {
   weightMenu?: LibrarySource;
   blacklistSource?: string;
   editBlacklist?: string;
-  sourceOptionsType?: string;
-  sourceOptions?: LibrarySource;
+  sourceOptions?: SourceOptions;
   deleteDialog?: LibrarySource;
 }
 
@@ -330,15 +329,15 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
             </Button>
           </DialogActions>
         </Dialog>
-        {this.state.sourceOptionsType == ST.local && (
+        {this.state.sourceOptions?.type == ST.local && (
           <Dialog
-            open={this.state.sourceOptionsType == ST.local}
+            open={this.state.sourceOptions?.type == ST.local}
             onClose={this.onCloseSourceOptions.bind(this)}
             aria-describedby="local-options-description"
           >
             <DialogContent>
               <DialogContentText id="local-options-description">
-                Directory Options ({this.state.sourceOptions.url})
+                Directory Options ({this.state.sourceOptions?.source.url})
               </DialogContentText>
               <FormControlLabel
                 control={
@@ -349,7 +348,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                     }
                   >
                     <Switch
-                      checked={this.state.sourceOptions.dirOfSources}
+                      checked={this.state.sourceOptions?.source.dirOfSources}
                       onChange={this.onSourceBoolInput.bind(
                         this,
                         "dirOfSources",
@@ -362,15 +361,15 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
             </DialogContent>
           </Dialog>
         )}
-        {this.state.sourceOptionsType == ST.video && (
+        {this.state.sourceOptions?.type == ST.video && (
           <Dialog
-            open={this.state.sourceOptionsType == ST.video}
+            open={this.state.sourceOptions?.type == ST.video}
             onClose={this.onCloseSourceOptions.bind(this)}
             aria-describedby="video-options-description"
           >
             <DialogContent>
               <DialogContentText id="video-options-description">
-                Video Options ({this.state.sourceOptions.url})
+                Video Options ({this.state.sourceOptions?.source.url})
               </DialogContentText>
               <TextField
                 variant="standard"
@@ -379,9 +378,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                 placeholder="Paste URL Here"
                 margin="dense"
                 value={
-                  this.state.sourceOptions.subtitleFile == null
+                  this.state.sourceOptions?.source.subtitleFile == null
                     ? ""
-                    : this.state.sourceOptions.subtitleFile
+                    : this.state.sourceOptions?.source.subtitleFile
                 }
                 InputProps={{
                   endAdornment: (
@@ -430,11 +429,14 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     );
   }
 
+  _shiftDown = false;
+  _lastChecked?: string = undefined;
+
   componentDidMount() {
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
     this._shiftDown = false;
-    this._lastChecked = null;
+    this._lastChecked = undefined;
   }
 
   componentDidUpdate(props: any) {
@@ -450,12 +452,11 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   componentWillUnmount() {
     removeEventListener("keydown", this.onKeyDown);
     addEventListener("keyup", this.onKeyUp);
-    this._shiftDown = null;
-    this._lastChecked = null;
+    this._shiftDown = false;
+    this._lastChecked = undefined;
     this.savePosition();
   }
 
-  _shiftDown = false;
   onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = true;
   };
@@ -508,7 +509,6 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     }
   }
 
-  _lastChecked: string = null;
   onToggleSelect(e: MouseEvent) {
     const source = (e.currentTarget as HTMLInputElement).value;
     let newSelected = Array.from(this.props.selected);
@@ -516,6 +516,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
       newSelected.splice(newSelected.indexOf(source), 1);
     } else {
       if (
+        this._lastChecked != null &&
         this.props.sources.map((s) => s.url).includes(this._lastChecked) &&
         this._shiftDown
       ) {
@@ -565,6 +566,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   onToggleClip(s: LibrarySource, c: Clip) {
     this.props.onUpdateScene((scene) => {
       const source = scene.sources.find((ls) => ls.id == s.id);
+      if (source == null) {
+        return;
+      }
+
       if (!source.disabledClips) {
         source.disabledClips = [c.id];
       } else if (source.disabledClips.includes(c.id)) {
@@ -646,6 +651,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     } else if (this.props.onUpdateLibrary) {
       this.props.onUpdateLibrary((l) => {
         const editSource = l.find((s) => s.id == this.state.isEditing);
+        if (editSource == null) {
+          return;
+        }
+
         const sourceChanged = editSource.url != newURL;
         editSource.offline = sourceChanged ? false : editSource.offline;
         editSource.lastCheck = sourceChanged ? null : editSource.lastCheck;
@@ -752,13 +761,13 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   onCloseSourceOptions() {
-    this.setState({ sourceOptions: undefined, sourceOptionsType: undefined });
+    this.setState({ sourceOptions: undefined });
   }
 
   onSourceOptions(source: LibrarySource) {
+    const type = getSourceType(source.url);
     this.setState({
-      sourceOptions: source,
-      sourceOptionsType: getSourceType(source.url),
+      sourceOptions: { source, type },
     });
   }
 
@@ -782,19 +791,27 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   }
 
   changeKey(key: string, value: any) {
+    const { source, type } = this.state.sourceOptions!;
+    const sourceURL = source.url;
     if (this.props.onUpdateScene) {
       this.props.onUpdateScene((s) => {
-        const source = s.sources.find(
-          (s) => s.url == this.state.sourceOptions.url,
-        );
+        const source = s.sources.find((s) => s.url == sourceURL);
+        if (source == null) {
+          return;
+        }
+
         (source as any)[key] = value;
-        this.setState({ sourceOptions: source });
+        this.setState({ sourceOptions: { source, type } });
       });
     } else if (this.props.onUpdateLibrary) {
       this.props.onUpdateLibrary((l) => {
-        const source = l.find((s) => s.url == this.state.sourceOptions.url);
+        const source = l.find((s) => s.url == sourceURL);
+        if (source == null) {
+          return;
+        }
+
         (source as any)[key] = value;
-        this.setState({ sourceOptions: source });
+        this.setState({ sourceOptions: { source, type } });
       });
     }
   }
@@ -828,7 +845,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     ({ value }: { value: { index: number; style: any; data: Array<any> } }) => {
       const index = value.index;
       const source: LibrarySource = value.data[index];
-      const canClip = this.props.library.some((s) => s.url === source.url)
+      const canClip = this.props.library.some((s) => s.url === source.url);
       return (
         <SourceListItem
           key={source.id}

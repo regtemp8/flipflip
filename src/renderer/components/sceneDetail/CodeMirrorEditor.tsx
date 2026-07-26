@@ -471,7 +471,7 @@ export default class CodeMirrorEditor extends React.Component<
     }
   }
 
-  _sendUpdate: number = null;
+  _sendUpdateTimeout?: number = undefined;
   onBeforeChangeScript(editor: any, data: any, value: any) {
     if (this.state.scriptText != value) {
       this.onUpdateScript(value, editor, true);
@@ -491,8 +491,11 @@ export default class CodeMirrorEditor extends React.Component<
     } else {
       this.setState({ scriptText: scriptText });
     }
-    window.clearTimeout(this._sendUpdate);
-    this._sendUpdate = window.setTimeout(
+    if (this._sendUpdateTimeout != null) {
+      window.clearTimeout(this._sendUpdateTimeout);
+    }
+
+    this._sendUpdateTimeout = window.setTimeout(
       this.props.onUpdateScript.bind(this, scriptText, changed),
       500,
     );

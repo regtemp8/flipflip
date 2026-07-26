@@ -1843,7 +1843,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
   onCopySceneEffects() {
     navigator.clipboard.writeText(this.state.sceneEffects);
     this.setState({ confirmCopy: true });
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.setState({ confirmCopy: false });
     }, 1000);
   }

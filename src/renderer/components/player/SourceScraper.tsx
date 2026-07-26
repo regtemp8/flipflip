@@ -32,7 +32,7 @@ interface SourceScraperProps {
   firstImageLoaded(): void;
   finishedLoading(empty: boolean): void;
   setProgress(total: number, current: number, message: string[]): void;
-  setVideo(video: HTMLVideoElement): void;
+  setVideo(video?: HTMLVideoElement): void;
   setCount(sourceURL: string, count: number, countComplete: boolean): void;
   cache(i: HTMLImageElement | HTMLVideoElement): void;
   systemMessage(message: string): void;
@@ -67,23 +67,22 @@ export default class SourceScraper extends React.Component<
   }
 
   _isMounted = false;
-  _backForth: number = null;
   _sourceQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
+  }> = [];
   _promiseQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
+  }> = [];
   _nextPromiseQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
-  _nextContentLookupKey: string = null;
-  _sourceTimeoutID: number = null;
-  _promiseTimeoutID: number = null;
-  _nextSourceTimeoutID: number = null;
+  }> = [];
+  _nextContentLookupKey: string = '';
+  _sourceTimeoutID?: number = undefined;
+  _promiseTimeoutID?: number = undefined;
+  _nextSourceTimeoutID?: number = undefined;
   _totalSources: number = 0;
 
   render() {
@@ -422,12 +421,15 @@ export default class SourceScraper extends React.Component<
 
     if (this._sourceTimeoutID != null) {
       window.clearTimeout(this._sourceTimeoutID);
+      this._sourceTimeoutID = undefined
     }
     if (this._promiseTimeoutID != null) {
       window.clearTimeout(this._promiseTimeoutID);
+      this._promiseTimeoutID = undefined
     }
     if (this._nextSourceTimeoutID != null) {
       window.clearTimeout(this._nextSourceTimeoutID);
+      this._nextSourceTimeoutID = undefined
     }
     if (this.state.preload) {
       this.setState({ preload: false });
@@ -559,13 +561,11 @@ export default class SourceScraper extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._sourceQueue = null;
-    this._promiseQueue = null;
-    this._nextPromiseQueue = null;
+    this._sourceQueue = [];
+    this._promiseQueue = [];
+    this._nextPromiseQueue = [];
     content().delete(this.state.contentLookupKey);
     content().delete(this._nextContentLookupKey);
-    window.clearTimeout(this._backForth);
-    this._backForth = null;
   }
 }
 

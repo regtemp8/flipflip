@@ -237,7 +237,7 @@ interface PlayerBarsProps {
   isEmpty: boolean;
   isPlaying: boolean;
   mainVideo: HTMLVideoElement;
-  overlayVideos: Array<Array<HTMLVideoElement>>;
+  overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
   persistAudio: boolean;
   persistText: boolean;
   recentPictureGrid: boolean;
@@ -293,29 +293,28 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     };
   }
 
-  _interval: number = null;
-  _appBarTimeout: any = null;
-  _drawerTimeout: any = null;
-  _tagDrawerTimeout: any = null;
+  _appBarTimeout?: number = undefined;
+  _drawerTimeout?: number = undefined;
+  _tagDrawerTimeout?: number = undefined;
   _showVideoControls = false;
   _alwaysOnTop = false;
   _fullScreen = false;
   _showMenu = false;
-  _removeOnPlayPause: () => void = null;
-  _removeOnNavigateBack: () => void = null;
-  _removeOnToggleFullscreen: () => void = null;
-  _removeOnToggleAlwaysOnTop: () => void = null;
-  _removeOnToggleMenuBarDisplay: () => void = null;
-  _removeOnHistoryBack: () => void = null;
-  _removeOnHistoryForward: () => void = null;
-  _removeOnDelete: () => void = null;
-  _removeOnPrevSource: () => void = null;
-  _removeOnNextSource: () => void = null;
-  _removeOnBlacklistFile: () => void = null;
-  _removeOnDeletePath: () => void = null;
-  _removeOnGoToTagSource: () => void = null;
-  _removeOnGoToClipSource: () => void = null;
-  _removeOnShowRecentPictureGrid: () => void = null;
+  _removeOnPlayPause?: () => void = undefined;
+  _removeOnNavigateBack?: () => void = undefined;
+  _removeOnToggleFullscreen?: () => void = undefined;
+  _removeOnToggleAlwaysOnTop?: () => void = undefined;
+  _removeOnToggleMenuBarDisplay?: () => void = undefined;
+  _removeOnHistoryBack?: () => void = undefined;
+  _removeOnHistoryForward?: () => void = undefined;
+  _removeOnDelete?: () => void = undefined;
+  _removeOnPrevSource?: () => void = undefined;
+  _removeOnNextSource?: () => void = undefined;
+  _removeOnBlacklistFile?: () => void = undefined;
+  _removeOnDeletePath?: () => void = undefined;
+  _removeOnGoToTagSource?: () => void = undefined;
+  _removeOnGoToClipSource?: () => void = undefined;
+  _removeOnShowRecentPictureGrid?: () => void = undefined;
 
   render() {
     const classes = this.props.classes;
@@ -324,8 +323,8 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       this.props.historyOffset > -(this.props.historyPaths.length - 1);
     const canGoForward = this.props.historyOffset < 0;
     const tagNames = this.props.tags ? this.props.tags.map((t) => t.name) : [];
-    let clipValue = null;
-    let clipID: number = null;
+    let clipValue: number[] | undefined = undefined;
+    let clipID: number | undefined = undefined;
     let source = null;
     if (
       this.props.mainVideo &&
@@ -333,10 +332,12 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       this.props.mainVideo.hasAttribute("end")
     ) {
       clipValue = [
-        Number.parseFloat(this.props.mainVideo.getAttribute("start")),
-        Number.parseFloat(this.props.mainVideo.getAttribute("end")),
+        Number.parseFloat(this.props.mainVideo.getAttribute("start") ?? "NaN"),
+        Number.parseFloat(this.props.mainVideo.getAttribute("end") ?? "NaN"),
       ];
-      clipID = Number.parseInt(this.props.mainVideo.getAttribute("clip"));
+      clipID = Number.parseInt(
+        this.props.mainVideo.getAttribute("clip") ?? "NaN",
+      );
       const sourceURL = this.props.mainVideo.getAttribute("source");
       source = this.props.scene.sources.find((s) => s.url == sourceURL);
     }
@@ -495,32 +496,34 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                 <Typography variant="h4">Settings</Typography>
               </div>
 
-              {!this.props.scene.audioScene && this._showVideoControls && (
-                <Accordion TransitionProps={{ unmountOnExit: false }}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>Video Controls</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <VideoCard
-                      scene={this.props.scene}
-                      otherScenes={this.props.scene.overlays.map((o) =>
-                        this.getScene(o.sceneID),
-                      )}
-                      isPlaying={this.props.isPlaying}
-                      mainVideo={this.props.mainVideo}
-                      mainClip={
-                        source ? source.clips.find((c) => c.id == clipID) : null
-                      }
-                      mainClipValue={clipValue ? clipValue : null}
-                      otherVideos={this.props.overlayVideos}
-                      imagePlayerAdvanceHacks={
-                        this.props.imagePlayerAdvanceHacks
-                      }
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
-                    />
-                  </AccordionDetails>
-                </Accordion>
-              )}
+                {!this.props.scene.audioScene && this._showVideoControls && (
+                  <Accordion TransitionProps={{ unmountOnExit: false }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Video Controls</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <VideoCard
+                        scene={this.props.scene}
+                        otherScenes={this.props.scene.overlays.map((o) =>
+                          this.getScene(o.sceneID),
+                        )}
+                        isPlaying={this.props.isPlaying}
+                        mainVideo={this.props.mainVideo}
+                        mainClip={
+                          source
+                            ? source.clips.find((c) => c.id == clipID)
+                            : undefined
+                        }
+                        mainClipValue={clipValue}
+                        otherVideos={this.props.overlayVideos}
+                        imagePlayerAdvanceHacks={
+                          this.props.imagePlayerAdvanceHacks
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                )}
 
               {!this.props.scene.audioScene && !this.props.scene.gridScene && (
                 <React.Fragment>
@@ -785,7 +788,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                             ? source.clips.find((c) => c.id == clipID)
                             : null
                         }
-                        clipValue={clipValue ? clipValue : null}
+                        clipValue={clipValue}
                         useHotkeys
                         skip={this.props.scene.videoSkip}
                         onChangeVolume={() => {}}
@@ -898,14 +901,18 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   componentWillUnmount() {
-    clearInterval(this._interval);
-    this._interval = null;
-    clearTimeout(this._appBarTimeout);
-    clearTimeout(this._drawerTimeout);
-    clearTimeout(this._tagDrawerTimeout);
-    this._appBarTimeout = null;
-    this._drawerTimeout = null;
-    this._tagDrawerTimeout = null;
+    if (this._appBarTimeout != null) {
+      window.clearTimeout(this._appBarTimeout);
+      this._appBarTimeout = undefined;
+    }
+    if (this._drawerTimeout != null) {
+      window.clearTimeout(this._drawerTimeout);
+      this._drawerTimeout = undefined;
+    }
+    if (this._tagDrawerTimeout != null) {
+      window.clearTimeout(this._tagDrawerTimeout);
+      this._tagDrawerTimeout = undefined;
+    }
 
     if (this._removeOnPlayPause != null) {
       this._removeOnPlayPause();
@@ -1012,12 +1019,14 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     );
   };
 
-  getScene(id: number): Scene | SceneGrid {
-    if (id == null) return null;
+  getScene(id?: number): Scene | SceneGrid | undefined {
+    if (id == null) {
+      return undefined;
+    }
+
     if (id.toString().startsWith("999")) {
-      return this.props.sceneGrids.find(
-        (s) => s.id.toString() == id.toString().replace("999", ""),
-      );
+      const gridID = id.toString().replace("999", "");
+      return this.props.sceneGrids.find((s) => s.id.toString() == gridID);
     } else {
       return this.props.scenes.find((s) => s.id == id);
     }
@@ -1028,13 +1037,13 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   onMouseMove() {
-    clearTimeout(this._appBarTimeout);
+    window.clearTimeout(this._appBarTimeout);
     this.setState({
       appBarHover: true,
       drawerHover: true,
       tagDrawerHover: true,
     });
-    this._appBarTimeout = setTimeout(() => {
+    this._appBarTimeout = window.setTimeout(() => {
       this.setState({
         appBarHover: false,
         drawerHover: false,
@@ -1222,11 +1231,21 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       this.props.onRecentPictureGrid.bind(this),
     );
     window.ipc.onClosePlayerContextMenu(() => {
-      this._removeOnBlacklistFile();
-      this._removeOnDeletePath();
-      this._removeOnGoToTagSource();
-      this._removeOnGoToClipSource();
-      this._removeOnShowRecentPictureGrid();
+      if (this._removeOnBlacklistFile != null) {
+        this._removeOnBlacklistFile();
+      }
+      if (this._removeOnDeletePath != null) {
+        this._removeOnDeletePath();
+      }
+      if (this._removeOnGoToTagSource != null) {
+        this._removeOnGoToTagSource();
+      }
+      if (this._removeOnGoToClipSource != null) {
+        this._removeOnGoToClipSource();
+      }
+      if (this._removeOnShowRecentPictureGrid != null) {
+        this._removeOnShowRecentPictureGrid();
+      }
     });
 
     const doShowGotoTagSource = !this.props.allTags;

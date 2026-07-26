@@ -247,7 +247,7 @@ class AudioPlaylist extends React.Component<
                         disableInteractive
                         placement={a.comment ? "right" : "bottom"}
                         classes={
-                          a.comment ? { tooltip: classes.bigTooltip } : null
+                          a.comment ? { tooltip: classes.bigTooltip } : undefined
                         }
                         arrow={!!a.comment || (a.tags && a.tags.length > 0)}
                         title={

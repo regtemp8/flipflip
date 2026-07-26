@@ -78,7 +78,7 @@ interface GridPlayerProps {
   systemMessage(message: string): void;
   finishedLoading?(empty: boolean): void;
   setProgress?(total: number, current: number, message: string[]): void;
-  setVideo?(index: number, video: HTMLVideoElement): void;
+  setVideo?(index: number, video?: HTMLVideoElement): void;
 }
 
 interface GridPlayerState {

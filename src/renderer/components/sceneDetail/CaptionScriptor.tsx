@@ -1408,7 +1408,7 @@ class CaptionScriptor extends React.Component<
     window.ipc.getTextFromURL(script.url).then((data) => {
       if (data == null) {
         this.setState({ loadFromSceneError: true });
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.setState({ loadFromSceneError: false });
         }, 3000);
         return;

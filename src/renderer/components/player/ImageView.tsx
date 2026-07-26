@@ -29,7 +29,7 @@ interface ImageViewProps {
   className?: string;
   onLoaded?(): void;
   setSceneCopy?(children: React.ReactNode): void;
-  setVideo?(video: HTMLVideoElement): void;
+  setVideo?(video?: HTMLVideoElement): void;
 }
 
 export default class ImageView extends React.Component<ImageViewProps> {
@@ -37,16 +37,16 @@ export default class ImageView extends React.Component<ImageViewProps> {
     super(props);
   }
 
-  _parentHeight: number;
-  _parentWidth: number;
   readonly backgroundRef: React.RefObject<HTMLDivElement> = React.createRef();
   readonly contentRef: React.RefObject<HTMLDivElement> = React.createRef();
-  _image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement = null;
-  _scale: number = null;
-  _timeouts: Array<number>;
+
+  _parentHeight: number = 0;
+  _parentWidth: number = 0;
+  _image?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
+  _scale: number = 1;
+  _timeouts?: Array<number> = undefined;
 
   componentDidMount() {
-    this._timeouts = new Array<number>();
     this._applyImage();
   }
 
@@ -81,13 +81,18 @@ export default class ImageView extends React.Component<ImageViewProps> {
 
   componentWillUnmount() {
     this.clearTimeouts();
-    this._timeouts = null;
+    this._timeouts = undefined;
   }
 
   clearTimeouts() {
-    for (let timeout of this._timeouts) {
+    if(this._timeouts == null) {
+      return
+    }
+
+    for (const timeout of this._timeouts) {
       window.clearTimeout(timeout);
     }
+    this._timeouts = []
   }
 
   _applyImage(forceBG = false) {
@@ -565,7 +570,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
 
     if (!forceBG) {
       if (this.props.setVideo) {
-        this.props.setVideo(img instanceof HTMLVideoElement ? img : null);
+        this.props.setVideo(img instanceof HTMLVideoElement ? img : undefined);
       }
 
       this._image = img;
@@ -1005,15 +1010,16 @@ export default class ImageView extends React.Component<ImageViewProps> {
   }
 
   strobeImage() {
-    const el = this.contentRef.current;
-    const img = this._image;
-    const scale = this._scale;
-    const appendOriginal = () => {
+    const appendOriginal = (el: HTMLDivElement, img: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement) => {
       el.appendChild(img);
       if (img instanceof HTMLVideoElement && img.paused) {
         img.play();
       }
     };
+
+    const el = this.contentRef.current;
+    const img = this._image;
+    const scale = this._scale;
     if (this.props.gridCoordinates) {
       for (let element of document.getElementsByClassName(
         "copy-" +
@@ -1023,7 +1029,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       )) {
         if (el && img && img.src == this.props.image.src) {
           if (element == el) {
-            appendOriginal();
+            appendOriginal(el, img);
           } else {
             if (
               this.props.removeChild &&
@@ -1064,7 +1070,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         }
       }
     } else if (el && img && img.src == this.props.image.src) {
-      appendOriginal();
+      appendOriginal(el, img);
     }
   }
 }

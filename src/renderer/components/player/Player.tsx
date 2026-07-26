@@ -72,7 +72,7 @@ interface PlayerProps {
   onLoaded?(): void;
   setProgress?(total: number, current: number, message: string[]): void;
   setSceneCopy?(children: React.ReactNode): void;
-  setVideo?(video: HTMLVideoElement): void;
+  setVideo?(video?: HTMLVideoElement): void;
   onGenerate?(scene: Scene | SceneGrid, children?: boolean): void;
 }
 
@@ -92,7 +92,7 @@ interface PlayerState {
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
   imagePlayerDeleteHack: ChildCallbackHack;
   mainVideo?: HTMLVideoElement;
-  overlayVideos: Array<Array<HTMLVideoElement | null>>;
+  overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
   currentAudio?: Audio;
   timeToNextFrame?: number;
   recentPictureGrid: boolean;
@@ -132,12 +132,12 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         .fill(null)
         .map(() => [new ChildCallbackHack()]),
       imagePlayerDeleteHack: new ChildCallbackHack(),
-      overlayVideos: new Array<Array<HTMLVideoElement | null>>(
+      overlayVideos: new Array<Array<HTMLVideoElement | undefined>>(
         props.scene.overlays.length,
       )
-        .fill(null)
+        .fill(undefined)
         .map(() => {
-          return [null];
+          return [undefined];
         }),
       recentPictureGrid: false,
       persistAudio: false,
@@ -147,9 +147,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   }
 
   readonly idleTimerRef: React.RefObject<HTMLDivElement> = React.createRef();
-  _interval: number = null;
+  _interval?: number = undefined;
   _toggleStrobe = false;
-  _powerSaveID: number = null;
+  _powerSaveID?: number = undefined;
+  _currentTimestamp: number = 0;
 
   render() {
     const nextScene = this.getScene(
@@ -352,7 +353,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
 
     const captionScale = this.props.captionScale ? this.props.captionScale : 1;
 
-    let getCurrentTimestamp: any = undefined;
+    let getCurrentTimestamp: () => number | undefined = undefined;
     if (this.props.getCurrentTimestamp) {
       getCurrentTimestamp = this.props.getCurrentTimestamp;
     } else if (this.props.scene && this.props.scene.audioEnabled) {
@@ -604,7 +605,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               isPlaying={this.state.isPlaying}
               hasStarted={this.state.hasStarted}
               strobeLayer={
-                this.props.scene.strobe ? this.props.scene.strobeLayer : null
+                this.props.scene.strobe
+                  ? this.props.scene.strobeLayer
+                  : undefined
               }
               historyOffset={this.state.historyOffset}
               advanceHack={
@@ -666,7 +669,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   changed = true;
                 }
                 if (changed) {
-                  setTimeout(
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
@@ -719,13 +722,13 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   )
                     .fill(null)
                     .map(() => new ChildCallbackHack());
-                  setTimeout(
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
                   );
                 } else if (changed) {
-                  setTimeout(
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
@@ -769,7 +772,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                 );
               } else {
                 if (!this.state.areOverlaysLoaded[index]) {
-                  setTimeout(() => this.setOverlayLoaded(index), 200);
+                  window.setTimeout(() => this.setOverlayLoaded(index), 200);
                 }
                 return <div key={overlay.id} />;
               }
@@ -813,8 +816,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   }
 
   nextSceneLoop() {
-    if (this.props.scene.nextSceneID == 0) {
-      clearInterval(this._interval);
+    if (this.props.scene.nextSceneID == 0 && this._interval != null) {
+      window.clearInterval(this._interval);
+      this._interval = undefined;
     }
     if (
       !this.props.scene.scriptScene &&
@@ -954,13 +958,15 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   }
 
   componentWillUnmount() {
-    clearInterval(this._interval);
-    this._interval = null;
+    if (this._interval != null) {
+      window.clearInterval(this._interval);
+      this._interval = undefined;
+    }
 
     window.ipc.clearBrowserCaches();
-    if (this.props.preventSleep || this._powerSaveID != null) {
+    if (this._powerSaveID != null) {
       window.ipc.stopPowerSaveBlocker(this._powerSaveID);
-      this._powerSaveID = null;
+      this._powerSaveID = undefined;
     }
   }
 
@@ -993,7 +999,6 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
 
   nop() {}
 
-  _currentTimestamp: number = null;
   onPlaying(position: number) {
     this._currentTimestamp = position;
   }
@@ -1047,7 +1052,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     this.setState({ timeToNextFrame: ttnf });
   }
 
-  setMainVideo(video: HTMLVideoElement) {
+  setMainVideo(video?: HTMLVideoElement) {
     this.setState({ mainVideo: video });
   }
 
@@ -1069,10 +1074,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     this.setState({ overlayVideos: newOV });
   }
 
-  setOverlayVideo(index: number, video: HTMLVideoElement) {
+  setOverlayVideo(index: number, video?: HTMLVideoElement) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     if (newOV[index][0] != video) {
       newOV[index][0] = video;
@@ -1080,13 +1085,17 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
   }
 
-  setGridOverlayVideo(oIndex: number, gIndex: number, video: HTMLVideoElement) {
+  setGridOverlayVideo(
+    oIndex: number,
+    gIndex: number,
+    video?: HTMLVideoElement,
+  ) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= oIndex) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     while (newOV[oIndex].length <= gIndex) {
-      newOV[oIndex].push(null);
+      newOV[oIndex].push(undefined);
     }
     if (newOV[oIndex][gIndex] != video) {
       newOV[oIndex][gIndex] = video;
@@ -1115,7 +1124,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         hasStarted: this.props.hasStarted ?? true,
         startTime: this.state.startTime ? this.state.startTime : new Date(),
       });
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (this.props.scene.gridScene) {
           for (const r of this.state.imagePlayerAdvanceHacks) {
             for (const hack of r) {
