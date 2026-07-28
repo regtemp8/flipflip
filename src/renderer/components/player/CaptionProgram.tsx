@@ -905,7 +905,7 @@ export default class CaptionProgram extends React.Component<
   }
 
   timestampLoop() {
-    const timeStarted = new Date().getTime()
+    const timeStarted = new Date().getTime();
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
       let fns;
@@ -990,8 +990,10 @@ export default class CaptionProgram extends React.Component<
         100,
       );
     } else {
-      const nextTimestamp = this._nextTimestamp ?? this.state.timestamps[this.state.timestampCounter]
-      this._nextTimestamp = nextTimestamp
+      const nextTimestamp =
+        this._nextTimestamp ??
+        this.state.timestamps[this.state.timestampCounter];
+      this._nextTimestamp = nextTimestamp;
       const passed = Date.now() - timeStarted;
       if (passed > nextTimestamp) {
         const index = doLoop(passed);
@@ -1140,38 +1142,41 @@ export default class CaptionProgram extends React.Component<
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
-        this.el.current.style.color = this.props.captionScript.caption.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.caption.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.caption.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "bottom";
-        const yPos = (14 + this.state.captionY) * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.captionX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        //this.el.current.style.transition = 'opacity 0.5s ease-in-out';
-        if (this.props.captionScript.caption.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.caption.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.caption.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.caption.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.caption.fontSize * this.props.scale +
+            "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.caption.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "bottom";
+          const yPos = (14 + this.state.captionY) * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.captionX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          //this.el.current.style.transition = 'opacity 0.5s ease-in-out';
+          if (this.props.captionScript.caption.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.caption.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.caption.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         if (this.state.captionDelayTF == TF.scene && !timestamp) {
           showText(function () {
@@ -1225,39 +1230,42 @@ export default class CaptionProgram extends React.Component<
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
-        this.el.current.style.color = this.props.captionScript.captionBig.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.captionBig.fontSize * this.props.scale +
-          "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.captionBig.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.bigCaptionY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.bigCaptionX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.captionBig.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.captionBig.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.captionBig.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color =
+            this.props.captionScript.captionBig.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.captionBig.fontSize * this.props.scale +
+            "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.captionBig.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.bigCaptionY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.bigCaptionX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.captionBig.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.captionBig.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.captionBig.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         if (this.state.captionDelayTF == TF.scene && !timestamp) {
           showText(function () {
@@ -1352,38 +1360,40 @@ export default class CaptionProgram extends React.Component<
           fns.push(() => lastWait(nextCommand));
         }
 
-        this.el.current.style.color = this.props.captionScript.blink.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.blink.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.blink.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.blinkY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.blinkX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.blink.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.blink.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.blink.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.blink.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.blink.fontSize * this.props.scale + "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.blink.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.blinkY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.blinkX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.blink.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.blink.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.blink.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         fns[0]();
       };
@@ -1453,13 +1463,13 @@ export default class CaptionProgram extends React.Component<
                   countCurrent: val - offset,
                   countColor: this.state.countColors.get(val),
                 });
-                if (this.state.countColorMatch) {
+                if (this.state.countColorMatch && this.el.current != null) {
                   this.el.current.style.color = this.state.countColors.get(val);
                 }
               } else {
                 this.setState({ countCurrent: val - offset });
               }
-            } else if (this.state.countColorMatch) {
+            } else if (this.state.countColorMatch && this.el.current != null) {
               this.el.current.style.color = this.state.countColors.get(val);
             }
             const showText = this.showText(
@@ -1512,38 +1522,40 @@ export default class CaptionProgram extends React.Component<
           fns.push(() => lastWait(nextCommand));
         }
 
-        this.el.current.style.color = this.props.captionScript.count.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.count.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.count.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.countY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.countX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.count.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.count.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.count.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.count.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.count.fontSize * this.props.scale + "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.count.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.countY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.countX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.count.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.count.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.count.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         fns[0]();
       };
