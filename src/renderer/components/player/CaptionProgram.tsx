@@ -1482,19 +1482,21 @@ export default class CaptionProgram extends React.Component<
               this.props.timeToNextFrame,
             );
             if (this.state.showCountProgress) {
-              if (this.state.countColors.has(val)) {
+              const countColor = this.state.countColors.get(val);
+              if (countColor != null) {
                 this.setState({
                   countCurrent: val - offset,
-                  countColor: this.state.countColors.get(val),
+                  countColor,
                 });
                 if (this.state.countColorMatch && this.el.current != null) {
-                  this.el.current.style.color = this.state.countColors.get(val);
+                  this.el.current.style.color = countColor;
                 }
               } else {
                 this.setState({ countCurrent: val - offset });
               }
             } else if (this.state.countColorMatch && this.el.current != null) {
-              this.el.current.style.color = this.state.countColors.get(val);
+              this.el.current.style.color =
+                this.state.countColors.get(val) ?? "unset";
             }
             const showText = this.showText(
               val.toString(),
