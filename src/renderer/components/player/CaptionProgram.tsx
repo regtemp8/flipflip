@@ -362,11 +362,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(this.advance());
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(this.advance());
-              } else {
-                newTimestamps.set(timestamp, [this.advance()]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(this.advance());
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "count":
@@ -409,11 +411,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(this.count(start, end));
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(this.count(start, end, true));
-              } else {
-                newTimestamps.set(timestamp, [this.count(start, end, true)]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(this.count(start, end, true));
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "blink":
@@ -455,15 +459,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push((this as any)[command](value));
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps
-                  .get(timestamp)
-                  .push((this as any)[command](value, true));
-              } else {
-                newTimestamps.set(timestamp, [
-                  (this as any)[command](value, true),
-                ]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push((this as any)[command](value, true));
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "storephrase":
@@ -654,11 +656,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(fn);
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkDuration":
@@ -697,10 +701,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](numbers);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkWaveRate":
@@ -752,10 +760,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](ms);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkTF":
@@ -784,10 +796,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](tf);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setShowCountProgress":
@@ -812,10 +828,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](value == "true" || value == "t");
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setCountProgressColor":
@@ -841,10 +861,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](args);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           default:
