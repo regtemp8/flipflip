@@ -154,19 +154,25 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
           <ScriptOptions
             script={this.state.sourceOptions}
             onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onFinishEdit={this.onFinishSourceOptions.bind(
+              this,
+              this.state.sourceOptions,
+              this.state.sourceOptionsPlaylist,
+            )}
           />
         )}
       </Grid>
     );
   }
 
-  onFinishSourceOptions(newScript: CaptionScript) {
+  onFinishSourceOptions(
+    sourceOptions: CaptionScript,
+    sourceOptionsPlaylist: number,
+    newScript: CaptionScript,
+  ) {
     this.props.onUpdateScene(this.props.scene, (s) => {
-      const playlist = s.scriptPlaylists[this.state.sourceOptionsPlaylist];
-      const editSource = playlist.scripts.find(
-        (s) => s.id == this.state.sourceOptions?.id,
-      );
+      const playlist = s.scriptPlaylists[sourceOptionsPlaylist];
+      const editSource = playlist.scripts.find((s) => s.id == sourceOptions.id);
       if (editSource == null) {
         return;
       }

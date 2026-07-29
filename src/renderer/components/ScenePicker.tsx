@@ -1726,7 +1726,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
             <Tooltip disableInteractive title="Delete Selected Scenes">
               <Fab
                 className={classes.deleteButton}
-                onClick={this.onFinishDelete.bind(this)}
+                onClick={this.onFinishDelete.bind(
+                  this,
+                  this.state.deleteScenes,
+                )}
                 size="large"
               >
                 <DeleteIcon className={classes.icon} />
@@ -2089,8 +2092,8 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     this.setState({ deleteScenes: undefined });
   }
 
-  onFinishDelete() {
-    this.props.onDeleteScenes(this.state.deleteScenes);
+  onFinishDelete(deleteScenes: number[]) {
+    this.props.onDeleteScenes(deleteScenes);
     this.setState({ deleteScenes: undefined });
   }
 
@@ -2104,9 +2107,9 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     this.setState({ deleteScenes: newDeleteScenes });
   }
 
-  onFinishImportScene() {
-    if (this.state.importFile.startsWith("http")) {
-      window.ipc.getTextFromURL(this.state.importFile).then((text) => {
+  onFinishImportScene(importFile: string, importSources: boolean) {
+    if (importFile.startsWith("http")) {
+      window.ipc.getTextFromURL(importFile).then((text) => {
         if (text == null) {
           this.props.systemMessage("Error accessing URL");
           return;
@@ -2114,15 +2117,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
         try {
           const json = JSON.parse(text);
-          this.props.onImportScene(json, this.state.importSources);
+          this.props.onImportScene(json, importSources);
           this.onCloseDialog();
         } catch {
           this.props.systemMessage("This is not a valid JSON file");
         }
       });
     } else {
-      window.ipc.readTextFile(this.state.importFile).then((text) => {
-        this.props.onImportScene(JSON.parse(text), this.state.importSources);
+      window.ipc.readTextFile(importFile).then((text) => {
+        this.props.onImportScene(JSON.parse(text), importSources);
         this.onCloseDialog();
       });
     }

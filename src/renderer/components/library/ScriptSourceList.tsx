@@ -198,7 +198,13 @@ class ScriptSourceList extends React.Component<
               >
                 Cancel
               </Button>
-              <Button onClick={this.onFinishDelete.bind(this)} color="primary">
+              <Button
+                onClick={this.onFinishDelete.bind(
+                  this,
+                  this.state.deleteDialog,
+                )}
+                color="primary"
+              >
                 Delete
               </Button>
             </DialogActions>
@@ -208,7 +214,10 @@ class ScriptSourceList extends React.Component<
           <ScriptOptions
             script={this.state.sourceOptions}
             onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onFinishEdit={this.onFinishSourceOptions.bind(
+              this,
+              this.state.sourceOptions,
+            )}
           />
         )}
         {this.state.beginPlay != null && (
@@ -242,7 +251,11 @@ class ScriptSourceList extends React.Component<
                   this.state.playWithScene == null ||
                   this.state.playWithScene == 0
                 }
-                onClick={this.onFinishPlay.bind(this)}
+                onClick={this.onFinishPlay.bind(
+                  this,
+                  this.state.beginPlay,
+                  this.state.playWithScene,
+                )}
                 color="primary"
               >
                 Play
@@ -310,9 +323,12 @@ class ScriptSourceList extends React.Component<
     this.setState({ sourceOptions: undefined });
   }
 
-  onFinishSourceOptions(newScript: CaptionScript) {
+  onFinishSourceOptions(
+    sourceOptions: CaptionScript,
+    newScript: CaptionScript,
+  ) {
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceOptions.id);
+      let editSource = a.find((a) => a.id == sourceOptions.id);
       Object.assign(editSource, newScript);
     });
     this.props.onUpdateScript(newScript);
@@ -327,9 +343,9 @@ class ScriptSourceList extends React.Component<
     this.setState({ deleteDialog: undefined });
   }
 
-  onFinishDelete() {
-    window.ipc.finishDelete(this.state.deleteDialog.url).then(() => {
-      this.onRemove(this.state.deleteDialog);
+  onFinishDelete(toDelete: CaptionScript) {
+    window.ipc.finishDelete(toDelete.url).then(() => {
+      this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
   }
@@ -422,14 +438,10 @@ class ScriptSourceList extends React.Component<
     this.setState({ beginPlay: undefined, playWithScene: undefined });
   }
 
-  onFinishPlay() {
+  onFinishPlay(beginPlay: string, playWithScene: number) {
     this.props.savePosition();
     try {
-      this.props.onPlay(
-        this.state.beginPlay,
-        this.state.playWithScene,
-        this.props.sources,
-      );
+      this.props.onPlay(beginPlay, playWithScene, this.props.sources);
     } catch {
       this.props.systemMessage(
         "The source " + this.state.beginPlay.url + " isn't in your Library",

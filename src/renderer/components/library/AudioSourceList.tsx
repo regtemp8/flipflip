@@ -201,7 +201,13 @@ class AudioSourceList extends React.Component<
               >
                 Cancel
               </Button>
-              <Button onClick={this.onFinishDelete.bind(this)} color="primary">
+              <Button
+                onClick={this.onFinishDelete.bind(
+                  this,
+                  this.state.deleteDialog,
+                )}
+                color="primary"
+              >
                 Delete
               </Button>
             </DialogActions>
@@ -211,7 +217,10 @@ class AudioSourceList extends React.Component<
           <AudioOptions
             audio={this.state.sourceOptions}
             onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onFinishEdit={this.onFinishSourceOptions.bind(
+              this,
+              this.state.sourceOptions,
+            )}
           />
         )}
         {this.state.sourceEdit != null && (
@@ -221,7 +230,10 @@ class AudioSourceList extends React.Component<
             title="Edit song info"
             allowSuggestion
             onCancel={this.onCloseSourceEditDialog.bind(this)}
-            onFinishEdit={this.onFinishSourceEdit.bind(this)}
+            onFinishEdit={this.onFinishSourceEdit.bind(
+              this,
+              this.state.sourceEdit,
+            )}
           />
         )}
       </React.Fragment>
@@ -281,9 +293,9 @@ class AudioSourceList extends React.Component<
     this.setState({ deleteDialog: undefined });
   }
 
-  onFinishDelete() {
-    window.ipc.finishDelete(this.state.deleteDialog.url).then(() => {
-      this.onRemove(this.state.deleteDialog);
+  onFinishDelete(toDelete: Audio) {
+    window.ipc.finishDelete(toDelete.url).then(() => {
+      this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
   }
@@ -382,17 +394,17 @@ class AudioSourceList extends React.Component<
     this.setState({ sourceOptions: undefined });
   }
 
-  onFinishSourceEdit(newAudio: Audio) {
+  onFinishSourceEdit(sourceEdit: Audio, newAudio: Audio) {
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceEdit.id);
+      let editSource = a.find((a) => a.id == sourceEdit.id);
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceEditDialog();
   }
 
-  onFinishSourceOptions(newAudio: Audio) {
+  onFinishSourceOptions(sourceOptions: Audio, newAudio: Audio) {
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceOptions.id);
+      let editSource = a.find((a) => a.id == sourceOptions.id);
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceOptions();

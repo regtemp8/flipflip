@@ -825,7 +825,11 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
               Cancel
             </Button>
             <Button
-              onClick={this.onFinishBlacklistFile.bind(this)}
+              onClick={this.onFinishBlacklistFile.bind(
+                this,
+                this.state.blacklistSource,
+                this.state.blacklistFile,
+              )}
               color="primary"
             >
               Yes
@@ -860,7 +864,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
               Cancel
             </Button>
             <Button
-              onClick={this.onFinishDeletePath.bind(this)}
+              onClick={this.onFinishDeletePath.bind(
+                this,
+                this.state.deletePath,
+              )}
               color="primary"
             >
               Yes
@@ -1072,11 +1079,8 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     }
   }
 
-  onFinishBlacklistFile() {
-    this.props.blacklistFile(
-      this.state.blacklistSource,
-      this.state.blacklistFile,
-    );
+  onFinishBlacklistFile(blacklistSource: string, blacklistFile: string) {
+    this.props.blacklistFile(blacklistSource, blacklistFile);
     this.onCloseDialog();
   }
 
@@ -1111,8 +1115,8 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     });
   }
 
-  onFinishDeletePath() {
-    this.doDelete(this.state.deletePath);
+  onFinishDeletePath(deletePath: string) {
+    this.doDelete(deletePath);
   }
 
   toggleFull() {

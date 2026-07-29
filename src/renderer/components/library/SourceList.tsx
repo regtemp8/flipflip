@@ -120,7 +120,7 @@ interface SourceListState {
   clipMenu?: LibrarySource;
   weightMenu?: LibrarySource;
   blacklistSource?: string;
-  editBlacklist?: string;
+  editBlacklist: string;
   sourceOptions?: SourceOptions;
   deleteDialog?: LibrarySource;
 }
@@ -131,6 +131,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
 
     this.state = {
       isEditing: -1,
+      editBlacklist: "",
     };
   }
 
@@ -291,7 +292,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               <Button onClick={this.onCloseClean.bind(this)} color="secondary">
                 Cancel
               </Button>
-              <Button onClick={this.onFinishClean.bind(this)} color="primary">
+              <Button
+                onClick={this.onFinishClean.bind(this, this.state.cachePath)}
+                color="primary"
+              >
                 OK
               </Button>
             </DialogActions>
@@ -324,7 +328,14 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
             >
               Cancel
             </Button>
-            <Button onClick={this.onFinishBlacklist.bind(this)} color="primary">
+            <Button
+              onClick={this.onFinishBlacklist.bind(
+                this,
+                this.state.blacklistSource,
+                this.state.editBlacklist,
+              )}
+              color="primary"
+            >
               Save
             </Button>
           </DialogActions>
@@ -419,7 +430,13 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               >
                 Cancel
               </Button>
-              <Button onClick={this.onFinishDelete.bind(this)} color="primary">
+              <Button
+                onClick={this.onFinishDelete.bind(
+                  this,
+                  this.state.deleteDialog,
+                )}
+                color="primary"
+              >
                 Delete
               </Button>
             </DialogActions>
@@ -482,9 +499,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     this.setState({ deleteDialog: undefined });
   }
 
-  onFinishDelete() {
-    window.ipc.deleteSource(this.state.deleteDialog.url).then(() => {
-      this.onRemove(this.state.deleteDialog);
+  onFinishDelete(toDelete: LibrarySource) {
+    window.ipc.deleteSource(toDelete.url).then(() => {
+      this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
   }
@@ -700,8 +717,8 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
       });
   }
 
-  onFinishClean() {
-    window.ipc.cleanCache(this.state.cachePath).then(() => {
+  onFinishClean(cachePath: string) {
+    window.ipc.cleanCache(cachePath).then(() => {
       this.onCloseClean();
     });
   }
@@ -739,11 +756,8 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     this.setState({ blacklistSource: undefined, editBlacklist: undefined });
   }
 
-  onFinishBlacklist() {
-    this.props.onEditBlacklist(
-      this.state.blacklistSource,
-      this.state.editBlacklist,
-    );
+  onFinishBlacklist(blacklistSource: string, editBlacklist: string) {
+    this.props.onEditBlacklist(blacklistSource, editBlacklist);
     this.onCloseBlacklist();
   }
 
