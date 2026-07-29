@@ -204,7 +204,7 @@ export default class FadeInOut extends React.Component<
       ) {
         if (this._fadeTimeout != null) {
           window.clearTimeout(this._fadeTimeout);
-          this._fadeTimeout = undefined
+          this._fadeTimeout = undefined;
         }
         if (
           this.props.scene.fadeIOPulse

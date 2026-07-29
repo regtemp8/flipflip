@@ -79,7 +79,7 @@ export default class SourceScraper extends React.Component<
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
   }> = [];
-  _nextContentLookupKey: string = '';
+  _nextContentLookupKey: string = "";
   _sourceTimeoutID?: number = undefined;
   _promiseTimeoutID?: number = undefined;
   _nextSourceTimeoutID?: number = undefined;
@@ -421,15 +421,15 @@ export default class SourceScraper extends React.Component<
 
     if (this._sourceTimeoutID != null) {
       window.clearTimeout(this._sourceTimeoutID);
-      this._sourceTimeoutID = undefined
+      this._sourceTimeoutID = undefined;
     }
     if (this._promiseTimeoutID != null) {
       window.clearTimeout(this._promiseTimeoutID);
-      this._promiseTimeoutID = undefined
+      this._promiseTimeoutID = undefined;
     }
     if (this._nextSourceTimeoutID != null) {
       window.clearTimeout(this._nextSourceTimeoutID);
-      this._nextSourceTimeoutID = undefined
+      this._nextSourceTimeoutID = undefined;
     }
     if (this.state.preload) {
       this.setState({ preload: false });

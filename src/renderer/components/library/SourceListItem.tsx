@@ -151,7 +151,7 @@ interface SourceListItemProps {
   style: any;
   tutorial: string;
   useWeights?: boolean;
-  canClip: boolean
+  canClip: boolean;
   onClean(source: LibrarySource): void;
   onClearBlacklist(sourceURL: string): void;
   onClip(source: LibrarySource, displaySources: Array<LibrarySource>): void;

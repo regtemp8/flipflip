@@ -76,81 +76,75 @@ export default class VideoCard extends React.Component<VideoCardProps> {
           )}
         </Grid>
         {this.props.otherVideos?.map((otherVideoList, listIndex) => (
-            <React.Fragment key={listIndex}>
-              {otherVideoList.map((otherVideo, index) => {
-                if (otherVideo == null) return <React.Fragment key={index} />;
-                if (this.props.otherScenes[listIndex] == null)
-                  return <React.Fragment key={index} />;
-                const sourceURL = otherVideo.getAttribute("source") ?? "";
-                let otherVideoTitle;
-                const sourceType = getSourceType(sourceURL);
-                if (sourceType == ST.video) {
-                  if (sourceURL.startsWith("http")) {
-                    otherVideoTitle = sourceURL.substring(
-                      sourceURL.lastIndexOf("/") + 1,
-                    );
-                  } else {
-                    otherVideoTitle = sourceURL.substring(
-                      sourceURL.lastIndexOf("\\") + 1,
-                    );
-                  }
+          <React.Fragment key={listIndex}>
+            {otherVideoList.map((otherVideo, index) => {
+              if (otherVideo == null) return <React.Fragment key={index} />;
+              if (this.props.otherScenes[listIndex] == null)
+                return <React.Fragment key={index} />;
+              const sourceURL = otherVideo.getAttribute("source") ?? "";
+              let otherVideoTitle;
+              const sourceType = getSourceType(sourceURL);
+              if (sourceType == ST.video) {
+                if (sourceURL.startsWith("http")) {
+                  otherVideoTitle = sourceURL.substring(
+                    sourceURL.lastIndexOf("/") + 1,
+                  );
                 } else {
-                  otherVideoTitle = unproxy(otherVideo.src);
-                  otherVideoTitle = otherVideoTitle.substring(
-                    otherVideoTitle.lastIndexOf("/") + 1,
+                  otherVideoTitle = sourceURL.substring(
+                    sourceURL.lastIndexOf("\\") + 1,
                   );
                 }
-                let clipValue = null;
-                let clipID = -1;
-                let source = null;
-                const start = otherVideo.getAttribute("start");
-                const end = otherVideo.getAttribute("end");
-                if (start && end) {
-                  clipValue = [
-                    Number.parseFloat(start),
-                    Number.parseFloat(end),
-                  ];
-                  clipID = Number.parseInt(
-                    otherVideo.getAttribute("clip") ?? "-1",
-                  );
-                  if (this.props.otherScenes[listIndex] instanceof Scene) {
-                    source = (
-                      this.props.otherScenes[listIndex] as Scene
-                    ).sources.find((s) => s.url == sourceURL);
-                  }
-                }
-                return (
-                  <Grid item xs={12} key={index}>
-                    <Typography>
-                      {this.props.otherScenes[listIndex].name} Video:
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ whiteSpace: "normal" }}
-                    >
-                      {otherVideoTitle}
-                    </Typography>
-                    <VideoControl
-                      video={otherVideo}
-                      clip={
-                        source ? source.clips.find((c) => c.id == clipID) : null
-                      }
-                      clipValue={clipValue}
-                      player
-                      nextTrack={() => {
-                        this.props.imagePlayerAdvanceHacks[listIndex + 1][
-                          index
-                        ].fire();
-                      }}
-                      onChangeSpeed={this.nop}
-                      onChangeVolume={this.nop}
-                      skip={this.props.scene.videoSkip}
-                    />
-                  </Grid>
+              } else {
+                otherVideoTitle = unproxy(otherVideo.src);
+                otherVideoTitle = otherVideoTitle.substring(
+                  otherVideoTitle.lastIndexOf("/") + 1,
                 );
-              })}
-            </React.Fragment>
-          ))}
+              }
+              let clipValue = null;
+              let clipID = -1;
+              let source = null;
+              const start = otherVideo.getAttribute("start");
+              const end = otherVideo.getAttribute("end");
+              if (start && end) {
+                clipValue = [Number.parseFloat(start), Number.parseFloat(end)];
+                clipID = Number.parseInt(
+                  otherVideo.getAttribute("clip") ?? "-1",
+                );
+                if (this.props.otherScenes[listIndex] instanceof Scene) {
+                  source = (
+                    this.props.otherScenes[listIndex] as Scene
+                  ).sources.find((s) => s.url == sourceURL);
+                }
+              }
+              return (
+                <Grid item xs={12} key={index}>
+                  <Typography>
+                    {this.props.otherScenes[listIndex].name} Video:
+                  </Typography>
+                  <Typography variant="body2" style={{ whiteSpace: "normal" }}>
+                    {otherVideoTitle}
+                  </Typography>
+                  <VideoControl
+                    video={otherVideo}
+                    clip={
+                      source ? source.clips.find((c) => c.id == clipID) : null
+                    }
+                    clipValue={clipValue}
+                    player
+                    nextTrack={() => {
+                      this.props.imagePlayerAdvanceHacks[listIndex + 1][
+                        index
+                      ].fire();
+                    }}
+                    onChangeSpeed={this.nop}
+                    onChangeVolume={this.nop}
+                    skip={this.props.scene.videoSkip}
+                  />
+                </Grid>
+              );
+            })}
+          </React.Fragment>
+        ))}
       </Grid>
     );
   }

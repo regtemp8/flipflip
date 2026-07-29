@@ -1399,8 +1399,8 @@ class CaptionScriptor extends React.Component<
     const sceneScript = this.state.sceneScripts?.find(
       (s) => s.url == this.state.selectScript,
     );
-    if(sceneScript ==null) {
-      return
+    if (sceneScript == null) {
+      return;
     }
 
     const script = JSON.parse(JSON.stringify(sceneScript));

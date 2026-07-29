@@ -100,7 +100,7 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     this.setState({ visible: true });
     if (this._timeout != null) {
       window.clearTimeout(this._timeout);
-      this._timeout = undefined
+      this._timeout = undefined;
     }
 
     this._timeout = window.setTimeout(this.hide.bind(this), 6000);

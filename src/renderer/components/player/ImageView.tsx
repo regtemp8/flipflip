@@ -85,14 +85,14 @@ export default class ImageView extends React.Component<ImageViewProps> {
   }
 
   clearTimeouts() {
-    if(this._timeouts == null) {
-      return
+    if (this._timeouts == null) {
+      return;
     }
 
     for (const timeout of this._timeouts) {
       window.clearTimeout(timeout);
     }
-    this._timeouts = []
+    this._timeouts = [];
   }
 
   _applyImage(forceBG = false) {
@@ -1010,7 +1010,10 @@ export default class ImageView extends React.Component<ImageViewProps> {
   }
 
   strobeImage() {
-    const appendOriginal = (el: HTMLDivElement, img: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement) => {
+    const appendOriginal = (
+      el: HTMLDivElement,
+      img: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement,
+    ) => {
       el.appendChild(img);
       if (img instanceof HTMLVideoElement && img.paused) {
         img.play();

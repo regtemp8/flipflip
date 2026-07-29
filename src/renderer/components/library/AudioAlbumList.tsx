@@ -56,7 +56,12 @@ const styles = (theme: Theme) =>
     },
   });
 
-interface Album { name: string, artist: string; thumb: string; count: number }
+interface Album {
+  name: string;
+  artist: string;
+  thumb: string;
+  count: number;
+}
 
 interface AudioAlbumListProps {
   classes: any;
@@ -152,7 +157,11 @@ class AudioAlbumList extends React.Component<
                 )}
                 {!thumb && <AudiotrackIcon className={classes.mediaIcon} />}
                 <CardContent classes={{ root: classes.cardContent }}>
-                  <Tooltip disableInteractive title={data.name} enterDelay={800}>
+                  <Tooltip
+                    disableInteractive
+                    title={data.name}
+                    enterDelay={800}
+                  >
                     <Typography
                       className={clsx(
                         this.state.hover == data.name && classes.underlineTitle,
@@ -265,9 +274,9 @@ class AudioAlbumList extends React.Component<
       }
     }
 
-    const albums: Album[] = []
-    for(const [key, value] of albumMap) {
-      albums.push({...value, name: key})
+    const albums: Album[] = [];
+    for (const [key, value] of albumMap) {
+      albums.push({ ...value, name: key });
     }
     return albums;
   }

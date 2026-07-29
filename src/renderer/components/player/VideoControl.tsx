@@ -320,7 +320,7 @@ class VideoControl extends React.Component<
   }
 
   onChangePosition(e: Event, value: number | number[]) {
-    this.changePosition(value as number)
+    this.changePosition(value as number);
   }
 
   private changePosition(value: number) {
