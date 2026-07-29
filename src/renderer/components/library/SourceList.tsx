@@ -608,6 +608,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     if (this.props.onUpdateScene) {
       this.props.onUpdateScene((s) => {
         const editSource = s.sources.find((s) => s.id == this.state.isEditing);
+        if (editSource == null) {
+          return;
+        }
+
         const librarySource = this.props.library.find((s) => s.url == newURL);
         const sourceChanged = editSource.url != newURL;
         editSource.offline = sourceChanged ? false : editSource.offline;
