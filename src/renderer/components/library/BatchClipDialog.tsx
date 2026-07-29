@@ -162,6 +162,10 @@ class BatchClipDialog extends React.Component<
     };
     const successCallback = (video: HTMLVideoElement, sourceURL: string) => {
       const source = newLibrary.find((s) => s.url === sourceURL);
+      if (source == null) {
+        return;
+      }
+
       let id = source.clips.length + 1;
       source.clips.forEach((c) => {
         id = Math.max(c.id + 1, id);
@@ -181,7 +185,10 @@ class BatchClipDialog extends React.Component<
         this.props.onUpdateLibrary((l) => {
           for (let sourceURL of this.props.selected) {
             const source = l.find((s) => s.url === sourceURL);
-            source.clips = newLibrary.find((s) => s.url === sourceURL).clips;
+            const newSource = newLibrary.find((s) => s.url === sourceURL);
+            if (source != null && newSource != null) {
+              source.clips = newSource.clips;
+            }
           }
         });
         this.onCloseDialog();
