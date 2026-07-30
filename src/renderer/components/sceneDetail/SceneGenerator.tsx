@@ -134,11 +134,11 @@ const styles = (theme: Theme) =>
 interface SceneGeneratorProps {
   classes: any;
   library: Array<LibrarySource>;
-  scene: Scene;
+  generatorWeights: Array<WeightGroup>
   tags: Array<Tag>;
   tutorial: string;
   onTutorial(tutorial: string): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
+  onUpdateScene(fn: (scene: Scene) => void): void;
 }
 
 interface SceneGeneratorState {
@@ -170,16 +170,16 @@ class SceneGenerator extends React.Component<
       this.state.isWeighing == -1
         ? null
         : this.state.isEditing == -1
-          ? this.props.scene.generatorWeights[this.state.isWeighing]
-          : this.props.scene.generatorWeights[this.state.isEditing].rules[
+          ? this.props.generatorWeights[this.state.isWeighing]
+          : this.props.generatorWeights[this.state.isEditing].rules[
               this.state.isWeighing
             ];
     const isEditing: WeightGroup =
       this.state.isEditing == -1
         ? null
-        : this.props.scene.generatorWeights[this.state.isEditing];
+        : this.props.generatorWeights[this.state.isEditing];
 
-    const weights = Array.from(this.props.scene.generatorWeights);
+    const weights = Array.from(this.props.generatorWeights);
     let grid = new Array<Array<any>>();
     for (let w = 0; w < weights.length; w++) {
       if (!grid[w % 4]) {
@@ -286,7 +286,7 @@ class SceneGenerator extends React.Component<
                             onClick={this.onMoveRight.bind(this, y * 4 + x)}
                             disabled={
                               y * 4 + x ==
-                              this.props.scene.generatorWeights.length - 1
+                              this.props.generatorWeights.length - 1
                             }
                           >
                             <ArrowRightIcon />
@@ -442,7 +442,7 @@ class SceneGenerator extends React.Component<
         >
           <DialogTitle id="adv-rule-title">
             {this.getRuleName(
-              this.props.scene.generatorWeights[this.state.isEditing],
+              this.props.generatorWeights[this.state.isEditing],
             )}
           </DialogTitle>
           <DialogContent className={classes.noScroll}>
@@ -521,7 +521,7 @@ class SceneGenerator extends React.Component<
                   {this.state.addRule && (
                     <LibrarySearch
                       displaySources={this.props.library}
-                      filters={this.props.scene.generatorWeights[
+                      filters={this.props.generatorWeights[
                         this.state.isEditing
                       ].rules
                         .filter((wg) => !wg.rules)
@@ -548,13 +548,12 @@ class SceneGenerator extends React.Component<
 
   componentDidUpdate(props: any) {
     if (
-      this.props.scene.generatorWeights &&
-      this.props.scene.generatorWeights.length > 0 &&
-      this.props.scene.generatorWeights.length >
-        props.scene.generatorWeights.length
+      this.props.generatorWeights.length > 0 &&
+      this.props.generatorWeights.length >
+        props.generatorWeights.length
     ) {
-      const lastIndex = this.props.scene.generatorWeights.length - 1;
-      const lastWG = this.props.scene.generatorWeights[lastIndex];
+      const lastIndex = this.props.generatorWeights.length - 1;
+      const lastWG = this.props.generatorWeights[lastIndex];
       if (lastWG.rules) {
         this.setState({ isEditing: lastIndex });
       }
@@ -582,13 +581,13 @@ class SceneGenerator extends React.Component<
   getRemainingPercent(): number {
     let remaining = 100;
     if (this.state.isEditing == -1) {
-      for (let wg of this.props.scene.generatorWeights) {
+      for (let wg of this.props.generatorWeights) {
         if (wg.type == TT.weight) {
           remaining = remaining - wg.percent;
         }
       }
     } else {
-      for (let wg of this.props.scene.generatorWeights[this.state.isEditing]
+      for (let wg of this.props.generatorWeights[this.state.isEditing]
         .rules) {
         if (wg.type == TT.weight) {
           remaining = remaining - wg.percent;
@@ -617,7 +616,7 @@ class SceneGenerator extends React.Component<
   }
 
   onAddRule(filters: Array<string>) {
-    let generatorWeights = this.props.scene.generatorWeights;
+    let generatorWeights = this.props.generatorWeights;
     let wg = generatorWeights[this.state.isEditing];
     for (let search of filters) {
       if (search.length > 0 && wg.rules.every((wg) => wg.search != search)) {
@@ -648,7 +647,7 @@ class SceneGenerator extends React.Component<
   }
 
   onDeleteRule(index: number) {
-    const generatorWeights = this.props.scene.generatorWeights;
+    const generatorWeights = this.props.generatorWeights;
     const wg = generatorWeights[this.state.isEditing];
     wg.rules.splice(index, 1);
     this.changeGeneratorWeights(generatorWeights);
@@ -727,7 +726,7 @@ class SceneGenerator extends React.Component<
   }
 
   onDeleteGroup(index: number) {
-    const generatorWeights = this.props.scene.generatorWeights;
+    const generatorWeights = this.props.generatorWeights;
     generatorWeights.splice(index, 1);
     this.changeGeneratorWeights(generatorWeights);
   }
@@ -738,7 +737,7 @@ class SceneGenerator extends React.Component<
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
   ) {
-    const generatorWeights = this.props.scene.generatorWeights;
+    const generatorWeights = this.props.generatorWeights;
     if (this.state.isEditing == -1) {
       const wg = generatorWeights[index];
       (wg as any)[key] = value;
@@ -755,7 +754,7 @@ class SceneGenerator extends React.Component<
     key: string,
     e: React.ChangeEvent<HTMLInputElement>,
   ) {
-    const generatorWeights = this.props.scene.generatorWeights;
+    const generatorWeights = this.props.generatorWeights;
     const input = e.target as HTMLInputElement;
     if (this.state.isEditing == -1) {
       const wg = generatorWeights[index];
@@ -796,8 +795,8 @@ class SceneGenerator extends React.Component<
     });
   }
 
-  update(fn: (scene: any) => void) {
-    this.props.onUpdateScene(this.props.scene, fn);
+  update(fn: (scene: Scene) => void) {
+    this.props.onUpdateScene(fn);
   }
 }
 

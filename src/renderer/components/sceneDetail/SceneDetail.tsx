@@ -981,11 +981,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     <Box p={1} className={classes.fill}>
                       <SceneGenerator
                         library={this.props.library}
-                        scene={this.props.scene}
+                        generatorWeights={this.props.scene.generatorWeights}
                         tags={this.props.tags}
                         tutorial={this.props.tutorial}
                         onTutorial={this.props.onTutorial.bind(this)}
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene.bind(this, this.props.scene)}
                       />
                     </Box>
                   </div>
