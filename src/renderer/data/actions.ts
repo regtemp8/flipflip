@@ -1336,7 +1336,7 @@ export function generateScenes(
   const newScenes = Array.from(state.scenes);
   for (const scene of generateScenes) {
     const newScene = state.scenes.find((s) => s.id == scene.id);
-    let generatorWeights = newScene.generatorWeights;
+    let generatorWeights = newScene.generatorWeights ?? [];
 
     // Add globally ignored tags/types if not overridden by generator
     if (!newScene.overrideIgnore) {
@@ -1362,9 +1362,9 @@ export function generateScenes(
       .map((wg) => wg.search);
 
     // Sources to require
-    let reqAdvSources: Array<LibrarySource> = null;
+    let reqAdvSources: Array<LibrarySource> = [];
     // Sources to exclude
-    let excAdvSources: Array<LibrarySource> = null;
+    let excAdvSources: Array<LibrarySource> = [];
 
     // Build generator's list of sources
     let genSources = new Array<LibrarySource>();
@@ -1672,7 +1672,7 @@ export function generateScenes(
         }
         // If this adv rule is all, add the sources to the require list
         case TT.all:
-          if (reqAdvSources) {
+          if (reqAdvSources.length > 0) {
             reqAdvSources = reqAdvSources.filter((s) =>
               rulesSources.some((source) => source.url == s.url),
             );
@@ -1682,7 +1682,7 @@ export function generateScenes(
           break;
         // If this adv rule is none, add the sources to the excl list
         case TT.none:
-          if (excAdvSources) {
+          if (excAdvSources.length > 0) {
             excAdvSources = excAdvSources.concat(rulesSources);
           } else {
             excAdvSources = rulesSources;
@@ -1704,14 +1704,14 @@ export function generateScenes(
       for (const s of state.library) {
         // Filter out sources which are not in required list
         if (
-          reqAdvSources &&
+          reqAdvSources.length > 0 &&
           !reqAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
         }
         // Filter out sources which are in exclude list
         if (
-          excAdvSources &&
+          excAdvSources.length > 0 &&
           excAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
@@ -1788,14 +1788,14 @@ export function generateScenes(
         for (const s of state.library) {
           // Filter out sources which are not in required list
           if (
-            reqAdvSources &&
+            reqAdvSources.length > 0 &&
             !reqAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
           }
           // Filter out sources which are in exclude list
           if (
-            excAdvSources &&
+            excAdvSources.length > 0 &&
             excAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
