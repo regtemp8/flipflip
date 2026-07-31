@@ -595,6 +595,8 @@ export function nextScene(state: State): Object {
       };
     }
   }
+
+  return {};
 }
 
 export function startFromScene(state: State, sceneName: string) {
