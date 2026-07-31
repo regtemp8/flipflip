@@ -223,6 +223,11 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeTF,
+        );
     }
     return duration;
   }
@@ -264,6 +269,11 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.scene:
         delay = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeDelayTF,
+        );
     }
     return delay;
   }

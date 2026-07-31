@@ -61,6 +61,10 @@ export default class Slide extends React.Component<SlideProps> {
           slideDuration = 1000;
         }
         break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.slideTF,
+        );
     }
 
     let slideHStart, slideHEnd, slideVStart, slideVEnd;

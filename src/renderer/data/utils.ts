@@ -124,8 +124,8 @@ export function getTimeout(
   bpmMulti: number,
   audio?: Audio,
   timeToNextFrame?: number,
-): number | null {
-  let timeout = null;
+) {
+  let timeout;
   switch (tf) {
     case TF.random:
       timeout = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -150,6 +150,8 @@ export function getTimeout(
     case TF.scene:
       timeout = timeToNextFrame ?? 1000;
       break;
+    default:
+      throw new Error('Unsupported timing function: ' + tf)
   }
   return timeout;
 }

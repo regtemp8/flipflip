@@ -463,6 +463,11 @@ export default class Panning extends React.Component<
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.panTF,
+        );
     }
     duration = duration / 2;
     return duration;

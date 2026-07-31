@@ -65,6 +65,10 @@ export default class CrossFade extends React.Component<CrossFadeProps> {
           fadeDuration = 1000;
         }
         break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.fadeTF,
+        );
     }
 
     const fadeTransitions: [{ item: any; props: any; key: any }] =

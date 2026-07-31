@@ -59,6 +59,11 @@ export default class StrobeImage extends React.Component<StrobeImageProps> {
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeTF,
+        );
     }
 
     const imageProps = useSpring({

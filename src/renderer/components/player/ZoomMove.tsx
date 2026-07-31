@@ -141,6 +141,10 @@ export default class ZoomMove extends React.Component<ZoomMoveProps> {
           transDuration = 1000;
         }
         break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.transTF,
+        );
     }
 
     const imageProps = useSpring({
