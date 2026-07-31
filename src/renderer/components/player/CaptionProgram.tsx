@@ -1075,12 +1075,13 @@ export default class CaptionProgram extends React.Component<
       const register = Number.parseInt(registerRegex[1]);
       return getRandomListItem(this.state.phrases.get(register));
     } else if (value == "$TAG_PHRASE") {
-      if (this.props.currentImage) {
+      const source = this.props.currentImage?.getAttribute("source");
+      if (source) {
         const tag = getRandomListItem(
           this.props
             .getTags(
-              this.props.currentImage.getAttribute("source"),
-              this.props.currentImage.getAttribute("clip"),
+              source,
+              this.props.currentImage?.getAttribute("clip") ?? undefined,
             )
             .filter((t) => t.phraseString && t.phraseString != ""),
         );
@@ -1105,7 +1106,9 @@ export default class CaptionProgram extends React.Component<
       this.el.current.innerHTML = htmlEntities(value);
       const wait = this.wait(ms);
       wait(() => {
-        this.el.current.style.opacity = "0";
+        if (this.el.current) {
+          this.el.current.style.opacity = "0";
+        }
         nextCommand();
       });
     };
