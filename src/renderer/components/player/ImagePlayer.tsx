@@ -1431,12 +1431,10 @@ export default class ImagePlayer extends React.Component<
           break;
         }
       }
-      if (
-        nextImg &&
-        nextImg.getAttribute("duration") &&
-        timeToNextFrame < Number.parseFloat(nextImg.getAttribute("duration"))
-      ) {
-        timeToNextFrame = Number.parseFloat(nextImg.getAttribute("duration"));
+
+      const duration = Number.parseFloat(nextImg?.getAttribute("duration") ?? "NaN")
+      if (timeToNextFrame < duration) {
+        timeToNextFrame = duration
       }
       if (this.props.setTimeToNextFrame) {
         this.props.setTimeToNextFrame(timeToNextFrame);
