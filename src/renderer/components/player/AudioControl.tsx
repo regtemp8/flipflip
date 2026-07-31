@@ -310,7 +310,10 @@ class AudioControl extends React.Component<
     ) {
       if (this._queueNextTrack) {
         this._queueNextTrack = false;
-        this.props.nextTrack();
+        if (this.props.nextTrack != null) {
+          this.props.nextTrack();
+        }
+
         this.setState({ tick: !this.state.tick, position: 0, duration: 0 });
       } else {
         this.setState({ tick: !this.state.tick });
@@ -331,7 +334,10 @@ class AudioControl extends React.Component<
     if (!starting) {
       if (this._queueNextTrack) {
         this._queueNextTrack = false;
-        this.props.nextTrack();
+        if (this.props.nextTrack != null) {
+          this.props.nextTrack();
+        }
+
         this.setState({ tick: !this.state.tick, position: 0, duration: 0 });
       } else {
         this.setState({ tick: !this.state.tick });
@@ -407,7 +413,9 @@ class AudioControl extends React.Component<
       } else if (this.props.singleTrack) {
         this.setState({ position: 1 });
       } else {
-        this.props.nextTrack();
+        if (this.props.nextTrack != null) {
+          this.props.nextTrack();
+        }
         this.setState({ position: 0, duration: 0 });
       }
     } else if (this.props.repeat == RP.one) {
@@ -421,7 +429,10 @@ class AudioControl extends React.Component<
       if (this.props.audio.tick) {
         this._queueNextTrack = true;
       } else {
-        this.props.nextTrack();
+        if (this.props.nextTrack != null) {
+          this.props.nextTrack();
+        }
+        
         this.setState({ position: 0, duration: 0 });
       }
     }
