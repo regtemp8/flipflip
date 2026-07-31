@@ -1607,6 +1607,7 @@ class AudioLibrary extends React.Component<
     // dedup
     let sourceURLs = originalSources.map((s) => s.url);
     if (
+      this.state.importURL == null ||
       sourceURLs.includes(this.state.importURL) ||
       !isAudio(this.state.importURL, false)
     ) {
