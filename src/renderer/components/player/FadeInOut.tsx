@@ -271,6 +271,11 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.fadeIOTF,
+        );
     }
     duration = duration / 2;
     return duration;
@@ -313,6 +318,11 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.scene:
         delay = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.fadeIODelayTF,
+        );
     }
     return delay;
   }
