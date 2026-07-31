@@ -412,7 +412,7 @@ class VideoControl extends React.Component<
   }
 
   onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
     switch (e.key) {
       case " ":
         e.preventDefault();
@@ -446,7 +446,7 @@ class VideoControl extends React.Component<
   };
 
   onPlayerKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
     if (e.shiftKey) {
       switch (e.key) {
         case " ":

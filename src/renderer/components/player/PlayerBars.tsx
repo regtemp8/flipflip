@@ -1128,7 +1128,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   historyBack() {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       if (this.props.historyOffset > -(this.props.historyPaths.length - 1)) {
         this.props.historyBack();
@@ -1139,7 +1139,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   historyForward() {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       if (this.props.historyOffset >= 0) {
         this.props.imagePlayerAdvanceHacks[0][0].fire();
@@ -1274,7 +1274,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
     switch (e.key) {
       case " ":
         if ((!this.state.drawerHover || focus != "input") && !e.shiftKey) {
@@ -1413,7 +1413,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   onDelete() {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       const img =
         this.props.historyPaths[
@@ -1450,7 +1450,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   playPause() {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       this.setPlayPause(!this.props.isPlaying);
     }

@@ -1033,10 +1033,9 @@ class VideoClipper extends React.Component<
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const activeElement = document.activeElement as Element;
-    const focus = activeElement.tagName.toLocaleLowerCase();
-    const start = activeElement.id == "start";
-    const end = activeElement.id == "end";
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
+    const start = document.activeElement?.id == "start";
+    const end = document.activeElement?.id == "end";
     switch (e.key) {
       case "Escape":
         e.preventDefault();
