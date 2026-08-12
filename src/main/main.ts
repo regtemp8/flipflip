@@ -49,7 +49,7 @@ app.on("ready", () => {
           let exists;
           try {
             exists = fs.existsSync(url);
-          } catch (err) {
+          } catch {
             exists = false;
           }
 
@@ -69,8 +69,24 @@ app.on("ready", () => {
         }
         url = entry.substring(0, entry.lastIndexOf(sep) + 1) + url;
       }
+      if (url.endsWith(".woff") || url.endsWith(".woff2")) {
+        const entry = new URL(MAIN_WINDOW_WEBPACK_ENTRY);
+        if (entry.protocol === "file:") {
+          if (path.sep !== "/") {
+            url = url.replace(/\//g, path.sep);
+          }
+          const entryPath = fileURLToPath(MAIN_WINDOW_WEBPACK_ENTRY);
+          const pieces = entryPath.split(path.sep);
+          pieces.pop();
+          pieces.pop();
+          pieces.push(url)
+          url = `${entry.protocol}//${pieces.join(path.sep)}`;
+        } else {
+          url = entry.origin + "/" + url;
+        }
+      }
 
-      const promise = net.fetch(new Request(url, req));
+      const promise = net.fetch(url);
       if (getSourceType(url) === ST.nimja) {
         const res = await promise;
         let html = await res.text();
@@ -102,7 +118,7 @@ app.on("ready", () => {
         return promise;
       }
     } catch (err) {
-      console.error(err);
+      console.error(`Couldn't handle: ${req.url}`, err);
       return Response.error();
     }
   });

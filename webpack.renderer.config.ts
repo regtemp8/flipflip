@@ -10,11 +10,10 @@ export const rendererConfig: Configuration = {
     rules: [
       ...rules,
       {
-        test: /\.(scss|css)$/,
+        test: /\.css$/,
         use: [
           { loader: "style-loader" },
-          { loader: "css-loader" },
-          { loader: "sass-loader" },
+          { loader: "css-loader" }
         ],
       },
     ],
@@ -31,7 +30,7 @@ export const rendererConfig: Configuration = {
     }),
   ],
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".scss"],
+    extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
   },
   devtool: "source-map",
 };

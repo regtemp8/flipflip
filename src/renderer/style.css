@@ -14,19 +14,17 @@ body {
   overflow: hidden;
 }
 
-.MuiDrawer-paper::-webkit-scrollbar { width: 0 !important }
-
-div.CreatableSelect {
-  > div:first-child {
-    max-height: 64px;
-  }
+.MuiDrawer-paper::-webkit-scrollbar {
+  width: 0 !important;
 }
 
-#sortable-list {
-  > div {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-  }
+div.CreatableSelect > div:first-child {
+  max-height: 64px;
+}
+
+#sortable-list > div {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 #force-webpack-to-load-logo {
@@ -53,5 +51,5 @@ video::cue {
 }
 
 .react-draggable-dragging {
-  z-index:1;
+  z-index: 1;
 }

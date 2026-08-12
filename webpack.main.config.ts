@@ -18,7 +18,7 @@ export const mainConfig: Configuration = {
         // We're specifying native_modules in the test because the asset relocator loader generates a
         // "fake" .node file which is really a cjs file.
         test: /native_modules[/\\].+\.node$/,
-        use: "node-loader",
+        use: "node-loader"
       },
       {
         test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
@@ -28,7 +28,7 @@ export const mainConfig: Configuration = {
           options: {
             outputAssetBase: "native_modules",
           },
-        },
+        }
       },
     ],
   },
@@ -41,7 +41,7 @@ export const mainConfig: Configuration = {
     }),
   ],
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
+    extensions: [".js", ".ts", ".json"],
   },
   devtool: "source-map",
 };

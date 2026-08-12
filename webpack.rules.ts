@@ -9,6 +9,6 @@ export const rules: Required<ModuleOptions>["rules"] = [
       options: {
         transpileOnly: true,
       },
-    },
+    }
   },
 ];
