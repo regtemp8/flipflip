@@ -606,15 +606,18 @@ function onCacheImage(
 function onGetCacheSize(ev: IpcMainEvent, config: Config) {
   return new Promise((resolve) => {
     const cachePath = getCachePath(null, config);
-    if (fs.existsSync(cachePath)) {
-      getFolderSize(cachePath, (err: string, size: number) => {
-        if (err) {
-          resolve(0);
-        } else {
-          resolve(size);
-        }
-      });
+    if (!fs.existsSync(cachePath)) {
+      resolve(0);
+      return;
     }
+
+    getFolderSize(cachePath, (err: string, size: number) => {
+      if (err) {
+        resolve(0);
+      } else {
+        resolve(size);
+      }
+    });
   });
 }
 
@@ -920,7 +923,7 @@ function onGetCachedFileURL(
   const filePath = sourceCachePath + getFileName(url, path.sep);
   const cachedAlready = fs.existsSync(filePath);
   if (cachedAlready) {
-    url = filePath;
+    url = pathToFileURL(filePath).toString();
   }
 
   return url;

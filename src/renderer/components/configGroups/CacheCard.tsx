@@ -255,6 +255,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   }
 
   onFinishClearCache() {
+    this.onCloseClear();
     window.ipc.clearCache(this.props.config).then(() => {
       this.setState({ cacheSize: "--" });
       this.calculateCacheSize();
