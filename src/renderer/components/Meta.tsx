@@ -288,7 +288,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   onImportFromLibrary={a(actions.importFromLibrary)}
                   onImportLibrary={a(
                     actions.importLibrary,
-                    actions.createBackup.bind(this.state),
+                    actions.createBackup.bind(this, this.state),
                   )}
                   onImportTumblr={p(actions.importTumblr)}
                   onManageTags={a(actions.manageTags)}
@@ -513,7 +513,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   tags={this.state.tags}
                   theme={this.state.theme}
                   goBack={a(actions.goBack)}
-                  onBackup={actions.createBackup.bind(this.state)}
+                  onBackup={actions.createBackup.bind(this, this.state)}
                   onChangeThemeColor={a(actions.changeThemeColor)}
                   onClean={actions.cleanBackups}
                   onDefault={a(actions.setDefaultConfig)}
