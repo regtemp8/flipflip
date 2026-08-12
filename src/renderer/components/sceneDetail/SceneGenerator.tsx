@@ -46,6 +46,7 @@ import Tag from "../../../common/Tag";
 import WeightGroup from "../../../common/WeightGroup";
 import LibrarySearch from "../library/LibrarySearch";
 import LibrarySource from "../../../common/LibrarySource";
+import SceneGeneratorWeighing from "./SceneGeneratorWeighing";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -134,7 +135,7 @@ const styles = (theme: Theme) =>
 interface SceneGeneratorProps {
   classes: any;
   library: Array<LibrarySource>;
-  generatorWeights: Array<WeightGroup>
+  generatorWeights: Array<WeightGroup>;
   tags: Array<Tag>;
   tutorial: string;
   onTutorial(tutorial: string): void;
@@ -166,15 +167,7 @@ class SceneGenerator extends React.Component<
 
   render() {
     const classes = this.props.classes;
-    const isWeighing: WeightGroup =
-      this.state.isWeighing == -1
-        ? null
-        : this.state.isEditing == -1
-          ? this.props.generatorWeights[this.state.isWeighing]
-          : this.props.generatorWeights[this.state.isEditing].rules[
-              this.state.isWeighing
-            ];
-    const isEditing: WeightGroup =
+    const isEditing: WeightGroup | null =
       this.state.isEditing == -1
         ? null
         : this.props.generatorWeights[this.state.isEditing];
@@ -377,61 +370,23 @@ class SceneGenerator extends React.Component<
           open={this.state.isWeighing != -1}
           onClose={this.onCloseMenu.bind(this)}
         >
-          {this.state.isWeighing != -1 && (
-            <div
-              className={clsx(
-                classes.slider,
-                isWeighing.type != TT.weight && classes.sliderClose,
-              )}
-            >
-              <Slider
-                className={classes.editSlider}
-                classes={{
-                  valueLabel: classes.valueLabel,
-                }}
-                max={this.getRemainingPercent() + isWeighing.percent}
-                defaultValue={isWeighing.percent}
-                onChangeCommitted={this.onGroupSliderChange.bind(
-                  this,
-                  this.state.isWeighing,
-                  "percent",
-                )}
-                valueLabelDisplay="auto"
-                valueLabelFormat={(v) => v + "%"}
-                orientation="vertical"
-              />
-            </div>
-          )}
-          {this.state.isWeighing != -1 && (
-            <RadioGroup
-              className={classes.editRadios}
-              value={isWeighing.type}
-              onChange={this.onGroupInput.bind(
-                this,
-                this.state.isWeighing,
-                "type",
-              )}
-            >
-              {Object.values(TT)
-                .filter((tt) => this.state.advRule || tt != TT.or)
-                .map((tt) => (
-                  <FormControlLabel
-                    key={tt}
-                    value={tt}
-                    control={
-                      <Radio
-                        className={clsx(
-                          this.props.tutorial == SDGT.edit2 &&
-                            tt == TT.all &&
-                            classes.highlight,
-                        )}
-                      />
-                    }
-                    label={en.get(tt)}
-                  />
-                ))}
-            </RadioGroup>
-          )}
+          <SceneGeneratorWeighing
+            isWeighing={this.state.isWeighing}
+            isEditing={this.state.isEditing}
+            generatorWeights={this.props.generatorWeights}
+            onGroupSliderChange={this.onGroupSliderChange.bind(
+              this,
+              this.state.isWeighing,
+              "percent",
+            )}
+            onGroupInput={this.onGroupInput.bind(
+              this,
+              this.state.isWeighing,
+              "type",
+            )}
+            advRule={this.state.advRule}
+            tutorial={this.props.tutorial}
+          />
         </Menu>
         <Dialog
           classes={{ paper: classes.editDialogPaper }}
@@ -549,8 +504,7 @@ class SceneGenerator extends React.Component<
   componentDidUpdate(props: any) {
     if (
       this.props.generatorWeights.length > 0 &&
-      this.props.generatorWeights.length >
-        props.generatorWeights.length
+      this.props.generatorWeights.length > props.generatorWeights.length
     ) {
       const lastIndex = this.props.generatorWeights.length - 1;
       const lastWG = this.props.generatorWeights[lastIndex];
@@ -576,25 +530,6 @@ class SceneGenerator extends React.Component<
       (rulesRemaining == 0 ||
         (rulesRemaining == 100 && weightRules.length == 0))
     );
-  }
-
-  getRemainingPercent(): number {
-    let remaining = 100;
-    if (this.state.isEditing == -1) {
-      for (let wg of this.props.generatorWeights) {
-        if (wg.type == TT.weight) {
-          remaining = remaining - wg.percent;
-        }
-      }
-    } else {
-      for (let wg of this.props.generatorWeights[this.state.isEditing]
-        .rules) {
-        if (wg.type == TT.weight) {
-          remaining = remaining - wg.percent;
-        }
-      }
-    }
-    return remaining;
   }
 
   onCloseDialog() {
@@ -775,13 +710,17 @@ class SceneGenerator extends React.Component<
 
   onMoveRight(index: number) {
     this.update((s) => {
-      arrayMove(s.generatorWeights, index, index + 1);
+      if (s.generatorWeights != null) {
+        arrayMove(s.generatorWeights, index, index + 1);
+      }
     });
   }
 
   onMoveLeft(index: number) {
     this.update((s) => {
-      arrayMove(s.generatorWeights, index, index - 1);
+      if (s.generatorWeights != null) {
+        arrayMove(s.generatorWeights, index, index - 1);
+      }
     });
   }
 
