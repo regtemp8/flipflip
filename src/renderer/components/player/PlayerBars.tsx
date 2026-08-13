@@ -85,17 +85,14 @@ const hexToRGB = (h: string) => {
 
 const styles = (theme: Theme) =>
   createStyles({
-    hoverBar: {
+    hoverLayer: {
       zIndex: theme.zIndex.drawer + 1,
       position: "absolute",
       opacity: 0,
-      height: theme.spacing(5),
-      width: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      padding: "0 8px",
-      minHeight: 64,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     appBar: {
       zIndex: theme.zIndex.drawer + 1,
@@ -155,13 +152,6 @@ const styles = (theme: Theme) =>
         duration: theme.transitions.duration.enteringScreen,
       }),
     },
-    hoverDrawer: {
-      zIndex: theme.zIndex.drawer,
-      position: "absolute",
-      opacity: 0,
-      width: theme.spacing(5),
-      height: "100%",
-    },
     drawerPaper: {
       position: "relative",
       whiteSpace: "nowrap",
@@ -201,14 +191,6 @@ const styles = (theme: Theme) =>
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
       }),
-    },
-    hoverTagDrawer: {
-      zIndex: theme.zIndex.drawer + 1,
-      position: "absolute",
-      bottom: 0,
-      opacity: 0,
-      width: "100%",
-      height: theme.spacing(5),
     },
     tagList: {
       padding: theme.spacing(1),
@@ -372,16 +354,13 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     return (
       <React.Fragment>
         <div
-          className={classes.hoverBar}
-          onMouseEnter={this.onMouseEnterAppBar.bind(this)}
-          onMouseLeave={this.onMouseLeaveAppBar.bind(this)}
+          className={classes.hoverLayer}
+          onMouseMove={this.onMouseMove.bind(this)}
         />
 
         <AppBar
           enableColorOnDark
           position="absolute"
-          onMouseEnter={this.onMouseEnterAppBar.bind(this)}
-          onMouseLeave={this.onMouseLeaveAppBar.bind(this)}
           className={clsx(
             classes.appBar,
             (this.props.tutorial == PT.toolbar ||
@@ -497,357 +476,328 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
           !this.props.isEmpty &&
           !this.props.recentPictureGrid &&
           !this.props.scene.downloadScene && (
-            <React.Fragment>
-              <div
-                className={classes.hoverDrawer}
-                onMouseEnter={this.onMouseEnterDrawer.bind(this)}
-                onMouseLeave={this.onMouseLeaveDrawer.bind(this)}
-              />
-
-              <Drawer
-                variant="permanent"
-                className={clsx(
-                  classes.drawer,
+            <Drawer
+              variant="permanent"
+              className={clsx(
+                classes.drawer,
+                (this.props.tutorial == PT.sidebar || this.state.drawerHover) &&
+                  classes.drawerHover,
+              )}
+              classes={{
+                paper: clsx(
+                  classes.drawerPaper,
                   (this.props.tutorial == PT.sidebar ||
                     this.state.drawerHover) &&
-                    classes.drawerHover,
-                )}
-                classes={{
-                  paper: clsx(
-                    classes.drawerPaper,
-                    (this.props.tutorial == PT.sidebar ||
-                      this.state.drawerHover) &&
-                      classes.drawerPaperHover,
-                    this.props.tutorial == PT.toolbar &&
-                      clsx(classes.backdropTop, classes.highlight),
-                  ),
-                }}
-                open={
-                  this.props.tutorial == PT.sidebar || this.state.drawerHover
-                }
-                onMouseEnter={this.onMouseEnterDrawer.bind(this)}
-                onMouseLeave={this.onMouseLeaveDrawer.bind(this)}
-              >
-                <div className={classes.drawerToolbar}>
-                  <Typography variant="h4">Settings</Typography>
-                </div>
+                    classes.drawerPaperHover,
+                  this.props.tutorial == PT.toolbar &&
+                    clsx(classes.backdropTop, classes.highlight),
+                ),
+              }}
+              open={this.props.tutorial == PT.sidebar || this.state.drawerHover}
+            >
+              <div className={classes.drawerToolbar}>
+                <Typography variant="h4">Settings</Typography>
+              </div>
 
-                {!this.props.scene.audioScene && this._showVideoControls && (
-                  <Accordion TransitionProps={{ unmountOnExit: false }}>
+              {!this.props.scene.audioScene && this._showVideoControls && (
+                <Accordion TransitionProps={{ unmountOnExit: false }}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography>Video Controls</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <VideoCard
+                      scene={this.props.scene}
+                      otherScenes={this.props.scene.overlays.map((o) =>
+                        this.getScene(o.sceneID),
+                      )}
+                      isPlaying={this.props.isPlaying}
+                      mainVideo={this.props.mainVideo}
+                      mainClip={
+                        source ? source.clips.find((c) => c.id == clipID) : null
+                      }
+                      mainClipValue={clipValue ? clipValue : null}
+                      otherVideos={this.props.overlayVideos}
+                      imagePlayerAdvanceHacks={
+                        this.props.imagePlayerAdvanceHacks
+                      }
+                      onUpdateScene={this.props.onUpdateScene.bind(this)}
+                    />
+                  </AccordionDetails>
+                </Accordion>
+              )}
+
+              {!this.props.scene.audioScene && !this.props.scene.gridScene && (
+                <React.Fragment>
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>Video Controls</Typography>
+                      <Typography>Scene Options</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <VideoCard
+                      <SceneOptionCard
+                        sidebar
+                        allScenes={this.props.scenes}
+                        allSceneGrids={this.props.sceneGrids}
+                        isTagging={this.props.allTags != null}
                         scene={this.props.scene}
-                        otherScenes={this.props.scene.overlays.map((o) =>
-                          this.getScene(o.sceneID),
-                        )}
-                        isPlaying={this.props.isPlaying}
-                        mainVideo={this.props.mainVideo}
-                        mainClip={
-                          source
-                            ? source.clips.find((c) => c.id == clipID)
-                            : null
-                        }
-                        mainClipValue={clipValue ? clipValue : null}
-                        otherVideos={this.props.overlayVideos}
-                        imagePlayerAdvanceHacks={
-                          this.props.imagePlayerAdvanceHacks
-                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onGenerate={this.props.onGenerate}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Image/Video Options</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <ImageVideoCard
+                        sidebar
+                        isPlayer
+                        isConfig={false}
+                        scene={this.props.scene}
                         onUpdateScene={this.props.onUpdateScene.bind(this)}
                       />
                     </AccordionDetails>
                   </Accordion>
-                )}
 
-                {!this.props.scene.audioScene &&
-                  !this.props.scene.gridScene && (
-                    <React.Fragment>
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Scene Options</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <SceneOptionCard
-                            sidebar
-                            allScenes={this.props.scenes}
-                            allSceneGrids={this.props.sceneGrids}
-                            isTagging={this.props.allTags != null}
-                            scene={this.props.scene}
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                            onGenerate={this.props.onGenerate}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Image/Video Options</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <ImageVideoCard
-                            sidebar
-                            isPlayer
-                            isConfig={false}
-                            scene={this.props.scene}
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Zoom/Move</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <ZoomMoveCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Cross-Fade</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <CrossFadeCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Slide</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <SlideCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Strobe</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <StrobeCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Fade In/Out</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <FadeIOCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-
-                      <Accordion TransitionProps={{ unmountOnExit: true }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Panning</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <PanningCard
-                            sidebar
-                            scene={this.props.scene}
-                            easingControls={
-                              this.props.config.displaySettings.easingControls
-                            }
-                            onUpdateScene={this.props.onUpdateScene.bind(this)}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
-                    </React.Fragment>
-                  )}
-
-                {!this.props.scene.gridScene && (
-                  <Accordion
-                    defaultExpanded={this.props.scene.audioScene}
-                    TransitionProps={{
-                      unmountOnExit:
-                        !this.props.scene.audioEnabled &&
-                        this.props.scene.nextSceneID === 0,
-                    }}
-                  >
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>Audio Tracks</Typography>
+                      <Typography>Zoom/Move</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <AudioCard
+                      <ZoomMoveCard
                         sidebar
                         scene={this.props.scene}
-                        scenePaths={this.props.historyPaths}
-                        startPlaying
-                        persist={this.props.persistAudio}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
                         onUpdateScene={this.props.onUpdateScene.bind(this)}
-                        goBack={this.navigateBack.bind(this)}
-                        orderAudioTags={this.orderAudioTags.bind(this)}
-                        onPlaying={this.props.onPlaying}
-                        playTrack={this.props.playTrack}
-                        playNextScene={this.props.playNextScene}
-                        setCurrentAudio={this.props.setCurrentAudio.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Cross-Fade</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <CrossFadeCard
+                        sidebar
+                        scene={this.props.scene}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Slide</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <SlideCard
+                        sidebar
+                        scene={this.props.scene}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Strobe</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <StrobeCard
+                        sidebar
+                        scene={this.props.scene}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Fade In/Out</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <FadeIOCard
+                        sidebar
+                        scene={this.props.scene}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Panning</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <PanningCard
+                        sidebar
+                        scene={this.props.scene}
+                        easingControls={
+                          this.props.config.displaySettings.easingControls
+                        }
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                </React.Fragment>
+              )}
+
+              {!this.props.scene.gridScene && (
+                <Accordion
+                  defaultExpanded={this.props.scene.audioScene}
+                  TransitionProps={{
+                    unmountOnExit:
+                      !this.props.scene.audioEnabled &&
+                      this.props.scene.nextSceneID === 0,
+                  }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography>Audio Tracks</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <AudioCard
+                      sidebar
+                      scene={this.props.scene}
+                      scenePaths={this.props.historyPaths}
+                      startPlaying
+                      persist={this.props.persistAudio}
+                      onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      goBack={this.navigateBack.bind(this)}
+                      orderAudioTags={this.orderAudioTags.bind(this)}
+                      onPlaying={this.props.onPlaying}
+                      playTrack={this.props.playTrack}
+                      playNextScene={this.props.playNextScene}
+                      setCurrentAudio={this.props.setCurrentAudio.bind(this)}
+                    />
+                  </AccordionDetails>
+                </Accordion>
+              )}
+
+              {!this.props.scene.audioScene &&
+                !this.props.scene.gridScene &&
+                !this.props.persistText && (
+                  <Accordion TransitionProps={{ unmountOnExit: true }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Text Overlay</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <TextCard
+                        sidebar
+                        scene={this.props.scene}
+                        onUpdateScene={this.props.onUpdateScene.bind(this)}
                       />
                     </AccordionDetails>
                   </Accordion>
                 )}
-
-                {!this.props.scene.audioScene &&
-                  !this.props.scene.gridScene &&
-                  !this.props.persistText && (
-                    <Accordion TransitionProps={{ unmountOnExit: true }}>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>Text Overlay</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <TextCard
-                          sidebar
-                          scene={this.props.scene}
-                          onUpdateScene={this.props.onUpdateScene.bind(this)}
-                        />
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-              </Drawer>
-            </React.Fragment>
+            </Drawer>
           )}
 
         {!this.props.scene.downloadScene &&
           this.props.hasStarted &&
           this.props.allTags && (
-            <React.Fragment>
-              <div
-                className={classes.hoverTagDrawer}
-                onMouseEnter={this.onMouseEnterTagDrawer.bind(this)}
-                onMouseLeave={this.onMouseLeaveTagDrawer.bind(this)}
-              />
-
-              <Drawer
-                variant="permanent"
-                anchor="bottom"
-                className={classes.tagDrawer}
-                classes={{
-                  paper: clsx(
-                    classes.tagDrawerPaper,
-                    this.state.tagDrawerHover && classes.tagDrawerPaperHover,
-                  ),
-                }}
-                open={this.state.tagDrawerHover}
-                onMouseEnter={this.onMouseEnterTagDrawer.bind(this)}
-                onMouseLeave={this.onMouseLeaveTagDrawer.bind(this)}
-              >
-                <Grid container alignItems="center">
-                  {this.props.tags != null && (
-                    <React.Fragment>
-                      <Grid item xs>
-                        <div className={classes.tagList}>
-                          {this.props.allTags.map((tag) => (
-                            <Card
-                              className={clsx(
-                                classes.tag,
-                                tagNames &&
-                                  tagNames.includes(tag.name) &&
-                                  classes.selectedTag,
+            <Drawer
+              variant="permanent"
+              anchor="bottom"
+              className={classes.tagDrawer}
+              classes={{
+                paper: clsx(
+                  classes.tagDrawerPaper,
+                  this.state.tagDrawerHover && classes.tagDrawerPaperHover,
+                ),
+              }}
+              open={this.state.tagDrawerHover}
+            >
+              <Grid container alignItems="center">
+                {this.props.tags != null && (
+                  <React.Fragment>
+                    <Grid item xs>
+                      <div className={classes.tagList}>
+                        {this.props.allTags.map((tag) => (
+                          <Card
+                            className={clsx(
+                              classes.tag,
+                              tagNames &&
+                                tagNames.includes(tag.name) &&
+                                classes.selectedTag,
+                            )}
+                            key={tag.id}
+                          >
+                            <CardActionArea
+                              onClick={this.props.toggleTag.bind(
+                                this,
+                                this.props.scene.libraryID,
+                                tag,
                               )}
-                              key={tag.id}
                             >
-                              <CardActionArea
-                                onClick={this.props.toggleTag.bind(
-                                  this,
-                                  this.props.scene.libraryID,
-                                  tag,
-                                )}
-                              >
-                                <CardContent className={classes.tagContent}>
-                                  <Typography component="h6" variant="body2">
-                                    {tag.name}
-                                  </Typography>
-                                </CardContent>
-                              </CardActionArea>
-                            </Card>
-                          ))}
-                        </div>
-                      </Grid>
-                      {this.props.inheritTags &&
-                        (!tagNames || tagNames.length == 0) &&
-                        this.props.scene.sources[0].clips &&
-                        this.props.scene.sources[0].clips.some(
-                          (c) => c.tags && c.tags.length > 0,
-                        ) && (
-                          <Grid item className={classes.tagButtons}>
-                            <Tooltip
-                              disableInteractive
-                              title="Inherit Clip Tags"
+                              <CardContent className={classes.tagContent}>
+                                <Typography component="h6" variant="body2">
+                                  {tag.name}
+                                </Typography>
+                              </CardContent>
+                            </CardActionArea>
+                          </Card>
+                        ))}
+                      </div>
+                    </Grid>
+                    {this.props.inheritTags &&
+                      (!tagNames || tagNames.length == 0) &&
+                      this.props.scene.sources[0].clips &&
+                      this.props.scene.sources[0].clips.some(
+                        (c) => c.tags && c.tags.length > 0,
+                      ) && (
+                        <Grid item className={classes.tagButtons}>
+                          <Tooltip disableInteractive title="Inherit Clip Tags">
+                            <Fab
+                              color="primary"
+                              size="small"
+                              onClick={this.props.inheritTags.bind(
+                                this,
+                                this.props.scene.libraryID,
+                              )}
                             >
-                              <Fab
-                                color="primary"
-                                size="small"
-                                onClick={this.props.inheritTags.bind(
-                                  this,
-                                  this.props.scene.libraryID,
-                                )}
-                              >
-                                <SystemUpdateAltIcon />
-                              </Fab>
-                            </Tooltip>
-                          </Grid>
-                        )}
-                    </React.Fragment>
-                  )}
-                  <Grid item xs={12}>
-                    {this.props.scene.sources.length == 1 &&
-                      getSourceType(this.props.scene.sources[0].url) ==
-                        ST.video && (
-                        <VideoControl
-                          video={this.props.mainVideo}
-                          clip={
-                            source
-                              ? source.clips.find((c) => c.id == clipID)
-                              : null
-                          }
-                          clipValue={clipValue ? clipValue : null}
-                          useHotkeys
-                          skip={this.props.scene.videoSkip}
-                          onChangeVolume={() => {}}
-                        />
+                              <SystemUpdateAltIcon />
+                            </Fab>
+                          </Tooltip>
+                        </Grid>
                       )}
-                  </Grid>
+                  </React.Fragment>
+                )}
+                <Grid item xs={12}>
+                  {this.props.scene.sources.length == 1 &&
+                    getSourceType(this.props.scene.sources[0].url) ==
+                      ST.video && (
+                      <VideoControl
+                        video={this.props.mainVideo}
+                        clip={
+                          source
+                            ? source.clips.find((c) => c.id == clipID)
+                            : null
+                        }
+                        clipValue={clipValue ? clipValue : null}
+                        useHotkeys
+                        skip={this.props.scene.videoSkip}
+                        onChangeVolume={() => {}}
+                      />
+                    )}
                 </Grid>
-              </Drawer>
-            </React.Fragment>
+              </Grid>
+            </Drawer>
           )}
 
         <Dialog
@@ -1081,46 +1031,20 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     window.ipc.openExternal(url);
   }
 
-  onMouseEnterAppBar() {
+  onMouseMove() {
     clearTimeout(this._appBarTimeout);
-    this.setState({ appBarHover: true });
-  }
-
-  closeAppBar() {
-    this.setState({ appBarHover: false });
-  }
-
-  onMouseLeaveAppBar() {
-    clearTimeout(this._appBarTimeout);
-    this._appBarTimeout = setTimeout(this.closeAppBar.bind(this), 1000);
-  }
-
-  onMouseEnterDrawer() {
-    clearTimeout(this._drawerTimeout);
-    this.setState({ drawerHover: true });
-  }
-
-  closeDrawer() {
-    this.setState({ drawerHover: false });
-  }
-
-  onMouseLeaveDrawer() {
-    clearTimeout(this._drawerTimeout);
-    this._drawerTimeout = setTimeout(this.closeDrawer.bind(this), 1000);
-  }
-
-  onMouseEnterTagDrawer() {
-    clearTimeout(this._tagDrawerTimeout);
-    this.setState({ tagDrawerHover: true });
-  }
-
-  closeTagDrawer() {
-    this.setState({ tagDrawerHover: false });
-  }
-
-  onMouseLeaveTagDrawer() {
-    clearTimeout(this._tagDrawerTimeout);
-    this._tagDrawerTimeout = setTimeout(this.closeTagDrawer.bind(this), 500);
+    this.setState({
+      appBarHover: true,
+      drawerHover: true,
+      tagDrawerHover: true,
+    });
+    this._appBarTimeout = setTimeout(() => {
+      this.setState({
+        appBarHover: false,
+        drawerHover: false,
+        tagDrawerHover: false,
+      });
+    }, 3000);
   }
 
   onCloseDialog() {
