@@ -1,8 +1,9 @@
 import * as React from "react";
 
 import {
+  Card,
+  CardContent,
   Collapse,
-  Divider,
   Fab,
   FormControlLabel,
   Grid,
@@ -97,7 +98,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
     }
 
     return (
-      <Grid container alignItems="center">
+      <Grid container alignItems="center" spacing={this.props.scene.textEnabled ? 2 : 0}>
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
@@ -108,7 +109,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                     onChange={this.onBoolInput.bind(this, "textEnabled")}
                   />
                 }
-                label="Text Overlay"
+                label="Text Overlays"
               />
             </Grid>
             <Grid item>
@@ -127,29 +128,24 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
           </Grid>
         </Grid>
         {this.props.scene.scriptPlaylists.map((playlist, i) => (
-          <React.Fragment key={i}>
-            <Grid item xs={12}>
-              <Collapse in={this.props.scene.textEnabled}>
-                <ScriptPlaylist
-                  playlistIndex={i}
-                  playlist={playlist}
-                  scene={this.props.scene}
-                  onAddScript={this.props.onAddScript}
-                  onPlay={this.props.onPlay}
-                  onSourceOptions={this.onSourceOptions.bind(this)}
-                  onUpdateScene={this.props.onUpdateScene.bind(this)}
-                  systemMessage={this.props.systemMessage}
-                />
-              </Collapse>
-            </Grid>
-            {i != this.props.scene.scriptPlaylists.length - 1 && (
-              <Grid item xs={12}>
-                <Collapse in={this.props.scene.textEnabled}>
-                  <Divider />
-                </Collapse>
-              </Grid>
-            )}
-          </React.Fragment>
+          <Grid key={i} item xs={12}>
+            <Collapse in={this.props.scene.textEnabled}>
+              <Card>
+                <CardContent>
+                  <ScriptPlaylist
+                    playlistIndex={i}
+                    playlist={playlist}
+                    scene={this.props.scene}
+                    onAddScript={this.props.onAddScript}
+                    onPlay={this.props.onPlay}
+                    onSourceOptions={this.onSourceOptions.bind(this)}
+                    onUpdateScene={this.props.onUpdateScene.bind(this)}
+                    systemMessage={this.props.systemMessage}
+                  />
+                </CardContent>
+              </Card>
+            </Collapse>
+          </Grid>
         ))}
         {this.state.sourceOptions != null && (
           <ScriptOptions
