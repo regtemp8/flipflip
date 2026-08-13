@@ -923,7 +923,7 @@ class SceneOptionCard extends React.Component<
                               )}
                             />
                           }
-                          label="Persist Text Overlay"
+                          label="Persist Text Overlays"
                         />
                       </Collapse>
                     </Grid>

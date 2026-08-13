@@ -53,7 +53,7 @@ Choose a Scene to transition to after this one (or none). Control the timing of 
   * You can also choose to move to the next scene after an audio clip has ended or after a captioning script has completed.
     You will find these options in the audio and text options, respectively.
 * **Persist Audio** - Persist the Audio tracks of this scene through all subsequent Next Scenes
-* **Persist Text Overlay** - Persist the Text Overlay scripts of this scene through all subsequent Next Scenes
+* **Persist Text Overlays** - Persist the Text Overlay scripts of this scene through all subsequent Next Scenes
 
 Rather than picking a single scene, you can select "Random". Click <img style="vertical-align: -5px" src="doc_icons/list.svg" alt="List" width="20" height="20">
 to select the scenes you'd like to be randomly picked from.

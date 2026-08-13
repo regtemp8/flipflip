@@ -694,7 +694,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                 !this.props.persistText && (
                   <Accordion TransitionProps={{ unmountOnExit: true }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>Text Overlay</Typography>
+                      <Typography>Text Overlays</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <TextCard

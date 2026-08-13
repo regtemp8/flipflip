@@ -88,7 +88,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                       onChange={this.onBoolInput.bind(this, "textEnabled")}
                     />
                   }
-                  label="Text Overlay"
+                  label="Text Overlays"
                 />
               </Grid>
             </Grid>
