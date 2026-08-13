@@ -320,6 +320,9 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   _drawerTimeout: any = null;
   _tagDrawerTimeout: any = null;
   _showVideoControls = false;
+  _alwaysOnTop = false;
+  _fullScreen = false;
+  _showMenu = false;
   _removeOnPlayPause: () => void = null;
   _removeOnNavigateBack: () => void = null;
   _removeOnToggleFullscreen: () => void = null;
@@ -1184,7 +1187,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   toggleFull() {
-    const toggleFull = !this.props.config.displaySettings.fullScreen;
+    const toggleFull = !this._fullScreen;
     this.setFullscreen(toggleFull);
     this.setMenuBarVisibility(toggleFull);
   }
@@ -1214,12 +1217,12 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   setMenuBarVisibility(showMenu: boolean) {
-    this.props.config.displaySettings.showMenu = showMenu;
+    this._showMenu = showMenu;
     window.ipc.setMenuBarVisibility(showMenu);
   }
 
   setFullscreen(fullScreen: boolean) {
-    this.props.config.displaySettings.fullScreen = fullScreen;
+    this._fullScreen = fullScreen;
     window.ipc.setFullScreen(fullScreen);
   }
 
@@ -1442,7 +1445,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   setAlwaysOnTop(alwaysOnTop: boolean) {
-    this.props.config.displaySettings.alwaysOnTop = alwaysOnTop;
+    this._alwaysOnTop = alwaysOnTop;
     window.ipc.setAllwaysOnTop(alwaysOnTop);
   }
 
@@ -1511,15 +1514,15 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   toggleAlwaysOnTop() {
-    this.setAlwaysOnTop(!this.props.config.displaySettings.alwaysOnTop);
+    this.setAlwaysOnTop(!this._alwaysOnTop);
   }
 
   toggleMenuBarDisplay() {
-    this.setMenuBarVisibility(!this.props.config.displaySettings.showMenu);
+    this.setMenuBarVisibility(!this._showMenu);
   }
 
   toggleFullscreen() {
-    this.setFullscreen(!this.props.config.displaySettings.fullScreen);
+    this.setFullscreen(!this._fullScreen);
   }
 
   prevSource() {
