@@ -69,7 +69,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
   render() {
     const classes = this.props.classes;
     return (
-      <Grid container alignItems="center" spacing={2}>
+      <Grid container alignItems="center" spacing={this.props.scene.audioEnabled ? 2 : 0}>
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
