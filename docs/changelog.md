@@ -1,12 +1,12 @@
 # Changelog
 
-#### v5.2.0 <small>(08/22/2026)</small>
+#### v5.2.0 <small>(08/23/2026)</small>
 - Experimental: make player bars work for VR controllers
 - Bundle fonts and icons
 - Improve audio and script playlist layout in audio/text tab
 - Fix create backup action
 - Fix full screen display setting only working once
-- Upgrade Electron to 42.7.0
+- Upgrade Electron to 43.4.1
 - Upgrade 3rd party libraries
 
 #### v5.1.2 <small>(07/19/2026)</small>
