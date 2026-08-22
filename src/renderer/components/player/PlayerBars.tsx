@@ -86,7 +86,7 @@ const hexToRGB = (h: string) => {
 const styles = (theme: Theme) =>
   createStyles({
     hoverLayer: {
-      zIndex: theme.zIndex.drawer + 1,
+      zIndex: theme.zIndex.drawer - 1,
       position: "absolute",
       opacity: 0,
       top: 0,
