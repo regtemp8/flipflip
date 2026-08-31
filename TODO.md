@@ -47,7 +47,7 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 </StyledEngineProvider>
 ```
 
-**Verification:** `yarn lint` passes; app renders without theme errors.
+**Verification:** `yarn package` completes without build errors.
 
 ---
 
