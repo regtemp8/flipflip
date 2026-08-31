@@ -196,7 +196,7 @@ const styles = (theme: Theme) =>
     openFileName: {
       marginLeft: "auto",
       marginTop: theme.spacing(1.5),
-      color: (theme.palette.text as any).hint,
+      color: theme.palette.text.disabled,
     },
     menuDivider: {
       marginLeft: "auto",

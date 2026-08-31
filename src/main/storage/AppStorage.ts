@@ -411,10 +411,9 @@ export default class AppStorage {
           };
           if (
             !this.initialState.theme.palette.mode &&
-            !!this.initialState.theme.palette.type
+            !!data.theme?.palette?.type
           ) {
-            this.initialState.theme.palette.mode =
-              this.initialState.theme.palette.type;
+            this.initialState.theme.palette.mode = data.theme.palette.type;
           }
           // Multiply all nextSceneTime
           for (let scene of this.initialState.scenes) {

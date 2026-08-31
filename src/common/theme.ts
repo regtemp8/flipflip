@@ -12,10 +12,6 @@ export interface Theme {
       700: string;
       800: string;
       900: string;
-      A100: string;
-      A200: string;
-      A400: string;
-      A700: string;
       main: string;
     };
     secondary: {
@@ -25,10 +21,8 @@ export interface Theme {
       main: string;
     };
     text: {
-      hint: string;
+      disabled: string;
     };
-    // migration only
-    type?: string;
   };
 }
 
@@ -46,10 +40,6 @@ const defaultTheme: Theme = {
       700: "#303f9f",
       800: "#283593",
       900: "#1a237e",
-      A100: "#8c9eff",
-      A200: "#536dfe",
-      A400: "#3d5afe",
-      A700: "#304ffe",
       main: "#3f51b5",
     },
     secondary: {
@@ -59,7 +49,7 @@ const defaultTheme: Theme = {
       main: "#f44336",
     },
     text: {
-      hint: "rgba(0, 0, 0, 0.38)",
+      disabled: "rgba(0, 0, 0, 0.38)",
     },
   },
 };
