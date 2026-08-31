@@ -47,7 +47,7 @@ class PictureGrid extends React.Component<PictureGridProps> {
     return (
       <div className={classes.content}>
         <div className={classes.masonry}>
-          <Masonry columns={[1, 2, 3, 4]} spacing={1}>
+          <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={1}>
             {pictures.map((p, x) => (
               <ImageView
                 key={x}

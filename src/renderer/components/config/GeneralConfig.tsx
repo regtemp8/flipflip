@@ -18,7 +18,7 @@ import BackupCard from "../configGroups/BackupCard";
 import APICard from "../configGroups/APICard";
 import ThemeCard from "../configGroups/ThemeCard";
 import WatermarkCard from "../configGroups/WatermarkCard";
-import Masonry from "@mui/lab/Masonry/Masonry";
+import Masonry from "@mui/lab/Masonry";
 
 interface GeneralConfigProps {
   config: Config;
@@ -47,7 +47,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
     return (
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Masonry columns={[1, 2, 3, 4]} spacing={2}>
+          <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={2}>
             <Card>
               <CardContent>
                 <PlayerBoolCard
