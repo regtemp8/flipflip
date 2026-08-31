@@ -1,252 +1,217 @@
 # MUI v5 Migration TODO
 
-> The `@mui/icons-material`, `@mui/lab`, `@mui/material`, `@mui/styles`, and `@mui/system` packages have been upgraded to version 5 in `package.json`, but the codebase still uses MUI v4 patterns. This TODO lists every React component that uses MUI and the migration tasks required.
+> `@mui/*` packages upgraded to v5 in `package.json`, but codebase still uses MUI v4 patterns (`withStyles`, `createStyles`, `@mui/lab/Masonry`, deprecated tokens).
+
+## Quick Reference: Key v5 Changes
+
+| v4 Pattern | v5 Replacement |
+|---|---|
+| `withStyles(styles)(Component)` | `styled(Component)(styles)` or `sx={}` prop |
+| `createStyles({})` | Remove — not needed in v5 |
+| `@mui/styles/withStyles` | `@mui/material/styles/styled` |
+| `MuiThemeProvider` | `ThemeProvider` from `@mui/material` |
+| `@mui/lab/Masonry` | `@mui/material/Masonry` |
+| `@mui/material/colors/blue` | `@mui/material/colors/blue` (unchanged) |
+| `alpha`/`darken` from `@mui/material/styles` | `@mui/material/styles` (unchanged) |
+| `primary: { A100, A200, A400, A700 }` | Remove — deprecated in v5 |
+| `theme.type` | `theme.mode` |
+| `theme.palette.text.hint` | `theme.palette.text.disabled` |
+| Root provider | Wrap with `StyledEngineProvider` |
 
 ---
 
-## Migration Overview
+## Phase 0 — Infrastructure (1 file)
 
-| Pattern | Files Affected | v5 Status |
-|---|---|---|
-| `withStyles` + `createStyles` (JSS) | **65 files** | **Removed** — must migrate to `styled` API or `sx` prop |
-| `@mui/icons-material` | **42 files** | Still available, verify import paths |
-| `@mui/material` core components | **30 files** | Major API changes |
-| `@mui/lab/Masonry` | **2 files** | **Removed from `@mui/lab`** — moved to `@mui/material` |
-| `@mui/material/colors` | **14 files** | Import path may change |
-| `StyledEngineProvider` + `ThemeProvider` | **1 file** | New injection pattern required |
-| `ThemeOptions` | **1 file** | Renamed in v5 |
+### 0.1 Add `StyledEngineProvider` to root
 
----
+**File:** `src/renderer/components/Meta.tsx`
 
-## Critical Migration Tasks
+- Add `StyledEngineProvider` import from `@mui/material`
+- Wrap the root component tree with it
+- Replace `MuiThemeProvider` → `ThemeProvider` (from `@mui/material`, not `@mui/styles`)
+- Remove `@mui/styles/MuiThemeProvider` import
 
-### 1. Replace `withStyles` + `createStyles` with `styled` API or `sx` prop (65 files)
+```tsx
+// Before
+import { MuiThemeProvider } from '@mui/styles';
+<MuiThemeProvider theme={theme}>
+  <App />
+</MuiThemeProvider>
 
-`withStyles` and `createStyles` from `@mui/styles` are **removed** in MUI v5. Each file must be migrated.
+// After
+import { ThemeProvider, StyledEngineProvider } from '@mui/material';
+<StyledEngineProvider injectFirst>
+  <ThemeProvider theme={theme}>
+    <App />
+  </ThemeProvider>
+</StyledEngineProvider>
+```
 
-**Recommended approach:**
-- For simple styling: use the `sx` prop directly
-- For reusable styles: use the `styled` component API from `@mui/material/styles`
-
-**Affected files (65 total):**
-
-#### config/ (7 files)
-- `src/renderer/components/config/ColorPicker.tsx`
-- `src/renderer/components/config/ColorSetPicker.tsx`
-- `src/renderer/components/config/ConfigForm.tsx`
-- `src/renderer/components/config/GridSetup.tsx`
-- `src/renderer/components/config/ThemeColorPicker.tsx`
-- `src/renderer/components/config/VideoClipper.tsx`
-
-#### configGroups/ (20 files)
-- `src/renderer/components/configGroups/APICard.tsx`
-- `src/renderer/components/configGroups/AudioCard.tsx`
-- `src/renderer/components/configGroups/BackupCard.tsx`
-- `src/renderer/components/configGroups/CacheCard.tsx`
-- `src/renderer/components/configGroups/CrossFadeCard.tsx`
-- `src/renderer/components/configGroups/FadeIOCard.tsx`
-- `src/renderer/components/configGroups/ImageVideoCard.tsx`
-- `src/renderer/components/configGroups/MultiSceneSelect.tsx`
-- `src/renderer/components/configGroups/PanningCard.tsx`
-- `src/renderer/components/configGroups/PlayerNumCard.tsx`
-- `src/renderer/components/configGroups/PlaylistSelect.tsx`
-- `src/renderer/components/configGroups/SceneOptionCard.tsx`
-- `src/renderer/components/configGroups/SceneSelect.tsx`
-- `src/renderer/components/configGroups/ScriptPlaylist.tsx`
-- `src/renderer/components/configGroups/SlideCard.tsx`
-- `src/renderer/components/configGroups/StrobeCard.tsx`
-- `src/renderer/components/configGroups/TextCard.tsx`
-- `src/renderer/components/configGroups/ThemeCard.tsx`
-- `src/renderer/components/configGroups/WatermarkCard.tsx`
-- `src/renderer/components/configGroups/ZoomMoveCard.tsx`
-
-#### library/ (18 files)
-- `src/renderer/components/library/AudioAlbumList.tsx`
-- `src/renderer/components/library/AudioArtistList.tsx`
-- `src/renderer/components/library/AudioEdit.tsx`
-- `src/renderer/components/library/AudioLibrary.tsx`
-- `src/renderer/components/library/AudioOptions.tsx`
-- `src/renderer/components/library/AudioSourceListItem.tsx`
-- `src/renderer/components/library/AudioSourceList.tsx`
-- `src/renderer/components/library/BatchClipDialog.tsx`
-- `src/renderer/components/library/FontOptions.tsx`
-- `src/renderer/components/library/LibrarySearch.tsx`
-- `src/renderer/components/library/Library.tsx`
-- `src/renderer/components/library/PlaylistList.tsx`
-- `src/renderer/components/library/ScriptLibrary.tsx`
-- `src/renderer/components/library/ScriptOptions.tsx`
-- `src/renderer/components/library/ScriptSourceListItem.tsx`
-- `src/renderer/components/library/ScriptSourceList.tsx`
-- `src/renderer/components/library/SourceListItem.tsx`
-- `src/renderer/components/library/SourceList.tsx`
-- `src/renderer/components/library/TagManager.tsx`
-
-#### player/ (8 files)
-- `src/renderer/components/player/AudioAlert.tsx`
-- `src/renderer/components/player/AudioControl.tsx`
-- `src/renderer/components/player/AudioPlaylist.tsx`
-- `src/renderer/components/player/GridPlayer.tsx`
-- `src/renderer/components/player/PictureGrid.tsx`
-- `src/renderer/components/player/PlayerBars.tsx`
-- `src/renderer/components/player/VideoControl.tsx`
-
-#### sceneDetail/ (12 files)
-- `src/renderer/components/sceneDetail/CaptionScriptor.tsx`
-- `src/renderer/components/sceneDetail/GooninatorDialog.tsx`
-- `src/renderer/components/sceneDetail/HydrusDialog.tsx`
-- `src/renderer/components/sceneDetail/PiwigoDialog.tsx`
-- `src/renderer/components/sceneDetail/SceneDetail.tsx`
-- `src/renderer/components/sceneDetail/SceneEffects.tsx`
-- `src/renderer/components/sceneDetail/SceneGenerator.tsx`
-- `src/renderer/components/sceneDetail/SceneOptions.tsx`
-- `src/renderer/components/sceneDetail/URLDialog.tsx`
-
-#### Other (4 files)
-- `src/renderer/components/ScenePicker.tsx`
-- `src/renderer/components/Tutorial.tsx`
-- `src/renderer/SceneSearch.tsx`
-- `src/renderer/Template.tsx`
+**Verification:** `yarn lint` passes; app renders without theme errors.
 
 ---
 
-### 2. Migrate `@mui/lab/Masonry` to `@mui/material` (2 files)
+## Phase 1 — Critical Build Blockers (2 files)
 
-`@mui/lab` is no longer included in the main MUI package in v5. The `Masonry` component has moved.
+### 1.1 Fix `@mui/lab/Masonry` import
 
-**Affected files:**
-- `src/renderer/components/config/GeneralConfig.tsx` — imports `Masonry` from `@mui/lab/Masonry/Masonry`
-- `src/renderer/components/player/PictureGrid.tsx` — imports `Masonry` from `@mui/lab/Masonry`
+**Files:** `src/renderer/components/config/GeneralConfig.tsx`, `src/renderer/components/player/PictureGrid.tsx`
 
-**Migration:** Change import to `@mui/material/Masonry` (or use a third-party Masonry component if not available).
+- Replace `import { Masonry } from '@mui/lab/Masonry'` → `import { Masonry } from '@mui/material'`
+- Check for any API changes in usage (props may differ slightly)
 
----
-
-### 3. Update `StyledEngineProvider` injection pattern (1 file)
-
-MUI v5 requires `StyledEngineProvider` to be the root provider to handle CSS injection.
-
-**Affected file:**
-- `src/renderer/components/Meta.tsx` — already imports `StyledEngineProvider` and `ThemeProvider` from `@mui/material/styles`
-
-**Check:** Ensure `StyledEngineProvider` wraps `ThemeProvider` at the root of the app.
+**Verification:** `yarn lint` passes; no Masonry-related errors.
 
 ---
 
-### 4. Update `ThemeOptions` type (1 file)
+## Phase 2 — Theme Interface (1 file)
 
-`ThemeOptions` has been renamed/moved in MUI v5.
+### 2.1 Update `src/common/theme.ts`
 
-**Affected file:**
-- `src/renderer/components/Meta.tsx` — imports `ThemeOptions` from `@mui/material/styles`
+- Remove `A100`, `A200`, `A400`, `A700` from primary/secondary palettes
+- Replace `type: 'light' | 'dark'` → `mode: 'light' | 'dark'`
+- Replace `text.hint` → `text.disabled`
+- Ensure `ThemeOptions` import is from `@mui/material` (not `@mui/styles`)
 
----
-
-### 5. Update `@mui/material/colors` imports (14 files)
-
-The color palette is now a separate package. Import paths may need updating.
-
-**Affected files:**
-- `src/renderer/components/config/ThemeColorPicker.tsx`
-- `src/renderer/components/config/VideoClipper.tsx`
-- `src/renderer/components/configGroups/MultiSceneSelect.tsx`
-- `src/renderer/components/configGroups/PlaylistSelect.tsx`
-- `src/renderer/components/configGroups/SceneSelect.tsx`
-- `src/renderer/components/library/AudioLibrary.tsx`
-- `src/renderer/components/library/AudioOptions.tsx`
-- `src/renderer/components/library/AudioSourceListItem.tsx`
-- `src/renderer/components/library/LibrarySearch.tsx`
-- `src/renderer/components/library/ScriptOptions.tsx`
-- `src/renderer/components/library/ScriptSourceListItem.tsx`
-- `src/renderer/components/library/SourceListItem.tsx`
-- `src/renderer/components/player/AudioAlert.tsx`
-- `src/renderer/SceneSearch.tsx`
+**Verification:** `yarn lint` passes.
 
 ---
 
-### 6. Update `@mui/icons-material` imports (42 files)
+## Phase 3 — `withStyles` → `styled`/`sx` (Batch: config/ — 6 files)
 
-Verify all icon imports still work correctly with v5.
+**Strategy:** For each file, replace `withStyles` HOC with `styled` API.
 
-**Affected files (42 total):**
-- `src/renderer/components/ErrorBoundary.tsx`
-- `src/renderer/components/ScenePicker.tsx`
-- `src/renderer/components/Tutorial.tsx`
-- `src/renderer/components/config/ColorSetPicker.tsx`
-- `src/renderer/components/config/ConfigForm.tsx`
-- `src/renderer/components/config/GridSetup.tsx`
-- `src/renderer/components/config/VideoClipper.tsx`
-- `src/renderer/components/configGroups/AudioCard.tsx`
-- `src/renderer/components/configGroups/BackupCard.tsx`
-- `src/renderer/components/configGroups/CacheCard.tsx`
-- `src/renderer/components/configGroups/CrossFadeCard.tsx`
-- `src/renderer/components/configGroups/FadeIOCard.tsx`
-- `src/renderer/components/configGroups/ImageVideoCard.tsx`
-- `src/renderer/components/configGroups/PanningCard.tsx`
-- `src/renderer/components/configGroups/SceneOptionCard.tsx`
-- `src/renderer/components/configGroups/ScriptPlaylist.tsx`
-- `src/renderer/components/configGroups/SlideCard.tsx`
-- `src/renderer/components/configGroups/StrobeCard.tsx`
-- `src/renderer/components/configGroups/TextCard.tsx`
-- `src/renderer/components/configGroups/ZoomMoveCard.tsx`
-- `src/renderer/components/library/AudioAlbumList.tsx`
-- `src/renderer/components/library/AudioArtistList.tsx`
-- `src/renderer/components/library/AudioEdit.tsx`
-- `src/renderer/components/library/AudioLibrary.tsx`
-- `src/renderer/components/library/AudioOptions.tsx`
-- `src/renderer/components/library/AudioSourceListItem.tsx`
-- `src/renderer/components/library/Library.tsx`
-- `src/renderer/components/library/PlaylistList.tsx`
-- `src/renderer/components/library/ScriptLibrary.tsx`
-- `src/renderer/components/library/ScriptSourceListItem.tsx`
-- `src/renderer/components/library/SourceIcon.tsx`
-- `src/renderer/components/library/SourceListItem.tsx`
-- `src/renderer/components/library/SourceList.tsx`
-- `src/renderer/components/library/TagManager.tsx`
-- `src/renderer/components/player/AudioControl.tsx`
-- `src/renderer/components/player/AudioPlaylist.tsx`
-- `src/renderer/components/player/PlayerBars.tsx`
-- `src/renderer/components/player/VideoControl.tsx`
-- `src/renderer/components/sceneDetail/CaptionScriptor.tsx`
-- `src/renderer/components/sceneDetail/PiwigoDialog.tsx`
-- `src/renderer/components/sceneDetail/SceneDetail.tsx`
-- `src/renderer/components/sceneDetail/SceneGenerator.tsx`
+| # | File |
+|---|---|
+| 3.1 | `src/renderer/components/config/ColorPicker.tsx` |
+| 3.2 | `src/renderer/components/config/ColorSetPicker.tsx` |
+| 3.3 | `src/renderer/components/config/ConfigForm.tsx` |
+| 3.4 | `src/renderer/components/config/ThemeColorPicker.tsx` |
+| 3.5 | `src/renderer/components/config/VideoClipper.tsx` |
+| 3.6 | `src/renderer/components/config/GridSetup.tsx` |
+
+**Pattern for each file:**
+```tsx
+// Before
+import { withStyles, createStyles } from '@mui/styles';
+const styles = createStyles({ root: { padding: 16 } });
+class MyComponent extends React.Component<{ classes: string }> {}
+export default withStyles(styles)(MyComponent);
+
+// After
+import { styled } from '@mui/material/styles';
+const StyledComponent = styled('div')(({ theme }) => ({
+  root: { padding: 16 },
+}));
+// or use sx prop directly on the element
+```
+
+**Verification:** `yarn lint` passes after each file.
 
 ---
 
-### 7. Update common `Theme` interface (`src/common/theme.ts`)
+## Phase 4 — `withStyles` → `styled`/`sx` (Batch: configGroups/ — 20 files)
 
-The theme interface uses v4 naming conventions (e.g., `A100`, `A200`, `A400`, `A700` color scales are removed in v5; `type` is deprecated).
+| # | File |
+|---|---|
+| 4.1 | `src/renderer/components/configGroups/APICard.tsx` |
+| 4.2 | `src/renderer/components/configGroups/AudioCard.tsx` |
+| 4.3 | `src/renderer/components/configGroups/BackupCard.tsx` |
+| 4.4 | `src/renderer/components/configGroups/CacheCard.tsx` |
+| 4.5 | `src/renderer/components/configGroups/CrossFadeCard.tsx` |
+| 4.6 | `src/renderer/components/configGroups/FadeIOCard.tsx` |
+| 4.7 | `src/renderer/components/configGroups/ImageVideoCard.tsx` |
+| 4.8 | `src/renderer/components/configGroups/MultiSceneSelect.tsx` |
+| 4.9 | `src/renderer/components/configGroups/PanningCard.tsx` |
+| 4.10 | `src/renderer/components/configGroups/PlayerNumCard.tsx` |
+| 4.11 | `src/renderer/components/configGroups/PlaylistSelect.tsx` |
+| 4.12 | `src/renderer/components/configGroups/SceneOptionCard.tsx` |
+| 4.13 | `src/renderer/components/configGroups/SceneSelect.tsx` |
+| 4.14 | `src/renderer/components/configGroups/ScriptPlaylist.tsx` |
+| 4.15 | `src/renderer/components/configGroups/SlideCard.tsx` |
+| 4.16 | `src/renderer/components/configGroups/StrobeCard.tsx` |
+| 4.17 | `src/renderer/components/configGroups/TextCard.tsx` |
+| 4.18 | `src/renderer/components/configGroups/ThemeCard.tsx` |
+| 4.19 | `src/renderer/components/configGroups/WatermarkCard.tsx` |
+| 4.20 | `src/renderer/components/configGroups/ZoomMoveCard.tsx` |
 
-**Tasks:**
-- Remove `A100`, `A200`, `A400`, `A700` from primary palette (no longer used in v5)
-- Remove `type` field (deprecated in v5, use `mode` instead)
-- Update `text.hint` → `text.disabled` (v5 uses `disabled` instead of `hint`)
-- Ensure `mode: "light" | "dark"` is properly typed
+**Verification:** `yarn lint` passes after batch.
 
 ---
 
-## Recommended Migration Order
+## Phase 5 — `withStyles` → `styled`/`sx` (Batch: library/ — 18 files)
 
-1. **`src/common/theme.ts`** — Update the shared theme interface first
-2. **`src/renderer/components/Meta.tsx`** — Update root provider setup (`StyledEngineProvider` + theme)
-3. **`src/renderer/components/config/GeneralConfig.tsx`** and **`src/renderer/components/player/PictureGrid.tsx`** — Fix `@mui/lab/Masonry` imports (critical build blockers)
-4. **`src/renderer/components/config/ThemeColorPicker.tsx`** — Fix `@mui/material/colors` import (used as reference for other files)
-5. **Batch migrate `withStyles` → `styled`/`sx`** — Process files by directory (config → configGroups → library → player → sceneDetail → other)
-6. **Verify all `@mui/icons-material` imports** — Run type-check after all other changes
-7. **Run tests and verify visually** — Check every screen/page for styling regressions
+| # | File |
+|---|---|
+| 5.1 | `src/renderer/components/library/AudioAlbumList.tsx` |
+| 5.2 | `src/renderer/components/library/AudioArtistList.tsx` |
+| 5.3 | `src/renderer/components/library/AudioEdit.tsx` |
+| 5.4 | `src/renderer/components/library/AudioLibrary.tsx` |
+| 5.5 | `src/renderer/components/library/AudioOptions.tsx` |
+| 5.6 | `src/renderer/components/library/AudioSourceListItem.tsx` |
+| 5.7 | `src/renderer/components/library/AudioSourceList.tsx` |
+| 5.8 | `src/renderer/components/library/BatchClipDialog.tsx` |
+| 5.9 | `src/renderer/components/library/FontOptions.tsx` |
+| 5.10 | `src/renderer/components/library/LibrarySearch.tsx` |
+| 5.11 | `src/renderer/components/library/Library.tsx` |
+| 5.12 | `src/renderer/components/library/PlaylistList.tsx` |
+| 5.13 | `src/renderer/components/library/ScriptLibrary.tsx` |
+| 5.14 | `src/renderer/components/library/ScriptSourceListItem.tsx` |
+| 5.15 | `src/renderer/components/library/SourceIcon.tsx` |
+| 5.16 | `src/renderer/components/library/SourceListItem.tsx` |
+| 5.17 | `src/renderer/components/library/SourceList.tsx` |
+| 5.18 | `src/renderer/components/library/TagManager.tsx` |
+
+**Verification:** `yarn lint` passes after batch.
 
 ---
 
-## Summary Statistics
+## Phase 6 — `withStyles` → `styled`/`sx` (Batch: player/ + sceneDetail/ — 8 files)
+
+| # | File |
+|---|---|
+| 6.1 | `src/renderer/components/player/AudioControl.tsx` |
+| 6.2 | `src/renderer/components/player/AudioPlaylist.tsx` |
+| 6.3 | `src/renderer/components/player/PlayerBars.tsx` |
+| 6.4 | `src/renderer/components/player/VideoControl.tsx` |
+| 6.5 | `src/renderer/components/sceneDetail/CaptionScriptor.tsx` |
+| 6.6 | `src/renderer/components/sceneDetail/PiwigoDialog.tsx` |
+| 6.7 | `src/renderer/components/sceneDetail/SceneDetail.tsx` |
+| 6.8 | `src/renderer/components/sceneDetail/SceneGenerator.tsx` |
+
+**Verification:** `yarn lint` passes after batch.
+
+---
+
+## Phase 7 — Final Verification
+
+### 7.1 Check all `@mui/icons-material` imports
+
+- Verify 42 files still import from `@mui/icons-material` (should be unchanged)
+- Check for any icon deprecations
+
+### 7.2 Run full type-check
+
+```
+yarn lint
+```
+
+### 7.3 Visual regression check
+
+- Launch app (`yarn start`)
+- Navigate through every screen: config, library, player, scene detail
+- Verify themes (light/dark), spacing, and layout look correct
+
+---
+
+## Summary
 
 | Category | Count |
 |---|---|
-| Total React components using MUI | **65+** |
-| Files using `withStyles` + `createStyles` (must migrate) | **65** |
-| Files using `@mui/icons-material` | **42** |
-| Files using `@mui/material` core | **30** |
-| Files using `@mui/lab/Masonry` (critical) | **2** |
-| Files using `@mui/material/colors` | **14** |
-| Files using `StyledEngineProvider`/`ThemeProvider` | **1** |
-| Files using `ThemeOptions` | **1** |
-| Shared theme interface files | **1** |
+| Total files using MUI | **65+** |
+| `withStyles`/`createStyles` to migrate | **65** |
+| `@mui/icons-material` files | **42** |
+| `@mui/material` core files | **30** |
+| `@mui/lab/Masonry` (critical) | **2** |
+| `@mui/material/colors` files | **14** |
+| Theme provider updates | **1** |
