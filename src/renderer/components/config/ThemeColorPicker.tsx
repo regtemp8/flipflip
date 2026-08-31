@@ -1,37 +1,17 @@
 import * as React from "react";
 
-import { Fab, Grid, TextField, Theme } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
+import { Fab, Grid, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 import * as color from "@mui/material/colors";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    colorGrid: {
-      width: 170,
-    },
-    colorButton: {
-      backgroundColor: theme.palette.common.white,
-      marginTop: 0,
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      boxShadow: "none",
-    },
-    colorPickerButton: {
-      backgroundColor: theme.palette.common.white,
-      marginRight: theme.spacing(0.25),
-      width: theme.spacing(2),
-      height: theme.spacing(2),
-      minHeight: theme.spacing(2),
-      boxShadow: "none",
-    },
-    colorField: {
-      width: 100,
-    },
-  });
+const StyledColorPickerButton = styled(Fab)(({ theme }) => ({
+  marginRight: theme.spacing(0.25),
+  width: theme.spacing(2),
+  height: theme.spacing(2),
+  minHeight: theme.spacing(2),
+  boxShadow: "none",
+}));
 
 const colors = [
   color.red,
@@ -56,7 +36,6 @@ const colors = [
 ];
 
 interface ThemeColorPickerProps {
-  classes: any;
   currentColor: string;
   onChangeColor(colorTheme: any): void;
 }
@@ -67,13 +46,15 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
   }
 
   render() {
-    const classes = this.props.classes;
-
     return (
       <Grid container alignItems="center">
-        <Grid item className={classes.colorGrid}>
+        <Grid item sx={{ width: 170 }}>
           <Fab
-            className={classes.colorButton}
+            sx={{
+              m: 1,
+              mt: 0,
+              boxShadow: "none",
+            }}
             style={{ backgroundColor: this.props.currentColor }}
             size="medium"
           >
@@ -81,7 +62,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
           </Fab>
           <TextField
             variant="standard"
-            className={classes.colorField}
+            sx={{ width: 100 }}
             label="Color"
             InputProps={{
               readOnly: true,
@@ -93,38 +74,35 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
           <Grid container alignItems="center">
             {colors.map((c) => (
               <Grid key={c[500]} item>
-                <Fab
-                  className={classes.colorPickerButton}
+                <StyledColorPickerButton
                   style={{ backgroundColor: c[500] }}
                   value={c[500]}
                   onClick={this.onChangeColor.bind(this, c)}
                   size="small"
                 >
                   <div />
-                </Fab>
+                </StyledColorPickerButton>
               </Grid>
             ))}
             <Grid key={color.common.white} item>
-              <Fab
-                className={classes.colorPickerButton}
+              <StyledColorPickerButton
                 style={{ backgroundColor: color.common.white }}
                 value={color.common.white}
                 onClick={this.onChangeWhite.bind(this)}
                 size="small"
               >
                 <div />
-              </Fab>
+              </StyledColorPickerButton>
             </Grid>
             <Grid key={color.common.black} item>
-              <Fab
-                className={classes.colorPickerButton}
+              <StyledColorPickerButton
                 style={{ backgroundColor: color.common.black }}
                 value={color.common.black}
                 onClick={this.onChangeBlack.bind(this)}
                 size="small"
               >
                 <div />
-              </Fab>
+              </StyledColorPickerButton>
             </Grid>
           </Grid>
         </Grid>
@@ -146,10 +124,6 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       700: grey[700],
       800: grey[800],
       900: grey[900],
-      A100: grey.A100,
-      A200: grey.A200,
-      A400: grey.A400,
-      A700: grey.A700,
       main: black,
     });
   }
@@ -168,10 +142,6 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       700: grey[200],
       800: grey[100],
       900: grey[50],
-      A100: grey.A700,
-      A200: grey.A400,
-      A400: grey.A200,
-      A700: grey.A100,
       main: white,
     });
   }
@@ -188,14 +158,9 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       700: color[700],
       800: color[800],
       900: color[900],
-      A100: color.A100,
-      A200: color.A200,
-      A400: color.A400,
-      A700: color.A700,
       main: color[500],
     });
   }
 }
 
-(ThemeColorPicker as any).displayName = "ThemeColorPicker";
-export default withStyles(styles)(ThemeColorPicker as any);
+export default ThemeColorPicker;
