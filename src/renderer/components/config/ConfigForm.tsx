@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Alert,
@@ -23,14 +22,13 @@ import {
   Snackbar,
   Tab,
   Tabs,
-  Theme,
+  Theme as MuiTheme,
   Toolbar,
   Tooltip,
   Typography,
+  ListItemButton,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BuildIcon from "@mui/icons-material/Build";
@@ -42,6 +40,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 import { MO } from "../../../common/const";
+import { Theme } from "../../../common/theme";
 import Config, {
   CacheSettings,
   DisplaySettings,
@@ -59,147 +58,152 @@ import SceneEffects from "../sceneDetail/SceneEffects";
 
 const drawerWidth = 240;
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      display: "flex",
+const Root = styled("div")(() => ({
+  display: "flex",
+}));
+
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+}));
+
+const appBarSpacerWrapperSx = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: "0 8px",
+  minHeight: 64,
+};
+
+const AppBarSpacer = styled("div")(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: "0 8px",
+  minHeight: 64,
+}));
+
+const StyledDrawer = styled(Drawer)({
+  position: "absolute",
+});
+
+const DrawerSpacer = styled("div")(({ theme }) => ({
+  minWidth: theme.spacing(7),
+  [theme.breakpoints.up("sm")]: {
+    minWidth: theme.spacing(9),
+  },
+}));
+
+const getDrawerPaperSx = (theme: MuiTheme) => ({
+  position: "relative",
+  whiteSpace: "nowrap",
+  overflowX: "hidden",
+  height: "100vh",
+  width: drawerWidth,
+  zIndex: theme.zIndex.drawer + 2,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+});
+
+const getDrawerPaperCloseSx = (theme: MuiTheme) => {
+  const base = getDrawerPaperSx(theme);
+  return {
+    ...base,
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    zIndex: theme.zIndex.drawer,
+    width: theme.spacing(7),
+    [theme.breakpoints.up("sm")]: {
+      width: theme.spacing(9),
     },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1,
+  };
+};
+
+const DrawerButton = styled(ListItem)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  minHeight: theme.spacing(6),
+  [theme.breakpoints.down("sm")]: {
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+}));
+
+const DrawerIcon = styled("span")(({ theme }) => ({
+  color: theme.palette.primary.contrastText,
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  borderRight: `1px solid ${theme.palette.divider}`,
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  width: drawerWidth,
+  height: theme.spacing(12),
+  transition: theme.transitions.create(
+    ["width", "margin", "background", "opacity"],
+    {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
     },
-    appBarSpacerWrapper: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      padding: "0 8px",
-      minHeight: 64,
-    },
-    appBarSpacer: {
-      backgroundColor: theme.palette.primary.main,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      padding: "0 8px",
-      minHeight: 64,
-    },
-    title: {
-      textAlign: "center",
-    },
-    drawer: {
-      position: "absolute",
-    },
-    drawerSpacer: {
-      minWidth: theme.spacing(7),
-      [theme.breakpoints.up("sm")]: {
-        minWidth: theme.spacing(9),
-      },
-    },
-    drawerPaper: {
-      position: "relative",
-      whiteSpace: "nowrap",
-      overflowX: "hidden",
-      height: "100vh",
-      width: drawerWidth,
-      zIndex: theme.zIndex.drawer + 2,
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    drawerPaperClose: {
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      zIndex: theme.zIndex.drawer,
-      width: theme.spacing(7),
-      [theme.breakpoints.up("sm")]: {
-        width: theme.spacing(9),
-      },
-    },
-    drawerButton: {
-      backgroundColor: theme.palette.primary.main,
-      minHeight: theme.spacing(6),
-      [theme.breakpoints.down("sm")]: {
-        paddingLeft: 0,
-        paddingRight: 0,
-      },
-    },
-    drawerIcon: {
-      color: theme.palette.primary.contrastText,
-    },
-    tabs: {
-      borderRight: `1px solid ${theme.palette.divider}`,
-    },
-    tab: {
-      width: drawerWidth,
-      height: theme.spacing(12),
-      transition: theme.transitions.create(
-        ["width", "margin", "background", "opacity"],
-        {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        },
-      ),
-      "&:hover": {
-        backgroundColor: "rgba(0, 0, 0, 0.08)",
-        opacity: 1,
-        transition: theme.transitions.create(["background", "opacity"], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-      },
-    },
-    tabClose: {
-      minWidth: 0,
-      transition: theme.transitions.create(["width", "margin"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up("sm")]: {
-        width: theme.spacing(9),
-      },
-    },
-    optionsTab: {
-      ariaControls: "vertical-tabpanel-0",
-    },
-    effectsTab: {
-      ariaControls: "vertical-tabpanel-1",
-    },
-    sourcesTab: {
-      ariaControls: "vertical-tabpanel-2",
-    },
-    tabPanel: {
-      display: "flex",
-      height: "100%",
-    },
-    deleteItem: {
-      color: theme.palette.error.main,
-    },
-    content: {
-      display: "flex",
-      flexGrow: 1,
-      flexDirection: "column",
-      height: "100vh",
-      backgroundColor: theme.palette.background.default,
-    },
-    container: {
-      height: "100%",
-      padding: theme.spacing(0),
-      overflowY: "auto",
-    },
-    fill: {
-      flexGrow: 1,
-    },
-  });
+  ),
+  "&:hover": {
+    backgroundColor: "rgba(0, 0, 0, 0.08)",
+    opacity: 1,
+    transition: theme.transitions.create(["background", "opacity"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+}));
+
+const getTabCloseSx = (theme: MuiTheme) => ({
+  minWidth: 0,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  width: theme.spacing(7),
+  [theme.breakpoints.up("sm")]: {
+    width: theme.spacing(9),
+  },
+});
+
+const TabPanelDiv = styled("div")(() => ({
+  display: "flex",
+  height: "100%",
+}));
+
+const DeleteItem = styled(ListItemButton)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
+
+const Content = styled("main")(({ theme }) => ({
+  display: "flex",
+  flexGrow: 1,
+  flexDirection: "column",
+  height: "100vh",
+  backgroundColor: theme.palette.background.default,
+}));
+
+const ContentContainer = styled(Container)(({ theme }) => ({
+  height: "100%",
+  padding: theme.spacing(0),
+  overflowY: "auto",
+}));
+
+const Fill = styled("div")(() => ({
+  flexGrow: 1,
+}));
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />;
 }
 
 interface ConfigFormProps {
-  classes: any;
   config: Config;
   library: Array<LibrarySource>;
   scenes: Array<Scene>;
@@ -243,16 +247,11 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
   }
 
   render() {
-    const classes = this.props.classes;
     const open = this.state.drawerOpen;
 
     return (
-      <div className={classes.root}>
-        <AppBar
-          enableColorOnDark
-          position="absolute"
-          className={classes.appBar}
-        >
+      <Root>
+        <StyledAppBar enableColorOnDark position="absolute">
           <Toolbar>
             <Tooltip disableInteractive title="Back" placement="right-end">
               <IconButton
@@ -266,17 +265,17 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
               </IconButton>
             </Tooltip>
 
-            <div className={classes.fill} />
+            <Fill />
             <Typography
               component="h1"
               variant="h4"
               color="inherit"
               noWrap
-              className={classes.title}
+              sx={{ textAlign: "center" }}
             >
               Settings
             </Typography>
-            <div className={classes.fill} />
+            <Fill />
 
             <Tooltip disableInteractive title="Confirm Settings">
               <IconButton
@@ -290,81 +289,67 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
               </IconButton>
             </Tooltip>
           </Toolbar>
-        </AppBar>
+        </StyledAppBar>
 
-        <Drawer
-          className={classes.drawer}
+        <StyledDrawer
           variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
+          PaperProps={{ sx: open ? getDrawerPaperSx : getDrawerPaperCloseSx }}
           open={this.state.drawerOpen}
         >
-          <div className={clsx(!open && classes.appBarSpacerWrapper)}>
+          <Box sx={!open ? appBarSpacerWrapperSx : undefined}>
             <Collapse in={!open}>
-              <div className={classes.appBarSpacer} />
+              <AppBarSpacer />
             </Collapse>
-          </div>
+          </Box>
 
-          <ListItem className={classes.drawerButton}>
+          <DrawerButton>
             <IconButton onClick={this.onToggleDrawer.bind(this)} size="large">
-              <MenuIcon className={classes.drawerIcon} />
+              <DrawerIcon>
+                <MenuIcon />
+              </DrawerIcon>
             </IconButton>
-          </ListItem>
+          </DrawerButton>
 
           <Divider />
 
           <div>
-            <Tabs
+            <StyledTabs
               orientation="vertical"
               value={this.state.openTab}
               onChange={this.onChangeTab.bind(this)}
               aria-label="scene detail tabs"
-              className={classes.tabs}
             >
-              <Tab
+              <StyledTab
                 id="vertical-tab-0"
                 aria-controls="vertical-tabpanel-0"
                 icon={<BuildIcon />}
                 label={open ? "Default Options" : ""}
-                className={clsx(
-                  classes.tab,
-                  classes.optionsTab,
-                  !open && classes.tabClose,
-                )}
+                sx={!open ? getTabCloseSx : undefined}
               />
-              <Tab
+              <StyledTab
                 id="vertical-tab-1"
                 aria-controls="vertical-tabpanel-1"
                 icon={<PhotoFilterIcon />}
                 label={open ? "Default Effects" : ""}
-                className={clsx(
-                  classes.tab,
-                  classes.effectsTab,
-                  !open && classes.tabClose,
-                )}
+                sx={!open ? getTabCloseSx : undefined}
               />
-              <Tab
+              <StyledTab
                 id="vertical-tab-2"
                 aria-controls="vertical-tabpanel-2"
                 icon={<SettingsIcon />}
                 label={open ? "General Settings" : ""}
-                className={clsx(
-                  classes.tab,
-                  classes.sourcesTab,
-                  !open && classes.tabClose,
-                )}
+                sx={!open ? getTabCloseSx : undefined}
               />
-            </Tabs>
+            </StyledTabs>
           </div>
-          <div className={classes.fill} />
+          <Fill />
 
           <div>
             <Tooltip
               disableInteractive
               title={this.state.drawerOpen ? "" : "Reset Tutorials"}
             >
-              <ListItem
+              <DeleteItem
                 disabled={
                   this.props.config.tutorials.scenePicker == null &&
                   this.props.config.tutorials.sceneDetail == null &&
@@ -377,30 +362,24 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                   this.props.config.tutorials.sceneGrid == null &&
                   this.props.config.tutorials.videoClipper == null
                 }
-                button
                 onClick={this.props.onResetTutorials.bind(this)}
-                className={classes.deleteItem}
               >
                 <ListItemIcon>
                   <LiveHelpIcon color="error" />
                 </ListItemIcon>
                 <ListItemText primary="Reset Tutorials" />
-              </ListItem>
+              </DeleteItem>
             </Tooltip>
             <Tooltip
               disableInteractive
               title={this.state.drawerOpen ? "" : "Restore Defaults"}
             >
-              <ListItem
-                button
-                onClick={this.onRestoreDefaults.bind(this)}
-                className={classes.deleteItem}
-              >
+              <DeleteItem onClick={this.onRestoreDefaults.bind(this)}>
                 <ListItemIcon>
                   <RestoreIcon color="error" />
                 </ListItemIcon>
                 <ListItemText primary="Restore Defaults" />
-              </ListItem>
+              </DeleteItem>
             </Tooltip>
             <Dialog
               open={this.state.openMenu == MO.deleteAlert}
@@ -431,16 +410,16 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
               </DialogActions>
             </Dialog>
           </div>
-        </Drawer>
+        </StyledDrawer>
 
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth={false} className={classes.container}>
+        <Content>
+          <AppBarSpacer />
+          <ContentContainer maxWidth={false}>
             {this.state.openTab === 0 && (
               <Typography component="div">
-                <div className={classes.tabPanel}>
-                  <div className={classes.drawerSpacer} />
-                  <Box p={2} className={classes.fill}>
+                <TabPanelDiv>
+                  <DrawerSpacer />
+                  <Box p={2} sx={{ flexGrow: 1 }}>
                     <SceneOptions
                       allScenes={this.props.scenes}
                       allSceneGrids={this.props.sceneGrids}
@@ -449,15 +428,15 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                       onUpdateScene={this.onUpdateDefaultScene.bind(this)}
                     />
                   </Box>
-                </div>
+                </TabPanelDiv>
               </Typography>
             )}
 
             {this.state.openTab === 1 && (
               <Typography component="div">
-                <div className={classes.tabPanel}>
-                  <div className={classes.drawerSpacer} />
-                  <Box p={2} className={classes.fill}>
+                <TabPanelDiv>
+                  <DrawerSpacer />
+                  <Box p={2} sx={{ flexGrow: 1 }}>
                     <SceneEffects
                       easingControls={
                         this.state.config.displaySettings.easingControls
@@ -466,20 +445,15 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                       onUpdateScene={this.onUpdateDefaultScene.bind(this)}
                     />
                   </Box>
-                </div>
+                </TabPanelDiv>
               </Typography>
             )}
 
             {this.state.openTab === 2 && (
-              <Typography
-                className={clsx(
-                  this.state.openTab === 2 && classes.sourcesSection,
-                )}
-                component="div"
-              >
-                <div className={classes.tabPanel}>
-                  <div className={classes.drawerSpacer} />
-                  <Box p={2} className={classes.fill}>
+              <Typography component="div">
+                <TabPanelDiv>
+                  <DrawerSpacer />
+                  <Box p={2} sx={{ flexGrow: 1 }}>
                     <GeneralConfig
                       config={this.state.config}
                       library={this.props.library}
@@ -508,11 +482,11 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                       )}
                     />
                   </Box>
-                </div>
+                </TabPanelDiv>
               </Typography>
             )}
-          </Container>
-        </main>
+          </ContentContainer>
+        </Content>
 
         <Dialog
           open={this.state.openMenu == MO.error}
@@ -550,7 +524,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
             Error: {this.state.errorSnack}
           </Alert>
         </Snackbar>
-      </div>
+      </Root>
     );
   }
 
@@ -654,5 +628,4 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
   }
 }
 
-(ConfigForm as any).displayName = "ConfigForm";
-export default withStyles(styles)(ConfigForm as any);
+export default ConfigForm;

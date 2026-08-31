@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Card, CardContent, Grid, Theme } from "@mui/material";
+import { Card, CardContent, Grid } from "@mui/material";
 
 import Config, {
   CacheSettings,
@@ -8,6 +8,7 @@ import Config, {
   GeneralSettings,
   RemoteSettings,
 } from "../../../common/Config";
+import { Theme } from "../../../common/theme";
 import Tag from "../../../common/Tag";
 import LibrarySource from "../../../common/LibrarySource";
 import PlayerBoolCard from "../configGroups/PlayerBoolCard";
@@ -149,5 +150,3 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
     );
   }
 }
-
-(GeneralConfig as any).displayName = "GeneralConfig";

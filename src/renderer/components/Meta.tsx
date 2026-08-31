@@ -515,7 +515,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   goBack={a(actions.goBack)}
                   onBackup={actions.createBackup.bind(this, this.state)}
                   onChangeThemeColor={a(actions.changeThemeColor)}
-                  onClean={actions.cleanBackups}
+                  onClean={actions.cleanBackups.bind(this, this.state.config)}
                   onDefault={a(actions.setDefaultConfig)}
                   onRestore={a(actions.restoreFromBackup)}
                   onResetTutorials={a(actions.resetTutorials)}
