@@ -1,43 +1,22 @@
 import * as React from "react";
-import clsx from "clsx";
 import { SketchPicker } from "react-color";
 
-import { Fab, Grid, IconButton, Menu, Theme, Tooltip } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
+import { Fab, Grid, IconButton, Menu, Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    colorGrid: {
-      width: 64,
-    },
-    colorButton: {
-      backgroundColor: theme.palette.common.white,
-      marginTop: 0,
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      boxShadow: "none",
-    },
-    colorPickerButton: {
-      backgroundColor: theme.palette.common.white,
-      marginRight: theme.spacing(0.25),
-      width: theme.spacing(2),
-      height: theme.spacing(2),
-      minHeight: theme.spacing(2),
-      boxShadow: "none",
-    },
-    pickedColor: {
-      border: "black solid 3px",
-    },
-  });
+const StyledColorPickerButton = styled(Fab)(({ theme }) => ({
+  backgroundColor: theme.palette.common.white,
+  marginRight: theme.spacing(0.25),
+  width: theme.spacing(2),
+  height: theme.spacing(2),
+  minHeight: theme.spacing(2),
+  boxShadow: "none",
+}));
 
 interface ColorSetPickerProps {
-  classes: any;
   currentColors: Array<string>;
   sidebar?: boolean;
   onChangeColors(e: any): void;
@@ -64,15 +43,17 @@ class ColorSetPicker extends React.Component<
   }
 
   render() {
-    const classes = this.props.classes;
-
     return (
       <Grid container>
-        <Grid item className={classes.colorGrid}>
+        <Grid item sx={{ width: 64 }}>
           <Tooltip disableInteractive title="Add Color">
             <Fab
               id="add-color"
-              className={classes.colorButton}
+              sx={{
+                m: 1,
+                mt: 0,
+                boxShadow: "none",
+              }}
               style={
                 this.state.pickerIndex == null
                   ? {}
@@ -115,19 +96,21 @@ class ColorSetPicker extends React.Component<
           <Grid container alignItems="center">
             {this.props.currentColors.map((c, index) => (
               <Grid key={c + index} item>
-                <Fab
+                <StyledColorPickerButton
                   id={"color-" + index}
-                  className={clsx(
-                    classes.colorPickerButton,
-                    index == this.state.pickerIndex && classes.pickedColor,
-                  )}
-                  style={{ backgroundColor: c }}
+                  style={{
+                    backgroundColor: c,
+                    border:
+                      index == this.state.pickerIndex
+                        ? "black solid 3px"
+                        : undefined,
+                  }}
                   value={c}
                   onClick={this.onOpenColorPicker.bind(this)}
                   size="small"
                 >
                   <div />
-                </Fab>
+                </StyledColorPickerButton>
               </Grid>
             ))}
           </Grid>
@@ -188,5 +171,4 @@ class ColorSetPicker extends React.Component<
   }
 }
 
-(ColorSetPicker as any).displayName = "ColorSetPicker";
-export default withStyles(styles)(ColorSetPicker as any);
+export default ColorSetPicker;
