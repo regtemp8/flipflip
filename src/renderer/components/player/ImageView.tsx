@@ -97,9 +97,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
     if (!el || !img) return;
 
     const firstChild = el.firstChild as
-      | HTMLImageElement
-      | HTMLVideoElement
-      | HTMLIFrameElement;
+      HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
     if (
       !forceBG &&
       firstChild &&

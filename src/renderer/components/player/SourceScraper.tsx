@@ -263,9 +263,7 @@ export default class SourceScraper extends React.Component<
               if (this._promiseQueue.length == 0) {
                 content().setSingleImage(object.uuid);
               }
-              this.props.finishedLoading(
-                content().isEmpty(object.uuid),
-              );
+              this.props.finishedLoading(content().isEmpty(object.uuid));
               this._promiseTimeoutID = window.setTimeout(promiseLoop, 1000);
               if (this.props.nextScene && this.props.playNextScene) {
                 this._nextSourceTimeoutID = window.setTimeout(

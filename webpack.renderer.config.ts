@@ -11,10 +11,7 @@ export const rendererConfig: Configuration = {
       ...rules,
       {
         test: /\.css$/,
-        use: [
-          { loader: "style-loader" },
-          { loader: "css-loader" }
-        ],
+        use: [{ loader: "style-loader" }, { loader: "css-loader" }],
       },
     ],
   },

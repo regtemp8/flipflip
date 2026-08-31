@@ -79,7 +79,7 @@ app.on("ready", () => {
           const pieces = entryPath.split(path.sep);
           pieces.pop();
           pieces.pop();
-          pieces.push(url)
+          pieces.push(url);
           url = `${entry.protocol}//${pieces.join(path.sep)}`;
         } else {
           url = entry.origin + "/" + url;

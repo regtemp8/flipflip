@@ -98,7 +98,11 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
     }
 
     return (
-      <Grid container alignItems="center" spacing={this.props.scene.textEnabled ? 2 : 0}>
+      <Grid
+        container
+        alignItems="center"
+        spacing={this.props.scene.textEnabled ? 2 : 0}
+      >
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>

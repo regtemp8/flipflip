@@ -1237,14 +1237,12 @@ export default class ImagePlayer extends React.Component<
   _strictCheckCount = 0;
   advance(force = false, schedule = true) {
     // bail if dead
-    if (
-      !(
-        force ||
-        (this.props.isPlaying &&
-          this._isMounted &&
-          (this.props.hasStarted || this.state.historyPaths.length == 0))
-      )
-    ) {
+    if (!(
+      force ||
+      (this.props.isPlaying &&
+        this._isMounted &&
+        (this.props.hasStarted || this.state.historyPaths.length == 0))
+    )) {
       this._isLooping = false;
       return;
     }

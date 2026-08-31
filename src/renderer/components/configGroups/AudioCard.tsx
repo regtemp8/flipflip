@@ -69,7 +69,11 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
   render() {
     const classes = this.props.classes;
     return (
-      <Grid container alignItems="center" spacing={this.props.scene.audioEnabled ? 2 : 0}>
+      <Grid
+        container
+        alignItems="center"
+        spacing={this.props.scene.audioEnabled ? 2 : 0}
+      >
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
@@ -103,42 +107,40 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
           </Grid>
         </Grid>
         {this.props.scene.audioPlaylists.map((playlist, i) => (
-            <Grid key={i} item xs={12}>
-              <Collapse
-                in={this.props.scene.audioEnabled || this.props.persist}
-              >
-                <Card>
-                  <CardContent>
-                    <AudioPlaylist
-                      playlistIndex={i}
-                      playlist={playlist}
-                      scene={this.props.scene}
-                      scenePaths={this.props.scenePaths}
-                      shorterSeek={this.props.shorterSeek}
-                      showMsTimestamp={this.props.showMsTimestamp}
-                      sidebar={this.props.sidebar}
-                      startPlaying={this.props.startPlaying}
-                      persist={this.props.persist}
-                      onAddTracks={this.props.onAddTracks}
-                      onSourceOptions={this.onSourceOptions.bind(this)}
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
-                      setCurrentAudio={
-                        i == 0 && this.props.setCurrentAudio
-                          ? this.props.setCurrentAudio.bind(this)
-                          : undefined
-                      }
-                      goBack={this.props.goBack}
-                      onPlay={this.props.onPlay}
-                      onPlaying={this.props.onPlaying}
-                      orderAudioTags={this.props.orderAudioTags}
-                      playTrack={this.props.playTrack}
-                      playNextScene={this.props.playNextScene}
-                      systemMessage={this.props.systemMessage}
-                    />
-                  </CardContent>
-                </Card>
-              </Collapse>
-            </Grid>
+          <Grid key={i} item xs={12}>
+            <Collapse in={this.props.scene.audioEnabled || this.props.persist}>
+              <Card>
+                <CardContent>
+                  <AudioPlaylist
+                    playlistIndex={i}
+                    playlist={playlist}
+                    scene={this.props.scene}
+                    scenePaths={this.props.scenePaths}
+                    shorterSeek={this.props.shorterSeek}
+                    showMsTimestamp={this.props.showMsTimestamp}
+                    sidebar={this.props.sidebar}
+                    startPlaying={this.props.startPlaying}
+                    persist={this.props.persist}
+                    onAddTracks={this.props.onAddTracks}
+                    onSourceOptions={this.onSourceOptions.bind(this)}
+                    onUpdateScene={this.props.onUpdateScene.bind(this)}
+                    setCurrentAudio={
+                      i == 0 && this.props.setCurrentAudio
+                        ? this.props.setCurrentAudio.bind(this)
+                        : undefined
+                    }
+                    goBack={this.props.goBack}
+                    onPlay={this.props.onPlay}
+                    onPlaying={this.props.onPlaying}
+                    orderAudioTags={this.props.orderAudioTags}
+                    playTrack={this.props.playTrack}
+                    playNextScene={this.props.playNextScene}
+                    systemMessage={this.props.systemMessage}
+                  />
+                </CardContent>
+              </Card>
+            </Collapse>
+          </Grid>
         ))}
         {this.state.sourceOptions != null && (
           <AudioOptions
