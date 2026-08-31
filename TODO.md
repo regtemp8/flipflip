@@ -60,7 +60,7 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 - Replace `import { Masonry } from '@mui/lab/Masonry'` → `import { Masonry } from '@mui/material'`
 - Check for any API changes in usage (props may differ slightly)
 
-**Verification:** `yarn lint` passes; no Masonry-related errors.
+**Verification:** `yarn package` completes without build errors; no Masonry-related errors.
 
 ---
 
@@ -73,7 +73,7 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 - Replace `text.hint` → `text.disabled`
 - Ensure `ThemeOptions` import is from `@mui/material` (not `@mui/styles`)
 
-**Verification:** `yarn lint` passes.
+**Verification:** `yarn package` completes without build errors.
 
 ---
 
@@ -106,7 +106,7 @@ const StyledComponent = styled('div')(({ theme }) => ({
 // or use sx prop directly on the element
 ```
 
-**Verification:** `yarn lint` passes after each file.
+**Verification:** `yarn package` completes without build errors after each file.
 
 ---
 
@@ -135,7 +135,7 @@ const StyledComponent = styled('div')(({ theme }) => ({
 | 4.19 | `src/renderer/components/configGroups/WatermarkCard.tsx` |
 | 4.20 | `src/renderer/components/configGroups/ZoomMoveCard.tsx` |
 
-**Verification:** `yarn lint` passes after batch.
+**Verification:** `yarn package` completes without build errors after each file.
 
 ---
 
@@ -162,7 +162,7 @@ const StyledComponent = styled('div')(({ theme }) => ({
 | 5.17 | `src/renderer/components/library/SourceList.tsx` |
 | 5.18 | `src/renderer/components/library/TagManager.tsx` |
 
-**Verification:** `yarn lint` passes after batch.
+**Verification:** `yarn package` completes without build errors after each file.
 
 ---
 
@@ -179,7 +179,7 @@ const StyledComponent = styled('div')(({ theme }) => ({
 | 6.7 | `src/renderer/components/sceneDetail/SceneDetail.tsx` |
 | 6.8 | `src/renderer/components/sceneDetail/SceneGenerator.tsx` |
 
-**Verification:** `yarn lint` passes after batch.
+**Verification:** `yarn package` completes without build errors after each file.
 
 ---
 
@@ -193,7 +193,7 @@ const StyledComponent = styled('div')(({ theme }) => ({
 ### 7.2 Run full type-check
 
 ```
-yarn lint
+yarn make
 ```
 
 ### 7.3 Visual regression check
