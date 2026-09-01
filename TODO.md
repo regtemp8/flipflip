@@ -7,7 +7,7 @@
 | v4 Pattern | v5 Replacement |
 |---|---|
 | `withStyles(styles)(Component)` | `styled(Component)(styles)` or `sx={}` prop |
-| `createStyles({})` | Remove — not needed in v5 |
+| `createStyles({})` | Remove — not needed in v5 (except for type-checking edge cases) |
 | `@mui/styles/withStyles` | `@mui/material/styles/styled` |
 | `MuiThemeProvider` | `ThemeProvider` from `@mui/material` |
 | `@mui/lab/Masonry` | `@mui/material/Masonry` |
@@ -17,6 +17,8 @@
 | `theme.type` | `theme.mode` |
 | `theme.palette.text.hint` | `theme.palette.text.disabled` |
 | Root provider | Wrap with `StyledEngineProvider` |
+| `withTheme` from `@mui/styles` | `withTheme` from `@mui/material` |
+| `useTheme` from `@mui/styles` | `useTheme` from `@mui/material` |
 
 ---
 
@@ -47,13 +49,45 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 </StyledEngineProvider>
 ```
 
+**Note:** `injectFirst` ensures your styles take precedence over MUI's styled-engine styles.
+
 **Verification:** `yarn package` completes without build errors.
 
 ---
 
-## Phase 1 — Critical Build Blockers (2 files)
+## Phase 1 — Theme Interface (1 file)
 
-### 1.1 Fix `@mui/lab/Masonry` import
+> **Do this before Phase 2** — Theme changes affect all components' TypeScript types.
+
+### 1.1 Update `src/common/theme.ts`
+
+- Remove `A100`, `A200`, `A400`, `A700` from primary/secondary palettes
+- Replace `type: 'light' | 'dark'` → `mode: 'light' | 'dark'`
+- Replace `text.hint` → `text.disabled`
+- Ensure `ThemeOptions` import is from `@mui/material` (not `@mui/styles`)
+
+### 1.2 Check `theme.spacing` usage
+
+- Verify spacing function calls work correctly
+- Consider updating to function syntax where dynamic spacing needed: `theme.spacing((value) => value * 8)`
+
+### 1.3 Check typography token usage
+
+- Review any direct typography property assignments
+- Add `@mui/material/styles/typography` import if using custom typography tokens
+
+### 1.4 Check z-index usage
+
+- MUI v5 uses `theme.zIndex` object by default
+- Replace hardcoded z-index values with `theme.zIndex.*` tokens where applicable
+
+**Verification:** `yarn package` completes without build errors.
+
+---
+
+## Phase 2 — Critical Build Blockers (2 files)
+
+### 2.1 Fix `@mui/lab/Masonry` import
 
 **Files:** `src/renderer/components/config/GeneralConfig.tsx`, `src/renderer/components/player/PictureGrid.tsx`
 
@@ -64,22 +98,13 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 
 ---
 
-## Phase 2 — Theme Interface (1 file)
-
-### 2.1 Update `src/common/theme.ts`
-
-- Remove `A100`, `A200`, `A400`, `A700` from primary/secondary palettes
-- Replace `type: 'light' | 'dark'` → `mode: 'light' | 'dark'`
-- Replace `text.hint` → `text.disabled`
-- Ensure `ThemeOptions` import is from `@mui/material` (not `@mui/styles`)
-
-**Verification:** `yarn package` completes without build errors.
-
----
-
 ## Phase 3 — `withStyles` → `styled`/`sx` (Batch: config/ — 6 files)
 
 **Strategy:** For each file, replace `withStyles` HOC with `styled` API.
+
+**Decision guide for sx vs styled:**
+- Use **`sx` prop** for simple, one-off styling (replaces inline-like styles)
+- Use **`styled` API** for component-level style wrapping when you need theme access, pseudo-selectors (`:hover`, `:focus`), or component variants
 
 | # | File |
 |---|---|
@@ -98,12 +123,14 @@ const styles = createStyles({ root: { padding: 16 } });
 class MyComponent extends React.Component<{ classes: string }> {}
 export default withStyles(styles)(MyComponent);
 
-// After
+// After (styled API)
 import { styled } from '@mui/material/styles';
 const StyledComponent = styled('div')(({ theme }) => ({
   root: { padding: 16 },
 }));
-// or use sx prop directly on the element
+
+// After (sx prop - for simple cases)
+// <div sx={{ padding: 16 }}>...</div>
 ```
 
 **Verification:** `yarn package` completes without build errors after each file.
@@ -111,6 +138,12 @@ const StyledComponent = styled('div')(({ theme }) => ({
 ---
 
 ## Phase 4 — `withStyles` → `styled`/`sx` (Batch: configGroups/ — 20 files)
+
+**Strategy:** For each file, replace `withStyles` HOC with `styled` API.
+
+**Decision guide for sx vs styled:**
+- Use **`sx` prop** for simple, one-off styling (replaces inline-like styles)
+- Use **`styled` API** for component-level style wrapping when you need theme access, pseudo-selectors (`:hover`, `:focus`), or component variants
 
 | # | File |
 |---|---|
@@ -141,6 +174,12 @@ const StyledComponent = styled('div')(({ theme }) => ({
 
 ## Phase 5 — `withStyles` → `styled`/`sx` (Batch: library/ — 18 files)
 
+**Strategy:** For each file, replace `withStyles` HOC with `styled` API.
+
+**Decision guide for sx vs styled:**
+- Use **`sx` prop** for simple, one-off styling (replaces inline-like styles)
+- Use **`styled` API** for component-level style wrapping when you need theme access, pseudo-selectors (`:hover`, `:focus`), or component variants
+
 | # | File |
 |---|---|
 | 5.1 | `src/renderer/components/library/AudioAlbumList.tsx` |
@@ -168,6 +207,12 @@ const StyledComponent = styled('div')(({ theme }) => ({
 
 ## Phase 6 — `withStyles` → `styled`/`sx` (Batch: player/ + sceneDetail/ — 8 files)
 
+**Strategy:** For each file, replace `withStyles` HOC with `styled` API.
+
+**Decision guide for sx vs styled:**
+- Use **`sx` prop** for simple, one-off styling (replaces inline-like styles)
+- Use **`styled` API** for component-level style wrapping when you need theme access, pseudo-selectors (`:hover`, `:focus`), or component variants
+
 | # | File |
 |---|---|
 | 6.1 | `src/renderer/components/player/AudioControl.tsx` |
@@ -183,24 +228,69 @@ const StyledComponent = styled('div')(({ theme }) => ({
 
 ---
 
-## Phase 7 — Final Verification
+## Phase 7 — Additional Component Checks
 
-### 7.1 Check all `@mui/icons-material` imports
+### 7.1 Check `ListItem` usage
+
+In v5, `ListItem.disabled` and `ListItem.button` have different default behaviors. Search for:
+```
+grep -r "ListItem" src/renderer/components/ --include="*.tsx"
+```
+
+### 7.2 Check `TextField` usage
+
+- Review `margin`, `dense`, and `inputLabel` props
+- `InputLabelProps.shrink` behavior changed in v5
+
+### 7.3 Check `Select` and `Autocomplete` usage
+
+- Review `MenuProps` changes for `Select`
+- `Autocomplete` has significant changes if used (new `renderInput`, `options`, etc.)
+
+### 7.4 Check icon component props
+
+- Verify `color` prop values: `primary`/`secondary` → `primary`/`inherit`
+- `fontSize` prop: `small`/`medium`/`large` still works
+
+---
+
+## Phase 8 — Final Verification
+
+### 8.1 Check all `@mui/icons-material` imports
 
 - Verify 42 files still import from `@mui/icons-material` (should be unchanged)
 - Check for any icon deprecations
 
-### 7.2 Run full type-check
+### 8.2 Run full type-check and build
 
 ```
 yarn make
 ```
 
-### 7.3 Visual regression check
+### 8.3 Visual regression check
 
 - Launch app (`yarn start`)
 - Navigate through every screen: config, library, player, scene detail
 - Verify themes (light/dark), spacing, and layout look correct
+- Test dark mode toggle if applicable
+
+### 8.4 Search for remaining v4 patterns
+
+```bash
+# Find remaining @mui/styles imports
+grep -r "@mui/styles" src/ --include="*.tsx" --include="*.ts"
+
+# Find remaining createStyles usage
+grep -r "createStyles" src/ --include="*.tsx" --include="*.ts"
+
+# Find remaining theme.type usage
+grep -r "theme\.type" src/ --include="*.tsx" --include="*.ts"
+
+# Find remaining text.hint usage
+grep -r "text\.hint" src/ --include="*.tsx" --include="*.ts"
+```
+
+All searches should return empty results (except intentional `createStyles` for type-checking edge cases).
 
 ---
 
@@ -215,3 +305,4 @@ yarn make
 | `@mui/lab/Masonry` (critical) | **2** |
 | `@mui/material/colors` files | **14** |
 | Theme provider updates | **1** |
+| Theme interface changes | **1** |
