@@ -1,10 +1,7 @@
-<div style="display: flex; justify-content: center; align-items: top; gap: 5px;">
-  <a href="https://regtemp8.github.io/flipflip/">
-    <img alt="flipflip" src="./docs/doc_images/flipflip_logo.png" height="32" />
-  </a>
-  <h1 style="border: 0">FlipFlip</h1>
-</div>
-<hr/>
+<h1 align="center">
+  <img alt="flipflip" src="./docs/doc_images/flipflip_logo.png" height="32" />
+  <span>FlipFlip</span>
+</h1>
 <div style="display: flex; justify-content: center; align-items: top; gap: 3px;">
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
