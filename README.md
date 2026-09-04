@@ -3,9 +3,6 @@
   <span>FlipFlip</span>
 </h1>
 <p align="center">
-  <span>
-    <img src="https://img.shields.io/github/downloads/regtemp8/flipflip/total" alt="Downloads"/>
-  </span>
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
   </a>
@@ -21,6 +18,9 @@
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md">
     <img src="https://img.shields.io/badge/support-SUPPORT.md-blue.svg" alt="Support"/>
   </a>
+  <span>
+    <img src="https://img.shields.io/github/downloads/regtemp8/flipflip/total" alt="Downloads"/>
+  </span>
   <a href="https://discord.gg/xU88npVvF">
     <img src="https://img.shields.io/discord/1414566995474780164.svg?logo=discord" alt="Discord"/>
   </a>
