@@ -8,5 +8,5 @@ You can reach the community here:
 - [Reddit](https://reddit.com/r/flipflip) for discussion, questions, and feature ideas  
 - [Discord](https://discord.gg/xU88npVvF) for real-time chat and help
 
-Please use GitHub Issues only for reproducible bugs.  
+Please use GitHub Issues only for reproducible bugs. Before opening an issue, check the [troubleshooting section](https://regtemp8.github.io/flipflip/#/v5/troubleshooting) in the documentation. 
 General questions and feature ideas are best posted on Reddit or Discord.
