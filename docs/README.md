@@ -6,17 +6,13 @@
 #### [Latest Release](https://github.com/regtemp8/flipflip/releases/latest)
 
 ## Features
-* Local files as well as Tumblr, Imgur, DeviantArt, Booru & More
-* Animated GIF and video support
-* Grid view with cloneable grid cells
-* Multiple windows
-* Visual effects (zoom/transition, cross-fade, slide, strobe/pulse, fade in/out, panning, overlay)
-* Randomized and ordered playback
-* Timing control
-* Audio track/playlist support and Audio Library to organize tracks
-* Caption scripting support and Script Library to organize scripts
-* Library and Tagging to organize sources and generate slideshows
-* Easy to share!
+- **[Media sources](sources.md)** - Use local files or pull from Tumblr, Imgur, DeviantArt, Booru, and more.
+- **[Playback features](playing_scene.md)** - Control video and audio playback with a dedicated sidebar and context menu actions.
+- **[Visual effects](effects.md)** - Apply zoom, transitions, cross‑fade, slide, strobe/pulse, fade in/out, panning, and overlay effects.
+- **[Grids](grid.md)** - Play multiple scenes in a grid with clone and mirror cell options.
+- **[Audio](audio_library.md)** - Build playlists and organize tracks with the Audio Library.
+- **[Organization](library.md)** - Library and tagging system to organize sources and generate slideshows.
+- **[Captions](scriptor.md)** - Caption scripting support for dynamic text overlays.
 
 ## Community
 Need help or want to share ideas? Visit [Reddit](https://reddit.com/r/flipflip) or [Discord](https://discord.gg/xU88npVvF). For bug reports, see [SUPPORT.md](https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md).
