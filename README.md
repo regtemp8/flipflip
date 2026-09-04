@@ -3,30 +3,44 @@
   <span>FlipFlip</span>
 </h1>
 <p align="center">
+  <span>
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
   </a>
+    </span>
+  <span>
   <a href="https://github.com/regtemp8/flipflip/releases">
     <img src="https://img.shields.io/github/v/release/regtemp8/flipflip?logo=github" alt="GitHub release (latest by date)"/>
   </a>
+    </span>
+  <span>
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="Contributing"/>
   </a>
+    </span>
+  <span>
   <a href="https://regtemp8.github.io/flipflip/">
     <img src="https://img.shields.io/badge/docs-user_manual-blue.svg" alt="Docs"/>
   </a>
+    </span>
+  <span>
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md">
     <img src="https://img.shields.io/badge/support-SUPPORT.md-blue.svg" alt="Support"/>
   </a>
+    </span>
   <span>
     <img src="https://img.shields.io/github/downloads/regtemp8/flipflip/total" alt="Downloads"/>
   </span>
+  <span>
   <a href="https://discord.gg/xU88npVvF">
     <img src="https://img.shields.io/discord/1414566995474780164.svg?logo=discord" alt="Discord"/>
   </a>
+    </span>
+  <span>
   <a href="https://reddit.com/r/flipflip">
     <img src="https://img.shields.io/badge/follow-/r/flipflip-orange.svg?logo=reddit" alt="Reddit"/>
   </a>
+    </span>
 </p>
 <h3 align="center">
   A customizable slideshow player for images and videos with <i>lots</i> of bells and whistles.
