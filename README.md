@@ -2,7 +2,7 @@
   <img alt="flipflip" src="./docs/doc_images/flipflip_logo.png" height="32" />
   <span>FlipFlip</span>
 </h1>
-<p align="center">
+<p align="center" id="badges-toc">
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE" style="text-decoration: none;">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
   </a>
