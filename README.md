@@ -2,7 +2,7 @@
   <img alt="flipflip" src="./docs/doc_images/flipflip_logo.png" height="32" />
   <span>FlipFlip</span>
 </h1>
-<div style="display: flex; justify-content: center; align-items: top; gap: 3px;">
+<p align="center">
   <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
   </a>
@@ -27,7 +27,7 @@
   <a href="https://reddit.com/r/flipflip">
     <img src="https://img.shields.io/badge/follow-/r/flipflip-orange.svg?logo=reddit" alt="Reddit"/>
   </a>
-</div>
+</p>
 <h3 align="center">
   A customizable slideshow player for images and videos with <i>lots</i> of bells and whistles.
 </h3>
