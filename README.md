@@ -44,4 +44,4 @@
 - **[Captions](https://regtemp8.github.io/flipflip/#/v5/scriptor)** - Caption scripting support for dynamic text overlays.
 
 ## Getting Started
-New to FlipFlip? The [quick start guide](https://regtemp8.github.io/flipflip/#/quickstart) walks you through creating your first scene, adding sources, and starting playback.
+New to FlipFlip? The [quick start guide](https://regtemp8.github.io/flipflip/#/v5/quickstart) walks you through creating your first scene, adding sources, and starting playback.
