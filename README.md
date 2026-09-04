@@ -21,7 +21,6 @@
   <span>
     <img src="https://img.shields.io/github/downloads/regtemp8/flipflip/total" alt="Downloads"/>
   </span>
-  <span>
   <a href="https://discord.gg/xU88npVvF" style="text-decoration: none;">
     <img src="https://img.shields.io/discord/1414566995474780164.svg?logo=discord" alt="Discord"/>
   </a>
