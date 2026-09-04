@@ -8,8 +8,8 @@ Thank you for your interest in contributing to FlipFlip! This document explains 
 
 ### Prerequisites
 FlipFlip is an Electron app written in TypeScript and React. You will need to download and install the following tools:
-- Git — https://git-scm.com/downloads  
-- Node.js — https://nodejs.org/en/download/
+- Git: https://git-scm.com/downloads  
+- Node.js: https://nodejs.org/en/download/
 
 Enable Yarn (bundled with Node.js):
 ```sh
@@ -36,7 +36,7 @@ Run `yarn start` again after making changes.
 Patches are generally accepted. If your contributions make sense, you may be added as a collaborator.
 
 ## Style Guide
-- Use proper TypeScript. Hacks are okay when necessary, but be reasonable.
+- Use proper TypeScript. Hacks are OK when necessary, but be reasonable.
 - Use `import` instead of `require`. To make non-TypeScript modules work, add an entry to `src/declaration.d.ts`.
 - Run `yarn format` before submitting a pull request.
 
