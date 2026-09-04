@@ -35,5 +35,4 @@
 - [Caption Script Format](caption_script.md)
 - [Screen Capture](screen_capture.md)
 - [Troubleshooting](troubleshooting.md)
-- [Developers](developers.md)
 - [Changelog](changelog.md)
