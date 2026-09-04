@@ -19,6 +19,4 @@
 * Easy to share!
 
 ## Community
-Having an issue with FlipFlip? Have a new feature recommendation? Just want to share how much you enjoy it?
-You can reach us on our [GitHub](https://github.com/regtemp8/flipflip) or on Reddit at 
-[/r/flipflip](https://www.reddit.com/r/flipflip/).
+Need help or want to share ideas? Visit [Reddit](https://reddit.com/r/flipflip) or [Discord](https://discord.gg/xU88npVvF). For bug reports, see [SUPPORT.md](https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md).
