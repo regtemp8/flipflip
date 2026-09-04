@@ -2,29 +2,29 @@
   <img alt="flipflip" src="./docs/doc_images/flipflip_logo.png" height="32" />
   <span>FlipFlip</span>
 </h1>
-<p align="center" id="badges-toc">
-  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE" style="text-decoration: none;">
+<p align="center">
+  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License"/>
   </a>
-  <a href="https://github.com/regtemp8/flipflip/releases" style="text-decoration: none;">
+  <a href="https://github.com/regtemp8/flipflip/releases">
     <img src="https://img.shields.io/github/v/release/regtemp8/flipflip?logo=github" alt="GitHub release (latest by date)"/>
   </a>
-  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/CONTRIBUTING.md" style="text-decoration: none;">
+  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="Contributing"/>
   </a>
-  <a href="https://regtemp8.github.io/flipflip/" style="text-decoration: none;">
+  <a href="https://regtemp8.github.io/flipflip/">
     <img src="https://img.shields.io/badge/docs-user_manual-blue.svg" alt="Docs"/>
   </a>
-  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md" style="text-decoration: none;">
+  <a href="https://github.com/regtemp8/flipflip/blob/v5.0.0/SUPPORT.md">
     <img src="https://img.shields.io/badge/support-SUPPORT.md-blue.svg" alt="Support"/>
   </a>
   <span>
     <img src="https://img.shields.io/github/downloads/regtemp8/flipflip/total" alt="Downloads"/>
   </span>
-  <a href="https://discord.gg/xU88npVvF" style="text-decoration: none;">
+  <a href="https://discord.gg/xU88npVvF">
     <img src="https://img.shields.io/discord/1414566995474780164.svg?logo=discord" alt="Discord"/>
   </a>
-  <a href="https://reddit.com/r/flipflip" style="text-decoration: none;">
+  <a href="https://reddit.com/r/flipflip">
     <img src="https://img.shields.io/badge/follow-/r/flipflip-orange.svg?logo=reddit" alt="Reddit"/>
   </a>
 </p>
