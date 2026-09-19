@@ -232,7 +232,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   }
 
   calculateCacheSize() {
-    if (this.props.config.caching.maxSize != 0) {
+    if (this.props.config.caching.maxSize !== 0) {
       window.ipc.getCacheSize(this.props.config).then((size) => {
         const mbSize = size / 1024 / 1024;
         this.setState({ cacheSize: mbSize.toFixed(2) });
