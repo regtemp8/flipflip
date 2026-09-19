@@ -118,14 +118,14 @@ class APICard extends React.Component<APICardProps, APICardState> {
   render() {
     const classes = this.props.classes;
     const tumblrAuthorized =
-      this.props.settings.tumblrOAuthToken != "" &&
-      this.props.settings.tumblrOAuthTokenSecret != "";
-    const hydrusConfigured = this.props.settings.hydrusAPIKey != "";
+      this.props.settings.tumblrOAuthToken !== "" &&
+      this.props.settings.tumblrOAuthTokenSecret !== "";
+    const hydrusConfigured = this.props.settings.hydrusAPIKey !== "";
     const piwigoConfigured =
-      this.props.settings.piwigoProtocol != "" &&
-      this.props.settings.piwigoHost != "" &&
-      this.props.settings.piwigoUsername != "" &&
-      this.props.settings.piwigoPassword != "";
+      this.props.settings.piwigoProtocol !== "" &&
+      this.props.settings.piwigoHost !== "" &&
+      this.props.settings.piwigoUsername !== "" &&
+      this.props.settings.piwigoPassword !== "";
     const indexOf = this.props.settings.tumblrKeys.indexOf(
       this.props.settings.tumblrKey,
     );
@@ -245,7 +245,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
         </Grid>
 
         <Dialog
-          open={this.state.openMenu == MO.signOut}
+          open={this.state.openMenu === MO.signOut}
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="sign-out-title"
           aria-describedby="sign-out-description"
@@ -274,7 +274,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={
-            this.state.openMenu == MO.signIn && this.state.menuType == ST.tumblr
+            this.state.openMenu === MO.signIn &&
+            this.state.menuType === ST.tumblr
           }
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="sign-in-title"
@@ -317,7 +318,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={
-            this.state.openMenu == MO.new && this.state.menuType == ST.tumblr
+            this.state.openMenu === MO.new &&
+            this.state.menuType === ST.tumblr
           }
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="tumblr-title"
@@ -370,7 +372,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                         key={i}
                         value={i}
                         control={<Radio />}
-                        label={i == 0 ? "Use Your Key" : "Public Key " + i}
+                        label={i === 0 ? "Use Your Key" : "Public Key " + i}
                       />
                     ))}
                 </RadioGroup>
@@ -401,7 +403,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </Button>
             <Button
               disabled={
-                this.state.input1.length != 50 || this.state.input2.length != 50
+                this.state.input1.length !== 50 ||
+                this.state.input2.length !== 50
               }
               onClick={this.onContinueAuthTumblr.bind(this)}
               color="primary"
@@ -413,7 +416,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={
-            this.state.openMenu == MO.signIn && this.state.menuType == ST.hydrus
+            this.state.openMenu === MO.signIn &&
+            this.state.menuType === ST.hydrus
           }
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="hydrus-title"
@@ -477,10 +481,10 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </Button>
             <Button
               disabled={
-                this.state.input1.length == 0 ||
-                this.state.input2.length == 0 ||
-                this.state.input3.length == 0 ||
-                this.state.input4.length == 0
+                this.state.input1.length === 0 ||
+                this.state.input2.length === 0 ||
+                this.state.input3.length === 0 ||
+                this.state.input4.length === 0
               }
               onClick={this.onFinishAuthHydrus.bind(this)}
               color="primary"
@@ -492,7 +496,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={
-            this.state.openMenu == MO.signIn && this.state.menuType == ST.piwigo
+            this.state.openMenu === MO.signIn &&
+            this.state.menuType === ST.piwigo
           }
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="piwigo-title"
@@ -558,7 +563,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </Button>
             <Button
               disabled={
-                this.state.input1.length == 0 || this.state.input2.length == 0
+                this.state.input1.length === 0 ||
+                this.state.input2.length === 0
               }
               onClick={this.onFinishAuthPiwigo.bind(this)}
               color="primary"
