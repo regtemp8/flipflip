@@ -8,12 +8,8 @@ import {
   FormControlLabel,
   Grid,
   Switch,
-  Theme,
   Tooltip,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 
 import AddIcon from "@mui/icons-material/Add";
 
@@ -23,15 +19,8 @@ import Audio from "../../../common/Audio";
 import AudioPlaylist from "../player/AudioPlaylist";
 import AudioOptions from "../library/AudioOptions";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    addButton: {
-      boxShadow: "none",
-    },
-  });
 
 interface AudioCardProps {
-  classes: any;
   scene: Scene;
   sidebar: boolean;
   startPlaying: boolean;
@@ -67,7 +56,6 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
   }
 
   render() {
-    const classes = this.props.classes;
     return (
       <Grid
         container
@@ -95,7 +83,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
               >
                 <Tooltip disableInteractive title={"Add Playlist"}>
                   <Fab
-                    className={classes.addButton}
+                    sx={{ boxShadow: "none" }}
                     onClick={this.onAddPlaylist.bind(this)}
                     size="small"
                   >
@@ -199,5 +187,4 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
   }
 }
 
-(AudioCard as any).displayName = "AudioCard";
-export default withStyles(styles)(AudioCard as any);
+export default AudioCard;
