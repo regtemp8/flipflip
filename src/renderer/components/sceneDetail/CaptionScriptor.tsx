@@ -401,7 +401,7 @@ class CaptionScriptor extends React.Component<
                   classes.scriptGrid,
                   this.state.fullscreen && classes.hidden,
                 )}
-                id={"script-field"}
+                id="script-field"
               >
                 {this.state.error != null && (
                   <div className={classes.statusMessage}>
@@ -578,7 +578,7 @@ class CaptionScriptor extends React.Component<
                               size="large"
                             >
                               {this.state.loadFromSceneError ? (
-                                <ErrorOutlineIcon color={"error"} />
+                                <ErrorOutlineIcon color="error" />
                               ) : (
                                 <GetAppIcon />
                               )}
@@ -595,7 +595,7 @@ class CaptionScriptor extends React.Component<
                             classes.backdropTop,
                         )}
                       >
-                        <Divider variant={"fullWidth"} />
+                        <Divider variant="fullWidth" />
                       </Grid>
                       <Grid
                         item
@@ -633,7 +633,7 @@ class CaptionScriptor extends React.Component<
                       >
                         <Grid container spacing={1}>
                           <Grid item xs={12}>
-                            <Typography variant={"h5"}>Actions</Typography>
+                            <Typography variant="h5">Actions</Typography>
                           </Grid>
                           <Grid item>
                             <Tooltip
@@ -702,7 +702,7 @@ class CaptionScriptor extends React.Component<
                           <Grid item>
                             <Tooltip
                               disableInteractive
-                              title={"Wait <MILLISECONDS> ms"}
+                              title="Wait <MILLISECONDS> ms"
                             >
                               <Button
                                 className={classes.actionButton}
@@ -716,7 +716,7 @@ class CaptionScriptor extends React.Component<
                           <Grid item>
                             <Tooltip
                               disableInteractive
-                              title={"Advance to the next image"}
+                              title="Advance to the next image"
                             >
                               <Button
                                 className={classes.actionButton}
@@ -730,7 +730,7 @@ class CaptionScriptor extends React.Component<
                           <Grid item>
                             <Tooltip
                               disableInteractive
-                              title={"Play audio <ALIAS> at volume <VOLUME>"}
+                              title="Play audio <ALIAS> at volume <VOLUME>"
                             >
                               <Button
                                 className={classes.actionButton}
@@ -751,7 +751,7 @@ class CaptionScriptor extends React.Component<
                             classes.backdropTop,
                         )}
                       >
-                        <Divider variant={"fullWidth"} />
+                        <Divider variant="fullWidth" />
                       </Grid>
                       <Grid
                         item
@@ -764,16 +764,16 @@ class CaptionScriptor extends React.Component<
                       >
                         <Grid container spacing={1}>
                           <Grid item xs={12}>
-                            <Typography variant={"h5"}>Setters</Typography>
+                            <Typography variant="h5">Setters</Typography>
                           </Grid>
                           <Grid item xs={12}>
                             <Select
                               variant="standard"
                               fullWidth
-                              value={""}
+                              value=""
                               onChange={this.onAddSetter.bind(this)}
                             >
-                              <MenuItem key={"all"} value={"all"}>
+                              <MenuItem key="all" value="all">
                                 Insert All
                               </MenuItem>
                               <Divider />
@@ -837,7 +837,7 @@ class CaptionScriptor extends React.Component<
                             classes.backdropTop,
                         )}
                       >
-                        <Divider variant={"fullWidth"} />
+                        <Divider variant="fullWidth" />
                       </Grid>
                       <Grid
                         item
@@ -850,7 +850,7 @@ class CaptionScriptor extends React.Component<
                       >
                         <Grid container spacing={1}>
                           <Grid item xs={12}>
-                            <Typography variant={"h5"}>Special</Typography>
+                            <Typography variant="h5">Special</Typography>
                           </Grid>
                           <Grid item>
                             <Tooltip
@@ -925,7 +925,7 @@ class CaptionScriptor extends React.Component<
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Divider variant={"fullWidth"} />
+                        <Divider variant="fullWidth" />
                       </Grid>
                       <Grid item xs={12}>
                         <Typography variant="body2" color="inherit">
@@ -971,7 +971,7 @@ class CaptionScriptor extends React.Component<
                         this,
                         "opacity",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v: any) => v + "%"}
                       aria-labelledby="opacity-slider"
                     />
@@ -1054,7 +1054,7 @@ class CaptionScriptor extends React.Component<
                   <CardContent>
                     <Grid item xs={12}>
                       <FontOptions
-                        name={"Blink"}
+                        name="Blink"
                         options={this.state.captionScript.blink}
                         systemFonts={this.state.systemFonts}
                         onUpdateOptions={this.onUpdateOptions.bind(
@@ -1064,7 +1064,7 @@ class CaptionScriptor extends React.Component<
                       />
                       <Divider className={classes.fontDivider} />
                       <FontOptions
-                        name={"Caption"}
+                        name="Caption"
                         options={this.state.captionScript.caption}
                         systemFonts={this.state.systemFonts}
                         onUpdateOptions={this.onUpdateOptions.bind(
@@ -1074,7 +1074,7 @@ class CaptionScriptor extends React.Component<
                       />
                       <Divider className={classes.fontDivider} />
                       <FontOptions
-                        name={"Big Caption"}
+                        name="Big Caption"
                         options={this.state.captionScript.captionBig}
                         systemFonts={this.state.systemFonts}
                         onUpdateOptions={this.onUpdateOptions.bind(
@@ -1084,7 +1084,7 @@ class CaptionScriptor extends React.Component<
                       />
                       <Divider className={classes.fontDivider} />
                       <FontOptions
-                        name={"Count"}
+                        name="Count"
                         options={this.state.captionScript.count}
                         systemFonts={this.state.systemFonts}
                         onUpdateOptions={this.onUpdateOptions.bind(

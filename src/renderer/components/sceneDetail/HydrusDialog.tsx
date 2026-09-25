@@ -123,7 +123,7 @@ class HydrusDialog extends React.Component<
                 displaySources={[]}
                 filters={this.state.selectedTags}
                 tags={this.props.tags}
-                placeholder={"Add Tags"}
+                placeholder="Add Tags"
                 isClearable
                 isCreatable
                 onlyTags
@@ -194,10 +194,10 @@ class HydrusDialog extends React.Component<
                   value={this.state.fileSortOrder}
                   onChange={this.onFileSortOrder.bind(this)}
                 >
-                  <MenuItem key={"asc"} value={"asc"}>
+                  <MenuItem key="asc" value="asc">
                     Ascending
                   </MenuItem>
-                  <MenuItem key={"desc"} value={"desc"}>
+                  <MenuItem key="desc" value="desc">
                     Descending
                   </MenuItem>
                 </Select>

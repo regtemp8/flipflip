@@ -443,10 +443,10 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 value={this.state.input1}
                 onChange={this.onInput1.bind(this)}
               >
-                <MenuItem key={"http"} value={"http"}>
+                <MenuItem key="http" value="http">
                   http
                 </MenuItem>
-                <MenuItem key={"https"} value={"https"}>
+                <MenuItem key="https" value="https">
                   https
                 </MenuItem>
               </Select>
@@ -523,10 +523,10 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 value={this.state.input1}
                 onChange={this.onInput1.bind(this)}
               >
-                <MenuItem key={"http"} value={"http"}>
+                <MenuItem key="http" value="http">
                   http
                 </MenuItem>
-                <MenuItem key={"https"} value={"https"}>
+                <MenuItem key="https" value="https">
                   https
                 </MenuItem>
               </Select>

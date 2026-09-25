@@ -555,7 +555,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
             <SceneSearch
               displaySources={this.state.displayScenes}
               filters={this.state.filters}
-              placeholder={"Search ..."}
+              placeholder="Search ..."
               onUpdateFilters={this.onUpdateFilters.bind(this)}
             />
           </Toolbar>
@@ -1008,7 +1008,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
-                              variant={"h6"}
+                              variant="h6"
                               onClick={this.beginEditingName.bind(this, g)}
                               className={classes.groupTitle}
                             >
@@ -1286,7 +1286,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
-                              variant={"h6"}
+                              variant="h6"
                               onClick={this.beginEditingName.bind(this, g)}
                               className={classes.groupTitle}
                             >
@@ -1568,7 +1568,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
-                              variant={"h6"}
+                              variant="h6"
                               onClick={this.beginEditingName.bind(this, g)}
                               className={classes.groupTitle}
                             >
@@ -1710,7 +1710,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
         {this.state.deleteScenes != null && (
           <React.Fragment>
-            <Tooltip disableInteractive title={"Delete Selected Scenes"}>
+            <Tooltip disableInteractive title="Delete Selected Scenes">
               <Fab
                 className={classes.deleteButton}
                 onClick={this.onFinishDelete.bind(this)}
@@ -1719,7 +1719,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                 <DeleteIcon className={classes.icon} />
               </Fab>
             </Tooltip>
-            <Tooltip disableInteractive title={"Cancel Delete"}>
+            <Tooltip disableInteractive title="Cancel Delete">
               <Fab
                 className={classes.sortMenuButton}
                 onClick={this.onCancelDelete.bind(this)}

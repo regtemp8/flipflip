@@ -148,7 +148,7 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
         <Grid item xs={12}>
           <Tooltip
             disableInteractive
-            placement={"top"}
+            placement="top"
             title="The following tags/types will be ignored when using a Scene Generator. This setting overrides any generator rules."
           >
             <div>

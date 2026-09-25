@@ -450,7 +450,7 @@ class ScriptLibrary extends React.Component<
                   displaySources={this.state.displaySources}
                   filters={this.state.filters}
                   tags={this.props.tags}
-                  placeholder={"Search ..."}
+                  placeholder="Search ..."
                   isCreatable
                   onlyUsed
                   noTypes
@@ -857,7 +857,7 @@ class ScriptLibrary extends React.Component<
                 displaySources={this.props.library}
                 filters={this.state.selectedTags}
                 tags={this.props.tags}
-                placeholder={"Tag These Sources"}
+                placeholder="Tag These Sources"
                 isClearable
                 onlyTags
                 showCheckboxes

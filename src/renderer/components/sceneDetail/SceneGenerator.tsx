@@ -397,7 +397,7 @@ class SceneGenerator extends React.Component<
                   this.state.isWeighing,
                   "percent",
                 )}
-                valueLabelDisplay={"auto"}
+                valueLabelDisplay="auto"
                 valueLabelFormat={(v) => v + "%"}
                 orientation="vertical"
               />
@@ -450,7 +450,7 @@ class SceneGenerator extends React.Component<
             {this.state.isEditing != -1 && (
               <div>
                 <div style={{ display: "flex" }}>
-                  <Typography variant={"overline"} style={{ flexGrow: 1 }}>
+                  <Typography variant="overline" style={{ flexGrow: 1 }}>
                     Create advanced rule:
                   </Typography>
                   <IconButton
@@ -528,7 +528,7 @@ class SceneGenerator extends React.Component<
                         .filter((wg) => !wg.rules)
                         .map((wg) => wg.search)}
                       tags={this.props.tags}
-                      placeholder={"Search ..."}
+                      placeholder="Search ..."
                       autoFocus
                       isCreatable
                       fullWidth

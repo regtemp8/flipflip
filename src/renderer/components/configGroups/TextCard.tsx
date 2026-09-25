@@ -118,7 +118,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
             </Grid>
             <Grid item>
               <Collapse in={this.props.scene.textEnabled}>
-                <Tooltip disableInteractive title={"Add Playlist"}>
+                <Tooltip disableInteractive title="Add Playlist">
                   <Fab
                     className={classes.addButton}
                     onClick={this.onAddPlaylist.bind(this)}

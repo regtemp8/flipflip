@@ -165,7 +165,7 @@ class AudioAlbumList extends React.Component<
                     </Typography>
                   </Tooltip>
                   <Typography
-                    id={"artist-link"}
+                    id="artist-link"
                     noWrap
                     onClick={
                       artist == va

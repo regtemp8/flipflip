@@ -204,10 +204,10 @@ class AudioPlaylist extends React.Component<
               <IconButton onClick={this.changeRepeat.bind(this)} size="large">
                 {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                 {this.props.playlist.repeat == RP.all && (
-                  <RepeatIcon color={"primary"} />
+                  <RepeatIcon color="primary" />
                 )}
                 {this.props.playlist.repeat == RP.one && (
-                  <RepeatOneIcon color={"primary"} />
+                  <RepeatOneIcon color="primary" />
                 )}
               </IconButton>
             </Tooltip>
@@ -325,7 +325,7 @@ class AudioPlaylist extends React.Component<
                       onClick={this.removeTrack.bind(this, i)}
                       size="large"
                     >
-                      <DeleteIcon color={"error"} />
+                      <DeleteIcon color="error" />
                     </IconButton>
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -362,10 +362,10 @@ class AudioPlaylist extends React.Component<
                 <IconButton onClick={this.changeRepeat.bind(this)} size="large">
                   {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                   {this.props.playlist.repeat == RP.all && (
-                    <RepeatIcon color={"primary"} />
+                    <RepeatIcon color="primary" />
                   )}
                   {this.props.playlist.repeat == RP.one && (
-                    <RepeatOneIcon color={"primary"} />
+                    <RepeatOneIcon color="primary" />
                   )}
                 </IconButton>
               </Tooltip>
@@ -398,7 +398,7 @@ class AudioPlaylist extends React.Component<
                   onClick={this.removePlaylist.bind(this)}
                   size="large"
                 >
-                  <ClearIcon color={"error"} />
+                  <ClearIcon color="error" />
                 </IconButton>
               </Tooltip>
             </div>

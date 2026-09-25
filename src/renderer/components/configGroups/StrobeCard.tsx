@@ -308,7 +308,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeOpacity",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v + "%"}
                         aria-labelledby="strobe-opacity-slider"
                       />
@@ -384,12 +384,9 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -427,7 +424,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="strobe-sin-rate-slider"
                       />
                     </Grid>
@@ -468,7 +465,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                       this,
                       "strobeBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-bpm-multi-slider"
                   />
@@ -628,7 +625,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeDelaySinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="strobe-delay-sin-rate-slider"
                       />
                     </Grid>
@@ -675,7 +672,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                       this,
                       "strobeDelayBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-delay-bpm-multi-slider"
                   />
@@ -835,7 +832,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
@@ -863,7 +860,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
@@ -893,7 +890,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobeAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
@@ -923,7 +920,7 @@ class StrobeCard extends React.Component<StrobeCardProps> {
                           this,
                           "strobePer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />

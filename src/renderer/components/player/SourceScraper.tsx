@@ -134,7 +134,7 @@ export default class SourceScraper extends React.Component<
               <iframe
                 sandbox="allow-forms"
                 src={this.state.captcha.captcha}
-                height={"100%"}
+                height="100%"
                 onLoad={this.onIFrameLoad.bind(this)}
               />
             </DialogContent>

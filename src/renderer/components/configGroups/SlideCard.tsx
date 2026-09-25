@@ -179,7 +179,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                     this,
                     "slideDistance",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v + "%"}
                   aria-labelledby="slide-distance-slider"
                 />
@@ -200,12 +200,9 @@ class SlideCard extends React.Component<SlideCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -243,7 +240,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                           this,
                           "slideSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="slide-sin-rate-slider"
                       />
                     </Grid>
@@ -284,7 +281,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                       this,
                       "slideBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="slide-bpm-multi-slider"
                   />
@@ -432,7 +429,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                           this,
                           "slideExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
@@ -460,7 +457,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                           this,
                           "slideOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
@@ -490,7 +487,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                           this,
                           "slideAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
@@ -520,7 +517,7 @@ class SlideCard extends React.Component<SlideCardProps> {
                           this,
                           "slidePer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />

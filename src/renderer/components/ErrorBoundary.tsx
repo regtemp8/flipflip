@@ -78,29 +78,29 @@ export default class ErrorBoundary extends React.Component<
           }}
           className="Error"
         >
-          <Typography component={"h2"} variant={"h2"}>
+          <Typography component="h2" variant="h2">
             Mistakes were made ಥ﹏ಥ
           </Typography>
           <Divider />
           <Typography
             style={{ margin: 10 }}
-            component={"h5"}
-            variant={"h5"}
-            color={"error"}
+            component="h5"
+            variant="h5"
+            color="error"
           >
             {this.state.error.name}: {this.state.error.message}
           </Typography>
           <Typography
             style={{ whiteSpace: "pre", marginBottom: 20 }}
-            component={"div"}
-            variant={"body2"}
-            color={"error"}
+            component="div"
+            variant="body2"
+            color="error"
           >
             {this.state.info.componentStack
               .trim()
               .replace(/\s*in (ForwardRef|div)/g, "")}
           </Typography>
-          <Typography component={"h6"} variant={"h6"}>
+          <Typography component="h6" variant="h6">
             Please consider reporting this bug to our{" "}
             <Link
               href="#"
@@ -112,9 +112,9 @@ export default class ErrorBoundary extends React.Component<
           </Typography>
           <Button
             style={{ margin: 10 }}
-            variant={"contained"}
-            size={"large"}
-            color={"primary"}
+            variant="contained"
+            size="large"
+            color="primary"
             onClick={this.goBack.bind(this)}
             startIcon={<ArrowBackIcon />}
           >
@@ -122,9 +122,9 @@ export default class ErrorBoundary extends React.Component<
           </Button>
           <Button
             style={{ margin: 10 }}
-            variant={"contained"}
-            size={"large"}
-            color={"secondary"}
+            variant="contained"
+            size="large"
+            color="secondary"
             onClick={this.backupCheck.bind(this)}
             startIcon={<RestoreIcon />}
           >
@@ -132,8 +132,8 @@ export default class ErrorBoundary extends React.Component<
           </Button>
           <Button
             style={{ margin: 10 }}
-            variant={"contained"}
-            size={"large"}
+            variant="contained"
+            size="large"
             onClick={this.resetCheck.bind(this)}
             startIcon={<HighlightOffIcon />}
           >

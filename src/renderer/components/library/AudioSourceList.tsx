@@ -217,7 +217,7 @@ class AudioSourceList extends React.Component<
           <AudioEdit
             audio={this.state.sourceEdit}
             config={this.props.config}
-            title={"Edit song info"}
+            title="Edit song info"
             allowSuggestion
             onCancel={this.onCloseSourceEditDialog.bind(this)}
             onFinishEdit={this.onFinishSourceEdit.bind(this)}

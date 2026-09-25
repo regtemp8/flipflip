@@ -417,7 +417,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                           {sceneCopy && (
                             <FormControlLabel
                               control={
-                                <Switch size={"small"} checked={cell.mirror} />
+                                <Switch size="small" checked={cell.mirror} />
                               }
                               label="Mirror"
                             />

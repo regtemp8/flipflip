@@ -532,7 +532,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 max={40}
                 defaultValue={this.props.scene.videoSpeed}
                 onChangeCommitted={this.onSliderChange.bind(this, "videoSpeed")}
-                valueLabelDisplay={"auto"}
+                valueLabelDisplay="auto"
                 valueLabelFormat={(v) => v / 10 + "x"}
                 aria-labelledby="video-speed-slider"
               />
@@ -561,7 +561,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                       this,
                       "videoSpeedMin",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-min-slider"
                   />
@@ -582,7 +582,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                       this,
                       "videoSpeedMax",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-max-slider"
                   />
@@ -646,7 +646,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 step={null}
                 defaultValue={this.props.scene.videoSkip}
                 onChangeCommitted={this.onSliderChange.bind(this, "videoSkip")}
-                valueLabelDisplay={"auto"}
+                valueLabelDisplay="auto"
                 marks={[5, 10, 30, 60, 120].map((s) => {
                   return { value: s, label: s.toString() };
                 })}

@@ -81,7 +81,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
               <Collapse
                 in={this.props.scene.audioEnabled && !this.props.startPlaying}
               >
-                <Tooltip disableInteractive title={"Add Playlist"}>
+                <Tooltip disableInteractive title="Add Playlist">
                   <Fab
                     sx={{ boxShadow: "none" }}
                     onClick={this.onAddPlaylist.bind(this)}

@@ -525,7 +525,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   displaySources={this.state.displaySources}
                   filters={this.state.filters}
                   tags={this.props.tags}
-                  placeholder={"Search ..."}
+                  placeholder="Search ..."
                   isCreatable
                   onlyUsed
                   onUpdateFilters={this.onUpdateFilters.bind(this)}
@@ -631,7 +631,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             </Tooltip>
             <Tooltip
               disableInteractive
-              title={"Identify local sources which have identical tags"}
+              title="Identify local sources which have identical tags"
             >
               <ListItem button onClick={this.onFindMerges.bind(this)}>
                 <ListItemIcon>
@@ -676,7 +676,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           <div className={clsx(this.props.tutorial != null && classes.disable)}>
             <Tooltip
               disableInteractive
-              title={"Identify sources which are not accessible"}
+              title="Identify sources which are not accessible"
             >
               <ListItem
                 button
@@ -691,7 +691,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             </Tooltip>
             <Tooltip
               disableInteractive
-              title={"Detect duration and resolution of video sources"}
+              title="Detect duration and resolution of video sources"
             >
               <ListItem
                 button
@@ -1331,7 +1331,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 displaySources={this.props.library}
                 filters={this.state.selectedTags}
                 tags={this.props.tags}
-                placeholder={"Tag These Sources"}
+                placeholder="Tag These Sources"
                 isClearable
                 onlyTags
                 showCheckboxes

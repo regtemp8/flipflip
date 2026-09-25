@@ -175,35 +175,35 @@ class ScriptOptions extends React.Component<
                 max={100}
                 defaultValue={this.state.script.opacity}
                 onChangeCommitted={this.onSliderChange.bind(this, "opacity")}
-                valueLabelDisplay={"auto"}
+                valueLabelDisplay="auto"
                 valueLabelFormat={(v) => v + "%"}
                 aria-labelledby="opacity-slider"
               />
             </Grid>
             <Grid item xs={12}>
               <FontOptions
-                name={"Blink"}
+                name="Blink"
                 options={this.state.script.blink}
                 systemFonts={this.state.systemFonts}
                 onUpdateOptions={this.onUpdateOptions.bind(this, "blink")}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
-                name={"Caption"}
+                name="Caption"
                 options={this.state.script.caption}
                 systemFonts={this.state.systemFonts}
                 onUpdateOptions={this.onUpdateOptions.bind(this, "caption")}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
-                name={"Big Caption"}
+                name="Big Caption"
                 options={this.state.script.captionBig}
                 systemFonts={this.state.systemFonts}
                 onUpdateOptions={this.onUpdateOptions.bind(this, "captionBig")}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
-                name={"Count"}
+                name="Count"
                 options={this.state.script.count}
                 systemFonts={this.state.systemFonts}
                 onUpdateOptions={this.onUpdateOptions.bind(this, "count")}

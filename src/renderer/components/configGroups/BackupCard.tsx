@@ -117,7 +117,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           justifyContent="center"
           className={classes.chipGrid}
         >
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <FormControlLabel
               control={
                 <Switch
@@ -128,7 +128,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               label="Auto Backup"
             />
           </Grid>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <TextField
               className={classes.backupDays}
               disabled={!this.props.settings.autoBackup}
@@ -162,7 +162,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
             title="If enabled, backups will be automatically cleaned up. This algorithm will keep 1 backup for
            each of the configured periods."
           >
-            <Grid item xs={"auto"} className={classes.buttonGrid}>
+            <Grid item xs="auto" className={classes.buttonGrid}>
               <FormControlLabel
                 control={
                   <Switch
@@ -174,7 +174,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               />
             </Grid>
           </Tooltip>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <TextField
               className={classes.backupDays}
               disabled={!this.props.settings.autoCleanBackup}
@@ -195,7 +195,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               }}
             />
           </Grid>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <TextField
               className={classes.backupDays}
               disabled={!this.props.settings.autoCleanBackup}
@@ -216,7 +216,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               }}
             />
           </Grid>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <TextField
               className={classes.backupDays}
               disabled={!this.props.settings.autoCleanBackup}
@@ -239,7 +239,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           </Grid>
         </Grid>
         <Grid container spacing={2} alignItems="center" justifyContent="center">
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <Button
               variant="contained"
               color="primary"
@@ -250,7 +250,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               Backup Data
             </Button>
           </Grid>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <Button
               variant="contained"
               color="secondary"
@@ -262,7 +262,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               Restore Backup
             </Button>
           </Grid>
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <Button
               variant="contained"
               color="inherit"
@@ -282,7 +282,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           justifyContent="center"
           className={classes.chipGrid}
         >
-          <Grid item xs={"auto"} className={classes.buttonGrid}>
+          <Grid item xs="auto" className={classes.buttonGrid}>
             <Chip
               label={`Backups: ${hasBackup ? this.state.backups.length : "--"}`}
               color="primary"
@@ -291,7 +291,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           </Grid>
           <Grid
             item
-            xs={"auto"}
+            xs="auto"
             className={clsx(classes.buttonGrid, classes.hideXS)}
           >
             <Chip
@@ -302,7 +302,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           </Grid>
           <Grid
             item
-            xs={"auto"}
+            xs="auto"
             className={clsx(classes.buttonGrid, classes.showXS)}
           >
             <Chip

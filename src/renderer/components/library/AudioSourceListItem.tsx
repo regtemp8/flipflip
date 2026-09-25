@@ -227,7 +227,7 @@ class AudioSourceListItem extends React.Component<
           )}
           <Badge
             anchorOrigin={{ vertical: "top", horizontal: "left" }}
-            variant={"dot"}
+            variant="dot"
             invisible={!this.props.source.marked}
             overlap="rectangular"
             color="secondary"

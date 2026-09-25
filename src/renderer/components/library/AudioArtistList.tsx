@@ -149,12 +149,12 @@ class AudioArtistList extends React.Component<
                 )}
               </Avatar>
               <Typography
-                display={"block"}
+                display="block"
                 className={clsx(
                   classes.trackArtist,
                   this.state.hover == a && classes.underlineTitle,
                 )}
-                variant={"h6"}
+                variant="h6"
               >
                 {a}
               </Typography>

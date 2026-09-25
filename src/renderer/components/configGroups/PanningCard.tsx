@@ -303,7 +303,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panHorizTransLevel",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-level-slider"
                     />
@@ -353,7 +353,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panHorizTransLevelMin",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-min-slider"
                     />
@@ -366,7 +366,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panHorizTransLevelMax",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-max-slider"
                     />
@@ -524,7 +524,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panVertTransLevel",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-level-slider"
                     />
@@ -571,7 +571,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panVertTransLevelMin",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-min-slider"
                     />
@@ -584,7 +584,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                         this,
                         "panVertTransLevelMax",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-max-slider"
                     />
@@ -627,12 +627,9 @@ class PanningCard extends React.Component<PanningCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -672,7 +669,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="pan-sin-rate-slider"
                       />
                     </Grid>
@@ -715,7 +712,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                       this,
                       "panBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="pan-bpm-multi-slider"
                   />
@@ -866,7 +863,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panStartExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
                       />
@@ -894,7 +891,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panStartOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
                       />
@@ -924,7 +921,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panStartAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
                       />
@@ -954,7 +951,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panStartPer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
                       />
@@ -1003,7 +1000,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panEndExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
                       />
@@ -1031,7 +1028,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panEndOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
                       />
@@ -1061,7 +1058,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panEndAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
                       />
@@ -1091,7 +1088,7 @@ class PanningCard extends React.Component<PanningCardProps> {
                           this,
                           "panEndPer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
                       />

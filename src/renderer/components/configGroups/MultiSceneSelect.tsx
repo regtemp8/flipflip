@@ -69,7 +69,7 @@ class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
         hideSelectedOptions={false}
         closeMenuOnSelect={false}
         backspaceRemovesValue={false}
-        placeholder={"Search scenes ..."}
+        placeholder="Search scenes ..."
         onChange={this.onChange.bind(this)}
       />
     );

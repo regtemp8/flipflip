@@ -215,7 +215,7 @@ class VideoControl extends React.Component<
                     max={40}
                     defaultValue={this.props.video.playbackRate * 10}
                     onChangeCommitted={this.onChangeSpeed.bind(this)}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-slider"
                   />

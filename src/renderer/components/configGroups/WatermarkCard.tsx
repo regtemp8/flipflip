@@ -115,7 +115,7 @@ class WatermarkCard extends React.Component<
               {this.props.settings.watermark && (
                 <Tooltip
                   disableInteractive
-                  title={"When enabled, watermark will display on Grid Scenes"}
+                  title="When enabled, watermark will display on Grid Scenes"
                 >
                   <FormControlLabel
                     control={

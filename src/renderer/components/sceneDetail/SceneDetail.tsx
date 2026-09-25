@@ -586,7 +586,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   displaySources={this.state.displaySources}
                   filters={this.state.filters}
                   tags={this.props.tags}
-                  placeholder={"Search ..."}
+                  placeholder="Search ..."
                   isCreatable
                   onlyUsed
                   onUpdateFilters={this.onUpdateFilters.bind(this)}
@@ -828,7 +828,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 <ListItemIcon>
                   <RestoreIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Restore Defaults"} />
+                <ListItemText primary="Restore Defaults" />
               </ListItem>
             </Tooltip>
             <Tooltip
@@ -1613,7 +1613,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     .filter((wg) => !wg.rules)
                     .map((wg) => wg.search)}
                   tags={this.props.tags}
-                  placeholder={"Search ..."}
+                  placeholder="Search ..."
                   autoFocus
                   isCreatable
                   fullWidth

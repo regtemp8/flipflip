@@ -560,7 +560,7 @@ class AudioLibrary extends React.Component<
                   displaySources={this.state.displaySources}
                   filters={this.state.filters}
                   tags={this.props.tags}
-                  placeholder={"Search ..."}
+                  placeholder="Search ..."
                   isCreatable
                   onlyUsed
                   noTypes
@@ -738,7 +738,7 @@ class AudioLibrary extends React.Component<
           <Divider />
 
           <div className={clsx(this.props.tutorial != null && classes.disable)}>
-            <Tooltip disableInteractive title={"BPM Detection"}>
+            <Tooltip disableInteractive title="BPM Detection">
               <ListItem
                 button
                 disabled={this.props.progressMode != null}
@@ -770,7 +770,7 @@ class AudioLibrary extends React.Component<
                     <ListItemIcon>
                       <CancelIcon color="error" />
                     </ListItemIcon>
-                    <ListItemText primary={"Cancel BPM Detection"} />
+                    <ListItemText primary="Cancel BPM Detection" />
                   </ListItem>
                 </Tooltip>
                 <LinearProgress
@@ -913,7 +913,7 @@ class AudioLibrary extends React.Component<
             {this.props.specialMode == SP.batchTag && (
               <Tooltip
                 disableInteractive
-                title={"Batch Tag"}
+                title="Batch Tag"
                 placement="top-end"
               >
                 <Badge
@@ -939,7 +939,7 @@ class AudioLibrary extends React.Component<
             {this.props.specialMode == SP.batchEdit && (
               <Tooltip
                 disableInteractive
-                title={"Batch Edit"}
+                title="Batch Edit"
                 placement="top-end"
               >
                 <Badge
@@ -965,7 +965,7 @@ class AudioLibrary extends React.Component<
             {this.props.specialMode == SP.addToPlaylist && (
               <Tooltip
                 disableInteractive
-                title={"Add to Playlist"}
+                title="Add to Playlist"
                 placement="top-end"
               >
                 <Badge
@@ -989,7 +989,7 @@ class AudioLibrary extends React.Component<
               </Tooltip>
             )}
             {this.props.specialMode == SP.select && (
-              <Tooltip disableInteractive title={"Import"} placement="top-end">
+              <Tooltip disableInteractive title="Import" placement="top-end">
                 <Badge
                   classes={{
                     badge: classes.importBadge,
@@ -1402,7 +1402,7 @@ class AudioLibrary extends React.Component<
           <AudioEdit
             audio={this.getCommonAudio()}
             config={this.props.config}
-            title={"Batch Edit song info"}
+            title="Batch Edit song info"
             onCancel={this.onCloseDialog.bind(this)}
             onFinishEdit={this.onFinishBatchEdit.bind(this)}
           />
@@ -1427,7 +1427,7 @@ class AudioLibrary extends React.Component<
                   displaySources={this.props.library}
                   filters={this.state.selectedTags}
                   tags={this.props.tags}
-                  placeholder={"Tag These Sources"}
+                  placeholder="Tag These Sources"
                   isClearable
                   onlyTags
                   showCheckboxes

@@ -246,7 +246,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomStart",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-start-slider"
                 />
@@ -266,7 +266,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomEnd",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-end-slider"
                 />
@@ -288,7 +288,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomStartMin",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-start-min-slider"
                 />
@@ -303,7 +303,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomStartMax",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-start-max-slider"
                 />
@@ -318,7 +318,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomEndMin",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-end-min-slider"
                 />
@@ -333,7 +333,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                     this,
                     "zoomEndMax",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="zoom-end-max-slider"
                 />
@@ -431,7 +431,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "horizTransLevel",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-level-slider"
                     />
@@ -476,7 +476,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "horizTransLevelMin",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-min-slider"
                     />
@@ -489,7 +489,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "horizTransLevelMax",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-max-slider"
                     />
@@ -587,7 +587,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "vertTransLevel",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-level-slider"
                     />
@@ -632,7 +632,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "vertTransLevelMin",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-min-slider"
                     />
@@ -645,7 +645,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                         this,
                         "vertTransLevelMax",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-max-slider"
                     />
@@ -700,12 +700,9 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -743,7 +740,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                           this,
                           "transSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="trans-sin-rate-slider"
                       />
                     </Grid>
@@ -784,7 +781,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                       this,
                       "transBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="trans-bpm-multi-slider"
                   />
@@ -930,7 +927,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                           this,
                           "transExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
@@ -958,7 +955,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                           this,
                           "transOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
@@ -988,7 +985,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                           this,
                           "transAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
@@ -1018,7 +1015,7 @@ class ZoomMoveCard extends React.Component<ZoomMoveCardProps> {
                           this,
                           "transPer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />

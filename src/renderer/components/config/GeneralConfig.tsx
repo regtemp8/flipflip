@@ -121,7 +121,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
           </Masonry>
         </Grid>
 
-        <Grid item xs={12} sm={"auto"}>
+        <Grid item xs={12} sm="auto">
           <Card>
             <CardContent>
               <BackupCard
@@ -135,7 +135,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={"auto"}>
+        <Grid item xs={12} sm="auto">
           <Card>
             <CardContent>
               <ThemeCard

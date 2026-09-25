@@ -120,7 +120,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
               <ListItemAvatar className={classes.listAvatar}>
                 <Tooltip
                   disableInteractive
-                  placement={"bottom"}
+                  placement="bottom"
                   title={
                     <div>
                       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click:
@@ -160,7 +160,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
                   onClick={this.removeScript.bind(this, i)}
                   size="large"
                 >
-                  <DeleteIcon color={"error"} />
+                  <DeleteIcon color="error" />
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
@@ -194,10 +194,10 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
               <IconButton onClick={this.changeRepeat.bind(this)} size="large">
                 {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                 {this.props.playlist.repeat == RP.all && (
-                  <RepeatIcon color={"primary"} />
+                  <RepeatIcon color="primary" />
                 )}
                 {this.props.playlist.repeat == RP.one && (
-                  <RepeatOneIcon color={"primary"} />
+                  <RepeatOneIcon color="primary" />
                 )}
               </IconButton>
             </Tooltip>
@@ -216,7 +216,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           <div className={classes.right}>
             <Tooltip disableInteractive title="Remove Playlist">
               <IconButton onClick={this.removePlaylist.bind(this)} size="large">
-                <ClearIcon color={"error"} />
+                <ClearIcon color="error" />
               </IconButton>
             </Tooltip>
           </div>

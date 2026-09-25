@@ -178,7 +178,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
                                 <ErrorOutlineIcon color="error" />
                               </Tooltip>
@@ -215,7 +215,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           this,
                           "fadeSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="fade-sin-rate-slider"
                       />
                     </Grid>
@@ -262,7 +262,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                       this,
                       "fadeBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fade-bpm-multi-slider"
                   />
@@ -404,7 +404,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           this,
                           "fadeExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
@@ -431,7 +431,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           this,
                           "fadeOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
@@ -460,7 +460,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           this,
                           "fadeAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
@@ -489,7 +489,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           this,
                           "fadePer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />

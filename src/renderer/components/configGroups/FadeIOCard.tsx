@@ -132,7 +132,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
                                 <ErrorOutlineIcon color="error" />
                               </Tooltip>
@@ -169,7 +169,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="fadeio-sin-rate-slider"
                       />
                     </Grid>
@@ -216,7 +216,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       this,
                       "fadeIOBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fadeio-bpm-multi-slider"
                   />
@@ -354,7 +354,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOStartExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
                       />
@@ -381,7 +381,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOStartOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
                       />
@@ -410,7 +410,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOStartAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
                       />
@@ -439,7 +439,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOStartPer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
                       />
@@ -484,7 +484,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOEndExp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
                       />
@@ -511,7 +511,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOEndOv",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
                       />
@@ -540,7 +540,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOEndAmp",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
                       />
@@ -569,7 +569,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           this,
                           "fadeIOEndPer",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
                       />

@@ -235,10 +235,10 @@ class SceneOptionCard extends React.Component<
                           {!hasBPM && (
                             <Tooltip
                               disableInteractive
-                              title={"Missing audio with BPM"}
+                              title="Missing audio with BPM"
                             >
                               <ErrorOutlineIcon
-                                color={"error"}
+                                color="error"
                                 className={classes.noBPM}
                               />
                             </Tooltip>
@@ -278,7 +278,7 @@ class SceneOptionCard extends React.Component<
                         this,
                         "timingSinRate",
                       )}
-                      valueLabelDisplay={"auto"}
+                      valueLabelDisplay="auto"
                       aria-labelledby="scene-sin-rate-slider"
                     />
                   </Grid>
@@ -319,7 +319,7 @@ class SceneOptionCard extends React.Component<
                     this,
                     "timingBPMMulti",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="scene-bpm-multi-slider"
                 />
@@ -453,10 +453,10 @@ class SceneOptionCard extends React.Component<
                             {!hasBPM && (
                               <Tooltip
                                 disableInteractive
-                                title={"Missing audio with BPM"}
+                                title="Missing audio with BPM"
                               >
                                 <ErrorOutlineIcon
-                                  color={"error"}
+                                  color="error"
                                   className={classes.noBPM}
                                 />
                               </Tooltip>
@@ -496,7 +496,7 @@ class SceneOptionCard extends React.Component<
                           this,
                           "backForthSinRate",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         aria-labelledby="bf-sin-rate-slider"
                       />
                     </Grid>
@@ -540,7 +540,7 @@ class SceneOptionCard extends React.Component<
                       this,
                       "backForthBPMMulti",
                     )}
-                    valueLabelDisplay={"auto"}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="bf-bpm-multi-slider"
                   />
@@ -707,7 +707,7 @@ class SceneOptionCard extends React.Component<
                     this,
                     "backgroundBlur",
                   )}
-                  valueLabelDisplay={"auto"}
+                  valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v + "px"}
                   aria-labelledby="scene-bg-color-slider"
                 />
@@ -1026,7 +1026,7 @@ class SceneOptionCard extends React.Component<
                               o.id,
                               "opacity",
                             )}
-                            valueLabelDisplay={"auto"}
+                            valueLabelDisplay="auto"
                             valueLabelFormat={(v) => v + "%"}
                             aria-labelledby="overlay-opacity-slider"
                           />

@@ -202,7 +202,7 @@ class AudioOptions extends React.Component<
                       control={
                         <Tooltip
                           disableInteractive
-                          title={"Repeat track at particular interval"}
+                          title="Repeat track at particular interval"
                         >
                           <Switch
                             size="small"
@@ -314,7 +314,7 @@ class AudioOptions extends React.Component<
                           this,
                           "speed",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 10 + "x"}
                         aria-labelledby="audio-speed-slider"
                       />
@@ -375,7 +375,7 @@ class AudioOptions extends React.Component<
                               this,
                               "tickSinRate",
                             )}
-                            valueLabelDisplay={"auto"}
+                            valueLabelDisplay="auto"
                             aria-labelledby="tick-sin-rate-slider"
                           />
                         </Grid>
@@ -426,7 +426,7 @@ class AudioOptions extends React.Component<
                           this,
                           "tickBPMMulti",
                         )}
-                        valueLabelDisplay={"auto"}
+                        valueLabelDisplay="auto"
                         valueLabelFormat={(v) =>
                           v > 0 ? v + "x" : "1/" + -1 * (v - 2) + "x"
                         }
