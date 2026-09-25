@@ -1,5 +1,12 @@
 # Changelog
 
+#### v5.2.1 <small>(09/25/2026)</small>
+- Fix SourceList being cleared on edit
+- Start MUI v5 migration
+- Upgrade Electron to 43.7.5
+- Upgrade Node.js to 26.x
+- Upgrade 3rd party libraries
+
 #### v5.2.0 <small>(08/23/2026)</small>
 - Experimental: make player bars work for VR controllers
 - Bundle fonts and icons
