@@ -36,8 +36,8 @@ const FullWidthFormControl = styled(FormControl)(() => ({
 interface FadeIOCardProps {
   scene: Scene | SceneSettings;
   easingControls: boolean;
-  sidebar: boolean;
-  tutorial: string;
+  sidebar?: boolean;
+  tutorial?: string;
   onUpdateScene(
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,

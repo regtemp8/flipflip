@@ -22,7 +22,7 @@ import AudioOptions from "../library/AudioOptions";
 
 interface AudioCardProps {
   scene: Scene;
-  sidebar: boolean;
+  sidebar?: boolean;
   startPlaying: boolean;
   onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
   persist?: boolean;

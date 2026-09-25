@@ -5,12 +5,11 @@ import { Card, CardContent, Grid } from "@mui/material";
 import Scene from "../../../common/Scene";
 import AudioCard from "../configGroups/AudioCard";
 import TextCard from "../configGroups/TextCard";
-import { SceneSettings } from "../../../common/Config";
 import Audio from "../../../common/Audio";
 import CaptionScript from "../../../common/CaptionScript";
 
 interface AudioTextEffectsProps {
-  scene: Scene | SceneSettings;
+  scene: Scene;
   onAddScript(playlistIndex: number): void;
   onAddTracks(playlistIndex: number): void;
   onPlayAudio(source: Audio, displayed: Array<Audio>): void;
