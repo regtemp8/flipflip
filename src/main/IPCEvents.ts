@@ -77,6 +77,14 @@ import OpenScriptResponse from "../common/OpenScriptResponse";
 import { processAllURLs } from "./scraper/Scrapers";
 
 // Define functions
+function openExternal(url: string) {
+  if (!url.startsWith("http")) {
+    url = pathToFileURL(url).href;
+  }
+
+  shell.openExternal(url);
+}
+
 function onRequestCreateNewWindow() {
   createNewWindow();
 }
@@ -106,11 +114,7 @@ function onRestoreBackup(ev: IpcMainInvokeEvent, backupFile: string) {
 }
 
 function onOpenExternal(ev: IpcMainEvent, url: string) {
-  if (!url.startsWith("http")) {
-    url = pathToFileURL(url).href
-  }
-
-  shell.openExternal(url);
+  openExternal(url);
 }
 
 function onShowItemInFolder(ev: IpcMainEvent, path: string) {
@@ -418,7 +422,7 @@ function onShowPlayerContextMenu(
     new MenuItem({
       label: "Open Source",
       click: () => {
-        shell.openExternal(source);
+        openExternal(source);
       },
     }),
   );
@@ -836,7 +840,11 @@ function onCleanCache(ev: IpcMainInvokeEvent, cachePath: string) {
   rimrafSync(cachePath);
 }
 
-function onRevealFile(ev: IpcMainEvent, sourceURL: string, config: Config) {
+function onRevealFile(
+  ev: IpcMainEvent,
+  sourceURL: string,
+  config: Config,
+) {
   const fileType = getSourceType(sourceURL);
   let cachePath;
   if (fileType == ST.video || fileType == ST.playlist) {
@@ -853,11 +861,12 @@ function onRevealFile(ev: IpcMainEvent, sourceURL: string, config: Config) {
     cachePath = getCachePath(sourceURL, config);
   }
   if (cachePath) {
-    const url =
-      process.platform === "win32"
-        ? cachePath
-        : urlToPath(cachePath, process.platform);
-    shell.openExternal(url);
+    // for some reason windows uses URLs and everyone else uses paths
+    if (process.platform === "win32") {
+      shell.openExternal(cachePath);
+    } else {
+      shell.openPath(cachePath);
+    }
   }
 }
 
