@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Button,
@@ -17,12 +16,8 @@ import {
   Link,
   Switch,
   TextField,
-  Theme,
   Tooltip,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
@@ -30,20 +25,7 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import Config, { CacheSettings } from "../../../common/Config";
 import { urlToPath } from "../../../common/utils";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-  });
-
 interface CacheCardProps {
-  classes: any;
   config: Config;
   onUpdateSettings(fn: (settings: CacheSettings) => void): void;
 }
@@ -66,7 +48,6 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   }
 
   render() {
-    const classes = this.props.classes;
     return (
       <Grid
         container
@@ -94,7 +75,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
             <Grid item>
               <Collapse
                 in={this.props.config.caching.enabled}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
+                sx={{ width: "100%", pl: {xs: 1, sm: 0} }}
               >
                 <Tooltip disableInteractive title="Clear Cache">
                   <IconButton
@@ -113,7 +94,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
         <Grid item xs={12}>
           <Collapse
             in={this.props.config.caching.enabled}
-            className={classes.fullWidth}
+            sx={{width: "100%"}}
           >
             <Divider />
           </Collapse>
@@ -121,7 +102,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
         <Grid item xs={12}>
           <Collapse
             in={this.props.config.caching.enabled}
-            className={classes.fullWidth}
+            sx={{width: "100%"}}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
@@ -326,5 +307,4 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
   }
 }
 
-(CacheCard as any).displayName = "CacheCard";
-export default withStyles(styles)(CacheCard as any);
+export default CacheCard;
