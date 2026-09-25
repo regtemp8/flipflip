@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Collapse,
@@ -14,13 +13,9 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
@@ -29,39 +24,16 @@ import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
 import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
 
 interface CrossFadeCardProps {
-  classes: any;
   scene: Scene | SceneSettings;
   easingControls: boolean;
   sidebar: boolean;
@@ -80,8 +52,6 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
   }
 
   render() {
-    const classes = this.props.classes;
-
     const fadeSinRate =
       typeof this.props.scene.fadeSinRate === "number"
         ? this.props.scene.fadeSinRate
@@ -113,6 +83,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
       playlists.length &&
       playlists[0].audios.length &&
       playlists[0].audios[0].bpm;
+
     return (
       <Grid
         container
@@ -122,18 +93,21 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial != null &&
-              this.props.tutorial != SDT.fade1 &&
-              classes.disable,
-          )}
+          sx={{
+            pointerEvents:
+              this.props.tutorial != null && this.props.tutorial != SDT.fade1
+                ? "none"
+                : undefined,
+          }}
         >
           <Grid container alignItems="center">
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 5}>
               <FormControlLabel
-                className={clsx(
-                  this.props.tutorial == SDT.fade1 && classes.highlight,
-                )}
+                sx={{
+                  borderWidth: this.props.tutorial == SDT.fade1 ? 2 : 0,
+                  borderColor: "secondary.main",
+                  borderStyle: "solid",
+                }}
                 control={
                   <Switch
                     checked={this.props.scene.crossFade}
@@ -144,9 +118,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
               />
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 7}>
-              <Collapse
+              <FullWidthCollapse
                 in={this.props.scene.crossFade}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
+                sx={{ pl: { xs: 1, sm: 0 } }}
               >
                 <FormControlLabel
                   control={
@@ -158,38 +132,38 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                   }
                   label="Cross-Fade Audio"
                 />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Collapse
-            in={this.props.scene.crossFade}
-            className={classes.fullWidth}
-          >
+          <FullWidthCollapse in={this.props.scene.crossFade}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial != null && classes.disable,
-            this.props.tutorial == SDT.fade2 && classes.highlight,
-          )}
+          sx={{
+            ...{
+              pointerEvents: this.props.tutorial != null ? "none" : undefined,
+            },
+            ...{
+              borderWidth: this.props.tutorial == SDT.fade2 ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            },
+          }}
         >
-          <Collapse
-            in={this.props.scene.crossFade}
-            className={classes.fullWidth}
-          >
+          <FullWidthCollapse in={this.props.scene.crossFade}>
             <Grid container spacing={2} alignItems="center">
               <Grid
                 item
                 xs={12}
                 sm={this.props.sidebar ? 12 : 4}
-                style={{ paddingTop: 10 }}
+                sx={{ pt: 1.25 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Timing</InputLabel>
                   <Select
                     variant="standard"
@@ -197,7 +171,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     onChange={this.onInput.bind(this, "fadeTF")}
                   >
                     {Object.values(TF).map((tf) => {
-                      if (tf == TF.bpm) {
+                      if (tf === TF.bpm) {
                         return (
                           <MenuItem key={tf} value={tf}>
                             {en.get(tf)}{" "}
@@ -206,10 +180,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                                 disableInteractive
                                 title={"Missing audio with BPM"}
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -223,13 +194,10 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
-                  in={this.props.scene.fadeTF == TF.sin}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.fadeTF === TF.sin}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -251,14 +219,23 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         aria-labelledby="fade-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <Grid
+                      item
+                      xs={3}
+                      sx={{ minWidth: (theme) => theme.spacing(11) }}
+                    >
                       <TextField
                         variant="standard"
                         value={fadeSinRate}
                         onChange={this.onIntInput.bind(this, "fadeSinRate")}
                         onBlur={this.blurIntKey.bind(this, "fadeSinRate")}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -268,11 +245,8 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                       />
                     </Grid>
                   </Grid>
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.fadeTF == TF.bpm}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.fadeTF === TF.bpm}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -292,11 +266,8 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fade-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.fadeTF == TF.constant}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.fadeTF === TF.constant}>
                   <TextField
                     variant="outlined"
                     label="For"
@@ -315,23 +286,24 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(this.props.tutorial != null && classes.disable)}
+          sx={{
+            pointerEvents: this.props.tutorial != null ? "none" : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.crossFade &&
-              (this.props.scene.fadeTF == TF.random ||
-                this.props.scene.fadeTF == TF.sin)
+              (this.props.scene.fadeTF === TF.random ||
+                this.props.scene.fadeTF === TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -375,33 +347,26 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         {this.props.easingControls && (
           <React.Fragment>
             <Grid
               item
               xs={12}
-              className={clsx(!this.props.scene.crossFade && classes.noPadding)}
+              sx={{
+                p: !this.props.scene.crossFade ? 0 : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.crossFade}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.crossFade}>
                 <Divider />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
             <Grid item xs={12}>
-              <Collapse
-                in={this.props.scene.crossFade}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.crossFade}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>Easing</InputLabel>
                       <Select
                         variant="standard"
@@ -414,16 +379,15 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
-                        this.props.scene.fadeEase == EA.polyIn ||
-                        this.props.scene.fadeEase == EA.polyOut ||
-                        this.props.scene.fadeEase == EA.polyInOut
+                        this.props.scene.fadeEase === EA.polyIn ||
+                        this.props.scene.fadeEase === EA.polyOut ||
+                        this.props.scene.fadeEase === EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -444,14 +408,13 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
-                        this.props.scene.fadeEase == EA.backIn ||
-                        this.props.scene.fadeEase == EA.backOut ||
-                        this.props.scene.fadeEase == EA.backInOut
+                        this.props.scene.fadeEase === EA.backIn ||
+                        this.props.scene.fadeEase === EA.backOut ||
+                        this.props.scene.fadeEase === EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -472,16 +435,15 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
-                        this.props.scene.fadeEase == EA.elasticIn ||
-                        this.props.scene.fadeEase == EA.elasticOut ||
-                        this.props.scene.fadeEase == EA.elasticInOut
+                        this.props.scene.fadeEase === EA.elasticIn ||
+                        this.props.scene.fadeEase === EA.elasticOut ||
+                        this.props.scene.fadeEase === EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -502,16 +464,15 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
-                        this.props.scene.fadeEase == EA.elasticIn ||
-                        this.props.scene.fadeEase == EA.elasticOut ||
-                        this.props.scene.fadeEase == EA.elasticInOut
+                        this.props.scene.fadeEase === EA.elasticIn ||
+                        this.props.scene.fadeEase === EA.elasticOut ||
+                        this.props.scene.fadeEase === EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -532,10 +493,10 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </React.Fragment>
         )}
@@ -606,5 +567,4 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
   }
 }
 
-(CrossFadeCard as any).displayName = "CrossFadeCard";
-export default withStyles(styles)(CrossFadeCard as any);
+export default CrossFadeCard;
