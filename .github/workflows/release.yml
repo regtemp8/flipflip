@@ -24,14 +24,14 @@ jobs:
       uses: actions/setup-node@v7
       with:
         node-version: 26
+    - name: Enable corepack
+      run: corepack enable
     - name: Enable Yarn
-      run: |
-        corepack enable
-        corepack prepare yarn@stable --activate
+      run: corepack prepare yarn@stable --activate
     - name: Install packages
-      run: yarn install
+      run: corepack yarn install
     - name: Make Release
-      run: yarn make --platform ${{ env.PLATFORM }} --arch ${{ matrix.arch }}
+      run: corepack yarn make --platform ${{ env.PLATFORM }} --arch ${{ matrix.arch }}
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: softprops/action-gh-release@v3
