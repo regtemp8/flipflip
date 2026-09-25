@@ -106,6 +106,10 @@ function onRestoreBackup(ev: IpcMainInvokeEvent, backupFile: string) {
 }
 
 function onOpenExternal(ev: IpcMainEvent, url: string) {
+  if (!url.startsWith("http")) {
+    url = pathToFileURL(url).href
+  }
+
   shell.openExternal(url);
 }
 
