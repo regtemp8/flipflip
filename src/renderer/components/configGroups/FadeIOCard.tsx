@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Collapse,
@@ -14,13 +13,9 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
@@ -29,39 +24,16 @@ import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
 import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
 
 interface FadeIOCardProps {
-  classes: any;
   scene: Scene | SceneSettings;
   easingControls: boolean;
   sidebar: boolean;
@@ -80,8 +52,6 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
   }
 
   render() {
-    const classes = this.props.classes;
-
     const fadeSinRate =
       typeof this.props.scene.fadeIOSinRate === "number"
         ? this.props.scene.fadeIOSinRate
@@ -118,7 +88,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
         container
         spacing={this.props.scene.fadeInOut ? 2 : 0}
         alignItems="center"
-        className={clsx(this.props.tutorial != null && classes.disable)}
+        sx={{
+          pointerEvents: this.props.tutorial != null ? "none" : undefined,
+        }}
       >
         <Grid item xs={12}>
           <FormControlLabel
@@ -132,26 +104,20 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
           />
         </Grid>
         <Grid item xs={12}>
-          <Collapse
-            in={this.props.scene.fadeInOut}
-            className={classes.fullWidth}
-          >
+          <FullWidthCollapse in={this.props.scene.fadeInOut}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
-          <Collapse
-            in={this.props.scene.fadeInOut}
-            className={classes.fullWidth}
-          >
+          <FullWidthCollapse in={this.props.scene.fadeInOut}>
             <Grid container spacing={2} alignItems="center">
               <Grid
                 item
                 xs={12}
                 sm={this.props.sidebar ? 12 : 4}
-                style={{ paddingTop: 10 }}
+                sx={{ pt: 1.25 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Timing</InputLabel>
                   <Select
                     variant="standard"
@@ -168,10 +134,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                                 disableInteractive
                                 title={"Missing audio with BPM"}
                               >
-                                <ErrorOutlineIcon
-                                  color={"error"}
-                                  className={classes.noBPM}
-                                />
+                                <ErrorOutlineIcon color="error" />
                               </Tooltip>
                             )}
                           </MenuItem>
@@ -185,13 +148,10 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
-                  in={this.props.scene.fadeIOTF == TF.sin}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.fadeIOTF == TF.sin}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -213,14 +173,23 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         aria-labelledby="fadeio-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <Grid
+                      item
+                      xs={3}
+                      sx={{ minWidth: (theme) => theme.spacing(11) }}
+                    >
                       <TextField
                         variant="standard"
                         value={fadeSinRate}
                         onChange={this.onIntInput.bind(this, "fadeIOSinRate")}
                         onBlur={this.blurIntKey.bind(this, "fadeIOSinRate")}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -230,11 +199,8 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       />
                     </Grid>
                   </Grid>
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.fadeIOTF == TF.bpm}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.fadeIOTF == TF.bpm}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -254,10 +220,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fadeio-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={this.props.scene.fadeIOTF == TF.constant}
-                  className={classes.fullWidth}
                 >
                   <TextField
                     variant="outlined"
@@ -277,19 +242,18 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.fadeInOut &&
               (this.props.scene.fadeIOTF == TF.random ||
                 this.props.scene.fadeIOTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -333,33 +297,26 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         {this.props.easingControls && (
           <React.Fragment>
             <Grid
               item
               xs={12}
-              className={clsx(!this.props.scene.fadeInOut && classes.noPadding)}
+              sx={{
+                padding: !this.props.scene.fadeInOut ? 0 : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.fadeInOut}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.fadeInOut}>
                 <Divider />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
             <Grid item xs={12}>
-              <Collapse
-                in={this.props.scene.fadeInOut}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.fadeInOut}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>Start Easing</InputLabel>
                       <Select
                         variant="standard"
@@ -372,16 +329,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOStartEase == EA.polyIn ||
                         this.props.scene.fadeIOStartEase == EA.polyOut ||
                         this.props.scene.fadeIOStartEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -402,14 +358,13 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOStartEase == EA.backIn ||
                         this.props.scene.fadeIOStartEase == EA.backOut ||
                         this.props.scene.fadeIOStartEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -430,16 +385,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOStartEase == EA.elasticIn ||
                         this.props.scene.fadeIOStartEase == EA.elasticOut ||
                         this.props.scene.fadeIOStartEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -460,16 +414,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOStartEase == EA.elasticIn ||
                         this.props.scene.fadeIOStartEase == EA.elasticOut ||
                         this.props.scene.fadeIOStartEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -490,13 +443,10 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>End Easing</InputLabel>
                       <Select
                         variant="standard"
@@ -509,16 +459,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOEndEase == EA.polyIn ||
                         this.props.scene.fadeIOEndEase == EA.polyOut ||
                         this.props.scene.fadeIOEndEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -539,14 +488,13 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOEndEase == EA.backIn ||
                         this.props.scene.fadeIOEndEase == EA.backOut ||
                         this.props.scene.fadeIOEndEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -567,16 +515,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOEndEase == EA.elasticIn ||
                         this.props.scene.fadeIOEndEase == EA.elasticOut ||
                         this.props.scene.fadeIOEndEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -597,16 +544,15 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.fadeIOEndEase == EA.elasticIn ||
                         this.props.scene.fadeIOEndEase == EA.elasticOut ||
                         this.props.scene.fadeIOEndEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -627,10 +573,10 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </React.Fragment>
         )}
@@ -701,5 +647,4 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
   }
 }
 
-(FadeIOCard as any).displayName = "FadeIOCard";
-export default withStyles(styles)(FadeIOCard as any);
+export default FadeIOCard;
