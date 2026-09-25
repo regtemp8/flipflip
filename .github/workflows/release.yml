@@ -36,8 +36,10 @@ jobs:
       run: |
         node -e "
         const fs = require('fs');
-        const file = fs.readdirSync('./out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}').find(fn => fn.startsWith('FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-') && fn.endsWith('.zip'));
-        fs.renameSync(file, file.replace('${{ env.PLATFORM }}', '${{ env.PLATFORM_NAME }}'));
+        const path = require('path');
+        const dir = path.resolve('./out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}');
+        const file = fs.readdirSync(dir).find(fn => fn.startsWith('FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-') && fn.endsWith('.zip'));
+        fs.renameSync(path.join(dir, file), path.join(dir, file.replace('${{ env.PLATFORM }}', '${{ env.PLATFORM_NAME }}')));
         "
     - name: Upload Release Asset
       id: upload-release-asset 
