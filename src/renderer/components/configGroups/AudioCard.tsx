@@ -19,7 +19,6 @@ import Audio from "../../../common/Audio";
 import AudioPlaylist from "../player/AudioPlaylist";
 import AudioOptions from "../library/AudioOptions";
 
-
 interface AudioCardProps {
   scene: Scene;
   sidebar?: boolean;

@@ -911,11 +911,7 @@ class AudioLibrary extends React.Component<
               </Fab>
             </Tooltip>
             {this.props.specialMode == SP.batchTag && (
-              <Tooltip
-                disableInteractive
-                title="Batch Tag"
-                placement="top-end"
-              >
+              <Tooltip disableInteractive title="Batch Tag" placement="top-end">
                 <Badge
                   classes={{
                     badge: classes.importBadge,

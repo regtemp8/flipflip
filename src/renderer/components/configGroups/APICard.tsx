@@ -318,8 +318,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={
-            this.state.openMenu === MO.new &&
-            this.state.menuType === ST.tumblr
+            this.state.openMenu === MO.new && this.state.menuType === ST.tumblr
           }
           onClose={this.onCloseDialog.bind(this)}
           aria-labelledby="tumblr-title"
@@ -563,8 +562,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </Button>
             <Button
               disabled={
-                this.state.input1.length === 0 ||
-                this.state.input2.length === 0
+                this.state.input1.length === 0 || this.state.input2.length === 0
               }
               onClick={this.onFinishAuthPiwigo.bind(this)}
               color="primary"

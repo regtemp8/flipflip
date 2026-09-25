@@ -75,7 +75,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
             <Grid item>
               <Collapse
                 in={this.props.config.caching.enabled}
-                sx={{ width: "100%", pl: {xs: 1, sm: 0} }}
+                sx={{ width: "100%", pl: { xs: 1, sm: 0 } }}
               >
                 <Tooltip disableInteractive title="Clear Cache">
                   <IconButton
@@ -94,7 +94,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
         <Grid item xs={12}>
           <Collapse
             in={this.props.config.caching.enabled}
-            sx={{width: "100%"}}
+            sx={{ width: "100%" }}
           >
             <Divider />
           </Collapse>
@@ -102,7 +102,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
         <Grid item xs={12}>
           <Collapse
             in={this.props.config.caching.enabled}
-            sx={{width: "100%"}}
+            sx={{ width: "100%" }}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
