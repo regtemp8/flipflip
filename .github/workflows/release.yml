@@ -32,6 +32,13 @@ jobs:
       run: corepack yarn install
     - name: Make Release
       run: corepack yarn make --platform ${{ env.PLATFORM }} --arch ${{ matrix.arch }}
+    - name: Rename Release Asset
+      run: |
+        node -e "
+        const fs = require('fs');
+        const file = fs.readdirSync('./out/make/zip/${{ env.PLATFORM }}/${{ matrix.arch }}').find(fn => fn.startsWith('FlipFlip-${{ env.PLATFORM }}-${{ matrix.arch }}-') && fn.endsWith('.zip'));
+        fs.renameSync(file, file.replace('${{ env.PLATFORM }}', '${{ env.PLATFORM_NAME }}'));
+        "
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: softprops/action-gh-release@v3
