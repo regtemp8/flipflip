@@ -713,7 +713,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         const newSources = new Array<LibrarySource>();
         for (let source of l) {
           if (/^\s*$/.exec(source.url) == null) {
-            if (!newSources.map((s) => s.url).includes(source.url)) {
+            if (newSources.map((s) => s.url).includes(source.url)) {
               for (let existingSource of newSources) {
                 if (existingSource.url == source.url) {
                   if (existingSource.id > source.id) {
