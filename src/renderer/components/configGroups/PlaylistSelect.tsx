@@ -53,7 +53,7 @@ class PlaylistSelect extends React.Component<PlaylistSelectProps> {
     );
   }
 
-  onChange(e: { label: any; value: any }) {
+  onChange(e: { label: string; value: number }) {
     this.props.onChange(e.value);
   }
 }
