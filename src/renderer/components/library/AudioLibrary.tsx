@@ -1714,26 +1714,31 @@ class AudioLibrary extends React.Component<
     } else {
       // Check to see if playlist already has any of these tracks
       const playlist = this.props.playlists.find((p) => p.id == playlistID);
-      for (let url of this.state.selected) {
-        const audio = this.props.library.find((a) => a.url == url);
-        if (playlist.audios.includes(audio.id)) {
-          // If so, show alert before adding to playlist
-          this.setState({
-            openMenu: MO.playlistDuplicates,
-            playlistID: playlistID,
-          });
-          return;
+      if (playlist != null) {
+        for (let url of this.state.selected) {
+          const audio = this.props.library.find((a) => a.url == url);
+          if (audio == null) {
+            continue;
+          }
+          if (playlist.audios.includes(audio.id)) {
+            // If so, show alert before adding to playlist
+            this.setState({
+              openMenu: MO.playlistDuplicates,
+              playlistID: playlistID,
+            });
+            return;
+          }
         }
       }
       // Otherwise, add tracks to playlist
       this.props.onUpdatePlaylists((ps) => {
         const playlist = ps.find((p) => p.id == playlistID);
         if (playlist) {
-          playlist.audios = playlist.audios.concat(
-            this.state.selected.map(
-              (s) => this.props.library.find((a) => a.url == s)?.id,
-            ),
-          );
+          const newAudios = this.state.selected
+            .map((s) => this.props.library.find((a) => a.url == s))
+            .filter((a) => a != null)
+            .map((a) => a.id);
+          playlist.audios = playlist.audios.concat(newAudios);
         }
       });
       this.goBack();
@@ -1747,13 +1752,13 @@ class AudioLibrary extends React.Component<
       if (playlist) {
         for (let url of this.state.selected) {
           const audio = this.props.library.find((a) => a.url == url);
-          if (!playlist.audios.includes(audio.id)) {
+          if (audio != null && !playlist.audios.includes(audio.id)) {
             playlist.audios.push(audio.id);
           }
         }
         for (let aID of playlist.audios) {
           const audio = this.props.library.find((a) => a.id == aID);
-          if (!this.state.selected.includes(audio.url)) {
+          if (audio != null && !this.state.selected.includes(audio.url)) {
             playlist.audios.push(audio.id);
           }
         }
@@ -1767,11 +1772,11 @@ class AudioLibrary extends React.Component<
     this.props.onUpdatePlaylists((ps) => {
       const playlist = ps.find((p) => p.id == this.state.playlistID);
       if (playlist) {
-        playlist.audios = playlist.audios.concat(
-          this.state.selected.map(
-            (s) => this.props.library.find((a) => a.url == s)?.id,
-          ),
-        );
+        const newAudios = this.state.selected
+          .map((s) => this.props.library.find((a) => a.url == s))
+          .filter((a) => a != null)
+          .map((a) => a.id);
+        playlist.audios = playlist.audios.concat(newAudios);
       }
     });
     this.goBack();
@@ -1790,9 +1795,10 @@ class AudioLibrary extends React.Component<
     const playlist = new Playlist({
       id: id,
       name: name,
-      audios: this.state.selected.map(
-        (s) => this.props.library.find((a) => a.url == s)?.id,
-      ),
+      audios: this.state.selected
+        .map((s) => this.props.library.find((a) => a.url == s))
+        .filter((a) => a != null)
+        .map((a) => a.id),
     });
     this.props.onUpdatePlaylists((ps) => {
       ps.push(playlist);
