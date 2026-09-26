@@ -65,7 +65,6 @@ interface JiggleProps {
 }
 
 interface JiggleState {
-  jiggling: Array<string>;
   hasStarted: boolean;
 }
 
@@ -74,29 +73,25 @@ export default class Jiggle extends React.Component<JiggleProps, JiggleState> {
     super(props);
 
     this.state = {
-      jiggling: new Array<string>(),
       hasStarted: false,
     };
   }
 
-  jiggle = (e: any) => {
-    const target = e.currentTarget;
-    if (!this.state.jiggling.includes(target)) {
-      this.setState({
-        jiggling: this.state.jiggling.concat([target]),
-        hasStarted: true,
-      });
-    }
+  jiggle = () => {
+    this.setState({
+      hasStarted: true,
+    });
   };
 
-  stopJiggle = (e: any) => {
-    this.state.jiggling.splice(this.state.jiggling.indexOf(e), 1);
+  stopJiggle = () => {
+    this.setState({
+      hasStarted: false,
+    });
   };
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(props: JiggleProps, state: JiggleState): boolean {
     return (
       this.state.hasStarted !== state.hasStarted ||
-      this.state.jiggling !== state.jiggling ||
       this.props.disable !== props.disable ||
       this.props.className !== props.className
     );
@@ -120,7 +115,7 @@ export default class Jiggle extends React.Component<JiggleProps, JiggleState> {
           native
           started={this.state.hasStarted}
           bounce={this.props.bounce ? this.props.bounce : false}
-          onRest={this.stopJiggle.bind(this)}
+          onRest={this.stopJiggle}
         >
           {(props: any) => (
             <animated.div
@@ -129,7 +124,7 @@ export default class Jiggle extends React.Component<JiggleProps, JiggleState> {
               style={
                 this.props.style ? { ...props, ...this.props.style } : props
               }
-              onMouseEnter={this.jiggle.bind(this)}
+              onMouseEnter={this.jiggle}
               onClick={this.props.onClick}
             >
               {this.props.children}
