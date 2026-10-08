@@ -61,13 +61,13 @@ interface AudioControlProps {
   startPlaying: boolean;
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
-  onAudioSliderChange(e: Event, value: number): void;
-  nextTrack?(): void;
-  prevTrack?(): void;
-  goBack?(): void;
-  onPlaying?(position: number, duration: number): void;
-  playTrack?(url: string): void;
-  playNextScene?(): void;
+  onAudioSliderChange: (e: Event, value: number) => void;
+  nextTrack?: () => void;
+  prevTrack?: () => void;
+  goBack?: () => void;
+  onPlaying?: (position: number, duration: number) => void;
+  playTrack?: (url: string) => void;
+  playNextScene?: () => void;
 }
 
 interface AudioControlState {
@@ -118,9 +118,9 @@ class AudioControl extends React.Component<
               speed={this.props.audio.speed / 10}
               volume={this.props.audio.volume}
               tick={this.state.tick}
-              onPlaying={this.onPlaying.bind(this)}
-              onError={this.onError.bind(this)}
-              onFinishedPlaying={this.onFinishedPlaying.bind(this)}
+              onPlaying={this.onPlaying}
+              onError={this.onError}
+              onFinishedPlaying={this.onFinishedPlaying}
             />
           )}
         {this.props.audioEnabled && !this.props.audio.tick && (
@@ -130,9 +130,9 @@ class AudioControl extends React.Component<
             playbackRate={this.props.audio.speed / 10}
             volume={this.props.audio.volume}
             position={this.state.position}
-            onPlaying={this.onPlaying.bind(this)}
-            onError={this.onError.bind(this)}
-            onFinishedPlaying={this.onFinishedPlaying.bind(this)}
+            onPlaying={this.onPlaying}
+            onError={this.onError}
+            onFinishedPlaying={this.onFinishedPlaying}
           />
         )}
         <Grid
@@ -170,7 +170,7 @@ class AudioControl extends React.Component<
                             track: classes.noTransition,
                           }}
                           max={this.state.duration}
-                          onChange={this.onChangePosition.bind(this)}
+                          onChange={this.onChangePosition}
                         />
                       </Grid>
                       <Grid item>
@@ -187,16 +187,13 @@ class AudioControl extends React.Component<
                   <Grid item>
                     {this.props.prevTrack && (
                       <Tooltip disableInteractive title="Prev Track">
-                        <IconButton
-                          onClick={this.props.prevTrack.bind(this)}
-                          size="large"
-                        >
+                        <IconButton onClick={this.props.prevTrack} size="large">
                           <SkipPreviousIcon />
                         </IconButton>
                       </Tooltip>
                     )}
                     <Tooltip disableInteractive title="Jump Back">
-                      <IconButton onClick={this.onBack.bind(this)} size="large">
+                      <IconButton onClick={this.onBack} size="large">
                         {this.props.shorterSeek ? (
                           <Replay5Icon />
                         ) : (
@@ -210,9 +207,7 @@ class AudioControl extends React.Component<
                     >
                       <IconButton
                         onClick={
-                          this.state.playing
-                            ? this.onPause.bind(this)
-                            : this.onPlay.bind(this)
+                          this.state.playing ? this.onPause : this.onPlay
                         }
                         size="large"
                       >
@@ -220,10 +215,7 @@ class AudioControl extends React.Component<
                       </IconButton>
                     </Tooltip>
                     <Tooltip disableInteractive title="Jump Forward">
-                      <IconButton
-                        onClick={this.onForward.bind(this)}
-                        size="large"
-                      >
+                      <IconButton onClick={this.onForward} size="large">
                         {this.props.shorterSeek ? (
                           <Forward5Icon />
                         ) : (
@@ -233,10 +225,7 @@ class AudioControl extends React.Component<
                     </Tooltip>
                     {this.props.nextTrack && (
                       <Tooltip disableInteractive title="Next Track">
-                        <IconButton
-                          onClick={this.props.nextTrack.bind(this)}
-                          size="large"
-                        >
+                        <IconButton onClick={this.props.nextTrack} size="large">
                           <SkipNextIcon />
                         </IconButton>
                       </Tooltip>
@@ -252,7 +241,7 @@ class AudioControl extends React.Component<
                   <Grid item xs>
                     <Slider
                       value={audioVolume}
-                      onChange={this.onAudioSliderChange.bind(this)}
+                      onChange={this.onAudioSliderChange}
                       aria-labelledby="audio-volume-slider"
                     />
                   </Grid>
@@ -329,7 +318,7 @@ class AudioControl extends React.Component<
     this._queueNextTrack = false;
   }
 
-  tickLoop(starting: boolean = false) {
+  tickLoop = (starting: boolean = false) => {
     this._timeout = undefined;
     if (!starting) {
       if (this._queueNextTrack) {
@@ -379,24 +368,24 @@ class AudioControl extends React.Component<
           break;
       }
       if (timeout != null) {
-        this._timeout = window.setTimeout(this.tickLoop.bind(this), timeout);
+        this._timeout = window.setTimeout(this.tickLoop, timeout);
         return;
       }
     }
-  }
+  };
 
-  onChangePosition(e: Event, value: number | number[]) {
+  onChangePosition = (e: Event, value: number | number[]) => {
     const position = value as number;
     this.setState({ position });
-  }
+  };
 
-  onAudioSliderChange(e: Event, value: number | number[]) {
+  onAudioSliderChange = (e: Event, value: number | number[]) => {
     const volume = value as number;
     this.props.audio.volume = volume;
     this.props.onAudioSliderChange(e, volume);
-  }
+  };
 
-  onFinishedPlaying() {
+  onFinishedPlaying = () => {
     // Increment play count upon finish
     if (this.props.playTrack) {
       this.props.playTrack(this.props.audio.url);
@@ -432,13 +421,13 @@ class AudioControl extends React.Component<
         if (this.props.nextTrack != null) {
           this.props.nextTrack();
         }
-        
+
         this.setState({ position: 0, duration: 0 });
       }
     }
-  }
+  };
 
-  onPlaying(soundData: any) {
+  onPlaying = (soundData: any) => {
     let position = this.state.position;
     let duration = this.state.duration;
     if (soundData.position) {
@@ -451,38 +440,38 @@ class AudioControl extends React.Component<
       this.props.onPlaying(position, duration);
     }
     this.setState({ position: position, duration: duration });
-  }
+  };
 
-  onError(errorCode: number, description: string) {
+  onError = (errorCode: number, description: string) => {
     console.error(errorCode + " - " + description);
-  }
+  };
 
-  onPlay() {
+  onPlay = () => {
     this.setState({ playing: true });
-  }
+  };
 
-  onPause() {
+  onPause = () => {
     this.setState({ playing: false });
-  }
+  };
 
-  onBack() {
+  onBack = () => {
     const amount = this.props.shorterSeek ? 5000 : 10000;
     let position = this.state.position - amount;
     if (position < 0) {
       position = 0;
     }
     this.setState({ position: position });
-  }
+  };
 
-  onForward() {
+  onForward = () => {
     const amount = this.props.shorterSeek ? 5000 : 10000;
     let position = this.state.position + amount;
     if (position > this.state.duration) {
       position = this.state.duration;
     }
     this.setState({ position: position });
-  }
+  };
 }
 
 (AudioControl as any).displayName = "AudioControl";
-export default withStyles(styles)(AudioControl as any);
+export default withStyles(styles)(AudioControl);

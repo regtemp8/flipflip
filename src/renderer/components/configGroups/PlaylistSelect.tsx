@@ -26,7 +26,7 @@ interface PlaylistSelectProps {
   playlists: Array<Playlist>;
   menuIsOpen?: boolean;
   autoFocus?: boolean;
-  onChange(sceneID: number): void;
+  onChange: (sceneID: number) => void;
 }
 
 class PlaylistSelect extends React.Component<PlaylistSelectProps> {
@@ -48,15 +48,15 @@ class PlaylistSelect extends React.Component<PlaylistSelectProps> {
         backspaceRemovesValue={false}
         menuIsOpen={this.props.menuIsOpen}
         autoFocus={this.props.autoFocus}
-        onChange={this.onChange.bind(this)}
+        onChange={this.onChange}
       />
     );
   }
 
-  onChange(e: { label: string; value: number }) {
+  onChange = (e: { label: string; value: number }) => {
     this.props.onChange(e.value);
-  }
+  };
 }
 
 (PlaylistSelect as any).displayName = "PlaylistSelect";
-export default withStyles(styles)(PlaylistSelect as any);
+export default withStyles(styles)(PlaylistSelect);

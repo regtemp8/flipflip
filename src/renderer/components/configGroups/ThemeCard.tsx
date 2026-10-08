@@ -23,8 +23,8 @@ const styles = (theme: Theme) =>
 interface ThemeCardProps {
   classes: any;
   theme: Theme;
-  onChangeThemeColor(colorTheme: any, primary: boolean): void;
-  onToggleDarkMode(): void;
+  onChangeThemeColor: (colorTheme: any, primary: boolean) => void;
+  onToggleDarkMode: () => void;
 }
 
 class ThemeCard extends React.Component<ThemeCardProps> {
@@ -42,7 +42,7 @@ class ThemeCard extends React.Component<ThemeCardProps> {
             control={
               <Switch
                 checked={this.props.theme.palette.mode === "dark"}
-                onChange={this.props.onToggleDarkMode.bind(this)}
+                onChange={this.props.onToggleDarkMode}
               />
             }
             label="Dark Mode"
@@ -52,28 +52,28 @@ class ThemeCard extends React.Component<ThemeCardProps> {
           <Typography>Primary Color</Typography>
           <ThemeColorPicker
             currentColor={this.props.theme.palette.primary.main}
-            onChangeColor={this.onPrimaryInput.bind(this)}
+            onChangeColor={this.onPrimaryInput}
           />
         </div>
         <div className={classes.themePicker}>
           <Typography>Secondary Color</Typography>
           <ThemeColorPicker
             currentColor={this.props.theme.palette.secondary.main}
-            onChangeColor={this.onSecondaryInput.bind(this)}
+            onChangeColor={this.onSecondaryInput}
           />
         </div>
       </React.Fragment>
     );
   }
 
-  onPrimaryInput(colorTheme: any) {
+  onPrimaryInput = (colorTheme: any) => {
     this.props.onChangeThemeColor(colorTheme, true);
-  }
+  };
 
-  onSecondaryInput(colorTheme: any) {
+  onSecondaryInput = (colorTheme: any) => {
     this.props.onChangeThemeColor(colorTheme, false);
-  }
+  };
 }
 
 (ThemeCard as any).displayName = "ThemeCard";
-export default withStyles(styles)(ThemeCard as any);
+export default withStyles(styles)(ThemeCard);

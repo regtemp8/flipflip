@@ -179,16 +179,19 @@ interface AudioSourceListItemProps {
   source: Audio;
   sources: Array<Audio>;
   style: any;
-  onClickAlbum(album: string): void;
-  onClickArtist(artist: string): void;
-  onDelete(source: Audio): void;
-  onEditSource(source: Audio): void;
-  onPlay(source: Audio, displaySources: Array<Audio>): void;
-  onRemove(source: Audio): void;
-  onSourceOptions(source: Audio): void;
-  onToggleSelect(): void;
-  savePosition(): void;
-  systemMessage(message: string): void;
+  onClickAlbum: (album: string) => void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
+  onDelete: (source: Audio) => void;
+  onEditSource: (source: Audio, e: React.MouseEvent<HTMLButtonElement>) => void;
+  onPlay: (source: Audio, displaySources: Array<Audio>) => void;
+  onRemove: (source: Audio) => void;
+  onSourceOptions: (
+    source: Audio,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => void;
+  onToggleSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  savePosition: () => void;
+  systemMessage: (message: string) => void;
 }
 
 interface AudioSourceListItemState {
@@ -221,7 +224,7 @@ class AudioSourceListItem extends React.Component<
           {this.props.isSelect && (
             <Checkbox
               value={this.props.source.url}
-              onChange={this.props.onToggleSelect.bind(this)}
+              onChange={this.props.onToggleSelect}
               checked={this.props.checked}
             />
           )}
@@ -285,7 +288,7 @@ class AudioSourceListItem extends React.Component<
                   }
                 >
                   <div
-                    onClick={this.onSourceIconClick.bind(this)}
+                    onClick={this.onSourceIconClick}
                     className={classes.trackThumb}
                   >
                     {this.props.source.thumb != null && (
@@ -327,10 +330,9 @@ class AudioSourceListItem extends React.Component<
             </Typography>
             <div
               className={classes.artistContainer}
-              onClick={this.props.onClickArtist.bind(
-                this,
-                this.props.source.artist,
-              )}
+              onClick={(e) =>
+                this.props.onClickArtist(this.props.source.artist, e)
+              }
             >
               <Typography noWrap className={classes.trackArtist}>
                 {this.props.source.artist}
@@ -338,10 +340,7 @@ class AudioSourceListItem extends React.Component<
             </div>
             <div
               className={classes.albumContainer}
-              onClick={this.props.onClickAlbum.bind(
-                this,
-                this.props.source.album,
-              )}
+              onClick={() => this.props.onClickAlbum(this.props.source.album)}
             >
               <Typography className={classes.trackAlbum}>
                 {this.props.source.album}
@@ -359,7 +358,7 @@ class AudioSourceListItem extends React.Component<
                 />
               )}
               <IconButton
-                onClick={this.props.onEditSource.bind(this, this.props.source)}
+                onClick={(e) => this.props.onEditSource(this.props.source, e)}
                 className={classes.actionButton}
                 edge="end"
                 size="small"
@@ -368,10 +367,9 @@ class AudioSourceListItem extends React.Component<
                 <EditIcon />
               </IconButton>
               <IconButton
-                onClick={this.props.onSourceOptions.bind(
-                  this,
-                  this.props.source,
-                )}
+                onClick={(e) =>
+                  this.props.onSourceOptions(this.props.source, e)
+                }
                 className={classes.actionButton}
                 edge="end"
                 size="small"
@@ -380,7 +378,7 @@ class AudioSourceListItem extends React.Component<
                 <BuildIcon />
               </IconButton>
               <IconButton
-                onClick={this.props.onRemove.bind(this, this.props.source)}
+                onClick={() => this.props.onRemove(this.props.source)}
                 className={clsx(classes.deleteButton, classes.actionButton)}
                 edge="end"
                 size="small"
@@ -395,7 +393,7 @@ class AudioSourceListItem extends React.Component<
     );
   }
 
-  onSourceIconClick(e: React.MouseEvent<HTMLDivElement>) {
+  onSourceIconClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const sourceURL = this.props.source.url;
     if (e.shiftKey && e.ctrlKey && e.altKey) {
       this.props.onDelete(this.props.source);
@@ -413,7 +411,7 @@ class AudioSourceListItem extends React.Component<
         );
       }
     }
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);
@@ -421,4 +419,4 @@ class AudioSourceListItem extends React.Component<
 }
 
 (AudioSourceListItem as any).displayName = "AudioSourceListItem";
-export default withStyles(styles)(AudioSourceListItem as any);
+export default withStyles(styles)(AudioSourceListItem);

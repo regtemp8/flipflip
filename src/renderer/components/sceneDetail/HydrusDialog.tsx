@@ -38,8 +38,12 @@ interface HydrusDialogProps {
   tags: any;
   classes: any;
   open: boolean;
-  onClose(): void;
-  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
+  onClose: () => void;
+  onImportURL: (
+    type: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) => void;
 }
 
 type FileSortOrder = "asc" | "desc";
@@ -104,7 +108,7 @@ class HydrusDialog extends React.Component<
       <Dialog
         classes={{ paper: classes.noScroll }}
         open={this.props.open}
-        onClose={this.props.onClose.bind(this)}
+        onClose={this.props.onClose}
         fullWidth={true}
         aria-labelledby="url-import-title"
         aria-describedby="url-import-description"
@@ -130,17 +134,14 @@ class HydrusDialog extends React.Component<
                 onlyTags
                 showCheckboxes
                 hideSelectedOptions={false}
-                onUpdateFilters={this.onSelectTags.bind(this)}
+                onUpdateFilters={this.onSelectTags}
               />
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={this.setIncludeCurrentTags.bind(
-                      this,
-                      !this.state.includeCurrentTags,
-                    )}
+                    onChange={this.setIncludeCurrentTags}
                     checked={this.state.includeCurrentTags}
                   />
                 }
@@ -151,10 +152,7 @@ class HydrusDialog extends React.Component<
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={this.setIncludePendingTags.bind(
-                      this,
-                      !this.state.includePendingTags,
-                    )}
+                    onChange={this.setIncludePendingTags}
                     checked={this.state.includePendingTags}
                   />
                 }
@@ -171,7 +169,7 @@ class HydrusDialog extends React.Component<
                 <Select
                   variant="standard"
                   value={this.state.fileSortType}
-                  onChange={this.onFileSortType.bind(this)}
+                  onChange={this.onFileSortType}
                 >
                   {sortTypes.map((type, index) => {
                     return (
@@ -193,7 +191,7 @@ class HydrusDialog extends React.Component<
                 <Select
                   variant="standard"
                   value={this.state.fileSortOrder}
-                  onChange={this.onFileSortOrder.bind(this)}
+                  onChange={this.onFileSortOrder}
                 >
                   <MenuItem key="asc" value="asc">
                     Ascending
@@ -207,11 +205,11 @@ class HydrusDialog extends React.Component<
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.onClose.bind(this)} color="secondary">
+          <Button onClick={this.onClose} color="secondary">
             Cancel
           </Button>
           <Button
-            onClick={this.createAPICall.bind(this)}
+            onClick={this.createAPICall}
             disabled={
               this.state.selectedTags && this.state.selectedTags.length == 0
             }
@@ -224,25 +222,25 @@ class HydrusDialog extends React.Component<
     );
   }
 
-  setIncludeCurrentTags(includeCurrentTags: boolean) {
-    this.setState({ includeCurrentTags });
-  }
+  setIncludeCurrentTags = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ includeCurrentTags: e.target.checked });
+  };
 
-  setIncludePendingTags(includePendingTags: boolean) {
-    this.setState({ includePendingTags });
-  }
+  setIncludePendingTags = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ includePendingTags: e.target.checked });
+  };
 
-  onFileSortType(e: SelectChangeEvent<number>) {
+  onFileSortType = (e: SelectChangeEvent<number>) => {
     const input = e.target;
     this.setState({ fileSortType: Number(input.value) });
-  }
+  };
 
-  onFileSortOrder(e: SelectChangeEvent<FileSortOrder>) {
+  onFileSortOrder = (e: SelectChangeEvent<FileSortOrder>) => {
     const input = e.target;
     this.setState({ fileSortOrder: input.value as FileSortOrder });
-  }
+  };
 
-  onSelectTags(selectedTags: Array<string>) {
+  onSelectTags = (selectedTags: Array<string>) => {
     selectedTags = selectedTags.map((tag) => {
       if (tag.startsWith("[") && tag.endsWith("]")) {
         tag = tag.substring(1, tag.length - 1);
@@ -252,14 +250,14 @@ class HydrusDialog extends React.Component<
     });
 
     this.setState({ selectedTags });
-  }
+  };
 
-  onClose() {
+  onClose = () => {
     this.setState(defaultState);
     this.props.onClose();
-  }
+  };
 
-  createAPICall(e: React.MouseEvent<HTMLButtonElement>) {
+  createAPICall = (e: React.MouseEvent<HTMLButtonElement>) => {
     const { selectedTags } = this.state;
     const tags = encodeURIComponent(JSON.stringify(selectedTags));
     let url = `${this.makeURL()}?tags=${tags}`;
@@ -269,8 +267,8 @@ class HydrusDialog extends React.Component<
     url += `&file_sort_asc=${this.state.fileSortOrder === "asc"}`;
 
     this.setState(defaultState);
-    this.props.onImportURL(AF.url, e.shiftKey, [url]);
-  }
+    this.props.onImportURL(AF.url, e, [url]);
+  };
 
   makeURL() {
     const { hydrusProtocol, hydrusDomain, hydrusPort } =
@@ -287,4 +285,4 @@ class HydrusDialog extends React.Component<
 }
 
 (HydrusDialog as any).displayName = "HydrusDialog";
-export default withStyles(styles)(HydrusDialog as any);
+export default withStyles(styles)(HydrusDialog);

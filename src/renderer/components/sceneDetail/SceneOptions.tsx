@@ -38,10 +38,10 @@ interface SceneOptionsProps {
   scene: Scene | SceneSettings;
   tutorial: string;
   isConfig: boolean;
-  onUpdateScene(
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  ) => void;
 }
 
 class SceneOptions extends React.Component<SceneOptionsProps> {
@@ -87,7 +87,7 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
                 allSceneGrids={this.props.allSceneGrids}
                 scene={this.props.scene}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -111,7 +111,7 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
                 scene={this.props.scene}
                 isConfig={this.props.isConfig}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -122,4 +122,4 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
 }
 
 (SceneOptions as any).displayName = "SceneOptions";
-export default withStyles(styles)(SceneOptions as any);
+export default withStyles(styles)(SceneOptions);

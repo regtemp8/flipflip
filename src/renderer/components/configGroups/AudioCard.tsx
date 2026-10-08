@@ -23,20 +23,20 @@ interface AudioCardProps {
   scene: Scene;
   sidebar?: boolean;
   startPlaying: boolean;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
   persist?: boolean;
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
   scenePaths?: Array<any>;
-  goBack?(): void;
-  onAddTracks?(playlistIndex: number): void;
-  onPlay?(source: Audio, displayed: Array<Audio>): void;
-  onPlaying?(position: number, duration: number): void;
-  orderAudioTags?(audio: Audio): void;
-  playTrack?(url: string): void;
-  playNextScene?(): void;
-  setCurrentAudio?(audio: Audio): void;
-  systemMessage?(message: string): void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  goBack?: () => void;
+  onAddTracks?: (playlistIndex: number) => void;
+  onPlay?: (source: Audio, displayed: Array<Audio>) => void;
+  onPlaying?: (position: number, duration: number) => void;
+  orderAudioTags?: (audio: Audio) => void;
+  playTrack?: (url: string) => void;
+  playNextScene?: () => void;
+  setCurrentAudio?: (audio: Audio) => void;
+  systemMessage?: (message: string) => void;
 }
 
 interface AudioCardState {
@@ -68,7 +68,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
                   control={
                     <Switch
                       checked={this.props.scene.audioEnabled}
-                      onChange={this.onBoolInput.bind(this, "audioEnabled")}
+                      onChange={(e) => this.onBoolInput("audioEnabled", e)}
                     />
                   }
                   label="Audio Playlists"
@@ -82,7 +82,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
                 <Tooltip disableInteractive title="Add Playlist">
                   <Fab
                     sx={{ boxShadow: "none" }}
-                    onClick={this.onAddPlaylist.bind(this)}
+                    onClick={this.onAddPlaylist}
                     size="small"
                   >
                     <AddIcon />
@@ -108,12 +108,10 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
                     startPlaying={this.props.startPlaying}
                     persist={this.props.persist}
                     onAddTracks={this.props.onAddTracks}
-                    onSourceOptions={this.onSourceOptions.bind(this)}
-                    onUpdateScene={this.props.onUpdateScene.bind(this)}
+                    onSourceOptions={this.onSourceOptions}
+                    onUpdateScene={this.props.onUpdateScene}
                     setCurrentAudio={
-                      i == 0 && this.props.setCurrentAudio
-                        ? this.props.setCurrentAudio.bind(this)
-                        : undefined
+                      i == 0 ? this.props.setCurrentAudio : undefined
                     }
                     goBack={this.props.goBack}
                     onPlay={this.props.onPlay}
@@ -131,23 +129,16 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
         {this.state.sourceOptions != null && (
           <AudioOptions
             audio={this.state.sourceOptions}
-            onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(
-              this,
-              this.state.sourceOptions,
-              this.state.sourceOptionsPlaylist,
-            )}
+            onCancel={this.onCloseSourceOptions}
+            onFinishEdit={this.onFinishSourceOptions}
           />
         )}
       </Grid>
     );
   }
 
-  onFinishSourceOptions(
-    sourceOptions: Audio,
-    sourceOptionsPlaylist: number,
-    newAudio: Audio,
-  ) {
+  onFinishSourceOptions = (newAudio: Audio) => {
+    const { sourceOptions, sourceOptionsPlaylist } = this.state;
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.audioPlaylists[sourceOptionsPlaylist];
       const editSource = playlist.audios.find((a) => a.id == sourceOptions.id);
@@ -156,33 +147,33 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
       }
     });
     this.onCloseSourceOptions();
-  }
+  };
 
-  onCloseSourceOptions() {
+  onCloseSourceOptions = () => {
     this.setState({ sourceOptions: undefined, sourceOptionsPlaylist: -1 });
-  }
+  };
 
-  onSourceOptions(playlistIndex: number, audio: Audio) {
+  onSourceOptions = (playlistIndex: number, audio: Audio) => {
     this.setState({
       sourceOptions: audio,
       sourceOptionsPlaylist: playlistIndex,
     });
-  }
+  };
 
-  onAddPlaylist() {
+  onAddPlaylist = () => {
     this.changeKey(
       "audioPlaylists",
       this.props.scene.audioPlaylists.concat([
         { audios: [], shuffle: false, repeat: RP.all },
       ]),
     );
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));

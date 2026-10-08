@@ -375,13 +375,10 @@ export default class Panning extends React.Component<
     return duration;
   }
 
-  panLoop(panIn: boolean) {
+  panLoop = (panIn: boolean) => {
     const delay = panIn ? this.panIn() : this.panOut();
-    this._panTimeout = window.setTimeout(
-      this.panLoop.bind(this, !panIn),
-      delay,
-    );
-  }
+    this._panTimeout = window.setTimeout(() => this.panLoop(!panIn), delay);
+  };
 
   componentDidMount() {
     if (this.props.scene.panning && this.props.scene.panTF != TF.scene) {

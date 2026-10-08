@@ -93,23 +93,23 @@ interface SourceListProps {
   classes: any;
   config: Config;
   library: Array<LibrarySource>;
-  showHelp: boolean;
+  showHelp?: boolean;
   sources: Array<LibrarySource>;
   tutorial: string;
-  onClearBlacklist(sourceURL: string): void;
-  onClip(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onDownload(source: LibrarySource): void;
-  onEditBlacklist(sourceURL: string, blacklist: string): void;
-  onPlay(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  systemMessage(message: string): void;
   isSelect?: boolean;
   selected?: Array<string>;
   yOffset?: number;
   useWeights?: boolean;
-  onUpdateLibrary?(fn: (library: Array<LibrarySource>) => void): void;
-  onUpdateScene?(fn: (scene: Scene) => void): void;
-  onUpdateSelected?(selected: Array<string>): void;
-  savePosition?(): void;
+  onClearBlacklist: (sourceURL: string) => void;
+  onClip: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  onDownload: (source: LibrarySource) => void;
+  onEditBlacklist: (sourceURL: string, blacklist: string) => void;
+  onPlay: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  systemMessage: (message: string) => void;
+  onUpdateLibrary?: (fn: (library: Array<LibrarySource>) => void) => void;
+  onUpdateScene?: (fn: (scene: Scene) => void) => void;
+  onUpdateSelected?: (selected: Array<string>) => void;
+  savePosition?: () => void;
 }
 
 interface SourceListState {
@@ -224,7 +224,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                 distance={5}
                 height={height}
                 width={width}
-                onSortEnd={this.onSortEnd.bind(this)}
+                onSortEnd={this.onSortEnd}
               />
             </List>
           )}
@@ -233,8 +233,8 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           mouseX={this.state.mouseX}
           mouseY={this.state.mouseY}
           clipMenu={this.state.clipMenu}
-          onCloseDialog={this.onCloseDialog.bind(this)}
-          onToggleClip={this.onToggleClip.bind(this)}
+          onCloseDialog={this.onCloseDialog}
+          onToggleClip={this.onToggleClip}
         />
         <Menu
           id="weight-menu"
@@ -252,15 +252,15 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           }}
           keepMounted
           open={!!this.state.weightMenu}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
         >
           <MenuItem>
             <TextField
               variant="standard"
               margin="dense"
               value={this.state?.weightMenu?.weight || 1}
-              onChange={this.onWeightInput.bind(this)}
-              onBlur={this.blurWeight.bind(this)}
+              onChange={this.onWeightInput}
+              onBlur={this.blurWeight}
               inputProps={{
                 min: 1,
                 type: "number",
@@ -271,7 +271,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         {this.state.cachePath != null && (
           <Dialog
             open={true}
-            onClose={this.onCloseClean.bind(this)}
+            onClose={this.onCloseClean}
             aria-describedby="clean-cache-description"
           >
             <DialogContent>
@@ -280,7 +280,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                 <Link
                   className={classes.wordWrap}
                   href="#"
-                  onClick={this.openDirectory.bind(this, this.state.cachePath)}
+                  onClick={this.openDirectory}
                   underline="hover"
                 >
                   {this.state.cachePath}
@@ -289,13 +289,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onCloseClean.bind(this)} color="secondary">
+              <Button onClick={this.onCloseClean} color="secondary">
                 Cancel
               </Button>
-              <Button
-                onClick={this.onFinishClean.bind(this, this.state.cachePath)}
-                color="primary"
-              >
+              <Button onClick={this.onFinishClean} color="primary">
                 OK
               </Button>
             </DialogActions>
@@ -303,7 +300,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         )}
         <Dialog
           open={this.state.blacklistSource != null}
-          onClose={this.onCloseBlacklist.bind(this)}
+          onClose={this.onCloseBlacklist}
           aria-describedby="edit-blacklist-description"
         >
           <DialogContent>
@@ -318,24 +315,14 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               value={this.state.editBlacklist}
               margin="dense"
               inputProps={{ className: classes.blacklistInput }}
-              onChange={this.onChangeBlacklist.bind(this)}
+              onChange={this.onChangeBlacklist}
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={this.onCloseBlacklist.bind(this)}
-              color="secondary"
-            >
+            <Button onClick={this.onCloseBlacklist} color="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={this.onFinishBlacklist.bind(
-                this,
-                this.state.blacklistSource,
-                this.state.editBlacklist,
-              )}
-              color="primary"
-            >
+            <Button onClick={this.onFinishBlacklist} color="primary">
               Save
             </Button>
           </DialogActions>
@@ -343,7 +330,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         {this.state.sourceOptions?.type == ST.local && (
           <Dialog
             open={this.state.sourceOptions?.type == ST.local}
-            onClose={this.onCloseSourceOptions.bind(this)}
+            onClose={this.onCloseSourceOptions}
             aria-describedby="local-options-description"
           >
             <DialogContent>
@@ -360,10 +347,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                   >
                     <Switch
                       checked={this.state.sourceOptions?.source.dirOfSources}
-                      onChange={this.onSourceBoolInput.bind(
-                        this,
-                        "dirOfSources",
-                      )}
+                      onChange={(e) =>
+                        this.onSourceBoolInput("dirOfSources", e)
+                      }
                     />
                   </Tooltip>
                 }
@@ -375,7 +361,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         {this.state.sourceOptions?.type == ST.video && (
           <Dialog
             open={this.state.sourceOptions?.type == ST.video}
-            onClose={this.onCloseSourceOptions.bind(this)}
+            onClose={this.onCloseSourceOptions}
             aria-describedby="video-options-description"
           >
             <DialogContent>
@@ -398,7 +384,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                     <InputAdornment position="end">
                       <Tooltip disableInteractive title="Open File">
                         <IconButton
-                          onClick={this.onOpenSubtitleFile.bind(this)}
+                          onClick={this.onOpenSubtitleFile}
                           size="large"
                         >
                           <FolderIcon />
@@ -407,7 +393,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
                     </InputAdornment>
                   ),
                 }}
-                onChange={this.onSourceInput.bind(this, "subtitleFile")}
+                onChange={(e) => this.onSourceInput("subtitleFile", e)}
               />
             </DialogContent>
           </Dialog>
@@ -415,7 +401,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         {this.state.deleteDialog != null && (
           <Dialog
             open={true}
-            onClose={this.onCloseDeleteDialog.bind(this)}
+            onClose={this.onCloseDeleteDialog}
             aria-describedby="delete-description"
           >
             <DialogContent>
@@ -424,19 +410,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={this.onCloseDeleteDialog.bind(this)}
-                color="secondary"
-              >
+              <Button onClick={this.onCloseDeleteDialog} color="secondary">
                 Cancel
               </Button>
-              <Button
-                onClick={this.onFinishDelete.bind(
-                  this,
-                  this.state.deleteDialog,
-                )}
-                color="primary"
-              >
+              <Button onClick={this.onFinishDelete} color="primary">
                 Delete
               </Button>
             </DialogActions>
@@ -481,32 +458,33 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     if (e.key == "Shift") this._shiftDown = false;
   };
 
-  savePosition() {
+  savePosition = () => {
     if (this.props.savePosition) {
       this.props.savePosition();
     }
-  }
+  };
 
-  onDelete(source: LibrarySource) {
+  onDelete = (source: LibrarySource) => {
     window.ipc.shouldShowDeleteDialog(source.url).then((show) => {
       if (show) {
         this.setState({ deleteDialog: source });
       }
     });
-  }
+  };
 
-  onCloseDeleteDialog() {
+  onCloseDeleteDialog = () => {
     this.setState({ deleteDialog: undefined });
-  }
+  };
 
-  onFinishDelete(toDelete: LibrarySource) {
+  onFinishDelete = () => {
+    const toDelete = this.state.deleteDialog;
     window.ipc.deleteSource(toDelete.url).then(() => {
       this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
-  }
+  };
 
-  onRemove(source: LibrarySource) {
+  onRemove = (source: LibrarySource) => {
     if (this.props.onUpdateScene) {
       this.props.onUpdateScene(
         (s) => (s.sources = s.sources.filter((s) => s.id != source.id)),
@@ -524,10 +502,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         });
       });
     }
-  }
+  };
 
-  onToggleSelect(e: MouseEvent) {
-    const source = (e.currentTarget as HTMLInputElement).value;
+  onToggleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const source = e.currentTarget.value;
     let newSelected = Array.from(this.props.selected);
     if (newSelected.includes(source)) {
       newSelected.splice(newSelected.indexOf(source), 1);
@@ -554,21 +532,21 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     }
     this._lastChecked = source;
     this.props.onUpdateSelected(newSelected);
-  }
+  };
 
-  blurWeight(e: React.FocusEvent<HTMLInputElement>) {
+  blurWeight = (e: React.FocusEvent<HTMLInputElement>) => {
     const { min, max } = e.currentTarget;
     if (min && this.state.weightMenu.weight < Number(min)) {
       this.changeWeight(Number(min));
     } else if (max && this.state.weightMenu.weight > Number(max)) {
       this.changeWeight(Number(max));
     }
-  }
+  };
 
-  onWeightInput(e: React.ChangeEvent<HTMLInputElement>) {
+  onWeightInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.changeWeight(input.value === "" ? 1 : Number(input.value));
-  }
+  };
 
   changeWeight(intString: number) {
     this.props.onUpdateScene((scene) => {
@@ -580,7 +558,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     });
   }
 
-  onToggleClip(s: LibrarySource, c: Clip) {
+  onToggleClip = (s: LibrarySource, c: Clip) => {
     this.props.onUpdateScene((scene) => {
       const source = scene.sources.find((ls) => ls.id == s.id);
       if (source == null) {
@@ -598,13 +576,13 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
       }
       this.setState({ clipMenu: source });
     });
-  }
+  };
 
-  onStartEdit(id: number) {
+  onStartEdit = (id: number) => {
     this.setState({ isEditing: id });
-  }
+  };
 
-  onEndEdit(newURL: string) {
+  onEndEdit = (newURL: string) => {
     if (this.props.onUpdateScene) {
       this.props.onUpdateScene((s) => {
         const editSource = s.sources.find((s) => s.id == this.state.isEditing);
@@ -709,9 +687,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
       });
     }
     this.setState({ isEditing: -1 });
-  }
+  };
 
-  onClean(source: LibrarySource) {
+  onClean = (source: LibrarySource) => {
     window.ipc
       .getSourceCachePath(source.url, this.props.config)
       .then((cachePath) => {
@@ -719,94 +697,106 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           this.setState({ cachePath });
         }
       });
-  }
+  };
 
-  onFinishClean(cachePath: string) {
+  onFinishClean = () => {
+    const { cachePath } = this.state;
     window.ipc.cleanCache(cachePath).then(() => {
       this.onCloseClean();
     });
-  }
+  };
 
-  onCloseClean() {
+  onCloseClean = () => {
     this.setState({ cachePath: undefined });
-  }
+  };
 
-  openDirectory(cachePath: string) {
+  openDirectory = () => {
+    const { cachePath } = this.state;
     const platform = window.ipc.platform();
     if (platform === "win32") {
       this.openExternalURL(cachePath);
     } else {
       this.openExternalURL(urlToPath(cachePath, platform));
     }
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);
   }
 
-  onOpenClipMenu(source: LibrarySource, e: MouseEvent) {
+  onOpenClipMenu = (
+    source: LibrarySource,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
     this.setState({ mouseX: e.clientX, mouseY: e.clientY, clipMenu: source });
-  }
+  };
 
-  onOpenWeightMenu(source: LibrarySource, e: MouseEvent) {
+  onOpenWeightMenu = (
+    source: LibrarySource,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
     this.setState({ mouseX: e.clientX, mouseY: e.clientY, weightMenu: source });
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ clipMenu: undefined, weightMenu: undefined });
-  }
+  };
 
-  onCloseBlacklist() {
+  onCloseBlacklist = () => {
     this.setState({ blacklistSource: undefined, editBlacklist: undefined });
-  }
+  };
 
-  onFinishBlacklist(blacklistSource: string, editBlacklist: string) {
+  onFinishBlacklist = () => {
+    const { blacklistSource, editBlacklist } = this.state;
     this.props.onEditBlacklist(blacklistSource, editBlacklist);
     this.onCloseBlacklist();
-  }
+  };
 
-  onChangeBlacklist(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeBlacklist = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       editBlacklist: e.currentTarget.value,
     });
-  }
+  };
 
-  onEditBlacklist(source: LibrarySource) {
+  onEditBlacklist = (source: LibrarySource) => {
     this.setState({
       blacklistSource: source.url,
       editBlacklist: source.blacklist.join("\n"),
     });
-  }
+  };
 
-  onCloseSourceOptions() {
+  onCloseSourceOptions = () => {
     this.setState({ sourceOptions: undefined });
-  }
+  };
 
-  onSourceOptions(source: LibrarySource) {
+  onSourceOptions = (source: LibrarySource) => {
     const type = getSourceType(source.url);
     this.setState({
       sourceOptions: { source, type },
     });
-  }
+  };
 
-  onOpenSubtitleFile() {
+  onOpenSubtitleFile = () => {
     window.ipc.openSubtitle().then((result) => {
       if (result != null) {
         this.changeKey("subtitleFile", result);
       }
     });
-  }
+  };
 
-  onSourceInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onSourceInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
-  onSourceBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onSourceBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     const { source, type } = this.state.sourceOptions!;
@@ -882,23 +872,23 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           style={value.style}
           tutorial={this.props.tutorial}
           useWeights={this.props.useWeights}
-          onClean={this.onClean.bind(this)}
-          onClearBlacklist={this.props.onClearBlacklist.bind(this)}
+          onClean={this.onClean}
+          onClearBlacklist={this.props.onClearBlacklist}
           canClip={canClip}
-          onClip={this.props.onClip.bind(this)}
-          onDelete={this.onDelete.bind(this)}
-          onDownload={this.props.onDownload.bind(this)}
-          onEditBlacklist={this.onEditBlacklist.bind(this)}
-          onEndEdit={this.onEndEdit.bind(this)}
-          onOpenClipMenu={this.onOpenClipMenu.bind(this)}
-          onOpenWeightMenu={this.onOpenWeightMenu.bind(this)}
-          onPlay={this.props.onPlay.bind(this)}
-          onRemove={this.onRemove.bind(this)}
-          onSourceOptions={this.onSourceOptions.bind(this)}
-          onStartEdit={this.onStartEdit.bind(this)}
-          onToggleSelect={this.onToggleSelect.bind(this)}
-          savePosition={this.savePosition.bind(this)}
-          systemMessage={this.props.systemMessage.bind(this)}
+          onClip={this.props.onClip}
+          onDelete={this.onDelete}
+          onDownload={this.props.onDownload}
+          onEditBlacklist={this.onEditBlacklist}
+          onEndEdit={this.onEndEdit}
+          onOpenClipMenu={this.onOpenClipMenu}
+          onOpenWeightMenu={this.onOpenWeightMenu}
+          onPlay={this.props.onPlay}
+          onRemove={this.onRemove}
+          onSourceOptions={this.onSourceOptions}
+          onStartEdit={this.onStartEdit}
+          onToggleSelect={this.onToggleSelect}
+          savePosition={this.savePosition}
+          systemMessage={this.props.systemMessage}
         />
       );
     },
@@ -911,4 +901,4 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
 }
 
 (SourceList as any).displayName = "SourceList";
-export default withStyles(styles)(SourceList as any);
+export default withStyles(styles)(SourceList);

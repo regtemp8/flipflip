@@ -60,7 +60,7 @@ interface PlaylistListProps {
   playlists: Array<Playlist>;
   audios: Array<Audio>;
   showHelp: boolean;
-  onClickPlaylist(playlist: string): void;
+  onClickPlaylist: (playlist: string) => void;
 }
 
 interface PlaylistListState {
@@ -139,9 +139,9 @@ class PlaylistList extends React.Component<
               md={3}
               lg={2}
               className={classes.pointer}
-              onClick={this.props.onClickPlaylist.bind(this, p)}
-              onMouseEnter={this.onMouseEnter.bind(this, p)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onClick={() => this.props.onClickPlaylist(p)}
+              onMouseEnter={() => this.onMouseEnter(p)}
+              onMouseLeave={this.onMouseLeave}
             >
               <Card classes={{ root: classes.root }}>
                 <Grid container>
@@ -181,13 +181,13 @@ class PlaylistList extends React.Component<
     }
   }
 
-  onMouseEnter(album: string) {
+  onMouseEnter = (album: string) => {
     this.setState({ hover: album });
-  }
+  };
 
-  onMouseLeave() {
+  onMouseLeave = () => {
     this.setState({ hover: undefined });
-  }
+  };
 
   getPlaylists(): Map<string, Array<string>> {
     const playlistsMap = new Map<string, Array<string>>();
@@ -209,4 +209,4 @@ class PlaylistList extends React.Component<
 }
 
 (PlaylistList as any).displayName = "PlaylistList";
-export default withStyles(styles)(PlaylistList as any);
+export default withStyles(styles)(PlaylistList);

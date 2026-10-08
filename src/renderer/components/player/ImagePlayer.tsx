@@ -34,15 +34,15 @@ interface ImagePlayerProps {
   gridCoordinates?: Array<number>;
   isOverlay?: boolean;
   strobeLayer?: string;
-  setHistoryPaths(historyPaths: Array<any>): void;
-  setHistoryOffset(historyOffset: number): void;
-  onLoaded(): void;
-  setVideo(video?: HTMLVideoElement): void;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  onEndScene?(): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  setTimeToNextFrame?(timeToNextFrame: number): void;
-  playNextScene?(): void;
+  setHistoryPaths: (historyPaths: Array<any>) => void;
+  setHistoryOffset: (historyOffset: number) => void;
+  onLoaded: () => void;
+  setVideo: (video?: HTMLVideoElement) => void;
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  onEndScene?: () => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  setTimeToNextFrame?: (timeToNextFrame: number) => void;
+  playNextScene?: () => void;
 }
 
 interface ImagePlayerState {
@@ -328,7 +328,7 @@ export default class ImagePlayer extends React.Component<
     ) {
       window.setTimeout(() => this.advance(true, false), 200);
       this._backForth = window.setTimeout(
-        this.backForth.bind(this, -1),
+        () => this.backForth(-1),
         this.getBackForthTiming(),
       );
     } else if (
@@ -382,11 +382,11 @@ export default class ImagePlayer extends React.Component<
     return delay;
   }
 
-  backForth(newOffset: number) {
+  backForth = (newOffset: number) => {
     if (this.props.isPlaying && this._isMounted) {
       this.setState({ historyOffset: newOffset });
       this._backForth = window.setTimeout(
-        this.backForth.bind(this, newOffset == 0 ? -1 : 0),
+        () => this.backForth(newOffset == 0 ? -1 : 0),
         this.getBackForthTiming(),
       );
     } else {
@@ -396,7 +396,7 @@ export default class ImagePlayer extends React.Component<
       window.clearTimeout(this._backForth);
       this._backForth = undefined;
     }
-  }
+  };
 
   delete() {
     const img =
@@ -433,16 +433,16 @@ export default class ImagePlayer extends React.Component<
     this.advance(true, true);
   }
 
-  startFetchLoops(max: number, loop = 0) {
+  startFetchLoops = (max: number, loop = 0) => {
     if (loop < max) {
       this.runFetchLoop(loop);
       // Put a small delay between our loops
       this._waitTimeouts[loop] = window.setTimeout(
-        this.startFetchLoops.bind(this, max, loop + 1),
+        () => this.startFetchLoops(max, loop + 1),
         10,
       );
     }
-  }
+  };
 
   animationFrame = () => {
     if (
@@ -1248,7 +1248,7 @@ export default class ImagePlayer extends React.Component<
   }
 
   _strictCheckCount = 0;
-  advance(force = false, schedule = true) {
+  advance = (force = false, schedule = true) => {
     // bail if dead
     if (!(
       force ||
@@ -1263,10 +1263,7 @@ export default class ImagePlayer extends React.Component<
 
     let nextHistoryPaths = this.state.historyPaths;
     let nextImg:
-      | HTMLImageElement
-      | HTMLVideoElement
-      | HTMLIFrameElement
-      | undefined;
+      HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | undefined;
     if (this.props.historyOffset == 0) {
       if (
         this.props.scene.downloadScene &&
@@ -1432,9 +1429,11 @@ export default class ImagePlayer extends React.Component<
         }
       }
 
-      const duration = Number.parseFloat(nextImg?.getAttribute("duration") ?? "NaN")
+      const duration = Number.parseFloat(
+        nextImg?.getAttribute("duration") ?? "NaN",
+      );
       if (timeToNextFrame < duration) {
-        timeToNextFrame = duration
+        timeToNextFrame = duration;
       }
       if (this.props.setTimeToNextFrame) {
         this.props.setTimeToNextFrame(timeToNextFrame);
@@ -1462,7 +1461,7 @@ export default class ImagePlayer extends React.Component<
         )
       ) {
         this._timeout = window.setTimeout(
-          this.advance.bind(this, false, true),
+          () => this.advance(false, true),
           timeToNextFrame,
         );
       }
@@ -1472,7 +1471,7 @@ export default class ImagePlayer extends React.Component<
       });
       this.props.setHistoryPaths(nextHistoryPaths);
     }
-  }
+  };
 }
 
 (ImagePlayer as any).displayName = "ImagePlayer";

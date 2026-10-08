@@ -13,6 +13,7 @@ import en from "../../../common/en";
 import Audio from "../../../common/Audio";
 import LibrarySource from "../../../common/LibrarySource";
 import Tag from "../../../common/Tag";
+import CaptionScript from "../../../common/CaptionScript";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -36,7 +37,7 @@ interface SearchEntry {
 
 interface LibrarySearchProps {
   classes: any;
-  displaySources: Array<LibrarySource | Audio>;
+  displaySources: Array<LibrarySource | Audio | CaptionScript>;
   tags: Array<Tag>;
   filters: Array<string>;
   placeholder: string;
@@ -53,7 +54,7 @@ interface LibrarySearchProps {
   showCheckboxes?: boolean;
   fullWidth?: boolean;
   withBrackets?: boolean;
-  onUpdateFilters(filter: Array<string>): void;
+  onUpdateFilters: (filter: Array<string>) => void;
 }
 
 interface LibrarySearchState {
@@ -172,10 +173,7 @@ class LibrarySearch extends React.Component<
     let markedCount = 0;
     const options = new Array<{ label: string; value: string }>();
     const defaultValues = new Array<{ label: string; value: string }>();
-    for (let source of this.props.displaySources) {
-      if ((source as any).offline) {
-        offlineCount++;
-      }
+    for (const source of this.props.displaySources) {
       if (source.marked) {
         markedCount++;
       }
@@ -190,6 +188,10 @@ class LibrarySearch extends React.Component<
       }
 
       if (source instanceof LibrarySource) {
+        if (source.offline) {
+          offlineCount++;
+        }
+
         for (let clip of source.clips) {
           for (let tag of clip.tags) {
             untagged = false;
@@ -351,4 +353,4 @@ class LibrarySearch extends React.Component<
 }
 
 (LibrarySearch as any).displayName = "LibrarySearch";
-export default withStyles(styles)(LibrarySearch as any);
+export default withStyles(styles)(LibrarySearch);

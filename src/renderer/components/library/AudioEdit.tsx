@@ -73,8 +73,8 @@ interface AudioEditProps {
   config: Config;
   title: string;
   allowSuggestion?: boolean;
-  onCancel(): void;
-  onFinishEdit(common: Audio): void;
+  onCancel: () => void;
+  onFinishEdit: (common: Audio) => void;
 }
 
 interface AudioEditState {
@@ -96,7 +96,7 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
     return (
       <Dialog
         open={true}
-        onClose={this.props.onCancel.bind(this)}
+        onClose={this.props.onCancel}
         aria-describedby="edit-description"
       >
         <DialogContent>
@@ -107,23 +107,19 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
             value={this.state.audio.name == null ? "" : this.state.audio.name}
             margin="normal"
             label="Name"
-            onChange={this.onEdit.bind(this, "name")}
+            onChange={(e) => this.onEdit("name", e)}
           />
           <div
             className={clsx(
               classes.trackThumb,
               this.state.audio.thumb == null && classes.pointer,
             )}
-            onClick={
-              this.state.audio.thumb == null
-                ? this.loadThumb.bind(this)
-                : this.nop
-            }
+            onClick={this.state.audio.thumb == null ? this.loadThumb : this.nop}
           >
             {this.state.audio.thumb != null && (
               <React.Fragment>
                 <IconButton
-                  onClick={this.onRemoveThumb.bind(this)}
+                  onClick={this.onRemoveThumb}
                   className={classes.deleteThumbButton}
                   edge="end"
                   size="small"
@@ -149,7 +145,7 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
             }
             margin="normal"
             label="Artist"
-            onChange={this.onEdit.bind(this, "artist")}
+            onChange={(e) => this.onEdit("artist", e)}
           />
           <TextField
             variant="standard"
@@ -157,7 +153,7 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
             value={this.state.audio.album == null ? "" : this.state.audio.album}
             margin="normal"
             label="Album"
-            onChange={this.onEdit.bind(this, "album")}
+            onChange={(e) => this.onEdit("album", e)}
           />
           <TextField
             variant="standard"
@@ -171,7 +167,7 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
               min: 0,
               type: "number",
             }}
-            onChange={this.onEditInt.bind(this, "trackNum")}
+            onChange={(e) => this.onEditInt("trackNum", e)}
           />
           <TextField
             variant="standard"
@@ -182,20 +178,18 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
             margin="normal"
             label="Comment"
             multiline
-            onChange={this.onEdit.bind(this, "comment")}
+            onChange={(e) => this.onEdit("comment", e)}
           />
         </DialogContent>
         <DialogActions className={classes.actions}>
           {this.props.allowSuggestion && (
-            <Button onClick={this.loadSuggestions.bind(this)}>
-              Use Suggestions
-            </Button>
+            <Button onClick={this.loadSuggestions}>Use Suggestions</Button>
           )}
-          <Button onClick={this.props.onCancel.bind(this)} color="secondary">
+          <Button onClick={this.props.onCancel} color="secondary">
             Cancel
           </Button>
           <Button
-            onClick={this.props.onFinishEdit.bind(this, this.state.audio)}
+            onClick={() => this.props.onFinishEdit(this.state.audio)}
             color="primary"
           >
             Save
@@ -205,30 +199,36 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
     );
   }
 
-  nop() {}
+  nop = () => {};
 
-  onEditInt(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onEditInt = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     const newAudio = new Audio(this.state.audio);
     (newAudio as any)[key] = Number.parseInt(input.value);
     this.setState({ audio: newAudio });
-  }
+  };
 
-  onEdit(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onEdit = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     const newAudio = new Audio(this.state.audio);
     (newAudio as any)[key] = input.value;
     this.setState({ audio: newAudio });
-  }
+  };
 
-  onRemoveThumb(e: React.MouseEvent<HTMLButtonElement>) {
+  onRemoveThumb = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const newAudio = new Audio(this.state.audio);
     newAudio.thumb = null;
     this.setState({ audio: newAudio });
-  }
+  };
 
-  loadThumb() {
+  loadThumb = () => {
     window.ipc.getAudioThumbnail(this.props.config).then((thumb) => {
       if (thumb != null) {
         const newAudio = this.state.audio;
@@ -236,9 +236,9 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
         this.setState({ audio: newAudio });
       }
     });
-  }
+  };
 
-  loadSuggestions() {
+  loadSuggestions = () => {
     window.ipc
       .getAudioMetadata(this.state.audio, this.props.config)
       .then((audio) => {
@@ -246,8 +246,8 @@ class AudioEdit extends React.Component<AudioEditProps, AudioEditState> {
           this.setState({ audio });
         }
       });
-  }
+  };
 }
 
 (AudioEdit as any).displayName = "AudioEdit";
-export default withStyles(styles)(AudioEdit as any);
+export default withStyles(styles)(AudioEdit);

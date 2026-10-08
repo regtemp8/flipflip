@@ -59,9 +59,9 @@ interface VideoControlProps {
   clipValue?: Array<number>;
   clips?: Array<Clip>;
   skip?: number;
-  onChangeVolume(volume: number): void;
-  onChangeSpeed?(speed: number): void;
-  nextTrack?(): void;
+  onChangeVolume: (volume: number) => void;
+  onChangeSpeed?: (speed: number) => void;
+  nextTrack?: () => void;
 }
 
 interface VideoControlState {
@@ -126,7 +126,7 @@ class VideoControl extends React.Component<
             valueLabelDisplay="on"
             valueLabelFormat={(value) => getTimestamp(value)}
             marks={this.state.marks}
-            onChange={this.onChangePosition.bind(this)}
+            onChange={this.onChangePosition}
           />
         </Grid>
         <Grid item>
@@ -134,26 +134,20 @@ class VideoControl extends React.Component<
             <Grid item xs={12} style={{ textAlign: "center" }}>
               {this.props.nextTrack && this.state.showSpeed && (
                 <Tooltip disableInteractive title="Show Volume Controls">
-                  <IconButton
-                    onClick={this.onSwapSlider.bind(this)}
-                    size="large"
-                  >
+                  <IconButton onClick={this.onSwapSlider} size="large">
                     <VolumeUpIcon />
                   </IconButton>
                 </Tooltip>
               )}
               {this.props.nextTrack && !this.state.showSpeed && (
                 <Tooltip disableInteractive title="Show Speed Controls">
-                  <IconButton
-                    onClick={this.onSwapSlider.bind(this)}
-                    size="large"
-                  >
+                  <IconButton onClick={this.onSwapSlider} size="large">
                     <SpeedIcon />
                   </IconButton>
                 </Tooltip>
               )}
               <Tooltip disableInteractive title="Jump Back">
-                <IconButton onClick={this.onBack.bind(this)} size="large">
+                <IconButton onClick={this.onBack} size="large">
                   {this.props.skip == 5 && <Replay5Icon />}
                   {(!this.props.skip || this.props.skip == 10) && (
                     <Replay10Icon />
@@ -168,18 +162,14 @@ class VideoControl extends React.Component<
                 title={this.state.playing ? "Pause" : "Play"}
               >
                 <IconButton
-                  onClick={
-                    this.state.playing
-                      ? this.onPause.bind(this)
-                      : this.onPlay.bind(this)
-                  }
+                  onClick={this.state.playing ? this.onPause : this.onPlay}
                   size="large"
                 >
                   {this.state.playing ? <PauseIcon /> : <PlayArrowIcon />}
                 </IconButton>
               </Tooltip>
               <Tooltip disableInteractive title="Jump Forward">
-                <IconButton onClick={this.onForward.bind(this)} size="large">
+                <IconButton onClick={this.onForward} size="large">
                   {this.props.skip == 5 && <Forward5Icon />}
                   {(!this.props.skip || this.props.skip == 10) && (
                     <Forward10Icon />
@@ -191,10 +181,7 @@ class VideoControl extends React.Component<
               </Tooltip>
               {this.props.nextTrack && (
                 <Tooltip disableInteractive title="Next Track">
-                  <IconButton
-                    onClick={this.props.nextTrack.bind(this)}
-                    size="large"
-                  >
+                  <IconButton onClick={this.props.nextTrack} size="large">
                     <SkipNextIcon />
                   </IconButton>
                 </Tooltip>
@@ -214,7 +201,7 @@ class VideoControl extends React.Component<
                     min={1}
                     max={40}
                     defaultValue={this.props.video.playbackRate * 10}
-                    onChangeCommitted={this.onChangeSpeed.bind(this)}
+                    onChangeCommitted={this.onChangeSpeed}
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-slider"
@@ -233,7 +220,7 @@ class VideoControl extends React.Component<
                           ? Number.parseInt(this.props.volume)
                           : this.props.video.volume * 100
                       }
-                      onChange={this.onChangeVolume.bind(this)}
+                      onChange={this.onChangeVolume}
                       marks={
                         this.props.clip && this.props.clip.volume != null
                           ? [{ value: this.props.clip.volume, label: "↑" }]
@@ -311,17 +298,17 @@ class VideoControl extends React.Component<
     }
   }
 
-  onSwapSlider() {
+  onSwapSlider = () => {
     this.setState({ showSpeed: !this.state.showSpeed });
-  }
+  };
 
   triggerUpdate() {
     this.setState({ update: !this.state.update });
   }
 
-  onChangePosition(e: Event, value: number | number[]) {
+  onChangePosition = (e: Event, value: number | number[]) => {
     this.changePosition(value as number);
-  }
+  };
 
   private changePosition(value: number) {
     const position = value as number;
@@ -331,9 +318,9 @@ class VideoControl extends React.Component<
     }
   }
 
-  onChangeVolume(e: Event, value: number | number[]) {
+  onChangeVolume = (e: Event, value: number | number[]) => {
     this.changeVolume(value as number);
-  }
+  };
 
   private changeVolume(value: number) {
     let volume = value as number;
@@ -353,45 +340,45 @@ class VideoControl extends React.Component<
     }
   }
 
-  onChangeSpeed(
+  onChangeSpeed = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     const speed = value as number;
     this.props.onChangeSpeed(speed);
     if (this.props.video) {
       this.props.video.playbackRate = speed / 10;
       this.triggerUpdate();
     }
-  }
+  };
 
-  onPlay() {
+  onPlay = () => {
     this.setState({ playing: true });
     this.props.video.play();
-  }
+  };
 
-  onPause() {
+  onPause = () => {
     this.setState({ playing: false });
     this.props.video.pause();
-  }
+  };
 
-  onBack() {
+  onBack = () => {
     let skip = this.props.skip || 10;
     let position = this.props.video.currentTime - skip;
     if (position < 0) {
       position = 0;
     }
     this.changePosition(position);
-  }
+  };
 
-  onForward() {
+  onForward = () => {
     let skip = this.props.skip || 10;
     let position = this.props.video.currentTime + skip;
     if (position > this.props.video.duration) {
       position = this.props.video.duration;
     }
     this.changePosition(position);
-  }
+  };
 
   getMarks(): Array<{ value: number; label: string }> {
     if (!this.props.video) return [];
@@ -416,7 +403,11 @@ class VideoControl extends React.Component<
     switch (e.key) {
       case " ":
         e.preventDefault();
-        this.state.playing ? this.onPause() : this.onPlay();
+        if (this.state.playing) {
+          this.onPause();
+        } else {
+          this.onPlay();
+        }
         break;
       case "ArrowUp":
         if (e.ctrlKey) {
@@ -483,4 +474,4 @@ class VideoControl extends React.Component<
 }
 
 (VideoControl as any).displayName = "VideoControl";
-export default withStyles(styles)(VideoControl as any);
+export default withStyles(styles)(VideoControl);

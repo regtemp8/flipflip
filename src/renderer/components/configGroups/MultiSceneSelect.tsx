@@ -20,8 +20,8 @@ interface MultiSceneSelectProps {
   scene: Scene;
   allScenes: Array<Scene>;
   values: Array<number>;
-  getSceneName(sceneID: string): void;
-  onChange(sceneIDs: Array<number>): void;
+  getSceneName: (sceneID: string) => void;
+  onChange: (sceneIDs: Array<number>) => void;
 }
 
 class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
@@ -70,15 +70,15 @@ class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
         closeMenuOnSelect={false}
         backspaceRemovesValue={false}
         placeholder="Search scenes ..."
-        onChange={this.onChange.bind(this)}
+        onChange={this.onChange}
       />
     );
   }
 
-  onChange(e: Array<{ label: any; value: any }>) {
+  onChange = (e: Array<{ label: any; value: any }>) => {
     this.props.onChange(e.map((v) => v.value));
-  }
+  };
 }
 
 (MultiSceneSelect as any).displayName = "MultiSceneSelect";
-export default withStyles(styles)(MultiSceneSelect as any);
+export default withStyles(styles)(MultiSceneSelect);

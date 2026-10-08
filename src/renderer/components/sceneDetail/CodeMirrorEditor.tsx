@@ -370,11 +370,11 @@ export const timestampRegex =
 });
 
 interface CodeMirrorEditorProps {
-  onGutterClick(editor: any, clickedLine: number): void;
-  onUpdateScript(text: string, changed?: boolean): void;
   addHack?: ChildCallbackHack;
   className?: string;
   overwriteHack?: ChildCallbackHack;
+  onGutterClick: (editor: any, clickedLine: number) => void;
+  onUpdateScript: (text: string, changed?: boolean) => void;
 }
 
 interface CodeMirrorEditorState {
@@ -408,8 +408,8 @@ export default class CodeMirrorEditor extends React.Component<
           lineWrapping: true,
           viewportMargin: Infinity,
         }}
-        onBeforeChange={this.onBeforeChangeScript.bind(this)}
-        onCursorActivity={this.onCursorActivity.bind(this)}
+        onBeforeChange={this.onBeforeChangeScript}
+        onCursorActivity={this.onCursorActivity}
         onGutterClick={this.props.onGutterClick}
       />
     );
@@ -472,15 +472,15 @@ export default class CodeMirrorEditor extends React.Component<
   }
 
   _sendUpdateTimeout?: number = undefined;
-  onBeforeChangeScript(editor: any, data: any, value: any) {
+  onBeforeChangeScript = (editor: any, data: any, value: any) => {
     if (this.state.scriptText != value) {
       this.onUpdateScript(value, editor, true);
     }
-  }
+  };
 
-  onCursorActivity(editor: any) {
+  onCursorActivity = (editor: any) => {
     this.setState({ cursor: editor.getDoc().getCursor() });
-  }
+  };
 
   onUpdateScript(scriptText: any, editor?: any, changed = false) {
     if (editor) {
@@ -496,7 +496,7 @@ export default class CodeMirrorEditor extends React.Component<
     }
 
     this._sendUpdateTimeout = window.setTimeout(
-      this.props.onUpdateScript.bind(this, scriptText, changed),
+      () => this.props.onUpdateScript(scriptText, changed),
       500,
     );
   }

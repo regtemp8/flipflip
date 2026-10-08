@@ -1,5 +1,8 @@
 # Changelog
 
+#### v5.2.2 <small>(unreleased)</small>
+- Uncover new tutorials
+
 #### v5.2.1 <small>(09/25/2026)</small>
 - Fix SourceList being cleared on edit
 - Start MUI v5 migration

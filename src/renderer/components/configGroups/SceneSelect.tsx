@@ -33,8 +33,8 @@ interface SceneSelectProps {
   autoFocus?: boolean;
   includeExtra?: boolean;
   onlyExtra?: boolean;
-  getSceneName(sceneID: string): string;
-  onChange(sceneID: number): void;
+  getSceneName: (sceneID: string) => string;
+  onChange: (sceneID: number) => void;
 }
 
 class SceneSelect extends React.Component<SceneSelectProps> {
@@ -61,7 +61,7 @@ class SceneSelect extends React.Component<SceneSelectProps> {
     }
     const options = idList
       .map((id) => {
-        return { label: this.props.getSceneName(id), value: id };
+        return { label: this.props.getSceneName(id), value: Number(id) };
       })
       .filter((o) => o.label != "library_scene_temp");
     return (
@@ -75,15 +75,15 @@ class SceneSelect extends React.Component<SceneSelectProps> {
         backspaceRemovesValue={false}
         menuIsOpen={this.props.menuIsOpen}
         autoFocus={this.props.autoFocus}
-        onChange={this.onChange.bind(this)}
+        onChange={this.onChange}
       />
     );
   }
 
-  onChange(e: { label: any; value: any }) {
+  onChange = (e: { label: string; value: number }) => {
     this.props.onChange(e.value);
-  }
+  };
 }
 
 (SceneSelect as any).displayName = "SceneSelect";
-export default withStyles(styles)(SceneSelect as any);
+export default withStyles(styles)(SceneSelect);

@@ -28,7 +28,7 @@ interface PlayerNumCardProps {
   library: Array<LibrarySource>;
   tags: Array<Tag>;
   settings: DisplaySettings;
-  onUpdateSettings(fn: (settings: DisplaySettings) => void): void;
+  onUpdateSettings: (fn: (settings: DisplaySettings) => void) => void;
 }
 
 class PlayerNumCard extends React.Component<PlayerNumCardProps> {
@@ -50,8 +50,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
               label="Min Image Size"
               margin="dense"
               value={this.props.settings.minImageSize}
-              onChange={this.onIntInput.bind(this, "minImageSize")}
-              onBlur={this.blurIntKey.bind(this, "minImageSize")}
+              onChange={(e) => this.onIntInput("minImageSize", e)}
+              onBlur={(e) => this.blurIntKey("minImageSize", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">px</InputAdornment>
@@ -74,8 +74,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
               label="Min Video Size"
               margin="dense"
               value={this.props.settings.minVideoSize}
-              onChange={this.onIntInput.bind(this, "minVideoSize")}
-              onBlur={this.blurIntKey.bind(this, "minVideoSize")}
+              onChange={(e) => this.onIntInput("minVideoSize", e)}
+              onBlur={(e) => this.blurIntKey("minVideoSize", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">px</InputAdornment>
@@ -98,8 +98,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
               label="Max in History"
               margin="dense"
               value={this.props.settings.maxInHistory}
-              onChange={this.onIntInput.bind(this, "maxInHistory")}
-              onBlur={this.blurIntKey.bind(this, "maxInHistory")}
+              onChange={(e) => this.onIntInput("maxInHistory", e)}
+              onBlur={(e) => this.blurIntKey("maxInHistory", e)}
               inputProps={{
                 min: 0,
                 type: "number",
@@ -117,8 +117,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
               label="Max in Memory"
               margin="dense"
               value={this.props.settings.maxInMemory}
-              onChange={this.onIntInput.bind(this, "maxInMemory")}
-              onBlur={this.blurIntKey.bind(this, "maxInMemory")}
+              onChange={(e) => this.onIntInput("maxInMemory", e)}
+              onBlur={(e) => this.blurIntKey("maxInMemory", e)}
               inputProps={{
                 min: 0,
                 type: "number",
@@ -136,8 +136,8 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
               label="Max Loading at Once"
               margin="dense"
               value={this.props.settings.maxLoadingAtOnce}
-              onChange={this.onIntInput.bind(this, "maxLoadingAtOnce")}
-              onBlur={this.blurIntKey.bind(this, "maxLoadingAtOnce")}
+              onChange={(e) => this.onIntInput("maxLoadingAtOnce", e)}
+              onBlur={(e) => this.blurIntKey("maxLoadingAtOnce", e)}
               inputProps={{
                 min: 0,
                 type: "number",
@@ -164,7 +164,7 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
                 showCheckboxes
                 withBrackets
                 hideSelectedOptions={false}
-                onUpdateFilters={this.onSelectTags.bind(this)}
+                onUpdateFilters={this.onSelectTags}
               />
             </div>
           </Tooltip>
@@ -173,23 +173,29 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
     );
   }
 
-  onSelectTags(selectedTags: Array<string>) {
+  onSelectTags = (selectedTags: Array<string>) => {
     this.changeKey("ignoredTags", selectedTags);
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.settings as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.settings as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
@@ -205,4 +211,4 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
 }
 
 (PlayerNumCard as any).displayName = "PlayerNumCard";
-export default withStyles(styles)(PlayerNumCard as any);
+export default withStyles(styles)(PlayerNumCard);

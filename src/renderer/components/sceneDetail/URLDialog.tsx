@@ -37,8 +37,12 @@ const styles = (theme: Theme) =>
 interface URLDialogProps {
   classes: any;
   open: boolean;
-  onClose(): void;
-  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
+  onClose: () => void;
+  onImportURL: (
+    type: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) => void;
 }
 
 interface URLDialogState {
@@ -59,7 +63,7 @@ class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
     return (
       <Dialog
         open={this.props.open}
-        onClose={this.props.onClose.bind(this)}
+        onClose={this.props.onClose}
         aria-labelledby="url-import-title"
         aria-describedby="url-import-description"
       >
@@ -78,14 +82,14 @@ class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
             margin="dense"
             value={this.state.importURLs}
             inputProps={{ className: classes.urlInput }}
-            onChange={this.onURLChange.bind(this)}
+            onChange={this.onURLChange}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.props.onClose.bind(this)} color="secondary">
+          <Button onClick={this.props.onClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={this.onImportURL.bind(this)} color="primary">
+          <Button onClick={this.onImportURL} color="primary">
             Add Sources
           </Button>
         </DialogActions>
@@ -93,17 +97,17 @@ class URLDialog extends React.Component<URLDialogProps, URLDialogState> {
     );
   }
 
-  onURLChange(e: React.ChangeEvent<HTMLInputElement>) {
+  onURLChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const type = e.target.value;
     this.setState({ importURLs: type });
-  }
+  };
 
-  onImportURL() {
-    this.props.onImportURL(AF.list, false, this.state.importURLs);
+  onImportURL = (e: React.MouseEvent<HTMLButtonElement>) => {
+    this.props.onImportURL(AF.list, e, this.state.importURLs);
     this.setState({ importURLs: "" });
     this.props.onClose();
-  }
+  };
 }
 
 (URLDialog as any).displayName = "URLDialog";
-export default withStyles(styles)(URLDialog as any);
+export default withStyles(styles)(URLDialog);

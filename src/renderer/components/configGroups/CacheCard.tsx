@@ -27,7 +27,7 @@ import { urlToPath } from "../../../common/utils";
 
 interface CacheCardProps {
   config: Config;
-  onUpdateSettings(fn: (settings: CacheSettings) => void): void;
+  onUpdateSettings: (fn: (settings: CacheSettings) => void) => void;
 }
 
 interface CacheCardState {
@@ -65,7 +65,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
                   control={
                     <Switch
                       checked={this.props.config.caching.enabled}
-                      onChange={this.onBoolInput.bind(this, "enabled")}
+                      onChange={(e) => this.onBoolInput("enabled", e)}
                     />
                   }
                   label="Caching"
@@ -81,7 +81,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
                   <IconButton
                     edge="start"
                     color="inherit"
-                    onClick={this.onClearCache.bind(this)}
+                    onClick={this.onClearCache}
                     size="large"
                   >
                     <DeleteSweepIcon color="error" />
@@ -118,15 +118,12 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
                   InputProps={{
                     readOnly: true,
                   }}
-                  onClick={this.onCacheDirChange.bind(this)}
+                  onClick={this.onCacheDirChange}
                 />
               </Grid>
               <Grid item>
                 <Tooltip disableInteractive title="Reset Cache Directory">
-                  <IconButton
-                    onClick={this.onResetCacheDir.bind(this)}
-                    size="large"
-                  >
+                  <IconButton onClick={this.onResetCacheDir} size="large">
                     <ClearIcon color="error" />
                   </IconButton>
                 </Tooltip>
@@ -143,8 +140,8 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
                     label="Max Cache Size"
                     margin="dense"
                     value={this.props.config.caching.maxSize}
-                    onChange={this.onIntInput.bind(this, "maxSize")}
-                    onBlur={this.blurIntKey.bind(this, "maxSize")}
+                    onChange={(e) => this.onIntInput("maxSize", e)}
+                    onBlur={(e) => this.blurIntKey("maxSize", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">MB</InputAdornment>
@@ -169,30 +166,23 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
         </Grid>
         <Dialog
           open={this.state.clearCacheAlert}
-          onClose={this.onCloseClear.bind(this)}
+          onClose={this.onCloseClear}
           aria-describedby="clean-cache-description"
         >
           <DialogContent>
             <DialogContentText id="clean-cache-description">
               Are you SURE you want to delete the contents of{" "}
-              <Link
-                href="#"
-                onClick={this.openDirectory.bind(this)}
-                underline="hover"
-              >
+              <Link href="#" onClick={this.openDirectory} underline="hover">
                 {this.state.cachePath}
               </Link>{" "}
               ?
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseClear.bind(this)} color="secondary">
+            <Button onClick={this.onCloseClear} color="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={this.onFinishClearCache.bind(this)}
-              color="primary"
-            >
+            <Button onClick={this.onFinishClearCache} color="primary">
               OK
             </Button>
           </DialogActions>
@@ -227,58 +217,64 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     });
   }
 
-  onCloseClear() {
+  onCloseClear = () => {
     this.setState({ clearCacheAlert: false });
-  }
+  };
 
-  onClearCache() {
+  onClearCache = () => {
     this.setState({ clearCacheAlert: true });
-  }
+  };
 
-  onFinishClearCache() {
+  onFinishClearCache = () => {
     this.onCloseClear();
     window.ipc.clearCache(this.props.config).then(() => {
       this.setState({ cacheSize: "--" });
       this.calculateCacheSize();
     });
-  }
+  };
 
-  onResetCacheDir(e: React.MouseEvent<HTMLButtonElement>) {
+  onResetCacheDir = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     this.changeKey("directory", "");
-  }
+  };
 
-  onCacheDirChange() {
+  onCacheDirChange = () => {
     window.ipc.openDirectory().then((result) => {
       if (result.length > 0) {
         this.changeKey("directory", result[0]);
       }
     });
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.config.caching as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.config.caching as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -288,14 +284,14 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     this.props.onUpdateSettings(fn);
   }
 
-  openDirectory() {
+  openDirectory = () => {
     const platform = window.ipc.platform();
     if (platform === "win32") {
       this.openExternalURL(this.state.cachePath);
     } else {
       this.openExternalURL(urlToPath(this.state.cachePath, platform));
     }
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);

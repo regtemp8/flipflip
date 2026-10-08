@@ -38,8 +38,8 @@ interface BatchClipDialogProps {
   open: boolean;
   library: Array<LibrarySource>;
   selected: Array<string>;
-  onCloseDialog(): void;
-  onUpdateLibrary(fn: (library: Array<LibrarySource>) => void): void;
+  onCloseDialog: () => void;
+  onUpdateLibrary: (fn: (library: Array<LibrarySource>) => void) => void;
 }
 
 interface BatchClipDialogState {
@@ -67,7 +67,7 @@ class BatchClipDialog extends React.Component<
       <Dialog
         open={this.props.open}
         classes={{ paper: classes.noScroll }}
-        onClose={this.onCloseDialog.bind(this)}
+        onClose={this.onCloseDialog}
         aria-labelledby="batch-clip-title"
         aria-describedby="batch-clip-description"
       >
@@ -84,8 +84,8 @@ class BatchClipDialog extends React.Component<
                   label="Skip First"
                   margin="dense"
                   value={this.state.clipOffset[0]}
-                  onChange={this.onClipOffset.bind(this, 0)}
-                  onBlur={this.blurClipOffset.bind(this, 0)}
+                  onChange={(e) => this.onClipOffset(0, e)}
+                  onBlur={(e) => this.blurClipOffset(0, e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -104,8 +104,8 @@ class BatchClipDialog extends React.Component<
                   label="Skip Last"
                   margin="dense"
                   value={this.state.clipOffset[1]}
-                  onChange={this.onClipOffset.bind(this, 1)}
-                  onBlur={this.blurClipOffset.bind(this, 1)}
+                  onChange={(e) => this.onClipOffset(1, e)}
+                  onBlur={(e) => this.blurClipOffset(1, e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -125,7 +125,7 @@ class BatchClipDialog extends React.Component<
           {this.state.creatingClips && (
             <CircularProgress size={34} className={classes.progress} />
           )}
-          <Button onClick={this.batchClipFinish.bind(this)} color="primary">
+          <Button onClick={this.batchClipFinish} color="primary">
             Create Batch Clips
           </Button>
         </DialogActions>
@@ -133,19 +133,25 @@ class BatchClipDialog extends React.Component<
     );
   }
 
-  blurClipOffset(index: number, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurClipOffset = (
+    index: number,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && this.state.clipOffset[index] < Number(min)) {
       this.changeClipOffset(index, min);
     } else if (max && this.state.clipOffset[index] > Number(max)) {
       this.changeClipOffset(index, max);
     }
-  }
+  };
 
-  onClipOffset(index: number, e: React.ChangeEvent<HTMLInputElement>) {
+  onClipOffset = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeClipOffset(index, input.value === "" ? "" : input.value);
-  }
+  };
 
   changeClipOffset(index: number, intString: string) {
     const newClipOffset = Array.from(this.state.clipOffset);
@@ -153,7 +159,7 @@ class BatchClipDialog extends React.Component<
     this.setState({ clipOffset: newClipOffset });
   }
 
-  batchClipFinish() {
+  batchClipFinish = () => {
     const newLibrary = Array.from(this.props.library);
     let index = -1;
     const errorCallback = (msg: string) => {
@@ -218,13 +224,13 @@ class BatchClipDialog extends React.Component<
 
     this.setState({ creatingClips: true });
     createBatchClips();
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ clipOffset: [0, 0], creatingClips: false });
     this.props.onCloseDialog();
-  }
+  };
 }
 
 (BatchClipDialog as any).displayName = "BatchClipDialog";
-export default withStyles(styles)(BatchClipDialog as any);
+export default withStyles(styles)(BatchClipDialog);

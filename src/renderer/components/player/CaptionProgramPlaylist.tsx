@@ -21,16 +21,16 @@ interface CaptionProgramPlaylistProps {
   scale: number;
   scene: Scene;
   timeToNextFrame: number;
-  getTags(source: string, clipID?: string): Array<Tag>;
-  goBack(): void;
-  orderScriptTags(script: CaptionScript): void;
-  playNextScene(): void;
   jumpToHack?: ChildCallbackHack;
   persist?: boolean;
-  advance?(): void;
-  getCurrentTimestamp?(): number;
-  onError?(e: string): void;
-  systemMessage?(message: string): void;
+  getTags: (source: string, clipID?: string) => Array<Tag>;
+  goBack: () => void;
+  orderScriptTags: (script: CaptionScript) => void;
+  playNextScene: () => void;
+  advance?: () => void;
+  getCurrentTimestamp?: () => number;
+  onError?: (e: string) => void;
+  systemMessage?: (message: string) => void;
 }
 
 interface CaptionProgramPlaylistState {
@@ -65,7 +65,7 @@ export default class CaptionProgramPlaylist extends React.Component<
         getTags={this.props.getTags}
         goBack={this.props.goBack}
         playNextScene={this.props.playNextScene}
-        nextTrack={this.nextTrack.bind(this)}
+        nextTrack={this.nextTrack}
         currentAudio={this.props.currentAudio}
         getCurrentTimestamp={this.props.getCurrentTimestamp}
         timeToNextFrame={this.props.timeToNextFrame}
@@ -131,7 +131,7 @@ export default class CaptionProgramPlaylist extends React.Component<
     this.setState({ currentIndex: prevTrack });
   }
 
-  nextTrack() {
+  nextTrack = () => {
     let nextTrack = this.state.currentIndex + 1;
     if (nextTrack >= this.props.playlist.scripts.length) {
       if (this.props.playlist.repeat == RP.none) {
@@ -141,7 +141,7 @@ export default class CaptionProgramPlaylist extends React.Component<
       }
     }
     this.setState({ currentIndex: nextTrack });
-  }
+  };
 }
 
 (CaptionProgramPlaylist as any).displayName = "CaptionProgramPlaylist";

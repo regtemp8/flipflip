@@ -73,11 +73,11 @@ interface ImageVideoCardProps {
   sidebar: boolean;
   tutorial: string;
   isConfig: boolean;
-  onUpdateScene(
+  isPlayer?: boolean;
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
-  isPlayer?: boolean;
+  ) => void;
 }
 
 class ImageVideoCard extends React.Component<ImageVideoCardProps> {
@@ -154,7 +154,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     >
                       <Switch
                         checked={this.props.scene.regenerate}
-                        onChange={this.onBoolInput.bind(this, "regenerate")}
+                        onChange={(e) => this.onBoolInput("regenerate", e)}
                       />
                     </Tooltip>
                   }
@@ -168,7 +168,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 <Select
                   variant="standard"
                   value={this.props.scene.imageTypeFilter}
-                  onChange={this.onInput.bind(this, "imageTypeFilter")}
+                  onChange={(e) => this.onInput("imageTypeFilter", e)}
                 >
                   {Object.values(IF).map((tf) => (
                     <MenuItem key={tf} value={tf}>
@@ -190,7 +190,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     >
                       <Switch
                         checked={this.props.scene.fullSource}
-                        onChange={this.onBoolInput.bind(this, "fullSource")}
+                        onChange={(e) => this.onBoolInput("fullSource", e)}
                       />
                     </Tooltip>
                   }
@@ -213,7 +213,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Select
                     variant="standard"
                     value={this.props.scene.imageOrientation}
-                    onChange={this.onInput.bind(this, "imageOrientation")}
+                    onChange={(e) => this.onInput("imageOrientation", e)}
                   >
                     {Object.values(OT).map((tf) => (
                       <MenuItem key={tf} value={tf}>
@@ -246,7 +246,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Select
                     variant="standard"
                     value={this.props.scene.gifOption}
-                    onChange={this.onInput.bind(this, "gifOption")}
+                    onChange={(e) => this.onInput("gifOption", e)}
                   >
                     {Object.values(GO).map((go) => (
                       <MenuItem key={go} value={go}>
@@ -282,8 +282,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   label="For"
                   margin="dense"
                   value={gifTimingConstant}
-                  onChange={this.onIntInput.bind(this, "gifTimingConstant")}
-                  onBlur={this.blurIntKey.bind(this, "gifTimingConstant")}
+                  onChange={(e) => this.onIntInput("gifTimingConstant", e)}
+                  onBlur={(e) => this.blurIntKey("gifTimingConstant", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -308,8 +308,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   label="Between"
                   margin="dense"
                   value={gifTimingMin}
-                  onChange={this.onIntInput.bind(this, "gifTimingMin")}
-                  onBlur={this.blurIntKey.bind(this, "gifTimingMin")}
+                  onChange={(e) => this.onIntInput("gifTimingMin", e)}
+                  onBlur={(e) => this.blurIntKey("gifTimingMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -326,8 +326,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   label="and"
                   margin="dense"
                   value={gifTimingMax}
-                  onChange={this.onIntInput.bind(this, "gifTimingMax")}
-                  onBlur={this.blurIntKey.bind(this, "gifTimingMax")}
+                  onChange={(e) => this.onIntInput("gifTimingMax", e)}
+                  onBlur={(e) => this.blurIntKey("gifTimingMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -372,7 +372,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 <Select
                   variant="standard"
                   value={this.props.scene.videoOption}
-                  onChange={this.onInput.bind(this, "videoOption")}
+                  onChange={(e) => this.onInput("videoOption", e)}
                 >
                   {Object.values(VO).map((vo) => (
                     <MenuItem key={vo} value={vo}>
@@ -408,8 +408,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 label="For"
                 margin="dense"
                 value={videoTimingConstant}
-                onChange={this.onIntInput.bind(this, "videoTimingConstant")}
-                onBlur={this.blurIntKey.bind(this, "videoTimingConstant")}
+                onChange={(e) => this.onIntInput("videoTimingConstant", e)}
+                onBlur={(e) => this.blurIntKey("videoTimingConstant", e)}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">ms</InputAdornment>
@@ -434,8 +434,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 label="Between"
                 margin="dense"
                 value={videoTimingMin}
-                onChange={this.onIntInput.bind(this, "videoTimingMin")}
-                onBlur={this.blurIntKey.bind(this, "videoTimingMin")}
+                onChange={(e) => this.onIntInput("videoTimingMin", e)}
+                onBlur={(e) => this.blurIntKey("videoTimingMin", e)}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">ms</InputAdornment>
@@ -452,8 +452,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 label="and"
                 margin="dense"
                 value={videoTimingMax}
-                onChange={this.onIntInput.bind(this, "videoTimingMax")}
-                onBlur={this.blurIntKey.bind(this, "videoTimingMax")}
+                onChange={(e) => this.onIntInput("videoTimingMax", e)}
+                onBlur={(e) => this.blurIntKey("videoTimingMax", e)}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">ms</InputAdornment>
@@ -490,7 +490,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     <Select
                       variant="standard"
                       value={this.props.scene.videoOrientation}
-                      onChange={this.onInput.bind(this, "videoOrientation")}
+                      onChange={(e) => this.onInput("videoOrientation", e)}
                     >
                       {Object.values(OT).map((tf) => (
                         <MenuItem key={tf} value={tf}>
@@ -532,7 +532,9 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 min={1}
                 max={40}
                 defaultValue={this.props.scene.videoSpeed}
-                onChangeCommitted={this.onSliderChange.bind(this, "videoSpeed")}
+                onChangeCommitted={(e, value) =>
+                  this.onSliderChange("videoSpeed", e, value)
+                }
                 valueLabelDisplay="auto"
                 valueLabelFormat={(v) => v / 10 + "x"}
                 aria-labelledby="video-speed-slider"
@@ -558,10 +560,9 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     min={1}
                     max={40}
                     defaultValue={this.props.scene.videoSpeedMin}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "videoSpeedMin",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("videoSpeedMin", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-min-slider"
@@ -579,10 +580,9 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     min={1}
                     max={40}
                     defaultValue={this.props.scene.videoSpeedMax}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "videoSpeedMax",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("videoSpeedMax", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="video-speed-max-slider"
@@ -612,7 +612,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Switch
                     checked={this.props.scene.videoRandomSpeed}
                     size="small"
-                    onChange={this.onBoolInput.bind(this, "videoRandomSpeed")}
+                    onChange={(e) => this.onBoolInput("videoRandomSpeed", e)}
                   />
                 }
                 label="Random Speed"
@@ -646,7 +646,9 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 max={120}
                 step={null}
                 defaultValue={this.props.scene.videoSkip}
-                onChangeCommitted={this.onSliderChange.bind(this, "videoSkip")}
+                onChangeCommitted={(e, value) =>
+                  this.onSliderChange("videoSkip", e, value)
+                }
                 valueLabelDisplay="auto"
                 marks={[5, 10, 30, 60, 120].map((s) => {
                   return { value: s, label: s.toString() };
@@ -678,7 +680,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Switch
                     checked={this.props.scene.randomVideoStart}
                     size="small"
-                    onChange={this.onBoolInput.bind(this, "randomVideoStart")}
+                    onChange={(e) => this.onBoolInput("randomVideoStart", e)}
                   />
                 }
                 label="Start at Random Time"
@@ -714,7 +716,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     <Switch
                       checked={this.props.scene.continueVideo}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "continueVideo")}
+                      onChange={(e) => this.onBoolInput("continueVideo", e)}
                     />
                   </Tooltip>
                 }
@@ -751,7 +753,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Switch
                     checked={this.props.scene.playVideoClips}
                     size="small"
-                    onChange={this.onBoolInput.bind(this, "playVideoClips")}
+                    onChange={(e) => this.onBoolInput("playVideoClips", e)}
                   />
                 }
                 label="Use Clips"
@@ -781,8 +783,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 label="Skip First"
                 margin="dense"
                 value={skipVideoStart}
-                onChange={this.onIntInput.bind(this, "skipVideoStart")}
-                onBlur={this.blurIntKey.bind(this, "skipVideoStart")}
+                onChange={(e) => this.onIntInput("skipVideoStart", e)}
+                onBlur={(e) => this.blurIntKey("skipVideoStart", e)}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">ms</InputAdornment>
@@ -819,8 +821,8 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 label="Skip Last"
                 margin="dense"
                 value={skipVideoEnd}
-                onChange={this.onIntInput.bind(this, "skipVideoEnd")}
-                onBlur={this.blurIntKey.bind(this, "skipVideoEnd")}
+                onChange={(e) => this.onIntInput("skipVideoEnd", e)}
+                onBlur={(e) => this.blurIntKey("skipVideoEnd", e)}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">ms</InputAdornment>
@@ -856,10 +858,9 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 <Grid item xs>
                   <Slider
                     defaultValue={videoVolume}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "videoVolume",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("videoVolume", e, value)
+                    }
                   />
                 </Grid>
                 <Grid item>
@@ -893,7 +894,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 <FormLabel component="legend">Weighting</FormLabel>
                 <RadioGroup
                   value={this.props.scene.weightFunction}
-                  onChange={this.onInput.bind(this, "weightFunction")}
+                  onChange={(e) => this.onInput("weightFunction", e)}
                 >
                   {Object.values(WF).map((wf) => (
                     <FormControlLabel
@@ -920,7 +921,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
               <FormLabel component="legend">Source Ordering</FormLabel>
               <RadioGroup
                 value={this.props.scene.sourceOrderFunction}
-                onChange={this.onInput.bind(this, "sourceOrderFunction")}
+                onChange={(e) => this.onInput("sourceOrderFunction", e)}
               >
                 {Object.values(SOF).map((wf) => (
                   <FormControlLabel
@@ -946,7 +947,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                       disableWeightOptions
                     }
                     size="small"
-                    onChange={this.onBoolInput.bind(this, "forceAllSource")}
+                    onChange={(e) => this.onBoolInput("forceAllSource", e)}
                   />
                 }
                 label="Avoid Repeats"
@@ -965,7 +966,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
               <FormLabel component="legend">Image Ordering</FormLabel>
               <RadioGroup
                 value={this.props.scene.orderFunction}
-                onChange={this.onInput.bind(this, "orderFunction")}
+                onChange={(e) => this.onInput("orderFunction", e)}
               >
                 {Object.values(OF).map((wf) => (
                   <FormControlLabel
@@ -983,7 +984,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   <Switch
                     checked={this.props.scene.forceAll}
                     size="small"
-                    onChange={this.onBoolInput.bind(this, "forceAll")}
+                    onChange={(e) => this.onBoolInput("forceAll", e)}
                   />
                 }
                 label="Avoid Repeats"
@@ -995,38 +996,44 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
     );
   }
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.scene as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.scene as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onSliderChange(
+  onSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: SelectChangeEvent<string>) {
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);
@@ -1042,4 +1049,4 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
 }
 
 (ImageVideoCard as any).displayName = "ImageVideoCard";
-export default withStyles(styles)(ImageVideoCard as any);
+export default withStyles(styles)(ImageVideoCard);

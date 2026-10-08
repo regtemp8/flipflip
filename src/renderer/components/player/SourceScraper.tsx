@@ -27,19 +27,19 @@ interface SourceScraperProps {
   isOverlay?: boolean;
   nextScene?: Scene;
   strobeLayer?: string;
-  setHistoryOffset(historyOffset: number): void;
-  setHistoryPaths(historyPaths: Array<any>): void;
-  firstImageLoaded(): void;
-  finishedLoading(empty: boolean): void;
-  setProgress(total: number, current: number, message: string[]): void;
-  setVideo(video?: HTMLVideoElement): void;
-  setCount(sourceURL: string, count: number, countComplete: boolean): void;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  systemMessage(message: string): void;
-  onEndScene?(): void;
-  setTimeToNextFrame?(timeToNextFrame: number): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  playNextScene?(): void;
+  setHistoryOffset: (historyOffset: number) => void;
+  setHistoryPaths: (historyPaths: Array<any>) => void;
+  firstImageLoaded: () => void;
+  finishedLoading: (empty: boolean) => void;
+  setProgress: (total: number, current: number, message: string[]) => void;
+  setVideo: (video?: HTMLVideoElement) => void;
+  setCount: (sourceURL: string, count: number, countComplete: boolean) => void;
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  systemMessage: (message: string) => void;
+  onEndScene?: () => void;
+  setTimeToNextFrame?: (timeToNextFrame: number) => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  playNextScene?: () => void;
 }
 
 interface SourceScraperState {
@@ -115,7 +115,7 @@ export default class SourceScraper extends React.Component<
             deleteHack={this.props.deleteHack}
             strobeLayer={this.props.strobeLayer}
             hasStarted={this.props.hasStarted}
-            onLoaded={this.props.firstImageLoaded.bind(this)}
+            onLoaded={this.props.firstImageLoaded}
             setVideo={this.props.setVideo}
             cache={this.props.cache}
             onEndScene={this.props.onEndScene}
@@ -127,13 +127,13 @@ export default class SourceScraper extends React.Component<
           />
         )}
         {this.state.captcha != null && (
-          <Dialog open={true} onClose={this.onCloseDialog.bind(this)}>
+          <Dialog open={true} onClose={this.onCloseDialog}>
             <DialogContent style={{ height: 600 }}>
               <iframe
                 sandbox="allow-forms"
                 src={this.state.captcha.captcha}
                 height="100%"
-                onLoad={this.onIFrameLoad.bind(this)}
+                onLoad={this.onIFrameLoad}
               />
             </DialogContent>
           </Dialog>
@@ -142,17 +142,17 @@ export default class SourceScraper extends React.Component<
     );
   }
 
-  onIFrameLoad() {
+  onIFrameLoad = () => {
     if (this.state.load) {
       this.onCloseDialog();
     } else {
       this.setState({ load: true });
     }
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ captcha: null, load: false });
-  }
+  };
 
   async componentDidMount(restart = false) {
     this._isMounted = true;

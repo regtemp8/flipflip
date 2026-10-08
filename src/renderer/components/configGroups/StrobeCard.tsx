@@ -60,10 +60,10 @@ interface StrobeCardProps {
   scene: Scene | SceneSettings;
   easingControls: boolean;
   sidebar: boolean;
-  onUpdateScene(
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  ) => void;
 }
 
 interface StrobeCardState {
@@ -166,7 +166,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                 control={
                   <Switch
                     checked={this.props.scene.strobe}
-                    onChange={this.onBoolInput.bind(this, "strobe")}
+                    onChange={(e) => this.onBoolInput("strobe", e)}
                   />
                 }
                 label="Strobe"
@@ -182,7 +182,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     <Switch
                       checked={this.props.scene.strobePulse}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "strobePulse")}
+                      onChange={(e) => this.onBoolInput("strobePulse", e)}
                     />
                   }
                   label="Add Delay"
@@ -224,7 +224,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.strobeColorType}
-                    onChange={this.onInput.bind(this, "strobeColorType")}
+                    onChange={(e) => this.onInput("strobeColorType", e)}
                   >
                     {Object.values(SC).map((sc) => (
                       <MenuItem key={sc} value={sc}>
@@ -259,7 +259,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
               this.props.scene.strobeColorType == SC.color && (
                 <ColorPicker
                   currentColor={this.props.scene.strobeColor}
-                  onChangeColor={this.onInput.bind(this, "strobeColor")}
+                  onChangeColor={(color) =>
+                    this.changeKey("strobeColor", color)
+                  }
                 />
               )}
             {this.props.scene.strobe &&
@@ -267,7 +269,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
               this.props.scene.strobeColorType == SC.colorSet && (
                 <ColorSetPicker
                   currentColors={this.props.scene.strobeColorSet}
-                  onChangeColors={this.onInput.bind(this, "strobeColorSet")}
+                  onChangeColors={(colors) =>
+                    this.changeKey("strobeColorSet", colors)
+                  }
                 />
               )}
           </Collapse>
@@ -295,7 +299,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.strobeLayer}
-                    onChange={this.onInput.bind(this, "strobeLayer")}
+                    onChange={(e) => this.onInput("strobeLayer", e)}
                   >
                     {Object.values(SL).map((sl) => (
                       <MenuItem key={sl} value={sl}>
@@ -329,10 +333,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     <Grid item xs>
                       <Slider
                         defaultValue={strobeOpacity * 100}
-                        onChangeCommitted={this.onPercentSliderChange.bind(
-                          this,
-                          "strobeOpacity",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onPercentSliderChange("strobeOpacity", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v + "%"}
                         aria-labelledby="strobe-opacity-slider"
@@ -343,14 +346,12 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         variant="standard"
                         value={Math.round(strobeOpacity * 100)}
                         margin="dense"
-                        onChange={this.onPercentIntInput.bind(
-                          this,
-                          "strobeOpacity",
-                        )}
-                        onBlur={this.blurPercentIntKey.bind(
-                          this,
-                          "strobeOpacity",
-                        )}
+                        onChange={(e) =>
+                          this.onPercentIntInput("strobeOpacity", e)
+                        }
+                        onBlur={(e) =>
+                          this.blurPercentIntKey("strobeOpacity", e)
+                        }
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">%</InputAdornment>
@@ -399,7 +400,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.strobeTF}
-                    onChange={this.onInput.bind(this, "strobeTF")}
+                    onChange={(e) => this.onInput("strobeTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf == TF.bpm) {
@@ -444,11 +445,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       <Slider
                         min={1}
                         value={this.state.strobeSinRate}
-                        onChange={this.onStrobeSinRateChange.bind(this)}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobeSinRate",
-                        )}
+                        onChange={this.onStrobeSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobeSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="strobe-sin-rate-slider"
                       />
@@ -457,8 +457,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       <TextField
                         variant="standard"
                         value={this.state.strobeSinRate}
-                        onChange={this.onIntInput.bind(this, "strobeSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "strobeSinRate")}
+                        onChange={(e) => this.onIntInput("strobeSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("strobeSinRate", e)}
                         inputProps={{
                           className: classes.endInput,
                           step: 5,
@@ -486,10 +486,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     min={1}
                     max={100}
                     defaultValue={strobeBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "strobeBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("strobeBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-bpm-multi-slider"
@@ -504,8 +503,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     label="For"
                     margin="dense"
                     value={strobeTime}
-                    onChange={this.onIntInput.bind(this, "strobeTime")}
-                    onBlur={this.blurIntKey.bind(this, "strobeTime")}
+                    onChange={(e) => this.onIntInput("strobeTime", e)}
+                    onBlur={(e) => this.blurIntKey("strobeTime", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -542,8 +541,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   label="Between"
                   margin="dense"
                   value={strobeTimeMin}
-                  onChange={this.onIntInput.bind(this, "strobeTimeMin")}
-                  onBlur={this.blurIntKey.bind(this, "strobeTimeMin")}
+                  onChange={(e) => this.onIntInput("strobeTimeMin", e)}
+                  onBlur={(e) => this.blurIntKey("strobeTimeMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -562,8 +561,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   label="and"
                   margin="dense"
                   value={strobeTimeMax}
-                  onChange={this.onIntInput.bind(this, "strobeTimeMax")}
-                  onBlur={this.blurIntKey.bind(this, "strobeTimeMax")}
+                  onChange={(e) => this.onIntInput("strobeTimeMax", e)}
+                  onBlur={(e) => this.blurIntKey("strobeTimeMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -618,7 +617,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.strobeDelayTF}
-                    onChange={this.onInput.bind(this, "strobeDelayTF")}
+                    onChange={(e) => this.onInput("strobeDelayTF", e)}
                   >
                     {Object.values(TF).map((tf) => (
                       <MenuItem key={tf} value={tf}>
@@ -645,11 +644,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       <Slider
                         min={1}
                         value={this.state.strobeDelaySinRate}
-                        onChange={this.onStrobeDelaySinRateChange.bind(this)}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobeDelaySinRate",
-                        )}
+                        onChange={this.onStrobeDelaySinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobeDelaySinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="strobe-delay-sin-rate-slider"
                       />
@@ -658,14 +656,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       <TextField
                         variant="standard"
                         value={this.state.strobeDelaySinRate}
-                        onChange={this.onIntInput.bind(
-                          this,
-                          "strobeDelaySinRate",
-                        )}
-                        onBlur={this.blurIntKey.bind(
-                          this,
-                          "strobeDelaySinRate",
-                        )}
+                        onChange={(e) =>
+                          this.onIntInput("strobeDelaySinRate", e)
+                        }
+                        onBlur={(e) => this.blurIntKey("strobeDelaySinRate", e)}
                         inputProps={{
                           className: classes.endInput,
                           step: 5,
@@ -693,10 +687,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     min={1}
                     max={100}
                     defaultValue={strobeDelayBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "strobeDelayBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("strobeDelayBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-delay-bpm-multi-slider"
@@ -711,8 +704,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     label="For"
                     margin="dense"
                     value={strobeDelay}
-                    onChange={this.onIntInput.bind(this, "strobeDelay")}
-                    onBlur={this.blurIntKey.bind(this, "strobeDelay")}
+                    onChange={(e) => this.onIntInput("strobeDelay", e)}
+                    onBlur={(e) => this.blurIntKey("strobeDelay", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -753,8 +746,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   label="Between"
                   margin="dense"
                   value={strobeDelayMin}
-                  onChange={this.onIntInput.bind(this, "strobeDelayMin")}
-                  onBlur={this.blurIntKey.bind(this, "strobeDelayMin")}
+                  onChange={(e) => this.onIntInput("strobeDelayMin", e)}
+                  onBlur={(e) => this.blurIntKey("strobeDelayMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -773,8 +766,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   label="and"
                   margin="dense"
                   value={strobeDelayMax}
-                  onChange={this.onIntInput.bind(this, "strobeDelayMax")}
-                  onBlur={this.blurIntKey.bind(this, "strobeDelayMax")}
+                  onChange={(e) => this.onIntInput("strobeDelayMax", e)}
+                  onBlur={(e) => this.blurIntKey("strobeDelayMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -823,7 +816,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       <Select
                         variant="standard"
                         value={this.props.scene.strobeEase}
-                        onChange={this.onInput.bind(this, "strobeEase")}
+                        onChange={(e) => this.onInput("strobeEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -853,10 +846,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.strobeExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobeExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobeExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
@@ -881,10 +873,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.strobeOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobeOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobeOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
@@ -911,10 +902,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.strobeAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobeAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobeAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
@@ -941,10 +931,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.strobePer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "strobePer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("strobePer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
@@ -960,30 +949,39 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
     );
   }
 
-  blurPercentIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurPercentIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.scene as any)[key] * 100 < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.scene as any)[key] * 100 > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onPercentSliderChange(
+  onPercentSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, (value as number) / 100);
-  }
+  };
 
-  onPercentIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onPercentIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value) / 100);
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     let value = e.currentTarget.value;
     if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
@@ -999,45 +997,48 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
     } else if (key == "strobeDelaySinRate") {
       this.setState({ strobeDelaySinRate: Number(value) });
     }
-  }
+  };
 
-  onStrobeSinRateChange(
+  onStrobeSinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ strobeSinRate: value as number });
-  }
+  };
 
-  onStrobeDelaySinRateChange(
+  onStrobeDelaySinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ strobeDelaySinRate: value as number });
-  }
+  };
 
-  onSliderChange(
+  onSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: SelectChangeEvent<string>) {
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);
@@ -1053,4 +1054,4 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
 }
 
 (StrobeCard as any).displayName = "StrobeCard";
-export default withStyles(styles)(StrobeCard as any);
+export default withStyles(styles)(StrobeCard);

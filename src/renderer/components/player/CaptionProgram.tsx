@@ -44,14 +44,14 @@ interface CaptionProgramProps {
   scale: number;
   singleTrack: boolean;
   timeToNextFrame?: number;
-  getTags(source: string, clipID?: string): Array<Tag>;
-  goBack(): void;
-  playNextScene(): void;
   jumpToHack?: ChildCallbackHack;
-  advance?(): void;
-  getCurrentTimestamp?(): number;
-  nextTrack?(): void;
-  onError?(e: string): void;
+  getTags: (source: string, clipID?: string) => Array<Tag>;
+  goBack: () => void;
+  playNextScene: () => void;
+  advance?: () => void;
+  getCurrentTimestamp?: () => number;
+  nextTrack?: () => void;
+  onError?: (e: string) => void;
 }
 
 type CaptionProgramState = typeof captionProgramDefaults & {
@@ -928,7 +928,7 @@ export default class CaptionProgram extends React.Component<
     });
   }
 
-  timestampLoop() {
+  timestampLoop = () => {
     const timeStarted = new Date().getTime();
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
@@ -1009,10 +1009,7 @@ export default class CaptionProgram extends React.Component<
         }
       }
       this._lastTimestamp = passed;
-      this._timestampTimeout = window.setTimeout(
-        this.timestampLoop.bind(this),
-        100,
-      );
+      this._timestampTimeout = window.setTimeout(this.timestampLoop, 100);
     } else {
       const nextTimestamp =
         this._nextTimestamp ??
@@ -1025,12 +1022,9 @@ export default class CaptionProgram extends React.Component<
           return;
         }
       }
-      this._timestampTimeout = window.setTimeout(
-        this.timestampLoop.bind(this),
-        100,
-      );
+      this._timestampTimeout = window.setTimeout(this.timestampLoop, 100);
     }
-  }
+  };
 
   captionLoop() {
     if (this.state.program[this.state.programCounter]) {

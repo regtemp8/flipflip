@@ -77,10 +77,10 @@ function TransitionUp(props: any) {
 interface BackupCardProps {
   classes: any;
   settings: GeneralSettings;
-  onBackup(): void;
-  onClean(): void;
-  onRestore(backupFile: string): void;
-  onUpdateSettings(fn: (settings: GeneralSettings) => void): void;
+  onBackup: () => void;
+  onClean: () => void;
+  onRestore: (backupFile: string) => void;
+  onUpdateSettings: (fn: (settings: GeneralSettings) => void) => void;
 }
 
 interface BackupCardState {
@@ -119,7 +119,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               control={
                 <Switch
                   checked={this.props.settings.autoBackup}
-                  onChange={this.onBoolInput.bind(this, "autoBackup")}
+                  onChange={(e) => this.onBoolInput("autoBackup", e)}
                 />
               }
               label="Auto Backup"
@@ -133,8 +133,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               label="Every"
               margin="dense"
               value={this.props.settings.autoBackupDays}
-              onChange={this.onIntInput.bind(this, "autoBackupDays")}
-              onBlur={this.blurIntKey.bind(this, "autoBackupDays")}
+              onChange={(e) => this.onIntInput("autoBackupDays", e)}
+              onBlur={(e) => this.blurIntKey("autoBackupDays", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">Days</InputAdornment>
@@ -164,7 +164,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
                 control={
                   <Switch
                     checked={this.props.settings.autoCleanBackup}
-                    onChange={this.onBoolInput.bind(this, "autoCleanBackup")}
+                    onChange={(e) => this.onBoolInput("autoCleanBackup", e)}
                   />
                 }
                 label="Auto Clean"
@@ -179,8 +179,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               label="Keep Last"
               margin="dense"
               value={this.props.settings.autoCleanBackupDays}
-              onChange={this.onIntInput.bind(this, "autoCleanBackupDays")}
-              onBlur={this.blurIntKey.bind(this, "autoCleanBackupDays")}
+              onChange={(e) => this.onIntInput("autoCleanBackupDays", e)}
+              onBlur={(e) => this.blurIntKey("autoCleanBackupDays", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">Days</InputAdornment>
@@ -200,8 +200,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               label="Keep Last"
               margin="dense"
               value={this.props.settings.autoCleanBackupWeeks}
-              onChange={this.onIntInput.bind(this, "autoCleanBackupWeeks")}
-              onBlur={this.blurIntKey.bind(this, "autoCleanBackupWeeks")}
+              onChange={(e) => this.onIntInput("autoCleanBackupWeeks", e)}
+              onBlur={(e) => this.blurIntKey("autoCleanBackupWeeks", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">Weeks</InputAdornment>
@@ -221,8 +221,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               label="Keep Last"
               margin="dense"
               value={this.props.settings.autoCleanBackupMonths}
-              onChange={this.onIntInput.bind(this, "autoCleanBackupMonths")}
-              onBlur={this.blurIntKey.bind(this, "autoCleanBackupMonths")}
+              onChange={(e) => this.onIntInput("autoCleanBackupMonths", e)}
+              onBlur={(e) => this.blurIntKey("autoCleanBackupMonths", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">Months</InputAdornment>
@@ -241,7 +241,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               variant="contained"
               color="primary"
               size="large"
-              onClick={this.onBackup.bind(this)}
+              onClick={this.onBackup}
               startIcon={<SaveIcon />}
             >
               Backup Data
@@ -253,7 +253,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               color="secondary"
               size="large"
               disabled={!hasBackup}
-              onClick={this.onRestore.bind(this)}
+              onClick={this.onRestore}
               startIcon={<RestoreIcon />}
             >
               Restore Backup
@@ -265,7 +265,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
               color="inherit"
               size="large"
               disabled={this.state.backups.length <= 1}
-              onClick={this.onClean.bind(this)}
+              onClick={this.onClean}
               startIcon={<DeleteIcon />}
             >
               Clean Backups
@@ -311,7 +311,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
         </Grid>
         <Dialog
           open={this.state.openMenu == MO.deleteAlert}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="remove-all-title"
           aria-describedby="remove-all-description"
         >
@@ -339,8 +339,8 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
                     label="Keep Last"
                     margin="dense"
                     value={this.props.settings.cleanRetain}
-                    onChange={this.onIntInput.bind(this, "cleanRetain")}
-                    onBlur={this.blurIntKey.bind(this, "cleanRetain")}
+                    onChange={(e) => this.onIntInput("cleanRetain", e)}
+                    onBlur={(e) => this.blurIntKey("cleanRetain", e)}
                     inputProps={{
                       min: 1,
                       type: "number",
@@ -351,17 +351,17 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button onClick={this.onFinishClean.bind(this)} color="primary">
+            <Button onClick={this.onFinishClean} color="primary">
               Continue
             </Button>
           </DialogActions>
         </Dialog>
         <Dialog
           open={this.state.openMenu == MO.restore}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="restore-title"
           aria-describedby="restore-description"
         >
@@ -383,7 +383,7 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
                       },
                     },
                   }}
-                  onChange={this.onChangeBackup.bind(this)}
+                  onChange={this.onChangeBackup}
                 >
                   {this.state.backups.map((b) => (
                     <MenuItem value={b.url} key={b.url}>
@@ -395,10 +395,10 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button onClick={this.onFinishRestore.bind(this)} color="primary">
+            <Button onClick={this.onFinishRestore} color="primary">
               Restore
             </Button>
           </DialogActions>
@@ -407,11 +407,11 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
           open={this.state.snackbarOpen}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           autoHideDuration={5000}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           TransitionComponent={TransitionUp}
         >
           <Alert
-            onClose={this.onCloseDialog.bind(this)}
+            onClose={this.onCloseDialog}
             severity={this.state.snackbarSeverity as AlertColor}
           >
             {this.state.snackbar}
@@ -431,14 +431,14 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
     });
   }
 
-  onChangeBackup(e: SelectChangeEvent<string>) {
+  onChangeBackup = (e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.setState({
       backup: this.state.backups.find((b) => b.url == input.value),
     });
-  }
+  };
 
-  onBackup() {
+  onBackup = () => {
     try {
       this.props.onBackup();
       this.setState({
@@ -455,13 +455,13 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
       });
     }
     this.refreshBackups();
-  }
+  };
 
-  onClean() {
+  onClean = () => {
     this.setState({ backup: this.state.backups[0], openMenu: MO.deleteAlert });
-  }
+  };
 
-  onFinishClean() {
+  onFinishClean = () => {
     this.onCloseDialog();
     try {
       this.props.onClean();
@@ -479,13 +479,13 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
       });
     }
     this.refreshBackups();
-  }
+  };
 
-  onRestore() {
+  onRestore = () => {
     this.setState({ backup: this.state.backups[0], openMenu: MO.restore });
-  }
+  };
 
-  onFinishRestore() {
+  onFinishRestore = () => {
     this.onCloseDialog();
     if (this.state.backup?.url == null) {
       this.setState({
@@ -513,35 +513,41 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
         });
       }
     });
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ openMenu: undefined, snackbarOpen: false });
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.settings as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.settings as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -553,4 +559,4 @@ class BackupCard extends React.Component<BackupCardProps, BackupCardState> {
 }
 
 (BackupCard as any).displayName = "BackupCard";
-export default withStyles(styles)(BackupCard as any);
+export default withStyles(styles)(BackupCard);

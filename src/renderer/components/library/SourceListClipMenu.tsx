@@ -58,7 +58,7 @@ class SourceListClipMenu extends React.Component<SourceListClipMenuProps> {
         }}
         keepMounted
         open={open}
-        onClose={this.props.onCloseDialog.bind(this)}
+        onClose={this.props.onCloseDialog}
       >
         {clips.map((c, index) => (
           <MenuItem key={c.id}>
@@ -77,11 +77,9 @@ class SourceListClipMenu extends React.Component<SourceListClipMenuProps> {
               <Switch
                 size="small"
                 checked={!disabledClips.includes(c.id)}
-                onChange={this.props.onToggleClip.bind(
-                  this,
-                  this.props.clipMenu!,
-                  c,
-                )}
+                onChange={() =>
+                  this.props.onToggleClip(this.props.clipMenu!, c)
+                }
               />
             </ListItemSecondaryAction>
           </MenuItem>
@@ -92,4 +90,4 @@ class SourceListClipMenu extends React.Component<SourceListClipMenuProps> {
 }
 
 (SourceListClipMenu as any).displayName = "SourceListClipMenu";
-export default withStyles(styles)(SourceListClipMenu as any);
+export default withStyles(styles)(SourceListClipMenu);

@@ -102,7 +102,7 @@ interface AlbumListItemProps {
   album: Album;
   classes: any;
   selectedAlbums: number[];
-  onSelect(albumID: number, selected: boolean): void;
+  onSelect: (albumID: number, selected: boolean) => void;
 }
 
 interface AlbumListItemState {
@@ -121,10 +121,13 @@ class AlbumListItem extends React.Component<
     };
   }
 
-  setOpen(foldersOpen = false, e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
+  setOpen = (
+    foldersOpen = false,
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+  ) => {
     e.stopPropagation();
     this.setState({ foldersOpen });
-  }
+  };
 
   render() {
     const { foldersOpen } = this.state;
@@ -136,7 +139,7 @@ class AlbumListItem extends React.Component<
         <ListItem
           key={album.id}
           selected={isSelected}
-          onClick={onSelect.bind(null, album.id, !isSelected)}
+          onClick={() => onSelect(album.id, !isSelected)}
           button
         >
           <ListItemAvatar>
@@ -145,12 +148,12 @@ class AlbumListItem extends React.Component<
           <ListItemText primary={album.name} secondary={album.comment} />
           {album.sub_categories?.length && !foldersOpen && (
             <Tooltip disableInteractive title="Show Sub-Albums">
-              <ExpandMoreIcon onClick={this.setOpen.bind(this, true)} />
+              <ExpandMoreIcon onClick={(e) => this.setOpen(true, e)} />
             </Tooltip>
           )}
           {album.sub_categories?.length && foldersOpen && (
             <Tooltip disableInteractive title="Hide Sub-Albums">
-              <ExpandLessIcon onClick={this.setOpen.bind(this, false)} />
+              <ExpandLessIcon onClick={(e) => this.setOpen(false, e)} />
             </Tooltip>
           )}
         </ListItem>
@@ -176,8 +179,12 @@ interface PiwigoDialogProps {
   config: any;
   classes: any;
   open: boolean;
-  onClose(): void;
-  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
+  onClose: () => void;
+  onImportURL: (
+    type: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) => void;
 }
 
 interface PiwigoDialogState {
@@ -241,8 +248,8 @@ class PiwigoDialog extends React.Component<
     return (
       <Dialog
         open={this.props.open}
-        onClose={this.props.onClose.bind(this)}
-        TransitionProps={{ onEntered: this.onDialogEntered.bind(this) }}
+        onClose={this.props.onClose}
+        TransitionProps={{ onEntered: this.onDialogEntered }}
         fullWidth={true}
         aria-labelledby="url-import-title"
         aria-describedby="url-import-description"
@@ -266,7 +273,7 @@ class PiwigoDialog extends React.Component<
               variant="standard"
               value={listType}
               className={classes.typeSelect}
-              onChange={this.onListTypeChange.bind(this)}
+              onChange={this.onListTypeChange}
             >
               <MenuItem value={PW.apiTypeCategory}>Album Media</MenuItem>
               <MenuItem value={PW.apiTypeTag}>Tagged Media</MenuItem>
@@ -305,7 +312,7 @@ class PiwigoDialog extends React.Component<
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={this.setRecursive.bind(this, !recursiveMode)}
+                    onChange={this.setRecursive}
                     checked={recursiveMode}
                   />
                 }
@@ -332,9 +339,13 @@ class PiwigoDialog extends React.Component<
                     className={classes.tagChip}
                     key={tag.name}
                     color={isSelected ? "secondary" : "primary"}
-                    onClick={this[
-                      isSelected ? "removeSelectedTag" : "addSelectedTag"
-                    ].bind(this, tag.id)}
+                    onClick={() => {
+                      if (isSelected) {
+                        this.removeSelectedTag(tag.id);
+                      } else {
+                        this.addSelectedTag(tag.id);
+                      }
+                    }}
                     label={tag.name}
                   />
                 );
@@ -342,10 +353,7 @@ class PiwigoDialog extends React.Component<
               <Divider orientation="horizontal" flexItem />
               <FormControlLabel
                 control={
-                  <Checkbox
-                    onChange={this.setTagMode.bind(this, !tagModeAnd)}
-                    checked={tagModeAnd}
-                  />
+                  <Checkbox onChange={this.setTagMode} checked={tagModeAnd} />
                 }
                 label="Must Match All Tags"
               />
@@ -366,7 +374,7 @@ class PiwigoDialog extends React.Component<
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={this.setRandomSortOrder.bind(this, !sortRandom)}
+                  onChange={this.setRandomSortOrder}
                   checked={sortRandom}
                 />
               }
@@ -388,19 +396,16 @@ class PiwigoDialog extends React.Component<
                 <Card className={classes.sortCol} key={column.name}>
                   <CardContent
                     className={classes.sortColContent}
-                    onClick={this.setColumnDirection.bind(
-                      this,
-                      column.name,
-                      column.direction === "ASC" ? "DESC" : "ASC",
-                    )}
+                    onClick={() =>
+                      this.setColumnDirection(
+                        column.name,
+                        column.direction === "ASC" ? "DESC" : "ASC",
+                      )
+                    }
                   >
                     <Checkbox
                       checked={column.enabled}
-                      onChange={this.toggleSortColumn.bind(
-                        this,
-                        column.name,
-                        !column.enabled,
-                      )}
+                      onChange={(e) => this.toggleSortColumn(column.name, e)}
                     />
                     <Typography
                       component="h3"
@@ -450,12 +455,12 @@ class PiwigoDialog extends React.Component<
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.props.onClose.bind(this)} color="secondary">
+          <Button onClick={this.props.onClose} color="secondary">
             Cancel
           </Button>
           <Button
             // disabled={!this.state.importURL.match("^https?://") || (this.state.importType == GT.local && this.state.rootDir.length == 0)}
-            onClick={this.createAPICall.bind(this)}
+            onClick={this.createAPICall}
             color="primary"
           >
             Create List
@@ -465,16 +470,16 @@ class PiwigoDialog extends React.Component<
     );
   }
 
-  onDialogEntered() {
+  onDialogEntered = () => {
     const { listType } = this.state;
     if (listType === PW.apiTypeCategory) {
       this.getAlbums();
     } else if (listType === PW.apiTypeTag) {
       this.getTags();
     }
-  }
+  };
 
-  onListTypeChange(e: SelectChangeEvent<string>) {
+  onListTypeChange = (e: SelectChangeEvent<string>) => {
     const type = e.target.value;
     this.setState({ listType: type });
     if (type === PW.apiTypeCategory) {
@@ -482,7 +487,7 @@ class PiwigoDialog extends React.Component<
     } else if (type === PW.apiTypeTag) {
       this.getTags();
     }
-  }
+  };
 
   login() {
     const { piwigoPassword, piwigoUsername } = this.props.config.remoteSettings;
@@ -533,7 +538,7 @@ class PiwigoDialog extends React.Component<
     }
   }
 
-  createAPICall() {
+  createAPICall = (e: React.MouseEvent<HTMLButtonElement>) => {
     const {
       listType,
       sortRandom,
@@ -569,8 +574,8 @@ class PiwigoDialog extends React.Component<
       }
     }
 
-    this.props.onImportURL(AF.url, false, [url]);
-  }
+    this.props.onImportURL(AF.url, e, [url]);
+  };
 
   makeURL() {
     const { piwigoProtocol, piwigoHost } = this.props.config.remoteSettings;
@@ -589,41 +594,44 @@ class PiwigoDialog extends React.Component<
     });
   }
 
-  addSelectedTag(tagID: number) {
+  addSelectedTag = (tagID: number) => {
     const { selectedTags } = this.state;
     this.setState({ selectedTags: [...selectedTags, tagID] });
-  }
+  };
 
-  removeSelectedTag(tagID: number) {
+  removeSelectedTag = (tagID: number) => {
     const { selectedTags } = this.state;
     this.setState({
       selectedTags: selectedTags.filter((t: number) => t !== tagID),
     });
-  }
+  };
 
-  setRandomSortOrder(sortRandom: boolean) {
-    this.setState({ sortRandom });
-  }
+  setRandomSortOrder = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ sortRandom: e.target.checked });
+  };
 
-  setRecursive(recursiveMode: boolean) {
-    this.setState({ recursiveMode });
-  }
+  setRecursive = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ recursiveMode: e.target.checked });
+  };
 
-  setTagMode(tagModeAnd: boolean) {
-    this.setState({ tagModeAnd });
-  }
+  setTagMode = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ tagModeAnd: e.target.checked });
+  };
 
-  toggleSortColumn(columnName: string, enabled: boolean) {
+  toggleSortColumn = (
+    columnName: string,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const sortOrder = Array.from(this.state.sortOrder).map((col: Column) => {
       if (col.name === columnName) {
-        return { ...col, enabled };
+        return { ...col, enabled: e.target.checked };
       }
       return col;
     });
     this.setState({ sortOrder });
-  }
+  };
 
-  setColumnDirection(columnName: string, direction: string) {
+  setColumnDirection = (columnName: string, direction: string) => {
     const sortOrder = Array.from(this.state.sortOrder).map((col: Column) => {
       if (col.name === columnName) {
         return { ...col, enabled: true, direction };
@@ -631,8 +639,8 @@ class PiwigoDialog extends React.Component<
       return col;
     });
     this.setState({ sortOrder });
-  }
+  };
 }
 
 (PiwigoDialog as any).displayName = "PiwigoDialog";
-export default withStyles(styles)(PiwigoDialog as any);
+export default withStyles(styles)(PiwigoDialog);

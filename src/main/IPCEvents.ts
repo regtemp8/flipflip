@@ -848,11 +848,7 @@ function onCleanCache(ev: IpcMainInvokeEvent, cachePath: string) {
   rimrafSync(cachePath);
 }
 
-function onRevealFile(
-  ev: IpcMainEvent,
-  sourceURL: string,
-  config: Config,
-) {
+function onRevealFile(ev: IpcMainEvent, sourceURL: string, config: Config) {
   const fileType = getSourceType(sourceURL);
   let cachePath;
   if (fileType == ST.video || fileType == ST.playlist) {

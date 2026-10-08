@@ -117,12 +117,12 @@ interface SceneOptionCardProps {
   scene: Scene | SceneSettings;
   sidebar: boolean;
   tutorial: string;
-  onUpdateScene(
+  isTagging?: boolean;
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
-  isTagging?: boolean;
-  onGenerate?(scene: Scene | SceneGrid, children?: boolean): void;
+  ) => void;
+  onGenerate?: (scene: Scene | SceneGrid, children?: boolean) => void;
 }
 
 interface SceneOptionCardState {
@@ -249,7 +249,7 @@ class SceneOptionCard extends React.Component<
                 <Select
                   variant="standard"
                   value={this.props.scene.timingFunction}
-                  onChange={this.onInput.bind(this, "timingFunction")}
+                  onChange={(e) => this.onInput("timingFunction", e)}
                 >
                   {[TF.constant, TF.random, TF.sin, TF.bpm].map((tf) => {
                     if (tf == TF.bpm) {
@@ -297,11 +297,10 @@ class SceneOptionCard extends React.Component<
                     <Slider
                       min={1}
                       value={this.state.timingSinRate}
-                      onChange={this.onTimingSinRateChange.bind(this)}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "timingSinRate",
-                      )}
+                      onChange={this.onTimingSinRateChange}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("timingSinRate", e, value)
+                      }
                       valueLabelDisplay="auto"
                       aria-labelledby="scene-sin-rate-slider"
                     />
@@ -310,8 +309,8 @@ class SceneOptionCard extends React.Component<
                     <TextField
                       variant="standard"
                       value={this.state.timingSinRate}
-                      onChange={this.onIntInput.bind(this, "timingSinRate")}
-                      onBlur={this.blurIntKey.bind(this, "timingSinRate")}
+                      onChange={(e) => this.onIntInput("timingSinRate", e)}
+                      onBlur={(e) => this.blurIntKey("timingSinRate", e)}
                       inputProps={{
                         className: classes.endInput,
                         step: 5,
@@ -339,10 +338,9 @@ class SceneOptionCard extends React.Component<
                   min={1}
                   max={100}
                   defaultValue={timingBPMMulti}
-                  onChangeCommitted={this.onSliderChange.bind(
-                    this,
-                    "timingBPMMulti",
-                  )}
+                  onChangeCommitted={(e, value) =>
+                    this.onSliderChange("timingBPMMulti", e, value)
+                  }
                   valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="scene-bpm-multi-slider"
@@ -357,8 +355,8 @@ class SceneOptionCard extends React.Component<
                   label="For"
                   margin="dense"
                   value={timingConstant}
-                  onChange={this.onIntInput.bind(this, "timingConstant")}
-                  onBlur={this.blurIntKey.bind(this, "timingConstant")}
+                  onChange={(e) => this.onIntInput("timingConstant", e)}
+                  onBlur={(e) => this.blurIntKey("timingConstant", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -389,8 +387,8 @@ class SceneOptionCard extends React.Component<
                   label="Between"
                   margin="dense"
                   value={timingMin}
-                  onChange={this.onIntInput.bind(this, "timingMin")}
-                  onBlur={this.blurIntKey.bind(this, "timingMin")}
+                  onChange={(e) => this.onIntInput("timingMin", e)}
+                  onBlur={(e) => this.blurIntKey("timingMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -409,8 +407,8 @@ class SceneOptionCard extends React.Component<
                   label="and"
                   margin="dense"
                   value={timingMax}
-                  onChange={this.onIntInput.bind(this, "timingMax")}
-                  onBlur={this.blurIntKey.bind(this, "timingMax")}
+                  onChange={(e) => this.onIntInput("timingMax", e)}
+                  onBlur={(e) => this.blurIntKey("timingMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -446,7 +444,7 @@ class SceneOptionCard extends React.Component<
                   control={
                     <Switch
                       checked={this.props.scene.backForth}
-                      onChange={this.onBoolInput.bind(this, "backForth")}
+                      onChange={(e) => this.onBoolInput("backForth", e)}
                     />
                   }
                   label="Back/Forth"
@@ -467,7 +465,7 @@ class SceneOptionCard extends React.Component<
                   <Select
                     variant="standard"
                     value={this.props.scene.backForthTF}
-                    onChange={this.onInput.bind(this, "backForthTF")}
+                    onChange={(e) => this.onInput("backForthTF", e)}
                   >
                     {[TF.constant, TF.random, TF.sin, TF.bpm].map((tf) => {
                       if (tf == TF.bpm) {
@@ -515,11 +513,10 @@ class SceneOptionCard extends React.Component<
                       <Slider
                         min={1}
                         value={this.state.backForthSinRate}
-                        onChange={this.onBackForthSinRateChange.bind(this)}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "backForthSinRate",
-                        )}
+                        onChange={this.onBackForthSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("backForthSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="bf-sin-rate-slider"
                       />
@@ -528,11 +525,8 @@ class SceneOptionCard extends React.Component<
                       <TextField
                         variant="standard"
                         value={this.state.backForthSinRate}
-                        onChange={this.onIntInput.bind(
-                          this,
-                          "backForthSinRate",
-                        )}
-                        onBlur={this.blurIntKey.bind(this, "backForthSinRate")}
+                        onChange={(e) => this.onIntInput("backForthSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("backForthSinRate", e)}
                         inputProps={{
                           className: classes.endInput,
                           step: 5,
@@ -560,10 +554,9 @@ class SceneOptionCard extends React.Component<
                     min={1}
                     max={100}
                     defaultValue={backForthBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "backForthBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("backForthBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="bf-bpm-multi-slider"
@@ -578,8 +571,8 @@ class SceneOptionCard extends React.Component<
                     label="Every"
                     margin="dense"
                     value={backForthConstant}
-                    onChange={this.onIntInput.bind(this, "backForthConstant")}
-                    onBlur={this.blurIntKey.bind(this, "backForthConstant")}
+                    onChange={(e) => this.onIntInput("backForthConstant", e)}
+                    onBlur={(e) => this.blurIntKey("backForthConstant", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -622,8 +615,8 @@ class SceneOptionCard extends React.Component<
                   label="Between"
                   margin="dense"
                   value={backForthMin}
-                  onChange={this.onIntInput.bind(this, "backForthMin")}
-                  onBlur={this.blurIntKey.bind(this, "backForthMin")}
+                  onChange={(e) => this.onIntInput("backForthMin", e)}
+                  onBlur={(e) => this.blurIntKey("backForthMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -642,8 +635,8 @@ class SceneOptionCard extends React.Component<
                   label="and"
                   margin="dense"
                   value={backForthMax}
-                  onChange={this.onIntInput.bind(this, "backForthMax")}
-                  onBlur={this.blurIntKey.bind(this, "backForthMax")}
+                  onChange={(e) => this.onIntInput("backForthMax", e)}
+                  onBlur={(e) => this.blurIntKey("backForthMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -680,7 +673,7 @@ class SceneOptionCard extends React.Component<
                 <Select
                   variant="standard"
                   value={this.props.scene.imageType}
-                  onChange={this.onInput.bind(this, "imageType")}
+                  onChange={(e) => this.onInput("imageType", e)}
                 >
                   {Object.values(IT).map((it) => (
                     <MenuItem key={it} value={it}>
@@ -701,7 +694,7 @@ class SceneOptionCard extends React.Component<
                 <Select
                   variant="standard"
                   value={this.props.scene.backgroundType}
-                  onChange={this.onInput.bind(this, "backgroundType")}
+                  onChange={(e) => this.onInput("backgroundType", e)}
                 >
                   {Object.values(BT).map((bt) => (
                     <MenuItem key={bt} value={bt}>
@@ -727,10 +720,9 @@ class SceneOptionCard extends React.Component<
                   min={0}
                   max={30}
                   defaultValue={backgroundBlur}
-                  onChangeCommitted={this.onSliderChange.bind(
-                    this,
-                    "backgroundBlur",
-                  )}
+                  onChangeCommitted={(e, value) =>
+                    this.onSliderChange("backgroundBlur", e, value)
+                  }
                   valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v + "px"}
                   aria-labelledby="scene-bg-color-slider"
@@ -743,7 +735,9 @@ class SceneOptionCard extends React.Component<
                 {this.props.scene.backgroundType == BT.color && (
                   <ColorPicker
                     currentColor={this.props.scene.backgroundColor}
-                    onChangeColor={this.onInput.bind(this, "backgroundColor")}
+                    onChangeColor={(color) =>
+                      this.changeKey("backgroundColor", color)
+                    }
                   />
                 )}
               </Collapse>
@@ -754,10 +748,9 @@ class SceneOptionCard extends React.Component<
                 {this.props.scene.backgroundType == BT.colorSet && (
                   <ColorSetPicker
                     currentColors={this.props.scene.backgroundColorSet}
-                    onChangeColors={this.onInput.bind(
-                      this,
-                      "backgroundColorSet",
-                    )}
+                    onChangeColors={(colors) =>
+                      this.changeKey("backgroundColorSet", colors)
+                    }
                   />
                 )}
               </Collapse>
@@ -799,13 +792,15 @@ class SceneOptionCard extends React.Component<
                     allScenes={this.props.allScenes}
                     value={this.props.scene.nextSceneID}
                     includeExtra
-                    getSceneName={this.getSceneName.bind(this)}
-                    onChange={this.changeIntKey.bind(this, "nextSceneID")}
+                    getSceneName={this.getSceneName}
+                    onChange={(s: number) =>
+                      this.changeIntKey("nextSceneID", s.toString())
+                    }
                   />
                   <Dialog
                     classes={{ paper: classes.randomSceneDialog }}
                     open={this.state.randomSceneList != null}
-                    onClose={this.onRandomSceneDialog.bind(this)}
+                    onClose={this.onRandomSceneDialog}
                     aria-describedby="random-scene-description"
                   >
                     <DialogContent classes={{ root: classes.noScroll }}>
@@ -819,29 +814,22 @@ class SceneOptionCard extends React.Component<
                           this.state?.randomSceneList ??
                           this.props.scene.nextSceneRandoms
                         }
-                        getSceneName={this.getSceneName.bind(this)}
-                        onChange={this.changeRandomScenes.bind(this)}
+                        getSceneName={this.getSceneName}
+                        onChange={this.changeRandomScenes}
                       />
                     </DialogContent>
                     <DialogActions>
-                      <Button onClick={this.onSelectNone.bind(this)}>
-                        Select None
-                      </Button>
-                      <Button onClick={this.onSelectAll.bind(this)}>
-                        Select All
-                      </Button>
+                      <Button onClick={this.onSelectNone}>Select None</Button>
+                      <Button onClick={this.onSelectAll}>Select All</Button>
                     </DialogActions>
                     <DialogActions>
                       <Button
-                        onClick={this.onRandomSceneDialog.bind(this)}
+                        onClick={this.onRandomSceneDialog}
                         color="secondary"
                       >
                         Cancel
                       </Button>
-                      <Button
-                        onClick={this.onSaveRandomScene.bind(this)}
-                        color="primary"
-                      >
+                      <Button onClick={this.onSaveRandomScene} color="primary">
                         Save
                       </Button>
                     </DialogActions>
@@ -862,7 +850,7 @@ class SceneOptionCard extends React.Component<
                           this.props.scene.nextSceneRandoms.length == 0 &&
                             classes.error,
                         )}
-                        onClick={this.onRandomSceneDialog.bind(this)}
+                        onClick={this.onRandomSceneDialog}
                         size="large"
                       >
                         <ListIcon />
@@ -887,8 +875,8 @@ class SceneOptionCard extends React.Component<
                       label="Play after"
                       margin="dense"
                       value={nextSceneTime}
-                      onChange={this.onIntInput.bind(this, "nextSceneTime")}
-                      onBlur={this.blurIntKey.bind(this, "nextSceneTime")}
+                      onChange={(e) => this.onIntInput("nextSceneTime", e)}
+                      onBlur={(e) => this.blurIntKey("nextSceneTime", e)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">ms</InputAdornment>
@@ -907,10 +895,9 @@ class SceneOptionCard extends React.Component<
                       control={
                         <Switch
                           checked={this.props.scene.nextSceneAllImages}
-                          onChange={this.onBoolInput.bind(
-                            this,
-                            "nextSceneAllImages",
-                          )}
+                          onChange={(e) =>
+                            this.onBoolInput("nextSceneAllImages", e)
+                          }
                         />
                       }
                       label="Play After All Images"
@@ -925,10 +912,9 @@ class SceneOptionCard extends React.Component<
                           control={
                             <Switch
                               checked={this.props.scene.persistAudio}
-                              onChange={this.onBoolInput.bind(
-                                this,
-                                "persistAudio",
-                              )}
+                              onChange={(e) =>
+                                this.onBoolInput("persistAudio", e)
+                              }
                             />
                           }
                           label="Persist Audio"
@@ -941,10 +927,9 @@ class SceneOptionCard extends React.Component<
                           control={
                             <Switch
                               checked={this.props.scene.persistText}
-                              onChange={this.onBoolInput.bind(
-                                this,
-                                "persistText",
-                              )}
+                              onChange={(e) =>
+                                this.onBoolInput("persistText", e)
+                              }
                             />
                           }
                           label="Persist Text Overlays"
@@ -973,7 +958,7 @@ class SceneOptionCard extends React.Component<
                 control={
                   <Switch
                     checked={this.props.scene.overlayEnabled}
-                    onChange={this.onBoolInput.bind(this, "overlayEnabled")}
+                    onChange={(e) => this.onBoolInput("overlayEnabled", e)}
                   />
                 }
                 label="Overlays"
@@ -983,7 +968,7 @@ class SceneOptionCard extends React.Component<
               <Collapse in={this.props.scene.overlayEnabled}>
                 <Fab
                   className={classes.addButton}
-                  onClick={this.onAddOverlay.bind(this)}
+                  onClick={this.onAddOverlay}
                   size="small"
                 >
                   <AddIcon />
@@ -1023,12 +1008,14 @@ class SceneOptionCard extends React.Component<
                         allScenes={this.props.allScenes}
                         allSceneGrids={this.props.allSceneGrids}
                         value={o.sceneID}
-                        getSceneName={this.getSceneName.bind(this)}
-                        onChange={this.changeOverlayIntKey.bind(
-                          this,
-                          o.id,
-                          "sceneID",
-                        )}
+                        getSceneName={this.getSceneName}
+                        onChange={(s: number) =>
+                          this.changeOverlayIntKey(
+                            o.id,
+                            "sceneID",
+                            s.toString(),
+                          )
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={this.props.sidebar ? 12 : 7}>
@@ -1045,11 +1032,14 @@ class SceneOptionCard extends React.Component<
                             min={0}
                             max={100}
                             defaultValue={overlayOpacity}
-                            onChangeCommitted={this.onOverlaySliderChange.bind(
-                              this,
-                              o.id,
-                              "opacity",
-                            )}
+                            onChangeCommitted={(e, value) =>
+                              this.onOverlaySliderChange(
+                                o.id,
+                                "opacity",
+                                e,
+                                value,
+                              )
+                            }
                             valueLabelDisplay="auto"
                             valueLabelFormat={(v) => v + "%"}
                             aria-labelledby="overlay-opacity-slider"
@@ -1058,7 +1048,7 @@ class SceneOptionCard extends React.Component<
                         <Grid item>
                           <Tooltip disableInteractive title="Remove Overlay">
                             <IconButton
-                              onClick={this.onRemoveOverlay.bind(this, o.id)}
+                              onClick={() => this.onRemoveOverlay(o.id)}
                               size="large"
                             >
                               <DeleteIcon color="error" />
@@ -1091,7 +1081,7 @@ class SceneOptionCard extends React.Component<
     );
   }
 
-  onAddOverlay() {
+  onAddOverlay = () => {
     let id = this.props.scene.overlays.length + 1;
     this.props.scene.overlays.forEach((o) => {
       id = Math.max(o.id + 1, id);
@@ -1102,17 +1092,17 @@ class SceneOptionCard extends React.Component<
     this.update((s) => {
       s.overlays = newOverlays;
     });
-  }
+  };
 
-  onRemoveOverlay(id: number) {
+  onRemoveOverlay = (id: number) => {
     const newOverlays = Array.from(this.props.scene.overlays);
     newOverlays.splice(newOverlays.map((o) => o.id).indexOf(id), 1);
     this.update((s) => {
       s.overlays = newOverlays;
     });
-  }
+  };
 
-  getSceneName(id: string): string {
+  getSceneName = (id: string): string => {
     if (id === "0") return "None";
     if (id === "-1") return "Random";
 
@@ -1129,16 +1119,16 @@ class SceneOptionCard extends React.Component<
     }
 
     return sceneName ?? "";
-  }
+  };
 
-  onOverlaySliderChange(
+  onOverlaySliderChange = (
     id: number,
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeOverlayKey(id, key, value);
-  }
+  };
 
   changeOverlayKey(id: number, key: string, value: any) {
     this.update(
@@ -1146,7 +1136,7 @@ class SceneOptionCard extends React.Component<
     );
   }
 
-  changeOverlayIntKey(id: number, key: string, intString: string) {
+  changeOverlayIntKey = (id: number, key: string, intString: string) => {
     const value = intString === "" ? "" : Number(intString);
     if (this.props.sidebar && this.props.onGenerate) {
       let overlay;
@@ -1162,10 +1152,13 @@ class SceneOptionCard extends React.Component<
       }
     }
     this.changeOverlayKey(id, key, value);
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     let value = e.currentTarget.value;
     if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
@@ -1182,40 +1175,43 @@ class SceneOptionCard extends React.Component<
     if (key == "backForthSinRate") {
       this.setState({ backForthSinRate: Number(value) });
     }
-  }
+  };
 
-  onTimingSinRateChange(
+  onTimingSinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ timingSinRate: value as number });
-  }
+  };
 
-  onBackForthSinRateChange(
+  onBackForthSinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ backForthSinRate: value as number });
-  }
+  };
 
-  onSliderChange(
+  onSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
   onInput(key: string, e: SelectChangeEvent<string>) {
     const input = e.target;
@@ -1226,39 +1222,39 @@ class SceneOptionCard extends React.Component<
     this.props.onUpdateScene(this.props.scene, fn);
   }
 
-  changeIntKey(key: string, intString: string) {
+  changeIntKey = (key: string, intString: string) => {
     this.changeKey(key, intString === "" ? "" : Number(intString));
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
   }
 
-  onRandomSceneDialog() {
+  onRandomSceneDialog = () => {
     const randomSceneList =
       this.state.randomSceneList == null
         ? this.props.scene.nextSceneRandoms
         : undefined;
     this.setState({ randomSceneList });
-  }
+  };
 
-  changeRandomScenes(sceneIDs: Array<number>) {
+  changeRandomScenes = (sceneIDs: Array<number>) => {
     this.setState({ randomSceneList: sceneIDs });
-  }
+  };
 
-  onSelectNone() {
+  onSelectNone = () => {
     this.setState({ randomSceneList: [] });
-  }
+  };
 
-  onSelectAll() {
+  onSelectAll = () => {
     this.setState({ randomSceneList: this.props.allScenes.map((s) => s.id) });
-  }
+  };
 
-  onSaveRandomScene() {
+  onSaveRandomScene = () => {
     this.changeKey("nextSceneRandoms", this.state.randomSceneList);
     this.onRandomSceneDialog();
-  }
+  };
 }
 
 (SceneOptionCard as any).displayName = "SceneOptionCard";
-export default withStyles(styles)(SceneOptionCard as any);
+export default withStyles(styles)(SceneOptionCard);

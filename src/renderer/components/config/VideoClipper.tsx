@@ -193,13 +193,13 @@ interface VideoClipperProps {
   source: LibrarySource;
   tutorial: string;
   videoVolume: number;
-  cache(video: HTMLVideoElement): void;
-  goBack(): void;
-  navigateClipping(offset: number): void;
-  onTutorial(tutorial: string): void;
-  onStartVCTutorial(): void;
-  onSetDisabledClips(disabledClips: Array<number>): void;
-  onUpdateClips(url: string, clips: Array<Clip>): void;
+  cache: (video: HTMLVideoElement) => void;
+  goBack: () => void;
+  navigateClipping: (offset: number) => void;
+  onTutorial: (tutorial: string) => void;
+  onStartVCTutorial: () => void;
+  onSetDisabledClips: (disabledClips: Array<number>) => void;
+  onUpdateClips: (url: string, clips: Array<Clip>) => void;
 }
 
 interface VideoClipperState {
@@ -252,7 +252,7 @@ class VideoClipper extends React.Component<
                   edge="start"
                   color="inherit"
                   aria-label="Back"
-                  onClick={this.props.goBack.bind(this)}
+                  onClick={this.props.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -345,9 +345,7 @@ class VideoClipper extends React.Component<
                           )}
                           key={tag.id}
                         >
-                          <CardActionArea
-                            onClick={this.toggleTag.bind(this, tag)}
-                          >
+                          <CardActionArea onClick={() => this.toggleTag(tag)}>
                             <CardContent className={classes.tagContent}>
                               <Typography component="h6" variant="body2">
                                 {tag.name}
@@ -363,7 +361,7 @@ class VideoClipper extends React.Component<
                       <Fab
                         color="primary"
                         size="small"
-                        onClick={this.onInherit.bind(this)}
+                        onClick={this.onInherit}
                       >
                         <SystemUpdateAltIcon />
                       </Fab>
@@ -373,7 +371,7 @@ class VideoClipper extends React.Component<
                       title="End Tagging"
                       placement="top"
                     >
-                      <IconButton onClick={this.onTag.bind(this)} size="large">
+                      <IconButton onClick={this.onTag} size="large">
                         <KeyboardReturnIcon />
                       </IconButton>
                     </Tooltip>
@@ -393,7 +391,7 @@ class VideoClipper extends React.Component<
                         this.state.isEditing ? this.state.isEditingValue : null
                       }
                       useHotkeys
-                      onChangeVolume={this.onChangeVolume.bind(this)}
+                      onChangeVolume={this.onChangeVolume}
                     />
                   </Grid>
                 </Grid>
@@ -441,7 +439,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clips &&
                                   classes.highlight,
                               )}
-                              onClick={this.onAdd.bind(this)}
+                              onClick={this.onAdd}
                             >
                               <AddIcon />
                             </Fab>
@@ -457,7 +455,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clips &&
                                   classes.disable,
                               )}
-                              onClick={this.onEdit.bind(this, c)}
+                              onClick={() => this.onEdit(c)}
                             >
                               {index + 1}
                             </Button>
@@ -507,7 +505,7 @@ class VideoClipper extends React.Component<
                                       ) &&
                                       classes.disabledClip,
                                   )}
-                                  onClick={this.onToggleClip.bind(this)}
+                                  onClick={this.onToggleClip}
                                 >
                                   {this.props.source.disabledClips &&
                                   this.props.source.disabledClips.includes(
@@ -540,7 +538,7 @@ class VideoClipper extends React.Component<
                                 label: getTimestamp(this.state.videoDuration),
                               },
                             ]}
-                            onChange={this.onChangePosition.bind(this)}
+                            onChange={this.onChangePosition}
                           />
                         </Grid>
                         <Grid item>
@@ -550,8 +548,8 @@ class VideoClipper extends React.Component<
                             className={classes.clipField}
                             label="Start"
                             value={this.state.isEditingStartText}
-                            onDoubleClick={this.onClickStartText.bind(this)}
-                            onChange={this.onChangeStartText.bind(this)}
+                            onDoubleClick={this.onClickStartText}
+                            onChange={this.onChangeStartText}
                           />
                         </Grid>
                         <Grid item>
@@ -561,8 +559,8 @@ class VideoClipper extends React.Component<
                             className={classes.clipField}
                             label="End"
                             value={this.state.isEditingEndText}
-                            onDoubleClick={this.onClickEndText.bind(this)}
-                            onChange={this.onChangeEndText.bind(this)}
+                            onDoubleClick={this.onClickEndText}
+                            onChange={this.onChangeEndText}
                           />
                         </Grid>
                         <Grid item>
@@ -579,7 +577,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.highlight,
                               )}
-                              onClick={this.onSave.bind(this, true)}
+                              onClick={() => this.onSave(true)}
                             >
                               <SaveIcon />
                             </Fab>
@@ -599,7 +597,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onTag.bind(this)}
+                              onClick={this.onTag}
                             >
                               <LocalOfferIcon />
                             </Fab>
@@ -619,8 +617,8 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onSetVolume.bind(this)}
-                              onContextMenu={this.onClearVolume.bind(this)}
+                              onClick={this.onSetVolume}
+                              onContextMenu={this.onClearVolume}
                             >
                               <SvgIcon viewBox="0 0 24 24">
                                 <path d="M3 9V15H7L12 20V4L7 9H3M16 15H14V9H16V15M20 19H18V5H20V19Z" />
@@ -646,7 +644,7 @@ class VideoClipper extends React.Component<
                                     this.props.tutorial == VCT.clip &&
                                       classes.disable,
                                   )}
-                                  onClick={this.onRemove.bind(this)}
+                                  onClick={this.onRemove}
                                 >
                                   <DeleteIcon color="inherit" />
                                 </Fab>
@@ -664,7 +662,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onCancel.bind(this)}
+                              onClick={this.onCancel}
                               size="large"
                             >
                               <KeyboardReturnIcon />
@@ -690,7 +688,7 @@ class VideoClipper extends React.Component<
                       }
                       clips={this.props.source.clips}
                       useHotkeys
-                      onChangeVolume={this.onChangeVolume.bind(this)}
+                      onChangeVolume={this.onChangeVolume}
                     />
                   </Grid>
                 </Grid>
@@ -762,7 +760,7 @@ class VideoClipper extends React.Component<
     video.load();
   }
 
-  onAdd() {
+  onAdd = () => {
     if (this.props.tutorial == VCT.clips) {
       this.props.onTutorial(VCT.clips);
     }
@@ -783,9 +781,9 @@ class VideoClipper extends React.Component<
       isEditingStartText: getTimestamp(0),
       isEditingEndText: getTimestamp(video.duration),
     });
-  }
+  };
 
-  onEdit(clip: Clip) {
+  onEdit = (clip: Clip) => {
     if (clip.volume != null) {
       this.onChangeVolume(clip.volume);
     }
@@ -795,13 +793,13 @@ class VideoClipper extends React.Component<
       isEditingStartText: getTimestamp(clip.start),
       isEditingEndText: getTimestamp(clip.end),
     });
-  }
+  };
 
-  onCancel() {
+  onCancel = () => {
     this.closeEdit();
-  }
+  };
 
-  onSave(close: boolean) {
+  onSave = (close: boolean) => {
     if (this.props.tutorial == VCT.clip) {
       this.props.onTutorial(VCT.clip);
     }
@@ -821,22 +819,22 @@ class VideoClipper extends React.Component<
     if (close) {
       this.closeEdit();
     }
-  }
+  };
 
-  onToggleClip() {
+  onToggleClip = () => {
     const isEditing = this.state.isEditing as Clip;
     this.props.onSetDisabledClips(
       this.props.source.disabledClips
         ? this.props.source.disabledClips.concat(isEditing.id)
         : [isEditing.id],
     );
-  }
+  };
 
-  onTag() {
+  onTag = () => {
     this.setState({ isTagging: !this.state.isTagging });
-  }
+  };
 
-  onClearVolume() {
+  onClearVolume = () => {
     const source = this.props.source;
     const isEditing = this.state.isEditing as Clip;
     isEditing.volume = null;
@@ -846,9 +844,9 @@ class VideoClipper extends React.Component<
       clip.volume = null;
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  onSetVolume() {
+  onSetVolume = () => {
     const source = this.props.source;
     const isEditing = this.state.isEditing as Clip;
     isEditing.volume = Number.parseInt(this.state.scene.videoVolume as any);
@@ -858,9 +856,9 @@ class VideoClipper extends React.Component<
       clip.volume = this.state.scene.videoVolume;
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  onInherit() {
+  onInherit = () => {
     const source = this.props.source;
     const isEditing = this.state.isEditing as Clip;
     isEditing.tags = source.tags;
@@ -870,9 +868,9 @@ class VideoClipper extends React.Component<
       clip.tags = source.tags.concat();
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  toggleTag(tag: Tag) {
+  toggleTag = (tag: Tag) => {
     const source = this.props.source;
     const isEditing = this.state.isEditing as Clip;
     let clip = source.clips.find((c) => c.id === isEditing.id);
@@ -891,9 +889,9 @@ class VideoClipper extends React.Component<
           : isEditing.tags.toSpliced(tagIndex, 1);
       this.setState({ isEditing });
     }
-  }
+  };
 
-  onRemove() {
+  onRemove = () => {
     const source = this.props.source;
     const isEditing = this.state.isEditing as Clip;
     const clip = source.clips.find((c) => c.id === isEditing.id);
@@ -907,7 +905,7 @@ class VideoClipper extends React.Component<
       );
     }
     this.closeEdit();
-  }
+  };
 
   closeEdit() {
     this.setState({
@@ -918,21 +916,21 @@ class VideoClipper extends React.Component<
     });
   }
 
-  onChangeVolume(volume: number) {
+  onChangeVolume = (volume: number) => {
     const scene = this.state.scene;
     scene.videoVolume = volume;
     this.setState({ scene: scene });
-  }
+  };
 
-  onChangePosition(
+  onChangePosition = (
     e: Event,
     value: number | number[],
     activeThumb: number,
     forceStart = false,
     forceEnd = false,
-  ) {
+  ) => {
     this.changePosition(value, forceStart, forceEnd);
-  }
+  };
 
   private changePosition(
     value: number | number[],
@@ -967,14 +965,14 @@ class VideoClipper extends React.Component<
     });
   }
 
-  onChangeStartText(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeStartText = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.setState({ isEditingStartText: input.value });
     const timestampValue = getTimestampValue(input.value);
     if (timestampValue != null) {
       this.onChangeStartTextValue(timestampValue);
     }
-  }
+  };
 
   onChangeStartTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
@@ -986,22 +984,22 @@ class VideoClipper extends React.Component<
     }
   }
 
-  onClickStartText() {
+  onClickStartText = () => {
     const video = this.video as HTMLVideoElement;
     this.setState({
       isEditingStartText: getTimestamp(video.currentTime),
     });
     this.changePosition([video.currentTime, this.state.isEditingValue[1]]);
-  }
+  };
 
-  onChangeEndText(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeEndText = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.setState({ isEditingEndText: input.value });
     const timestampValue = getTimestampValue(input.value);
     if (timestampValue != null) {
       this.onChangeEndTextValue(timestampValue);
     }
-  }
+  };
 
   onChangeEndTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
@@ -1013,13 +1011,13 @@ class VideoClipper extends React.Component<
     }
   }
 
-  onClickEndText() {
+  onClickEndText = () => {
     const video = this.video as HTMLVideoElement;
     this.setState({
       isEditingEndText: getTimestamp(video.currentTime),
     });
     this.changePosition([this.state.isEditingValue[0], video.currentTime]);
-  }
+  };
 
   onScroll = (e: WheelEvent) => {
     const volumeChange = (e.deltaY / 100) * -5;
@@ -1149,4 +1147,4 @@ class VideoClipper extends React.Component<
 }
 
 (VideoClipper as any).displayName = "VideoClipper";
-export default withStyles(styles)(VideoClipper as any);
+export default withStyles(styles)(VideoClipper);

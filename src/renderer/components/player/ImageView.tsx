@@ -27,9 +27,9 @@ interface ImageViewProps {
   pictureGrid?: boolean;
   removeChild?: boolean;
   className?: string;
-  onLoaded?(): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  setVideo?(video?: HTMLVideoElement): void;
+  onLoaded?: () => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  setVideo?: (video?: HTMLVideoElement) => void;
 }
 
 export default class ImageView extends React.Component<ImageViewProps> {
@@ -880,7 +880,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
             toggleStrobe={this.props.toggleStrobe}
             timeToNextFrame={this.props.timeToNextFrame}
             scene={this.props.scene}
-            strobeFunction={this.strobeImage.bind(this)}
+            strobeFunction={this.strobeImage}
           >
             {imageDiv}
           </Strobe>
@@ -915,7 +915,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
           currentAudio={this.props.currentAudio}
           timeToNextFrame={this.props.timeToNextFrame}
           scene={this.props.scene}
-          fadeFunction={this.strobeImage.bind(this)}
+          fadeFunction={this.strobeImage}
         >
           {imageDiv}
         </FadeInOut>
@@ -937,7 +937,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
           currentAudio={this.props.currentAudio}
           timeToNextFrame={this.props.timeToNextFrame}
           scene={this.props.scene}
-          panFunction={this.strobeImage.bind(this)}
+          panFunction={this.strobeImage}
         >
           {imageDiv}
         </Panning>
@@ -1009,7 +1009,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
     return renderDiv;
   }
 
-  strobeImage() {
+  strobeImage = () => {
     const appendOriginal = (
       el: HTMLDivElement,
       img: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement,
@@ -1075,7 +1075,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
     } else if (el && img && img.src == this.props.image.src) {
       appendOriginal(el, img);
     }
-  }
+  };
 }
 
 (ImageView as any).displayName = "ImageView";

@@ -49,7 +49,7 @@ const styles = (theme: Theme) =>
       minWidth: theme.spacing(11),
     },
     backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
+      zIndex: `${theme.zIndex.modal + 1} !important`,
     },
     highlight: {
       borderWidth: 2,
@@ -70,10 +70,10 @@ interface PanningCardProps {
   sidebar: boolean;
   easingControls: boolean;
   tutorial: string;
-  onUpdateScene(
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  ) => void;
 }
 
 interface PanningCardState {
@@ -192,7 +192,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
             control={
               <Switch
                 checked={this.props.scene.panning}
-                onChange={this.onBoolInput.bind(this, "panning")}
+                onChange={(e) => this.onBoolInput("panning", e)}
               />
             }
             label="Panning"
@@ -224,7 +224,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.panHorizTransType}
-                    onChange={this.onInput.bind(this, "panHorizTransType")}
+                    onChange={(e) => this.onInput("panHorizTransType", e)}
                   >
                     {Object.values(HTF).map((tf) => {
                       switch (tf) {
@@ -286,10 +286,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Switch
                       checked={this.props.scene.panHorizTransRandom}
                       size="small"
-                      onChange={this.onBoolInput.bind(
-                        this,
-                        "panHorizTransRandom",
-                      )}
+                      onChange={(e) =>
+                        this.onBoolInput("panHorizTransRandom", e)
+                      }
                     />
                   }
                   label="Randomize"
@@ -307,7 +306,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Switch
                       checked={this.props.scene.panHorizTransImg}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "panHorizTransImg")}
+                      onChange={(e) => this.onBoolInput("panHorizTransImg", e)}
                     />
                   }
                   label="Use Img Width"
@@ -336,11 +335,10 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   <Grid item xs>
                     <Slider
                       value={this.state.panHorizTransLevel}
-                      onChange={this.onPanHorizTransLevelChange.bind(this)}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevel",
-                      )}
+                      onChange={this.onPanHorizTransLevelChange}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevel", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-level-slider"
@@ -351,11 +349,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                       variant="standard"
                       value={this.state.panHorizTransLevel}
                       margin="dense"
-                      onChange={this.onIntInput.bind(
-                        this,
-                        "panHorizTransLevel",
-                      )}
-                      onBlur={this.blurIntKey.bind(this, "panHorizTransLevel")}
+                      onChange={(e) => this.onIntInput("panHorizTransLevel", e)}
+                      onBlur={(e) => this.blurIntKey("panHorizTransLevel", e)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
@@ -387,10 +382,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Typography>Min: {horizTransLevelMin}%</Typography>
                     <Slider
                       defaultValue={horizTransLevelMin}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevelMin",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevelMin", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-min-slider"
@@ -400,10 +394,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Typography>Max: {horizTransLevelMax}%</Typography>
                     <Slider
                       defaultValue={horizTransLevelMax}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevelMax",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevelMax", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-max-slider"
@@ -444,7 +437,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.panVertTransType}
-                    onChange={this.onInput.bind(this, "panVertTransType")}
+                    onChange={(e) => this.onInput("panVertTransType", e)}
                   >
                     {Object.values(VTF).map((tf) => {
                       switch (tf) {
@@ -506,10 +499,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Switch
                       checked={this.props.scene.panVertTransRandom}
                       size="small"
-                      onChange={this.onBoolInput.bind(
-                        this,
-                        "panVertTransRandom",
-                      )}
+                      onChange={(e) =>
+                        this.onBoolInput("panVertTransRandom", e)
+                      }
                     />
                   }
                   label="Randomize"
@@ -527,7 +519,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Switch
                       checked={this.props.scene.panVertTransImg}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "panVertTransImg")}
+                      onChange={(e) => this.onBoolInput("panVertTransImg", e)}
                     />
                   }
                   label="Use Img Height"
@@ -557,11 +549,10 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   <Grid item xs>
                     <Slider
                       value={this.state.panVertTransLevel}
-                      onChange={this.onPanVertTransLevelChange.bind(this)}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevel",
-                      )}
+                      onChange={this.onPanVertTransLevelChange}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevel", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-level-slider"
@@ -572,8 +563,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                       variant="standard"
                       value={this.state.panVertTransLevel}
                       margin="dense"
-                      onChange={this.onIntInput.bind(this, "panVertTransLevel")}
-                      onBlur={this.blurIntKey.bind(this, "panVertTransLevel")}
+                      onChange={(e) => this.onIntInput("panVertTransLevel", e)}
+                      onBlur={(e) => this.blurIntKey("panVertTransLevel", e)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
@@ -605,10 +596,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Typography>Min: {vertTransLevelMin}%</Typography>
                     <Slider
                       defaultValue={vertTransLevelMin}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevelMin",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevelMin", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-min-slider"
@@ -618,10 +608,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Typography>Max: {vertTransLevelMax}%</Typography>
                     <Slider
                       defaultValue={vertTransLevelMax}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevelMax",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevelMax", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-max-slider"
@@ -655,7 +644,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.panTF}
-                    onChange={this.onInput.bind(this, "panTF")}
+                    onChange={(e) => this.onInput("panTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf == TF.bpm) {
@@ -701,11 +690,10 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     <Grid item xs>
                       <Slider
                         value={this.state.panSinRate}
-                        onChange={this.onPanSinRateChange.bind(this)}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panSinRate",
-                        )}
+                        onChange={this.onPanSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="pan-sin-rate-slider"
                       />
@@ -714,8 +702,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                       <TextField
                         variant="standard"
                         value={this.state.panSinRate}
-                        onChange={this.onIntInput.bind(this, "panSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "panSinRate")}
+                        onChange={(e) => this.onIntInput("panSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("panSinRate", e)}
                         inputProps={{
                           className: classes.endInput,
                           step: 5,
@@ -745,10 +733,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     min={1}
                     max={100}
                     defaultValue={panBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "panBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("panBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="pan-bpm-multi-slider"
@@ -766,8 +753,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                     label="For"
                     margin="dense"
                     value={panDuration}
-                    onChange={this.onIntInput.bind(this, "panDuration")}
-                    onBlur={this.blurIntKey.bind(this, "panDuration")}
+                    onChange={(e) => this.onIntInput("panDuration", e)}
+                    onBlur={(e) => this.blurIntKey("panDuration", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -800,8 +787,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   label="Between"
                   margin="dense"
                   value={panDurationMin}
-                  onChange={this.onIntInput.bind(this, "panDurationMin")}
-                  onBlur={this.blurIntKey.bind(this, "panDurationMin")}
+                  onChange={(e) => this.onIntInput("panDurationMin", e)}
+                  onBlur={(e) => this.blurIntKey("panDurationMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -820,8 +807,8 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                   label="and"
                   margin="dense"
                   value={panDurationMax}
-                  onChange={this.onIntInput.bind(this, "panDurationMax")}
-                  onBlur={this.blurIntKey.bind(this, "panDurationMax")}
+                  onChange={(e) => this.onIntInput("panDurationMax", e)}
+                  onBlur={(e) => this.blurIntKey("panDurationMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -866,7 +853,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                       <Select
                         variant="standard"
                         value={this.props.scene.panStartEase}
-                        onChange={this.onInput.bind(this, "panStartEase")}
+                        onChange={(e) => this.onInput("panStartEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -896,10 +883,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panStartExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
@@ -924,10 +910,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panStartOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
@@ -954,10 +939,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.panStartAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
@@ -984,10 +968,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.panStartPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
@@ -1003,7 +986,7 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                       <Select
                         variant="standard"
                         value={this.props.scene.panEndEase}
-                        onChange={this.onInput.bind(this, "panEndEase")}
+                        onChange={(e) => this.onInput("panEndEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -1033,10 +1016,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panEndExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
@@ -1061,10 +1043,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panEndOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
@@ -1091,10 +1072,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.panEndAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
@@ -1121,10 +1101,9 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.panEndPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
@@ -1140,8 +1119,11 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
     );
   }
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     let value = e.currentTarget.value;
     if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
@@ -1159,52 +1141,55 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
     } else if (key == "panSinRate") {
       this.setState({ panSinRate: Number(value) });
     }
-  }
+  };
 
-  onPanHorizTransLevelChange(
+  onPanHorizTransLevelChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ panHorizTransLevel: value as number });
-  }
+  };
 
-  onPanVertTransLevelChange(
+  onPanVertTransLevelChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ panVertTransLevel: value as number });
-  }
+  };
 
-  onPanSinRateChange(
+  onPanSinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ panSinRate: value as number });
-  }
+  };
 
-  onSliderChange(
+  onSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: SelectChangeEvent<string>) {
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);
@@ -1220,4 +1205,4 @@ class PanningCard extends React.Component<PanningCardProps, PanningCardState> {
 }
 
 (PanningCard as any).displayName = "PanningCard";
-export default withStyles(styles)(PanningCard as any);
+export default withStyles(styles)(PanningCard);

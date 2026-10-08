@@ -135,10 +135,10 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
     return delay;
   }
 
-  strobeLoop() {
+  strobeLoop = () => {
     const delay = this.strobe();
-    this._strobeTimeout = window.setTimeout(this.strobeLoop.bind(this), delay);
-  }
+    this._strobeTimeout = window.setTimeout(this.strobeLoop, delay);
+  };
 
   componentDidMount() {
     if (

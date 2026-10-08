@@ -151,7 +151,7 @@ export function getTimeout(
       timeout = timeToNextFrame ?? 1000;
       break;
     default:
-      throw new Error('Unsupported timing function: ' + tf)
+      throw new Error("Unsupported timing function: " + tf);
   }
   return timeout;
 }

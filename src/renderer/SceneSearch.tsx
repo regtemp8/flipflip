@@ -27,7 +27,7 @@ interface SceneSearchProps {
   displaySources: Array<Scene>;
   filters: Array<string>;
   placeholder: string;
-  onUpdateFilters(filter: Array<string>): void;
+  onUpdateFilters: (filter: Array<string>) => void;
 }
 
 interface SceneSearchState {
@@ -120,4 +120,4 @@ class SceneSearch extends React.Component<SceneSearchProps, SceneSearchState> {
 }
 
 (SceneSearch as any).displayName = "SceneSearch";
-export default withStyles(styles)(SceneSearch as any);
+export default withStyles(styles)(SceneSearch);

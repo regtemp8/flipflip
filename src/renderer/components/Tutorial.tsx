@@ -74,9 +74,9 @@ interface TutorialProps {
   route: Route[];
   scene: Scene | SceneGrid | null;
   tutorial: string;
-  onDoneTutorial(lastTutorial: string): void;
-  onSetTutorial(nextTutorial: string | null): void;
-  onSkipAllTutorials(): void;
+  onDoneTutorial: (lastTutorial: string) => void;
+  onSetTutorial: (nextTutorial: string | null) => void;
+  onSkipAllTutorials: () => void;
 }
 
 class Tutorial extends React.Component<TutorialProps> {
@@ -109,16 +109,16 @@ class Tutorial extends React.Component<TutorialProps> {
             </DialogContent>
             <DialogActions>
               <Button
-                onClick={this.onSkipAll.bind(this)}
+                onClick={this.onSkipAll}
                 color="inherit"
                 className={classes.deleteIcon}
               >
                 Skip ALL Tutorials
               </Button>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip This Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -156,7 +156,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -209,10 +209,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -234,7 +234,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -298,7 +298,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -337,7 +337,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -355,7 +355,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -377,7 +377,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -397,7 +397,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -461,7 +461,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -500,7 +500,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -520,7 +520,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -547,7 +547,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -571,7 +571,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -592,7 +592,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -624,7 +624,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -653,7 +653,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -673,7 +673,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -713,7 +713,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -750,7 +750,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -794,7 +794,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -823,7 +823,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -860,7 +860,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -901,7 +901,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -921,7 +921,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkipStep.bind(this)} color="secondary">
+              <Button onClick={this.onSkipStep} color="secondary">
                 Skip
               </Button>
             </DialogActions>
@@ -950,7 +950,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkipStep.bind(this)} color="secondary">
+              <Button onClick={this.onSkipStep} color="secondary">
                 Skip
               </Button>
             </DialogActions>
@@ -970,7 +970,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkipStep.bind(this)} color="secondary">
+              <Button onClick={this.onSkipStep} color="secondary">
                 Skip
               </Button>
             </DialogActions>
@@ -999,7 +999,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1019,7 +1019,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkipStep.bind(this)} color="secondary">
+              <Button onClick={this.onSkipStep} color="secondary">
                 Skip
               </Button>
             </DialogActions>
@@ -1042,7 +1042,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1076,10 +1076,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1098,7 +1098,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1122,7 +1122,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1147,7 +1147,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1166,14 +1166,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
               <DialogContentText id="tutorial-description">
                 Be sure to check out the{" "}
-                <Link
-                  href="#"
-                  onClick={this.openLink.bind(
-                    this,
-                    "https://regtemp8.github.io/flipflip/#",
-                  )}
-                  underline="hover"
-                >
+                <Link href="#" onClick={this.openManual} underline="hover">
                   FlipFlip docs
                 </Link>{" "}
                 if you need any help.
@@ -1183,7 +1176,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Player
               </Button>
             </DialogActions>
@@ -1202,10 +1195,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1238,7 +1231,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1257,7 +1250,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1324,7 +1317,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1355,7 +1348,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Library
               </Button>
             </DialogActions>
@@ -1375,10 +1368,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1401,7 +1394,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1421,7 +1414,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1471,7 +1464,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1496,7 +1489,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Audio Library
               </Button>
             </DialogActions>
@@ -1516,10 +1509,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1541,7 +1534,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1559,7 +1552,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1592,7 +1585,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1617,7 +1610,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Script Library
               </Button>
             </DialogActions>
@@ -1636,10 +1629,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1670,7 +1663,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1697,7 +1690,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1723,7 +1716,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1758,7 +1751,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1777,7 +1770,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1799,7 +1792,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Caption Scriptor
               </Button>
             </DialogActions>
@@ -1821,10 +1814,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -1927,7 +1920,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Scene Detail
               </Button>
             </DialogActions>
@@ -1957,7 +1950,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Scene Detail
               </Button>
             </DialogActions>
@@ -1979,10 +1972,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -2005,7 +1998,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkipStep.bind(this)} color="secondary">
+              <Button onClick={this.onSkipStep} color="secondary">
                 Skip
               </Button>
             </DialogActions>
@@ -2034,7 +2027,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -2063,7 +2056,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -2089,7 +2082,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Scene Grid
               </Button>
             </DialogActions>
@@ -2111,10 +2104,10 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onSkip.bind(this)} color="secondary">
+              <Button onClick={this.onSkip} color="secondary">
                 Skip Tutorial
               </Button>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -2137,7 +2130,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Continue
               </Button>
             </DialogActions>
@@ -2195,7 +2188,7 @@ class Tutorial extends React.Component<TutorialProps> {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.onContinue.bind(this)} color="primary">
+              <Button onClick={this.onContinue} color="primary">
                 Back to Video Clipper
               </Button>
             </DialogActions>
@@ -2590,15 +2583,15 @@ class Tutorial extends React.Component<TutorialProps> {
     }
   }
 
-  onSkipAll() {
+  onSkipAll = () => {
     this.props.onSkipAllTutorials();
-  }
+  };
 
-  onSkip() {
+  onSkip = () => {
     this.props.onDoneTutorial(DONE);
-  }
+  };
 
-  onSkipStep() {
+  onSkipStep = () => {
     switch (this.props.tutorial) {
       case SDT.zoom1:
         (this.props.scene as Scene).zoom = true;
@@ -2627,21 +2620,25 @@ class Tutorial extends React.Component<TutorialProps> {
         break;
     }
     this.onContinue();
-  }
+  };
 
-  onContinue() {
+  onContinue = () => {
     this.props.onDoneTutorial(this.props.tutorial);
-  }
+  };
 
   getRoute() {
     if (this.props.route.length < 1) return "picker";
     return this.props.route[this.props.route.length - 1].kind;
   }
 
-  openLink(url: string) {
+  openManual = () => {
+    this.openLink("https://regtemp8.github.io/flipflip/#");
+  };
+
+  openLink = (url: string) => {
     window.ipc.openExternal(url);
-  }
+  };
 }
 
 (Tutorial as any).displayName = "Tutorial";
-export default withStyles(styles)(Tutorial as any);
+export default withStyles(styles)(Tutorial);

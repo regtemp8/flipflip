@@ -10,16 +10,16 @@ import CaptionScript from "../../../common/CaptionScript";
 
 interface AudioTextEffectsProps {
   scene: Scene;
-  onAddScript(playlistIndex: number): void;
-  onAddTracks(playlistIndex: number): void;
-  onPlayAudio(source: Audio, displayed: Array<Audio>): void;
-  onPlayScript(
+  onAddScript: (playlistIndex: number) => void;
+  onAddTracks: (playlistIndex: number) => void;
+  onPlayAudio: (source: Audio, displayed: Array<Audio>) => void;
+  onPlayScript: (
     source: CaptionScript,
     sceneID: number,
     displayed: Array<CaptionScript>,
-  ): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
-  systemMessage(message: string): void;
+  ) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  systemMessage: (message: string) => void;
 }
 
 export default class AudioTextEffects extends React.Component<AudioTextEffectsProps> {
@@ -36,9 +36,9 @@ export default class AudioTextEffects extends React.Component<AudioTextEffectsPr
               <AudioCard
                 scene={this.props.scene}
                 startPlaying={false}
-                onAddTracks={this.props.onAddTracks.bind(this)}
+                onAddTracks={this.props.onAddTracks}
                 onPlay={this.props.onPlayAudio}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
                 systemMessage={this.props.systemMessage}
               />
             </CardContent>
@@ -50,9 +50,9 @@ export default class AudioTextEffects extends React.Component<AudioTextEffectsPr
             <CardContent>
               <TextCard
                 scene={this.props.scene}
-                onAddScript={this.props.onAddScript.bind(this)}
+                onAddScript={this.props.onAddScript}
                 onPlay={this.props.onPlayScript}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
                 systemMessage={this.props.systemMessage}
               />
             </CardContent>

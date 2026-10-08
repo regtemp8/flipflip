@@ -177,10 +177,10 @@ export default class FadeInOut extends React.Component<
     return delay;
   }
 
-  fadeLoop() {
+  fadeLoop = () => {
     const delay = this.fade();
-    this._fadeTimeout = window.setTimeout(this.fadeLoop.bind(this), delay);
-  }
+    this._fadeTimeout = window.setTimeout(this.fadeLoop, delay);
+  };
 
   componentDidMount() {
     this._fadeOut = false;

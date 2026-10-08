@@ -26,17 +26,17 @@ interface GeneralConfigProps {
   library: Array<LibrarySource>;
   tags: Array<Tag>;
   theme: Theme;
-  onBackup(): void;
-  onChangeThemeColor(colorTheme: any, primary: boolean): void;
-  onClean(config: Config): void;
-  onPortableOverride(): void;
-  onRestore(backupFile: string): void;
-  onToggleDarkMode(): void;
-  onUpdateCachingSettings(fn: (settings: CacheSettings) => void): void;
-  onUpdateDisplaySettings(fn: (settings: DisplaySettings) => void): void;
-  onUpdateGeneralSettings(fn: (settings: GeneralSettings) => void): void;
-  onUpdateRemoteSettings(fn: (settings: RemoteSettings) => void): void;
-  onUpdateConfig(fn: (config: Config) => void): void;
+  onBackup: () => void;
+  onChangeThemeColor: (colorTheme: any, primary: boolean) => void;
+  onClean: (config: Config) => void;
+  onPortableOverride: () => void;
+  onRestore: (backupFile: string) => void;
+  onToggleDarkMode: () => void;
+  onUpdateCachingSettings: (fn: (settings: CacheSettings) => void) => void;
+  onUpdateDisplaySettings: (fn: (settings: DisplaySettings) => void) => void;
+  onUpdateGeneralSettings: (fn: (settings: GeneralSettings) => void) => void;
+  onUpdateRemoteSettings: (fn: (settings: RemoteSettings) => void) => void;
+  onUpdateConfig: (fn: (config: Config) => void) => void;
 }
 
 export default class GeneralConfig extends React.Component<GeneralConfigProps> {
@@ -53,9 +53,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <PlayerBoolCard
                   displaySettings={this.props.config.displaySettings}
-                  onUpdateDisplaySettings={this.props.onUpdateDisplaySettings.bind(
-                    this,
-                  )}
+                  onUpdateDisplaySettings={this.props.onUpdateDisplaySettings}
                 />
               </CardContent>
             </Card>
@@ -64,10 +62,8 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <PlayerBoolCard2
                   generalSettings={this.props.config.generalSettings}
-                  onPortableOverride={this.props.onPortableOverride.bind(this)}
-                  onUpdateGeneralSettings={this.props.onUpdateGeneralSettings.bind(
-                    this,
-                  )}
+                  onPortableOverride={this.props.onPortableOverride}
+                  onUpdateGeneralSettings={this.props.onUpdateGeneralSettings}
                 />
               </CardContent>
             </Card>
@@ -78,9 +74,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
                   library={this.props.library}
                   tags={this.props.tags}
                   settings={this.props.config.displaySettings}
-                  onUpdateSettings={this.props.onUpdateDisplaySettings.bind(
-                    this,
-                  )}
+                  onUpdateSettings={this.props.onUpdateDisplaySettings}
                 />
               </CardContent>
             </Card>
@@ -89,9 +83,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <CacheCard
                   config={this.props.config}
-                  onUpdateSettings={this.props.onUpdateCachingSettings.bind(
-                    this,
-                  )}
+                  onUpdateSettings={this.props.onUpdateCachingSettings}
                 />
               </CardContent>
             </Card>
@@ -100,10 +92,8 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <APICard
                   settings={this.props.config.remoteSettings}
-                  onUpdateSettings={this.props.onUpdateRemoteSettings.bind(
-                    this,
-                  )}
-                  onUpdateConfig={this.props.onUpdateConfig.bind(this)}
+                  onUpdateSettings={this.props.onUpdateRemoteSettings}
+                  onUpdateConfig={this.props.onUpdateConfig}
                 />
               </CardContent>
             </Card>
@@ -112,9 +102,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <WatermarkCard
                   settings={this.props.config.generalSettings}
-                  onUpdateSettings={this.props.onUpdateGeneralSettings.bind(
-                    this,
-                  )}
+                  onUpdateSettings={this.props.onUpdateGeneralSettings}
                 />
               </CardContent>
             </Card>
@@ -126,10 +114,10 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
             <CardContent>
               <BackupCard
                 settings={this.props.config.generalSettings}
-                onBackup={this.props.onBackup.bind(this)}
-                onRestore={this.props.onRestore.bind(this)}
-                onClean={this.props.onClean.bind(this, this.props.config)}
-                onUpdateSettings={this.props.onUpdateGeneralSettings.bind(this)}
+                onBackup={this.props.onBackup}
+                onRestore={this.props.onRestore}
+                onClean={this.props.onClean}
+                onUpdateSettings={this.props.onUpdateGeneralSettings}
               />
             </CardContent>
           </Card>
@@ -140,8 +128,8 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
             <CardContent>
               <ThemeCard
                 theme={this.props.theme}
-                onChangeThemeColor={this.props.onChangeThemeColor.bind(this)}
-                onToggleDarkMode={this.props.onToggleDarkMode.bind(this)}
+                onChangeThemeColor={this.props.onChangeThemeColor}
+                onToggleDarkMode={this.props.onToggleDarkMode}
               />
             </CardContent>
           </Card>

@@ -60,8 +60,8 @@ interface JiggleProps {
   className?: string;
   style?: any;
   disable?: boolean;
-  onClick?(): void;
   children?: React.ReactNode;
+  onClick?: () => void;
 }
 
 interface JiggleState {

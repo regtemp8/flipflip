@@ -49,7 +49,7 @@ const styles = (theme: Theme) =>
       minWidth: theme.spacing(11),
     },
     backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
+      zIndex: `${theme.zIndex.modal + 1} !important`,
     },
     highlight: {
       borderWidth: 2,
@@ -67,10 +67,10 @@ interface SlideCardProps {
   easingControls: boolean;
   sidebar: boolean;
   tutorial: string;
-  onUpdateScene(
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  ) => void;
 }
 
 interface SlideCardState {
@@ -146,7 +146,7 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
             control={
               <Switch
                 checked={this.props.scene.slide}
-                onChange={this.onBoolInput.bind(this, "slide")}
+                onChange={(e) => this.onBoolInput("slide", e)}
               />
             }
             label="Slide"
@@ -171,7 +171,7 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.slideType}
-                    onChange={this.onInput.bind(this, "slideType")}
+                    onChange={(e) => this.onInput("slideType", e)}
                   >
                     {Object.values(STF).map((tf) => (
                       <MenuItem key={tf} value={tf}>
@@ -192,10 +192,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                 <Slider
                   min={1}
                   defaultValue={slideDistance}
-                  onChangeCommitted={this.onSliderChange.bind(
-                    this,
-                    "slideDistance",
-                  )}
+                  onChangeCommitted={(e, value) =>
+                    this.onSliderChange("slideDistance", e, value)
+                  }
                   valueLabelDisplay="auto"
                   valueLabelFormat={(v) => v + "%"}
                   aria-labelledby="slide-distance-slider"
@@ -207,7 +206,7 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                   <Select
                     variant="standard"
                     value={this.props.scene.slideTF}
-                    onChange={this.onInput.bind(this, "slideTF")}
+                    onChange={(e) => this.onInput("slideTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf == TF.bpm) {
@@ -252,11 +251,10 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                       <Slider
                         min={1}
                         value={this.state.slideSinRate}
-                        onChange={this.onSlideSinRateChange.bind(this)}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "slideSinRate",
-                        )}
+                        onChange={this.onSlideSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("slideSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="slide-sin-rate-slider"
                       />
@@ -265,8 +263,8 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                       <TextField
                         variant="standard"
                         value={this.state.slideSinRate}
-                        onChange={this.onIntInput.bind(this, "slideSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "slideSinRate")}
+                        onChange={(e) => this.onIntInput("slideSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("slideSinRate", e)}
                         inputProps={{
                           className: classes.endInput,
                           step: 5,
@@ -294,10 +292,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                     min={1}
                     max={100}
                     defaultValue={slideBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "slideBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("slideBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="slide-bpm-multi-slider"
@@ -312,8 +309,8 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                     label="For"
                     margin="dense"
                     value={slideDuration}
-                    onChange={this.onIntInput.bind(this, "slideDuration")}
-                    onBlur={this.blurIntKey.bind(this, "slideDuration")}
+                    onChange={(e) => this.onIntInput("slideDuration", e)}
+                    onBlur={(e) => this.blurIntKey("slideDuration", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -346,8 +343,8 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                   label="Between"
                   margin="dense"
                   value={slideDurationMin}
-                  onChange={this.onIntInput.bind(this, "slideDurationMin")}
-                  onBlur={this.blurIntKey.bind(this, "slideDurationMin")}
+                  onChange={(e) => this.onIntInput("slideDurationMin", e)}
+                  onBlur={(e) => this.blurIntKey("slideDurationMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -366,8 +363,8 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                   label="and"
                   margin="dense"
                   value={slideDurationMax}
-                  onChange={this.onIntInput.bind(this, "slideDurationMax")}
-                  onBlur={this.blurIntKey.bind(this, "slideDurationMax")}
+                  onChange={(e) => this.onIntInput("slideDurationMax", e)}
+                  onBlur={(e) => this.blurIntKey("slideDurationMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -412,7 +409,7 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                       <Select
                         variant="standard"
                         value={this.props.scene.slideEase}
-                        onChange={this.onInput.bind(this, "slideEase")}
+                        onChange={(e) => this.onInput("slideEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -442,10 +439,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.slideExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "slideExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("slideExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
@@ -470,10 +466,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.slideOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "slideOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("slideOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
@@ -500,10 +495,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.slideAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "slideAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("slideAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
@@ -530,10 +524,9 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.slidePer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "slidePer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("slidePer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
@@ -549,8 +542,11 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
     );
   }
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     let value = e.currentTarget.value;
     if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
@@ -564,38 +560,41 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
     if (key == "slideSinRate") {
       this.setState({ slideSinRate: Number(value) });
     }
-  }
+  };
 
-  onSlideSinRateChange(
+  onSlideSinRateChange = (
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.setState({ slideSinRate: value as number });
-  }
+  };
 
-  onSliderChange(
+  onSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: SelectChangeEvent<string>) {
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);
@@ -611,4 +610,4 @@ class SlideCard extends React.Component<SlideCardProps, SlideCardState> {
 }
 
 (SlideCard as any).displayName = "SlideCard";
-export default withStyles(styles)(SlideCard as any);
+export default withStyles(styles)(SlideCard);

@@ -67,8 +67,8 @@ interface AudioAlbumListProps {
   classes: any;
   sources: Array<Audio>;
   showHelp: boolean;
-  onClickAlbum(album: string): void;
-  onClickArtist(artist: string): void;
+  onClickAlbum: (album: string) => void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
 }
 
 interface AudioAlbumListState {
@@ -143,9 +143,9 @@ class AudioAlbumList extends React.Component<
               md={3}
               lg={2}
               className={classes.pointer}
-              onClick={this.props.onClickAlbum.bind(this, data.name)}
-              onMouseEnter={this.onMouseEnter.bind(this, data.name)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onClick={() => this.props.onClickAlbum(data.name)}
+              onMouseEnter={() => this.onMouseEnter(data.name)}
+              onMouseLeave={this.onMouseLeave}
             >
               <Card classes={{ root: classes.root }}>
                 {thumb && (
@@ -175,11 +175,11 @@ class AudioAlbumList extends React.Component<
                   <Typography
                     id="artist-link"
                     noWrap
-                    onClick={
-                      artist == va
-                        ? this.nop
-                        : this.props.onClickArtist.bind(this, artist)
-                    }
+                    onClick={(e) => {
+                      if (artist != va) {
+                        this.props.onClickArtist(artist, e);
+                      }
+                    }}
                     className={clsx(artist != va && classes.artist)}
                     color="textSecondary"
                     variant="body2"
@@ -211,13 +211,13 @@ class AudioAlbumList extends React.Component<
     }
   }
 
-  onMouseEnter(album: string) {
+  onMouseEnter = (album: string) => {
     this.setState({ hover: album });
-  }
+  };
 
-  onMouseLeave() {
+  onMouseLeave = () => {
     this.setState({ hover: undefined });
-  }
+  };
 
   getAlbums(): Album[] {
     const va = "Various Artists";
@@ -283,4 +283,4 @@ class AudioAlbumList extends React.Component<
 }
 
 (AudioAlbumList as any).displayName = "AudioAlbumList";
-export default withStyles(styles)(AudioAlbumList as any);
+export default withStyles(styles)(AudioAlbumList);

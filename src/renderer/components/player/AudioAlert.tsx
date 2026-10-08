@@ -103,13 +103,13 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
       this._timeout = undefined;
     }
 
-    this._timeout = window.setTimeout(this.hide.bind(this), 6000);
+    this._timeout = window.setTimeout(this.hide, 6000);
   }
 
-  hide() {
+  hide = () => {
     this.setState({ visible: false });
     this._timeout = undefined;
-  }
+  };
 
   componentDidMount() {
     if (this.props.audio) {
@@ -181,4 +181,4 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
 }
 
 (AudioAlert as any).displayName = "AudioAlert";
-export default withStyles(styles)(AudioAlert as any);
+export default withStyles(styles)(AudioAlert);

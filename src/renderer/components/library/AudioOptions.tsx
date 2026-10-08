@@ -85,8 +85,8 @@ const styles = (theme: Theme) =>
 interface AudioOptionsProps {
   classes: any;
   audio: Audio;
-  onCancel(): void;
-  onFinishEdit(common: Audio): void;
+  onCancel: () => void;
+  onFinishEdit: (common: Audio) => void;
 }
 
 interface AudioOptionsState {
@@ -123,7 +123,7 @@ class AudioOptions extends React.Component<
     return (
       <Dialog
         open={true}
-        onClose={this.props.onCancel.bind(this)}
+        onClose={this.props.onCancel}
         aria-describedby="edit-description"
       >
         <DialogContent>
@@ -136,7 +136,7 @@ class AudioOptions extends React.Component<
                 value={this.state.audio.url}
                 margin="normal"
                 label="URL"
-                onChange={this.onSourceTextInput.bind(this, "url")}
+                onChange={(e) => this.onSourceTextInput("url", e)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -148,10 +148,9 @@ class AudioOptions extends React.Component<
                 repeat={RP.one}
                 scenePaths={[]}
                 startPlaying={false}
-                onAudioSliderChange={this.onSourceSliderChange.bind(
-                  this,
-                  "volume",
-                )}
+                onAudioSliderChange={(e, value) =>
+                  this.onSourceSliderChange("volume", e, value)
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -167,10 +166,9 @@ class AudioOptions extends React.Component<
                         <Switch
                           size="small"
                           checked={this.state.audio.stopAtEnd}
-                          onChange={this.onSourceBoolInput.bind(
-                            this,
-                            "stopAtEnd",
-                          )}
+                          onChange={(e) =>
+                            this.onSourceBoolInput("stopAtEnd", e)
+                          }
                         />
                       }
                       label="Stop at End"
@@ -184,10 +182,9 @@ class AudioOptions extends React.Component<
                         <Switch
                           size="small"
                           checked={this.state.audio.nextSceneAtEnd}
-                          onChange={this.onSourceBoolInput.bind(
-                            this,
-                            "nextSceneAtEnd",
-                          )}
+                          onChange={(e) =>
+                            this.onSourceBoolInput("nextSceneAtEnd", e)
+                          }
                         />
                       }
                       label="Next Scene at End"
@@ -208,7 +205,7 @@ class AudioOptions extends React.Component<
                           <Switch
                             size="small"
                             checked={this.state.audio.tick}
-                            onChange={this.onSourceBoolInput.bind(this, "tick")}
+                            onChange={(e) => this.onSourceBoolInput("tick", e)}
                           />
                         </Tooltip>
                       }
@@ -229,8 +226,8 @@ class AudioOptions extends React.Component<
                         label="BPM"
                         margin="dense"
                         value={this.state.audio.bpm}
-                        onChange={this.onSourceIntInput.bind(this, "bpm")}
-                        onBlur={this.blurSourceIntKey.bind(this, "bpm")}
+                        onChange={(e) => this.onSourceIntInput("bpm", e)}
+                        onBlur={(e) => this.blurSourceIntKey("bpm", e)}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -240,7 +237,7 @@ class AudioOptions extends React.Component<
                                     this.state.successBPM && classes.success,
                                     this.state.errorBPM && classes.failure,
                                   )}
-                                  onClick={this.onDetectBPM.bind(this)}
+                                  onClick={this.onDetectBPM}
                                   size="large"
                                 >
                                   {this.state.successBPM ? (
@@ -272,7 +269,7 @@ class AudioOptions extends React.Component<
                                     this.state.successTag && classes.success,
                                     this.state.errorTag && classes.failure,
                                   )}
-                                  onClick={this.onReadBPMTag.bind(this)}
+                                  onClick={this.onReadBPMTag}
                                   size="large"
                                 >
                                   {this.state.successTag ? (
@@ -311,10 +308,9 @@ class AudioOptions extends React.Component<
                         min={5}
                         max={40}
                         defaultValue={this.state.audio.speed}
-                        onChangeCommitted={this.onSourceSliderChange.bind(
-                          this,
-                          "speed",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSourceSliderChange("speed", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 10 + "x"}
                         aria-labelledby="audio-speed-slider"
@@ -343,7 +339,7 @@ class AudioOptions extends React.Component<
                       <Select
                         variant="standard"
                         value={this.state.audio.tickMode}
-                        onChange={this.onSourceInput.bind(this, "tickMode")}
+                        onChange={(e) => this.onSourceInput("tickMode", e)}
                       >
                         {Object.values(TF).map((tf) => {
                           return (
@@ -372,10 +368,9 @@ class AudioOptions extends React.Component<
                           <Slider
                             min={1}
                             defaultValue={this.state.audio.tickSinRate}
-                            onChangeCommitted={this.onSourceSliderChange.bind(
-                              this,
-                              "tickSinRate",
-                            )}
+                            onChangeCommitted={(e, value) =>
+                              this.onSourceSliderChange("tickSinRate", e, value)
+                            }
                             valueLabelDisplay="auto"
                             aria-labelledby="tick-sin-rate-slider"
                           />
@@ -384,14 +379,12 @@ class AudioOptions extends React.Component<
                           <TextField
                             variant="standard"
                             value={this.state.audio.tickSinRate}
-                            onChange={this.onSourceIntInput.bind(
-                              this,
-                              "tickSinRate",
-                            )}
-                            onBlur={this.blurSourceIntKey.bind(
-                              this,
-                              "tickSinRate",
-                            )}
+                            onChange={(e) =>
+                              this.onSourceIntInput("tickSinRate", e)
+                            }
+                            onBlur={(e) =>
+                              this.blurSourceIntKey("tickSinRate", e)
+                            }
                             inputProps={{
                               className: classes.endInput,
                               step: 5,
@@ -423,10 +416,9 @@ class AudioOptions extends React.Component<
                         min={-8}
                         max={10}
                         defaultValue={this.state.audio.tickBPMMulti}
-                        onChangeCommitted={this.onSourceSliderChange.bind(
-                          this,
-                          "tickBPMMulti",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSourceSliderChange("tickBPMMulti", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) =>
                           v > 0 ? v + "x" : "1/" + -1 * (v - 2) + "x"
@@ -443,8 +435,8 @@ class AudioOptions extends React.Component<
                         label="For"
                         margin="dense"
                         value={this.state.audio.tickDelay}
-                        onChange={this.onSourceIntInput.bind(this, "tickDelay")}
-                        onBlur={this.blurSourceIntKey.bind(this, "tickDelay")}
+                        onChange={(e) => this.onSourceIntInput("tickDelay", e)}
+                        onBlur={(e) => this.blurSourceIntKey("tickDelay", e)}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">ms</InputAdornment>
@@ -481,11 +473,8 @@ class AudioOptions extends React.Component<
                       label="Between"
                       margin="dense"
                       value={this.state.audio.tickMinDelay}
-                      onChange={this.onSourceIntInput.bind(
-                        this,
-                        "tickMinDelay",
-                      )}
-                      onBlur={this.blurSourceIntKey.bind(this, "tickMinDelay")}
+                      onChange={(e) => this.onSourceIntInput("tickMinDelay", e)}
+                      onBlur={(e) => this.blurSourceIntKey("tickMinDelay", e)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">ms</InputAdornment>
@@ -504,11 +493,8 @@ class AudioOptions extends React.Component<
                       label="and"
                       margin="dense"
                       value={this.state.audio.tickMaxDelay}
-                      onChange={this.onSourceIntInput.bind(
-                        this,
-                        "tickMaxDelay",
-                      )}
-                      onBlur={this.blurSourceIntKey.bind(this, "tickMaxDelay")}
+                      onChange={(e) => this.onSourceIntInput("tickMaxDelay", e)}
+                      onBlur={(e) => this.blurSourceIntKey("tickMaxDelay", e)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">ms</InputAdornment>
@@ -527,11 +513,11 @@ class AudioOptions extends React.Component<
           </Grid>
         </DialogContent>
         <DialogActions className={classes.actions}>
-          <Button onClick={this.props.onCancel.bind(this)} color="secondary">
+          <Button onClick={this.props.onCancel} color="secondary">
             Cancel
           </Button>
           <Button
-            onClick={this.props.onFinishEdit.bind(this, this.state.audio)}
+            onClick={() => this.props.onFinishEdit(this.state.audio)}
             color="primary"
           >
             Save
@@ -541,39 +527,48 @@ class AudioOptions extends React.Component<
     );
   }
 
-  onSourceInput(key: string, e: SelectChangeEvent<string>) {
+  onSourceInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
-  onSourceTextInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onSourceTextInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
-  onSourceSliderChange(
+  onSourceSliderChange = (
     key: string,
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
-  ) {
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onSourceIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onSourceIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  blurSourceIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurSourceIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.state.audio as any)[key] < Number(min)) {
       this.changeKey(key, min === "" ? "" : Number(min));
     } else if (max && (this.state.audio as any)[key] > Number(max)) {
       this.changeKey(key, max === "" ? "" : Number(max));
     }
-  }
+  };
 
-  onSourceBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onSourceBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     switch (key) {
       case "tick":
@@ -609,7 +604,7 @@ class AudioOptions extends React.Component<
           this.changeKey(key, false);
         }
     }
-  }
+  };
 
   changeKey(key: string, value: any) {
     const audio = new Audio(this.state.audio);
@@ -617,7 +612,7 @@ class AudioOptions extends React.Component<
     this.setState({ audio: audio });
   }
 
-  onReadBPMTag() {
+  onReadBPMTag = () => {
     if (this.state.audio.url && !this.state.loadingTag) {
       this.setState({ loadingTag: true });
       window.ipc.getAudioBPMMetadata(this.state.audio.url).then((bpm) => {
@@ -636,9 +631,9 @@ class AudioOptions extends React.Component<
         }, 3000);
       });
     }
-  }
+  };
 
-  onDetectBPM() {
+  onDetectBPM = () => {
     const bpmError = () => {
       this.setState({ loadingBPM: false, errorBPM: true });
       window.setTimeout(() => {
@@ -683,8 +678,8 @@ class AudioOptions extends React.Component<
         }
       });
     }
-  }
+  };
 }
 
 (AudioOptions as any).displayName = "AudioOptions";
-export default withStyles(styles)(AudioOptions as any);
+export default withStyles(styles)(AudioOptions);

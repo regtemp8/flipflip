@@ -36,8 +36,12 @@ const styles = (theme: Theme) =>
 interface GooninatorDialogProps {
   classes: any;
   open: boolean;
-  onClose(): void;
-  onImportURL(type: string, shiftKey: boolean, ...args: any[]): void;
+  onClose: () => void;
+  onImportURL: (
+    type: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) => void;
 }
 
 interface GooninatorDialogState {
@@ -65,7 +69,7 @@ class GooninatorDialog extends React.Component<
     return (
       <Dialog
         open={this.props.open}
-        onClose={this.props.onClose.bind(this)}
+        onClose={this.props.onClose}
         aria-labelledby="url-import-title"
         aria-describedby="url-import-description"
       >
@@ -81,7 +85,7 @@ class GooninatorDialog extends React.Component<
             placeholder="Paste URL Here"
             margin="dense"
             value={this.state.importURL}
-            onChange={this.onURLChange.bind(this)}
+            onChange={this.onURLChange}
           />
           <div className={classes.root}>
             <FormControl variant="standard">
@@ -89,7 +93,7 @@ class GooninatorDialog extends React.Component<
               <Select
                 variant="standard"
                 value={this.state.importType}
-                onChange={this.onTypeChange.bind(this)}
+                onChange={this.onTypeChange}
               >
                 <MenuItem value={GT.tumblr}>Tumblr Blogs</MenuItem>
                 <MenuItem value={GT.local}>Local Directories</MenuItem>
@@ -105,13 +109,13 @@ class GooninatorDialog extends React.Component<
                 label="Parent Directory"
                 value={this.state.rootDir}
                 InputProps={{ readOnly: true }}
-                onClick={this.onRootChange.bind(this)}
+                onClick={this.onRootChange}
               />
             </Collapse>
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.props.onClose.bind(this)} color="secondary">
+          <Button onClick={this.props.onClose} color="secondary">
             Cancel
           </Button>
           <Button
@@ -120,7 +124,7 @@ class GooninatorDialog extends React.Component<
               (this.state.importType == GT.local &&
                 this.state.rootDir.length == 0)
             }
-            onClick={this.onImportURL.bind(this)}
+            onClick={this.onImportURL}
             color="primary"
           >
             Import
@@ -130,34 +134,34 @@ class GooninatorDialog extends React.Component<
     );
   }
 
-  onTypeChange(e: SelectChangeEvent<string>) {
+  onTypeChange = (e: SelectChangeEvent<string>) => {
     const type = e.target.value;
     this.setState({ importType: type });
-  }
+  };
 
-  onURLChange(e: React.ChangeEvent<HTMLInputElement>) {
+  onURLChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const type = e.target.value;
     this.setState({ importURL: type });
-  }
+  };
 
-  onRootChange() {
+  onRootChange = () => {
     window.ipc.openDirectory().then((result) => {
       if (result.length > 0) {
         this.setState({ rootDir: result[0] });
       }
     });
-  }
+  };
 
-  onImportURL() {
+  onImportURL = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.props.onImportURL(
       this.state.importType,
-      false,
+      e,
       this.state.importURL,
       this.state.rootDir,
     );
     this.props.onClose();
-  }
+  };
 }
 
 (GooninatorDialog as any).displayName = "GooninatorDialog";
-export default withStyles(styles)(GooninatorDialog as any);
+export default withStyles(styles)(GooninatorDialog);

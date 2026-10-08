@@ -36,10 +36,10 @@ interface SceneEffectsProps {
   scene: Scene | SceneSettings;
   easingControls: boolean;
   tutorial: string;
-  onUpdateScene(
+  onUpdateScene: (
     scene: Scene | SceneSettings,
     fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  ) => void;
 }
 
 class SceneEffects extends React.Component<SceneEffectsProps> {
@@ -71,7 +71,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -90,7 +90,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -103,7 +103,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -115,7 +115,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
               <StrobeCard
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -128,7 +128,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -141,7 +141,7 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
                 scene={this.props.scene}
                 easingControls={this.props.easingControls}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -152,4 +152,4 @@ class SceneEffects extends React.Component<SceneEffectsProps> {
 }
 
 (SceneEffects as any).displayName = "SceneEffects";
-export default withStyles(styles)(SceneEffects as any);
+export default withStyles(styles)(SceneEffects);

@@ -409,29 +409,29 @@ interface ScenePickerProps {
   sceneGroups: Array<SceneGroup>;
   tutorial: string;
   version: string;
-  onAddGenerator(): void;
-  onAddGrid(): void;
-  onAddGroup(type: string): void;
-  onAddScene(): void;
-  onChangeTab(newTab: number): void;
-  onDeleteGroup(group: SceneGroup): void;
-  onDeleteScenes(sceneIDs: Array<number>): void;
-  onImportScene(importScenes: any, addToLibrary: boolean): void;
-  onOpenConfig(): void;
-  onOpenAudioLibrary(): void;
-  onOpenScriptLibrary(): void;
-  onOpenCaptionScriptor(): void;
-  onOpenLibrary(): void;
-  onOpenScene(scene: Scene): void;
-  onOpenGrid(grid: SceneGrid): void;
-  onTutorial(tutorial: string): void;
-  onSort(algorithm: string, ascending: boolean): void;
-  onUpdateConfig(config: Config): void;
-  onUpdateGroups(groups: Array<SceneGroup>): void;
-  onUpdateScenes(scenes: Array<Scene>): void;
-  onUpdateGrids(grids: Array<SceneGrid>): void;
-  startTutorial(): void;
-  systemMessage(message: string): void;
+  onAddGenerator: () => void;
+  onAddGrid: () => void;
+  onAddGroup: (type: string) => void;
+  onAddScene: () => void;
+  onChangeTab: (newTab: number) => void;
+  onDeleteGroup: (group: SceneGroup) => void;
+  onDeleteScenes: (sceneIDs: Array<number>) => void;
+  onImportScene: (importScenes: any, addToLibrary: boolean) => void;
+  onOpenConfig: () => void;
+  onOpenAudioLibrary: () => void;
+  onOpenScriptLibrary: () => void;
+  onOpenCaptionScriptor: () => void;
+  onOpenLibrary: () => void;
+  onOpenScene: (scene: Scene) => void;
+  onOpenGrid: (grid: SceneGrid) => void;
+  onTutorial: (tutorial: string) => void;
+  onSort: (algorithm: string, ascending: boolean) => void;
+  onUpdateConfig: (config: Config) => void;
+  onUpdateGroups: (groups: Array<SceneGroup>) => void;
+  onUpdateScenes: (scenes: Array<Scene>) => void;
+  onUpdateGrids: (grids: Array<SceneGrid>) => void;
+  startTutorial: () => void;
+  systemMessage: (message: string) => void;
 }
 
 interface ScenePickerState {
@@ -488,7 +488,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
       groupedGrids = groupedGrids.concat(g.scenes);
     }
     return (
-      <div className={classes.root} onClick={this.onClickCloseMenu.bind(this)}>
+      <div className={classes.root} onClick={this.onClickCloseMenu}>
         <AppBar
           enableColorOnDark
           position="absolute"
@@ -506,7 +506,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
               className={clsx(
                 this.props.tutorial == SPT.scenePicker && classes.highlight,
               )}
-              onClick={this.onToggleDrawer.bind(this)}
+              onClick={this.onToggleDrawer}
               size="large"
             >
               <MenuIcon />
@@ -540,7 +540,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                 <IconButton
                   color="inherit"
                   className={classes.updateIcon}
-                  onClick={this.openGitRelease.bind(this)}
+                  onClick={this.openGitRelease}
                   size="large"
                 >
                   <Badge variant="dot" color="secondary">
@@ -553,7 +553,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
               displaySources={this.state.displayScenes}
               filters={this.state.filters}
               placeholder="Search ..."
-              onUpdateFilters={this.onUpdateFilters.bind(this)}
+              onUpdateFilters={this.onUpdateFilters}
             />
           </Toolbar>
         </AppBar>
@@ -575,7 +575,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
               edge="start"
               color="inherit"
               aria-label="Toggle Drawer"
-              onClick={this.onToggleDrawer.bind(this)}
+              onClick={this.onToggleDrawer}
               size="large"
             >
               <MenuIcon />
@@ -594,7 +594,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
             <Tabs
               orientation="vertical"
               value={this.props.openTab}
-              onChange={this.onChangeTab.bind(this)}
+              onChange={this.onChangeTab}
               aria-label="scene picker tabs"
               className={classes.tabs}
             >
@@ -651,10 +651,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "Library"}
                 >
-                  <ListItem
-                    button
-                    onClick={this.props.onOpenLibrary.bind(this)}
-                  >
+                  <ListItem button onClick={this.props.onOpenLibrary}>
                     <ListItemIcon>
                       <LocalLibraryIcon />
                     </ListItemIcon>
@@ -677,10 +674,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "Audio Library"}
                 >
-                  <ListItem
-                    button
-                    onClick={this.props.onOpenAudioLibrary.bind(this)}
-                  >
+                  <ListItem button onClick={this.props.onOpenAudioLibrary}>
                     <ListItemIcon>
                       <LibraryMusicIcon />
                     </ListItemIcon>
@@ -703,10 +697,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "Script Library"}
                 >
-                  <ListItem
-                    button
-                    onClick={this.props.onOpenScriptLibrary.bind(this)}
-                  >
+                  <ListItem button onClick={this.props.onOpenScriptLibrary}>
                     <ListItemIcon>
                       <LibraryBooksIcon />
                     </ListItemIcon>
@@ -734,10 +725,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "Caption Scripter"}
                 >
-                  <ListItem
-                    button
-                    onClick={this.props.onOpenCaptionScriptor.bind(this)}
-                  >
+                  <ListItem button onClick={this.props.onOpenCaptionScriptor}>
                     <ListItemIcon>
                       <CodeIcon />
                     </ListItemIcon>
@@ -755,7 +743,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       disableInteractive
                       title={this.state.drawerOpen ? "" : "New Window"}
                     >
-                      <ListItem button onClick={this.onNewWindow.bind(this)}>
+                      <ListItem button onClick={this.onNewWindow}>
                         <ListItemIcon>
                           <OpenInNewIcon />
                         </ListItemIcon>
@@ -765,7 +753,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
                     <Dialog
                       open={this.state.openMenu == MO.newWindowAlert}
-                      onClose={this.onCloseDialog.bind(this)}
+                      onClose={this.onCloseDialog}
                       aria-labelledby="new-window-title"
                       aria-describedby="new-window-description"
                     >
@@ -780,13 +768,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       </DialogContent>
                       <DialogActions>
                         <Button
-                          onClick={this.newWindow.bind(this, true)}
+                          onClick={() => this.newWindow(true)}
                           color="secondary"
                         >
                           Don't show again
                         </Button>
                         <Button
-                          onClick={this.newWindow.bind(this, false)}
+                          onClick={() => this.newWindow(false)}
                           color="primary"
                         >
                           OK
@@ -799,7 +787,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "Settings"}
                 >
-                  <ListItem button onClick={this.props.onOpenConfig.bind(this)}>
+                  <ListItem button onClick={this.props.onOpenConfig}>
                     <ListItemIcon>
                       <SettingsIcon />
                     </ListItemIcon>
@@ -810,13 +798,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   disableInteractive
                   title={this.state.drawerOpen ? "" : "User Manual"}
                 >
-                  <ListItem
-                    button
-                    onClick={this.openLink.bind(
-                      this,
-                      "https://regtemp8.github.io/flipflip/#/",
-                    )}
-                  >
+                  <ListItem button onClick={this.openManual}>
                     <ListItemIcon>
                       <HelpIcon />
                     </ListItemIcon>
@@ -842,25 +824,11 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
               Questions? Suggestions?
               <br />
               Visit us on{" "}
-              <Link
-                href="#"
-                onClick={this.openLink.bind(
-                  this,
-                  "https://github.com/regtemp8/flipflip",
-                )}
-                underline="hover"
-              >
+              <Link href="#" onClick={this.openGitRepo} underline="hover">
                 GitHub
               </Link>{" "}
               or{" "}
-              <Link
-                href="#"
-                onClick={this.openLink.bind(
-                  this,
-                  "https://www.reddit.com/r/flipflip",
-                )}
-                underline="hover"
-              >
+              <Link href="#" onClick={this.openReddit} underline="hover">
                 Reddit
               </Link>
             </Typography>
@@ -930,11 +898,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                         >
                           <CardActionArea
-                            onClick={
-                              this.state.deleteScenes == null
-                                ? this.props.onOpenScene.bind(this, scene)
-                                : this.onToggleDelete.bind(this, scene.id)
-                            }
+                            onClick={() => {
+                              if (this.state.deleteScenes == null) {
+                                this.props.onOpenScene(scene);
+                              } else {
+                                this.onToggleDelete(scene.id);
+                              }
+                            }}
                           >
                             <CardContent>
                               <Typography component="h2" variant="h6">
@@ -987,7 +957,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           />
                           {this.state.isEditing == g.id && (
                             <form
-                              onSubmit={this.endEditingName.bind(this)}
+                              onSubmit={this.endEditingName}
                               className={clsx(
                                 classes.titleField,
                                 classes.groupTitle,
@@ -1000,15 +970,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 value={this.state.isEditingName}
                                 margin="none"
                                 inputProps={{ className: classes.titleInput }}
-                                onBlur={this.endEditingName.bind(this)}
-                                onChange={this.onChangeName.bind(this)}
+                                onBlur={this.endEditingName}
+                                onChange={this.onChangeName}
                               />
                             </form>
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
                               variant="h6"
-                              onClick={this.beginEditingName.bind(this, g)}
+                              onClick={() => this.beginEditingName(g)}
                               className={classes.groupTitle}
                             >
                               {g.name}
@@ -1018,7 +988,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           <IconButton
                             color="inherit"
                             aria-label="Delete"
-                            onClick={this.props.onDeleteGroup.bind(this, g)}
+                            onClick={() => this.props.onDeleteGroup(g)}
                             size="large"
                           >
                             <CloseIcon />
@@ -1126,17 +1096,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                   )}
                                 >
                                   <CardActionArea
-                                    onClick={
-                                      this.state.deleteScenes == null
-                                        ? this.props.onOpenScene.bind(
-                                            this,
-                                            scene,
-                                          )
-                                        : this.onToggleDelete.bind(
-                                            this,
-                                            scene.id,
-                                          )
-                                    }
+                                    onClick={() => {
+                                      if (this.state.deleteScenes == null) {
+                                        this.props.onOpenScene(scene);
+                                      } else {
+                                        this.onToggleDelete(scene.id);
+                                      }
+                                    }}
                                   >
                                     <CardContent>
                                       <Typography component="h2" variant="h6">
@@ -1214,11 +1180,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                         >
                           <CardActionArea
-                            onClick={
-                              this.state.deleteScenes == null
-                                ? this.props.onOpenScene.bind(this, scene)
-                                : this.onToggleDelete.bind(this, scene.id)
-                            }
+                            onClick={() => {
+                              if (this.state.deleteScenes == null) {
+                                this.props.onOpenScene(scene);
+                              } else {
+                                this.onToggleDelete(scene.id);
+                              }
+                            }}
                           >
                             <CardContent>
                               <Typography component="h2" variant="h6">
@@ -1271,7 +1239,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           />
                           {this.state.isEditing == g.id && (
                             <form
-                              onSubmit={this.endEditingName.bind(this)}
+                              onSubmit={this.endEditingName}
                               className={clsx(
                                 classes.titleField,
                                 classes.groupTitle,
@@ -1284,15 +1252,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 value={this.state.isEditingName}
                                 margin="none"
                                 inputProps={{ className: classes.titleInput }}
-                                onBlur={this.endEditingName.bind(this)}
-                                onChange={this.onChangeName.bind(this)}
+                                onBlur={this.endEditingName}
+                                onChange={this.onChangeName}
                               />
                             </form>
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
                               variant="h6"
-                              onClick={this.beginEditingName.bind(this, g)}
+                              onClick={() => this.beginEditingName(g)}
                               className={classes.groupTitle}
                             >
                               {g.name}
@@ -1302,7 +1270,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           <IconButton
                             color="inherit"
                             aria-label="Delete"
-                            onClick={this.props.onDeleteGroup.bind(this, g)}
+                            onClick={() => this.props.onDeleteGroup(g)}
                             size="large"
                           >
                             <CloseIcon />
@@ -1410,17 +1378,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                   )}
                                 >
                                   <CardActionArea
-                                    onClick={
-                                      this.state.deleteScenes == null
-                                        ? this.props.onOpenScene.bind(
-                                            this,
-                                            scene,
-                                          )
-                                        : this.onToggleDelete.bind(
-                                            this,
-                                            scene.id,
-                                          )
-                                    }
+                                    onClick={() => {
+                                      if (this.state.deleteScenes == null) {
+                                        this.props.onOpenScene(scene);
+                                      } else {
+                                        this.onToggleDelete(scene.id);
+                                      }
+                                    }}
                                   >
                                     <CardContent>
                                       <Typography component="h2" variant="h6">
@@ -1497,14 +1461,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                         >
                           <CardActionArea
-                            onClick={
-                              this.state.deleteScenes == null
-                                ? this.props.onOpenGrid.bind(this, grid)
-                                : this.onToggleDelete.bind(
-                                    this,
-                                    Number.parseInt("999" + grid.id),
-                                  )
-                            }
+                            onClick={() => {
+                              if (this.state.deleteScenes == null) {
+                                this.props.onOpenGrid(grid);
+                              } else {
+                                this.onToggleDelete(
+                                  Number.parseInt("999" + grid.id),
+                                );
+                              }
+                            }}
                           >
                             <CardContent>
                               <Typography component="h2" variant="h6">
@@ -1557,7 +1522,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           />
                           {this.state.isEditing == g.id && (
                             <form
-                              onSubmit={this.endEditingName.bind(this)}
+                              onSubmit={this.endEditingName}
                               className={clsx(
                                 classes.titleField,
                                 classes.groupTitle,
@@ -1570,15 +1535,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 value={this.state.isEditingName}
                                 margin="none"
                                 inputProps={{ className: classes.titleInput }}
-                                onBlur={this.endEditingName.bind(this)}
-                                onChange={this.onChangeName.bind(this)}
+                                onBlur={this.endEditingName}
+                                onChange={this.onChangeName}
                               />
                             </form>
                           )}
                           {this.state.isEditing != g.id && (
                             <Typography
                               variant="h6"
-                              onClick={this.beginEditingName.bind(this, g)}
+                              onClick={() => this.beginEditingName(g)}
                               className={classes.groupTitle}
                             >
                               {g.name}
@@ -1588,7 +1553,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           <IconButton
                             color="inherit"
                             aria-label="Delete"
-                            onClick={this.props.onDeleteGroup.bind(this, g)}
+                            onClick={() => this.props.onDeleteGroup(g)}
                             size="large"
                           >
                             <CloseIcon />
@@ -1694,14 +1659,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                   )}
                                 >
                                   <CardActionArea
-                                    onClick={
-                                      this.state.deleteScenes == null
-                                        ? this.props.onOpenGrid.bind(this, grid)
-                                        : this.onToggleDelete.bind(
-                                            this,
-                                            Number.parseInt("999" + grid.id),
-                                          )
-                                    }
+                                    onClick={() => {
+                                      if (this.state.deleteScenes == null) {
+                                        this.props.onOpenGrid(grid);
+                                      } else {
+                                        this.onToggleDelete(
+                                          Number.parseInt("999" + grid.id),
+                                        );
+                                      }
+                                    }}
                                   >
                                     <CardContent>
                                       <Typography component="h2" variant="h6">
@@ -1726,10 +1692,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
             <Tooltip disableInteractive title="Delete Selected Scenes">
               <Fab
                 className={classes.deleteButton}
-                onClick={this.onFinishDelete.bind(
-                  this,
-                  this.state.deleteScenes,
-                )}
+                onClick={this.onFinishDelete}
                 size="large"
               >
                 <DeleteIcon className={classes.icon} />
@@ -1738,7 +1701,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
             <Tooltip disableInteractive title="Cancel Delete">
               <Fab
                 className={classes.sortMenuButton}
-                onClick={this.onCancelDelete.bind(this)}
+                onClick={this.onCancelDelete}
                 size="medium"
               >
                 <CloseIcon className={classes.icon} />
@@ -1763,7 +1726,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         classes.deleteScenesButton,
                         this.state.openMenu != MO.new && classes.addButtonClose,
                       )}
-                      onClick={this.onDeleteScenes.bind(this)}
+                      onClick={this.onDeleteScenes}
                       size="small"
                     >
                       <DeleteIcon className={classes.icon} />
@@ -1781,7 +1744,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       classes.importSceneButton,
                       this.state.openMenu != MO.new && classes.addButtonClose,
                     )}
-                    onClick={this.onImportScene.bind(this)}
+                    onClick={this.onImportScene}
                     size="small"
                   >
                     <GetAppIcon className={classes.icon} />
@@ -1796,7 +1759,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       this.props.tutorial == SPT.add2 &&
                         clsx(classes.backdropTop, classes.highlight),
                     )}
-                    onClick={this.onAddScene.bind(this)}
+                    onClick={this.onAddScene}
                     size="small"
                   >
                     <MovieIcon className={classes.icon} />
@@ -1819,7 +1782,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         classes.addGeneratorButton,
                         this.state.openMenu != MO.new && classes.addButtonClose,
                       )}
-                      onClick={this.props.onAddGenerator.bind(this)}
+                      onClick={this.props.onAddGenerator}
                       disabled={!this.props.canGenerate}
                       size="small"
                     >
@@ -1844,7 +1807,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         classes.addGridButton,
                         this.state.openMenu != MO.new && classes.addButtonClose,
                       )}
-                      onClick={this.props.onAddGrid.bind(this)}
+                      onClick={this.props.onAddGrid}
                       disabled={!this.props.canGrid}
                       size="small"
                     >
@@ -1859,7 +1822,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       classes.addGridButton,
                       this.state.openMenu == MO.new && classes.addButtonClose,
                     )}
-                    onClick={this.onAddGroup.bind(this)}
+                    onClick={this.onAddGroup}
                     size="small"
                   >
                     <CreateNewFolderIcon className={classes.icon} />
@@ -1873,7 +1836,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       classes.backdropTop,
                     this.props.tutorial == SPT.add1 && classes.highlight,
                   )}
-                  onClick={this.onToggleNewMenu.bind(this)}
+                  onClick={this.onToggleNewMenu}
                   size="large"
                 >
                   <AddIcon className={classes.icon} />
@@ -1886,7 +1849,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       aria-haspopup="true"
                       aria-controls="sort-menu"
                       aria-label="Sort Scenes"
-                      onClick={this.onOpenSortMenu.bind(this)}
+                      onClick={this.onOpenSortMenu}
                       size="medium"
                     >
                       <SortIcon className={classes.icon} />
@@ -1906,7 +1869,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                       keepMounted
                       classes={{ paper: classes.sortMenu }}
                       open={this.state.openMenu == MO.sort}
-                      onClose={this.onCloseDialog.bind(this)}
+                      onClose={this.onCloseDialog}
                     >
                       {[SF.alpha, SF.date, SF.count].map((sf) => (
                         <MenuItem key={sf}>
@@ -1914,14 +1877,14 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           <ListItemSecondaryAction>
                             <IconButton
                               edge="end"
-                              onClick={this.props.onSort.bind(this, sf, true)}
+                              onClick={() => this.props.onSort(sf, true)}
                               size="large"
                             >
                               <ArrowUpwardIcon />
                             </IconButton>
                             <IconButton
                               edge="end"
-                              onClick={this.props.onSort.bind(this, sf, false)}
+                              onClick={() => this.props.onSort(sf, false)}
                               size="large"
                             >
                               <ArrowDownwardIcon />
@@ -1934,11 +1897,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         <ListItemSecondaryAction>
                           <IconButton
                             edge="end"
-                            onClick={this.props.onSort.bind(
-                              this,
-                              SF.random,
-                              true,
-                            )}
+                            onClick={() => this.props.onSort(SF.random, true)}
                             size="large"
                           >
                             <ShuffleIcon />
@@ -1956,7 +1915,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                   classes.randomButton,
                   !this.state.isFirstWindow && classes.extraWindowRandomButton,
                 )}
-                onClick={this.onRandomScene.bind(this)}
+                onClick={this.onRandomScene}
                 size="small"
               >
                 <CasinoIcon className={classes.icon} />
@@ -1967,7 +1926,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
         <Dialog
           open={this.state.openMenu == MO.urlImport}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="import-title"
           aria-describedby="import-description"
         >
@@ -1988,10 +1947,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                 endAdornment: (
                   <InputAdornment position="end">
                     <Tooltip disableInteractive title="Open File">
-                      <IconButton
-                        onClick={this.onOpenImportFile.bind(this)}
-                        size="large"
-                      >
+                      <IconButton onClick={this.onOpenImportFile} size="large">
                         <FolderIcon />
                       </IconButton>
                     </Tooltip>
@@ -2001,26 +1957,22 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                     >
                       <Checkbox
                         value={this.state.importSources}
-                        onChange={this.onChangeImportSources.bind(this)}
+                        onChange={this.onChangeImportSources}
                         checked={this.state.importSources}
                       />
                     </Tooltip>
                   </InputAdornment>
                 ),
               }}
-              onChange={this.onChangeImportFile.bind(this)}
+              onChange={this.onChangeImportFile}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)}>Cancel</Button>
+            <Button onClick={this.onCloseDialog}>Cancel</Button>
             <Button
               color="primary"
               disabled={this.state.importFile.length == 0}
-              onClick={this.onFinishImportScene.bind(
-                this,
-                this.state.importFile,
-                this.state.importSources,
-              )}
+              onClick={this.onFinishImportScene}
             >
               Import
             </Button>
@@ -2072,32 +2024,32 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     }
   }
 
-  onUpdateFilters(filters: Array<string>) {
+  onUpdateFilters = (filters: Array<string>) => {
     this.setState({
       filters: filters,
       displayScenes: this.getDisplayScenes(),
       displayGrids: this.getDisplayGrids(),
     });
-  }
+  };
 
-  onImportScene() {
+  onImportScene = () => {
     this.setState({ openMenu: MO.urlImport });
-  }
+  };
 
-  onDeleteScenes() {
+  onDeleteScenes = () => {
     this.setState({ openMenu: undefined, deleteScenes: new Array<number>() });
-  }
+  };
 
-  onCancelDelete() {
+  onCancelDelete = () => {
     this.setState({ deleteScenes: undefined });
-  }
+  };
 
-  onFinishDelete(deleteScenes: number[]) {
-    this.props.onDeleteScenes(deleteScenes);
+  onFinishDelete = () => {
+    this.props.onDeleteScenes(this.state.deleteScenes);
     this.setState({ deleteScenes: undefined });
-  }
+  };
 
-  onToggleDelete(sceneID: number) {
+  onToggleDelete = (sceneID: number) => {
     const newDeleteScenes = Array.from(this.state.deleteScenes);
     if (newDeleteScenes.includes(sceneID)) {
       newDeleteScenes.splice(newDeleteScenes.indexOf(sceneID), 1);
@@ -2105,9 +2057,10 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
       newDeleteScenes.push(sceneID);
     }
     this.setState({ deleteScenes: newDeleteScenes });
-  }
+  };
 
-  onFinishImportScene(importFile: string, importSources: boolean) {
+  onFinishImportScene = () => {
+    const { importFile, importSources } = this.state;
     if (importFile.startsWith("http")) {
       window.ipc.getTextFromURL(importFile).then((text) => {
         if (text == null) {
@@ -2129,23 +2082,23 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
         this.onCloseDialog();
       });
     }
-  }
+  };
 
-  onNewWindow() {
+  onNewWindow = () => {
     if (this.props.config.newWindowAlerted) {
       this.newWindow(false);
     } else {
       this.setState({ openMenu: MO.newWindowAlert });
     }
-  }
+  };
 
-  onChangeTab(e: React.SyntheticEvent<Element, Event>, tab: number) {
+  onChangeTab = (e: React.SyntheticEvent<Element, Event>, tab: number) => {
     if (this.props.openTab != tab) {
       this.props.onChangeTab(tab);
     }
-  }
+  };
 
-  newWindow(hideFutureWarnings: boolean) {
+  newWindow = (hideFutureWarnings: boolean) => {
     if (this.state.openMenu == MO.newWindowAlert) {
       this.setState({ openMenu: undefined });
       if (hideFutureWarnings) {
@@ -2156,32 +2109,32 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     }
 
     window.ipc.newWindow();
-  }
+  };
 
-  onToggleDrawer() {
+  onToggleDrawer = () => {
     if (this.props.tutorial == SPT.scenePicker) {
       this.props.onTutorial(SPT.scenePicker);
     }
     this.setState({ drawerOpen: !this.state.drawerOpen });
-  }
+  };
 
-  onToggleNewMenu() {
+  onToggleNewMenu = () => {
     if (this.props.tutorial == SPT.add1) {
       this.props.onTutorial(SPT.add1);
     }
     this.setState({
       openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
     });
-  }
+  };
 
-  onAddScene() {
+  onAddScene = () => {
     if (this.props.tutorial == SPT.add2) {
       this.props.onTutorial(SPT.add2);
     }
     this.props.onAddScene();
-  }
+  };
 
-  onAddGroup() {
+  onAddGroup = () => {
     if (this.props.openTab == 0) {
       this.props.onAddGroup(SG.scene);
     } else if (this.props.openTab == 1) {
@@ -2189,13 +2142,13 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     } else if (this.props.openTab == 2) {
       this.props.onAddGroup(SG.grid);
     }
-  }
+  };
 
-  beginEditingName(group: SceneGroup) {
+  beginEditingName = (group: SceneGroup) => {
     this.setState({ isEditing: group.id, isEditingName: group.name });
-  }
+  };
 
-  endEditingName(e: React.SyntheticEvent<Element, Event>) {
+  endEditingName = (e: React.SyntheticEvent<Element, Event>) => {
     e.preventDefault();
     const newGroups = this.props.sceneGroups;
     const editGroup = newGroups.find((g) => g.id == this.state.isEditing);
@@ -2205,17 +2158,17 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 
     this.props.onUpdateGroups(newGroups);
     this.setState({ isEditing: -1, isEditingName: "" });
-  }
+  };
 
-  onChangeName(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ isEditingName: e.currentTarget.value });
-  }
+  };
 
-  onOpenSortMenu(e: React.MouseEvent<HTMLButtonElement>) {
+  onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
-  }
+  };
 
-  onClickCloseMenu(e: React.MouseEvent<HTMLDivElement>) {
+  onClickCloseMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     if (this.state.openMenu == MO.new) {
       let parent: any = e.target;
       do {
@@ -2232,46 +2185,58 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
       } while ((parent = parent.parentNode) != null);
       this.setState({ menuAnchorEl: undefined, openMenu: undefined });
     }
-  }
+  };
 
-  onOpenImportFile() {
+  onOpenImportFile = () => {
     window.ipc.openImport().then((importFile) => {
       if (importFile != null) {
         this.setState({ importFile });
       }
     });
-  }
+  };
 
-  onChangeImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.setState({ importFile: input.value });
-  }
+  };
 
-  onChangeImportSources(e: React.ChangeEvent<HTMLInputElement>) {
+  onChangeImportSources = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.setState({ importSources: input.checked });
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({
       menuAnchorEl: undefined,
       openMenu: undefined,
       importFile: "",
       importSources: false,
     });
-  }
+  };
 
-  onRandomScene() {
+  onRandomScene = () => {
     this.props.onOpenScene(getRandomListItem(this.props.scenes));
-  }
+  };
 
-  openGitRelease() {
+  openGitRelease = () => {
     this.openLink(this.state.newVersionLink);
-  }
+  };
 
-  openLink(url: string) {
+  openManual = () => {
+    this.openLink("https://regtemp8.github.io/flipflip/#/");
+  };
+
+  openReddit = () => {
+    this.openLink("https://www.reddit.com/r/flipflip");
+  };
+
+  openGitRepo = () => {
+    this.openLink("https://github.com/regtemp8/flipflip");
+  };
+
+  openLink = (url: string) => {
     window.ipc.openExternal(url);
-  }
+  };
 
   getDisplayScenes() {
     let displayScenes = [];
@@ -2369,4 +2334,4 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
 }
 
 (ScenePicker as any).displayName = "ScenePicker";
-export default withStyles(styles)(ScenePicker as any);
+export default withStyles(styles)(ScenePicker);

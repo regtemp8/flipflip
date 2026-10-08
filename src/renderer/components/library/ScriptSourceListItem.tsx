@@ -120,16 +120,19 @@ interface ScriptSourceListItemProps {
   source: CaptionScript;
   style: any;
   tutorial: string;
-  onDelete(source: CaptionScript): void;
-  onEditScript(source: CaptionScript): void;
-  onEndEdit(newURL: string): void;
-  onPlay(source: CaptionScript): void;
-  onRemove(source: CaptionScript): void;
-  onSourceOptions(source: CaptionScript): void;
-  onStartEdit(id: number): void;
-  onToggleSelect(): void;
-  savePosition(): void;
-  systemMessage(message: string): void;
+  onDelete: (source: CaptionScript) => void;
+  onEditScript: (source: CaptionScript) => void;
+  onEndEdit: (newURL: string) => void;
+  onPlay: (source: CaptionScript) => void;
+  onRemove: (source: CaptionScript) => void;
+  onSourceOptions: (
+    source: CaptionScript,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => void;
+  onStartEdit: (id: number) => void;
+  onToggleSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  savePosition: () => void;
+  systemMessage: (message: string) => void;
 }
 
 interface ScriptSourceListItemState {
@@ -163,14 +166,14 @@ class ScriptSourceListItem extends React.Component<
             this.props.specialMode == SP.select) && (
             <Checkbox
               value={this.props.source.url}
-              onChange={this.props.onToggleSelect.bind(this)}
+              onChange={this.props.onToggleSelect}
               checked={this.props.checked}
             />
           )}
           {this.props.specialMode == SP.selectSingle && (
             <Radio
               value={this.props.source.url}
-              onChange={this.props.onToggleSelect.bind(this)}
+              onChange={this.props.onToggleSelect}
               checked={this.props.checked}
             />
           )}
@@ -190,7 +193,7 @@ class ScriptSourceListItem extends React.Component<
             >
               <Fab
                 size="small"
-                onClick={this.onSourceIconClick.bind(this)}
+                onClick={this.onSourceIconClick}
                 className={clsx(
                   classes.avatar,
                   this.props.source.marked && classes.markedSource,
@@ -209,10 +212,7 @@ class ScriptSourceListItem extends React.Component<
 
           <ListItemText classes={{ primary: classes.root }}>
             {this.props.isEditing == this.props.source.id && (
-              <form
-                onSubmit={this.onEndEdit.bind(this)}
-                className={classes.urlField}
-              >
+              <form onSubmit={this.onEndEdit} className={classes.urlField}>
                 <TextField
                   variant="standard"
                   autoFocus
@@ -220,8 +220,8 @@ class ScriptSourceListItem extends React.Component<
                   value={this.state.urlInput}
                   margin="none"
                   className={classes.urlField}
-                  onBlur={this.onEndEdit.bind(this)}
-                  onChange={this.onEditSource.bind(this)}
+                  onBlur={this.onEndEdit}
+                  onChange={this.onEditSource}
                 />
               </form>
             )}
@@ -230,7 +230,7 @@ class ScriptSourceListItem extends React.Component<
                 <Typography
                   noWrap
                   className={classes.noUserSelect}
-                  onClick={this.onStartEdit.bind(this, this.props.source)}
+                  onClick={this.onStartEdit}
                 >
                   {this.props.source.url}
                 </Typography>
@@ -269,10 +269,7 @@ class ScriptSourceListItem extends React.Component<
             <ListItemSecondaryAction className={classes.source}>
               {!this.props.specialMode && (
                 <IconButton
-                  onClick={this.props.onEditScript.bind(
-                    this,
-                    this.props.source,
-                  )}
+                  onClick={() => this.props.onEditScript(this.props.source)}
                   className={classes.actionButton}
                   edge="end"
                   size="small"
@@ -282,10 +279,9 @@ class ScriptSourceListItem extends React.Component<
                 </IconButton>
               )}
               <IconButton
-                onClick={this.props.onSourceOptions.bind(
-                  this,
-                  this.props.source,
-                )}
+                onClick={(e) =>
+                  this.props.onSourceOptions(this.props.source, e)
+                }
                 className={classes.actionButton}
                 edge="end"
                 size="small"
@@ -294,7 +290,7 @@ class ScriptSourceListItem extends React.Component<
                 <BuildIcon />
               </IconButton>
               <IconButton
-                onClick={this.props.onRemove.bind(this, this.props.source)}
+                onClick={() => this.props.onRemove(this.props.source)}
                 className={clsx(classes.deleteButton, classes.actionButton)}
                 edge="end"
                 size="small"
@@ -314,7 +310,7 @@ class ScriptSourceListItem extends React.Component<
     return tagName;
   }
 
-  onSourceIconClick(e: React.MouseEvent<HTMLButtonElement>) {
+  onSourceIconClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const sourceURL = this.props.source.url;
     if (e.shiftKey && e.ctrlKey && e.altKey) {
       this.props.onDelete(this.props.source);
@@ -325,20 +321,20 @@ class ScriptSourceListItem extends React.Component<
     } else if (!e.shiftKey && !e.ctrlKey) {
       this.props.onPlay(this.props.source);
     }
-  }
+  };
 
-  onStartEdit(s: CaptionScript) {
-    this.props.onStartEdit(s.id);
-  }
+  onStartEdit = () => {
+    this.props.onStartEdit(this.props.source.id);
+  };
 
-  onEditSource(e: React.ChangeEvent<HTMLInputElement>) {
+  onEditSource = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     this.setState({ urlInput: input.value });
-  }
+  };
 
-  onEndEdit() {
+  onEndEdit = () => {
     this.props.onEndEdit(this.state.urlInput);
-  }
+  };
 
   openDirectory(cachePath: string) {
     const platform = window.ipc.platform();
@@ -355,4 +351,4 @@ class ScriptSourceListItem extends React.Component<
 }
 
 (ScriptSourceListItem as any).displayName = "ScriptSourceListItem";
-export default withStyles(styles)(ScriptSourceListItem as any);
+export default withStyles(styles)(ScriptSourceListItem);

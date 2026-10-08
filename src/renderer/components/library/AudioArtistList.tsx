@@ -58,7 +58,7 @@ interface AudioArtistListProps {
   classes: any;
   sources: Array<Audio>;
   showHelp: boolean;
-  onClickArtist(artist: string): void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
 }
 
 interface AudioArtistListState {
@@ -129,9 +129,9 @@ class AudioArtistList extends React.Component<
               key={a}
               className={classes.artist}
               style={{ padding: padding }}
-              onClick={this.props.onClickArtist.bind(this, a)}
-              onMouseEnter={this.onMouseEnter.bind(this, a)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onClick={(e) => this.props.onClickArtist(a, e)}
+              onMouseEnter={() => this.onMouseEnter(a)}
+              onMouseLeave={this.onMouseLeave}
             >
               <Avatar
                 alt={a}
@@ -168,13 +168,13 @@ class AudioArtistList extends React.Component<
     }
   }
 
-  onMouseEnter(artist: string) {
+  onMouseEnter = (artist: string) => {
     this.setState({ hover: artist });
-  }
+  };
 
-  onMouseLeave() {
+  onMouseLeave = () => {
     this.setState({ hover: undefined });
-  }
+  };
 
   getArtists(): Map<string, string | null> {
     const artistsMap = new Map<string, string | null>();
@@ -205,4 +205,4 @@ class AudioArtistList extends React.Component<
 }
 
 (AudioArtistList as any).displayName = "AudioArtistList";
-export default withStyles(styles)(AudioArtistList as any);
+export default withStyles(styles)(AudioArtistList);

@@ -19,7 +19,7 @@ interface VideoCardProps {
   mainClipValue?: Array<number>;
   otherVideos: Array<Array<HTMLVideoElement | undefined>>;
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
 }
 
 export default class VideoCard extends React.Component<VideoCardProps> {
@@ -64,12 +64,12 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                 nextTrack={() => {
                   this.props.imagePlayerAdvanceHacks[0][0].fire();
                 }}
-                onChangeSpeed={this.changeKey
-                  .bind(this, "videoSpeed", this.props.scene)
-                  .bind(this)}
-                onChangeVolume={this.changeKey
-                  .bind(this, "videoVolume", this.props.scene)
-                  .bind(this)}
+                onChangeSpeed={(speed: number) =>
+                  this.changeKey("videoSpeed", this.props.scene, speed)
+                }
+                onChangeVolume={(volume: number) =>
+                  this.changeKey("videoVolume", this.props.scene, volume)
+                }
                 skip={this.props.scene.videoSkip}
               />
             </React.Fragment>
@@ -151,9 +151,9 @@ export default class VideoCard extends React.Component<VideoCardProps> {
 
   nop() {}
 
-  changeKey(key: string, scene: Scene, value: any) {
+  changeKey = (key: string, scene: Scene, value: any) => {
     this.update(scene, (s) => (s[key] = value));
-  }
+  };
 
   update(scene: Scene, fn: (scene: any) => void) {
     this.props.onUpdateScene(scene, fn);

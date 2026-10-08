@@ -35,7 +35,7 @@ const styles = (theme: Theme) =>
 interface WatermarkCardProps {
   classes: any;
   settings: GeneralSettings;
-  onUpdateSettings(fn: (settings: GeneralSettings) => void): void;
+  onUpdateSettings: (fn: (settings: GeneralSettings) => void) => void;
 }
 
 interface WatermarkCardState {
@@ -104,7 +104,7 @@ class WatermarkCard extends React.Component<
                   control={
                     <Switch
                       checked={this.props.settings.watermark}
-                      onChange={this.onBoolInput.bind(this, "watermark")}
+                      onChange={(e) => this.onBoolInput("watermark", e)}
                     />
                   }
                   label="Enable Watermark"
@@ -121,7 +121,7 @@ class WatermarkCard extends React.Component<
                     control={
                       <Switch
                         checked={this.props.settings.watermarkGrid}
-                        onChange={this.onBoolInput.bind(this, "watermarkGrid")}
+                        onChange={(e) => this.onBoolInput("watermarkGrid", e)}
                       />
                     }
                     label="Show on Grids"
@@ -149,7 +149,7 @@ class WatermarkCard extends React.Component<
                 <Select
                   variant="standard"
                   value={this.props.settings.watermarkCorner}
-                  onChange={this.onInput.bind(this, "watermarkCorner")}
+                  onChange={(e) => this.onInput("watermarkCorner", e)}
                 >
                   {Object.values(WC).map((wc) => (
                     <MenuItem value={wc} key={wc}>
@@ -166,7 +166,7 @@ class WatermarkCard extends React.Component<
                   label="Watermark Text"
                   value={this.props.settings.watermarkText}
                   margin="dense"
-                  onChange={this.onTextInput.bind(this, "watermarkText")}
+                  onChange={(e) => this.onTextInput("watermarkText", e)}
                 />
               </Grid>
             </Grid>
@@ -195,7 +195,7 @@ class WatermarkCard extends React.Component<
                         },
                       },
                     }}
-                    onChange={this.onInput.bind(this, "watermarkFontFamily")}
+                    onChange={(e) => this.onInput("watermarkFontFamily", e)}
                   >
                     {this.state.systemFonts.map((f) => (
                       <MenuItem key={f} value={f} style={{ fontFamily: f }}>
@@ -211,8 +211,8 @@ class WatermarkCard extends React.Component<
                   label="Size"
                   margin="dense"
                   value={this.props.settings.watermarkFontSize}
-                  onChange={this.onIntInput.bind(this, "watermarkFontSize")}
-                  onBlur={this.blurIntKey.bind(this, "watermarkFontSize")}
+                  onChange={(e) => this.onIntInput("watermarkFontSize", e)}
+                  onBlur={(e) => this.blurIntKey("watermarkFontSize", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">px</InputAdornment>
@@ -227,7 +227,9 @@ class WatermarkCard extends React.Component<
               <Grid item xs={12}>
                 <ColorPicker
                   currentColor={this.props.settings.watermarkColor}
-                  onChangeColor={this.onInput.bind(this, "watermarkColor")}
+                  onChangeColor={(color) =>
+                    this.changeKey("watermarkColor", color)
+                  }
                 />
               </Grid>
             </Grid>
@@ -256,39 +258,48 @@ class WatermarkCard extends React.Component<
     this._abortController.abort();
   }
 
-  onInput(key: string, e: SelectChangeEvent<string>) {
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
-  onTextInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onTextInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
-  onIntInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  blurIntKey(key: string, e: React.FocusEvent<HTMLInputElement>) {
-    const { min, max } = e.currentTarget;
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
     if (min && (this.props.settings as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
     } else if (max && (this.props.settings as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onBoolInput(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -300,4 +311,4 @@ class WatermarkCard extends React.Component<
 }
 
 (WatermarkCard as any).displayName = "WatermarkCard";
-export default withStyles(styles)(WatermarkCard as any);
+export default withStyles(styles)(WatermarkCard);
