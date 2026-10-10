@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Collapse,
@@ -18,76 +17,39 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 
 import VolumeDownIcon from "@mui/icons-material/VolumeDown";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 
 import { GO, IF, OF, OT, SDT, SOF, VO, WF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
+import { SceneBase } from "../../../common/SceneBase";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    noPadding: {
-      padding: "0 !important",
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    gutterBottom: {
-      marginBottom: theme.spacing(2),
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-  });
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
 
-interface ImageVideoCardProps {
-  classes: any;
-  scene: Scene | SceneSettings;
-  sidebar: boolean;
+interface ImageVideoCardProps<T extends SceneBase> {
+  scene: T;
+  sidebar?: boolean;
   tutorial: string;
   isConfig: boolean;
   isPlayer?: boolean;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
-class ImageVideoCard extends React.Component<ImageVideoCardProps> {
-  constructor(props: ImageVideoCardProps) {
+class ImageVideoCard<T extends SceneBase> extends React.Component<
+  ImageVideoCardProps<T>
+> {
+  constructor(props: ImageVideoCardProps<T>) {
     super(props);
   }
 
   render() {
-    const classes = this.props.classes;
-
     const gifTimingConstant =
       typeof this.props.scene.gifTimingConstant === "number"
         ? this.props.scene.gifTimingConstant
@@ -136,10 +98,12 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             container
             spacing={2}
             alignItems="center"
-            className={clsx(
-              classes.gutterBottom,
-              this.props.tutorial == SDT.imageOptions && classes.highlight,
-            )}
+            sx={{
+              mb: 2,
+              borderWidth: this.props.tutorial == SDT.imageOptions ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             {(this.props.scene.generatorWeights != null ||
               this.props.isConfig) && (
@@ -163,7 +127,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
               </Grid>
             )}
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Image Filter</InputLabel>
                 <Select
                   variant="standard"
@@ -176,7 +140,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
               <Collapse in={this.props.scene.weightFunction == WF.sources}>
@@ -202,13 +166,15 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
               item
               xs={12}
               sm={this.props.sidebar ? 12 : 6}
-              className={clsx(
-                this.props.scene.imageTypeFilter == IF.videos &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.imageTypeFilter == IF.videos
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
               <Collapse in={this.props.scene.imageTypeFilter != IF.videos}>
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Image Orientation</InputLabel>
                   <Select
                     variant="standard"
@@ -221,19 +187,28 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Collapse>
             </Grid>
-            <Grid item xs={12} sm={6} className={classes.noPadding}></Grid>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              sx={{
+                p: "0 !important",
+              }}
+            ></Grid>
             <Grid
               item
               xs={12}
               sm={this.props.sidebar ? 12 : 6}
-              className={clsx(
-                (this.props.scene.imageTypeFilter == IF.stills ||
-                  this.props.scene.imageTypeFilter == IF.videos) &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.imageTypeFilter == IF.stills ||
+                  this.props.scene.imageTypeFilter == IF.videos
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
               <Collapse
                 in={
@@ -241,7 +216,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                   this.props.scene.imageTypeFilter != IF.videos
                 }
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>GIF Options</InputLabel>
                   <Select
                     variant="standard"
@@ -254,20 +229,22 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Collapse>
             </Grid>
             <Grid
               item
               xs={12}
               sm={this.props.sidebar ? 12 : 6}
-              className={clsx(
-                (this.props.scene.imageTypeFilter == IF.stills ||
+              sx={{
+                p:
+                  this.props.scene.imageTypeFilter == IF.stills ||
                   this.props.scene.imageTypeFilter == IF.videos ||
                   this.props.scene.gifOption == GO.none ||
-                  this.props.scene.gifOption == GO.full) &&
-                  classes.noPadding,
-              )}
+                  this.props.scene.gifOption == GO.full
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
               <Collapse
                 in={
@@ -347,19 +324,23 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
           container
           spacing={2}
           alignItems="center"
-          className={clsx(
-            this.props.tutorial == SDT.videoOptions && classes.highlight,
-          )}
+          sx={{
+            borderWidth: this.props.tutorial == SDT.videoOptions ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
           <Grid
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 6}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -367,7 +348,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 this.props.scene.imageTypeFilter != IF.images
               }
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Video Options</InputLabel>
                 <Select
                   variant="standard"
@@ -380,20 +361,22 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Collapse>
           </Grid>
           <Grid
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 6}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
                 this.props.scene.imageTypeFilter == IF.images ||
                 this.props.scene.videoOption == VO.none ||
-                this.props.scene.videoOption == VO.full) &&
-                classes.noPadding,
-            )}
+                this.props.scene.videoOption == VO.full
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -473,11 +456,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                 item
                 xs={12}
                 sm={this.props.sidebar ? 12 : 6}
-                className={clsx(
-                  (this.props.scene.imageTypeFilter == IF.stills ||
-                    this.props.scene.imageTypeFilter == IF.images) &&
-                    classes.noPadding,
-                )}
+                sx={{
+                  p:
+                    this.props.scene.imageTypeFilter == IF.stills ||
+                    this.props.scene.imageTypeFilter == IF.images
+                      ? "0 !important"
+                      : undefined,
+                }}
               >
                 <Collapse
                   in={
@@ -485,7 +470,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                     this.props.scene.imageTypeFilter != IF.images
                   }
                 >
-                  <FormControl variant="standard" className={classes.fullWidth}>
+                  <FullWidthFormControl variant="standard">
                     <InputLabel>Video Orientation</InputLabel>
                     <Select
                       variant="standard"
@@ -498,21 +483,30 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
                         </MenuItem>
                       ))}
                     </Select>
-                  </FormControl>
+                  </FullWidthFormControl>
                 </Collapse>
               </Grid>
-              <Grid item xs={12} sm={6} className={classes.noPadding}></Grid>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                sx={{
+                  p: "0 !important",
+                }}
+              ></Grid>
             </React.Fragment>
           )}
           <Grid
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 8}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -595,11 +589,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -622,11 +618,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
           <Grid
             item
             xs={12}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -663,11 +661,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             sm={this.props.sidebar ? 12 : 4}
             md={this.props.sidebar ? 12 : 6}
             lg={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -693,11 +693,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             sm={this.props.sidebar ? 12 : 4}
             md={this.props.sidebar ? 12 : 6}
             lg={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -730,17 +732,19 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             sm={this.props.sidebar ? 12 : 4}
             md={this.props.sidebar ? 12 : 6}
             lg={this.props.sidebar ? 12 : 4}
-            className={classes.noPadding}
+            sx={{ p: "0 !important" }}
           ></Grid>
           <Grid
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
-                this.props.scene.imageTypeFilter == IF.images) &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -764,12 +768,14 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
                 this.props.scene.imageTypeFilter == IF.images ||
-                this.props.scene.playVideoClips) &&
-                classes.noPadding,
-            )}
+                this.props.scene.playVideoClips
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -802,12 +808,14 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              (this.props.scene.imageTypeFilter == IF.stills ||
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills ||
                 this.props.scene.imageTypeFilter == IF.images ||
-                this.props.scene.playVideoClips) &&
-                classes.noPadding,
-            )}
+                this.props.scene.playVideoClips
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -839,11 +847,13 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
           <Grid
             item
             xs={12}
-            className={clsx(
-              this.props.scene.imageTypeFilter == IF.stills &&
-                this.props.scene.imageTypeFilter == IF.images &&
-                classes.noPadding,
-            )}
+            sx={{
+              p:
+                this.props.scene.imageTypeFilter == IF.stills &&
+                this.props.scene.imageTypeFilter == IF.images
+                  ? "0 !important"
+                  : undefined,
+            }}
           >
             <Collapse
               in={
@@ -870,12 +880,7 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             </Collapse>
           </Grid>
         </Grid>
-        <Grid
-          container
-          spacing={2}
-          alignItems="center"
-          className={classes.gutterBottom}
-        >
+        <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
           <Grid item xs={12}>
             <Divider />
           </Grid>
@@ -886,9 +891,11 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
               item
               xs={12}
               sm={this.props.sidebar ? 12 : 4}
-              className={clsx(
-                this.props.tutorial == SDT.weighting && classes.highlight,
-              )}
+              sx={{
+                borderWidth: this.props.tutorial == SDT.weighting ? 2 : 0,
+                borderColor: "secondary.main",
+                borderStyle: "solid",
+              }}
             >
               <FormControl variant="standard" component="fieldset">
                 <FormLabel component="legend">Weighting</FormLabel>
@@ -913,9 +920,11 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              this.props.tutorial == SDT.sordering && classes.highlight,
-            )}
+            sx={{
+              borderWidth: this.props.tutorial == SDT.sordering ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             <FormControl variant="standard" component="fieldset">
               <FormLabel component="legend">Source Ordering</FormLabel>
@@ -958,9 +967,11 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
             item
             xs={12}
             sm={this.props.sidebar ? 12 : 4}
-            className={clsx(
-              this.props.tutorial == SDT.ordering && classes.highlight,
-            )}
+            sx={{
+              borderWidth: this.props.tutorial == SDT.ordering ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             <FormControl variant="standard" component="fieldset">
               <FormLabel component="legend">Image Ordering</FormLabel>
@@ -1048,5 +1059,4 @@ class ImageVideoCard extends React.Component<ImageVideoCardProps> {
   }
 }
 
-(ImageVideoCard as any).displayName = "ImageVideoCard";
-export default withStyles(styles)(ImageVideoCard);
+export default ImageVideoCard;

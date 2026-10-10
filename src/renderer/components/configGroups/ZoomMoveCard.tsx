@@ -1,6 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
-
 import {
   Collapse,
   Divider,
@@ -15,65 +13,38 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
-
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, HTF, SDT, TF, VTF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
+import { SceneBase } from "../../../common/SceneBase";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    noPadding: {
-      padding: "0 !important",
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important`,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthPaddedCollapse = styled(FullWidthCollapse)(({ theme }) => ({
+  [theme.breakpoints.up("sm")]: {
+    paddingLeft: theme.spacing(1),
+  },
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
+const PercentInputGrid = styled(Grid)(({ theme }) => ({
+  minWidth: theme.spacing(11),
+}));
 
-interface ZoomMoveCardProps {
-  classes: any;
-  scene: Scene | SceneSettings;
+interface ZoomMoveCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
-  sidebar: boolean;
+  sidebar?: boolean;
   tutorial: string;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
 interface ZoomMoveCardState {
@@ -82,11 +53,11 @@ interface ZoomMoveCardState {
   transSinRate: number;
 }
 
-class ZoomMoveCard extends React.Component<
-  ZoomMoveCardProps,
+class ZoomMoveCard<T extends SceneBase> extends React.Component<
+  ZoomMoveCardProps<T>,
   ZoomMoveCardState
 > {
-  constructor(props: ZoomMoveCardProps) {
+  constructor(props: ZoomMoveCardProps<T>) {
     super(props);
 
     const horizTransLevel =
@@ -111,7 +82,7 @@ class ZoomMoveCard extends React.Component<
     };
   }
 
-  componentDidUpdate(props: ZoomMoveCardProps) {
+  componentDidUpdate(props: ZoomMoveCardProps<T>) {
     if (props.scene.horizTransLevel != this.props.scene.horizTransLevel) {
       const horizTransLevel =
         typeof this.props.scene.horizTransLevel === "number"
@@ -139,8 +110,6 @@ class ZoomMoveCard extends React.Component<
   }
 
   render() {
-    const classes = this.props.classes;
-
     const enabled =
       this.props.scene.zoom ||
       this.props.scene.horizTransType != HTF.none ||
@@ -217,19 +186,23 @@ class ZoomMoveCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial != null &&
+          sx={{
+            pointerEvents:
+              this.props.tutorial != null &&
               this.props.tutorial != SDT.zoom1 &&
-              this.props.tutorial != SDT.zoom2 &&
-              classes.disable,
-          )}
+              this.props.tutorial != SDT.zoom2
+                ? "none"
+                : undefined,
+          }}
         >
           <Grid container alignItems="center">
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 5}>
               <FormControlLabel
-                className={clsx(
-                  this.props.tutorial == SDT.zoom1 && classes.highlight,
-                )}
+                sx={{
+                  borderWidth: this.props.tutorial == SDT.zoom1 ? 2 : 0,
+                  borderColor: "secondary.main",
+                  borderStyle: "solid",
+                }}
                 control={
                   <Switch
                     checked={this.props.scene.zoom}
@@ -243,16 +216,16 @@ class ZoomMoveCard extends React.Component<
               item
               xs={12}
               sm={this.props.sidebar ? 12 : 7}
-              className={clsx(this.props.tutorial != null && classes.disable)}
+              sx={{
+                pointerEvents: this.props.tutorial != null ? "none" : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.zoom}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
-              >
+              <FullWidthPaddedCollapse in={this.props.scene.zoom}>
                 <FormControlLabel
-                  className={clsx(
-                    this.props.tutorial == SDT.zoom1 && classes.disable,
-                  )}
+                  sx={{
+                    pointerEvents:
+                      this.props.tutorial == SDT.zoom1 ? "none" : undefined,
+                  }}
                   control={
                     <Switch
                       checked={this.props.scene.zoomRandom}
@@ -262,15 +235,16 @@ class ZoomMoveCard extends React.Component<
                   }
                   label="Randomize Zoom"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
           </Grid>
-          <Collapse
+          <FullWidthCollapse
             in={this.props.scene.zoom && !this.props.scene.zoomRandom}
-            className={clsx(
-              classes.fullWidth,
-              this.props.tutorial == SDT.zoom2 && classes.highlight,
-            )}
+            sx={{
+              borderWidth: this.props.tutorial == SDT.zoom2 ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -278,11 +252,12 @@ class ZoomMoveCard extends React.Component<
                 <Slider
                   min={1}
                   max={50}
-                  className={clsx(
-                    this.props.tutorial == SDT.zoom2 &&
-                      zoomStart == 0.8 &&
-                      classes.disable,
-                  )}
+                  sx={{
+                    pointerEvents:
+                      this.props.tutorial == SDT.zoom2 && zoomStart == 0.8
+                        ? "none"
+                        : undefined,
+                  }}
                   defaultValue={zoomStart * 10}
                   onChangeCommitted={(e, value) =>
                     this.onZoomSliderChange("zoomStart", e, value)
@@ -297,11 +272,12 @@ class ZoomMoveCard extends React.Component<
                 <Slider
                   min={1}
                   max={50}
-                  className={clsx(
-                    this.props.tutorial == SDT.zoom2 &&
-                      zoomEnd == 1.2 &&
-                      classes.disable,
-                  )}
+                  sx={{
+                    pointerEvents:
+                      this.props.tutorial == SDT.zoom2 && zoomEnd == 1.2
+                        ? "none"
+                        : undefined,
+                  }}
                   defaultValue={zoomEnd * 10}
                   onChangeCommitted={(e, value) =>
                     this.onZoomSliderChange("zoomEnd", e, value)
@@ -312,10 +288,9 @@ class ZoomMoveCard extends React.Component<
                 />
               </Grid>
             </Grid>
-          </Collapse>
-          <Collapse
+          </FullWidthCollapse>
+          <FullWidthCollapse
             in={this.props.scene.zoom && this.props.scene.zoomRandom}
-            className={classes.fullWidth}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -375,17 +350,25 @@ class ZoomMoveCard extends React.Component<
                 />
               </Grid>
             </Grid>
-          </Collapse>
-        </Grid>
-        <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
-          <Collapse in={enabled} className={classes.fullWidth}>
-            <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(this.props.tutorial && classes.disable)}
+          sx={{
+            p: !enabled ? "0 !important" : undefined,
+          }}
+        >
+          <FullWidthCollapse in={enabled}>
+            <Divider />
+          </FullWidthCollapse>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            pointerEvents: this.props.tutorial ? "none" : undefined,
+          }}
         >
           <Grid container spacing={2} alignItems="center">
             <Grid
@@ -398,7 +381,7 @@ class ZoomMoveCard extends React.Component<
                   : 12
               }
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Move Horizontally</InputLabel>
                 <Select
                   variant="standard"
@@ -411,7 +394,7 @@ class ZoomMoveCard extends React.Component<
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid
               item
@@ -422,14 +405,15 @@ class ZoomMoveCard extends React.Component<
                   ? 7
                   : 12
               }
-              className={clsx(
-                this.props.scene.horizTransType == HTF.none &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.horizTransType == HTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthPaddedCollapse
                 in={this.props.scene.horizTransType != HTF.none}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
@@ -441,22 +425,23 @@ class ZoomMoveCard extends React.Component<
                   }
                   label="Randomize"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               item
               xs={12}
-              className={clsx(
-                this.props.scene.horizTransType == HTF.none &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.horizTransType == HTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthCollapse
                 in={
                   this.props.scene.horizTransType != HTF.none &&
                   !this.props.scene.horizTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
@@ -471,7 +456,7 @@ class ZoomMoveCard extends React.Component<
                       aria-labelledby="horiz-trans-level-slider"
                     />
                   </Grid>
-                  <Grid item xs={3} className={classes.percentInput}>
+                  <PercentInputGrid item xs={3}>
                     <TextField
                       variant="standard"
                       value={this.state.horizTransLevel}
@@ -479,12 +464,15 @@ class ZoomMoveCard extends React.Component<
                       onChange={(e) => this.onIntInput("horizTransLevel", e)}
                       onBlur={(e) => this.blurIntKey("horizTransLevel", e)}
                       InputProps={{
+                        sx: {
+                          pl: 1,
+                          pt: 0,
+                        },
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
                         ),
                       }}
                       inputProps={{
-                        className: classes.endInput,
                         step: 5,
                         min: 0,
                         max: 100,
@@ -492,15 +480,14 @@ class ZoomMoveCard extends React.Component<
                         "aria-labelledby": "horiz-trans-level-slider",
                       }}
                     />
-                  </Grid>
+                  </PercentInputGrid>
                 </Grid>
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={
                   this.props.scene.horizTransType != HTF.none &&
                   this.props.scene.horizTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -528,19 +515,27 @@ class ZoomMoveCard extends React.Component<
                     />
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
-          <Collapse in={enabled} className={classes.fullWidth}>
-            <Divider />
-          </Collapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(this.props.tutorial && classes.disable)}
+          sx={{
+            p: !enabled ? "0 !important" : undefined,
+          }}
+        >
+          <FullWidthCollapse in={enabled}>
+            <Divider />
+          </FullWidthCollapse>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            pointerEvents: this.props.tutorial ? "none" : undefined,
+          }}
         >
           <Grid container spacing={2} alignItems="center">
             <Grid
@@ -553,7 +548,7 @@ class ZoomMoveCard extends React.Component<
                   : 12
               }
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Move Vertically</InputLabel>
                 <Select
                   variant="standard"
@@ -566,7 +561,7 @@ class ZoomMoveCard extends React.Component<
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid
               item
@@ -577,13 +572,15 @@ class ZoomMoveCard extends React.Component<
                   ? 7
                   : 12
               }
-              className={clsx(
-                this.props.scene.vertTransType == VTF.none && classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.vertTransType == VTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthPaddedCollapse
                 in={this.props.scene.vertTransType != VTF.none}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
@@ -595,21 +592,23 @@ class ZoomMoveCard extends React.Component<
                   }
                   label="Randomize"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               item
               xs={12}
-              className={clsx(
-                this.props.scene.vertTransType == VTF.none && classes.noPadding,
-              )}
+              sx={{
+                p:
+                  this.props.scene.vertTransType == VTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthCollapse
                 in={
                   this.props.scene.vertTransType != VTF.none &&
                   !this.props.scene.vertTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
@@ -624,7 +623,7 @@ class ZoomMoveCard extends React.Component<
                       aria-labelledby="vert-trans-level-slider"
                     />
                   </Grid>
-                  <Grid item xs={3} className={classes.percentInput}>
+                  <PercentInputGrid item xs={3}>
                     <TextField
                       variant="standard"
                       value={this.state.vertTransLevel}
@@ -632,12 +631,15 @@ class ZoomMoveCard extends React.Component<
                       onChange={(e) => this.onIntInput("vertTransLevel", e)}
                       onBlur={(e) => this.blurIntKey("vertTransLevel", e)}
                       InputProps={{
+                        sx: {
+                          pl: 1,
+                          pt: 0,
+                        },
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
                         ),
                       }}
                       inputProps={{
-                        className: classes.endInput,
                         step: 5,
                         min: 0,
                         max: 100,
@@ -645,15 +647,14 @@ class ZoomMoveCard extends React.Component<
                         "aria-labelledby": "vert-trans-level-slider",
                       }}
                     />
-                  </Grid>
+                  </PercentInputGrid>
                 </Grid>
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={
                   this.props.scene.vertTransType != VTF.none &&
                   this.props.scene.vertTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -681,35 +682,46 @@ class ZoomMoveCard extends React.Component<
                     />
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
-          <Collapse in={enabled} className={classes.fullWidth}>
-            <Divider />
-          </Collapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            !enabled && classes.noPadding,
-            this.props.tutorial != null &&
-              this.props.tutorial != SDT.zoom3 &&
-              classes.disable,
-          )}
+          sx={{
+            p: !enabled ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={enabled} className={classes.fullWidth}>
+          <FullWidthCollapse in={enabled}>
+            <Divider />
+          </FullWidthCollapse>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            p: !enabled ? "0 !important" : undefined,
+            pointerEvents:
+              this.props.tutorial != null && this.props.tutorial != SDT.zoom3
+                ? "none"
+                : undefined,
+          }}
+        >
+          <FullWidthCollapse in={enabled}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 4}>
-                <FormControl
+                <FullWidthFormControl
                   variant="standard"
-                  className={clsx(
-                    classes.fullWidth,
-                    this.props.tutorial == SDT.zoom3 &&
-                      clsx(classes.highlight, classes.backdropTop),
-                  )}
+                  sx={{
+                    borderWidth: this.props.tutorial == SDT.zoom3 ? 2 : 0,
+                    borderColor: "secondary.main",
+                    borderStyle: "solid",
+                    zIndex:
+                      this.props.tutorial == SDT.zoom3
+                        ? (theme) => `${theme.zIndex.modal + 1} !important`
+                        : undefined,
+                  }}
                 >
                   <InputLabel>Timing</InputLabel>
                   <Select
@@ -717,7 +729,12 @@ class ZoomMoveCard extends React.Component<
                     value={this.props.scene.transTF}
                     MenuProps={
                       this.props.tutorial == SDT.zoom3
-                        ? { className: classes.backdropTop }
+                        ? {
+                            sx: {
+                              zIndex: (theme) =>
+                                `${theme.zIndex.modal + 1} !important`,
+                            },
+                          }
                         : {}
                     }
                     onChange={(e) => this.onInput("transTF", e)}
@@ -746,13 +763,10 @@ class ZoomMoveCard extends React.Component<
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
-                  in={this.props.scene.transTF == TF.sin}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.transTF == TF.sin}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -773,14 +787,19 @@ class ZoomMoveCard extends React.Component<
                         aria-labelledby="trans-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
                         value={this.state.transSinRate}
                         onChange={(e) => this.onIntInput("transSinRate", e)}
                         onBlur={(e) => this.blurIntKey("transSinRate", e)}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -788,13 +807,10 @@ class ZoomMoveCard extends React.Component<
                           "aria-labelledby": "trans-sin-rate-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.transTF == TF.bpm}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.transTF == TF.bpm}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -813,11 +829,8 @@ class ZoomMoveCard extends React.Component<
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="trans-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.transTF == TF.constant}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.transTF == TF.constant}>
                   <TextField
                     variant="outlined"
                     label="For"
@@ -836,27 +849,28 @@ class ZoomMoveCard extends React.Component<
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            !enabled && classes.noPadding,
-            this.props.tutorial != null && classes.disable,
-            this.props.tutorial == SDT.zoom4 && classes.highlight,
-          )}
+          sx={{
+            p: !enabled ? "0 !important" : undefined,
+            pointerEvents: this.props.tutorial != null ? "none" : undefined,
+            borderWidth: this.props.tutorial == SDT.zoom4 ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               enabled &&
               (this.props.scene.transTF == TF.random ||
                 this.props.scene.transTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -900,23 +914,26 @@ class ZoomMoveCard extends React.Component<
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         {this.props.easingControls && (
           <React.Fragment>
-            <Grid item xs={12} className={clsx(!enabled && classes.noPadding)}>
-              <Collapse in={enabled} className={classes.fullWidth}>
+            <Grid
+              item
+              xs={12}
+              sx={{
+                p: !enabled ? "0 !important" : undefined,
+              }}
+            >
+              <FullWidthCollapse in={enabled}>
                 <Divider />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
             <Grid item xs={12}>
-              <Collapse in={enabled} className={classes.fullWidth}>
+              <FullWidthCollapse in={enabled}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>Easing</InputLabel>
                       <Select
                         variant="standard"
@@ -929,16 +946,15 @@ class ZoomMoveCard extends React.Component<
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.transEase == EA.polyIn ||
                         this.props.scene.transEase == EA.polyOut ||
                         this.props.scene.transEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -958,14 +974,13 @@ class ZoomMoveCard extends React.Component<
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.transEase == EA.backIn ||
                         this.props.scene.transEase == EA.backOut ||
                         this.props.scene.transEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -985,16 +1000,15 @@ class ZoomMoveCard extends React.Component<
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.transEase == EA.elasticIn ||
                         this.props.scene.transEase == EA.elasticOut ||
                         this.props.scene.transEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -1014,16 +1028,15 @@ class ZoomMoveCard extends React.Component<
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.transEase == EA.elasticIn ||
                         this.props.scene.transEase == EA.elasticOut ||
                         this.props.scene.transEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -1043,10 +1056,10 @@ class ZoomMoveCard extends React.Component<
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </React.Fragment>
         )}
@@ -1147,5 +1160,4 @@ class ZoomMoveCard extends React.Component<
   }
 }
 
-(ZoomMoveCard as any).displayName = "ZoomMoveCard";
-export default withStyles(styles)(ZoomMoveCard);
+export default ZoomMoveCard;

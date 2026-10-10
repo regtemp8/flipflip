@@ -1,34 +1,17 @@
 import Select from "react-select";
 import * as React from "react";
-
-import { Theme } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 import { grey } from "@mui/material/colors";
 
 import Scene from "../../../common/Scene";
 import SceneGrid from "../../../common/SceneGrid";
 import { areWeightsValid } from "../../data/utils";
+import { SceneBase } from "../../../common/SceneBase";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    searchSelect: {
-      minWidth: 200,
-      maxWidth: `calc(100% - ${theme.spacing(7)})`,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900],
-    },
-    select: {
-      color: grey[900],
-    },
-  });
-
-interface SceneSelectProps {
-  classes: any;
+interface SceneSelectProps<T extends SceneBase> {
   allScenes: Array<Scene>;
   value: number;
   allSceneGrids?: Array<SceneGrid>;
-  scene?: Scene;
+  scene?: T;
   menuIsOpen?: boolean;
   autoFocus?: boolean;
   includeExtra?: boolean;
@@ -37,13 +20,14 @@ interface SceneSelectProps {
   onChange: (sceneID: number) => void;
 }
 
-class SceneSelect extends React.Component<SceneSelectProps> {
-  constructor(props: SceneSelectProps) {
+class SceneSelect<T extends SceneBase> extends React.Component<
+  SceneSelectProps<T>
+> {
+  constructor(props: SceneSelectProps<T>) {
     super(props);
   }
 
   render() {
-    const classes = this.props.classes;
     let defaults = [this.props.onlyExtra ? "-1" : "0"];
     if (this.props.includeExtra) {
       defaults = ["0", "-1"];
@@ -66,7 +50,9 @@ class SceneSelect extends React.Component<SceneSelectProps> {
       .filter((o) => o.label != "library_scene_temp");
     return (
       <Select
-        className={classes.select}
+        sx={{
+          color: grey[900],
+        }}
         value={{
           label: this.props.getSceneName(this.props.value.toString()),
           value: this.props.value,
@@ -85,5 +71,4 @@ class SceneSelect extends React.Component<SceneSelectProps> {
   };
 }
 
-(SceneSelect as any).displayName = "SceneSelect";
-export default withStyles(styles)(SceneSelect);
+export default SceneSelect;

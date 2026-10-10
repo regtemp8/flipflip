@@ -21,11 +21,9 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, SDT, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
-import Audio from "../../../common/Audio";
 import { styled } from "@mui/material/styles";
+import { SceneBase } from "../../../common/SceneBase";
 
 const FullWidthCollapse = styled(Collapse)(() => ({
   width: "100%",
@@ -34,26 +32,23 @@ const FullWidthFormControl = styled(FormControl)(() => ({
   width: "100%",
 }));
 
-interface CrossFadeCardProps {
-  scene: Scene | SceneSettings;
+interface CrossFadeCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
   sidebar?: boolean;
   tutorial?: string;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
 interface CrossFadeCardState {
   fadeSinRate: number;
 }
 
-class CrossFadeCard extends React.Component<
-  CrossFadeCardProps,
+class CrossFadeCard<T extends SceneBase> extends React.Component<
+  CrossFadeCardProps<T>,
   CrossFadeCardState
 > {
-  constructor(props: CrossFadeCardProps) {
+  constructor(props: CrossFadeCardProps<T>) {
     super(props);
 
     this.state = {
@@ -64,7 +59,7 @@ class CrossFadeCard extends React.Component<
     };
   }
 
-  componentDidUpdate(props: CrossFadeCardProps) {
+  componentDidUpdate(props: CrossFadeCardProps<T>) {
     if (props.scene.fadeSinRate != this.props.scene.fadeSinRate) {
       this.setState({
         fadeSinRate:
@@ -93,11 +88,7 @@ class CrossFadeCard extends React.Component<
         ? this.props.scene.fadeDurationMax
         : 0;
 
-    const playlists = this.props.scene.audioPlaylists as {
-      audios: Audio[];
-      shuffle: boolean;
-      repeat: string;
-    }[];
+    const playlists = this.props.scene.audioPlaylists
     const hasBPM =
       !!playlists &&
       playlists.length &&

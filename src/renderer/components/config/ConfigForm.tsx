@@ -553,7 +553,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
   };
 
   onUpdateDefaultScene = (
-    defualtScene: SceneSettings,
+    defaultScene: SceneSettings,
     fn: (settings: SceneSettings) => void,
   ) => {
     const newConfig = this.state.config;

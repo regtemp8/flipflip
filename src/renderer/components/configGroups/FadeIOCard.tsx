@@ -21,11 +21,10 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 import { styled } from "@mui/material/styles";
+import { SceneBase } from "../../../common/SceneBase";
 
 const FullWidthCollapse = styled(Collapse)(() => ({
   width: "100%",
@@ -34,23 +33,23 @@ const FullWidthFormControl = styled(FormControl)(() => ({
   width: "100%",
 }));
 
-interface FadeIOCardProps {
-  scene: Scene | SceneSettings;
+interface FadeIOCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
   sidebar?: boolean;
   tutorial?: string;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
 interface FadeIOCardState {
   fadeIOSinRate: number;
 }
 
-class FadeIOCard extends React.Component<FadeIOCardProps, FadeIOCardState> {
-  constructor(props: FadeIOCardProps) {
+class FadeIOCard<T extends SceneBase> extends React.Component<
+  FadeIOCardProps<T>,
+  FadeIOCardState
+> {
+  constructor(props: FadeIOCardProps<T>) {
     super(props);
 
     const fadeIOSinRate =
@@ -62,7 +61,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps, FadeIOCardState> {
     };
   }
 
-  componentDidUpdate(props: FadeIOCardProps) {
+  componentDidUpdate(props: FadeIOCardProps<T>) {
     if (props.scene.fadeIOSinRate != this.props.scene.fadeIOSinRate) {
       const fadeIOSinRate =
         typeof this.props.scene.fadeIOSinRate === "number"

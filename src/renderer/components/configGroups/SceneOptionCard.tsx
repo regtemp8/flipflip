@@ -1,6 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
-
 import {
   Button,
   Collapse,
@@ -22,21 +20,15 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
-
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ListIcon from "@mui/icons-material/List";
 
 import { BT, IT, SDT, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import SceneSelect from "./SceneSelect";
 import en from "../../../common/en";
 import Overlay from "../../../common/Overlay";
@@ -47,81 +39,31 @@ import MultiSceneSelect from "./MultiSceneSelect";
 import { areWeightsValid } from "../../data/utils";
 import Audio from "../../../common/Audio";
 import SceneGrid from "../../../common/SceneGrid";
+import { SceneBase } from "../../../common/SceneBase";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    noPadding: {
-      padding: "0 !important",
-    },
-    noTopPadding: {
-      paddingTop: "0 !important",
-    },
-    selectOffset: {
-      paddingTop: "10px !important",
-      paddingBottom: "0 !important",
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-    addButton: {
-      boxShadow: "none",
-    },
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-    randomScene: {
-      display: "block",
-    },
-    selectText: {
-      color: theme.palette.text.secondary,
-    },
-    error: {
-      color: theme.palette.error.main,
-    },
-    noScroll: {
-      overflow: "visible",
-    },
-    randomSceneDialog: {
-      minWidth: 400,
-      overflow: "visible",
-    },
-    noBPM: {
-      float: "right",
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
+const PercentInputGrid = styled(Grid)(({ theme }) => ({
+  minWidth: theme.spacing(11),
+}));
+const SelectOffsetGrid = styled(Grid)(() => ({
+  paddingTop: "10px !important",
+  paddingBottom: "0 !important",
+}));
 
-interface SceneOptionCardProps {
-  classes: any;
+interface SceneOptionCardProps<T extends SceneBase> {
   allScenes: Array<Scene>;
   allSceneGrids: Array<SceneGrid>;
-  scene: Scene | SceneSettings;
-  sidebar: boolean;
-  tutorial: string;
+  scene: T;
+  sidebar?: boolean;
+  tutorial?: string;
   isTagging?: boolean;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
   onGenerate?: (scene: Scene | SceneGrid, children?: boolean) => void;
 }
 
@@ -131,11 +73,11 @@ interface SceneOptionCardState {
   randomSceneList?: Array<number>;
 }
 
-class SceneOptionCard extends React.Component<
-  SceneOptionCardProps,
+class SceneOptionCard<T extends SceneBase> extends React.Component<
+  SceneOptionCardProps<T>,
   SceneOptionCardState
 > {
-  constructor(props: SceneOptionCardProps) {
+  constructor(props: SceneOptionCardProps<T>) {
     super(props);
 
     const timingSinRate =
@@ -151,7 +93,7 @@ class SceneOptionCard extends React.Component<
     this.state = { timingSinRate, backForthSinRate };
   }
 
-  componentDidUpdate(props: SceneOptionCardProps) {
+  componentDidUpdate(props: SceneOptionCardProps<T>) {
     if (props.scene.timingSinRate != this.props.scene.timingSinRate) {
       const timingSinRate =
         typeof this.props.scene.timingSinRate === "number"
@@ -171,8 +113,6 @@ class SceneOptionCard extends React.Component<
   }
 
   render() {
-    const classes = this.props.classes;
-
     const timingBPMMulti =
       typeof this.props.scene.timingBPMMulti === "number"
         ? this.props.scene.timingBPMMulti
@@ -188,10 +128,6 @@ class SceneOptionCard extends React.Component<
     const timingMax =
       typeof this.props.scene.timingMax === "number"
         ? this.props.scene.timingMax
-        : 0;
-    const backForthSinRate =
-      typeof this.props.scene.backForthSinRate === "number"
-        ? this.props.scene.backForthSinRate
         : 0;
     const backForthBPMMulti =
       typeof this.props.scene.backForthBPMMulti === "number"
@@ -233,9 +169,11 @@ class SceneOptionCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial == SDT.timing && classes.highlight,
-          )}
+          sx={{
+            borderWidth: this.props.tutorial == SDT.timing ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
           <Grid container spacing={2} alignItems="center">
             <Grid
@@ -244,7 +182,7 @@ class SceneOptionCard extends React.Component<
               sm={this.props.sidebar ? 12 : 4}
               style={{ paddingTop: 10 }}
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Timing</InputLabel>
                 <Select
                   variant="standard"
@@ -263,7 +201,7 @@ class SceneOptionCard extends React.Component<
                             >
                               <ErrorOutlineIcon
                                 color="error"
-                                className={classes.noBPM}
+                                sx={{ float: "right" }}
                               />
                             </Tooltip>
                           )}
@@ -278,13 +216,10 @@ class SceneOptionCard extends React.Component<
                     }
                   })}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-              <Collapse
-                in={this.props.scene.timingFunction == TF.sin}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.timingFunction == TF.sin}>
                 <Typography
                   variant="caption"
                   component="div"
@@ -305,14 +240,19 @@ class SceneOptionCard extends React.Component<
                       aria-labelledby="scene-sin-rate-slider"
                     />
                   </Grid>
-                  <Grid item xs={3} className={classes.percentInput}>
+                  <PercentInputGrid item xs={3}>
                     <TextField
                       variant="standard"
                       value={this.state.timingSinRate}
                       onChange={(e) => this.onIntInput("timingSinRate", e)}
                       onBlur={(e) => this.blurIntKey("timingSinRate", e)}
+                      InputProps={{
+                        sx: {
+                          pl: 1,
+                          pt: 0,
+                        },
+                      }}
                       inputProps={{
-                        className: classes.endInput,
                         step: 5,
                         min: 0,
                         max: 100,
@@ -320,13 +260,10 @@ class SceneOptionCard extends React.Component<
                         "aria-labelledby": "scene-sin-rate-slider",
                       }}
                     />
-                  </Grid>
+                  </PercentInputGrid>
                 </Grid>
-              </Collapse>
-              <Collapse
-                in={this.props.scene.timingFunction == TF.bpm}
-                className={classes.fullWidth}
-              >
+              </FullWidthCollapse>
+              <FullWidthCollapse in={this.props.scene.timingFunction == TF.bpm}>
                 <Typography
                   variant="caption"
                   component="div"
@@ -345,10 +282,9 @@ class SceneOptionCard extends React.Component<
                   valueLabelFormat={(v) => v / 10 + "x"}
                   aria-labelledby="scene-bpm-multi-slider"
                 />
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={this.props.scene.timingFunction == TF.constant}
-                className={classes.fullWidth}
               >
                 <TextField
                   variant="outlined"
@@ -368,17 +304,16 @@ class SceneOptionCard extends React.Component<
                     type: "number",
                   }}
                 />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.timingFunction == TF.random ||
               this.props.scene.timingFunction == TF.sin
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -422,7 +357,7 @@ class SceneOptionCard extends React.Component<
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
           <Divider />
@@ -430,9 +365,11 @@ class SceneOptionCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial == SDT.backForth && classes.highlight,
-          )}
+          sx={{
+            borderWidth: this.props.tutorial == SDT.backForth ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
           <Grid container alignItems="center">
             <Grid item xs={12}>
@@ -460,7 +397,7 @@ class SceneOptionCard extends React.Component<
                 sm={this.props.sidebar ? 12 : 4}
                 style={{ paddingTop: 10 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Back/Forth Timing</InputLabel>
                   <Select
                     variant="standard"
@@ -479,7 +416,7 @@ class SceneOptionCard extends React.Component<
                               >
                                 <ErrorOutlineIcon
                                   color="error"
-                                  className={classes.noBPM}
+                                  sx={{ float: "right" }}
                                 />
                               </Tooltip>
                             )}
@@ -494,13 +431,10 @@ class SceneOptionCard extends React.Component<
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
-                  in={this.props.scene.backForthTF == TF.sin}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.backForthTF == TF.sin}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -521,14 +455,19 @@ class SceneOptionCard extends React.Component<
                         aria-labelledby="bf-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
                         value={this.state.backForthSinRate}
                         onChange={(e) => this.onIntInput("backForthSinRate", e)}
                         onBlur={(e) => this.blurIntKey("backForthSinRate", e)}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -536,13 +475,10 @@ class SceneOptionCard extends React.Component<
                           "aria-labelledby": "bf-sin-rate-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.backForthTF == TF.bpm}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.backForthTF == TF.bpm}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -561,10 +497,9 @@ class SceneOptionCard extends React.Component<
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="bf-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={this.props.scene.backForthTF == TF.constant}
-                  className={classes.fullWidth}
                 >
                   <TextField
                     variant="outlined"
@@ -584,7 +519,7 @@ class SceneOptionCard extends React.Component<
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
           </Collapse>
@@ -592,21 +527,22 @@ class SceneOptionCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            !(
+          sx={{
+            p: !(
               this.props.scene.backForth &&
               (this.props.scene.backForthTF == TF.random ||
                 this.props.scene.backForthTF == TF.sin)
-            ) && classes.noPadding,
-          )}
+            )
+              ? "0 !important"
+              : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.backForth &&
               (this.props.scene.backForthTF == TF.random ||
                 this.props.scene.backForthTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -650,7 +586,7 @@ class SceneOptionCard extends React.Component<
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
           <Divider />
@@ -658,9 +594,11 @@ class SceneOptionCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial == SDT.imageSizing && classes.highlight,
-          )}
+          sx={{
+            borderWidth: this.props.tutorial == SDT.imageSizing ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
           <Grid container spacing={2} alignItems="center">
             <Grid
@@ -668,7 +606,7 @@ class SceneOptionCard extends React.Component<
               xs={this.props.sidebar ? 8 : 12}
               sm={this.props.sidebar ? 8 : 6}
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Image Sizing</InputLabel>
                 <Select
                   variant="standard"
@@ -681,7 +619,7 @@ class SceneOptionCard extends React.Component<
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 6} />
             <Grid
@@ -689,7 +627,7 @@ class SceneOptionCard extends React.Component<
               xs={this.props.sidebar ? 8 : 12}
               sm={this.props.sidebar ? 8 : 4}
             >
-              <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthFormControl variant="standard">
                 <InputLabel>Background</InputLabel>
                 <Select
                   variant="standard"
@@ -702,12 +640,11 @@ class SceneOptionCard extends React.Component<
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FullWidthFormControl>
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-              <Collapse
+              <FullWidthCollapse
                 in={this.props.scene.backgroundType == BT.blur}
-                className={classes.fullWidth}
               >
                 <Typography
                   variant="caption"
@@ -727,10 +664,9 @@ class SceneOptionCard extends React.Component<
                   valueLabelFormat={(v) => v + "px"}
                   aria-labelledby="scene-bg-color-slider"
                 />
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={this.props.scene.backgroundType == BT.color}
-                className={classes.fullWidth}
               >
                 {this.props.scene.backgroundType == BT.color && (
                   <ColorPicker
@@ -740,10 +676,9 @@ class SceneOptionCard extends React.Component<
                     }
                   />
                 )}
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={this.props.scene.backgroundType == BT.colorSet}
-                className={classes.fullWidth}
               >
                 {this.props.scene.backgroundType == BT.colorSet && (
                   <ColorSetPicker
@@ -753,7 +688,7 @@ class SceneOptionCard extends React.Component<
                     }
                   />
                 )}
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
         </Grid>
@@ -765,14 +700,18 @@ class SceneOptionCard extends React.Component<
             <Grid
               item
               xs={12}
-              className={clsx(
-                this.props.tutorial == SDT.nextScene && classes.highlight,
-              )}
+              sx={{
+                borderWidth: this.props.tutorial == SDT.nextScene ? 2 : 0,
+                borderColor: "secondary.main",
+                borderStyle: "solid",
+              }}
             >
               <Grid container spacing={2} alignItems="center">
                 <Grid
                   item
-                  className={classes.noTopPadding}
+                  sx={{
+                    pt: "0 !important",
+                  }}
                   xs={this.props.scene.nextSceneID == -1 ? 10 : 12}
                   sm={
                     this.props.scene.nextSceneID == -1
@@ -784,7 +723,10 @@ class SceneOptionCard extends React.Component<
                         : 7
                   }
                 >
-                  <Typography className={classes.selectText} variant="caption">
+                  <Typography
+                    color={(theme) => theme.palette.text.secondary}
+                    variant="caption"
+                  >
                     Next Scene
                   </Typography>
                   <SceneSelect
@@ -798,12 +740,17 @@ class SceneOptionCard extends React.Component<
                     }
                   />
                   <Dialog
-                    classes={{ paper: classes.randomSceneDialog }}
+                    PaperProps={{
+                      sx: {
+                        minWidth: 400,
+                        overflow: "visible",
+                      },
+                    }}
                     open={this.state.randomSceneList != null}
                     onClose={this.onRandomSceneDialog}
                     aria-describedby="random-scene-description"
                   >
-                    <DialogContent classes={{ root: classes.noScroll }}>
+                    <DialogContent sx={{ overflow: "visible" }}>
                       <DialogContentText id="random-scene-description">
                         Select which scenes to include:
                       </DialogContentText>
@@ -836,7 +783,7 @@ class SceneOptionCard extends React.Component<
                   </Dialog>
                 </Grid>
                 {this.props.scene.nextSceneID == -1 && (
-                  <Grid item className={classes.selectOffset}>
+                  <SelectOffsetGrid item>
                     <Tooltip
                       disableInteractive
                       title={
@@ -846,24 +793,21 @@ class SceneOptionCard extends React.Component<
                       }
                     >
                       <IconButton
-                        className={clsx(
-                          this.props.scene.nextSceneRandoms.length == 0 &&
-                            classes.error,
-                        )}
+                        sx={{
+                          color:
+                            this.props.scene.nextSceneRandoms.length == 0
+                              ? "error.main"
+                              : undefined,
+                        }}
                         onClick={this.onRandomSceneDialog}
                         size="large"
                       >
                         <ListIcon />
                       </IconButton>
                     </Tooltip>
-                  </Grid>
+                  </SelectOffsetGrid>
                 )}
-                <Grid
-                  item
-                  className={classes.selectOffset}
-                  xs={12}
-                  sm={this.props.sidebar ? 12 : 5}
-                >
+                <SelectOffsetGrid item xs={12} sm={this.props.sidebar ? 12 : 5}>
                   <Collapse
                     in={
                       this.props.scene.nextSceneID != 0 &&
@@ -888,7 +832,7 @@ class SceneOptionCard extends React.Component<
                       }}
                     />
                   </Collapse>
-                </Grid>
+                </SelectOffsetGrid>
                 <Grid item xs>
                   <Collapse in={this.props.scene.nextSceneID != 0}>
                     <FormControlLabel
@@ -948,9 +892,11 @@ class SceneOptionCard extends React.Component<
         <Grid
           item
           xs={12}
-          className={clsx(
-            this.props.tutorial == SDT.overlays && classes.highlight,
-          )}
+          sx={{
+            borderWidth: this.props.tutorial == SDT.overlays ? 2 : 0,
+            borderColor: "secondary.main",
+            borderStyle: "solid",
+          }}
         >
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
@@ -967,7 +913,7 @@ class SceneOptionCard extends React.Component<
             <Grid item>
               <Collapse in={this.props.scene.overlayEnabled}>
                 <Fab
-                  className={classes.addButton}
+                  sx={{ boxShadow: "none" }}
                   onClick={this.onAddOverlay}
                   size="small"
                 >
@@ -988,18 +934,17 @@ class SceneOptionCard extends React.Component<
               <Grid
                 item
                 xs={12}
-                className={clsx(
-                  !this.props.scene.overlayEnabled && classes.noPadding,
-                )}
+                sx={{
+                  p: !this.props.scene.overlayEnabled
+                    ? "0 !important"
+                    : undefined,
+                }}
               >
-                <Collapse
-                  in={this.props.scene.overlayEnabled}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.overlayEnabled}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} sm={this.props.sidebar ? 12 : 5}>
                       <Typography
-                        className={classes.selectText}
+                        color={(theme) => theme.palette.text.secondary}
                         variant="caption"
                       >
                         Overlay{regenerate ? (invalid ? " ✗" : " ⟳") : ""}
@@ -1058,21 +1003,20 @@ class SceneOptionCard extends React.Component<
                       </Grid>
                     </Grid>
                   </Grid>
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
               <Grid
                 item
                 xs={12}
-                className={clsx(
-                  !this.props.scene.overlayEnabled && classes.noPadding,
-                )}
+                sx={{
+                  p: !this.props.scene.overlayEnabled
+                    ? "0 !important"
+                    : undefined,
+                }}
               >
-                <Collapse
-                  in={this.props.scene.overlayEnabled}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.overlayEnabled}>
                   <Divider />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </React.Fragment>
           );
@@ -1256,5 +1200,4 @@ class SceneOptionCard extends React.Component<
   };
 }
 
-(SceneOptionCard as any).displayName = "SceneOptionCard";
-export default withStyles(styles)(SceneOptionCard);
+export default SceneOptionCard;

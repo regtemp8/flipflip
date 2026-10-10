@@ -1,31 +1,23 @@
 import Select, { components } from "react-select";
 import * as React from "react";
-
-import { Checkbox, Theme } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
+import { Checkbox } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
 import Scene from "../../../common/Scene";
+import { SceneBase } from "../../../common/SceneBase";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    select: {
-      color: grey[900],
-    },
-  });
-
-interface MultiSceneSelectProps {
-  classes: any;
-  scene: Scene;
+interface MultiSceneSelectProps<T extends SceneBase> {
+  scene: T;
   allScenes: Array<Scene>;
   values: Array<number>;
   getSceneName: (sceneID: string) => void;
   onChange: (sceneIDs: Array<number>) => void;
 }
 
-class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
-  constructor(props: MultiSceneSelectProps) {
+class MultiSceneSelect<T extends SceneBase> extends React.Component<
+  MultiSceneSelectProps<T>
+> {
+  constructor(props: MultiSceneSelectProps<T>) {
     super(props);
   }
 
@@ -33,7 +25,7 @@ class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
     <div>
       <components.Option {...props}>
         <Checkbox
-          className={this.props.classes.select}
+          sx={{ color: grey[900] }}
           checked={props.isSelected}
           onChange={() => null}
         />{" "}
@@ -50,10 +42,9 @@ class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
   render() {
     const Option = this.Option;
     const MultiValue = this.MultiValue;
-    const classes = this.props.classes;
     return (
       <Select
-        className={classes.select}
+        sx={{ color: grey[900] }}
         value={this.props.values.map((id) => {
           return { label: this.props.getSceneName(id.toString()), value: id };
         })}
@@ -80,5 +71,4 @@ class MultiSceneSelect extends React.Component<MultiSceneSelectProps> {
   };
 }
 
-(MultiSceneSelect as any).displayName = "MultiSceneSelect";
-export default withStyles(styles)(MultiSceneSelect);
+export default MultiSceneSelect;

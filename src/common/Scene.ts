@@ -23,8 +23,9 @@ import Audio from "./Audio";
 import Overlay from "./Overlay";
 import WeightGroup from "./WeightGroup";
 import CaptionScript from "./CaptionScript";
+import { SceneBase } from "./SceneBase";
 
-export default class Scene {
+export default class Scene implements SceneBase {
   id: number = 0;
   name: string = "Unnamed scene";
   sources: Array<LibrarySource> = [];

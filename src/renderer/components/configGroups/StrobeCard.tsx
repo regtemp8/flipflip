@@ -1,6 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
-
 import {
   Collapse,
   Divider,
@@ -15,55 +13,39 @@ import {
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
-
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, SC, SL, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 import ColorPicker from "../config/ColorPicker";
 import ColorSetPicker from "../config/ColorSetPicker";
+import { SceneBase } from "../../../common/SceneBase";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    noPadding: {
-      padding: "0 !important",
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthPaddedCollapse = styled(FullWidthCollapse)(({ theme }) => ({
+  [theme.breakpoints.up("sm")]: {
+    paddingLeft: theme.spacing(1),
+  },
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
+const PercentInputGrid = styled(Grid)(({ theme }) => ({
+  minWidth: theme.spacing(11),
+}));
 
-interface StrobeCardProps {
-  classes: any;
-  scene: Scene | SceneSettings;
+interface StrobeCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
-  sidebar: boolean;
-  onUpdateScene: (
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ) => void;
+  sidebar?: boolean;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
 interface StrobeCardState {
@@ -71,8 +53,11 @@ interface StrobeCardState {
   strobeDelaySinRate: number;
 }
 
-class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
-  constructor(props: StrobeCardProps) {
+class StrobeCard<T extends SceneBase> extends React.Component<
+  StrobeCardProps<T>,
+  StrobeCardState
+> {
+  constructor(props: StrobeCardProps<T>) {
     super(props);
 
     const strobeSinRate =
@@ -88,7 +73,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
     this.state = { strobeSinRate, strobeDelaySinRate };
   }
 
-  componentDidUpdate(props: StrobeCardProps) {
+  componentDidUpdate(props: StrobeCardProps<T>) {
     if (props.scene.strobeSinRate != this.props.scene.strobeSinRate) {
       const strobeSinRate =
         typeof this.props.scene.strobeSinRate === "number"
@@ -108,8 +93,6 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
   }
 
   render() {
-    const classes = this.props.classes;
-
     const strobeOpacity =
       typeof this.props.scene.strobeOpacity === "number"
         ? this.props.scene.strobeOpacity
@@ -173,10 +156,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
               />
             </Grid>
             <Grid item xs={12} sm={this.props.sidebar ? 12 : 7}>
-              <Collapse
-                in={this.props.scene.strobe}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
-              >
+              <FullWidthPaddedCollapse in={this.props.scene.strobe}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -187,25 +167,26 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   }
                   label="Add Delay"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
           </Grid>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            (!this.props.scene.strobe ||
-              this.props.scene.strobeLayer == SL.image) &&
-              classes.noPadding,
-          )}
+          sx={{
+            p:
+              !this.props.scene.strobe ||
+              this.props.scene.strobeLayer == SL.image
+                ? "0 !important"
+                : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.strobe &&
               this.props.scene.strobeLayer != SL.image
             }
-            className={classes.fullWidth}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid
@@ -217,9 +198,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     ? 4
                     : 12
                 }
-                className={classes.paddingTop}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Color Type</InputLabel>
                   <Select
                     variant="standard"
@@ -232,27 +212,28 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            (!this.props.scene.strobe ||
-              this.props.scene.strobeLayer == SL.image) &&
-              classes.noPadding,
-          )}
+          sx={{
+            p:
+              !this.props.scene.strobe ||
+              this.props.scene.strobeLayer == SL.image
+                ? "0 !important"
+                : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.strobe &&
               this.props.scene.strobeLayer != SL.image &&
               this.props.scene.strobeColorType != SC.colorRand
             }
-            className={classes.fullWidth}
           >
             {this.props.scene.strobe &&
               this.props.scene.strobeLayer != SL.image &&
@@ -274,14 +255,16 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                   }
                 />
               )}
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.strobe && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.strobe ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={this.props.scene.strobe} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.strobe}>
             <Grid container spacing={2} alignItems="center">
               <Grid
                 item
@@ -292,9 +275,8 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     ? 4
                     : 12
                 }
-                className={classes.paddingTop}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Strobe Layer</InputLabel>
                   <Select
                     variant="standard"
@@ -307,20 +289,21 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid
                 item
                 xs={12}
                 sm={this.props.sidebar ? 12 : true}
-                className={clsx(
-                  this.props.scene.strobeLayer != SL.bottom &&
-                    classes.noPadding,
-                )}
+                sx={{
+                  p:
+                    this.props.scene.strobeLayer != SL.bottom
+                      ? "0 !important"
+                      : undefined,
+                }}
               >
-                <Collapse
+                <FullWidthCollapse
                   in={this.props.scene.strobeLayer == SL.bottom}
-                  className={classes.fullWidth}
                 >
                   <Typography
                     variant="caption"
@@ -341,7 +324,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         aria-labelledby="strobe-opacity-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
                         value={Math.round(strobeOpacity * 100)}
@@ -353,12 +336,15 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           this.blurPercentIntKey("strobeOpacity", e)
                         }
                         InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
                           endAdornment: (
                             <InputAdornment position="end">%</InputAdornment>
                           ),
                         }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -366,28 +352,32 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           "aria-labelledby": "strobe-opacity-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.strobe && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.strobe ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={this.props.scene.strobe} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.strobe}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.strobe && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.strobe ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={this.props.scene.strobe} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.strobe}>
             <Grid container spacing={2} alignItems="center">
               <Grid
                 item
@@ -395,7 +385,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                 sm={this.props.sidebar ? 12 : 4}
                 style={{ paddingTop: 10 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Timing</InputLabel>
                   <Select
                     variant="standard"
@@ -426,13 +416,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
-                  in={this.props.scene.strobeTF == TF.sin}
-                  className={classes.fullWidth}
-                >
+                <FullWidthCollapse in={this.props.scene.strobeTF == TF.sin}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -453,14 +440,19 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         aria-labelledby="strobe-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
                         value={this.state.strobeSinRate}
                         onChange={(e) => this.onIntInput("strobeSinRate", e)}
                         onBlur={(e) => this.blurIntKey("strobeSinRate", e)}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -468,13 +460,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           "aria-labelledby": "strobe-sin-rate-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
-                <Collapse
-                  in={this.props.scene.strobeTF == TF.bpm}
-                  className={classes.fullWidth}
-                >
+                </FullWidthCollapse>
+                <FullWidthCollapse in={this.props.scene.strobeTF == TF.bpm}>
                   <Typography
                     variant="caption"
                     component="div"
@@ -493,10 +482,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={this.props.scene.strobeTF == TF.constant}
-                  className={classes.fullWidth}
                 >
                   <TextField
                     variant="outlined"
@@ -516,23 +504,24 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.strobe && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.strobe ? "0 !important" : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.strobe &&
               (this.props.scene.strobeTF == TF.random ||
                 this.props.scene.strobeTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -576,34 +565,36 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            (!this.props.scene.strobe || !this.props.scene.strobePulse) &&
-              classes.noPadding,
-          )}
+          sx={{
+            p:
+              !this.props.scene.strobe || !this.props.scene.strobePulse
+                ? "0 !important"
+                : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={this.props.scene.strobe && this.props.scene.strobePulse}
-            className={classes.fullWidth}
           >
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            (!this.props.scene.strobe || !this.props.scene.strobePulse) &&
-              classes.noPadding,
-          )}
+          sx={{
+            p:
+              !this.props.scene.strobe || !this.props.scene.strobePulse
+                ? "0 !important"
+                : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={this.props.scene.strobe && this.props.scene.strobePulse}
-            className={classes.fullWidth}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid
@@ -612,7 +603,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                 sm={this.props.sidebar ? 12 : 4}
                 style={{ paddingTop: 10 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Delay Timing</InputLabel>
                   <Select
                     variant="standard"
@@ -625,12 +616,11 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
+                <FullWidthCollapse
                   in={this.props.scene.strobeDelayTF == TF.sin}
-                  className={classes.fullWidth}
                 >
                   <Typography
                     variant="caption"
@@ -652,7 +642,7 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         aria-labelledby="strobe-delay-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
                         value={this.state.strobeDelaySinRate}
@@ -660,8 +650,13 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           this.onIntInput("strobeDelaySinRate", e)
                         }
                         onBlur={(e) => this.blurIntKey("strobeDelaySinRate", e)}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -669,12 +664,11 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           "aria-labelledby": "strobe-delay-sin-rate-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={this.props.scene.strobeDelayTF == TF.bpm}
-                  className={classes.fullWidth}
                 >
                   <Typography
                     variant="caption"
@@ -694,10 +688,9 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="strobe-delay-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={this.props.scene.strobeDelayTF == TF.constant}
-                  className={classes.fullWidth}
                 >
                   <TextField
                     variant="outlined"
@@ -717,27 +710,28 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(
-            (!this.props.scene.strobe || !this.props.scene.strobePulse) &&
-              classes.noPadding,
-          )}
+          sx={{
+            p:
+              !this.props.scene.strobe || !this.props.scene.strobePulse
+                ? "0 !important"
+                : undefined,
+          }}
         >
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.strobe &&
               this.props.scene.strobePulse &&
               (this.props.scene.strobeDelayTF == TF.random ||
                 this.props.scene.strobeDelayTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -781,37 +775,32 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         {this.props.easingControls && (
           <React.Fragment>
             <Grid
               item
               xs={12}
-              className={clsx(!this.props.scene.strobe && classes.noPadding)}
+              sx={{
+                p: !this.props.scene.strobe ? "0 !important" : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.strobe}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.strobe}>
                 <Divider />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
             <Grid
               item
               xs={12}
-              className={clsx(!this.props.scene.strobe && classes.noPadding)}
+              sx={{
+                p: !this.props.scene.strobe ? "0 !important" : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.strobe}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.strobe}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>Easing</InputLabel>
                       <Select
                         variant="standard"
@@ -824,16 +813,15 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.strobeEase == EA.polyIn ||
                         this.props.scene.strobeEase == EA.polyOut ||
                         this.props.scene.strobeEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -853,14 +841,13 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.strobeEase == EA.backIn ||
                         this.props.scene.strobeEase == EA.backOut ||
                         this.props.scene.strobeEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -880,16 +867,15 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.strobeEase == EA.elasticIn ||
                         this.props.scene.strobeEase == EA.elasticOut ||
                         this.props.scene.strobeEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -909,16 +895,15 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.strobeEase == EA.elasticIn ||
                         this.props.scene.strobeEase == EA.elasticOut ||
                         this.props.scene.strobeEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -938,10 +923,10 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </React.Fragment>
         )}
@@ -1053,5 +1038,4 @@ class StrobeCard extends React.Component<StrobeCardProps, StrobeCardState> {
   }
 }
 
-(StrobeCard as any).displayName = "StrobeCard";
-export default withStyles(styles)(StrobeCard);
+export default StrobeCard;
