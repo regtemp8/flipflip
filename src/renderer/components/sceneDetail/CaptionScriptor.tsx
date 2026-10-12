@@ -239,11 +239,11 @@ const styles = (theme: Theme) =>
 interface CaptionScriptorProps {
   classes: any;
   config: Config;
-  openScript: CaptionScript;
+  openScript: CaptionScript | null;
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   theme: Theme;
-  tutorial: string;
+  tutorial: string | null;
   onAddFromLibrary: () => void;
   getTags: (source: string) => Array<Tag>;
   goBack: () => void;

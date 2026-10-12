@@ -136,7 +136,7 @@ interface SceneGeneratorProps {
   library: Array<LibrarySource>;
   generatorWeights: Array<WeightGroup>;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   onTutorial(tutorial: string): void;
   onUpdateScene(fn: (scene: Scene) => void): void;
 }

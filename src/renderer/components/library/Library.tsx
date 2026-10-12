@@ -349,13 +349,13 @@ interface LibraryProps {
   filters: Array<string>;
   library: Array<LibrarySource>;
   progressCurrent: number;
-  progressMode: string;
-  progressTitle: string;
+  progressMode: string | null;
+  progressTitle: string | null;
   progressTotal: number;
   selected: Array<string>;
-  specialMode: string;
+  specialMode: string | null;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   yOffset: number;
   goBack: () => void;
   onAddSource: (scene: Scene | null, type: string, ...args: any[]) => void;

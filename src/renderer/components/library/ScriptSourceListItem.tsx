@@ -115,11 +115,11 @@ interface ScriptSourceListItemProps {
   checked: boolean;
   index: number;
   isEditing: number;
-  specialMode: string;
+  specialMode: string | null;
   lastSelected: boolean;
   source: CaptionScript;
   style: any;
-  tutorial: string;
+  tutorial: string | null;
   onDelete: (source: CaptionScript) => void;
   onEditScript: (source: CaptionScript) => void;
   onEndEdit: (newURL: string) => void;

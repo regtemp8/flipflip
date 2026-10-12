@@ -149,7 +149,7 @@ interface SourceListItemProps {
   source: LibrarySource;
   sources: Array<LibrarySource>;
   style: any;
-  tutorial: string;
+  tutorial: string | null;
   useWeights?: boolean;
   canClip: boolean;
   onClean: (source: LibrarySource) => void;

@@ -191,7 +191,7 @@ interface VideoClipperProps {
   allTags: Array<Tag>;
   isLibrary: boolean;
   source: LibrarySource;
-  tutorial: string;
+  tutorial: string | null;
   videoVolume: number;
   cache: (video: HTMLVideoElement) => void;
   goBack: () => void;

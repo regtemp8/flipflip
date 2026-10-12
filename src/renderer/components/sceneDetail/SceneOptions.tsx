@@ -12,7 +12,7 @@ interface SceneOptionsProps<T extends SceneBase> {
   allScenes: Array<Scene>;
   allSceneGrids: Array<SceneGrid>;
   scene: T;
-  tutorial?: string;
+  tutorial: string | null;
   isConfig?: boolean;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }

@@ -421,7 +421,7 @@ interface AudioLibraryProps {
   selected: Array<string>;
   specialMode: string;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   yOffset: number;
   goBack: () => void;
   onAddToPlaylist: () => void;

@@ -95,7 +95,7 @@ interface SourceListProps {
   library: Array<LibrarySource>;
   showHelp?: boolean;
   sources: Array<LibrarySource>;
-  tutorial: string;
+  tutorial: string | null;
   isSelect?: boolean;
   selected?: Array<string>;
   yOffset?: number;

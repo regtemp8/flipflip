@@ -59,7 +59,7 @@ interface AudioSourceListProps {
   showHelp: boolean;
   sources: Array<Audio>;
   yOffset: number;
-  tutorial: string;
+  tutorial: string | null;
   playlist?: string;
   onClickAlbum: (album: string) => void;
   onClickArtist: (artist: string, event: React.MouseEvent) => void;

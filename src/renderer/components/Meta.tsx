@@ -214,7 +214,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   openTab={this.state.openTab}
                   scenes={this.state.scenes}
                   sceneGroups={this.state.sceneGroups}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   version={this.state.version}
                   onAddGenerator={a(actions.addGenerator)}
                   onAddGrid={a(actions.addGrid)}
@@ -251,7 +251,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   library={this.state.library}
                   scene={scene as Scene}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   goBack={a(actions.goBack)}
                   onAddSource={a(actions.addSource)}
                   onAddTracks={a(actions.addTracks)}
@@ -289,7 +289,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   selected={this.state.librarySelected}
                   specialMode={this.state.specialMode}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   yOffset={this.state.libraryYOffset}
                   goBack={a(actions.goBack)}
                   onAddSource={a(actions.addSource)}
@@ -330,7 +330,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   selected={this.state.audioSelected}
                   specialMode={this.state.specialMode}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   yOffset={this.state.audioYOffset}
                   goBack={a(actions.goBack)}
                   onAddToPlaylist={a(actions.addToPlaylist)}
@@ -360,7 +360,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   selected={this.state.scriptSelected}
                   specialMode={this.state.specialMode}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   yOffset={this.state.scriptYOffset}
                   goBack={a(actions.goBack)}
                   onBatchTag={a(actions.batchTag)}
@@ -393,7 +393,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   allTags={this.state.tags}
                   source={actions.getActiveSource(this.state) as LibrarySource}
                   isLibrary={!actions.getActiveScene(this.state)}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   videoVolume={this.state.config.defaultScene.videoVolume}
                   onTutorial={a(actions.doneTutorial)}
                   onStartVCTutorial={a(actions.startVCTutorial)}
@@ -410,7 +410,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   allScenes={this.state.scenes}
                   autoEdit={this.state.specialMode == SP.autoEdit}
                   scene={grid as SceneGrid}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   goBack={a(actions.goBack)}
                   onDelete={a(actions.deleteGrid)}
                   onGenerate={a(actions.generateScenes)}
@@ -428,7 +428,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
@@ -452,7 +452,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   goBack={a(actions.endPlaySceneFromLibrary)}
@@ -502,7 +502,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
@@ -543,7 +543,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   config={this.state.config}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
-                  tutorial={this.state.tutorial ?? undefined}
+                  tutorial={this.state.tutorial}
                   openScript={actions.getSelectScript(this.state)}
                   theme={theme}
                   onAddFromLibrary={a(actions.addScriptSingle)}

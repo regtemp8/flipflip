@@ -442,7 +442,7 @@ interface SceneDetailProps {
   library: Array<LibrarySource>;
   scene: Scene;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   goBack: () => void;
   onAddSource: (scene: Scene, type: string, ...args: any[]) => void;
   onAddScript: (playlistIndex: number) => void;

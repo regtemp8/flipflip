@@ -317,9 +317,9 @@ interface ScriptLibraryProps {
   filters: Array<string>;
   library: Array<CaptionScript>;
   selected: Array<string>;
-  specialMode: string;
+  specialMode: string | null;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   yOffset: number;
   goBack: () => void;
   onBatchTag: () => void;

@@ -34,7 +34,7 @@ interface SlideCardProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
   sidebar?: boolean;
-  tutorial: string;
+  tutorial: string | null;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 

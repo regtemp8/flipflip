@@ -36,7 +36,7 @@ const FullWidthFormControl = styled(FormControl)(() => ({
 interface ImageVideoCardProps<T extends SceneBase> {
   scene: T;
   sidebar?: boolean;
-  tutorial: string;
+  tutorial: string | null;
   isConfig: boolean;
   isPlayer?: boolean;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;

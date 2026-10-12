@@ -60,9 +60,9 @@ interface ScriptSourceListProps {
   scenes: Array<Scene>;
   showHelp: boolean;
   sources: Array<CaptionScript>;
-  tutorial: string;
-  specialMode?: string;
-  selected?: Array<string>;
+  tutorial: string | null;
+  specialMode: string | null;
+  selected: Array<string>;
   yOffset?: number;
   onEditScript: (source: CaptionScript) => void;
   onPlay: (

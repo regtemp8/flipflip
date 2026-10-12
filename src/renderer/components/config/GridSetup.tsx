@@ -144,7 +144,7 @@ interface GridSetupProps {
   allScenes: Array<Scene>;
   autoEdit: boolean;
   scene: SceneGrid;
-  tutorial: string;
+  tutorial: string | null;
   goBack: () => void;
   onDelete: (grid: SceneGrid) => void;
   onGenerate: (

@@ -61,7 +61,7 @@ interface SceneOptionCardProps<T extends SceneBase> {
   allSceneGrids: Array<SceneGrid>;
   scene: T;
   sidebar?: boolean;
-  tutorial?: string;
+  tutorial: string | null;
   isTagging?: boolean;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
   onGenerate?: (scene: Scene | SceneGrid, children?: boolean) => void;

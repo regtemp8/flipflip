@@ -407,7 +407,7 @@ interface ScenePickerProps {
   openTab: number;
   scenes: Array<Scene>;
   sceneGroups: Array<SceneGroup>;
-  tutorial: string;
+  tutorial: string | null;
   version: string;
   onAddGenerator: () => void;
   onAddGrid: () => void;
