@@ -130,7 +130,7 @@ class AudioAlbumList extends React.Component<
     return (
       <Grid container spacing={2}>
         {this.state.albums.map((data) => {
-          let thumb: string = data.thumb;
+          let thumb = data.thumb;
           if (thumb) thumb = thumb.replace(/\\/g, "/");
           const artist = data.artist;
           const count = data.count;
@@ -226,51 +226,49 @@ class AudioAlbumList extends React.Component<
       { artist: string; thumb: string; count: number }
     >();
     const songs = Array.from(this.props.sources).sort((a, b) => {
-      if (a.album > b.album) {
+      if ((a.album ?? "") > (b.album ?? "")) {
         return 1;
-      } else if (a.album < b.album) {
+      } else if ((a.album ?? "") < (b.album ?? "")) {
         return -1;
-      } else if (a.trackNum > b.trackNum) {
+      } else if ((a.trackNum ?? 0) > (b.trackNum ?? 0)) {
         return 1;
-      } else if (a.trackNum < b.trackNum) {
+      } else if ((a.trackNum ?? 0) < (b.trackNum ?? 0)) {
         return -1;
       } else {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
-        const aValue = a.name.replace(reA, "");
-        const bValue = b.name.replace(reA, "");
+        const aValue = a.name ? a.name.replace(reA, "") : "";
+        const bValue = b.name ? b.name.replace(reA, "") : "";
         return aValue.localeCompare(bValue, "en", { numeric: true });
       }
     });
-    for (let song of songs) {
-      if (
-        song.album &&
-        (!albumMap.has(song.album) ||
-          !albumMap.get(song.album).thumb ||
-          (albumMap.get(song.album).artist != song.artist &&
-            albumMap.get(song.album).artist != va))
-      ) {
-        if (
-          albumMap.has(song.album) &&
-          albumMap.get(song.album).artist != song.artist
-        ) {
-          albumMap.set(song.album, { artist: va, thumb: song.thumb, count: 0 });
-        } else {
-          albumMap.set(song.album, {
-            artist: song.artist,
-            thumb: song.thumb,
-            count: 0,
-          });
-        }
+    for (const song of songs) {
+      if (!song.album) {
+        continue;
       }
-    }
-    for (let song of songs) {
-      if (song.album) {
-        const album = albumMap.get(song.album);
+
+      const album = albumMap.get(song.album);
+      if (!album) {
         albumMap.set(song.album, {
-          artist: album.artist,
-          thumb: album.thumb,
-          count: album.count + 1,
+          artist: song.artist ?? "",
+          thumb: song.thumb ?? "",
+          count: 1,
         });
+      } else {
+        if (!album.thumb && song.thumb) {
+          album.thumb = song.thumb;
+        }
+        if (!album.artist && song.artist) {
+          album.artist = song.artist;
+        } else if (
+          album.artist &&
+          album.artist != song.artist &&
+          album.artist != va
+        ) {
+          album.artist = va;
+        }
+
+        album.count++;
+        albumMap.set(song.album, album);
       }
     }
 
