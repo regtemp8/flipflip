@@ -251,7 +251,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   library={this.state.library}
                   scene={scene as Scene}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   goBack={a(actions.goBack)}
                   onAddSource={a(actions.addSource)}
                   onAddTracks={a(actions.addTracks)}
@@ -428,7 +428,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
@@ -452,7 +452,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   goBack={a(actions.endPlaySceneFromLibrary)}
@@ -462,9 +462,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                       ? actions.getAudioSource(this.state)?.tags
                       : (scene as Scene).scriptScene
                         ? actions.getScriptSource(this.state)?.tags
-                        : actions.getLibrarySource(this.state)?.id > -1
+                        : (actions.getLibrarySource(this.state)?.id ?? -1) > -1
                           ? actions.getLibrarySource(this.state)?.tags
-                          : null
+                          : undefined
                   }
                   allTags={this.state.tags}
                   toggleTag={
@@ -502,7 +502,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
