@@ -58,9 +58,13 @@ app.on("ready", () => {
             : new Response(null, { status: 404 });
         }
       }
+      if (url === "main_window/index.js") {
+        url = "index.js"
+      }
       if (
         url === "src/renderer/icons/flipflip_logo.png" ||
-        url === "index.js.map"
+        url === "index.js.map" ||
+        url === "index.js"
       ) {
         const entry = MAIN_WINDOW_WEBPACK_ENTRY;
         const sep = new URL(entry).protocol === "file:" ? path.sep : "/";
