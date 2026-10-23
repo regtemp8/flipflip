@@ -326,24 +326,32 @@ class AudioSourceListItem extends React.Component<
               {this.props.source.name}
             </Typography>
             <Typography className={classes.trackDuration}>
-              {getTimestamp(this.props.source.duration)}
+              {this.props.source.duration != null
+                ? getTimestamp(this.props.source.duration)
+                : "-"}
             </Typography>
             <div
               className={classes.artistContainer}
-              onClick={(e) =>
-                this.props.onClickArtist(this.props.source.artist, e)
-              }
+              onClick={(e) => {
+                if (this.props.source.artist != null) {
+                  this.props.onClickArtist(this.props.source.artist, e);
+                }
+              }}
             >
               <Typography noWrap className={classes.trackArtist}>
-                {this.props.source.artist}
+                {this.props.source.artist ?? "-"}
               </Typography>
             </div>
             <div
               className={classes.albumContainer}
-              onClick={() => this.props.onClickAlbum(this.props.source.album)}
+              onClick={() => {
+                if (this.props.source.album != null) {
+                  this.props.onClickAlbum(this.props.source.album);
+                }
+              }}
             >
               <Typography className={classes.trackAlbum}>
-                {this.props.source.album}
+                {this.props.source.album ?? "-"}
               </Typography>
             </div>
           </ListItemText>

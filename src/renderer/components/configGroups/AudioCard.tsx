@@ -104,7 +104,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
                     scenePaths={this.props.scenePaths}
                     shorterSeek={this.props.shorterSeek}
                     showMsTimestamp={this.props.showMsTimestamp}
-                    sidebar={this.props.sidebar}
+                    sidebar={this.props.sidebar ?? false}
                     startPlaying={this.props.startPlaying}
                     persist={this.props.persist}
                     onAddTracks={this.props.onAddTracks}
@@ -141,7 +141,7 @@ class AudioCard extends React.Component<AudioCardProps, AudioCardState> {
     const { sourceOptions, sourceOptionsPlaylist } = this.state;
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.audioPlaylists[sourceOptionsPlaylist];
-      const editSource = playlist.audios.find((a) => a.id == sourceOptions.id);
+      const editSource = playlist.audios.find((a) => a.id == sourceOptions!.id);
       if (editSource != null) {
         Object.assign(editSource, newAudio);
       }

@@ -243,7 +243,10 @@ class AudioSourceList extends React.Component<
     this.savePosition();
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: AudioSourceListProps,
+    state: AudioSourceListState,
+  ): boolean {
     return (
       this.props.isSelect != props.isSelect ||
       this.props.playlist != props.playlist ||
@@ -279,7 +282,7 @@ class AudioSourceList extends React.Component<
   };
 
   onFinishDelete = () => {
-    const toDelete = this.state.deleteDialog;
+    const toDelete = this.state.deleteDialog!;
     window.ipc.finishDelete(toDelete.url).then(() => {
       this.onRemove(toDelete);
       this.onCloseDeleteDialog();
@@ -381,18 +384,18 @@ class AudioSourceList extends React.Component<
   };
 
   onFinishSourceEdit = (newAudio: Audio) => {
-    const { sourceEdit } = this.state;
+    const sourceEdit = this.state.sourceEdit!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == sourceEdit.id);
+      let editSource = a.find((a) => a.id == sourceEdit.id)!;
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceEditDialog();
   };
 
   onFinishSourceOptions = (newAudio: Audio) => {
-    const { sourceOptions } = this.state;
+    const sourceOptions = this.state.sourceOptions!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == sourceOptions.id);
+      let editSource = a.find((a) => a.id == sourceOptions.id)!;
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceOptions();

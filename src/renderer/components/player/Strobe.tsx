@@ -11,10 +11,10 @@ import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 
 interface StrobeProps {
-  toggleStrobe: boolean;
+  toggleStrobe?: boolean;
   scene: Scene;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   zIndex: number;
   strobeFunction?: Function;
   children?: React.ReactNode;
@@ -150,7 +150,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
     }
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: StrobeProps) {
     if (
       this.props.scene.strobeTF != props.scene.strobeTF ||
       this.props.scene.strobeDelayTF != props.scene.strobeDelayTF ||
@@ -214,7 +214,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.strobeBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         duration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!duration) {
@@ -260,7 +260,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         delay = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!delay) {

@@ -510,7 +510,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: ConfigFormProps) {
     if (this.props.config !== props.config) {
       this.setState({ config: JSON.parse(JSON.stringify(this.props.config)) });
     }

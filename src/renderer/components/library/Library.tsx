@@ -1384,7 +1384,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     window.addEventListener("keydown", this.onKeyDown, false);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: LibraryProps, state: LibraryState) {
     if (
       state.filters != this.state.filters ||
       props.library != this.props.library ||

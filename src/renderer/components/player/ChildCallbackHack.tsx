@@ -8,7 +8,7 @@
  * method as the listener.
  */
 export default class ChildCallbackHack {
-  listener?: (args?: any[]) => void;
+  listener?: (args: any[]) => void;
 
   fire(...args: any[]) {
     if (this.listener) this.listener(args);

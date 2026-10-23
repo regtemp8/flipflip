@@ -442,7 +442,7 @@ interface SceneDetailProps {
   library: Array<LibrarySource>;
   scene: Scene;
   tags: Array<Tag>;
-  tutorial: string | null;
+  tutorial?: string;
   goBack: () => void;
   onAddSource: (scene: Scene, type: string, ...args: any[]) => void;
   onAddScript: (playlistIndex: number) => void;
@@ -948,7 +948,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                       tutorial={
                         this.props.tutorial == SDGT.final
                           ? null
-                          : this.props.tutorial
+                          : (this.props.tutorial ?? null)
                       }
                       useWeights={
                         this.props.scene.weightFunction == WF.sources &&
@@ -1167,7 +1167,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={(e) => this.onAddSource(AF.library, e)}
+                onClick={(e) => this.onAddSource(AF.library, e.shiftKey)}
                 size="small"
               >
                 <LocalLibraryIcon className={classes.icon} />
@@ -1186,7 +1186,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={(e) => this.onAddSource(AF.videos, e)}
+                onClick={(e) => this.onAddSource(AF.videos, e.shiftKey)}
                 size="small"
               >
                 <MovieIcon className={classes.icon} />
@@ -1205,7 +1205,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={(e) => this.onAddSource(AF.directory, e)}
+                onClick={(e) => this.onAddSource(AF.directory, e.shiftKey)}
                 size="small"
               >
                 <FolderIcon className={classes.icon} />
@@ -1221,7 +1221,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu != MO.new && classes.addButtonClose,
                   this.props.tutorial == SDT.add2 && classes.highlight,
                 )}
-                onClick={(e) => this.onAddSource(AF.url, e)}
+                onClick={(e) => this.onAddSource(AF.url, e.shiftKey)}
                 size="small"
               >
                 <HttpIcon className={classes.icon} />
@@ -1366,7 +1366,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
         {this.props.scene.openTab == 4 && (
           <React.Fragment>
-            {this.props.scene.generatorWeights.length > 0 && (
+            {this.props.scene.generatorWeights!.length > 0 && (
               <React.Fragment>
                 <Tooltip
                   disableInteractive
@@ -1574,8 +1574,8 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
               {this.state.openMenu == MO.simpleRule && (
                 <LibrarySearch
                   displaySources={this.props.library}
-                  filters={this.props.scene.generatorWeights
-                    .filter((wg) => !wg.rules)
+                  filters={this.props.scene
+                    .generatorWeights!.filter((wg) => !wg.rules)
                     .map((wg) => wg.search)}
                   tags={this.props.tags}
                   placeholder="Search ..."
@@ -1618,7 +1618,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     window.removeEventListener("keydown", this.onKeyDown);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: SceneDetailProps, state: SceneDetailState) {
     if (
       state.filters != this.state.filters ||
       props.scene.sources != this.props.scene.sources
@@ -1679,7 +1679,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
   getRemainingPercent(): number {
     let remaining = 100;
-    for (let wg of this.props.scene.generatorWeights) {
+    for (let wg of this.props.scene.generatorWeights!) {
       if (wg.type == TT.weight) {
         remaining = remaining - wg.percent;
       }
@@ -1722,7 +1722,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     wg.percent = 0;
     wg.type = TT.weight;
     wg.rules = [];
-    const generatorWeights = this.props.scene.generatorWeights.concat([wg]);
+    const generatorWeights = this.props.scene.generatorWeights!.concat([wg]);
     this.changeKey("generatorWeights", generatorWeights);
   };
 
@@ -1731,7 +1731,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       this.props.onTutorial(SDGT.buttons);
       this.onCloseDialog();
     }
-    let generatorWeights = this.props.scene.generatorWeights;
+    let generatorWeights = this.props.scene.generatorWeights!;
     for (let search of filters) {
       if (
         search.length > 0 &&
@@ -1755,18 +1755,14 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.simpleRule });
   };
 
-  onAddSource = (
-    addFunction: string,
-    e: React.MouseEvent<HTMLButtonElement>,
-    ...args: any[]
-  ) => {
+  onAddSource = (addFunction: string, shiftKey: boolean, ...args: any[]) => {
     this.onCloseDialog();
     if (this.props.tutorial == SDT.add2) {
       this.props.onTutorial(SDT.add2);
       this.props.onAddSource(this.props.scene, "tutorial");
-    } else if (addFunction == AF.videos && e.shiftKey) {
+    } else if (addFunction == AF.videos && shiftKey) {
       this.props.onAddSource(this.props.scene, AF.videoDir, ...args);
-    } else if (addFunction == AF.url && e.shiftKey) {
+    } else if (addFunction == AF.url && shiftKey) {
       this.setState({ openMenu: MO.urlImport });
     } else {
       this.props.onAddSource(this.props.scene, addFunction, ...args);

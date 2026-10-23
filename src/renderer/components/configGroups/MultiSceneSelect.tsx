@@ -1,4 +1,4 @@
-import Select, { components } from "react-select";
+import Select, { components, MultiValue } from "react-select";
 import * as React from "react";
 import { Checkbox } from "@mui/material";
 import { grey } from "@mui/material/colors";
@@ -10,7 +10,7 @@ interface MultiSceneSelectProps<T extends SceneBase> {
   scene: T;
   allScenes: Array<Scene>;
   values: Array<number>;
-  getSceneName: (sceneID: string) => void;
+  getSceneName: (sceneID: string) => string;
   onChange: (sceneIDs: Array<number>) => void;
 }
 
@@ -44,15 +44,16 @@ class MultiSceneSelect<T extends SceneBase> extends React.Component<
     const MultiValue = this.MultiValue;
     return (
       <Select
-        sx={{ color: grey[900] }}
+        styles={{
+          container: (baseStyles) => ({ ...baseStyles, color: grey[900] }),
+        }}
         value={this.props.values.map((id) => {
           return { label: this.props.getSceneName(id.toString()), value: id };
         })}
         options={this.props.allScenes
           .filter((s) => s.id !== this.props.scene.id && s.sources.length > 0)
-          .map((s) => s.id.toString())
-          .map((id) => {
-            return { label: this.props.getSceneName(id), value: id };
+          .map((s) => {
+            return { label: this.props.getSceneName(s.id.toString()), value: s.id };
           })}
         components={{ Option, MultiValue }}
         isClearable
@@ -66,7 +67,7 @@ class MultiSceneSelect<T extends SceneBase> extends React.Component<
     );
   }
 
-  onChange = (e: Array<{ label: any; value: any }>) => {
+  onChange = (e: MultiValue<{ label: string; value: number }>) => {
     this.props.onChange(e.map((v) => v.value));
   };
 }

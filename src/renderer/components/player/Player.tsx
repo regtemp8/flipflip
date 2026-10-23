@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import { SL, WC } from "../../../common/const";
-import { getRandomListItem } from "../../data/utils";
+import { assertDefined, getRandomListItem } from "../../data/utils";
 import {
   getFileGroup,
   getFileName,
@@ -41,7 +41,7 @@ interface PlayerProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   theme: Theme;
-  tutorial: string | null;
+  tutorial?: string;
   advanceHack?: ChildCallbackHack;
   allLoaded?: boolean;
   allTags?: Array<Tag>;
@@ -62,11 +62,11 @@ interface PlayerProps {
   goToClipSource?: (source: LibrarySource) => void;
   navigateTagging?: (offset: number) => void;
   nextScene?: () => void;
-  onUpdateScene?: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
   playTrack?: (url: string) => void;
   changeAudioRoute?: (aID: number) => void;
-  toggleTag?: (sourceID: number, tag: Tag) => void;
-  inheritTags?: (sourceID: number) => void;
+  toggleTag?: (sourceID: number | null, tag: Tag) => void;
+  inheritTags?: (sourceID: number | null) => void;
   getCurrentTimestamp?: () => number;
   onCaptionError?: (e: string) => void;
   onLoaded?: () => void;
@@ -94,9 +94,9 @@ interface PlayerState {
   mainVideo?: HTMLVideoElement;
   overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
   currentAudio?: Audio;
-  timeToNextFrame?: number;
+  timeToNextFrame: number;
   recentPictureGrid: boolean;
-  thumbImage?: HTMLImageElement;
+  thumbImage: HTMLImageElement | null;
   persistAudio: boolean;
   persistText: boolean;
   scriptPlaylists?: {
@@ -126,20 +126,18 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         props.scene.sources.length > 0 ? [props.scene.sources[0].url] : [""],
       historyOffset: 0,
       historyPaths: new Array<any>(),
-      imagePlayerAdvanceHacks: new Array<Array<ChildCallbackHack>>(
-        props.scene.overlays.length + 1,
-      )
-        .fill(null)
-        .map(() => [new ChildCallbackHack()]),
+      imagePlayerAdvanceHacks: Array.from(
+        { length: props.scene.overlays.length + 1 },
+        () => [new ChildCallbackHack()],
+      ),
       imagePlayerDeleteHack: new ChildCallbackHack(),
-      overlayVideos: new Array<Array<HTMLVideoElement | undefined>>(
-        props.scene.overlays.length,
-      )
-        .fill(undefined)
-        .map(() => {
-          return [undefined];
-        }),
+      overlayVideos: Array.from(
+        { length: props.scene.overlays.length },
+        (): Array<HTMLVideoElement | undefined> => [undefined],
+      ),
       recentPictureGrid: false,
+      timeToNextFrame: Number.MAX_VALUE,
+      thumbImage: null,
       persistAudio: false,
       persistText: false,
       hideCursor: false,
@@ -165,7 +163,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         this.props.scene.scriptPlaylists.length > 0) ||
         this.state.persistText);
     const scriptPlaylists = this.state.persistText
-      ? this.state.scriptPlaylists
+      ? this.state.scriptPlaylists!
       : this.props.scene.scriptPlaylists;
     const showStrobe =
       !this.state.recentPictureGrid &&
@@ -353,7 +351,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
 
     const captionScale = this.props.captionScale ? this.props.captionScale : 1;
 
-    let getCurrentTimestamp: () => number | undefined = undefined;
+    let getCurrentTimestamp: (() => number) | undefined = undefined;
     if (this.props.getCurrentTimestamp) {
       getCurrentTimestamp = this.props.getCurrentTimestamp;
     } else if (this.props.scene && this.props.scene.audioEnabled) {
@@ -531,7 +529,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               this.props.allTags
                 ? this.props.scene.audioScene
                   ? this.state.currentAudio
-                    ? this.state.currentAudio.name
+                    ? (this.state.currentAudio.name ?? "")
                     : "Loading..."
                   : this.props.scene.sources[0].url
                 : this.props.scene.name
@@ -601,7 +599,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               currentAudio={this.state.currentAudio}
               opacity={this.state.recentPictureGrid ? 0 : 1}
               gridCoordinates={this.props.gridCoordinates}
-              gridView={this.props.gridView}
+              gridView={this.props.gridView ?? false}
               isPlaying={this.state.isPlaying}
               hasStarted={this.state.hasStarted}
               strobeLayer={
@@ -673,14 +671,20 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                     200,
                   );
                 }
+
+                const overlayScene = this.getScene(overlay.sceneID);
+                assertDefined(
+                  overlayScene,
+                  `Player requires overlay scene (id: ${overlay.sceneID}) to exist.`,
+                );
                 return (
                   <SourceScraper
                     key={overlay.id}
                     config={this.props.config}
-                    scene={this.getScene(overlay.sceneID)}
+                    scene={overlayScene}
                     currentAudio={this.state.currentAudio}
                     opacity={overlay.opacity / 100}
-                    gridView={this.props.gridView}
+                    gridView={this.props.gridView ?? false}
                     isOverlay
                     isPlaying={this.state.isPlaying && !this.state.isEmpty}
                     hasStarted={this.state.hasStarted}
@@ -713,11 +717,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   changed = true;
                 }
                 if (advanceHacks[index + 1].length != gridSize) {
-                  advanceHacks[index + 1] = new Array<ChildCallbackHack>(
-                    gridSize,
-                  )
-                    .fill(null)
-                    .map(() => new ChildCallbackHack());
+                  advanceHacks[index + 1] = Array.from(
+                    { length: gridSize },
+                    () => new ChildCallbackHack(),
+                  );
                   window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
@@ -825,7 +828,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         this.props.scene.nextSceneTime
     ) {
       this.setState({ startTime: undefined });
-      this.props.nextScene();
+      this.props.nextScene!();
     } else if (!this.state.isPlaying && this.state.startTime) {
       const startTime = this.state.startTime;
       startTime.setTime(startTime.getTime() + 1000);
@@ -833,7 +836,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: PlayerProps, state: PlayerState) {
     if (
       this.state.currentAudio &&
       state.currentAudio != this.state.currentAudio
@@ -868,13 +871,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
     if (this.props.scene.overlayEnabled != props.scene.overlayEnabled) {
       this.setState({
-        overlayVideos: new Array<Array<HTMLVideoElement | null>>(
-          this.props.scene.overlays.length,
-        )
-          .fill(null)
-          .map(() => {
-            return [null];
-          }),
+        overlayVideos: Array.from(
+          { length: props.scene.overlays.length },
+          (): Array<HTMLVideoElement | undefined> => [undefined],
+        ),
       });
     } else if (this.props.scene.overlays != props.scene.overlays) {
       if (this.props.scene.overlays.length == props.scene.overlays.length) {
@@ -966,7 +966,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(props: PlayerProps, state: PlayerState): boolean {
     return (
       this.props.scene !== props.scene ||
       this.props.tags !== props.tags ||
@@ -1056,7 +1056,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   spliceOverlayVideo(index: number) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     newOV.splice(index, 1);
     this.setState({ overlayVideos: newOV });
@@ -1065,9 +1065,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   clearOverlayVideo(index: number) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
-    newOV[index] = [null];
+    newOV[index] = [undefined];
     this.setState({ overlayVideos: newOV });
   }
 
@@ -1172,11 +1172,11 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     this.setState({ historyOffset: offset });
   };
 
-  getSceneGrid(id: string): SceneGrid {
+  getSceneGrid(id: string): SceneGrid | undefined {
     return this.props.sceneGrids.find((s) => s.id.toString() == id);
   }
 
-  getScene(id: number): Scene {
+  getScene(id: number): Scene | undefined {
     return this.props.scenes.find((s) => s.id == id);
   }
 
@@ -1189,6 +1189,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   };
 
   navigateTagging = (offset: number) => {
+    assertDefined(
+      this.props.navigateTagging,
+      "Player requires navigateTagging to be provided.",
+    );
     this.setState({
       canStart: false,
       hasStarted: false,
@@ -1207,6 +1211,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   };
 
   orderScriptTags = (script: CaptionScript) => {
+    assertDefined(
+      this.props.allTags,
+      "Player requires allTags to be provided.",
+    );
     const tagNames = this.props.allTags.map((t: Tag) => t.name);
     // Re-order the tags of the audio we were playing
     script.tags = script.tags.sort((a: Tag, b: Tag) => {

@@ -196,7 +196,7 @@ class CacheCard extends React.Component<CacheCardProps, CacheCardState> {
     this.getCachePath();
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: CacheCardProps) {
     if (props.config != this.props.config) {
       this.getCachePath();
     }

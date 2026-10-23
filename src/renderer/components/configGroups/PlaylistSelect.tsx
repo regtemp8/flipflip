@@ -1,28 +1,11 @@
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import * as React from "react";
 
-import { Theme } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
 import { grey } from "@mui/material/colors";
 
 import Playlist from "../../../common/Playlist";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    searchSelect: {
-      minWidth: 200,
-      maxWidth: `calc(100% - ${theme.spacing(7)})`,
-      maxHeight: theme.mixins.toolbar.minHeight,
-      color: grey[900],
-    },
-    select: {
-      color: grey[900],
-    },
-  });
-
 interface PlaylistSelectProps {
-  classes: any;
   playlists: Array<Playlist>;
   menuIsOpen?: boolean;
   autoFocus?: boolean;
@@ -35,11 +18,12 @@ class PlaylistSelect extends React.Component<PlaylistSelectProps> {
   }
 
   render() {
-    const classes = this.props.classes;
     const defaults = [{ label: "+ New Playlist", value: -1 }];
     return (
       <Select
-        className={classes.select}
+        styles={{
+          container: (baseStyles) => ({ ...baseStyles, color: grey[900] }),
+        }}
         options={defaults.concat(
           this.props.playlists.map((p) => {
             return { label: p.name, value: p.id };
@@ -53,10 +37,11 @@ class PlaylistSelect extends React.Component<PlaylistSelectProps> {
     );
   }
 
-  onChange = (e: { label: string; value: number }) => {
-    this.props.onChange(e.value);
+  onChange = (e: SingleValue<{ label: string; value: number }>) => {
+    if (e != null) {
+      this.props.onChange(e.value);
+    }
   };
 }
 
-(PlaylistSelect as any).displayName = "PlaylistSelect";
-export default withStyles(styles)(PlaylistSelect);
+export default PlaylistSelect;

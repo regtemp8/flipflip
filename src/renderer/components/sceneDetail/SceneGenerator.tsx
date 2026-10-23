@@ -136,7 +136,7 @@ interface SceneGeneratorProps {
   library: Array<LibrarySource>;
   generatorWeights: Array<WeightGroup>;
   tags: Array<Tag>;
-  tutorial: string | null;
+  tutorial?: string;
   onTutorial(tutorial: string): void;
   onUpdateScene(fn: (scene: Scene) => void): void;
 }
@@ -545,7 +545,7 @@ class SceneGenerator extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: SceneGeneratorProps) {
     if (
       this.props.generatorWeights.length > 0 &&
       this.props.generatorWeights.length > props.generatorWeights.length

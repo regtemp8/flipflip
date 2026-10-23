@@ -126,7 +126,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
     actions.createBackup(this.state);
   };
 
-  componentDidUpdate(prevProps: any, prevState: any) {
+  componentDidUpdate(prevProps: unknown, prevState: AppStorageState) {
     if (
       prevState?.version !== this.state?.version ||
       prevState?.config !== this.state?.config ||
@@ -570,7 +570,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 open={this.state.systemSnackOpen}
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
                 autoHideDuration={2000}
-                key={this.state.systemSnack + new Date()}
+                key={`${this.state.systemSnack}${new Date()}`}
                 onClose={a(actions.closeMessage)}
                 TransitionComponent={TransitionUp}
               >

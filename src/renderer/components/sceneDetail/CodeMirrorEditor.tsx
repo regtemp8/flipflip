@@ -109,7 +109,7 @@ export const timestampRegex =
     define("variable-3", storers);
     define("builtin", actions);
 
-    function rt(type: string, state: any, stream: any) {
+    function rt(type: string | null, state: any, stream: any) {
       if (stream.eol()) {
         if (
           state.tokens.length > 0 &&
@@ -464,10 +464,10 @@ export default class CodeMirrorEditor extends React.Component<
 
   componentWillUnmount() {
     if (this.props.addHack) {
-      this.props.addHack.listener = null;
+      this.props.addHack.listener = undefined;
     }
     if (this.props.overwriteHack) {
-      this.props.overwriteHack.listener = null;
+      this.props.overwriteHack.listener = undefined;
     }
   }
 

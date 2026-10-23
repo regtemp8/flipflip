@@ -232,7 +232,7 @@ export default class Scene implements SceneBase {
   persistText = false;
   nextSceneRandomID: number = 0;
   nextSceneRandoms: Array<number> = [];
-  libraryID: number = -1;
+  libraryID: number | null = -1;
   audioScene = false;
   audioEnabled = false;
   audioPlaylists: Array<{

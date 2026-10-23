@@ -168,7 +168,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
     );
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(props: FontOptionsProps): boolean {
     return (
       this.props.options !== props.options ||
       this.props.systemFonts !== props.systemFonts

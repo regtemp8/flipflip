@@ -47,7 +47,7 @@ interface CaptionProgramProps {
   jumpToHack?: ChildCallbackHack;
   getTags: (source: string, clipID?: string) => Array<Tag>;
   goBack: () => void;
-  playNextScene: () => void;
+  playNextScene?: () => void;
   advance?: () => void;
   getCurrentTimestamp?: () => number;
   nextTrack?: () => void;
@@ -151,9 +151,9 @@ export default class CaptionProgram extends React.Component<
               }
               volume={a.volume}
               onFinishedPlaying={() => {
-                const newAudios = Array.from(this.state.audios);
-                const audio = newAudios.find((au) => a.alias == au.alias);
-                audio.playing = false;
+                const newAudios = this.state.audios.map((au) =>
+                  au.alias === a.alias ? { ...au, playing: false } : au,
+                );
                 this.setState({ audios: newAudios });
               }}
             />
@@ -225,11 +225,14 @@ export default class CaptionProgram extends React.Component<
     this.reset();
     this.stop();
     if (this.props.jumpToHack) {
-      this.props.jumpToHack.listener = null;
+      this.props.jumpToHack.listener = undefined;
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: CaptionProgramProps,
+    state: CaptionProgramState,
+  ): boolean {
     return (
       props.captionScript !== this.props.captionScript ||
       props.currentImage !== this.props.currentImage ||
@@ -242,7 +245,7 @@ export default class CaptionProgram extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: CaptionProgramProps) {
     if (
       this.props.currentImage !== props.currentImage &&
       this._sceneCommand != null
@@ -311,15 +314,15 @@ export default class CaptionProgram extends React.Component<
 
   start() {
     const url = this.props.captionScript.url;
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<string[]>((resolve) => {
       if (this.props.captionScript.script == null) {
         window.ipc.getTextFromURL(url).then((text) => {
           if (text != null) {
-            resolve({ data: [text], helpers: null });
+            resolve([text]);
           }
         });
       } else {
-        resolve({ data: [this.props.captionScript.script], helpers: null });
+        resolve([this.props.captionScript.script]);
       }
     });
     promise.then(async (data) => {
@@ -334,7 +337,7 @@ export default class CaptionProgram extends React.Component<
       let containsTimestampAction = false;
       let containsAction = false;
 
-      for (let line of data.data[0].split("\n")) {
+      for (let line of data[0].split("\n")) {
         index++;
         line = line.trim();
 
@@ -342,7 +345,8 @@ export default class CaptionProgram extends React.Component<
         let command = getFirstWord(line);
         let value = getRest(line);
 
-        let timestamp = getMsTimestampValue(command);
+        let timestamp =
+          command != null ? getMsTimestampValue(command) : undefined;
         if (timestamp != null && value != null && value.length > 0) {
           line = value;
           command = getFirstWord(line);
@@ -481,19 +485,13 @@ export default class CaptionProgram extends React.Component<
               const register = Number.parseInt(registerRegex[1]);
               if (register != 0) {
                 value = value.replace("$" + register + " ", "");
-                if (!newPhrases.has(register)) {
-                  newPhrases.set(register, []);
-                }
-                newPhrases.set(
-                  register,
-                  newPhrases.get(register).concat([value]),
-                );
+                const registerPhrase = newPhrases.get(register) ?? [];
+                newPhrases.set(register, registerPhrase.concat([value]));
               }
             }
-            if (!newPhrases.has(0)) {
-              newPhrases.set(0, []);
-            }
-            newPhrases.set(0, newPhrases.get(0).concat([value]));
+
+            const storedPhrase = newPhrases.get(0) ?? [];
+            newPhrases.set(0, storedPhrase.concat([value]));
             this.setState({ phrases: newPhrases });
             break;
           case "storeAudio":
@@ -918,7 +916,7 @@ export default class CaptionProgram extends React.Component<
           this.setState({ program: newProgram });
           this.captionLoop();
         }
-      } else if (this.props.onError) {
+      } else if (error != null) {
         if (this.props.onError) {
           this.props.onError(error);
         } else {
@@ -932,14 +930,13 @@ export default class CaptionProgram extends React.Component<
     const timeStarted = new Date().getTime();
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
-      let fns;
       while (
         this.state.timestamps.length >= index &&
         passed > this.state.timestamps[index + 1]
       ) {
         index++;
       }
-      fns = this.state.timestampFn.get(this.state.timestamps[index]);
+      const fns = this.state.timestampFn.get(this.state.timestamps[index])!;
       this._nextTimestamp = this.state.timestamps[index + 1];
 
       for (let fn of fns) {
@@ -990,7 +987,7 @@ export default class CaptionProgram extends React.Component<
           ) {
             for (let fn of this.state.timestampFn.get(
               this.state.timestamps[index],
-            )) {
+            )!) {
               if (/const command = \(\)/g.exec(fn.toString()) == null) {
                 fn(() => {});
               }
@@ -1064,10 +1061,10 @@ export default class CaptionProgram extends React.Component<
   getPhrase(value: string) {
     const registerRegex = /^\$(\d)$/.exec(value);
     if (value == "$RANDOM_PHRASE") {
-      return getRandomListItem(this.state.phrases.get(0));
+      return getRandomListItem(this.state.phrases.get(0) ?? []);
     } else if (registerRegex != null) {
       const register = Number.parseInt(registerRegex[1]);
-      return getRandomListItem(this.state.phrases.get(register));
+      return getRandomListItem(this.state.phrases.get(register) ?? []);
     } else if (value == "$TAG_PHRASE") {
       const source = this.props.currentImage?.getAttribute("source");
       if (source) {
@@ -1596,10 +1593,15 @@ export default class CaptionProgram extends React.Component<
 
   playAudio(alias: string, volume: number) {
     return (nextCommand: Function) => {
-      const newAudios = Array.from(this.state.audios);
-      const audio = newAudios.find((a) => a.alias == alias);
-      audio.playing = true;
-      audio.volume = volume;
+      const newAudios = this.state.audios.map((a) => {
+        if (a.alias === alias) {
+          a.playing = true;
+          a.volume = volume;
+        }
+
+        return a;
+      });
+
       this.setState({ audios: newAudios });
       nextCommand();
     };

@@ -49,7 +49,7 @@ const styles = (theme: Theme) =>
     },
   });
 
-interface VideoControlProps {
+interface VideoControlInnerProps {
   classes: any;
   video: HTMLVideoElement;
   useHotkeys?: boolean;
@@ -64,18 +64,18 @@ interface VideoControlProps {
   nextTrack?: () => void;
 }
 
-interface VideoControlState {
+interface VideoControlInnerState {
   playing: boolean;
   update: boolean;
   marks: Array<{ value: number; label: string }>;
   showSpeed: boolean;
 }
 
-class VideoControl extends React.Component<
-  VideoControlProps,
-  VideoControlState
+class VideoControlInner extends React.Component<
+  VideoControlInnerProps,
+  VideoControlInnerState
 > {
-  constructor(props: VideoControlProps) {
+  constructor(props: VideoControlInnerProps) {
     super(props);
 
     this.state = {
@@ -87,15 +87,6 @@ class VideoControl extends React.Component<
   }
 
   render() {
-    if (this.props.video == null)
-      return (
-        <Grid
-          container
-          spacing={1}
-          alignItems="center"
-          justifyContent={this.props.player ? "center" : "flex-start"}
-        />
-      );
     const classes = this.props.classes;
     return (
       <Grid
@@ -258,7 +249,7 @@ class VideoControl extends React.Component<
           this.props.video.currentTime > this.props.clipValue[1]
         ) {
           if (this.props.video.onended) {
-            this.props.video.onended(null);
+            this.props.video.onended(new Event("ended"));
           }
           this.props.video.currentTime = this.props.clipValue[0];
         }
@@ -274,7 +265,7 @@ class VideoControl extends React.Component<
     }
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: VideoControlInnerProps) {
     // If the clip/video has changed, or we don't have the expected number of marks
     if (
       this.props.clipValue != props.clipValue ||
@@ -345,7 +336,9 @@ class VideoControl extends React.Component<
     value: number | number[],
   ) => {
     const speed = value as number;
-    this.props.onChangeSpeed(speed);
+    if (this.props.onChangeSpeed != null) {
+      this.props.onChangeSpeed(speed);
+    }
     if (this.props.video) {
       this.props.video.playbackRate = speed / 10;
       this.triggerUpdate();
@@ -442,7 +435,11 @@ class VideoControl extends React.Component<
       switch (e.key) {
         case " ":
           e.preventDefault();
-          this.state.playing ? this.onPause() : this.onPlay();
+          if (this.state.playing) {
+            this.onPause();
+          } else {
+            this.onPlay();
+          }
           break;
         case "ArrowUp":
           if (e.ctrlKey) {
@@ -473,5 +470,52 @@ class VideoControl extends React.Component<
   };
 }
 
+const StyledVideoControlInner = withStyles(styles)(VideoControlInner);
+
+interface VideoControlProps {
+  video?: HTMLVideoElement;
+  useHotkeys?: boolean;
+  player?: boolean;
+  volume?: any;
+  clip?: Clip;
+  clipValue?: Array<number>;
+  clips?: Array<Clip>;
+  skip?: number;
+  onChangeVolume: (volume: number) => void;
+  onChangeSpeed?: (speed: number) => void;
+  nextTrack?: () => void;
+}
+
+class VideoControl extends React.Component<VideoControlProps> {
+  constructor(props: VideoControlProps) {
+    super(props);
+  }
+
+  render() {
+    return this.props.video == null ? (
+      <Grid
+        container
+        spacing={1}
+        alignItems="center"
+        justifyContent={this.props.player ? "center" : "flex-start"}
+      />
+    ) : (
+      <StyledVideoControlInner
+        video={this.props.video}
+        useHotkeys={this.props.useHotkeys}
+        player={this.props.player}
+        volume={this.props.volume}
+        clip={this.props.clip}
+        clipValue={this.props.clipValue}
+        clips={this.props.clips}
+        skip={this.props.skip}
+        onChangeVolume={this.props.onChangeVolume}
+        onChangeSpeed={this.props.onChangeSpeed}
+        nextTrack={this.props.nextTrack}
+      />
+    );
+  }
+}
+
 (VideoControl as any).displayName = "VideoControl";
-export default withStyles(styles)(VideoControl);
+export default VideoControl;

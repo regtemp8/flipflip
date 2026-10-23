@@ -162,7 +162,7 @@ class AudioArtistList extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: AudioArtistListProps) {
     if (props.sources != this.props.sources) {
       this.setState({ artists: this.getArtists() });
     }

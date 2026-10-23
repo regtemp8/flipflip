@@ -16,7 +16,7 @@ interface CaptionProgramPlaylistProps {
     shuffle: boolean;
     repeat: string;
   };
-  currentAudio: Audio;
+  currentAudio?: Audio;
   currentImage: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
   scale: number;
   scene: Scene;
@@ -26,7 +26,7 @@ interface CaptionProgramPlaylistProps {
   getTags: (source: string, clipID?: string) => Array<Tag>;
   goBack: () => void;
   orderScriptTags: (script: CaptionScript) => void;
-  playNextScene: () => void;
+  playNextScene?: () => void;
   advance?: () => void;
   getCurrentTimestamp?: () => number;
   onError?: (e: string) => void;
@@ -58,7 +58,7 @@ export default class CaptionProgramPlaylist extends React.Component<
     return (
       <CaptionProgram
         captionScript={script}
-        persist={this.props.persist}
+        persist={this.props.persist ?? false}
         repeat={this.props.playlist.repeat}
         scale={this.props.scale}
         singleTrack={this.state.playingScripts.length == 1}
@@ -77,7 +77,7 @@ export default class CaptionProgramPlaylist extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: CaptionProgramPlaylistProps) {
     if (!this.props.persist && this.props.playlist !== props.playlist) {
       this.restart();
     }

@@ -118,13 +118,10 @@ class PlaylistList extends React.Component<
       );
     }
 
-    const playlists = Array.from(this.state.playlists.keys());
     return (
       <Grid container spacing={2}>
-        {playlists.map((p) => {
-          const thumbs = this.state.playlists
-            .get(p)
-            .map((thumb) => thumb.replace(/\\/g, "/"));
+        {Array.from(this.state.playlists.entries()).map(([key, value]) => {
+          const thumbs = value.map((thumb) => thumb.replace(/\\/g, "/"));
           if (thumbs.length == 2) {
             thumbs.push("", "");
             thumbs[3] = thumbs[1];
@@ -132,15 +129,15 @@ class PlaylistList extends React.Component<
           }
           return (
             <Grid
-              key={p}
+              key={key}
               item
               xs={6}
               sm={4}
               md={3}
               lg={2}
               className={classes.pointer}
-              onClick={() => this.props.onClickPlaylist(p)}
-              onMouseEnter={() => this.onMouseEnter(p)}
+              onClick={() => this.props.onClickPlaylist(key)}
+              onMouseEnter={() => this.onMouseEnter(key)}
               onMouseLeave={this.onMouseLeave}
             >
               <Card classes={{ root: classes.root }}>
@@ -159,12 +156,12 @@ class PlaylistList extends React.Component<
                 <CardContent classes={{ root: classes.cardContent }}>
                   <Typography
                     className={clsx(
-                      this.state.hover == p && classes.underlineTitle,
+                      this.state.hover == key && classes.underlineTitle,
                     )}
                     noWrap
                     variant="body1"
                   >
-                    {p}
+                    {key}
                   </Typography>
                 </CardContent>
               </Card>
@@ -175,7 +172,7 @@ class PlaylistList extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: PlaylistListProps) {
     if (props.playlists != this.props.playlists) {
       this.setState({ playlists: this.getPlaylists() });
     }

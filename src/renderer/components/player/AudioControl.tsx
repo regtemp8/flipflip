@@ -57,7 +57,7 @@ interface AudioControlProps {
   singleTrack: boolean;
   lastTrack: boolean;
   repeat: string;
-  scenePaths: Array<any>;
+  scenePaths?: Array<any>;
   startPlaying: boolean;
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
@@ -103,7 +103,7 @@ class AudioControl extends React.Component<
     let msRemainder = undefined;
     if (this.props.showMsTimestamp) {
       msRemainder = getMsRemainder(this.state.position);
-      if (msRemainder == ".000") {
+      if (msRemainder == null || msRemainder == ".000") {
         msRemainder = undefined;
       }
     }
@@ -266,7 +266,7 @@ class AudioControl extends React.Component<
     this._queueNextTrack = false;
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioControlProps, state: AudioControlState) {
     if (this.props.audio.url != props.audio.url) {
       this.setState({ position: 0, duration: 0 });
     }
@@ -427,7 +427,7 @@ class AudioControl extends React.Component<
     }
   };
 
-  onPlaying = (soundData: any) => {
+  onPlaying = (soundData: { position: number; duration: number }) => {
     let position = this.state.position;
     let duration = this.state.duration;
     if (soundData.position) {

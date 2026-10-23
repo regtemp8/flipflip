@@ -413,13 +413,13 @@ interface AudioLibraryProps {
   filters: Array<string>;
   library: Array<Audio>;
   progressCurrent: number;
-  progressMode: string;
-  progressTitle: string;
+  progressMode: string | null;
+  progressTitle: string | null;
   progressTotal: number;
   openTab: number;
   playlists: Array<Playlist>;
   selected: Array<string>;
-  specialMode: string;
+  specialMode: string | null;
   tags: Array<Tag>;
   tutorial: string | null;
   yOffset: number;
@@ -1429,7 +1429,7 @@ class AudioLibrary extends React.Component<
     window.addEventListener("keydown", this.onKeyDown, false);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioLibraryProps, state: AudioLibraryState) {
     if (
       state.filters != this.state.filters ||
       props.library != this.props.library ||
@@ -1783,7 +1783,9 @@ class AudioLibrary extends React.Component<
   };
 
   onToggleNewMenu = () => {
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
   };
 
   onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -1871,8 +1873,9 @@ class AudioLibrary extends React.Component<
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
     for (let source of displaySources.map((s) => s.url)) {
-      if (newSelected.includes(source)) {
-        newSelected.splice(newSelected.indexOf(source), 1);
+      const index = newSelected.indexOf(source);
+      if (index !== -1) {
+        newSelected.splice(index, 1);
       }
     }
     this.setState({ selected: newSelected });
@@ -1900,14 +1903,14 @@ class AudioLibrary extends React.Component<
     if (taggingMode) {
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of this.state.displaySources) {
-          l.find((s) => s.id == source.id).marked = true;
+        for (const source of this.state.displaySources) {
+          l.find((s) => s.id == source.id)!.marked = true;
         }
       });
     } else {
       // We're unmarking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of l) {
+        for (const source of l) {
           source.marked = false;
         }
       });
@@ -1939,13 +1942,13 @@ class AudioLibrary extends React.Component<
   batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         source.tags = new Array<Tag>();
         for (let tag of this.state.selectedTags) {
           source.tags.push(
             new Tag({
               name: tag,
-              id: this.props.tags.find((t) => t.name == tag).id,
+              id: this.props.tags.find((t) => t.name == tag)!.id,
             }),
           );
         }
@@ -1957,14 +1960,14 @@ class AudioLibrary extends React.Component<
   batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
                 name: tag,
-                id: this.props.tags.find((t) => t.name == tag).id,
+                id: this.props.tags.find((t) => t.name == tag)!.id,
               }),
             );
           }
@@ -1977,7 +1980,7 @@ class AudioLibrary extends React.Component<
   batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
           if (sourceTags.includes(tag)) {
@@ -2016,7 +2019,7 @@ class AudioLibrary extends React.Component<
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
-      const source = this.props.library.find((s) => s.url === sourceURL);
+      const source = this.props.library.find((s) => s.url === sourceURL)!;
       const tags = source.tags;
       if (commonTags.length == 0) {
         commonTags = tags;
@@ -2045,10 +2048,10 @@ class AudioLibrary extends React.Component<
       const playlist = this.props.playlists.find((p) => p.name == playlistName);
       const library: Array<Audio> = playlist
         ? playlist.audios.map((aID) =>
-            this.props.library.find((a) => a.id == aID),
+            this.props.library.find((a) => a.id == aID)!,
           )
         : this.props.library;
-      for (let source of library) {
+      for (const source of library) {
         let matchesFilter = true;
         let countRegex;
         for (let filter of this.state.filters) {
@@ -2078,7 +2081,8 @@ class AudioLibrary extends React.Component<
             if (filter.startsWith("-")) {
               filter = filter.substring(1, filter.length);
               if (filter.length == 0) {
-                matchesFilter = source.artist && source.artist.length > 0;
+                matchesFilter =
+                  source.artist != null && source.artist.length > 0;
               } else {
                 matchesFilter = filter != source.artist;
               }
@@ -2095,7 +2099,7 @@ class AudioLibrary extends React.Component<
             if (filter.startsWith("-")) {
               filter = filter.substring(1, filter.length);
               if (filter.length == 0) {
-                matchesFilter = source.album && source.album.length > 0;
+                matchesFilter = source.album != null && source.album.length > 0;
               } else {
                 matchesFilter = filter != source.album;
               }
@@ -2120,16 +2124,17 @@ class AudioLibrary extends React.Component<
             if (filter.startsWith("-")) {
               filter = filter.substring(1, filter.length);
               if (filter.length == 0) {
-                matchesFilter = source.comment && source.comment.length > 0;
+                matchesFilter =
+                  source.comment != null && source.comment.length > 0;
               } else {
                 const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
-                matchesFilter = !regex.test(source.comment);
+                matchesFilter = !regex.test(source.comment ?? "");
               }
             } else if (filter.length == 0) {
               matchesFilter = !source.comment || source.comment.length == 0;
             } else {
               const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
-              matchesFilter = regex.test(source.comment);
+              matchesFilter = regex.test(source.comment ?? "");
             }
           } else if (
             (countRegex = /^count([>=<])(\d*)$/.exec(filter)) != null
@@ -2159,17 +2164,17 @@ class AudioLibrary extends React.Component<
               const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
               matchesFilter =
                 !regex.test(source.url) &&
-                !regex.test(source.name) &&
-                !regex.test(source.artist) &&
-                !regex.test(source.album);
+                !regex.test(source.name ?? "") &&
+                !regex.test(source.artist ?? "") &&
+                !regex.test(source.album ?? "");
             } else {
               filter = filter.substring(1, filter.length - 1);
               const regex = new RegExp(filter.replace(/\\/g, "\\\\"), "i");
               matchesFilter =
                 regex.test(source.url) ||
-                regex.test(source.name) ||
-                regex.test(source.artist) ||
-                regex.test(source.album);
+                regex.test(source.name ?? "") ||
+                regex.test(source.artist ?? "") ||
+                regex.test(source.album ?? "");
             }
           } else {
             // This is a search filter
@@ -2179,16 +2184,16 @@ class AudioLibrary extends React.Component<
               const regex = new RegExp(filter, "i");
               matchesFilter =
                 !regex.test(source.url) &&
-                !regex.test(source.name) &&
-                !regex.test(source.artist) &&
-                !regex.test(source.album);
+                !regex.test(source.name ?? "") &&
+                !regex.test(source.artist ?? "") &&
+                !regex.test(source.album ?? "");
             } else {
               const regex = new RegExp(filter, "i");
               matchesFilter =
                 regex.test(source.url) ||
-                regex.test(source.name) ||
-                regex.test(source.artist) ||
-                regex.test(source.album);
+                regex.test(source.name ?? "") ||
+                regex.test(source.artist ?? "") ||
+                regex.test(source.album ?? "");
             }
           }
           if (!matchesFilter) break;

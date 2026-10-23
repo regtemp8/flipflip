@@ -73,8 +73,8 @@ interface ScriptSourceListProps {
   onUpdateLibrary: (fn: (library: Array<CaptionScript>) => void) => void;
   onUpdateScript: (script: CaptionScript) => void;
   systemMessage: (message: string) => void;
-  onUpdateSelected?: (selected: Array<string>) => void;
-  savePosition?: () => void;
+  onUpdateSelected: (selected: Array<string>) => void;
+  savePosition: () => void;
 }
 
 interface ScriptSourceListState {
@@ -85,7 +85,7 @@ interface ScriptSourceListState {
   mouseY?: any;
   deleteDialog?: CaptionScript;
   beginPlay?: CaptionScript;
-  playWithScene?: number;
+  playWithScene: number;
 }
 
 class ScriptSourceList extends React.Component<
@@ -97,6 +97,7 @@ class ScriptSourceList extends React.Component<
 
     this.state = {
       isEditing: -1,
+      playWithScene: 0,
     };
   }
 
@@ -222,7 +223,7 @@ class ScriptSourceList extends React.Component<
                 autoFocus
                 menuIsOpen
                 allScenes={this.props.scenes}
-                value={this.state.playWithScene!}
+                value={this.state.playWithScene}
                 getSceneName={this.getSceneName}
                 onChange={this.onChangeScene}
               />
@@ -232,10 +233,7 @@ class ScriptSourceList extends React.Component<
                 Cancel
               </Button>
               <Button
-                disabled={
-                  this.state.playWithScene == null ||
-                  this.state.playWithScene == 0
-                }
+                disabled={this.state.playWithScene == 0}
                 onClick={this.onFinishPlay}
                 color="primary"
               >
@@ -258,7 +256,7 @@ class ScriptSourceList extends React.Component<
     this._lastChecked = undefined;
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: ScriptSourceListProps) {
     if (
       this.props.sources.length != props.sources.length &&
       this.props.sources.length > 0 &&
@@ -273,7 +271,7 @@ class ScriptSourceList extends React.Component<
     addEventListener("keyup", this.onKeyUp);
     this._shiftDown = false;
     this._lastChecked = undefined;
-    this.savePosition();
+    this.props.savePosition();
   }
 
   onKeyDown = (e: KeyboardEvent) => {
@@ -281,12 +279,6 @@ class ScriptSourceList extends React.Component<
   };
   onKeyUp = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = false;
-  };
-
-  savePosition = () => {
-    if (this.props.savePosition) {
-      this.props.savePosition();
-    }
   };
 
   clearLastSelected = () => {
@@ -308,9 +300,12 @@ class ScriptSourceList extends React.Component<
   };
 
   onFinishSourceOptions = (newScript: CaptionScript) => {
+    const sourceOptions = this.state.sourceOptions!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceOptions.id);
-      Object.assign(editSource, newScript);
+      let editSource = a.find((a) => a.id == sourceOptions.id);
+      if (editSource != null) {
+        Object.assign(editSource, newScript);
+      }
     });
     this.props.onUpdateScript(newScript);
     this.onCloseSourceOptions();
@@ -325,7 +320,7 @@ class ScriptSourceList extends React.Component<
   };
 
   onFinishDelete = () => {
-    const toDelete = this.state.deleteDialog;
+    const toDelete = this.state.deleteDialog!;
     window.ipc.finishDelete(toDelete.url).then(() => {
       this.onRemove(toDelete);
       this.onCloseDeleteDialog();
@@ -386,7 +381,7 @@ class ScriptSourceList extends React.Component<
 
   onEndEdit = (newURL: string) => {
     this.props.onUpdateLibrary((l) => {
-      const editSource = l.find((s) => s.id == this.state.isEditing);
+      const editSource = l.find((s) => s.id == this.state.isEditing)!;
       editSource.url = newURL;
 
       const newSources = new Array<CaptionScript>();
@@ -407,7 +402,7 @@ class ScriptSourceList extends React.Component<
         }
       }
       l.splice(0, l.length);
-      Array.prototype.push.apply(l, [].concat(newSources));
+      l.push(...newSources);
     });
     this.setState({ isEditing: -1 });
   };
@@ -417,17 +412,21 @@ class ScriptSourceList extends React.Component<
   };
 
   onClosePlayDialog = () => {
-    this.setState({ beginPlay: undefined, playWithScene: undefined });
+    this.setState({ beginPlay: undefined, playWithScene: 0 });
   };
 
   onFinishPlay = () => {
-    const { beginPlay, playWithScene } = this.state;
+    const beginPlay = this.state.beginPlay!;
     this.props.savePosition();
     try {
-      this.props.onPlay(beginPlay, playWithScene, this.props.sources);
+      this.props.onPlay(
+        beginPlay,
+        this.state.playWithScene,
+        this.props.sources,
+      );
     } catch {
       this.props.systemMessage(
-        "The source " + this.state.beginPlay.url + " isn't in your Library",
+        "The source " + beginPlay.url + " isn't in your Library",
       );
     }
   };
@@ -438,7 +437,7 @@ class ScriptSourceList extends React.Component<
 
   getSceneName = (id: string): string => {
     if (id === "0") return "None";
-    return this.props.scenes.find((s) => s.id.toString() === id).name;
+    return this.props.scenes.find((s) => s.id.toString() === id)!.name;
   };
 
   SortableVirtualList = SortableContainer<{ height: number; width: number }>(
@@ -472,7 +471,8 @@ class ScriptSourceList extends React.Component<
         <ScriptSourceListItem
           key={index}
           checked={
-            this.props.specialMode && this.props.selected.includes(source.url)
+            this.props.specialMode != null &&
+            this.props.selected.includes(source.url)
           }
           index={index}
           isEditing={this.state.isEditing}
@@ -489,7 +489,7 @@ class ScriptSourceList extends React.Component<
           onSourceOptions={this.onSourceOptions}
           onStartEdit={this.onStartEdit}
           onToggleSelect={this.onToggleSelect}
-          savePosition={this.savePosition}
+          savePosition={this.props.savePosition}
           systemMessage={this.props.systemMessage}
         />
       );

@@ -14,7 +14,7 @@ interface VideoCardProps {
   scene: Scene;
   otherScenes: Array<Scene | SceneGrid | undefined>;
   isPlaying: boolean;
-  mainVideo: HTMLVideoElement;
+  mainVideo?: HTMLVideoElement;
   mainClip?: Clip;
   mainClipValue?: Array<number>;
   otherVideos: Array<Array<HTMLVideoElement | undefined>>;
@@ -29,8 +29,8 @@ export default class VideoCard extends React.Component<VideoCardProps> {
 
   render() {
     let mainVideoTitle = "";
-    const source = this.props.mainVideo?.getAttribute("source");
-    if (source) {
+    if (this.props.mainVideo != null) {
+      const source = this.props.mainVideo.getAttribute("source")!;
       const sourceType = getSourceType(source);
       if (sourceType == ST.video) {
         if (source.startsWith("http")) {
@@ -100,7 +100,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                   otherVideoTitle.lastIndexOf("/") + 1,
                 );
               }
-              let clipValue = null;
+              let clipValue: number[] | undefined = undefined;
               let clipID = -1;
               let source = null;
               const start = otherVideo.getAttribute("start");
@@ -126,9 +126,7 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                   </Typography>
                   <VideoControl
                     video={otherVideo}
-                    clip={
-                      source ? source.clips.find((c) => c.id == clipID) : null
-                    }
+                    clip={source?.clips?.find((c) => c.id == clipID)}
                     clipValue={clipValue}
                     player
                     nextTrack={() => {
@@ -136,7 +134,6 @@ export default class VideoCard extends React.Component<VideoCardProps> {
                         index
                       ].fire();
                     }}
-                    onChangeSpeed={this.nop}
                     onChangeVolume={this.nop}
                     skip={this.props.scene.videoSkip}
                   />

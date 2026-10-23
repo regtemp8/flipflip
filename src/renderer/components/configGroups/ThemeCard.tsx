@@ -1,14 +1,20 @@
 import * as React from "react";
 import clsx from "clsx";
 
-import { FormControlLabel, Switch, Theme, Typography } from "@mui/material";
+import {
+  FormControlLabel,
+  Switch,
+  Theme as MuiTheme,
+  Typography,
+} from "@mui/material";
 
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
 
 import ThemeColorPicker from "../config/ThemeColorPicker";
+import { Theme } from "../../../common/theme";
 
-const styles = (theme: Theme) =>
+const styles = (theme: MuiTheme) =>
   createStyles({
     themePicker: {
       [theme.breakpoints.up("sm")]: {

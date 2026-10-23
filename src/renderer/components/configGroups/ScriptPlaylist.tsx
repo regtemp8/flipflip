@@ -80,15 +80,15 @@ interface ScriptPlaylistProps {
     repeat: string;
   };
   scene: Scene;
-  onAddScript: (playlistIndex: number) => void;
-  onPlay: (
+  onAddScript?: (playlistIndex: number) => void;
+  onPlay?: (
     source: CaptionScript,
     sceneID: number,
     displaySources: Array<CaptionScript>,
   ) => void;
   onSourceOptions: (playlistIndex: number, script: CaptionScript) => void;
   onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
-  systemMessage: (message: string) => void;
+  systemMessage?: (message: string) => void;
 }
 
 class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
@@ -202,7 +202,12 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={() => this.props.onAddScript(this.props.playlistIndex)}
+              disabled={this.props.onAddScript == null}
+              onClick={() => {
+                if (this.props.onAddScript != null) {
+                  this.props.onAddScript(this.props.playlistIndex);
+                }
+              }}
               size="large"
             >
               <AddIcon />
@@ -229,7 +234,12 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
       this.openExternalURL(sourceURL);
     } else if (!e.shiftKey && e.ctrlKey) {
       window.ipc.showItemInFolder(sourceURL);
-    } else if (!e.shiftKey && !e.ctrlKey && this.props.systemMessage) {
+    } else if (
+      !e.shiftKey &&
+      !e.ctrlKey &&
+      this.props.onPlay &&
+      this.props.systemMessage
+    ) {
       try {
         this.props.onPlay(
           script,

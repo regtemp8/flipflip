@@ -898,13 +898,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                           )}
                         >
                           <CardActionArea
-                            onClick={() => {
-                              if (this.state.deleteScenes == null) {
-                                this.props.onOpenScene(scene);
-                              } else {
-                                this.onToggleDelete(scene.id);
-                              }
-                            }}
+                            onClick={() => this.onClickSceneCard(scene)}
                           >
                             <CardContent>
                               <Typography component="h2" variant="h6">
@@ -1097,11 +1091,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 >
                                   <CardActionArea
                                     onClick={() => {
-                                      if (this.state.deleteScenes == null) {
-                                        this.props.onOpenScene(scene);
-                                      } else {
-                                        this.onToggleDelete(scene.id);
-                                      }
+                                      this.onClickSceneCard(scene);
                                     }}
                                   >
                                     <CardContent>
@@ -1181,11 +1171,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         >
                           <CardActionArea
                             onClick={() => {
-                              if (this.state.deleteScenes == null) {
-                                this.props.onOpenScene(scene);
-                              } else {
-                                this.onToggleDelete(scene.id);
-                              }
+                              this.onClickSceneCard(scene);
                             }}
                           >
                             <CardContent>
@@ -1379,11 +1365,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 >
                                   <CardActionArea
                                     onClick={() => {
-                                      if (this.state.deleteScenes == null) {
-                                        this.props.onOpenScene(scene);
-                                      } else {
-                                        this.onToggleDelete(scene.id);
-                                      }
+                                      this.onClickSceneCard(scene);
                                     }}
                                   >
                                     <CardContent>
@@ -1462,13 +1444,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                         >
                           <CardActionArea
                             onClick={() => {
-                              if (this.state.deleteScenes == null) {
-                                this.props.onOpenGrid(grid);
-                              } else {
-                                this.onToggleDelete(
-                                  Number.parseInt("999" + grid.id),
-                                );
-                              }
+                              this.onClickGridCard(grid);
                             }}
                           >
                             <CardContent>
@@ -1660,13 +1636,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
                                 >
                                   <CardActionArea
                                     onClick={() => {
-                                      if (this.state.deleteScenes == null) {
-                                        this.props.onOpenGrid(grid);
-                                      } else {
-                                        this.onToggleDelete(
-                                          Number.parseInt("999" + grid.id),
-                                        );
-                                      }
+                                      this.onClickGridCard(grid);
                                     }}
                                   >
                                     <CardContent>
@@ -2006,7 +1976,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
       });
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: ScenePickerProps, state: ScenePickerState) {
     if (
       state.filters != this.state.filters ||
       props.scenes != this.props.scenes ||
@@ -2045,12 +2015,31 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
   };
 
   onFinishDelete = () => {
-    this.props.onDeleteScenes(this.state.deleteScenes);
+    this.props.onDeleteScenes(this.state.deleteScenes!);
     this.setState({ deleteScenes: undefined });
   };
 
-  onToggleDelete = (sceneID: number) => {
-    const newDeleteScenes = Array.from(this.state.deleteScenes);
+  onClickSceneCard = (scene: Scene) => {
+    if (this.state.deleteScenes == null) {
+      this.props.onOpenScene(scene);
+    } else {
+      this.onToggleDelete(this.state.deleteScenes, scene.id);
+    }
+  };
+
+  onClickGridCard = (grid: SceneGrid) => {
+    if (this.state.deleteScenes == null) {
+      this.props.onOpenGrid(grid);
+    } else {
+      this.onToggleDelete(
+        this.state.deleteScenes,
+        Number.parseInt("999" + grid.id),
+      );
+    }
+  };
+
+  onToggleDelete = (deleteScenes: number[], sceneID: number) => {
+    const newDeleteScenes = Array.from(deleteScenes);
     if (newDeleteScenes.includes(sceneID)) {
       newDeleteScenes.splice(newDeleteScenes.indexOf(sceneID), 1);
     } else {

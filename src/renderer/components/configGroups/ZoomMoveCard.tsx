@@ -43,7 +43,7 @@ interface ZoomMoveCardProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
   sidebar?: boolean;
-  tutorial: string | null;
+  tutorial?: string;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 

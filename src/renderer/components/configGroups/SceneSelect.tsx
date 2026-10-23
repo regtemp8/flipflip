@@ -1,4 +1,4 @@
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import * as React from "react";
 import { grey } from "@mui/material/colors";
 
@@ -50,8 +50,11 @@ class SceneSelect<T extends SceneBase> extends React.Component<
       .filter((o) => o.label != "library_scene_temp");
     return (
       <Select
-        sx={{
-          color: grey[900],
+        styles={{
+          container: (baseStyles) => ({
+            ...baseStyles,
+            color: grey[900],
+          }),
         }}
         value={{
           label: this.props.getSceneName(this.props.value.toString()),
@@ -66,8 +69,10 @@ class SceneSelect<T extends SceneBase> extends React.Component<
     );
   }
 
-  onChange = (e: { label: string; value: number }) => {
-    this.props.onChange(e.value);
+  onChange = (e: SingleValue<{ label: string; value: number }>) => {
+    if (e != null) {
+      this.props.onChange(e.value);
+    }
   };
 }
 

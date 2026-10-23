@@ -28,8 +28,6 @@ declare module "fs-extra";
 declare module "imgur";
 declare module "music-metadata";
 declare module "react-color";
-declare module "react-select";
-declare module "react-select/creatable";
 declare module "react-sortablejs";
 declare module "react-spring";
 declare module "react-virtualized-auto-sizer";
@@ -53,10 +51,11 @@ declare module "react-sound" {
     playbackRate?: number | undefined;
     autoLoad?: boolean | undefined;
     loop?: boolean | undefined;
-    onError?: (() => void) | undefined;
+    onError?: ((errorCode: number, description: string) => void) | undefined;
     onLoading?: (() => void) | undefined;
     onLoad?: (() => void) | undefined;
-    onPlaying?: (() => void) | undefined;
+    onPlaying?:
+      ((soundData: { position: number; duration: number }) => void) | undefined;
     onPause?: (() => void) | undefined;
     onResume?: (() => void) | undefined;
     onStop?: (() => void) | undefined;

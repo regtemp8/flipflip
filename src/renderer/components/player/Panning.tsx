@@ -7,8 +7,8 @@ import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 
 interface PanningProps {
-  togglePan: boolean;
-  currentAudio: Audio;
+  togglePan?: boolean;
+  currentAudio?: Audio;
   timeToNextFrame: number;
   scene: Scene;
   panFunction: Function;
@@ -49,9 +49,10 @@ export default class Panning extends React.Component<
 
   PanningLayer = (data: { children: React.ReactNode }) => {
     const sceneTiming = this.props.scene.panTF == TF.scene;
-    if (this.props.togglePan != this._lastToggle) {
+    const togglePan = this.props.togglePan ?? false;
+    if (togglePan != this._lastToggle) {
       this._panOut = false;
-      this._lastToggle = this.props.togglePan;
+      this._lastToggle = togglePan;
     }
     let panTransitions: [{ item: any; props: any; key: any }];
     const image = this.props.image;
@@ -167,7 +168,7 @@ export default class Panning extends React.Component<
 
     if (sceneTiming) {
       panTransitions = useTransition(
-        this._panOut ? null : this.props.togglePan,
+        this._panOut ? null : togglePan,
         (toggle: any) => {
           return toggle;
         },
@@ -386,7 +387,7 @@ export default class Panning extends React.Component<
     }
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: PanningProps) {
     if (
       this.props.scene.panning &&
       this.props.scene.panTF != props.scene.panTF
@@ -401,9 +402,9 @@ export default class Panning extends React.Component<
     }
   }
 
-  shouldComponentUpdate(props: any, state: any) {
+  shouldComponentUpdate(props: PanningProps, state: PanningState) {
     return (
-      !props.panning ||
+      !props.scene.panning ||
       this.props.togglePan != props.togglePan ||
       this.state.togglePan != state.togglePan ||
       this.props.parentHeight != props.parentHeight ||
@@ -451,7 +452,7 @@ export default class Panning extends React.Component<
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.panBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         duration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!duration) {

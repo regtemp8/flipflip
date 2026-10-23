@@ -1,6 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
-import Select, { components } from "react-select";
+import Select, { components, MultiValue } from "react-select";
 import CreatableSelect from "react-select/creatable";
 
 import { Checkbox, Theme } from "@mui/material";
@@ -117,7 +117,6 @@ class LibrarySearch extends React.Component<
           inputValue={this.state.searchInput}
           isClearable
           isMulti
-          rightAligned
           controlShouldRenderValue={this.props.controlShouldRenderValue}
           placeholder={this.props.placeholder}
           formatCreateLabel={(input: string) => "Search for " + input}
@@ -151,7 +150,7 @@ class LibrarySearch extends React.Component<
     this.update();
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: LibrarySearchProps) {
     if (props) {
       if (
         props.filters != this.props.filters ||
@@ -318,7 +317,7 @@ class LibrarySearch extends React.Component<
     this.setState({ options: options, defaultValues: defaultValues });
   }
 
-  handleChange = (search: [{ label: string; value: string }]) => {
+  handleChange = (search: MultiValue<{ label: string; value: string }>) => {
     if (search == null) {
       this.props.onUpdateFilters([]);
     } else {

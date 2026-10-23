@@ -342,12 +342,13 @@ export function cacheImage(
   i: HTMLImageElement | HTMLVideoElement,
 ) {
   if (state.config.caching.enabled) {
-    const fileType = getSourceType(i.getAttribute("source"));
+    const source = i.getAttribute("source")!;
+    const fileType = getSourceType(source);
     if (fileType == ST.hydrus || fileType == ST.piwigo) return;
 
     const url = unproxy(i.src);
     if (fileType != ST.local && url.startsWith("http")) {
-      window.ipc.cacheImage(state.config, url, i.getAttribute("source"));
+      window.ipc.cacheImage(state.config, url, source);
     }
   }
 }
@@ -1308,6 +1309,10 @@ export function generateScenes(
         if (overlay.sceneID.toString().startsWith("999")) {
           const id = overlay.sceneID.toString().replace("999", "");
           const oScene = state.grids.find((s) => s.id.toString() == id);
+          if (!oScene) {
+            continue;
+          }
+
           for (const row of oScene.grid) {
             for (const cell of row) {
               const gScene = state.scenes.find((s) => s.id == cell.sceneID);
@@ -1337,7 +1342,7 @@ export function generateScenes(
   }
   const newScenes = Array.from(state.scenes);
   for (const scene of generateScenes) {
-    const newScene = state.scenes.find((s) => s.id == scene.id);
+    const newScene = state.scenes.find((s) => s.id == scene.id)!;
     let generatorWeights = newScene.generatorWeights ?? [];
 
     // Add globally ignored tags/types if not overridden by generator
@@ -2343,7 +2348,7 @@ export function batchEdit(state: State): Object {
 
 export function toggleAudioTag(
   state: State,
-  sourceID: number,
+  sourceID: number | null,
   tag: Tag,
 ): Object {
   const newAudios = state.audios;
@@ -2360,7 +2365,7 @@ export function toggleAudioTag(
 
 export function toggleScriptTag(
   state: State,
-  sourceID: number,
+  sourceID: number | null,
   tag: Tag,
 ): Object {
   const newScripts = state.scripts;
@@ -2375,7 +2380,11 @@ export function toggleScriptTag(
   return { scripts: newScripts };
 }
 
-export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
+export function toggleTag(
+  state: State,
+  sourceID: number | null,
+  tag: Tag,
+): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
   const source = newLibrary.find((s) => s.id == sourceID);
@@ -2395,7 +2404,7 @@ export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
   return { library: newLibrary, scenes: newScenes };
 }
 
-export function inheritTags(state: State, sourceID: number): Object {
+export function inheritTags(state: State, sourceID: number | null): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
   const source = newLibrary.find((s) => s.id == sourceID);
@@ -2478,7 +2487,7 @@ export function addSource(
 
   switch (type) {
     case "tutorial":
-      return updateScene(state, scene, (s) => {
+      return updateScene(state, scene!, (s) => {
         let id = s.sources.length + 1;
         s.sources.forEach((s) => {
           id = Math.max(s.id + 1, id);
@@ -2528,9 +2537,9 @@ export function addSource(
         });
       }
     case AF.list: {
-      const newSources = Array.from(args[0].trim().split("\n")).filter(
-        (s: string) => s.length > 0,
-      ) as Array<string>;
+      const newSources = Array.from(
+        (args[0] as string).trim().split("\n"),
+      ).filter((s) => s.length > 0);
       if (scene == null) {
         return updateLibrary(state, (l) =>
           addSources(l, newSources, state.library),
@@ -2805,9 +2814,8 @@ function audioSortFunction(
         break;
       case ASF.name: {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
-        aValue = a.name.replace(reA, "");
-        bValue = b.name.replace(reA, "");
-
+        const aValue = a.name ? a.name.replace(reA, "") : "";
+        const bValue = b.name ? b.name.replace(reA, "") : "";
         const compare = aValue.localeCompare(bValue, "en", { numeric: true });
         return ascending ? compare : compare * -1;
       }
@@ -3309,16 +3317,18 @@ export function importScene(
     for (const o of scene.overlays) {
       if (o.sceneID.toString().startsWith("999")) {
         const sID = Number.parseInt(o.sceneID.toString().replace("999", ""));
-        if (newGridMap.has(sID)) {
-          o.sceneID = Number.parseInt("999" + newGridMap.get(sID));
+        const newGridID = newGridMap.get(sID);
+        if (newGridID != null) {
+          o.sceneID = Number.parseInt("999" + newGridID);
         } else {
           o.sceneID = Number.parseInt("999" + gid);
           newGridMap.set(sID, gid++);
         }
       } else {
         const sID = Number.parseInt(o.sceneID as any);
-        if (newSceneMap.has(sID)) {
-          o.sceneID = newSceneMap.get(sID);
+        const newSceneID = newSceneMap.get(sID);
+        if (newSceneID != null) {
+          o.sceneID = newSceneID;
         } else {
           o.sceneID = id++;
           newSceneMap.set(sID, o.sceneID);
@@ -3331,7 +3341,12 @@ export function importScene(
     for (let i = 1; i < importScenes.length; i++) {
       if (importScenes[i].grid) {
         const grid = new SceneGrid(importScenes[i]);
-        grid.id = newGridMap.get(grid.id);
+        const newGridID = newGridMap.get(grid.id);
+        if (newGridID == null) {
+          continue;
+        }
+
+        grid.id = newGridID;
         for (let r = 0; r < grid.grid.length; r++) {
           for (let c = 0; c < grid.grid[r].length; c++) {
             const cellID = Number.parseInt(grid.grid[r][c].sceneID as any);

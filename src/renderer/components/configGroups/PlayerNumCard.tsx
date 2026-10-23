@@ -159,6 +159,7 @@ class PlayerNumCard extends React.Component<PlayerNumCardProps> {
                 displaySources={this.props.library}
                 filters={this.props.settings.ignoredTags}
                 tags={this.props.tags}
+                placeholder="Ignore These Tags"
                 isClearable
                 onlyTagsAndTypes
                 showCheckboxes

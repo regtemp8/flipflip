@@ -1,5 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
+import { MultiValue } from "react-select";
 import CreatableSelect from "react-select/creatable";
 
 import { Theme } from "@mui/material";
@@ -58,7 +59,6 @@ class SceneSearch extends React.Component<SceneSearchProps, SceneSearchState> {
         inputValue={this.state.searchInput}
         isClearable
         isMulti
-        rightAligned
         placeholder={this.props.placeholder}
         formatCreateLabel={(input: string) => "Search for " + input}
         onChange={this.handleChange}
@@ -71,7 +71,7 @@ class SceneSearch extends React.Component<SceneSearchProps, SceneSearchState> {
     this.update();
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: SceneSearchProps) {
     if (props) {
       if (
         props.filters != this.props.filters ||
@@ -93,7 +93,7 @@ class SceneSearch extends React.Component<SceneSearchProps, SceneSearchState> {
     this.setState({ options: options, defaultValues: defaultValues });
   }
 
-  handleChange = (search: [{ label: string; value: string }]) => {
+  handleChange = (search: MultiValue<{ label: string; value: string }>) => {
     if (search == null) {
       this.props.onUpdateFilters([]);
     } else {

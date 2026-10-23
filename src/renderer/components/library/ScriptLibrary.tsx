@@ -889,7 +889,7 @@ class ScriptLibrary extends React.Component<
     window.addEventListener("keydown", this.onKeyDown, false);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: ScriptLibraryProps, state: ScriptLibraryState) {
     if (
       state.filters != this.state.filters ||
       props.library != this.props.library
@@ -1150,7 +1150,7 @@ class ScriptLibrary extends React.Component<
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
         for (let source of this.state.displaySources) {
-          l.find((s) => s.id == source.id).marked = true;
+          l.find((s) => s.id == source.id)!.marked = true;
         }
       });
     } else {
@@ -1174,13 +1174,13 @@ class ScriptLibrary extends React.Component<
   batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         source.tags = new Array<Tag>();
         for (let tag of this.state.selectedTags) {
           source.tags.push(
             new Tag({
               name: tag,
-              id: this.props.tags.find((t) => t.name == tag).id,
+              id: this.props.tags.find((t) => t.name == tag)!.id,
             }),
           );
         }
@@ -1192,14 +1192,14 @@ class ScriptLibrary extends React.Component<
   batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
                 name: tag,
-                id: this.props.tags.find((t) => t.name == tag).id,
+                id: this.props.tags.find((t) => t.name == tag)!.id,
               }),
             );
           }
@@ -1212,7 +1212,7 @@ class ScriptLibrary extends React.Component<
   batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
           const indexOf = sourceTags.indexOf(tag);
@@ -1230,7 +1230,7 @@ class ScriptLibrary extends React.Component<
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
-      const source = this.props.library.find((s) => s.url === sourceURL);
+      const source = this.props.library.find((s) => s.url === sourceURL)!;
       const tags = source.tags;
       if (commonTags.length == 0) {
         commonTags = tags;

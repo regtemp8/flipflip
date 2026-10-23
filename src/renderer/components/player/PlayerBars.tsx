@@ -59,6 +59,7 @@ import FadeIOCard from "../configGroups/FadeIOCard";
 import PanningCard from "../configGroups/PanningCard";
 import Audio from "../../../common/Audio";
 import SceneGrid from "../../../common/SceneGrid";
+import { assertDefined } from "../../data/utils";
 
 const drawerWidth = 340;
 
@@ -236,7 +237,7 @@ interface PlayerBarsProps {
   imagePlayerDeleteHack: ChildCallbackHack;
   isEmpty: boolean;
   isPlaying: boolean;
-  mainVideo: HTMLVideoElement;
+  mainVideo?: HTMLVideoElement;
   overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
   persistAudio: boolean;
   persistText: boolean;
@@ -245,21 +246,21 @@ interface PlayerBarsProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   title: string;
-  tutorial: string | null;
+  tutorial?: string;
   allTags?: Array<Tag>;
   tags?: Array<Tag>;
   goBack: () => void;
   historyBack: () => void;
   historyForward: () => void;
   navigateTagging: (offset: number) => void;
-  onGenerate: (
+  onGenerate?: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
   ) => void;
   onRecentPictureGrid: () => void;
   onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
-  playNextScene: () => void;
+  playNextScene?: () => void;
   play: () => void;
   pause: () => void;
   setCurrentAudio: (audio: Audio) => void;
@@ -268,8 +269,8 @@ interface PlayerBarsProps {
   goToClipSource?: (source: LibrarySource) => void;
   playTrack?: (url: string) => void;
   onPlaying?: (position: number, duration: number) => void;
-  toggleTag?: (sourceID: number, tag: Tag) => void;
-  inheritTags?: (sourceID: number) => void;
+  toggleTag?: (sourceID: number | null, tag: Tag) => void;
+  inheritTags?: (sourceID: number | null) => void;
 }
 
 interface PlayerBarsState {
@@ -282,6 +283,7 @@ interface PlayerBarsState {
   deleteError?: string;
 }
 
+// FIXME use discriminator to determine what to show and which props are required
 class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   constructor(props: PlayerBarsProps) {
     super(props);
@@ -732,12 +734,16 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                             key={tag.id}
                           >
                             <CardActionArea
-                              onClick={() =>
+                              onClick={() => {
+                                if (this.props.toggleTag == null) {
+                                  return;
+                                }
+
                                 this.props.toggleTag(
                                   this.props.scene.libraryID,
                                   tag,
-                                )
-                              }
+                                );
+                              }}
                             >
                               <CardContent className={classes.tagContent}>
                                 <Typography component="h6" variant="body2">
@@ -760,11 +766,15 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                             <Fab
                               color="primary"
                               size="small"
-                              onClick={() =>
+                              onClick={() => {
+                                if (this.props.inheritTags == null) {
+                                  return;
+                                }
+
                                 this.props.inheritTags(
                                   this.props.scene.libraryID,
-                                )
-                              }
+                                );
+                              }}
                             >
                               <SystemUpdateAltIcon />
                             </Fab>
@@ -779,11 +789,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                       ST.video && (
                       <VideoControl
                         video={this.props.mainVideo}
-                        clip={
-                          source
-                            ? source.clips.find((c) => c.id == clipID)
-                            : null
-                        }
+                        clip={source?.clips.find((c) => c.id == clipID)}
                         clipValue={clipValue}
                         useHotkeys
                         skip={this.props.scene.videoSkip}
@@ -803,18 +809,20 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         >
           <DialogTitle id="blacklist-title">Blacklist File</DialogTitle>
           <DialogContent>
-            <DialogContentText id="blacklist-description">
-              Are you sure you want to blacklist{" "}
-              <Link
-                className={classes.wordWrap}
-                href="#"
-                onClick={() => this.openLink(this.state.blacklistFile)}
-                underline="hover"
-              >
-                {this.state.blacklistFile}
-              </Link>{" "}
-              ?
-            </DialogContentText>
+            {this.state.blacklistFile && (
+              <DialogContentText id="blacklist-description">
+                Are you sure you want to blacklist{" "}
+                <Link
+                  className={classes.wordWrap}
+                  href="#"
+                  onClick={() => this.openLink(this.state.blacklistFile!)}
+                  underline="hover"
+                >
+                  {this.state.blacklistFile}
+                </Link>{" "}
+                ?
+              </DialogContentText>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.onCloseDialog} color="secondary">
@@ -840,7 +848,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                 <Link
                   className={classes.wordWrap}
                   href="#"
-                  onClick={() => this.openLink(this.state.deletePath)}
+                  onClick={() => this.openLink(this.state.deletePath!)}
                   underline="hover"
                 >
                   {this.state.deletePath}
@@ -1058,12 +1066,22 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         blacklistFile: fileToBlacklist,
       });
     } else {
+      assertDefined(
+        this.props.blacklistFile,
+        "PlayerBars requires blacklistFile to be provided.",
+      );
       this.props.blacklistFile(source, fileToBlacklist);
     }
   };
 
   onFinishBlacklistFile = () => {
-    const { blacklistSource, blacklistFile } = this.state;
+    assertDefined(
+      this.props.blacklistFile,
+      "PlayerBars requires blacklistFile to be provided.",
+    );
+
+    const blacklistSource = this.state.blacklistSource!;
+    const blacklistFile = this.state.blacklistFile!;
     this.props.blacklistFile(blacklistSource, blacklistFile);
     this.onCloseDialog();
   };
@@ -1100,7 +1118,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   onFinishDeletePath = () => {
-    this.doDelete(this.state.deletePath);
+    this.doDelete(this.state.deletePath!);
   };
 
   toggleFull = () => {
@@ -1196,10 +1214,20 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       return;
     }
 
-    const goToTagSource = (source: string) =>
+    const goToTagSource = (source: string) => {
+      assertDefined(
+        this.props.goToTagSource,
+        "PlayerBars requires goToTagSource to be provided.",
+      );
       this.props.goToTagSource(new LibrarySource({ url: source }));
-    const goToClipSource = (source: string) =>
+    };
+    const goToClipSource = (source: string) => {
+      assertDefined(
+        this.props.goToClipSource,
+        "PlayerBars requires goToClipSource to be provided.",
+      );
       this.props.goToClipSource(new LibrarySource({ url: source }));
+    };
 
     this._removeOnBlacklistFile = window.ipc.onBlacklistFile(
       this.onBlacklistFile,
@@ -1338,6 +1366,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   };
 
   orderAudioTags = (audio: Audio) => {
+    assertDefined(
+      this.props.allTags,
+      "PlayerBars requires allTags to be provided.",
+    );
     const tagNames = this.props.allTags.map((t: Tag) => t.name);
     // Re-order the tags of the audio we were playing
     audio.tags = audio.tags.sort((a: Tag, b: Tag) => {

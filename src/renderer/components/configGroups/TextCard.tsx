@@ -47,14 +47,14 @@ interface TextCardProps {
   classes: any;
   scene: Scene;
   sidebar?: boolean;
-  onAddScript: (playlistIndex: number) => void;
-  onPlay: (
+  onAddScript?: (playlistIndex: number) => void;
+  onPlay?: (
     source: CaptionScript,
     sceneID: number,
     displayed: Array<CaptionScript>,
   ) => void;
   onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
-  systemMessage: (message: string) => void;
+  systemMessage?: (message: string) => void;
 }
 
 interface TextCardState {
@@ -165,7 +165,9 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
     const { sourceOptions, sourceOptionsPlaylist } = this.state;
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.scriptPlaylists[sourceOptionsPlaylist];
-      const editSource = playlist.scripts.find((s) => s.id == sourceOptions.id);
+      const editSource = playlist.scripts.find(
+        (s) => s.id == sourceOptions!.id,
+      );
       if (editSource == null) {
         return;
       }

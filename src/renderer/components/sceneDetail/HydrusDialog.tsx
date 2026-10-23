@@ -39,11 +39,7 @@ interface HydrusDialogProps {
   classes: any;
   open: boolean;
   onClose: () => void;
-  onImportURL: (
-    type: string,
-    e: React.MouseEvent<HTMLButtonElement>,
-    ...args: any[]
-  ) => void;
+  onImportURL: (type: string, shiftKey: boolean, ...args: any[]) => void;
 }
 
 type FileSortOrder = "asc" | "desc";
@@ -267,7 +263,7 @@ class HydrusDialog extends React.Component<
     url += `&file_sort_asc=${this.state.fileSortOrder === "asc"}`;
 
     this.setState(defaultState);
-    this.props.onImportURL(AF.url, e, [url]);
+    this.props.onImportURL(AF.url, e.shiftKey, [url]);
   };
 
   makeURL() {

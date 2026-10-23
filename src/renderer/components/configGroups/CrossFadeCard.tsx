@@ -36,7 +36,7 @@ interface CrossFadeCardProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
   sidebar?: boolean;
-  tutorial: string | null;
+  tutorial?: string;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
@@ -88,7 +88,7 @@ class CrossFadeCard<T extends SceneBase> extends React.Component<
         ? this.props.scene.fadeDurationMax
         : 0;
 
-    const playlists = this.props.scene.audioPlaylists
+    const playlists = this.props.scene.audioPlaylists;
     const hasBPM =
       !!playlists &&
       playlists.length &&

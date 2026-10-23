@@ -29,7 +29,7 @@ import withStyles from "@mui/styles/withStyles";
 
 import FolderIcon from "@mui/icons-material/Folder";
 
-import { arrayMove } from "../../data/utils";
+import { arrayMove, assertDefined } from "../../data/utils";
 import { getSourceType, urlToPath } from "../../../common/utils";
 import { SDT, ST } from "../../../common/const";
 import Config from "../../../common/Config";
@@ -433,7 +433,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
     this._lastChecked = undefined;
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: SourceListProps) {
     if (
       this.props.sources.length != props.sources.length &&
       this.props.sources.length > 0 &&
@@ -477,7 +477,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   onFinishDelete = () => {
-    const toDelete = this.state.deleteDialog;
+    const toDelete = this.state.deleteDialog!;
     window.ipc.deleteSource(toDelete.url).then(() => {
       this.onRemove(toDelete);
       this.onCloseDeleteDialog();
@@ -485,14 +485,16 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   onRemove = (source: LibrarySource) => {
+    if (this.props.onUpdateSelected && this.props.selected) {
+      this.props.onUpdateSelected(
+        this.props.selected.filter((url) => url != source.url),
+      );
+    }
     if (this.props.onUpdateScene) {
       this.props.onUpdateScene(
         (s) => (s.sources = s.sources.filter((s) => s.id != source.id)),
       );
     } else if (this.props.onUpdateLibrary) {
-      this.props.onUpdateSelected(
-        this.props.selected.filter((url) => url != source.url),
-      );
       this.props.onUpdateLibrary((l) => {
         l.forEach((s, index) => {
           if (s.id == source.id) {
@@ -505,6 +507,15 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   onToggleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    assertDefined(
+      this.props.onUpdateSelected,
+      "SourceList requires onUpdateSelected to be provided.",
+    );
+    assertDefined(
+      this.props.selected,
+      "SourceList requires selected to be provided.",
+    );
+
     const source = e.currentTarget.value;
     let newSelected = Array.from(this.props.selected);
     if (newSelected.includes(source)) {
@@ -536,9 +547,9 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
 
   blurWeight = (e: React.FocusEvent<HTMLInputElement>) => {
     const { min, max } = e.currentTarget;
-    if (min && this.state.weightMenu.weight < Number(min)) {
+    if (min && this.state.weightMenu!.weight < Number(min)) {
       this.changeWeight(Number(min));
-    } else if (max && this.state.weightMenu.weight > Number(max)) {
+    } else if (max && this.state.weightMenu!.weight > Number(max)) {
       this.changeWeight(Number(max));
     }
   };
@@ -549,16 +560,24 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   changeWeight(intString: number) {
+    assertDefined(
+      this.props.onUpdateScene,
+      "SourceList requires onUpdateScene to be provided.",
+    );
     this.props.onUpdateScene((scene) => {
       const source = scene.sources.find(
-        (ls) => ls.id == this.state.weightMenu.id,
-      );
+        (ls) => ls.id == this.state.weightMenu!.id,
+      )!;
       source.weight = intString;
       this.setState({ weightMenu: source });
     });
   }
 
   onToggleClip = (s: LibrarySource, c: Clip) => {
+    assertDefined(
+      this.props.onUpdateScene,
+      "SourceList requires onUpdateScene to be provided.",
+    );
     this.props.onUpdateScene((scene) => {
       const source = scene.sources.find((ls) => ls.id == s.id);
       if (source == null) {
@@ -683,7 +702,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           }
         }
         l.splice(0, l.length);
-        Array.prototype.push.apply(l, [].concat(newSources));
+        l.push(...newSources);
       });
     }
     this.setState({ isEditing: -1 });
@@ -700,7 +719,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   onFinishClean = () => {
-    const { cachePath } = this.state;
+    const cachePath = this.state.cachePath!;
     window.ipc.cleanCache(cachePath).then(() => {
       this.onCloseClean();
     });
@@ -711,7 +730,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   openDirectory = () => {
-    const { cachePath } = this.state;
+    const cachePath = this.state.cachePath!;
     const platform = window.ipc.platform();
     if (platform === "win32") {
       this.openExternalURL(cachePath);
@@ -743,11 +762,12 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
   };
 
   onCloseBlacklist = () => {
-    this.setState({ blacklistSource: undefined, editBlacklist: undefined });
+    this.setState({ blacklistSource: undefined, editBlacklist: "" });
   };
 
   onFinishBlacklist = () => {
-    const { blacklistSource, editBlacklist } = this.state;
+    const blacklistSource = this.state.blacklistSource!;
+    const editBlacklist = this.state.editBlacklist;
     this.props.onEditBlacklist(blacklistSource, editBlacklist);
     this.onCloseBlacklist();
   };
@@ -859,14 +879,14 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
           key={source.id}
           checked={
             this.props.isSelect
-              ? this.props.selected.includes(source.url)
+              ? this.props.selected!.includes(source.url)
               : false
           }
           config={this.props.config}
           index={index}
           isEditing={this.state.isEditing}
           isLibrary={!!this.props.onUpdateLibrary}
-          isSelect={this.props.isSelect}
+          isSelect={this.props.isSelect ?? false}
           source={source}
           sources={this.props.sources}
           style={value.style}

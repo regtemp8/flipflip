@@ -10,7 +10,7 @@ interface CrossFadeProps {
   image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
   scene: Scene;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   children?: React.ReactNode;
 }
 
@@ -58,7 +58,7 @@ export default class CrossFade extends React.Component<CrossFadeProps> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.fadeBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         fadeDuration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!fadeDuration) {

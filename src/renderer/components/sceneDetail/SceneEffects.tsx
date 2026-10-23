@@ -13,7 +13,7 @@ import { SceneBase } from "../../../common/SceneBase";
 interface SceneEffectsProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
-  tutorial: string | null;
+  tutorial?: string;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 

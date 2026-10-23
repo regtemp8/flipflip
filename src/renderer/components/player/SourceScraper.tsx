@@ -15,7 +15,7 @@ import content from "./ContentLookup";
 interface SourceScraperProps {
   config: Config;
   scene: Scene;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   opacity: number;
   isPlaying: boolean;
   gridView: boolean;
@@ -43,7 +43,7 @@ interface SourceScraperProps {
 }
 
 interface SourceScraperState {
-  contentLookupKey?: string;
+  contentLookupKey: string;
   restart: boolean;
   preload: boolean;
   videoVolume: number;
@@ -58,11 +58,14 @@ export default class SourceScraper extends React.Component<
   constructor(props: SourceScraperProps) {
     super(props);
 
+    const contentLookupKey = uuidv4();
+    content().initContent(contentLookupKey);
     this.state = {
       restart: false,
       preload: false,
       videoVolume: props.scene.videoVolume,
       load: false,
+      contentLookupKey,
     };
   }
 
@@ -172,17 +175,15 @@ export default class SourceScraper extends React.Component<
       }>();
       this._nextContentLookupKey = uuidv4();
       content().initContent(this._nextContentLookupKey);
-      const contentLookupKey = uuidv4();
-      content().initContent(contentLookupKey);
-      this.setState({ contentLookupKey });
     }
 
     const sourceLoop = () => {
-      if (!this._isMounted || this._sourceQueue.length == 0) return;
+      if (!this._isMounted) {
+        return;
+      }
 
-      const d = this._sourceQueue.shift();
-
-      let message = d ? [d.source.url] : [""];
+      const d = this._sourceQueue.shift()!;
+      let message = [d.source.url];
       if (this.props.isOverlay) {
         message = ["Loading '" + this.props.scene.name + "'", ...message];
       }
@@ -276,11 +277,15 @@ export default class SourceScraper extends React.Component<
     };
 
     const nextSourceLoop = () => {
-      if (!this._isMounted || this._nextPromiseQueue.length == 0) {
+      if (!this._isMounted || this.props.nextScene == null) {
         return;
       }
 
       const promiseData = this._nextPromiseQueue.shift();
+      if (promiseData == null) {
+        return;
+      }
+
       if (!this.props.nextScene.playVideoClips && promiseData.source.clips) {
         promiseData.source.clips = [];
       }
@@ -347,11 +352,15 @@ export default class SourceScraper extends React.Component<
         this._promiseTimeoutID = window.setTimeout(promiseLoop, 2000);
       }
       // Process until queue is empty or player has been stopped
-      if (!this._isMounted || this._promiseQueue.length == 0) {
+      if (!this._isMounted) {
         return;
       }
 
       const promiseData = this._promiseQueue.shift();
+      if (promiseData == null) {
+        return;
+      }
+
       window.ipc.scrapeFiles(
         this.props.config,
         promiseData.source,
@@ -472,7 +481,10 @@ export default class SourceScraper extends React.Component<
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: SourceScraperProps,
+    state: SourceScraperState,
+  ): boolean {
     return (
       props.scene !== this.props.scene ||
       (props.nextScene &&
@@ -490,7 +502,7 @@ export default class SourceScraper extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: SourceScraperProps, state: SourceScraperState) {
     if (this.props.scene.videoVolume !== this.state.videoVolume) {
       this.setState({ videoVolume: this.props.scene.videoVolume });
     }

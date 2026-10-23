@@ -3,7 +3,12 @@ import * as React from "react";
 import { CircularProgress, Container, Typography } from "@mui/material";
 
 import { GO, IF, OF, OT, SL, SOF, ST, TF, VO, WF } from "../../../common/const";
-import { flatten, getRandomListItem, getRandomNumber } from "../../data/utils";
+import {
+  assertDefined,
+  flatten,
+  getRandomListItem,
+  getRandomNumber,
+} from "../../data/utils";
 import {
   getSourceType,
   isVideo,
@@ -23,7 +28,7 @@ import content from "./ContentLookup";
 interface ImagePlayerProps {
   config: Config;
   scene: Scene;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   gridView: boolean;
   advanceHack: ChildCallbackHack;
   contentLookupKey: string;
@@ -47,7 +52,7 @@ interface ImagePlayerProps {
 
 interface ImagePlayerState {
   readyToDisplay: Array<
-    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | null
   >;
   historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>;
   timeToNextFrame: number;
@@ -65,7 +70,7 @@ export default class ImagePlayer extends React.Component<
 
     this.state = {
       readyToDisplay: Array<
-        HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+        HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | null
       >(),
       historyPaths: Array<
         HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
@@ -286,7 +291,10 @@ export default class ImagePlayer extends React.Component<
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: ImagePlayerProps,
+    state: ImagePlayerState,
+  ): boolean {
     return (
       state.historyPaths !== this.state.historyPaths ||
       props.scene !== this.props.scene ||
@@ -300,7 +308,7 @@ export default class ImagePlayer extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: ImagePlayerProps) {
     if (
       ((!props.isPlaying && this.props.isPlaying) ||
         (!props.contentLookupKey && this.props.contentLookupKey) ||
@@ -370,7 +378,7 @@ export default class ImagePlayer extends React.Component<
       }
       case TF.bpm: {
         const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         delay = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!delay) {
@@ -421,7 +429,7 @@ export default class ImagePlayer extends React.Component<
     this.setState({
       historyPaths: newHistoryPaths,
       historyOffset: newHistoryOffset,
-      readyToDisplay: this.state.readyToDisplay.filter((i) => i.src != url),
+      readyToDisplay: this.state.readyToDisplay.filter((i) => i?.src != url),
     });
   }
 
@@ -502,7 +510,7 @@ export default class ImagePlayer extends React.Component<
     let collection: string[];
     let url: string;
     let urlIndex: number;
-    let sourceIndex: number = null;
+    let sourceIndex: number | null = null;
     let sourceLength: number;
 
     // For source weighted
@@ -912,7 +920,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
             let readyToDisplay = this.state.readyToDisplay;
@@ -959,7 +967,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -1064,7 +1072,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -1112,7 +1120,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -1263,13 +1271,21 @@ export default class ImagePlayer extends React.Component<
 
     let nextHistoryPaths = this.state.historyPaths;
     let nextImg:
-      HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | undefined;
+      | HTMLImageElement
+      | HTMLVideoElement
+      | HTMLIFrameElement
+      | null
+      | undefined;
     if (this.props.historyOffset == 0) {
       if (
         this.props.scene.downloadScene &&
         this._playedURLs.length == this.props.scene.sources[0].count &&
         this.props.hasStarted
       ) {
+        assertDefined(
+          this.props.onEndScene,
+          "ImagePlayer requires onEndScene to be provided.",
+        );
         this.props.onEndScene();
       }
       if (
@@ -1346,13 +1362,16 @@ export default class ImagePlayer extends React.Component<
           this.props.scene.continueVideo &&
           nextImg instanceof HTMLVideoElement
         ) {
+          const nextSrc = nextImg.src;
+          const nextStart = nextImg.getAttribute("start");
+          const nextEnd = nextImg.getAttribute("end");
           const videoFind = Array.from(this.state.historyPaths)
             .reverse()
             .find(
               (i) =>
-                i.src == nextImg.src &&
-                i.getAttribute("start") == nextImg.getAttribute("start") &&
-                i.getAttribute("end") == nextImg.getAttribute("end"),
+                i.src == nextSrc &&
+                i.getAttribute("start") == nextStart &&
+                i.getAttribute("end") == nextEnd,
             );
           if (videoFind) {
             nextImg = videoFind;
@@ -1364,7 +1383,7 @@ export default class ImagePlayer extends React.Component<
       while (
         nextHistoryPaths.length > this.props.config.displaySettings.maxInHistory
       ) {
-        nextHistoryPaths.shift().remove();
+        nextHistoryPaths.shift()!.remove();
       }
 
       if (
@@ -1417,9 +1436,7 @@ export default class ImagePlayer extends React.Component<
           break;
         case TF.bpm: {
           const bpmMulti = this.props.scene.timingBPMMulti / 10;
-          const bpm = this.props.currentAudio
-            ? this.props.currentAudio.bpm
-            : 60;
+          const bpm = this.props.currentAudio?.bpm ?? 60;
           timeToNextFrame = 60000 / (bpm * bpmMulti);
           // If we cannot parse this, default to 1s
           if (!timeToNextFrame) {
@@ -1456,7 +1473,7 @@ export default class ImagePlayer extends React.Component<
           getSourceType(
             this.state.historyPaths[
               this.state.historyPaths.length - 1
-            ]?.getAttribute("source"),
+            ]?.getAttribute("source") ?? "",
           ) == ST.nimja
         )
       ) {

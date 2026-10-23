@@ -69,7 +69,7 @@ interface GridPlayerProps {
   cache: (i: HTMLImageElement | HTMLVideoElement) => void;
   getTags: (source: string) => Array<Tag>;
   goBack: () => void;
-  onGenerate: (
+  onGenerate?: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
@@ -148,6 +148,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
       gridTemplateRows += rowSize.toString() + "% ";
     }
 
+    const setVideo = this.props.setVideo;
     return (
       <div className={classes.root}>
         <main
@@ -265,6 +266,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               nextScene={() =>
                                 this.nextScene(rowIndex, colIndex)
                               }
+                              onUpdateScene={() => {}}
                               gridView
                               gridCoordinates={
                                 this.state.scene.grid.some((r) =>
@@ -280,7 +282,6 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               scenes={this.props.allScenes}
                               sceneGrids={this.props.sceneGrids}
                               theme={this.props.theme}
-                              tutorial={undefined}
                               captionScale={
                                 1 /
                                 Math.sqrt(
@@ -303,11 +304,9 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                                 this.setSceneCopy(rowIndex, colIndex, children)
                               }
                               setVideo={
-                                this.props.setVideo
+                                setVideo
                                   ? () =>
-                                      this.props.setVideo(
-                                        rowIndex * row.length + colIndex,
-                                      )
+                                      setVideo(rowIndex * row.length + colIndex)
                                   : undefined
                               }
                               systemMessage={this.props.systemMessage}

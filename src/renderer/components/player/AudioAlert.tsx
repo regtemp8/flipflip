@@ -4,6 +4,7 @@ import { Theme, Typography } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
 import { grey } from "@mui/material/colors";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 import Audio from "../../../common/Audio";
 
@@ -47,7 +48,7 @@ const styles = (theme: Theme) =>
 
 interface AudioAlertProps {
   classes: any;
-  audio: Audio;
+  audio?: Audio;
 }
 
 interface AudioAlertState {
@@ -70,7 +71,11 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     return (
       <this.AudioAlertLayer>
         <div className={classes.alert}>
-          <img className={classes.thumb} src={this.props.audio.thumb} />
+          {this.props.audio.thumb != null ? (
+            <img className={classes.thumb} src={this.props.audio.thumb} />
+          ) : (
+            <AudiotrackIcon className={classes.thumb} />
+          )}
           <div className={classes.infoContainer}>
             <div className={classes.infoBackdrop} />
             <Typography variant="h3" className={classes.info}>
@@ -117,7 +122,7 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioAlertProps) {
     if (this.props.audio != props.audio) {
       this.show();
     }

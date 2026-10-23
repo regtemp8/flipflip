@@ -44,7 +44,7 @@ interface PanningCardProps<T extends SceneBase> {
   scene: T;
   sidebar?: boolean;
   easingControls: boolean;
-  tutorial: string | null;
+  tutorial?: string;
   onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 

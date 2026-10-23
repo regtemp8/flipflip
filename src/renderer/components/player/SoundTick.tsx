@@ -7,7 +7,7 @@ interface SoundTickProps {
   speed: number;
   volume: number;
   tick: boolean;
-  onPlaying: (soundData: any) => void;
+  onPlaying: (soundData: { position: number; duration: number }) => void;
   onError: (errorCode: number, description: string) => void;
   onFinishedPlaying: () => void;
 }
@@ -17,7 +17,7 @@ export default class SoundTick extends React.Component<SoundTickProps> {
     super(props);
   }
 
-  shouldComponentUpdate(props: any) {
+  shouldComponentUpdate(props: SoundTickProps) {
     return this.props.tick !== props.tick;
   }
 

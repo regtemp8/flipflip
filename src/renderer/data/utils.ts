@@ -925,6 +925,15 @@ export function applyEffects(scene: Scene, base64String: string) {
   return scene;
 }
 
+export function assertDefined<T>(
+  value: T | null | undefined,
+  message: string,
+): asserts value is T {
+  if (value == null) {
+    throw new Error(message);
+  }
+}
+
 let captionProgramDefaults = {
   program: new Array<Function>(),
   programCounter: 0,

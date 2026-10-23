@@ -386,9 +386,11 @@ class VideoClipper extends React.Component<
                     <VideoControl
                       video={this.video as HTMLVideoElement}
                       volume={this.state.scene.videoVolume}
-                      clip={this.state.isEditing || null}
+                      clip={this.state.isEditing}
                       clipValue={
-                        this.state.isEditing ? this.state.isEditingValue : null
+                        this.state.isEditing
+                          ? this.state.isEditingValue
+                          : undefined
                       }
                       useHotkeys
                       onChangeVolume={this.onChangeVolume}
@@ -682,9 +684,11 @@ class VideoClipper extends React.Component<
                     <VideoControl
                       video={this.video as HTMLVideoElement}
                       volume={this.state.scene.videoVolume}
-                      clip={this.state.isEditing || null}
+                      clip={this.state.isEditing}
                       clipValue={
-                        this.state.isEditing ? this.state.isEditingValue : null
+                        this.state.isEditing
+                          ? this.state.isEditingValue
+                          : undefined
                       }
                       clips={this.props.source.clips}
                       useHotkeys
@@ -717,7 +721,7 @@ class VideoClipper extends React.Component<
     window.removeEventListener("wheel", this.onScroll);
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: VideoClipperProps) {
     if (this.props.source.url !== props.source.url) {
       this.setState({
         hasVideo: false,

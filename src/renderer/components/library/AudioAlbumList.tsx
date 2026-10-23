@@ -205,7 +205,7 @@ class AudioAlbumList extends React.Component<
 
   nop() {}
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: AudioAlbumListProps) {
     if (props.sources != this.props.sources) {
       this.setState({ albums: this.getAlbums() });
     }

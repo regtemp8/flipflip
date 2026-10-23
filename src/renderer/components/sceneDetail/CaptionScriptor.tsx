@@ -1182,14 +1182,15 @@ class CaptionScriptor extends React.Component<
           scriptChanged: false,
         });
       } else {
-        window.ipc.getTextFromURL(this.props.openScript.url).then((data) => {
+        const openScript = this.props.openScript;
+        window.ipc.getTextFromURL(openScript.url).then((data) => {
           if (data == null) {
             return;
           }
 
           this.state.codeMirrorOverwriteHack.fire(data);
           this.setState({
-            captionScript: this.props.openScript,
+            captionScript: openScript,
             scriptChanged: false,
           });
         });

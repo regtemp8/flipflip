@@ -1,7 +1,13 @@
 # Changelog
 
 #### v5.2.2 <small>(unreleased)</small>
+- Remove ImageFap
 - Uncover new tutorials
+- Refactor getAlbums in AudioAlbumList
+- Adjusted video cross-fade logic
+- Assume timeToNextFrame has value when strobe is active in ImageView
+- Removed attribute copy when cloning video in ImageView
+- Upgrade TypeScript to 6.0.3
 
 #### v5.2.1 <small>(09/25/2026)</small>
 - Fix SourceList being cleared on edit

@@ -103,7 +103,7 @@ interface AudioPlaylistProps {
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
   scenePaths?: Array<any>;
-  onAddTracks: (playlistIndex: number) => void;
+  onAddTracks?: (playlistIndex: number) => void;
   onSourceOptions: (playlistIndex: number, audio: Audio) => void;
   onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
   goBack?: () => void;
@@ -146,8 +146,8 @@ class AudioPlaylist extends React.Component<
           <ListItem disableGutters>
             <ListItemIcon>
               <Avatar
-                alt={audio.name}
-                src={audio.thumb}
+                alt={audio.name ?? undefined}
+                src={audio.thumb ?? undefined}
                 className={classes.thumb}
               >
                 {audio.thumb == null && (
@@ -159,7 +159,9 @@ class AudioPlaylist extends React.Component<
           </ListItem>
           <AudioControl
             audio={audio}
-            audioEnabled={this.props.scene.audioEnabled || this.props.persist}
+            audioEnabled={
+              this.props.scene.audioEnabled || (this.props.persist ?? false)
+            }
             singleTrack={this.state.playingAudios.length == 1}
             lastTrack={
               this.state.currentIndex == this.state.playingAudios.length - 1
@@ -306,7 +308,9 @@ class AudioPlaylist extends React.Component<
                   <ListItemText primary={a.name} />
                   <ListItemSecondaryAction>
                     <Chip
-                      label={getTimestamp(a.duration)}
+                      label={
+                        a.duration != null ? getTimestamp(a.duration) : "-"
+                      }
                       color="default"
                       size="small"
                       variant="outlined"
@@ -369,7 +373,12 @@ class AudioPlaylist extends React.Component<
             </div>
             <Tooltip disableInteractive title="Add Tracks">
               <IconButton
-                onClick={() => this.props.onAddTracks(this.props.playlistIndex)}
+                disabled={this.props.onAddTracks == null}
+                onClick={() => {
+                  if (this.props.onAddTracks != null) {
+                    this.props.onAddTracks(this.props.playlistIndex);
+                  }
+                }}
                 size="large"
               >
                 <AddIcon />
@@ -379,7 +388,7 @@ class AudioPlaylist extends React.Component<
               <Chip
                 label={getTimestamp(
                   this.props.playlist.audios.reduce(
-                    (total, a) => total + a.duration,
+                    (total, a) => total + (a.duration ?? 0),
                     0,
                   ),
                 )}
@@ -399,7 +408,7 @@ class AudioPlaylist extends React.Component<
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioPlaylistProps) {
     if (!this.props.persist && this.props.scene !== props.scene) {
       this.restart();
     }
@@ -437,16 +446,20 @@ class AudioPlaylist extends React.Component<
     switch (e.key) {
       case "[":
         e.preventDefault();
-        this.props.orderAudioTags(
-          this.props.playlist.audios[this.state.currentIndex],
-        );
+        if (this.props.orderAudioTags != null) {
+          this.props.orderAudioTags(
+            this.props.playlist.audios[this.state.currentIndex],
+          );
+        }
         this.prevTrack();
         break;
       case "]":
         e.preventDefault();
-        this.props.orderAudioTags(
-          this.props.playlist.audios[this.state.currentIndex],
-        );
+        if (this.props.orderAudioTags != null) {
+          this.props.orderAudioTags(
+            this.props.playlist.audios[this.state.currentIndex],
+          );
+        }
         this.nextTrack();
         break;
     }

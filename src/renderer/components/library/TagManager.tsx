@@ -460,12 +460,12 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     this.setState({
       isEditing: tag.id,
       tagName: tag.name,
-      tagPhrase: tag.phraseString,
+      tagPhrase: tag.phraseString ?? "",
     });
   };
 
   onFinishEdit = () => {
-    const tag = this.state.tags.find((t) => t.id == this.state.isEditing);
+    const tag = this.state.tags.find((t) => t.id == this.state.isEditing)!;
     tag.name = this.state.tagName;
     tag.phraseString = this.state.tagPhrase;
     this.setState({
