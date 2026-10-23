@@ -1,56 +1,30 @@
 import * as React from "react";
-import clsx from "clsx";
-
-import { Card, CardContent, Grid, Theme } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
+import { Card, CardContent, Grid } from "@mui/material";
 
 import { SDT } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import Scene from "../../../common/Scene";
 import ImageVideoCard from "../configGroups/ImageVideoCard";
 import SceneOptionCard from "../configGroups/SceneOptionCard";
 import SceneGrid from "../../../common/SceneGrid";
+import { SceneBase } from "../../../common/SceneBase";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    backdropTop: {
-      zIndex: theme.zIndex.modal + 1,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-    overflow: {
-      overflow: "inherit",
-    },
-  });
-
-interface SceneOptionsProps {
-  classes: any;
+interface SceneOptionsProps<T extends SceneBase> {
   allScenes: Array<Scene>;
   allSceneGrids: Array<SceneGrid>;
-  scene: Scene | SceneSettings;
-  tutorial: string;
-  isConfig: boolean;
-  onUpdateScene(
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  scene: T;
+  tutorial?: string;
+  isConfig?: boolean;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
-class SceneOptions extends React.Component<SceneOptionsProps> {
-  constructor(props: SceneOptionsProps) {
+class SceneOptions<T extends SceneBase> extends React.Component<
+  SceneOptionsProps<T>
+> {
+  constructor(props: SceneOptionsProps<T>) {
     super(props);
   }
 
   render() {
-    const classes = this.props.classes;
     const tutorial1 =
       this.props.tutorial == SDT.optionsLeft ||
       this.props.tutorial == SDT.timing ||
@@ -71,15 +45,22 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
           item
           xs={12}
           md={6}
-          className={clsx(
-            tutorial1 && clsx(classes.backdropTop, classes.disable),
-          )}
+          sx={
+            tutorial1
+              ? {
+                  zIndex: (theme) => theme.zIndex.modal + 1,
+                  pointerEvents: "none",
+                }
+              : undefined
+          }
         >
           <Card
-            classes={{ root: classes.overflow }}
-            className={clsx(
-              this.props.tutorial == SDT.optionsLeft && classes.highlight,
-            )}
+            sx={{
+              overflow: "inherit",
+              borderWidth: this.props.tutorial == SDT.optionsLeft ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             <CardContent>
               <SceneOptionCard
@@ -87,7 +68,7 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
                 allSceneGrids={this.props.allSceneGrids}
                 scene={this.props.scene}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -97,21 +78,28 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
           item
           xs={12}
           md={6}
-          className={clsx(
-            tutorial2 && clsx(classes.backdropTop, classes.disable),
-          )}
+          sx={
+            tutorial2
+              ? {
+                  zIndex: (theme) => theme.zIndex.modal + 1,
+                  pointerEvents: "none",
+                }
+              : undefined
+          }
         >
           <Card
-            className={clsx(
-              this.props.tutorial == SDT.optionsRight && classes.highlight,
-            )}
+            sx={{
+              borderWidth: this.props.tutorial == SDT.optionsRight ? 2 : 0,
+              borderColor: "secondary.main",
+              borderStyle: "solid",
+            }}
           >
             <CardContent>
               <ImageVideoCard
                 scene={this.props.scene}
                 isConfig={this.props.isConfig}
                 tutorial={this.props.tutorial}
-                onUpdateScene={this.props.onUpdateScene.bind(this)}
+                onUpdateScene={this.props.onUpdateScene}
               />
             </CardContent>
           </Card>
@@ -121,5 +109,4 @@ class SceneOptions extends React.Component<SceneOptionsProps> {
   }
 }
 
-(SceneOptions as any).displayName = "SceneOptions";
-export default withStyles(styles)(SceneOptions as any);
+export default SceneOptions;

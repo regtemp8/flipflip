@@ -58,12 +58,12 @@ interface AudioArtistListProps {
   classes: any;
   sources: Array<Audio>;
   showHelp: boolean;
-  onClickArtist(artist: string): void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
 }
 
 interface AudioArtistListState {
-  artists: Map<string, string>;
-  hover: any;
+  artists: Map<string, string | null>;
+  hover?: any;
 }
 
 class AudioArtistList extends React.Component<
@@ -75,7 +75,6 @@ class AudioArtistList extends React.Component<
 
     this.state = {
       artists: this.getArtists(),
-      hover: null as any,
     };
   }
 
@@ -117,28 +116,26 @@ class AudioArtistList extends React.Component<
       );
     }
 
-    const artists = Array.from(this.state.artists.keys());
     const width = window.innerWidth - 104; // 72px drawer + 2x18px padding
     const numIcons = Math.floor(width / 178); // 160xp width + 2x9px padding
     const remainingWidth = width - numIcons * 178;
     const padding = Math.floor(remainingWidth / numIcons / 2) + 6;
     return (
       <div className={classes.artistContainer}>
-        {artists.map((a) => {
-          let thumb: string = this.state.artists.get(a);
+        {Array.from(this.state.artists.entries()).map(([a, thumb]) => {
           if (thumb) thumb = thumb.replace(/\\/g, "/");
           return (
             <div
               key={a}
               className={classes.artist}
               style={{ padding: padding }}
-              onClick={this.props.onClickArtist.bind(this, a)}
-              onMouseEnter={this.onMouseEnter.bind(this, a)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onClick={(e) => this.props.onClickArtist(a, e)}
+              onMouseEnter={() => this.onMouseEnter(a)}
+              onMouseLeave={this.onMouseLeave}
             >
               <Avatar
                 alt={a}
-                src={thumb}
+                src={thumb ?? undefined}
                 className={clsx(
                   classes.large,
                   this.state.hover == a && classes.shadow,
@@ -165,31 +162,33 @@ class AudioArtistList extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: AudioArtistListProps) {
     if (props.sources != this.props.sources) {
       this.setState({ artists: this.getArtists() });
     }
   }
 
-  onMouseEnter(artist: string) {
+  onMouseEnter = (artist: string) => {
     this.setState({ hover: artist });
-  }
+  };
 
-  onMouseLeave() {
-    this.setState({ hover: null });
-  }
+  onMouseLeave = () => {
+    this.setState({ hover: undefined });
+  };
 
-  getArtists(): Map<string, string> {
-    const artistsMap = new Map<string, string>();
+  getArtists(): Map<string, string | null> {
+    const artistsMap = new Map<string, string | null>();
     const songs = Array.from(this.props.sources).sort((a, b) => {
-      if (a.artist > b.artist) {
+      const aArtist = a.artist ?? "";
+      const bArtist = b.artist ?? "";
+      if (aArtist > bArtist) {
         return 1;
-      } else if (a.artist < b.artist) {
+      } else if (aArtist < bArtist) {
         return -1;
       } else {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
-        const aValue = a.name.replace(reA, "");
-        const bValue = b.name.replace(reA, "");
+        const aValue = (a.name ?? "").replace(reA, "");
+        const bValue = (b.name ?? "").replace(reA, "");
         return aValue.localeCompare(bValue, "en", { numeric: true });
       }
     });
@@ -206,4 +205,4 @@ class AudioArtistList extends React.Component<
 }
 
 (AudioArtistList as any).displayName = "AudioArtistList";
-export default withStyles(styles)(AudioArtistList as any);
+export default withStyles(styles)(AudioArtistList);

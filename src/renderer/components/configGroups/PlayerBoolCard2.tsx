@@ -16,8 +16,8 @@ import { GeneralSettings } from "../../../common/Config";
 
 interface PlayerBoolCard2Props {
   generalSettings: GeneralSettings;
-  onPortableOverride(): void;
-  onUpdateGeneralSettings(fn: (settings: GeneralSettings) => void): void;
+  onPortableOverride: () => void;
+  onUpdateGeneralSettings: (fn: (settings: GeneralSettings) => void) => void;
 }
 
 interface PlayerBoolCard2State {
@@ -56,10 +56,7 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.prioritizePerformance}
-                  onChange={this.onBoolInput.bind(
-                    this,
-                    "prioritizePerformance",
-                  )}
+                  onChange={(e) => this.onBoolInput("prioritizePerformance", e)}
                 />
               }
               label={
@@ -79,7 +76,7 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmSceneDeletion}
-                  onChange={this.onBoolInput.bind(this, "confirmSceneDeletion")}
+                  onChange={(e) => this.onBoolInput("confirmSceneDeletion", e)}
                 />
               }
               label="Confirm Scene Deletion"
@@ -95,7 +92,7 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmBlacklist}
-                  onChange={this.onBoolInput.bind(this, "confirmBlacklist")}
+                  onChange={(e) => this.onBoolInput("confirmBlacklist", e)}
                 />
               }
               label="Confirm Blacklist"
@@ -111,7 +108,7 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmFileDeletion}
-                  onChange={this.onBoolInput.bind(this, "confirmFileDeletion")}
+                  onChange={(e) => this.onBoolInput("confirmFileDeletion", e)}
                 />
               }
               label="Confirm File Deletion"
@@ -127,7 +124,7 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.portableMode}
-                  onChange={this.onTogglePortable.bind(this)}
+                  onChange={this.onTogglePortable}
                 />
               }
               label="Portable Mode"
@@ -144,7 +141,7 @@ export default class PlayerBoolCard2 extends React.Component<
                 control={
                   <Switch
                     checked={this.props.generalSettings.disableLocalSave}
-                    onChange={this.onBoolInput.bind(this, "disableLocalSave")}
+                    onChange={(e) => this.onBoolInput("disableLocalSave", e)}
                   />
                 }
                 label="Disable Local Saves"
@@ -154,7 +151,7 @@ export default class PlayerBoolCard2 extends React.Component<
         )}
         <Dialog
           open={this.state.portableDialog}
-          onClose={this.onToggleDialog.bind(this)}
+          onClose={this.onToggleDialog}
           aria-describedby="portable-description"
         >
           <DialogContent>
@@ -164,10 +161,10 @@ export default class PlayerBoolCard2 extends React.Component<
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onToggleDialog.bind(this)} color="secondary">
+            <Button onClick={this.onToggleDialog} color="secondary">
               Local data
             </Button>
-            <Button onClick={this.onChoosePortable.bind(this)} color="primary">
+            <Button onClick={this.onChoosePortable} color="primary">
               Portable data
             </Button>
           </DialogActions>
@@ -176,8 +173,8 @@ export default class PlayerBoolCard2 extends React.Component<
     );
   }
 
-  onTogglePortable(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onTogglePortable = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     if (checked) {
       window.ipc.portablePathExists().then((exists) => {
@@ -188,22 +185,22 @@ export default class PlayerBoolCard2 extends React.Component<
       });
     }
     this.changeKey("portableMode", checked);
-  }
+  };
 
-  onToggleDialog() {
+  onToggleDialog = () => {
     this.setState({ portableDialog: !this.state.portableDialog });
-  }
+  };
 
-  onChoosePortable() {
+  onChoosePortable = () => {
     this.props.onPortableOverride();
     this.onToggleDialog();
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));

@@ -1,6 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
-import Draggable, { DraggableData } from "react-draggable";
+import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {
   AppBar,
@@ -144,23 +144,23 @@ interface GridSetupProps {
   allScenes: Array<Scene>;
   autoEdit: boolean;
   scene: SceneGrid;
-  tutorial: string;
-  goBack(): void;
-  onDelete(grid: SceneGrid): void;
-  onGenerate(
+  tutorial: string | null;
+  goBack: () => void;
+  onDelete: (grid: SceneGrid) => void;
+  onGenerate: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
-  ): void;
-  onPlayGrid(grid: SceneGrid): void;
-  onTutorial(tutorial: string): void;
-  onUpdateGrid(grid: SceneGrid, fn: (grid: SceneGrid) => void): void;
+  ) => void;
+  onPlayGrid: (grid: SceneGrid) => void;
+  onTutorial: (tutorial: string) => void;
+  onUpdateGrid: (grid: SceneGrid, fn: (grid: SceneGrid) => void) => void;
 }
 
 interface GridSetupState {
-  isEditingName: string;
-  isEditing: Array<number>;
-  menuAnchorEl: any;
+  isEditingName?: string;
+  isEditing?: Array<number>;
+  menuAnchorEl?: any;
   height: number;
   width: number;
   dragging: boolean;
@@ -171,9 +171,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     super(props);
 
     this.state = {
-      isEditingName: props.autoEdit ? props.scene.name : (null as string),
-      isEditing: null as Array<number>,
-      menuAnchorEl: null as any,
+      isEditingName: props.autoEdit ? props.scene.name : undefined,
       height:
         props.scene.grid &&
         props.scene.grid.length > 0 &&
@@ -264,7 +262,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                   className={clsx(
                     this.props.tutorial == SGT.dimensions && classes.disable,
                   )}
-                  onClick={this.goBack.bind(this)}
+                  onClick={this.props.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -274,7 +272,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
 
             {this.state.isEditingName != null && (
               <form
-                onSubmit={this.endEditingName.bind(this)}
+                onSubmit={this.endEditingName}
                 className={classes.titleField}
               >
                 <TextField
@@ -286,8 +284,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                   margin="none"
                   ref={this.nameInputRef}
                   inputProps={{ className: classes.titleInput }}
-                  onBlur={this.endEditingName.bind(this)}
-                  onChange={this.onChangeName.bind(this)}
+                  onBlur={this.endEditingName}
+                  onChange={this.onChangeName}
                 />
               </form>
             )}
@@ -301,7 +299,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                   this.props.scene.name.length == 0 && classes.noTitle,
                   this.props.tutorial == SGT.dimensions && classes.disable,
                 )}
-                onClick={this.beginEditingName.bind(this)}
+                onClick={this.beginEditingName}
               >
                 {this.props.scene.name}
               </Typography>
@@ -312,8 +310,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                 label="Height"
                 margin="dense"
                 value={this.state.height}
-                onChange={this.onHeightInput.bind(this)}
-                onBlur={this.blurHeight.bind(this)}
+                onChange={this.onHeightInput}
+                onBlur={this.blurHeight}
                 variant="filled"
                 className={clsx(
                   this.props.tutorial == SGT.dimensions && classes.highlight,
@@ -329,8 +327,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                 label="Width"
                 margin="dense"
                 value={this.state.width}
-                onChange={this.onWidthInput.bind(this)}
-                onBlur={this.blurWidth.bind(this)}
+                onChange={this.onWidthInput}
+                onBlur={this.blurWidth}
                 variant="filled"
                 className={clsx(
                   this.props.tutorial == SGT.dimensions && classes.highlight,
@@ -349,7 +347,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                 className={clsx(
                   this.props.tutorial == SGT.dimensions && classes.disable,
                 )}
-                onClick={this.onPlayGrid.bind(this)}
+                onClick={this.onPlayGrid}
                 size="large"
               >
                 <PlayCircleOutlineIcon fontSize="large" />
@@ -390,8 +388,10 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                         bounds="#app"
                         position={{ x: 0, y: 0 }}
                         defaultClassNameDragging={classes.dragging}
-                        onStop={this.onDragStop.bind(this, rowIndex, colIndex)}
-                        onDrag={this.onDrag.bind(this)}
+                        onStop={(e, position) =>
+                          this.onDragStop(rowIndex, colIndex, e, position)
+                        }
+                        onDrag={this.onDrag}
                       >
                         <Button
                           id={rowIndex + "-" + colIndex}
@@ -444,7 +444,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
               keepMounted
               classes={{ paper: classes.sceneMenu }}
               open={!!this.state.isEditing}
-              onClose={this.onCloseMenu.bind(this)}
+              onClose={this.onCloseMenu}
             >
               {!!this.state.isEditing && (
                 <SceneSelect
@@ -452,19 +452,19 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
                   value={
                     this.props.scene.grid[this.state.isEditing[0]][
                       this.state.isEditing[1]
-                    ]
+                    ].sceneID
                   }
                   menuIsOpen
                   autoFocus
                   onlyExtra
-                  getSceneName={this.getSceneName.bind(this)}
-                  onChange={this.onChooseScene.bind(this)}
+                  getSceneName={this.getSceneName}
+                  onChange={this.onChooseScene}
                 />
               )}
             </Menu>
             <Fab
               className={classes.deleteButton}
-              onClick={this.props.onDelete.bind(this, this.props.scene)}
+              onClick={() => this.props.onDelete(this.props.scene)}
               size="small"
             >
               <DeleteIcon className={classes.deleteIcon} />
@@ -516,9 +516,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     }
   }
 
-  onChooseScene(sceneID: number) {
-    const row = this.state.isEditing[0];
-    const col = this.state.isEditing[1];
+  onChooseScene = (sceneID: number) => {
+    const [row, col] = this.state.isEditing as number[];
     let newGrid = this.props.scene.grid;
     newGrid[row][col].sceneID = sceneID;
     newGrid[row][col].sceneCopy = [];
@@ -536,11 +535,11 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     }
     this.changeKey("grid", newGrid);
     this.onCloseMenu();
-  }
+  };
 
-  onCloseMenu() {
-    this.setState({ isEditing: null });
-  }
+  onCloseMenu = () => {
+    this.setState({ isEditing: undefined });
+  };
 
   getNewGrid(height: number, width: number) {
     let grid = this.props.scene.grid;
@@ -592,79 +591,70 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.setState({ width: width });
   }
 
-  onHeightInput(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onHeightInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     if (input.value === "") {
       this.onUpdateHeight(1);
     } else {
       this.onUpdateHeight(Number(input.value));
     }
-  }
+  };
 
-  blurHeight(e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.height < min) {
-      this.onUpdateHeight(min);
-    } else if (max && this.state.height > max) {
-      this.onUpdateHeight(max);
+  blurHeight = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { min, max } = e.currentTarget;
+    if (min && this.state.height < Number(min)) {
+      this.onUpdateHeight(Number(min));
+    } else if (max && this.state.height > Number(max)) {
+      this.onUpdateHeight(Number(max));
     }
-  }
+  };
 
-  onWidthInput(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onWidthInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     if (input.value === "") {
       this.onUpdateWidth(1);
     } else {
       this.onUpdateWidth(Number(input.value));
     }
-  }
+  };
 
-  blurWidth(e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && this.state.width < min) {
-      this.onUpdateWidth(min);
-    } else if (max && this.state.width > max) {
-      this.onUpdateWidth(max);
+  blurWidth = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { min, max } = e.currentTarget;
+    if (min && this.state.width < Number(min)) {
+      this.onUpdateWidth(Number(min));
+    } else if (max && this.state.width > Number(max)) {
+      this.onUpdateWidth(Number(max));
     }
-  }
+  };
 
-  onDrag() {
+  onDrag = () => {
     if (!this.state.dragging) {
       this.setState({ dragging: true });
     }
-  }
+  };
 
-  onDragStop(
+  onDragStop = (
     rowIndex: number,
     colIndex: number,
-    e: MouseEvent,
+    e: DraggableEvent,
     position: DraggableData,
-  ) {
+  ) => {
     if (this.state.dragging) {
       this.onDragDrop(rowIndex, colIndex, e, position);
     } else {
       this.onClickCell(rowIndex, colIndex, e);
     }
     this.setState({ dragging: false });
-  }
+  };
 
   onDragDrop(
     rowIndex: number,
     colIndex: number,
-    e: MouseEvent,
+    e: DraggableEvent,
     position: DraggableData,
   ) {
-    const path = e.composedPath();
+    const nativeEvent = "nativeEvent" in e ? e.nativeEvent : e;
+    const path = nativeEvent.composedPath();
     if (!path || path.length == 0) {
       return;
     }
@@ -693,7 +683,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.changeKey("grid", newGrid);
   }
 
-  onClickCell(rowIndex: number, colIndex: number, e: MouseEvent) {
+  onClickCell(rowIndex: number, colIndex: number, e: DraggableEvent) {
     if ((e.target as Element).className?.includes("MuiSwitch-input")) {
       this.onToggleMirror(rowIndex, colIndex);
     } else {
@@ -710,19 +700,19 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.changeKey("grid", newGrid);
   }
 
-  beginEditingName() {
+  beginEditingName = () => {
     this.setState({ isEditingName: this.props.scene.name });
-  }
+  };
 
-  endEditingName(e: Event) {
+  endEditingName = (e: React.SyntheticEvent<Element, Event>) => {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
-    this.setState({ isEditingName: null });
-  }
+    this.setState({ isEditingName: undefined });
+  };
 
-  onChangeName(e: React.FormEvent<HTMLInputElement>) {
+  onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ isEditingName: e.currentTarget.value });
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -732,22 +722,18 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
     this.props.onUpdateGrid(this.props.scene, fn);
   }
 
-  goBack() {
-    this.props.goBack();
-  }
-
-  onPlayGrid() {
+  onPlayGrid = () => {
     // Regenerate scene(s) before playback
     this.props.onGenerate(this.props.scene);
     this.props.onPlayGrid(this.props.scene);
-  }
+  };
 
-  getSceneName(id: string): string {
+  getSceneName = (id: string): string => {
     if (id === "-1") return "~~EMPTY~~";
     const scene = this.props.allScenes.find((s) => s.id.toString() === id);
     return scene ? scene.name : "~~EMPTY~~";
-  }
+  };
 }
 
 (GridSetup as any).displayName = "GridSetup";
-export default withStyles(styles)(GridSetup as any);
+export default withStyles(styles)(GridSetup);

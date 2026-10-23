@@ -169,8 +169,6 @@ const ST = {
   list: "st.list",
   tumblr: "st.tumblr",
   redgifs: "st.redgifs",
-  imagefap: "st.imagefap",
-  sexcom: "st.sexcom",
   imgur: "st.imgur",
   deviantart: "st.deviantart",
   danbooru: "st.danbooru",

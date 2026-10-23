@@ -11,10 +11,10 @@ import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 
 interface StrobeProps {
-  toggleStrobe: boolean;
+  toggleStrobe?: boolean;
   scene: Scene;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   zIndex: number;
   strobeFunction?: Function;
   children?: React.ReactNode;
@@ -37,7 +37,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
     };
   }
 
-  _strobeTimeout: number = null;
+  _strobeTimeout?: number = undefined;
 
   render() {
     return <this.StrobeLayer>{this.props.children}</this.StrobeLayer>;
@@ -135,10 +135,10 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
     return delay;
   }
 
-  strobeLoop() {
+  strobeLoop = () => {
     const delay = this.strobe();
-    this._strobeTimeout = window.setTimeout(this.strobeLoop.bind(this), delay);
-  }
+    this._strobeTimeout = window.setTimeout(this.strobeLoop, delay);
+  };
 
   componentDidMount() {
     if (
@@ -150,13 +150,17 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
     }
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: StrobeProps) {
     if (
       this.props.scene.strobeTF != props.scene.strobeTF ||
       this.props.scene.strobeDelayTF != props.scene.strobeDelayTF ||
       this.props.scene.strobePulse != props.scene.strobePulse
     ) {
-      window.clearTimeout(this._strobeTimeout);
+      if (this._strobeTimeout != null) {
+        window.clearTimeout(this._strobeTimeout);
+        this._strobeTimeout = undefined;
+      }
+
       if (
         this.props.scene.strobePulse
           ? this.props.scene.strobeDelayTF != TF.scene
@@ -176,8 +180,10 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._strobeTimeout);
-    this._strobeTimeout = null;
+    if (this._strobeTimeout != null) {
+      window.clearTimeout(this._strobeTimeout);
+      this._strobeTimeout = undefined;
+    }
   }
 
   getDuration() {
@@ -208,7 +214,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.strobeBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         duration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!duration) {
@@ -217,6 +223,11 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeTF,
+        );
     }
     return duration;
   }
@@ -249,7 +260,7 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         delay = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!delay) {
@@ -258,6 +269,11 @@ export default class Strobe extends React.Component<StrobeProps, StrobeState> {
         break;
       case TF.scene:
         delay = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeDelayTF,
+        );
     }
     return delay;
   }

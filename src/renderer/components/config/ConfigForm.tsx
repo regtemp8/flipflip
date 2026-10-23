@@ -210,25 +210,25 @@ interface ConfigFormProps {
   sceneGrids: Array<SceneGrid>;
   tags: Array<Tag>;
   theme: Theme;
-  goBack(): void;
-  onBackup(): void;
-  onChangeThemeColor(colorTheme: any, primary: boolean): void;
-  onClean(): void;
-  onDefault(): void;
-  onResetTutorials(): void;
-  onRestore(backupFile: string): void;
-  onToggleDarkMode(): void;
-  onUpdateConfig(config: Config): void;
+  goBack: () => void;
+  onBackup: () => void;
+  onChangeThemeColor: (colorTheme: any, primary: boolean) => void;
+  onClean: (config: Config) => void;
+  onDefault: () => void;
+  onResetTutorials: () => void;
+  onRestore: (backupFile: string) => void;
+  onToggleDarkMode: () => void;
+  onUpdateConfig: (config: Config) => void;
 }
 
 interface ConfigFormState {
   changeMade: boolean;
   config: Config;
   drawerOpen: boolean;
-  openMenu: string;
+  openMenu?: string;
   openTab: number;
   errorSnackOpen: boolean;
-  errorSnack: string;
+  errorSnack?: string;
 }
 
 class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
@@ -239,10 +239,8 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
       changeMade: false,
       config: JSON.parse(JSON.stringify(props.config)), // Make a copy
       drawerOpen: false,
-      openMenu: null as string,
       openTab: 2,
       errorSnackOpen: false,
-      errorSnack: null as string,
     };
   }
 
@@ -258,7 +256,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                 edge="start"
                 color="inherit"
                 aria-label="Back"
-                onClick={this.goBack.bind(this)}
+                onClick={this.goBack}
                 size="large"
               >
                 <ArrowBackIcon />
@@ -282,7 +280,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                 edge="start"
                 color="inherit"
                 aria-label="Confirm"
-                onClick={this.onConfirmConfig.bind(this)}
+                onClick={this.onConfirmConfig}
                 size="large"
               >
                 <CheckCircleIcon fontSize="large" />
@@ -303,7 +301,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
           </Box>
 
           <DrawerButton>
-            <IconButton onClick={this.onToggleDrawer.bind(this)} size="large">
+            <IconButton onClick={this.onToggleDrawer} size="large">
               <DrawerIcon>
                 <MenuIcon />
               </DrawerIcon>
@@ -316,7 +314,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
             <StyledTabs
               orientation="vertical"
               value={this.state.openTab}
-              onChange={this.onChangeTab.bind(this)}
+              onChange={this.onChangeTab}
               aria-label="scene detail tabs"
             >
               <StyledTab
@@ -362,7 +360,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                   this.props.config.tutorials.sceneGrid == null &&
                   this.props.config.tutorials.videoClipper == null
                 }
-                onClick={this.props.onResetTutorials.bind(this)}
+                onClick={this.props.onResetTutorials}
               >
                 <ListItemIcon>
                   <LiveHelpIcon color="error" />
@@ -374,7 +372,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Restore Defaults"}
             >
-              <DeleteItem onClick={this.onRestoreDefaults.bind(this)}>
+              <DeleteItem onClick={this.onRestoreDefaults}>
                 <ListItemIcon>
                   <RestoreIcon color="error" />
                 </ListItemIcon>
@@ -383,7 +381,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
             </Tooltip>
             <Dialog
               open={this.state.openMenu == MO.deleteAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="delete-title"
               aria-describedby="delete-description"
             >
@@ -395,16 +393,10 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={this.onCloseDialog.bind(this)}
-                  color="secondary"
-                >
+                <Button onClick={this.onCloseDialog} color="secondary">
                   Cancel
                 </Button>
-                <Button
-                  onClick={this.onFinishRestoreDefaults.bind(this)}
-                  color="primary"
-                >
+                <Button onClick={this.onFinishRestoreDefaults} color="primary">
                   OK
                 </Button>
               </DialogActions>
@@ -425,7 +417,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                       allSceneGrids={this.props.sceneGrids}
                       scene={this.state.config.defaultScene}
                       isConfig
-                      onUpdateScene={this.onUpdateDefaultScene.bind(this)}
+                      onUpdateScene={this.onUpdateDefaultScene}
                     />
                   </Box>
                 </TabPanelDiv>
@@ -442,7 +434,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                         this.state.config.displaySettings.easingControls
                       }
                       scene={this.state.config.defaultScene}
-                      onUpdateScene={this.onUpdateDefaultScene.bind(this)}
+                      onUpdateScene={this.onUpdateDefaultScene}
                     />
                   </Box>
                 </TabPanelDiv>
@@ -459,27 +451,17 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
                       library={this.props.library}
                       tags={this.props.tags}
                       theme={this.props.theme}
-                      onBackup={this.props.onBackup.bind(this)}
-                      onChangeThemeColor={this.props.onChangeThemeColor.bind(
-                        this,
-                      )}
-                      onClean={this.props.onClean.bind(this)}
-                      onPortableOverride={this.onPortableOverride.bind(this)}
-                      onRestore={this.onRestore.bind(this)}
-                      onToggleDarkMode={this.props.onToggleDarkMode.bind(this)}
-                      onUpdateCachingSettings={this.onUpdateCachingSettings.bind(
-                        this,
-                      )}
-                      onUpdateConfig={this.onUpdateConfig.bind(this)}
-                      onUpdateGeneralSettings={this.onUpdateGeneralSettings.bind(
-                        this,
-                      )}
-                      onUpdateDisplaySettings={this.onUpdateDisplaySettings.bind(
-                        this,
-                      )}
-                      onUpdateRemoteSettings={this.onUpdateRemoteSettings.bind(
-                        this,
-                      )}
+                      onBackup={this.props.onBackup}
+                      onChangeThemeColor={this.props.onChangeThemeColor}
+                      onClean={this.props.onClean}
+                      onPortableOverride={this.onPortableOverride}
+                      onRestore={this.onRestore}
+                      onToggleDarkMode={this.props.onToggleDarkMode}
+                      onUpdateCachingSettings={this.onUpdateCachingSettings}
+                      onUpdateConfig={this.onUpdateConfig}
+                      onUpdateGeneralSettings={this.onUpdateGeneralSettings}
+                      onUpdateDisplaySettings={this.onUpdateDisplaySettings}
+                      onUpdateRemoteSettings={this.onUpdateRemoteSettings}
                     />
                   </Box>
                 </TabPanelDiv>
@@ -490,7 +472,7 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
 
         <Dialog
           open={this.state.openMenu == MO.error}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="back-title"
           aria-describedby="back-description"
         >
@@ -501,13 +483,13 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.props.goBack.bind(this)} color="inherit">
+            <Button onClick={this.props.goBack} color="inherit">
               Back - Don't Save
             </Button>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button onClick={this.onConfirmConfig.bind(this)} color="primary">
+            <Button onClick={this.onConfirmConfig} color="primary">
               Save Changes
             </Button>
           </DialogActions>
@@ -517,10 +499,10 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
           open={this.state.errorSnackOpen}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           autoHideDuration={20000}
-          onClose={this.onCloseErrorSnack.bind(this)}
+          onClose={this.onCloseErrorSnack}
           TransitionComponent={TransitionUp}
         >
-          <Alert onClose={this.onCloseErrorSnack.bind(this)} severity="error">
+          <Alert onClose={this.onCloseErrorSnack} severity="error">
             Error: {this.state.errorSnack}
           </Alert>
         </Snackbar>
@@ -528,21 +510,21 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: ConfigFormProps) {
     if (this.props.config !== props.config) {
       this.setState({ config: JSON.parse(JSON.stringify(this.props.config)) });
     }
   }
 
-  goBack() {
+  goBack = () => {
     if (this.state.changeMade) {
       this.setState({ openMenu: MO.error });
     } else {
       this.props.goBack();
     }
-  }
+  };
 
-  onConfirmConfig() {
+  onConfirmConfig = () => {
     window.ipc.validateConfig(this.state.config).then((errorMessage) => {
       if (errorMessage.length == 0) {
         this.props.onUpdateConfig(this.state.config);
@@ -552,80 +534,80 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
         this.setState({ errorSnackOpen: true, errorSnack: errorMessage });
       }
     });
-  }
+  };
 
-  onPortableOverride() {
+  onPortableOverride = () => {
     this.onRestore(window.constants.portablePath);
-  }
+  };
 
-  onRestore(backupFile: string) {
+  onRestore = (backupFile: string) => {
     this.setState({ changeMade: false });
     this.props.onRestore(backupFile);
-  }
+  };
 
-  onUpdateConfig(fn: (config: Config) => void) {
+  onUpdateConfig = (fn: (config: Config) => void) => {
     const newConfig = this.props.config;
     fn(newConfig);
     this.props.onUpdateConfig(newConfig);
     this.setState({ config: newConfig, changeMade: false });
-  }
+  };
 
-  onUpdateDefaultScene(
-    defualtScene: SceneSettings,
+  onUpdateDefaultScene = (
+    defaultScene: SceneSettings,
     fn: (settings: SceneSettings) => void,
-  ) {
+  ) => {
     const newConfig = this.state.config;
     fn(newConfig.defaultScene);
     this.setState({ config: newConfig, changeMade: true });
-  }
+  };
 
-  onUpdateGeneralSettings(fn: (keys: GeneralSettings) => void) {
+  onUpdateGeneralSettings = (fn: (keys: GeneralSettings) => void) => {
     const newConfig = this.state.config;
     fn(newConfig.generalSettings);
     this.setState({ config: newConfig, changeMade: true });
-  }
+  };
 
-  onUpdateDisplaySettings(fn: (keys: DisplaySettings) => void) {
+  onUpdateDisplaySettings = (fn: (keys: DisplaySettings) => void) => {
     const newConfig = this.state.config;
     fn(newConfig.displaySettings);
     this.setState({ config: newConfig, changeMade: true });
-  }
+  };
 
-  onUpdateCachingSettings(fn: (settings: CacheSettings) => void) {
+  onUpdateCachingSettings = (fn: (settings: CacheSettings) => void) => {
     const newConfig = this.state.config;
     fn(newConfig.caching);
     this.setState({ config: newConfig, changeMade: true });
-  }
+  };
 
-  onUpdateRemoteSettings(fn: (keys: RemoteSettings) => void) {
+  onUpdateRemoteSettings = (fn: (keys: RemoteSettings) => void) => {
     const newConfig = this.state.config;
     fn(newConfig.remoteSettings);
     this.setState({ config: newConfig });
-  }
+  };
 
-  onToggleDrawer() {
+  onToggleDrawer = () => {
     this.setState({ drawerOpen: !this.state.drawerOpen });
-  }
+  };
 
-  onChangeTab(e: any, newTab: number) {
+  onChangeTab = (e: any, newTab: number) => {
     this.setState({ openTab: newTab });
-  }
+  };
 
-  onRestoreDefaults() {
+  onRestoreDefaults = () => {
     this.setState({ openMenu: MO.deleteAlert });
-  }
+  };
 
-  onFinishRestoreDefaults() {
+  onFinishRestoreDefaults = () => {
     this.props.onDefault();
-  }
+  };
 
-  onCloseDialog() {
-    this.setState({ openMenu: null, drawerOpen: false });
-  }
+  onCloseDialog = () => {
+    this.setState({ openMenu: undefined, drawerOpen: false });
+  };
 
-  onCloseErrorSnack() {
+  onCloseErrorSnack = () => {
     this.setState({ errorSnackOpen: false });
-  }
+  };
 }
 
 export default ConfigForm;

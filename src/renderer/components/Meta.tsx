@@ -36,6 +36,9 @@ import ScriptLibrary from "./library/ScriptLibrary";
 import AppStorageState, {
   defaultInitialState,
 } from "../../common/AppStorageState";
+import LibrarySource from "../../common/LibrarySource";
+import SceneGrid from "../../common/SceneGrid";
+import Scene from "../../common/Scene";
 
 function TransitionUp(props: any) {
   return <Slide {...props} direction="up" />;
@@ -48,7 +51,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
     this.state = defaultInitialState;
   }
 
-  _removeOnStartScene: () => void = null;
+  _queueSave = false;
+  _lastSave?: Date = undefined;
+  _removeOnStartScene?: () => void = undefined;
 
   isRoute(kind: string): Boolean {
     return actions.isRoute(this.state, kind);
@@ -82,24 +87,22 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
       .then((constants) => (window.constants = constants));
     window.ipc.getAppStorage().then((result) => {
       this.setState(result);
-      setInterval(this.queueSave.bind(this), 500);
+      window.setInterval(this.queueSave, 500);
     });
 
-    this._removeOnStartScene = window.ipc.onStartScene(
-      this.startScene.bind(this),
-    );
+    this._removeOnStartScene = window.ipc.onStartScene(this.startScene);
 
     // Disable react-sound's verbose console output
     (window as any).soundManager.setup({ debugMode: false });
   }
 
   componentWillUnmount() {
-    this._removeOnStartScene();
+    if (this._removeOnStartScene != null) {
+      this._removeOnStartScene();
+    }
   }
 
-  _queueSave = false;
-  _lastSave: Date = null;
-  queueSave() {
+  queueSave = () => {
     if (
       this.state != null &&
       this._queueSave &&
@@ -109,9 +112,21 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
       this._lastSave = new Date();
       this._queueSave = false;
     }
-  }
+  };
 
-  componentDidUpdate(prevProps: any, prevState: any) {
+  getTags = (source: string, clipID?: string) => {
+    return actions.getTags(this.state.library, source, clipID);
+  };
+
+  cleanBackups = () => {
+    actions.cleanBackups(this.state.config);
+  };
+
+  createBackup = () => {
+    actions.createBackup(this.state);
+  };
+
+  componentDidUpdate(prevProps: unknown, prevState: AppStorageState) {
     if (
       prevState?.version !== this.state?.version ||
       prevState?.config !== this.state?.config ||
@@ -152,9 +167,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
     }
   }
 
-  startScene(sceneName: string) {
+  startScene = (sceneName: string) => {
     this.applyAction(actions.startFromScene, sceneName);
-  }
+  };
 
   // TODO Be able to change audio/script playlists during playback
   //      Be able to right click on grid scenes as overlay
@@ -234,9 +249,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   allSceneGrids={this.state.grids}
                   config={this.state.config}
                   library={this.state.library}
-                  scene={scene}
+                  scene={scene as Scene}
                   tags={this.state.tags}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   goBack={a(actions.goBack)}
                   onAddSource={a(actions.addSource)}
                   onAddTracks={a(actions.addTracks)}
@@ -286,10 +301,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   onEditBlacklist={a(actions.editBlacklist)}
                   onExportLibrary={a(actions.exportLibrary)}
                   onImportFromLibrary={a(actions.importFromLibrary)}
-                  onImportLibrary={a(
-                    actions.importLibrary,
-                    actions.createBackup.bind(this, this.state),
-                  )}
+                  onImportLibrary={a(actions.importLibrary, this.createBackup)}
                   onImportTumblr={p(actions.importTumblr)}
                   onManageTags={a(actions.manageTags)}
                   onMarkOffline={p(actions.markOffline)}
@@ -379,7 +391,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
               {this.isRoute("clip") && (
                 <VideoClipper
                   allTags={this.state.tags}
-                  source={actions.getActiveSource(this.state)}
+                  source={actions.getActiveSource(this.state) as LibrarySource}
                   isLibrary={!actions.getActiveScene(this.state)}
                   tutorial={this.state.tutorial}
                   videoVolume={this.state.config.defaultScene.videoVolume}
@@ -397,7 +409,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <GridSetup
                   allScenes={this.state.scenes}
                   autoEdit={this.state.specialMode == SP.autoEdit}
-                  scene={grid}
+                  scene={grid as SceneGrid}
                   tutorial={this.state.tutorial}
                   goBack={a(actions.goBack)}
                   onDelete={a(actions.deleteGrid)}
@@ -412,11 +424,11 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
@@ -424,7 +436,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   playTrack={a(actions.playTrack)}
                   goToTagSource={a(actions.playSceneFromLibrary)}
                   goToClipSource={a(actions.clipVideo)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
+                  getTags={this.getTags}
                   setCount={a(actions.setCount)}
                   cache={a(actions.cacheImage)}
                   blacklistFile={a(actions.blacklistFile)}
@@ -436,41 +448,43 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   goBack={a(actions.endPlaySceneFromLibrary)}
                   playTrack={a(actions.playTrack)}
                   tags={
-                    scene.audioScene
+                    (scene as Scene).audioScene
                       ? actions.getAudioSource(this.state)?.tags
-                      : scene.scriptScene
+                      : (scene as Scene).scriptScene
                         ? actions.getScriptSource(this.state)?.tags
-                        : actions.getLibrarySource(this.state)?.id > -1
+                        : (actions.getLibrarySource(this.state)?.id ?? -1) > -1
                           ? actions.getLibrarySource(this.state)?.tags
-                          : null
+                          : undefined
                   }
                   allTags={this.state.tags}
                   toggleTag={
-                    scene.audioScene
+                    (scene as Scene).audioScene
                       ? a(actions.toggleAudioTag)
-                      : scene.scriptScene
+                      : (scene as Scene).scriptScene
                         ? a(actions.toggleScriptTag)
                         : a(actions.toggleTag)
                   }
                   inheritTags={
-                    scene.audioScene || scene.scriptScene
+                    (scene as Scene).audioScene || (scene as Scene).scriptScene
                       ? undefined
                       : a(actions.inheritTags)
                   }
                   navigateTagging={a(actions.navigateDisplayedLibrary)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
+                  getTags={this.getTags}
                   changeAudioRoute={
-                    scene.audioScene ? a(actions.changeAudioRoute) : undefined
+                    (scene as Scene).audioScene
+                      ? a(actions.changeAudioRoute)
+                      : undefined
                   }
                   setCount={a(actions.setCount)}
                   cache={a(actions.cacheImage)}
@@ -484,11 +498,11 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 <Player
                   preventSleep
                   config={this.state.config}
-                  scene={scene}
+                  scene={scene as Scene}
                   scenes={this.state.scenes}
                   sceneGrids={this.state.grids}
                   theme={theme}
-                  tutorial={this.state.tutorial}
+                  tutorial={this.state.tutorial ?? undefined}
                   onGenerate={a(actions.generateScenes)}
                   onUpdateScene={a(actions.updateScene)}
                   nextScene={a(actions.nextScene)}
@@ -496,7 +510,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   playTrack={a(actions.playTrack)}
                   goToTagSource={a(actions.playSceneFromLibrary)}
                   goToClipSource={a(actions.clipVideo)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
+                  getTags={this.getTags}
                   setCount={a(actions.setCount)}
                   cache={a(actions.cacheImage)}
                   blacklistFile={a(actions.blacklistFile)}
@@ -513,9 +527,9 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   tags={this.state.tags}
                   theme={this.state.theme}
                   goBack={a(actions.goBack)}
-                  onBackup={actions.createBackup.bind(this, this.state)}
+                  onBackup={this.createBackup}
                   onChangeThemeColor={a(actions.changeThemeColor)}
-                  onClean={actions.cleanBackups.bind(this, this.state.config)}
+                  onClean={this.cleanBackups}
                   onDefault={a(actions.setDefaultConfig)}
                   onRestore={a(actions.restoreFromBackup)}
                   onResetTutorials={a(actions.resetTutorials)}
@@ -533,7 +547,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                   openScript={actions.getSelectScript(this.state)}
                   theme={theme}
                   onAddFromLibrary={a(actions.addScriptSingle)}
-                  getTags={actions.getTags.bind(this, this.state.library)}
+                  getTags={this.getTags}
                   goBack={a(actions.goBack)}
                   onUpdateScene={a(actions.updateScene)}
                   onUpdateLibrary={a(actions.updateScriptLibrary)}
@@ -556,7 +570,7 @@ export default class Meta extends React.Component<unknown, AppStorageState> {
                 open={this.state.systemSnackOpen}
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
                 autoHideDuration={2000}
-                key={this.state.systemSnack + new Date()}
+                key={`${this.state.systemSnack}${new Date()}`}
                 onClose={a(actions.closeMessage)}
                 TransitionComponent={TransitionUp}
               >

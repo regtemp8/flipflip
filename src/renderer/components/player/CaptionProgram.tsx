@@ -2,7 +2,6 @@ import * as React from "react";
 import Sound from "react-sound";
 
 import captionProgramDefaults, {
-  CancelablePromise,
   getMsTimestampValue,
   getRandomListItem,
   getTimeout,
@@ -38,21 +37,21 @@ const getRest = function (s: string) {
 
 interface CaptionProgramProps {
   captionScript: CaptionScript;
-  currentAudio: Audio;
-  currentImage: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
+  currentAudio?: Audio;
+  currentImage?: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
   persist: boolean;
   repeat: string;
   scale: number;
   singleTrack: boolean;
-  timeToNextFrame: number;
-  getTags(source: string, clipID?: string): Array<Tag>;
-  goBack(): void;
-  playNextScene(): void;
+  timeToNextFrame?: number;
   jumpToHack?: ChildCallbackHack;
-  advance?(): void;
-  getCurrentTimestamp?(): number;
-  nextTrack?(): void;
-  onError?(e: string): void;
+  getTags: (source: string, clipID?: string) => Array<Tag>;
+  goBack: () => void;
+  playNextScene?: () => void;
+  advance?: () => void;
+  getCurrentTimestamp?: () => number;
+  nextTrack?: () => void;
+  onError?: (e: string) => void;
 }
 
 type CaptionProgramState = typeof captionProgramDefaults & {
@@ -84,8 +83,12 @@ export default class CaptionProgram extends React.Component<
     };
   }
 
-  _runningPromise: CancelablePromise = null;
-  _timeout: number = null;
+  _abortController: AbortController = new AbortController();
+  _timeout?: number = undefined;
+  _sceneCommand?: Function = undefined;
+  _nextTimestamp?: number = undefined;
+  _lastTimestamp?: number = undefined;
+  _timestampTimeout?: number = undefined;
 
   render() {
     const countXPos = this.state.countX * this.props.scale;
@@ -148,9 +151,9 @@ export default class CaptionProgram extends React.Component<
               }
               volume={a.volume}
               onFinishedPlaying={() => {
-                const newAudios = Array.from(this.state.audios);
-                const audio = newAudios.find((au) => a.alias == au.alias);
-                audio.playing = false;
+                const newAudios = this.state.audios.map((au) =>
+                  au.alias === a.alias ? { ...au, playing: false } : au,
+                );
                 this.setState({ audios: newAudios });
               }}
             />
@@ -222,11 +225,14 @@ export default class CaptionProgram extends React.Component<
     this.reset();
     this.stop();
     if (this.props.jumpToHack) {
-      this.props.jumpToHack.listener = null;
+      this.props.jumpToHack.listener = undefined;
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: CaptionProgramProps,
+    state: CaptionProgramState,
+  ): boolean {
     return (
       props.captionScript !== this.props.captionScript ||
       props.currentImage !== this.props.currentImage ||
@@ -239,14 +245,13 @@ export default class CaptionProgram extends React.Component<
     );
   }
 
-  _sceneCommand: Function = null;
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: CaptionProgramProps) {
     if (
       this.props.currentImage !== props.currentImage &&
       this._sceneCommand != null
     ) {
       const command = this._sceneCommand;
-      this._sceneCommand = null;
+      this._sceneCommand = undefined;
       command();
     }
     if (
@@ -289,41 +294,42 @@ export default class CaptionProgram extends React.Component<
     }>();
     captionProgramDefaults.timestampFn = new Map<number, Array<Function>>();
     this.setState({ countProgress: false });
-    if (this.el) {
+    if (this.el.current) {
       this.el.current.style.opacity = "0";
     }
-    if (this._runningPromise) {
-      this._runningPromise.cancel();
-      this._runningPromise = null;
-    }
-    if (this._timeout) {
+
+    this._abortController.abort();
+    if (this._timeout != null) {
       window.clearTimeout(this._timeout);
-      this._timeout = null;
+      this._timeout = undefined;
     }
-    this._sceneCommand = null;
-    this._timeStarted = null;
-    this._lastTimestamp = null;
-    this._nextTimestamp = null;
-    if (this._timestampTimeout) {
+    this._sceneCommand = undefined;
+    this._lastTimestamp = undefined;
+    this._nextTimestamp = undefined;
+    if (this._timestampTimeout != null) {
       window.clearTimeout(this._timestampTimeout);
-      this._timestampTimeout = null;
+      this._timestampTimeout = undefined;
     }
   }
 
   start() {
     const url = this.props.captionScript.url;
-    this._runningPromise = new CancelablePromise((resolve, reject) => {
+    const promise = new Promise<string[]>((resolve) => {
       if (this.props.captionScript.script == null) {
         window.ipc.getTextFromURL(url).then((text) => {
           if (text != null) {
-            resolve({ data: [text], helpers: null });
+            resolve([text]);
           }
         });
       } else {
-        resolve({ data: [this.props.captionScript.script], helpers: null });
+        resolve([this.props.captionScript.script]);
       }
     });
-    this._runningPromise.then(async (data) => {
+    promise.then(async (data) => {
+      if (this._abortController.signal.aborted) {
+        return;
+      }
+
       let error = null;
       let newProgram = new Array<Function>();
       let newTimestamps = new Map<number, Array<Function>>();
@@ -331,7 +337,7 @@ export default class CaptionProgram extends React.Component<
       let containsTimestampAction = false;
       let containsAction = false;
 
-      for (let line of data.data[0].split("\n")) {
+      for (let line of data[0].split("\n")) {
         index++;
         line = line.trim();
 
@@ -339,7 +345,8 @@ export default class CaptionProgram extends React.Component<
         let command = getFirstWord(line);
         let value = getRest(line);
 
-        let timestamp = getMsTimestampValue(command);
+        let timestamp =
+          command != null ? getMsTimestampValue(command) : undefined;
         if (timestamp != null && value != null && value.length > 0) {
           line = value;
           command = getFirstWord(line);
@@ -359,11 +366,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(this.advance());
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(this.advance());
-              } else {
-                newTimestamps.set(timestamp, [this.advance()]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(this.advance());
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "count":
@@ -406,11 +415,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(this.count(start, end));
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(this.count(start, end, true));
-              } else {
-                newTimestamps.set(timestamp, [this.count(start, end, true)]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(this.count(start, end, true));
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "blink":
@@ -452,15 +463,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push((this as any)[command](value));
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps
-                  .get(timestamp)
-                  .push((this as any)[command](value, true));
-              } else {
-                newTimestamps.set(timestamp, [
-                  (this as any)[command](value, true),
-                ]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push((this as any)[command](value, true));
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "storephrase":
@@ -476,19 +485,13 @@ export default class CaptionProgram extends React.Component<
               const register = Number.parseInt(registerRegex[1]);
               if (register != 0) {
                 value = value.replace("$" + register + " ", "");
-                if (!newPhrases.has(register)) {
-                  newPhrases.set(register, []);
-                }
-                newPhrases.set(
-                  register,
-                  newPhrases.get(register).concat([value]),
-                );
+                const registerPhrase = newPhrases.get(register) ?? [];
+                newPhrases.set(register, registerPhrase.concat([value]));
               }
             }
-            if (!newPhrases.has(0)) {
-              newPhrases.set(0, []);
-            }
-            newPhrases.set(0, newPhrases.get(0).concat([value]));
+
+            const storedPhrase = newPhrases.get(0) ?? [];
+            newPhrases.set(0, storedPhrase.concat([value]));
             this.setState({ phrases: newPhrases });
             break;
           case "storeAudio":
@@ -651,11 +654,13 @@ export default class CaptionProgram extends React.Component<
               newProgram.push(fn);
             } else {
               containsTimestampAction = true;
-              if (newTimestamps.has(timestamp)) {
-                newTimestamps.get(timestamp).push(fn);
-              } else {
-                newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
               }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkDuration":
@@ -694,10 +699,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](numbers);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkWaveRate":
@@ -749,10 +758,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](ms);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setBlinkTF":
@@ -781,10 +794,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](tf);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setShowCountProgress":
@@ -809,10 +826,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](value == "true" || value == "t");
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           case "setCountProgressColor":
@@ -838,10 +859,14 @@ export default class CaptionProgram extends React.Component<
             fn = (this as any)[command](args);
             if (timestamp == null) {
               newProgram.push(fn);
-            } else if (newTimestamps.has(timestamp)) {
-              newTimestamps.get(timestamp).push(fn);
             } else {
-              newTimestamps.set(timestamp, [fn]);
+              let newTimestamp = newTimestamps.get(timestamp);
+              if (newTimestamp == null) {
+                newTimestamp = [];
+              }
+
+              newTimestamp.push(fn);
+              newTimestamps.set(timestamp, newTimestamp);
             }
             break;
           default:
@@ -871,7 +896,6 @@ export default class CaptionProgram extends React.Component<
               }
             }),
           });
-          this._timeStarted = new Date();
           this.timestampLoop();
           this.captionLoop();
         } else if (newTimestamps.size > 0 && containsTimestampAction) {
@@ -887,13 +911,12 @@ export default class CaptionProgram extends React.Component<
               }
             }),
           });
-          this._timeStarted = new Date();
           this.timestampLoop();
         } else if (containsAction) {
           this.setState({ program: newProgram });
           this.captionLoop();
         }
-      } else if (this.props.onError) {
+      } else if (error != null) {
         if (this.props.onError) {
           this.props.onError(error);
         } else {
@@ -903,21 +926,17 @@ export default class CaptionProgram extends React.Component<
     });
   }
 
-  _timeStarted: Date = null;
-  _nextTimestamp: number = null;
-  _lastTimestamp: number = null;
-  _timestampTimeout: number = null;
-  timestampLoop() {
+  timestampLoop = () => {
+    const timeStarted = new Date().getTime();
     const doLoop = (passed: number): number => {
       let index = this.state.timestampCounter;
-      let fns;
       while (
         this.state.timestamps.length >= index &&
         passed > this.state.timestamps[index + 1]
       ) {
         index++;
       }
-      fns = this.state.timestampFn.get(this.state.timestamps[index]);
+      const fns = this.state.timestampFn.get(this.state.timestamps[index])!;
       this._nextTimestamp = this.state.timestamps[index + 1];
 
       for (let fn of fns) {
@@ -968,7 +987,7 @@ export default class CaptionProgram extends React.Component<
           ) {
             for (let fn of this.state.timestampFn.get(
               this.state.timestamps[index],
-            )) {
+            )!) {
               if (/const command = \(\)/g.exec(fn.toString()) == null) {
                 fn(() => {});
               }
@@ -980,35 +999,29 @@ export default class CaptionProgram extends React.Component<
           this._nextTimestamp = this.state.timestamps[index];
         }
         this.setState({ timestampCounter: index });
-      } else if (passed > this._nextTimestamp) {
+      } else if (this._nextTimestamp != null && passed > this._nextTimestamp) {
         const index = doLoop(passed);
         if (index >= this.state.timestamps.length - 1) {
           this._nextTimestamp = 99999999;
         }
       }
       this._lastTimestamp = passed;
-      this._timestampTimeout = window.setTimeout(
-        this.timestampLoop.bind(this),
-        100,
-      );
+      this._timestampTimeout = window.setTimeout(this.timestampLoop, 100);
     } else {
-      if (this._nextTimestamp == null) {
-        this._nextTimestamp =
-          this.state.timestamps[this.state.timestampCounter];
-      }
-      const passed = Date.now() - this._timeStarted.getTime();
-      if (passed > this._nextTimestamp) {
+      const nextTimestamp =
+        this._nextTimestamp ??
+        this.state.timestamps[this.state.timestampCounter];
+      this._nextTimestamp = nextTimestamp;
+      const passed = Date.now() - timeStarted;
+      if (passed > nextTimestamp) {
         const index = doLoop(passed);
         if (index >= this.state.timestamps.length - 1) {
           return;
         }
       }
-      this._timestampTimeout = window.setTimeout(
-        this.timestampLoop.bind(this),
-        100,
-      );
+      this._timestampTimeout = window.setTimeout(this.timestampLoop, 100);
     }
-  }
+  };
 
   captionLoop() {
     if (this.state.program[this.state.programCounter]) {
@@ -1048,17 +1061,18 @@ export default class CaptionProgram extends React.Component<
   getPhrase(value: string) {
     const registerRegex = /^\$(\d)$/.exec(value);
     if (value == "$RANDOM_PHRASE") {
-      return getRandomListItem(this.state.phrases.get(0));
+      return getRandomListItem(this.state.phrases.get(0) ?? []);
     } else if (registerRegex != null) {
       const register = Number.parseInt(registerRegex[1]);
-      return getRandomListItem(this.state.phrases.get(register));
+      return getRandomListItem(this.state.phrases.get(register) ?? []);
     } else if (value == "$TAG_PHRASE") {
-      if (this.props.currentImage) {
+      const source = this.props.currentImage?.getAttribute("source");
+      if (source) {
         const tag = getRandomListItem(
           this.props
             .getTags(
-              this.props.currentImage.getAttribute("source"),
-              this.props.currentImage.getAttribute("clip"),
+              source,
+              this.props.currentImage?.getAttribute("clip") ?? undefined,
             )
             .filter((t) => t.phraseString && t.phraseString != ""),
         );
@@ -1075,11 +1089,17 @@ export default class CaptionProgram extends React.Component<
 
   showText(value: string, ms: number, opacity: number) {
     return (nextCommand: Function) => {
+      if (!this.el.current) {
+        return;
+      }
+
       this.el.current.style.opacity = (opacity / 100).toString();
       this.el.current.innerHTML = htmlEntities(value);
       const wait = this.wait(ms);
       wait(() => {
-        this.el.current.style.opacity = "0";
+        if (this.el.current) {
+          this.el.current.style.opacity = "0";
+        }
         nextCommand();
       });
     };
@@ -1087,7 +1107,9 @@ export default class CaptionProgram extends React.Component<
 
   wait(ms: number) {
     return (nextCommand: Function) => {
-      window.clearTimeout(this._timeout);
+      if (this._timeout != null) {
+        window.clearTimeout(this._timeout);
+      }
       this._timeout = window.setTimeout(nextCommand, ms);
     };
   }
@@ -1116,8 +1138,8 @@ export default class CaptionProgram extends React.Component<
           this.state.captionDuration[0],
           this.state.captionDuration[1],
           this.state.captionWaveRate,
-          this.props.currentAudio,
           this.state.captionBPMMulti,
+          this.props.currentAudio,
           this.props.timeToNextFrame,
         );
         const showText = this.showText(
@@ -1133,43 +1155,46 @@ export default class CaptionProgram extends React.Component<
               this.state.captionDelay[0],
               this.state.captionDelay[1],
               this.state.captionDelayWaveRate,
-              this.props.currentAudio,
               this.state.captionDelayBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
-        this.el.current.style.color = this.props.captionScript.caption.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.caption.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.caption.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "bottom";
-        const yPos = (14 + this.state.captionY) * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.captionX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        //this.el.current.style.transition = 'opacity 0.5s ease-in-out';
-        if (this.props.captionScript.caption.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.caption.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.caption.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.caption.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.caption.fontSize * this.props.scale +
+            "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.caption.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "bottom";
+          const yPos = (14 + this.state.captionY) * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.captionX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          //this.el.current.style.transition = 'opacity 0.5s ease-in-out';
+          if (this.props.captionScript.caption.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.caption.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.caption.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         if (this.state.captionDelayTF == TF.scene && !timestamp) {
           showText(function () {
@@ -1201,8 +1226,8 @@ export default class CaptionProgram extends React.Component<
           this.state.captionDuration[0],
           this.state.captionDuration[1],
           this.state.captionWaveRate,
-          this.props.currentAudio,
           this.state.captionBPMMulti,
+          this.props.currentAudio,
           this.props.timeToNextFrame,
         );
         const showText = this.showText(
@@ -1218,44 +1243,47 @@ export default class CaptionProgram extends React.Component<
               this.state.captionDelay[0],
               this.state.captionDelay[1],
               this.state.captionDelayWaveRate,
-              this.props.currentAudio,
               this.state.captionDelayBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
         const wait = this.wait(delay);
-        this.el.current.style.color = this.props.captionScript.captionBig.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.captionBig.fontSize * this.props.scale +
-          "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.captionBig.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.bigCaptionY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.bigCaptionX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.captionBig.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.captionBig.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.captionBig.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color =
+            this.props.captionScript.captionBig.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.captionBig.fontSize * this.props.scale +
+            "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.captionBig.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.bigCaptionY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.bigCaptionX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.captionBig.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.captionBig.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.captionBig.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         if (this.state.captionDelayTF == TF.scene && !timestamp) {
           showText(function () {
@@ -1296,8 +1324,8 @@ export default class CaptionProgram extends React.Component<
               this.state.blinkDuration[0],
               this.state.blinkDuration[1],
               this.state.blinkWaveRate,
-              this.props.currentAudio,
               this.state.blinkBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
             const showText = this.showText(
@@ -1321,8 +1349,8 @@ export default class CaptionProgram extends React.Component<
                 this.state.blinkDelay[0],
                 this.state.blinkDelay[1],
                 this.state.blinkDelayWaveRate,
-                this.props.currentAudio,
                 this.state.blinkDelayBPMMulti,
+                this.props.currentAudio,
                 this.props.timeToNextFrame,
               );
               const wait = this.wait(delay);
@@ -1342,46 +1370,48 @@ export default class CaptionProgram extends React.Component<
             this.state.blinkGroupDelay[0],
             this.state.blinkGroupDelay[1],
             this.state.blinkGroupDelayWaveRate,
-            this.props.currentAudio,
             this.state.blinkGroupDelayBPMMulti,
+            this.props.currentAudio,
             this.props.timeToNextFrame,
           );
           const lastWait = this.wait(delay);
           fns.push(() => lastWait(nextCommand));
         }
 
-        this.el.current.style.color = this.props.captionScript.blink.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.blink.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.blink.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.blinkY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.blinkX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.blink.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.blink.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.blink.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.blink.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.blink.fontSize * this.props.scale + "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.blink.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.blinkY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.blinkX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.blink.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.blink.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.blink.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         fns[0]();
       };
@@ -1441,24 +1471,26 @@ export default class CaptionProgram extends React.Component<
               this.state.countDuration[0],
               this.state.countDuration[1],
               this.state.countWaveRate,
-              this.props.currentAudio,
               this.state.countBPMMulti,
+              this.props.currentAudio,
               this.props.timeToNextFrame,
             );
             if (this.state.showCountProgress) {
-              if (this.state.countColors.has(val)) {
+              const countColor = this.state.countColors.get(val);
+              if (countColor != null) {
                 this.setState({
                   countCurrent: val - offset,
-                  countColor: this.state.countColors.get(val),
+                  countColor,
                 });
-                if (this.state.countColorMatch) {
-                  this.el.current.style.color = this.state.countColors.get(val);
+                if (this.state.countColorMatch && this.el.current != null) {
+                  this.el.current.style.color = countColor;
                 }
               } else {
                 this.setState({ countCurrent: val - offset });
               }
-            } else if (this.state.countColorMatch) {
-              this.el.current.style.color = this.state.countColors.get(val);
+            } else if (this.state.countColorMatch && this.el.current != null) {
+              this.el.current.style.color =
+                this.state.countColors.get(val) ?? "unset";
             }
             const showText = this.showText(
               val.toString(),
@@ -1481,8 +1513,8 @@ export default class CaptionProgram extends React.Component<
                 this.state.countDelay[0],
                 this.state.countDelay[1],
                 this.state.countDelayWaveRate,
-                this.props.currentAudio,
                 this.state.countDelayBPMMulti,
+                this.props.currentAudio,
                 this.props.timeToNextFrame,
               );
               const wait = this.wait(delay);
@@ -1502,46 +1534,48 @@ export default class CaptionProgram extends React.Component<
             this.state.countGroupDelay[0],
             this.state.countGroupDelay[1],
             this.state.countGroupDelayWaveRate,
-            this.props.currentAudio,
             this.state.countGroupDelayBPMMulti,
+            this.props.currentAudio,
             this.props.timeToNextFrame,
           );
           const lastWait = this.wait(delay);
           fns.push(() => lastWait(nextCommand));
         }
 
-        this.el.current.style.color = this.props.captionScript.count.color;
-        this.el.current.style.fontSize =
-          this.props.captionScript.count.fontSize * this.props.scale + "vmin";
-        this.el.current.style.fontFamily =
-          this.props.captionScript.count.fontFamily;
-        this.el.current.style.display = "table-cell";
-        this.el.current.style.textAlign = "center";
-        this.el.current.style.verticalAlign = "middle";
-        const yPos = this.state.countY * this.props.scale;
-        if (yPos > 0) {
-          this.el.current.style.paddingBottom = yPos + "vmin";
-          this.el.current.style.paddingTop = "unset";
-        } else {
-          this.el.current.style.paddingBottom = "unset";
-          this.el.current.style.paddingTop = yPos * -1 + "vmin";
-        }
-        const xPos = this.state.countX * this.props.scale;
-        if (xPos > 0) {
-          this.el.current.style.paddingLeft = xPos + "vmin";
-          this.el.current.style.paddingRight = "unset";
-        } else {
-          this.el.current.style.paddingLeft = "unset";
-          this.el.current.style.paddingRight = xPos * -1 + "vmin";
-        }
-        this.el.current.style.transition = "opacity 0.1s ease-out";
-        if (this.props.captionScript.count.border) {
-          this.el.current.style.webkitTextStroke =
-            this.props.captionScript.count.borderpx * this.props.scale +
-            "px " +
-            this.props.captionScript.count.borderColor;
-        } else {
-          this.el.current.style.webkitTextStroke = "unset";
+        if (this.el.current != null) {
+          this.el.current.style.color = this.props.captionScript.count.color;
+          this.el.current.style.fontSize =
+            this.props.captionScript.count.fontSize * this.props.scale + "vmin";
+          this.el.current.style.fontFamily =
+            this.props.captionScript.count.fontFamily;
+          this.el.current.style.display = "table-cell";
+          this.el.current.style.textAlign = "center";
+          this.el.current.style.verticalAlign = "middle";
+          const yPos = this.state.countY * this.props.scale;
+          if (yPos > 0) {
+            this.el.current.style.paddingBottom = yPos + "vmin";
+            this.el.current.style.paddingTop = "unset";
+          } else {
+            this.el.current.style.paddingBottom = "unset";
+            this.el.current.style.paddingTop = yPos * -1 + "vmin";
+          }
+          const xPos = this.state.countX * this.props.scale;
+          if (xPos > 0) {
+            this.el.current.style.paddingLeft = xPos + "vmin";
+            this.el.current.style.paddingRight = "unset";
+          } else {
+            this.el.current.style.paddingLeft = "unset";
+            this.el.current.style.paddingRight = xPos * -1 + "vmin";
+          }
+          this.el.current.style.transition = "opacity 0.1s ease-out";
+          if (this.props.captionScript.count.border) {
+            this.el.current.style.webkitTextStroke =
+              this.props.captionScript.count.borderpx * this.props.scale +
+              "px " +
+              this.props.captionScript.count.borderColor;
+          } else {
+            this.el.current.style.webkitTextStroke = "unset";
+          }
         }
         fns[0]();
       };
@@ -1559,10 +1593,15 @@ export default class CaptionProgram extends React.Component<
 
   playAudio(alias: string, volume: number) {
     return (nextCommand: Function) => {
-      const newAudios = Array.from(this.state.audios);
-      const audio = newAudios.find((a) => a.alias == alias);
-      audio.playing = true;
-      audio.volume = volume;
+      const newAudios = this.state.audios.map((a) => {
+        if (a.alias === alias) {
+          a.playing = true;
+          a.volume = volume;
+        }
+
+        return a;
+      });
+
       this.setState({ audios: newAudios });
       nextCommand();
     };

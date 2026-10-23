@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import { SL, WC } from "../../../common/const";
-import { getRandomListItem } from "../../data/utils";
+import { assertDefined, getRandomListItem } from "../../data/utils";
 import {
   getFileGroup,
   getFileName,
@@ -41,7 +41,7 @@ interface PlayerProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   theme: Theme;
-  tutorial: string;
+  tutorial?: string;
   advanceHack?: ChildCallbackHack;
   allLoaded?: boolean;
   allTags?: Array<Tag>;
@@ -52,28 +52,28 @@ interface PlayerProps {
   hasStarted?: boolean;
   preventSleep?: boolean;
   tags?: Array<Tag>;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  getTags(source: string): Array<Tag>;
-  goBack(): void;
-  setCount(sourceURL: string, count: number, countComplete: boolean): void;
-  systemMessage(message: string): void;
-  blacklistFile?(sourceURL: string, fileToBlacklist: string): void;
-  goToTagSource?(source: LibrarySource): void;
-  goToClipSource?(source: LibrarySource): void;
-  navigateTagging?(offset: number): void;
-  nextScene?(): void;
-  onUpdateScene?(scene: Scene, fn: (scene: Scene) => void): void;
-  playTrack?(url: string): void;
-  changeAudioRoute?(aID: number): void;
-  toggleTag?(sourceID: number, tag: Tag): void;
-  inheritTags?(sourceID: number): void;
-  getCurrentTimestamp?(): number;
-  onCaptionError?(e: string): void;
-  onLoaded?(): void;
-  setProgress?(total: number, current: number, message: string[]): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  setVideo?(video: HTMLVideoElement): void;
-  onGenerate?(scene: Scene | SceneGrid, children?: boolean): void;
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  getTags: (source: string) => Array<Tag>;
+  goBack: () => void;
+  setCount: (sourceURL: string, count: number, countComplete: boolean) => void;
+  systemMessage: (message: string) => void;
+  blacklistFile?: (sourceURL: string, fileToBlacklist: string) => void;
+  goToTagSource?: (source: LibrarySource) => void;
+  goToClipSource?: (source: LibrarySource) => void;
+  navigateTagging?: (offset: number) => void;
+  nextScene?: () => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  playTrack?: (url: string) => void;
+  changeAudioRoute?: (aID: number) => void;
+  toggleTag?: (sourceID: number | null, tag: Tag) => void;
+  inheritTags?: (sourceID: number | null) => void;
+  getCurrentTimestamp?: () => number;
+  onCaptionError?: (e: string) => void;
+  onLoaded?: () => void;
+  setProgress?: (total: number, current: number, message: string[]) => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  setVideo?: (video?: HTMLVideoElement) => void;
+  onGenerate?: (scene: Scene | SceneGrid, children?: boolean) => void;
 }
 
 interface PlayerState {
@@ -86,20 +86,20 @@ interface PlayerState {
   total: number;
   progress: number;
   progressMessage: string[];
-  startTime: Date;
+  startTime?: Date;
   historyOffset: number;
   historyPaths: Array<any>;
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
   imagePlayerDeleteHack: ChildCallbackHack;
-  mainVideo: HTMLVideoElement;
-  overlayVideos: Array<Array<HTMLVideoElement>>;
-  currentAudio: Audio;
+  mainVideo?: HTMLVideoElement;
+  overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
+  currentAudio?: Audio;
   timeToNextFrame: number;
   recentPictureGrid: boolean;
-  thumbImage: HTMLImageElement;
+  thumbImage: HTMLImageElement | null;
   persistAudio: boolean;
   persistText: boolean;
-  scriptPlaylists: {
+  scriptPlaylists?: {
     scripts: CaptionScript[];
     shuffle: boolean;
     repeat: string;
@@ -124,40 +124,31 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
       progress: 0,
       progressMessage:
         props.scene.sources.length > 0 ? [props.scene.sources[0].url] : [""],
-      startTime: null as Date,
       historyOffset: 0,
       historyPaths: new Array<any>(),
-      imagePlayerAdvanceHacks: new Array<Array<ChildCallbackHack>>(
-        props.scene.overlays.length + 1,
-      )
-        .fill(null)
-        .map(() => [new ChildCallbackHack()]),
+      imagePlayerAdvanceHacks: Array.from(
+        { length: props.scene.overlays.length + 1 },
+        () => [new ChildCallbackHack()],
+      ),
       imagePlayerDeleteHack: new ChildCallbackHack(),
-      mainVideo: null as HTMLVideoElement,
-      overlayVideos: new Array<Array<HTMLVideoElement>>(
-        props.scene.overlays.length,
-      )
-        .fill(null)
-        .map(() => [null as HTMLVideoElement]),
-      currentAudio: null as Audio,
-      timeToNextFrame: null as number,
+      overlayVideos: Array.from(
+        { length: props.scene.overlays.length },
+        (): Array<HTMLVideoElement | undefined> => [undefined],
+      ),
       recentPictureGrid: false,
-      thumbImage: null as HTMLImageElement,
+      timeToNextFrame: Number.MAX_VALUE,
+      thumbImage: null,
       persistAudio: false,
       persistText: false,
-      scriptPlaylists: null as {
-        scripts: CaptionScript[];
-        shuffle: boolean;
-        repeat: string;
-      }[],
       hideCursor: false,
     };
   }
 
   readonly idleTimerRef: React.RefObject<HTMLDivElement> = React.createRef();
-  _interval: number = null;
+  _interval?: number = undefined;
   _toggleStrobe = false;
-  _powerSaveID: number = null;
+  _powerSaveID?: number = undefined;
+  _currentTimestamp: number = 0;
 
   render() {
     const nextScene = this.getScene(
@@ -172,7 +163,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         this.props.scene.scriptPlaylists.length > 0) ||
         this.state.persistText);
     const scriptPlaylists = this.state.persistText
-      ? this.state.scriptPlaylists
+      ? this.state.scriptPlaylists!
       : this.props.scene.scriptPlaylists;
     const showStrobe =
       !this.state.recentPictureGrid &&
@@ -360,11 +351,11 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
 
     const captionScale = this.props.captionScale ? this.props.captionScale : 1;
 
-    let getCurrentTimestamp: any = undefined;
+    let getCurrentTimestamp: (() => number) | undefined = undefined;
     if (this.props.getCurrentTimestamp) {
       getCurrentTimestamp = this.props.getCurrentTimestamp;
     } else if (this.props.scene && this.props.scene.audioEnabled) {
-      getCurrentTimestamp = this.getTimestamp.bind(this);
+      getCurrentTimestamp = this.getTimestamp;
     }
 
     return (
@@ -386,8 +377,8 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                 ref={() => {
                   return this.idleTimerRef;
                 }}
-                onActive={this.onActive.bind(this)}
-                onIdle={this.onIdle.bind(this)}
+                onActive={this.onActive}
+                onIdle={this.onIdle}
                 timeout={2000}
               />
             </div>
@@ -466,7 +457,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                       }}
                       variant="contained"
                       color="secondary"
-                      onClick={this.start.bind(this, this.state.canStart, true)}
+                      onClick={() => this.start(this.state.canStart, true)}
                     >
                       Start Now
                     </Button>
@@ -538,7 +529,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               this.props.allTags
                 ? this.props.scene.audioScene
                   ? this.state.currentAudio
-                    ? this.state.currentAudio.name
+                    ? (this.state.currentAudio.name ?? "")
                     : "Loading..."
                   : this.props.scene.sources[0].url
                 : this.props.scene.name
@@ -547,15 +538,15 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
             recentPictureGrid={this.state.recentPictureGrid}
             persistAudio={this.state.persistAudio}
             persistText={this.state.persistText}
-            goBack={this.goBack.bind(this)}
-            historyBack={this.historyBack.bind(this)}
-            historyForward={this.historyForward.bind(this)}
-            navigateTagging={this.navigateTagging.bind(this)}
-            onRecentPictureGrid={this.onRecentPictureGrid.bind(this)}
-            onUpdateScene={this.props.onUpdateScene.bind(this)}
+            goBack={this.goBack}
+            historyBack={this.historyBack}
+            historyForward={this.historyForward}
+            navigateTagging={this.navigateTagging}
+            onRecentPictureGrid={this.onRecentPictureGrid}
+            onUpdateScene={this.props.onUpdateScene}
             playNextScene={this.props.nextScene}
-            play={this.play.bind(this)}
-            pause={this.pause.bind(this)}
+            play={this.play}
+            pause={this.pause}
             playTrack={this.props.playTrack}
             onGenerate={this.props.onGenerate}
             onPlaying={
@@ -563,9 +554,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               !this.state.currentAudio ||
               this.props.getCurrentTimestamp
                 ? undefined
-                : this.onPlaying.bind(this)
+                : this.onPlaying
             }
-            setCurrentAudio={this.setCurrentAudio.bind(this)}
+            setCurrentAudio={this.setCurrentAudio}
             allTags={this.props.allTags}
             tags={this.props.tags}
             blacklistFile={this.props.blacklistFile}
@@ -608,11 +599,13 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               currentAudio={this.state.currentAudio}
               opacity={this.state.recentPictureGrid ? 0 : 1}
               gridCoordinates={this.props.gridCoordinates}
-              gridView={this.props.gridView}
+              gridView={this.props.gridView ?? false}
               isPlaying={this.state.isPlaying}
               hasStarted={this.state.hasStarted}
               strobeLayer={
-                this.props.scene.strobe ? this.props.scene.strobeLayer : null
+                this.props.scene.strobe
+                  ? this.props.scene.strobeLayer
+                  : undefined
               }
               historyOffset={this.state.historyOffset}
               advanceHack={
@@ -621,22 +614,20 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   : this.state.imagePlayerAdvanceHacks[0][0]
               }
               deleteHack={this.state.imagePlayerDeleteHack}
-              setHistoryOffset={this.setHistoryOffset.bind(this)}
-              setHistoryPaths={this.setHistoryPaths.bind(this)}
-              finishedLoading={this.setMainLoaded.bind(this)}
-              firstImageLoaded={this.setMainCanStart.bind(this)}
-              setProgress={this.setProgress.bind(this)}
+              setHistoryOffset={this.setHistoryOffset}
+              setHistoryPaths={this.setHistoryPaths}
+              finishedLoading={this.setMainLoaded}
+              firstImageLoaded={this.setMainCanStart}
+              setProgress={this.setProgress}
               setSceneCopy={this.props.setSceneCopy}
               setVideo={
-                this.props.setVideo
-                  ? this.props.setVideo
-                  : this.setMainVideo.bind(this)
+                this.props.setVideo ? this.props.setVideo : this.setMainVideo
               }
-              setCount={this.props.setCount.bind(this)}
-              cache={this.props.cache.bind(this)}
-              onEndScene={this.props.goBack.bind(this)}
-              setTimeToNextFrame={this.setTimeToNextFrame.bind(this)}
-              systemMessage={this.props.systemMessage.bind(this)}
+              setCount={this.props.setCount}
+              cache={this.props.cache}
+              onEndScene={this.props.goBack}
+              setTimeToNextFrame={this.setTimeToNextFrame}
+              systemMessage={this.props.systemMessage}
               playNextScene={this.props.nextScene}
             />
           )}
@@ -674,20 +665,26 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   changed = true;
                 }
                 if (changed) {
-                  setTimeout(
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
                   );
                 }
+
+                const overlayScene = this.getScene(overlay.sceneID);
+                assertDefined(
+                  overlayScene,
+                  `Player requires overlay scene (id: ${overlay.sceneID}) to exist.`,
+                );
                 return (
                   <SourceScraper
                     key={overlay.id}
                     config={this.props.config}
-                    scene={this.getScene(overlay.sceneID)}
+                    scene={overlayScene}
                     currentAudio={this.state.currentAudio}
                     opacity={overlay.opacity / 100}
-                    gridView={this.props.gridView}
+                    gridView={this.props.gridView ?? false}
                     isOverlay
                     isPlaying={this.state.isPlaying && !this.state.isEmpty}
                     hasStarted={this.state.hasStarted}
@@ -697,19 +694,17 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                     }
                     setHistoryOffset={this.nop}
                     setHistoryPaths={this.nop}
-                    finishedLoading={this.setOverlayLoaded.bind(this, index)}
+                    finishedLoading={() => this.setOverlayLoaded(index)}
                     firstImageLoaded={this.nop}
-                    setProgress={
-                      showProgress ? this.setProgress.bind(this) : this.nop
-                    }
+                    setProgress={showProgress ? this.setProgress : this.nop}
                     setVideo={
                       this.props.setVideo && !this.props.gridView
                         ? this.props.setVideo
-                        : this.setOverlayVideo.bind(this, index)
+                        : (video) => this.setOverlayVideo(index, video)
                     }
-                    setCount={this.props.setCount.bind(this)}
-                    cache={this.props.cache.bind(this)}
-                    systemMessage={this.props.systemMessage.bind(this)}
+                    setCount={this.props.setCount}
+                    cache={this.props.cache}
+                    systemMessage={this.props.systemMessage}
                   />
                 );
               } else if (overlayGrid && !this.props.gridView) {
@@ -722,18 +717,17 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                   changed = true;
                 }
                 if (advanceHacks[index + 1].length != gridSize) {
-                  advanceHacks[index + 1] = new Array<ChildCallbackHack>(
-                    gridSize,
-                  )
-                    .fill(null)
-                    .map(() => new ChildCallbackHack());
-                  setTimeout(
+                  advanceHacks[index + 1] = Array.from(
+                    { length: gridSize },
+                    () => new ChildCallbackHack(),
+                  );
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
                   );
                 } else if (changed) {
-                  setTimeout(
+                  window.setTimeout(
                     () =>
                       this.setState({ imagePlayerAdvanceHacks: advanceHacks }),
                     200,
@@ -762,22 +756,22 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
                       sceneGrids={this.props.sceneGrids}
                       theme={this.props.theme}
                       cache={this.props.cache}
-                      finishedLoading={this.setOverlayLoaded.bind(this, index)}
+                      finishedLoading={() => this.setOverlayLoaded(index)}
                       getTags={this.props.getTags}
                       goBack={this.props.goBack}
                       onGenerate={this.props.onGenerate}
                       setCount={this.props.setCount}
-                      setProgress={
-                        showProgress ? this.setProgress.bind(this) : undefined
+                      setProgress={showProgress ? this.setProgress : undefined}
+                      setVideo={(i, video) =>
+                        this.setGridOverlayVideo(index, i, video)
                       }
-                      setVideo={this.setGridOverlayVideo.bind(this, index)}
                       systemMessage={this.props.systemMessage}
                     />
                   </div>
                 );
               } else {
                 if (!this.state.areOverlaysLoaded[index]) {
-                  setTimeout(() => this.setOverlayLoaded(index), 200);
+                  window.setTimeout(() => this.setOverlayLoaded(index), 200);
                 }
                 return <div key={overlay.id} />;
               }
@@ -800,9 +794,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
               scene={this.props.scene}
               timeToNextFrame={this.state.timeToNextFrame}
               persist={this.state.persistText}
-              getTags={this.props.getTags.bind(this)}
-              goBack={this.props.goBack.bind(this)}
-              orderScriptTags={this.orderScriptTags.bind(this)}
+              getTags={this.props.getTags}
+              goBack={this.props.goBack}
+              orderScriptTags={this.orderScriptTags}
               playNextScene={this.props.nextScene}
               jumpToHack={this.props.captionProgramJumpToHack}
               getCurrentTimestamp={getCurrentTimestamp}
@@ -821,8 +815,9 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   }
 
   nextSceneLoop() {
-    if (this.props.scene.nextSceneID == 0) {
-      clearInterval(this._interval);
+    if (this.props.scene.nextSceneID == 0 && this._interval != null) {
+      window.clearInterval(this._interval);
+      this._interval = undefined;
     }
     if (
       !this.props.scene.scriptScene &&
@@ -832,8 +827,8 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
       Math.abs(Date.now() - this.state.startTime.getTime()) >=
         this.props.scene.nextSceneTime
     ) {
-      this.setState({ startTime: null });
-      this.props.nextScene();
+      this.setState({ startTime: undefined });
+      this.props.nextScene!();
     } else if (!this.state.isPlaying && this.state.startTime) {
       const startTime = this.state.startTime;
       startTime.setTime(startTime.getTime() + 1000);
@@ -841,7 +836,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: PlayerProps, state: PlayerState) {
     if (
       this.state.currentAudio &&
       state.currentAudio != this.state.currentAudio
@@ -876,11 +871,10 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     }
     if (this.props.scene.overlayEnabled != props.scene.overlayEnabled) {
       this.setState({
-        overlayVideos: new Array<Array<HTMLVideoElement>>(
-          this.props.scene.overlays.length,
-        )
-          .fill(null)
-          .map(() => [null as HTMLVideoElement]),
+        overlayVideos: Array.from(
+          { length: props.scene.overlays.length },
+          (): Array<HTMLVideoElement | undefined> => [undefined],
+        ),
       });
     } else if (this.props.scene.overlays != props.scene.overlays) {
       if (this.props.scene.overlays.length == props.scene.overlays.length) {
@@ -960,17 +954,19 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   }
 
   componentWillUnmount() {
-    clearInterval(this._interval);
-    this._interval = null;
+    if (this._interval != null) {
+      window.clearInterval(this._interval);
+      this._interval = undefined;
+    }
 
     window.ipc.clearBrowserCaches();
-    if (this.props.preventSleep || this._powerSaveID != null) {
+    if (this._powerSaveID != null) {
       window.ipc.stopPowerSaveBlocker(this._powerSaveID);
-      this._powerSaveID = null;
+      this._powerSaveID = undefined;
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(props: PlayerProps, state: PlayerState): boolean {
     return (
       this.props.scene !== props.scene ||
       this.props.tags !== props.tags ||
@@ -997,24 +993,24 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
     );
   }
 
-  nop() {}
+  nop = () => {};
 
-  _currentTimestamp: number = null;
-  onPlaying(position: number) {
+  onPlaying = (position: number) => {
     this._currentTimestamp = position;
-  }
-  getTimestamp() {
-    return this._currentTimestamp;
-  }
+  };
 
-  setCurrentAudio(audio: Audio) {
+  getTimestamp = () => {
+    return this._currentTimestamp;
+  };
+
+  setCurrentAudio = (audio: Audio) => {
     this.setState({ currentAudio: audio });
     if (this.props.changeAudioRoute) {
       this.props.changeAudioRoute(audio.id);
     }
-  }
+  };
 
-  setProgress(total: number, current: number, message: string[]) {
+  setProgress = (total: number, current: number, message: string[]) => {
     if (this.props.setProgress) {
       this.props.setProgress(total, current, message);
     }
@@ -1023,44 +1019,44 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
       progress: current,
       progressMessage: message,
     });
-  }
+  };
 
-  setMainCanStart() {
+  setMainCanStart = () => {
     if (!this.state.canStart) {
       this.setState({ canStart: true, isEmpty: false });
       this.start(true);
     }
-  }
+  };
 
-  setMainLoaded(empty: boolean) {
+  setMainLoaded = (empty: boolean) => {
     if (empty) {
       this.setState({ isEmpty: empty });
     } else {
       this.setState({ isMainLoaded: true });
       this.play();
     }
-  }
+  };
 
-  setOverlayLoaded(index: number) {
+  setOverlayLoaded = (index: number) => {
     const newAOL = this.state.areOverlaysLoaded;
     newAOL[index] = true;
     this.setState({ areOverlaysLoaded: newAOL });
     this.play();
-  }
+  };
 
-  setTimeToNextFrame(ttnf: number) {
+  setTimeToNextFrame = (ttnf: number) => {
     this._toggleStrobe = !this._toggleStrobe;
     this.setState({ timeToNextFrame: ttnf });
-  }
+  };
 
-  setMainVideo(video: HTMLVideoElement) {
+  setMainVideo = (video?: HTMLVideoElement) => {
     this.setState({ mainVideo: video });
-  }
+  };
 
   spliceOverlayVideo(index: number) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     newOV.splice(index, 1);
     this.setState({ overlayVideos: newOV });
@@ -1069,38 +1065,42 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
   clearOverlayVideo(index: number) {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
-    newOV[index] = [null];
+    newOV[index] = [undefined];
     this.setState({ overlayVideos: newOV });
   }
 
-  setOverlayVideo(index: number, video: HTMLVideoElement) {
+  setOverlayVideo = (index: number, video?: HTMLVideoElement) => {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= index) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     if (newOV[index][0] != video) {
       newOV[index][0] = video;
       this.setState({ overlayVideos: newOV });
     }
-  }
+  };
 
-  setGridOverlayVideo(oIndex: number, gIndex: number, video: HTMLVideoElement) {
+  setGridOverlayVideo = (
+    oIndex: number,
+    gIndex: number,
+    video?: HTMLVideoElement,
+  ) => {
     const newOV = Array.from(this.state.overlayVideos);
     while (newOV.length <= oIndex) {
-      newOV.push([null]);
+      newOV.push([undefined]);
     }
     while (newOV[oIndex].length <= gIndex) {
-      newOV[oIndex].push(null);
+      newOV[oIndex].push(undefined);
     }
     if (newOV[oIndex][gIndex] != video) {
       newOV[oIndex][gIndex] = video;
       this.setState({ overlayVideos: newOV });
     }
-  }
+  };
 
-  start(canStart: boolean, force = false) {
+  start = (canStart: boolean, force = false) => {
     const isLoaded =
       !force &&
       this.state.isMainLoaded &&
@@ -1121,7 +1121,7 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         hasStarted: this.props.hasStarted ?? true,
         startTime: this.state.startTime ? this.state.startTime : new Date(),
       });
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (this.props.scene.gridScene) {
           for (const r of this.state.imagePlayerAdvanceHacks) {
             for (const hack of r) {
@@ -1131,64 +1131,68 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         }
       }, 200);
     }
-  }
+  };
 
-  goBack() {
+  goBack = () => {
     if (this.state.recentPictureGrid) {
       this.setState({ recentPictureGrid: false });
     } else {
       this.props.goBack();
     }
-  }
+  };
 
-  play() {
+  play = () => {
     this.setState({ isPlaying: true });
     this.start(this.state.canStart);
-  }
+  };
 
-  pause() {
+  pause = () => {
     this.setState({ isPlaying: false });
-  }
+  };
 
-  historyBack() {
+  historyBack = () => {
     this.setState({
       isPlaying: false,
       historyOffset: this.state.historyOffset - 1,
     });
-  }
+  };
 
-  historyForward() {
+  historyForward = () => {
     this.setState({
       isPlaying: false,
       historyOffset: this.state.historyOffset + 1,
     });
-  }
+  };
 
-  setHistoryPaths(paths: Array<any>) {
+  setHistoryPaths = (paths: Array<any>) => {
     this.setState({ historyPaths: paths });
-  }
+  };
 
-  setHistoryOffset(offset: number) {
+  setHistoryOffset = (offset: number) => {
     this.setState({ historyOffset: offset });
-  }
+  };
 
-  getSceneGrid(id: string): SceneGrid {
+  getSceneGrid(id: string): SceneGrid | undefined {
     return this.props.sceneGrids.find((s) => s.id.toString() == id);
   }
 
-  getScene(id: number): Scene {
+  getScene(id: number): Scene | undefined {
     return this.props.scenes.find((s) => s.id == id);
   }
 
-  onActive() {
+  onActive = () => {
     this.setState({ hideCursor: false });
-  }
+  };
 
-  onIdle() {
+  onIdle = () => {
     this.setState({ hideCursor: true });
-  }
+  };
 
-  navigateTagging(offset: number) {
+  navigateTagging = (offset: number) => {
+    assertDefined(
+      this.props.navigateTagging,
+      "Player requires navigateTagging to be provided.",
+    );
     this.setState({
       canStart: false,
       hasStarted: false,
@@ -1204,9 +1208,13 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
           : [""],
     });
     this.props.navigateTagging(offset);
-  }
+  };
 
-  orderScriptTags(script: CaptionScript) {
+  orderScriptTags = (script: CaptionScript) => {
+    assertDefined(
+      this.props.allTags,
+      "Player requires allTags to be provided.",
+    );
     const tagNames = this.props.allTags.map((t: Tag) => t.name);
     // Re-order the tags of the audio we were playing
     script.tags = script.tags.sort((a: Tag, b: Tag) => {
@@ -1220,11 +1228,11 @@ export default class Player extends React.Component<PlayerProps, PlayerState> {
         return 0;
       }
     });
-  }
+  };
 
-  onRecentPictureGrid() {
+  onRecentPictureGrid = () => {
     this.setState({ recentPictureGrid: true });
-  }
+  };
 }
 
 (Player as any).displayName = "Player";

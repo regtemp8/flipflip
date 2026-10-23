@@ -37,7 +37,7 @@ const colors = [
 
 interface ThemeColorPickerProps {
   currentColor: string;
-  onChangeColor(colorTheme: any): void;
+  onChangeColor: (colorTheme: any) => void;
 }
 
 class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
@@ -77,7 +77,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
                 <StyledColorPickerButton
                   style={{ backgroundColor: c[500] }}
                   value={c[500]}
-                  onClick={this.onChangeColor.bind(this, c)}
+                  onClick={() => this.onChangeColor(c)}
                   size="small"
                 >
                   <div />
@@ -88,7 +88,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
               <StyledColorPickerButton
                 style={{ backgroundColor: color.common.white }}
                 value={color.common.white}
-                onClick={this.onChangeWhite.bind(this)}
+                onClick={this.onChangeWhite}
                 size="small"
               >
                 <div />
@@ -98,7 +98,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
               <StyledColorPickerButton
                 style={{ backgroundColor: color.common.black }}
                 value={color.common.black}
-                onClick={this.onChangeBlack.bind(this)}
+                onClick={this.onChangeBlack}
                 size="small"
               >
                 <div />
@@ -110,7 +110,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
     );
   }
 
-  onChangeBlack() {
+  onChangeBlack = () => {
     const black = color.common.black;
     const grey = color.grey;
     this.props.onChangeColor({
@@ -126,9 +126,9 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       900: grey[900],
       main: black,
     });
-  }
+  };
 
-  onChangeWhite() {
+  onChangeWhite = () => {
     const white = color.common.white;
     const grey = color.grey;
     this.props.onChangeColor({
@@ -144,9 +144,9 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       900: grey[50],
       main: white,
     });
-  }
+  };
 
-  onChangeColor(color: any) {
+  onChangeColor = (color: any) => {
     this.props.onChangeColor({
       50: color[50],
       100: color[100],
@@ -160,7 +160,7 @@ class ThemeColorPicker extends React.Component<ThemeColorPickerProps> {
       900: color[900],
       main: color[500],
     });
-  }
+  };
 }
 
 export default ThemeColorPicker;

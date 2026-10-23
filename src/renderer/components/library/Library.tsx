@@ -349,40 +349,40 @@ interface LibraryProps {
   filters: Array<string>;
   library: Array<LibrarySource>;
   progressCurrent: number;
-  progressMode: string;
-  progressTitle: string;
+  progressMode: string | null;
+  progressTitle: string | null;
   progressTotal: number;
   selected: Array<string>;
-  specialMode: string;
+  specialMode: string | null;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   yOffset: number;
-  goBack(): void;
-  onAddSource(scene: Scene, type: string, ...args: any[]): void;
-  onBatchClip(): void;
-  onBatchTag(): void;
-  onClearBlacklist(sourceURL: string): void;
-  onClip(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onDownload(source: LibrarySource): void;
-  onEditBlacklist(sourceURL: string, blacklist: string): void;
-  onExportLibrary(): void;
-  onImportFromLibrary(sources: Array<LibrarySource>): void;
-  onImportLibrary(importLibrary: any): void;
-  onImportTumblr(): void;
-  onManageTags(): void;
-  onMarkOffline(): void;
-  onPlay(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
-  onTutorial(tutorial: string): void;
-  onUpdateLibrary(fn: (library: Array<LibrarySource>) => void): void;
-  onUpdateMode(mode: string): void;
-  onUpdateVideoMetadata(): void;
-  savePosition(
+  goBack: () => void;
+  onAddSource: (scene: Scene | null, type: string, ...args: any[]) => void;
+  onBatchClip: () => void;
+  onBatchTag: () => void;
+  onClearBlacklist: (sourceURL: string) => void;
+  onClip: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  onDownload: (source: LibrarySource) => void;
+  onEditBlacklist: (sourceURL: string, blacklist: string) => void;
+  onExportLibrary: () => void;
+  onImportFromLibrary: (sources: Array<LibrarySource>) => void;
+  onImportLibrary: (importLibrary: any) => void;
+  onImportTumblr: () => void;
+  onManageTags: () => void;
+  onMarkOffline: () => void;
+  onPlay: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  onSort: (algorithm: string, ascending: boolean, scene?: Scene) => void;
+  onTutorial: (tutorial: string) => void;
+  onUpdateLibrary: (fn: (library: Array<LibrarySource>) => void) => void;
+  onUpdateMode: (mode: string) => void;
+  onUpdateVideoMetadata: () => void;
+  savePosition: (
     yOffset: number,
     filters: Array<string>,
     selected: Array<string>,
-  ): void;
-  systemMessage(message: string): void;
+  ) => void;
+  systemMessage: (message: string) => void;
 }
 
 interface LibraryState {
@@ -391,8 +391,8 @@ interface LibraryState {
   filters: Array<string>;
   selected: Array<string>;
   selectedTags: Array<string>;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
   moveDialog: boolean;
   importFile: string;
 }
@@ -407,12 +407,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       filters: props.filters,
       selected: props.selected,
       selectedTags: new Array<string>(),
-      menuAnchorEl: null as any,
-      openMenu: null as string,
       moveDialog: false,
       importFile: "",
     };
   }
+
+  onSort = (algorithm: string, ascending: boolean) => {
+    this.props.onSort(algorithm, ascending);
+  };
 
   render() {
     const classes = this.props.classes;
@@ -481,7 +483,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   color="inherit"
                   aria-label="Back"
                   className={classes.backButton}
-                  onClick={this.goBack.bind(this)}
+                  onClick={this.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -528,7 +530,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   placeholder="Search ..."
                   isCreatable
                   onlyUsed
-                  onUpdateFilters={this.onUpdateFilters.bind(this)}
+                  onUpdateFilters={this.onUpdateFilters}
                 />
               </div>
             </div>
@@ -565,7 +567,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               className={clsx(
                 this.props.tutorial == LT.sidebar1 && classes.highlight,
               )}
-              onClick={this.onToggleDrawer.bind(this)}
+              onClick={this.onToggleDrawer}
               size="large"
             >
               <MenuIcon className={classes.drawerIcon} />
@@ -579,7 +581,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Manage Tags"}
             >
-              <ListItem button onClick={this.props.onManageTags.bind(this)}>
+              <ListItem button onClick={this.props.onManageTags}>
                 <ListItemIcon>
                   <LocalOfferIcon />
                 </ListItemIcon>
@@ -599,7 +601,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Batch Tag"}
             >
-              <ListItem button onClick={this.onBatchTag.bind(this)}>
+              <ListItem button onClick={this.onBatchTag}>
                 <ListItemIcon>
                   <FormatListBulletedIcon />
                 </ListItemIcon>
@@ -610,7 +612,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Batch Clip"}
             >
-              <ListItem button onClick={this.onBatchClip.bind(this)}>
+              <ListItem button onClick={this.onBatchClip}>
                 <ListItemIcon>
                   <SvgIcon>
                     <path
@@ -633,7 +635,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title="Identify local sources which have identical tags"
             >
-              <ListItem button onClick={this.onFindMerges.bind(this)}>
+              <ListItem button onClick={this.onFindMerges}>
                 <ListItemIcon>
                   <MergeTypeIcon />
                 </ListItemIcon>
@@ -659,7 +661,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   <ListItem
                     button
                     disabled={this.props.progressMode != null}
-                    onClick={this.props.onImportTumblr.bind(this)}
+                    onClick={this.props.onImportTumblr}
                   >
                     <ListItemIcon>
                       <SourceIcon type={ST.tumblr} />
@@ -681,7 +683,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               <ListItem
                 button
                 disabled={this.props.progressMode != null}
-                onClick={this.props.onMarkOffline.bind(this)}
+                onClick={this.props.onMarkOffline}
               >
                 <ListItemIcon>
                   <OfflineBoltIcon />
@@ -696,7 +698,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               <ListItem
                 button
                 disabled={this.props.progressMode != null}
-                onClick={this.props.onUpdateVideoMetadata.bind(this)}
+                onClick={this.props.onUpdateVideoMetadata}
               >
                 <ListItemIcon>
                   <MovieFilterIcon />
@@ -717,7 +719,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 >
                   <ListItem
                     button
-                    onClick={this.props.onUpdateMode.bind(this, PR.cancel)}
+                    onClick={() => this.props.onUpdateMode(PR.cancel)}
                   >
                     <ListItemIcon>
                       <CancelIcon color="error" />
@@ -758,7 +760,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Export Library"}
             >
-              <ListItem button onClick={this.props.onExportLibrary.bind(this)}>
+              <ListItem button onClick={this.props.onExportLibrary}>
                 <ListItemIcon>
                   <PublishIcon />
                 </ListItemIcon>
@@ -769,7 +771,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disableInteractive
               title={this.state.drawerOpen ? "" : "Import Library"}
             >
-              <ListItem button onClick={this.onImportLibrary.bind(this)}>
+              <ListItem button onClick={this.onImportLibrary}>
                 <ListItemIcon>
                   <GetAppIcon />
                 </ListItemIcon>
@@ -794,6 +796,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               )}
             >
               <SourceList
+                tutorial={this.props.tutorial}
                 config={this.props.config}
                 isSelect={!!this.props.specialMode}
                 library={this.props.library}
@@ -803,15 +806,15 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 }
                 sources={this.state.displaySources}
                 yOffset={this.props.yOffset}
-                onClearBlacklist={this.props.onClearBlacklist.bind(this)}
-                onClip={this.props.onClip.bind(this)}
-                onDownload={this.props.onDownload.bind(this)}
-                onEditBlacklist={this.props.onEditBlacklist.bind(this)}
-                onPlay={this.props.onPlay.bind(this)}
-                onUpdateSelected={this.onUpdateSelected.bind(this)}
-                onUpdateLibrary={this.props.onUpdateLibrary.bind(this)}
-                savePosition={this.savePosition.bind(this)}
-                systemMessage={this.props.systemMessage.bind(this)}
+                onClearBlacklist={this.props.onClearBlacklist}
+                onClip={this.props.onClip}
+                onDownload={this.props.onDownload}
+                onEditBlacklist={this.props.onEditBlacklist}
+                onPlay={this.props.onPlay}
+                onUpdateSelected={this.onUpdateSelected}
+                onUpdateLibrary={this.props.onUpdateLibrary}
+                savePosition={this.savePosition}
+                systemMessage={this.props.systemMessage}
               />
             </Container>
           </div>
@@ -819,7 +822,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
         <Backdrop
           className={classes.backdrop}
-          onClick={this.onCloseDialog.bind(this)}
+          onClick={this.onCloseDialog}
           open={
             this.props.tutorial == null &&
             (this.state.openMenu == MO.new || this.state.drawerOpen)
@@ -831,7 +834,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             <Tooltip disableInteractive title="Clear" placement="top-end">
               <Fab
                 className={classes.selectNoneButton}
-                onClick={this.onSelectNone.bind(this)}
+                onClick={this.onSelectNone}
                 size="small"
               >
                 <ClearIcon className={classes.icon} />
@@ -840,7 +843,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             <Tooltip disableInteractive title="Select All" placement="top-end">
               <Fab
                 className={classes.selectAllButton}
-                onClick={this.onSelectAll.bind(this)}
+                onClick={this.onSelectAll}
                 size="medium"
               >
                 <SelectAllIcon className={classes.icon} />
@@ -871,10 +874,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   disabled={this.state.selected.length == 0}
                   onClick={
                     this.props.specialMode == SP.batchTag
-                      ? this.onToggleBatchTagModal.bind(this)
+                      ? this.onToggleBatchTagModal
                       : this.props.specialMode == SP.batchClip
-                        ? this.onToggleBatchClipModal.bind(this)
-                        : this.onImportFromLibrary.bind(this)
+                        ? this.onToggleBatchClipModal
+                        : this.onImportFromLibrary
                   }
                   size="large"
                 >
@@ -919,7 +922,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               >
                 <Fab
                   className={classes.removeAllButton}
-                  onClick={this.onRemoveAll.bind(this)}
+                  onClick={this.onRemoveAll}
                   size="small"
                 >
                   <DeleteSweepIcon className={classes.icon} />
@@ -928,7 +931,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             )}
             <Dialog
               open={this.state.openMenu == MO.libraryImport}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="import-title"
               aria-describedby="import-description"
             >
@@ -949,7 +952,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                       <InputAdornment position="end">
                         <Tooltip disableInteractive title="Open File">
                           <IconButton
-                            onClick={this.onOpenImportFile.bind(this)}
+                            onClick={this.onOpenImportFile}
                             size="large"
                           >
                             <FolderIcon />
@@ -958,18 +961,15 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                       </InputAdornment>
                     ),
                   }}
-                  onChange={this.onChangeImportFile.bind(this)}
+                  onChange={this.onChangeImportFile}
                 />
               </DialogContent>
               <DialogActions>
-                <Button onClick={this.onCloseDialog.bind(this)}>Cancel</Button>
+                <Button onClick={this.onCloseDialog}>Cancel</Button>
                 <Button
                   color="primary"
                   disabled={this.state.importFile.length == 0}
-                  onClick={this.onFinishImportLibrary.bind(
-                    this,
-                    this.state.importFile,
-                  )}
+                  onClick={this.onFinishImportLibrary}
                 >
                   Import
                 </Button>
@@ -977,7 +977,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             </Dialog>
             <Dialog
               open={this.state.openMenu == MO.removeAllAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="remove-all-title"
               aria-describedby="remove-all-description"
             >
@@ -993,16 +993,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button
-                      onClick={this.onFinishRemoveAll.bind(this)}
-                      color="primary"
-                    >
+                    <Button onClick={this.onFinishRemoveAll} color="primary">
                       Yea... I'm sure
                     </Button>
                   </DialogActions>
@@ -1020,14 +1014,11 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                     <Button
-                      onClick={this.onFinishRemoveVisible.bind(this)}
+                      onClick={this.onFinishRemoveVisible}
                       color="primary"
                     >
                       Confirm
@@ -1038,7 +1029,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             </Dialog>
             <Dialog
               open={this.state.openMenu == MO.deleteAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="delete-all-title"
               aria-describedby="delete-all-description"
             >
@@ -1057,16 +1048,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button
-                      onClick={this.onFinishDeleteAll.bind(this)}
-                      color="primary"
-                    >
+                    <Button onClick={this.onFinishDeleteAll} color="primary">
                       PERMANENTLY DELETE FROM DISK
                     </Button>
                   </DialogActions>
@@ -1087,14 +1072,11 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                     <Button
-                      onClick={this.onFinishDeleteVisible.bind(this)}
+                      onClick={this.onFinishDeleteVisible}
                       color="primary"
                     >
                       PERMANENTLY DELETE FROM DISK
@@ -1118,7 +1100,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     this.state.filters.length > 0 && classes.hidden,
                   )}
                   disabled={this.state.filters.length > 0}
-                  onClick={this.openPiwigoDialog.bind(this)}
+                  onClick={this.openPiwigoDialog}
                   size="small"
                 >
                   <SourceIcon className={classes.icon} type={ST.piwigo} />
@@ -1142,7 +1124,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                     this.state.filters.length > 0 && classes.hidden,
                   )}
                   disabled={this.state.filters.length > 0}
-                  onClick={this.openHydrusDialog.bind(this)}
+                  onClick={this.openHydrusDialog}
                   size="small"
                 >
                   <SourceIcon className={classes.icon} type={ST.hydrus} />
@@ -1165,7 +1147,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   this.state.filters.length > 0 && classes.hidden,
                 )}
                 disabled={this.state.filters.length > 0}
-                onClick={this.onAddSource.bind(this, AF.videos)}
+                onClick={(e) => this.onAddSource(AF.videos, e)}
                 size="small"
               >
                 <MovieIcon className={classes.icon} />
@@ -1185,7 +1167,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   this.state.filters.length > 0 && classes.hidden,
                 )}
                 disabled={this.state.filters.length > 0}
-                onClick={this.onAddSource.bind(this, AF.directory)}
+                onClick={(e) => this.onAddSource(AF.directory, e)}
                 size="small"
               >
                 <FolderIcon className={classes.icon} />
@@ -1205,7 +1187,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                   this.state.filters.length > 0 && classes.hidden,
                 )}
                 disabled={this.state.filters.length > 0}
-                onClick={this.onAddSource.bind(this, AF.url)}
+                onClick={(e) => this.onAddSource(AF.url, e)}
                 size="small"
               >
                 <HttpIcon className={classes.icon} />
@@ -1217,7 +1199,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 this.state.openMenu == MO.new && classes.backdropTop,
               )}
               disabled={this.state.filters.length > 0}
-              onClick={this.onToggleNewMenu.bind(this)}
+              onClick={this.onToggleNewMenu}
               size="large"
             >
               <AddIcon className={classes.icon} />
@@ -1228,15 +1210,15 @@ class Library extends React.Component<LibraryProps, LibraryState> {
         <PiwigoDialog
           config={this.props.config}
           open={this.state.openMenu == MO.piwigo}
-          onClose={this.onCloseDialog.bind(this)}
-          onImportURL={this.onAddSource.bind(this)}
+          onClose={this.onCloseDialog}
+          onImportURL={this.addSource}
         />
         <HydrusDialog
           config={this.props.config}
           tags={this.props.tags}
           open={this.state.openMenu == MO.hydrus}
-          onClose={this.onCloseDialog.bind(this)}
-          onImportURL={this.onAddSource.bind(this)}
+          onClose={this.onCloseDialog}
+          onImportURL={this.addSource}
         />
 
         <Fab
@@ -1245,7 +1227,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           aria-haspopup="true"
           aria-controls="sort-menu"
           aria-label="Sort Sources"
-          onClick={this.onOpenSortMenu.bind(this)}
+          onClick={this.onOpenSortMenu}
           size="medium"
         >
           <SortIcon className={classes.icon} />
@@ -1265,7 +1247,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           keepMounted
           classes={{ paper: classes.sortMenu }}
           open={this.state.openMenu == MO.sort}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
         >
           {Object.values(SF)
             .filter((sf) => sf != SF.random)
@@ -1275,14 +1257,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 <ListItemSecondaryAction>
                   <IconButton
                     edge="end"
-                    onClick={this.props.onSort.bind(this, null, sf, true)}
+                    onClick={() => this.onSort(sf, true)}
                     size="large"
                   >
                     <ArrowUpwardIcon />
                   </IconButton>
                   <IconButton
                     edge="end"
-                    onClick={this.props.onSort.bind(this, null, sf, false)}
+                    onClick={() => this.onSort(sf, false)}
                     size="large"
                   >
                     <ArrowDownwardIcon />
@@ -1295,7 +1277,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             <ListItemSecondaryAction>
               <IconButton
                 edge="end"
-                onClick={this.props.onSort.bind(this, null, SF.random, true)}
+                onClick={() => this.onSort(SF.random, true)}
                 size="large"
               >
                 <ShuffleIcon />
@@ -1306,18 +1288,18 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
         <GooninatorDialog
           open={this.state.openMenu == MO.gooninatorImport}
-          onImportURL={this.onAddSource.bind(this)}
-          onClose={this.onCloseDialog.bind(this)}
+          onImportURL={this.addSource}
+          onClose={this.onCloseDialog}
         />
         <URLDialog
           open={this.state.openMenu == MO.urlImport}
-          onImportURL={this.onAddSource.bind(this)}
-          onClose={this.onCloseDialog.bind(this)}
+          onImportURL={this.addSource}
+          onClose={this.onCloseDialog}
         />
         <Dialog
           classes={{ paper: classes.noScroll }}
           open={this.state.openMenu == MO.batchTag}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="batch-tag-title"
           aria-describedby="batch-tag-description"
         >
@@ -1336,7 +1318,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
                 onlyTags
                 showCheckboxes
                 hideSelectedOptions={false}
-                onUpdateFilters={this.onSelectTags.bind(this)}
+                onUpdateFilters={this.onSelectTags}
               />
             )}
           </DialogContent>
@@ -1345,7 +1327,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disabled={
                 this.state.selectedTags && this.state.selectedTags.length == 0
               }
-              onClick={this.batchTagRemove.bind(this)}
+              onClick={this.batchTagRemove}
               color="secondary"
             >
               - Remove
@@ -1354,12 +1336,12 @@ class Library extends React.Component<LibraryProps, LibraryState> {
               disabled={
                 this.state.selectedTags && this.state.selectedTags.length == 0
               }
-              onClick={this.batchTagAdd.bind(this)}
+              onClick={this.batchTagAdd}
               color="secondary"
             >
               + Add
             </Button>
-            <Button onClick={this.batchTagOverwrite.bind(this)} color="primary">
+            <Button onClick={this.batchTagOverwrite} color="primary">
               Overwrite
             </Button>
           </DialogActions>
@@ -1368,12 +1350,12 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           open={this.state.openMenu == MO.batchClip}
           library={this.props.library}
           selected={this.state.selected}
-          onCloseDialog={this.onCloseDialog.bind(this)}
-          onUpdateLibrary={this.props.onUpdateLibrary.bind(this)}
+          onCloseDialog={this.onCloseDialog}
+          onUpdateLibrary={this.props.onUpdateLibrary}
         />
         <Dialog
           open={this.state.moveDialog}
-          onClose={this.onCloseMoveDialog.bind(this)}
+          onClose={this.onCloseMoveDialog}
           aria-describedby="move-description"
         >
           <DialogTitle id="move-title">Localize Offline Sources</DialogTitle>
@@ -1385,13 +1367,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={this.onCloseMoveDialog.bind(this)}
-              color="secondary"
-            >
+            <Button onClick={this.onCloseMoveDialog} color="secondary">
               Cancel
             </Button>
-            <Button onClick={this.onFinishMove.bind(this)} color="primary">
+            <Button onClick={this.onFinishMove} color="primary">
               Confirm
             </Button>
           </DialogActions>
@@ -1405,7 +1384,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     window.addEventListener("keydown", this.onKeyDown, false);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: LibraryProps, state: LibraryState) {
     if (
       state.filters != this.state.filters ||
       props.library != this.props.library ||
@@ -1435,7 +1414,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       this.setState({
         openMenu:
           this.state.openMenu == MO.gooninatorImport
-            ? null
+            ? undefined
             : MO.gooninatorImport,
       });
     } else if (
@@ -1475,15 +1454,15 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.setState({ moveDialog: true });
   }
 
-  openPiwigoDialog() {
+  openPiwigoDialog = () => {
     this.setState({ openMenu: MO.piwigo });
-  }
+  };
 
-  openHydrusDialog() {
+  openHydrusDialog = () => {
     this.setState({ openMenu: MO.hydrus });
-  }
+  };
 
-  onFinishMove() {
+  onFinishMove = () => {
     for (let source of this.props.library) {
       if (source.offline) {
         window.ipc
@@ -1516,25 +1495,25 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     }
     this.onCloseMoveDialog();
-  }
+  };
 
-  onCloseMoveDialog() {
+  onCloseMoveDialog = () => {
     this.setState({ moveDialog: false });
-  }
+  };
 
-  onBatchClip() {
+  onBatchClip = () => {
     this.onCloseDialog();
     this.props.onBatchClip();
-  }
+  };
 
-  onBatchTag() {
+  onBatchTag = () => {
     this.onCloseDialog();
     this.props.onBatchTag();
-  }
+  };
 
-  onFindMerges() {
+  onFindMerges = () => {
     this.onUpdateFilters(["<Mergeable>"]);
-  }
+  };
 
   getMerges() {
     let merges: Array<LibrarySource> = [];
@@ -1579,7 +1558,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     return merges;
   }
 
-  goBack() {
+  goBack = () => {
     if (this.props.specialMode == SP.batchTag) {
       this.setState({ selected: [], selectedTags: [] });
       this.props.onBatchTag();
@@ -1589,89 +1568,99 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     } else {
       this.props.goBack();
     }
-  }
+  };
 
-  onUpdateFilters(filters: Array<string>) {
+  onUpdateFilters = (filters: Array<string>) => {
     this.setState({
       filters: filters,
       displaySources: this.getDisplaySources(),
     });
-  }
+  };
 
-  onAddSource(addFunction: string, e: MouseEvent, ...args: any[]) {
+  onAddSource = (
+    addFunction: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+    ...args: any[]
+  ) => {
+    this.addSource(addFunction, e.shiftKey, args);
+  };
+
+  addSource = (addFunction: string, shiftKey: boolean, ...args: any[]) => {
     this.onCloseDialog();
-    if (addFunction == AF.videos && e.shiftKey) {
+    if (addFunction == AF.videos && shiftKey) {
       this.props.onAddSource(null, AF.videoDir, ...args);
-    } else if (addFunction == AF.url && e.shiftKey) {
+    } else if (addFunction == AF.url && shiftKey) {
       this.setState({ openMenu: MO.urlImport });
     } else {
       this.props.onAddSource(null, addFunction, ...args);
     }
-  }
+  };
 
-  onToggleBatchClipModal() {
+  onToggleBatchClipModal = () => {
     if (this.state.openMenu == MO.batchClip) {
-      this.setState({ openMenu: null });
+      this.setState({ openMenu: undefined });
     } else {
       this.setState({ openMenu: MO.batchClip });
     }
-  }
+  };
 
-  onToggleBatchTagModal() {
+  onToggleBatchTagModal = () => {
     if (this.state.openMenu == MO.batchTag) {
-      this.setState({ openMenu: null, selectedTags: [] });
+      this.setState({ openMenu: undefined, selectedTags: [] });
     } else {
       this.setState({
         openMenu: MO.batchTag,
         selectedTags: this.getSelectedTags(),
       });
     }
-  }
+  };
 
-  onSelectTags(selectedTags: Array<string>) {
+  onSelectTags = (selectedTags: Array<string>) => {
     this.setState({ selectedTags: selectedTags });
-  }
+  };
 
-  onToggleDrawer() {
+  onToggleDrawer = () => {
     if (this.props.tutorial == LT.sidebar1) {
       this.props.onTutorial(LT.sidebar1);
     }
     this.setState({ drawerOpen: !this.state.drawerOpen });
-  }
+  };
 
-  onToggleNewMenu() {
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
-  }
-
-  onOpenSortMenu(e: MouseEvent) {
-    this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
-  }
-
-  onCloseDialog() {
+  onToggleNewMenu = () => {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
+  };
+
+  onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
+  };
+
+  onCloseDialog = () => {
+    this.setState({
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       drawerOpen: false,
       importFile: "",
     });
-  }
+  };
 
-  onRemoveAll(e: MouseEvent) {
+  onRemoveAll = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey && e.altKey && e.ctrlKey) {
       this.setState({ openMenu: MO.deleteAlert });
     } else {
       this.setState({ openMenu: MO.removeAllAlert });
     }
-  }
+  };
 
-  onFinishRemoveAll() {
+  onFinishRemoveAll = () => {
     this.props.onUpdateLibrary((l) => {
       l.splice(0, l.length);
     });
     this.onCloseDialog();
-  }
+  };
 
-  onFinishRemoveVisible() {
+  onFinishRemoveVisible = () => {
     this.props.onUpdateLibrary((l) => {
       const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
@@ -1682,9 +1671,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
     this.onCloseDialog();
     this.setState({ filters: [] });
-  }
+  };
 
-  onFinishDeleteAll() {
+  onFinishDeleteAll = () => {
     const sourceURLs = this.props.library.map((l) => l.url);
     window.ipc.deleteAllLibrarySources(sourceURLs).then(() => {
       this.props.onUpdateLibrary((l) => {
@@ -1692,9 +1681,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       });
       this.onCloseDialog();
     });
-  }
+  };
 
-  onFinishDeleteVisible() {
+  onFinishDeleteVisible = () => {
     this.props.onUpdateLibrary(async (l) => {
       const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
@@ -1707,26 +1696,26 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     });
     this.onCloseDialog();
     this.setState({ filters: [] });
-  }
+  };
 
-  onOpenImportFile() {
+  onOpenImportFile = () => {
     window.ipc.openImport().then((importFile) => {
       if (importFile != null) {
         this.setState({ importFile });
       }
     });
-  }
+  };
 
-  onChangeImportFile(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ importFile: input.value });
-  }
+  };
 
-  onImportLibrary() {
+  onImportLibrary = () => {
     this.setState({ openMenu: MO.libraryImport });
-  }
+  };
 
-  onFinishImportLibrary() {
+  onFinishImportLibrary = () => {
     if (this.state.importFile.startsWith("http")) {
       window.ipc.getTextFromURL(this.state.importFile).then((text) => {
         if (text == null) {
@@ -1738,7 +1727,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
           const json = JSON.parse(text);
           this.props.onImportLibrary(json);
           this.onCloseDialog();
-        } catch (e) {
+        } catch {
           this.props.systemMessage("This is not a valid JSON file");
         }
       });
@@ -1748,9 +1737,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
         this.onCloseDialog();
       });
     }
-  }
+  };
 
-  onImportFromLibrary() {
+  onImportFromLibrary = () => {
     const selected = this.state.selected;
     const sources = new Array<LibrarySource>();
     for (let url of selected) {
@@ -1760,13 +1749,13 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     }
     this.props.onImportFromLibrary(sources);
-  }
+  };
 
-  onUpdateSelected(selected: Array<string>) {
+  onUpdateSelected = (selected: Array<string>) => {
     this.setState({ selected: selected });
-  }
+  };
 
-  onSelectAll() {
+  onSelectAll = () => {
     const displaySources = this.state.displaySources;
     const newSelected = Array.from(this.state.selected);
     for (let source of displaySources.map((s) => s.url)) {
@@ -1775,9 +1764,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     }
     this.setState({ selected: newSelected });
-  }
+  };
 
-  onSelectNone() {
+  onSelectNone = () => {
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
     for (let source of displaySources.map((s) => s.url)) {
@@ -1786,9 +1775,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     }
     this.setState({ selected: newSelected });
-  }
+  };
 
-  savePosition() {
+  savePosition = () => {
     const sortableList = document.getElementById("sortable-list");
     if (sortableList) {
       const scrollElement = sortableList.firstElementChild;
@@ -1799,7 +1788,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
         this.state.selected,
       );
     }
-  }
+  };
 
   toggleMarked(taggingMode?: boolean) {
     if (taggingMode == null) {
@@ -1810,7 +1799,10 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
         for (let source of this.state.displaySources) {
-          l.find((s) => s.id == source.id).marked = true;
+          const librarySource = l.find((s) => s.id == source.id);
+          if (librarySource != null) {
+            librarySource.marked = true;
+          }
         }
       });
     } else {
@@ -1831,35 +1823,22 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     this.toggleMarked(false);
   }
 
-  batchTagOverwrite() {
+  batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
         source.tags = new Array<Tag>();
         for (let tag of this.state.selectedTags) {
-          source.tags.push(
-            new Tag({
-              name: tag,
-              id: this.props.tags.find((t) => t.name == tag).id,
-            }),
-          );
-        }
-      }
-    });
-    this.onCloseDialog();
-  }
-
-  batchTagAdd() {
-    this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
-        const sourceTags = new Set(source.tags.map((t) => t.name));
-        for (let tag of this.state.selectedTags) {
-          if (!sourceTags.has(tag)) {
+          const tagID = this.props.tags.find((t) => t.name == tag)?.id;
+          if (tagID != null) {
             source.tags.push(
               new Tag({
                 name: tag,
-                id: this.props.tags.find((t) => t.name == tag).id,
+                id: tagID,
               }),
             );
           }
@@ -1867,12 +1846,43 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     });
     this.onCloseDialog();
-  }
+  };
 
-  batchTagRemove() {
+  batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
+        const sourceTags = new Set(source.tags.map((t) => t.name));
+        for (let tag of this.state.selectedTags) {
+          if (!sourceTags.has(tag)) {
+            const tagID = this.props.tags.find((t) => t.name == tag)?.id;
+            if (tagID != null) {
+              source.tags.push(
+                new Tag({
+                  name: tag,
+                  id: tagID,
+                }),
+              );
+            }
+          }
+        }
+      }
+    });
+    this.onCloseDialog();
+  };
+
+  batchTagRemove = () => {
+    this.props.onUpdateLibrary((l) => {
+      for (let sourceURL of this.state.selected) {
+        const source = l.find((s) => s.url === sourceURL);
+        if (source == null) {
+          continue;
+        }
+
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
           if (sourceTags.includes(tag)) {
@@ -1884,13 +1894,17 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
     });
     this.onCloseDialog();
-  }
+  };
 
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL);
+      if (source == null) {
+        continue;
+      }
+
       const tags = source.tags;
       if (commonTags.length == 0) {
         commonTags = tags;
@@ -1915,11 +1929,11 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     if (filtering) {
       const mergeSources = this.state.filters.includes("<Mergeable>")
         ? this.getMerges()
-        : null;
+        : undefined;
       for (let source of mergeSources ? mergeSources : this.props.library) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {
-          matchesFilter = filterSource(filter, source, null, mergeSources);
+          matchesFilter = filterSource(filter, source, undefined, mergeSources);
           if (!matchesFilter) break;
         }
         if (matchesFilter) {
@@ -1939,4 +1953,4 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 }
 
 (Library as any).displayName = "Library";
-export default withStyles(styles)(Library as any);
+export default withStyles(styles)(Library);

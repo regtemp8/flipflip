@@ -47,19 +47,19 @@ interface TextCardProps {
   classes: any;
   scene: Scene;
   sidebar?: boolean;
-  onAddScript(playlistIndex: number): void;
-  onPlay(
+  onAddScript?: (playlistIndex: number) => void;
+  onPlay?: (
     source: CaptionScript,
     sceneID: number,
     displayed: Array<CaptionScript>,
-  ): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
-  systemMessage(message: string): void;
+  ) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  systemMessage?: (message: string) => void;
 }
 
 interface TextCardState {
   sourceOptionsPlaylist: number;
-  sourceOptions: CaptionScript;
+  sourceOptions?: CaptionScript;
 }
 
 class TextCard extends React.Component<TextCardProps, TextCardState> {
@@ -68,7 +68,6 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
 
     this.state = {
       sourceOptionsPlaylist: -1,
-      sourceOptions: null as CaptionScript,
     };
   }
 
@@ -85,7 +84,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                   control={
                     <Switch
                       checked={this.props.scene.textEnabled}
-                      onChange={this.onBoolInput.bind(this, "textEnabled")}
+                      onChange={(e) => this.onBoolInput("textEnabled", e)}
                     />
                   }
                   label="Text Overlays"
@@ -110,7 +109,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                 control={
                   <Switch
                     checked={this.props.scene.textEnabled}
-                    onChange={this.onBoolInput.bind(this, "textEnabled")}
+                    onChange={(e) => this.onBoolInput("textEnabled", e)}
                   />
                 }
                 label="Text Overlays"
@@ -121,7 +120,7 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                 <Tooltip disableInteractive title="Add Playlist">
                   <Fab
                     className={classes.addButton}
-                    onClick={this.onAddPlaylist.bind(this)}
+                    onClick={this.onAddPlaylist}
                     size="small"
                   >
                     <AddIcon />
@@ -142,8 +141,8 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
                     scene={this.props.scene}
                     onAddScript={this.props.onAddScript}
                     onPlay={this.props.onPlay}
-                    onSourceOptions={this.onSourceOptions.bind(this)}
-                    onUpdateScene={this.props.onUpdateScene.bind(this)}
+                    onSourceOptions={this.onSourceOptions}
+                    onUpdateScene={this.props.onUpdateScene}
                     systemMessage={this.props.systemMessage}
                   />
                 </CardContent>
@@ -154,50 +153,55 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
         {this.state.sourceOptions != null && (
           <ScriptOptions
             script={this.state.sourceOptions}
-            onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onCancel={this.onCloseSourceOptions}
+            onFinishEdit={this.onFinishSourceOptions}
           />
         )}
       </Grid>
     );
   }
 
-  onFinishSourceOptions(newScript: CaptionScript) {
+  onFinishSourceOptions = (newScript: CaptionScript) => {
+    const { sourceOptions, sourceOptionsPlaylist } = this.state;
     this.props.onUpdateScene(this.props.scene, (s) => {
-      const playlist = s.scriptPlaylists[this.state.sourceOptionsPlaylist];
-      let editSource = playlist.scripts.find(
-        (s) => s.id == this.state.sourceOptions.id,
+      const playlist = s.scriptPlaylists[sourceOptionsPlaylist];
+      const editSource = playlist.scripts.find(
+        (s) => s.id == sourceOptions!.id,
       );
+      if (editSource == null) {
+        return;
+      }
+
       Object.assign(editSource, newScript);
     });
     this.onCloseSourceOptions();
-  }
+  };
 
-  onCloseSourceOptions() {
-    this.setState({ sourceOptions: null, sourceOptionsPlaylist: -1 });
-  }
+  onCloseSourceOptions = () => {
+    this.setState({ sourceOptions: undefined, sourceOptionsPlaylist: -1 });
+  };
 
-  onSourceOptions(playlistIndex: number, script: CaptionScript) {
+  onSourceOptions = (playlistIndex: number, script: CaptionScript) => {
     this.setState({
       sourceOptions: script,
       sourceOptionsPlaylist: playlistIndex,
     });
-  }
+  };
 
-  onAddPlaylist() {
+  onAddPlaylist = () => {
     this.changeKey(
       "scriptPlaylists",
       this.props.scene.scriptPlaylists.concat([
         { scripts: [], shuffle: false, repeat: RP.all },
       ]),
     );
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -209,4 +213,4 @@ class TextCard extends React.Component<TextCardProps, TextCardState> {
 }
 
 (TextCard as any).displayName = "TextCard";
-export default withStyles(styles)(TextCard as any);
+export default withStyles(styles)(TextCard);

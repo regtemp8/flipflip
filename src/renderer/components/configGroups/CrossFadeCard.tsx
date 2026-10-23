@@ -10,6 +10,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Switch,
   TextField,
@@ -20,11 +21,9 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, SDT, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
-import Audio from "../../../common/Audio";
 import { styled } from "@mui/material/styles";
+import { SceneBase } from "../../../common/SceneBase";
 
 const FullWidthCollapse = styled(Collapse)(() => ({
   width: "100%",
@@ -33,29 +32,45 @@ const FullWidthFormControl = styled(FormControl)(() => ({
   width: "100%",
 }));
 
-interface CrossFadeCardProps {
-  scene: Scene | SceneSettings;
+interface CrossFadeCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
   sidebar?: boolean;
   tutorial?: string;
-  onUpdateScene(
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
-class CrossFadeCard extends React.Component<CrossFadeCardProps> {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface CrossFadeCardState {
+  fadeSinRate: number;
+}
 
-  constructor(props: CrossFadeCardProps) {
+class CrossFadeCard<T extends SceneBase> extends React.Component<
+  CrossFadeCardProps<T>,
+  CrossFadeCardState
+> {
+  constructor(props: CrossFadeCardProps<T>) {
     super(props);
+
+    this.state = {
+      fadeSinRate:
+        typeof this.props.scene.fadeSinRate === "number"
+          ? this.props.scene.fadeSinRate
+          : 0,
+    };
+  }
+
+  componentDidUpdate(props: CrossFadeCardProps<T>) {
+    if (props.scene.fadeSinRate != this.props.scene.fadeSinRate) {
+      this.setState({
+        fadeSinRate:
+          typeof this.props.scene.fadeSinRate === "number"
+            ? this.props.scene.fadeSinRate
+            : 0,
+      });
+    }
   }
 
   render() {
-    const fadeSinRate =
-      typeof this.props.scene.fadeSinRate === "number"
-        ? this.props.scene.fadeSinRate
-        : 0;
     const fadeBPMMulti =
       typeof this.props.scene.fadeBPMMulti === "number"
         ? this.props.scene.fadeBPMMulti
@@ -73,11 +88,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
         ? this.props.scene.fadeDurationMax
         : 0;
 
-    const playlists = this.props.scene.audioPlaylists as {
-      audios: Audio[];
-      shuffle: boolean;
-      repeat: string;
-    }[];
+    const playlists = this.props.scene.audioPlaylists;
     const hasBPM =
       !!playlists &&
       playlists.length &&
@@ -111,7 +122,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                 control={
                   <Switch
                     checked={this.props.scene.crossFade}
-                    onChange={this.onBoolInput.bind(this, "crossFade")}
+                    onChange={(e) => this.onBoolInput("crossFade", e)}
                   />
                 }
                 label="Cross-Fade"
@@ -127,7 +138,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     <Switch
                       checked={this.props.scene.crossFadeAudio}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "crossFadeAudio")}
+                      onChange={(e) => this.onBoolInput("crossFadeAudio", e)}
                     />
                   }
                   label="Cross-Fade Audio"
@@ -168,7 +179,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                   <Select
                     variant="standard"
                     value={this.props.scene.fadeTF}
-                    onChange={this.onInput.bind(this, "fadeTF")}
+                    onChange={(e) => this.onInput("fadeTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf === TF.bpm) {
@@ -208,13 +219,13 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={fadeSinRate}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeSinRate",
-                        )}
+                        max={100}
+                        value={this.state.fadeSinRate}
+                        onChange={this.onFadeSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="fade-sin-rate-slider"
                       />
@@ -226,9 +237,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     >
                       <TextField
                         variant="standard"
-                        value={fadeSinRate}
-                        onChange={this.onIntInput.bind(this, "fadeSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "fadeSinRate")}
+                        value={this.state.fadeSinRate}
+                        onChange={(e) => this.onIntInput("fadeSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("fadeSinRate", e)}
                         InputProps={{
                           sx: {
                             pl: 1,
@@ -258,10 +269,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     min={1}
                     max={100}
                     defaultValue={fadeBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "fadeBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("fadeBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fade-bpm-multi-slider"
@@ -273,8 +283,8 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                     label="For"
                     margin="dense"
                     value={fadeDuration}
-                    onChange={this.onIntInput.bind(this, "fadeDuration")}
-                    onBlur={this.blurIntKey.bind(this, "fadeDuration")}
+                    onChange={(e) => this.onIntInput("fadeDuration", e)}
+                    onBlur={(e) => this.blurIntKey("fadeDuration", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -312,8 +322,8 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                   label="Between"
                   margin="dense"
                   value={fadeDurationMin}
-                  onChange={this.onIntInput.bind(this, "fadeDurationMin")}
-                  onBlur={this.blurIntKey.bind(this, "fadeDurationMin")}
+                  onChange={(e) => this.onIntInput("fadeDurationMin", e)}
+                  onBlur={(e) => this.blurIntKey("fadeDurationMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -332,8 +342,8 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                   label="and"
                   margin="dense"
                   value={fadeDurationMax}
-                  onChange={this.onIntInput.bind(this, "fadeDurationMax")}
-                  onBlur={this.blurIntKey.bind(this, "fadeDurationMax")}
+                  onChange={(e) => this.onIntInput("fadeDurationMax", e)}
+                  onBlur={(e) => this.blurIntKey("fadeDurationMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -371,7 +381,7 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                       <Select
                         variant="standard"
                         value={this.props.scene.fadeEase}
-                        onChange={this.onInput.bind(this, "fadeEase")}
+                        onChange={(e) => this.onInput("fadeEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -400,10 +410,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="exp-slider"
@@ -427,10 +436,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="ov-slider"
@@ -456,10 +464,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.fadeAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="amp-slider"
@@ -485,10 +492,9 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.fadePer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadePer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadePer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="per-slider"
@@ -504,55 +510,59 @@ class CrossFadeCard extends React.Component<CrossFadeCardProps> {
     );
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    let value = (e.currentTarget as any).value;
-    if (min && (this.props.scene as any)[key] < min) {
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    let value = e.currentTarget.value;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       value = max;
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update fadeSinRate slider
     if (key == "fadeSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ fadeSinRate: Number(value) });
     }
-  }
+  };
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onFadeSinRateChange = (
+    event: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
+    this.setState({ fadeSinRate: value as number });
+  };
+
+  onSliderChange = (
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);

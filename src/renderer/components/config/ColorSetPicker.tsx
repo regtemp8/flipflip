@@ -19,13 +19,13 @@ const StyledColorPickerButton = styled(Fab)(({ theme }) => ({
 interface ColorSetPickerProps {
   currentColors: Array<string>;
   sidebar?: boolean;
-  onChangeColors(e: any): void;
+  onChangeColors: (colors: string[]) => void;
 }
 
 interface ColorSetPickerState {
-  pickerIndex: number;
-  pickerColor: string;
-  pickerAnchorEl: any;
+  pickerIndex?: number;
+  pickerColor?: string;
+  pickerAnchorEl?: any;
 }
 
 class ColorSetPicker extends React.Component<
@@ -35,11 +35,7 @@ class ColorSetPicker extends React.Component<
   constructor(props: ColorSetPickerProps) {
     super(props);
 
-    this.state = {
-      pickerIndex: null as number,
-      pickerColor: null as string,
-      pickerAnchorEl: null as any,
-    };
+    this.state = {};
   }
 
   render() {
@@ -59,7 +55,7 @@ class ColorSetPicker extends React.Component<
                   ? {}
                   : { backgroundColor: this.state.pickerColor }
               }
-              onClick={this.onOpenColorPicker.bind(this)}
+              onClick={this.onOpenColorPicker}
               size="medium"
             >
               {this.state.pickerIndex == null && <AddIcon />}
@@ -80,7 +76,7 @@ class ColorSetPicker extends React.Component<
             anchorEl={this.state.pickerAnchorEl}
             keepMounted
             open={!!this.state.pickerColor}
-            onClose={this.onCloseColorPicker.bind(this)}
+            onClose={this.onCloseColorPicker}
           >
             <SketchPicker
               color={
@@ -88,7 +84,7 @@ class ColorSetPicker extends React.Component<
               }
               disableAlpha={false}
               presetColors={[]}
-              onChange={this.onChangeColor.bind(this)}
+              onChange={this.onChangeColor}
             />
           </Menu>
         </Grid>
@@ -106,7 +102,7 @@ class ColorSetPicker extends React.Component<
                         : undefined,
                   }}
                   value={c}
-                  onClick={this.onOpenColorPicker.bind(this)}
+                  onClick={this.onOpenColorPicker}
                   size="small"
                 >
                   <div />
@@ -117,7 +113,7 @@ class ColorSetPicker extends React.Component<
         </Grid>
         <Grid item>
           <Tooltip disableInteractive title="Clear Colors">
-            <IconButton onClick={this.onClearColors.bind(this)} size="large">
+            <IconButton onClick={this.onClearColors} size="large">
               <DeleteIcon color="error" />
             </IconButton>
           </Tooltip>
@@ -126,15 +122,13 @@ class ColorSetPicker extends React.Component<
     );
   }
 
-  onOpenColorPicker(e: MouseEvent) {
-    const target = e.currentTarget as HTMLElement;
+  onOpenColorPicker = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget;
     let color, index;
     if (target.id == "add-color") {
       index = this.props.currentColors.length;
       color = "#000000";
-      this.props.onChangeColors({
-        target: { value: this.props.currentColors.concat(color) },
-      });
+      this.props.onChangeColors(this.props.currentColors.concat(color));
     } else {
       index = Number.parseInt(target.id.replace("color-", ""));
       color = this.props.currentColors[index];
@@ -144,31 +138,32 @@ class ColorSetPicker extends React.Component<
       pickerColor: color,
       pickerAnchorEl: document.getElementById("add-color"),
     });
-  }
+  };
 
-  onCloseColorPicker() {
+  onCloseColorPicker = () => {
     const newColors = this.props.currentColors;
-    newColors[this.state.pickerIndex] = this.state.pickerColor;
-    this.props.onChangeColors({ target: { value: newColors } });
+    newColors[this.state.pickerIndex as number] = this.state
+      .pickerColor as string;
+    this.props.onChangeColors(newColors);
     this.setState({
-      pickerIndex: null,
-      pickerColor: null,
-      pickerAnchorEl: null,
+      pickerIndex: undefined,
+      pickerColor: undefined,
+      pickerAnchorEl: undefined,
     });
-  }
+  };
 
-  onChangeColor(color: any) {
+  onChangeColor = (color: any) => {
     this.setState({ pickerColor: color.hex });
-  }
+  };
 
-  onClearColors() {
+  onClearColors = () => {
     this.setState({
-      pickerIndex: null,
-      pickerColor: null,
-      pickerAnchorEl: null,
+      pickerIndex: undefined,
+      pickerColor: undefined,
+      pickerAnchorEl: undefined,
     });
-    this.props.onChangeColors({ target: { value: [] } });
-  }
+    this.props.onChangeColors([]);
+  };
 }
 
 export default ColorSetPicker;

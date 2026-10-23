@@ -20,7 +20,6 @@ import withStyles from "@mui/styles/withStyles";
 
 import { green, red } from "@mui/material/colors";
 
-import { CancelablePromise } from "../../data/utils";
 import CaptionScript, { FontSettingsI } from "../../../common/CaptionScript";
 import FontOptions from "./FontOptions";
 
@@ -77,8 +76,8 @@ const styles = (theme: Theme) =>
 interface ScriptOptionsProps {
   classes: any;
   script: CaptionScript;
-  onCancel(): void;
-  onFinishEdit(common: CaptionScript): void;
+  onCancel: () => void;
+  onFinishEdit: (common: CaptionScript) => void;
 }
 
 interface ScriptOptionsState {
@@ -107,7 +106,7 @@ class ScriptOptions extends React.Component<
     return (
       <Dialog
         open={true}
-        onClose={this.props.onCancel.bind(this)}
+        onClose={this.props.onCancel}
         aria-describedby="edit-description"
       >
         <DialogContent>
@@ -122,10 +121,9 @@ class ScriptOptions extends React.Component<
                         <Switch
                           size="small"
                           checked={this.state.script.stopAtEnd}
-                          onChange={this.onSourceBoolInput.bind(
-                            this,
-                            "stopAtEnd",
-                          )}
+                          onChange={(e) =>
+                            this.onSourceBoolInput("stopAtEnd", e)
+                          }
                         />
                       }
                       label="Stop at End"
@@ -137,10 +135,9 @@ class ScriptOptions extends React.Component<
                         <Switch
                           size="small"
                           checked={this.state.script.nextSceneAtEnd}
-                          onChange={this.onSourceBoolInput.bind(
-                            this,
-                            "nextSceneAtEnd",
-                          )}
+                          onChange={(e) =>
+                            this.onSourceBoolInput("nextSceneAtEnd", e)
+                          }
                         />
                       }
                       label="Next Scene at End"
@@ -151,10 +148,9 @@ class ScriptOptions extends React.Component<
                       <Switch
                         size="small"
                         checked={this.state.script.syncWithAudio}
-                        onChange={this.onSourceBoolInput.bind(
-                          this,
-                          "syncWithAudio",
-                        )}
+                        onChange={(e) =>
+                          this.onSourceBoolInput("syncWithAudio", e)
+                        }
                       />
                     }
                     label="Sync Timestamp with Audio"
@@ -174,7 +170,9 @@ class ScriptOptions extends React.Component<
                 min={0}
                 max={100}
                 defaultValue={this.state.script.opacity}
-                onChangeCommitted={this.onSliderChange.bind(this, "opacity")}
+                onChangeCommitted={(e, value) =>
+                  this.onSliderChange("opacity", e, value)
+                }
                 valueLabelDisplay="auto"
                 valueLabelFormat={(v) => v + "%"}
                 aria-labelledby="opacity-slider"
@@ -185,38 +183,38 @@ class ScriptOptions extends React.Component<
                 name="Blink"
                 options={this.state.script.blink}
                 systemFonts={this.state.systemFonts}
-                onUpdateOptions={this.onUpdateOptions.bind(this, "blink")}
+                onUpdateOptions={(fn) => this.onUpdateOptions("blink", fn)}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
                 name="Caption"
                 options={this.state.script.caption}
                 systemFonts={this.state.systemFonts}
-                onUpdateOptions={this.onUpdateOptions.bind(this, "caption")}
+                onUpdateOptions={(fn) => this.onUpdateOptions("caption", fn)}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
                 name="Big Caption"
                 options={this.state.script.captionBig}
                 systemFonts={this.state.systemFonts}
-                onUpdateOptions={this.onUpdateOptions.bind(this, "captionBig")}
+                onUpdateOptions={(fn) => this.onUpdateOptions("captionBig", fn)}
               />
               <Divider className={classes.fontDivider} />
               <FontOptions
                 name="Count"
                 options={this.state.script.count}
                 systemFonts={this.state.systemFonts}
-                onUpdateOptions={this.onUpdateOptions.bind(this, "count")}
+                onUpdateOptions={(fn) => this.onUpdateOptions("count", fn)}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions className={classes.actions}>
-          <Button onClick={this.props.onCancel.bind(this)} color="secondary">
+          <Button onClick={this.props.onCancel} color="secondary">
             Cancel
           </Button>
           <Button
-            onClick={this.props.onFinishEdit.bind(this, this.state.script)}
+            onClick={() => this.props.onFinishEdit(this.state.script)}
             color="primary"
           >
             Save
@@ -226,39 +224,38 @@ class ScriptOptions extends React.Component<
     );
   }
 
-  _promise: CancelablePromise = null;
+  _abortController: AbortController = new AbortController();
   componentDidMount() {
     // Define system fonts
-    this._promise = new CancelablePromise((resolve, reject) => {
-      window.ipc.getFonts().then(
-        (res: Array<string>) => {
-          if (!this._promise.hasCanceled) {
-            this.setState({ systemFonts: res });
-          }
-        },
-        (err: string) => {
-          console.error(err);
-        },
-      );
-    });
+    window.ipc.getFonts().then(
+      (res: Array<string>) => {
+        if (!this._abortController.signal.aborted) {
+          this.setState({ systemFonts: res });
+        }
+      },
+      (err: string) => {
+        console.error(err);
+      },
+    );
   }
 
   componentWillUnmount() {
-    if (this._promise != null) {
-      this._promise.cancel();
-    }
+    this._abortController.abort();
   }
 
-  onUpdateOptions(property: string, fn: (options: FontSettingsI) => void) {
+  onUpdateOptions = (
+    property: string,
+    fn: (options: FontSettingsI) => void,
+  ) => {
     const script = new CaptionScript(this.state.script);
     const newOptions = JSON.parse(JSON.stringify((script as any)[property]));
     fn(newOptions);
     (script as any)[property] = newOptions;
     this.setState({ script: script });
-  }
+  };
 
-  onSourceBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onSourceBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     switch (key) {
       case "stopAtEnd":
         if (input.checked) {
@@ -283,11 +280,15 @@ class ScriptOptions extends React.Component<
       default:
         this.changeKey(key, input.checked);
     }
-  }
+  };
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onSliderChange = (
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
   changeKey(key: string, value: any) {
     const script = new CaptionScript(this.state.script);
@@ -297,4 +298,4 @@ class ScriptOptions extends React.Component<
 }
 
 (ScriptOptions as any).displayName = "ScriptOptions";
-export default withStyles(styles)(ScriptOptions as any);
+export default withStyles(styles)(ScriptOptions);

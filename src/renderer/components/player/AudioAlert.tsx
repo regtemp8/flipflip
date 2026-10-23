@@ -4,6 +4,7 @@ import { Theme, Typography } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
 import { grey } from "@mui/material/colors";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 import Audio from "../../../common/Audio";
 
@@ -47,7 +48,7 @@ const styles = (theme: Theme) =>
 
 interface AudioAlertProps {
   classes: any;
-  audio: Audio;
+  audio?: Audio;
 }
 
 interface AudioAlertState {
@@ -70,7 +71,11 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     return (
       <this.AudioAlertLayer>
         <div className={classes.alert}>
-          <img className={classes.thumb} src={this.props.audio.thumb} />
+          {this.props.audio.thumb != null ? (
+            <img className={classes.thumb} src={this.props.audio.thumb} />
+          ) : (
+            <AudiotrackIcon className={classes.thumb} />
+          )}
           <div className={classes.infoContainer}>
             <div className={classes.infoBackdrop} />
             <Typography variant="h3" className={classes.info}>
@@ -94,32 +99,40 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
     );
   }
 
+  _timeout?: number = undefined;
+
   show() {
     this.setState({ visible: true });
-    this._timeout = window.setTimeout(this.hide.bind(this), 6000);
+    if (this._timeout != null) {
+      window.clearTimeout(this._timeout);
+      this._timeout = undefined;
+    }
+
+    this._timeout = window.setTimeout(this.hide, 6000);
   }
 
-  hide() {
+  hide = () => {
     this.setState({ visible: false });
-  }
+    this._timeout = undefined;
+  };
 
-  _timeout: number = null;
   componentDidMount() {
     if (this.props.audio) {
       this.show();
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioAlertProps) {
     if (this.props.audio != props.audio) {
-      window.clearTimeout(this._timeout);
       this.show();
     }
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._timeout);
-    this._timeout = null;
+    if (this._timeout != null) {
+      window.clearTimeout(this._timeout);
+      this._timeout = undefined;
+    }
   }
 
   AudioAlertLayer = (data: { children: React.ReactNode }) => {
@@ -173,4 +186,4 @@ class AudioAlert extends React.Component<AudioAlertProps, AudioAlertState> {
 }
 
 (AudioAlert as any).displayName = "AudioAlert";
-export default withStyles(styles)(AudioAlert as any);
+export default withStyles(styles)(AudioAlert);

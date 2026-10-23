@@ -86,14 +86,13 @@ export const loadRemoteImageURLList = (
   wretch(url)
     .get()
     .text((data) => {
-      const lines = data
-        .match(/[^\r\n]+/g)
-        .filter(
-          (line) =>
-            line.startsWith("http://") ||
-            line.startsWith("https://") ||
-            line.startsWith("file:///"),
-        );
+      const matches = data.match(/[^\r\n]+/g) ?? [];
+      const lines = matches.filter(
+        (line) =>
+          line.startsWith("http://") ||
+          line.startsWith("https://") ||
+          line.startsWith("file:///"),
+      );
       if (lines.length > 0) {
         let convertedSource = new Array<string>();
         let convertedCount = 0;
@@ -220,7 +219,7 @@ export const loadTumblr = (
         return;
       }
       // End loop if we're at end of posts
-      if (data.posts.length == 0) {
+      if (!data || data.posts.length == 0) {
         helpers.next = null;
         pm({
           data: [],
@@ -472,484 +471,6 @@ export const loadRedGifs = (
     });
 };
 
-const loadImageFapGallery = (
-  galleryURL: string,
-  source: LibrarySource,
-  filter: string,
-  weight: string,
-  helpers: { next: any; count: number; retries: number },
-  timeout: number,
-  images: Array<string>,
-  baseGalleryURL: string,
-  onFinishedLoading: (helpers: {
-    next: any;
-    count: number;
-    retries: number;
-  }) => void,
-  pm: (object: any) => void,
-) => {
-  wretch(galleryURL)
-    .get()
-    .setTimeout(15000)
-    .onAbort((e) =>
-      pm({
-        error: e.message,
-        helpers: helpers,
-        source: source,
-        timeout: timeout,
-      }),
-    )
-    .text((html) => {
-      const galleryWindow = new JSDOM(html, { contentType: "text/html" })
-        .window;
-      let imageEl = galleryWindow.document.querySelector<HTMLAnchorElement>(
-        ".expp-container > form > table > tbody > tr > td > table > tbody > tr > td > a",
-      );
-      if (imageEl) {
-        const imageURL = "https://www.imagefap.com" + imageEl.href;
-        wretch(imageURL)
-          .get()
-          .text((html) => {
-            let captcha = undefined;
-            const ahrefs = new JSDOM(html, {
-              contentType: "text/html",
-            }).window.document.querySelectorAll<HTMLAnchorElement>(
-              'a[href^="https://cdnc.imagefap.com/images/full/"]',
-            );
-            if (ahrefs.length > 0) {
-              for (let i = 0; i < ahrefs.length; i++) {
-                images.push(ahrefs.item(i).href);
-              }
-            } else {
-              captcha = imageURL;
-            }
-            if (captcha != null) {
-              pm({
-                captcha: captcha,
-                data: images,
-                allPosts: new Map<string, string>(),
-                weight: weight,
-                helpers: helpers,
-                source: source,
-                timeout: timeout,
-              });
-            }
-          });
-      } else {
-        let captcha = undefined;
-        if (html.includes("Enter the captcha")) {
-          helpers.count = source.count;
-          captcha = galleryURL;
-          images = [];
-          pm({ warning: source.url + " - blocked due to captcha" });
-        } else {
-          onFinishedLoading(helpers);
-        }
-        pm({
-          captcha: captcha,
-          data: images,
-          allPosts: new Map<string, string>(),
-          weight: weight,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        });
-      }
-      const nextGalleryLink =
-        galleryWindow.document.querySelector<HTMLAnchorElement>(
-          "#gallery > font > span > a:last-child",
-        );
-      if (nextGalleryLink && nextGalleryLink.innerHTML == ":: next ::") {
-        let href = nextGalleryLink.href;
-        if (href.startsWith("/")) {
-          href = href.substring(1);
-        }
-        setTimeout(
-          () =>
-            loadImageFapGallery(
-              baseGalleryURL + href,
-              source,
-              filter,
-              weight,
-              helpers,
-              timeout,
-              images,
-              baseGalleryURL,
-              onFinishedLoading,
-              pm,
-            ),
-          2000,
-        );
-      } else {
-        onFinishedLoading(helpers);
-        pm({
-          data: filterPathsToJustPlayable(filter, images, false),
-          allPosts: new Map<string, string>(),
-          weight: weight,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        });
-      }
-    });
-};
-
-export const loadImageFap = (
-  config: Config,
-  source: LibrarySource,
-  filter: string,
-  weight: string,
-  helpers: { next: any; count: number; retries: number },
-  pm: (object: any) => void,
-) => {
-  const timeout = 8000;
-  const url = source.url;
-  if (url.includes("/gallery/") || url.includes("/pictures/")) {
-    let images = new Array<string>();
-    const gid = getFileGroup(url, path.sep);
-    const baseGalleryURL = "https://www.imagefap.com/gallery/" + gid;
-    loadImageFapGallery(
-      baseGalleryURL + "?gid=" + gid + "&view=0",
-      source,
-      filter,
-      weight,
-      helpers,
-      timeout,
-      images,
-      baseGalleryURL,
-      (h) => (h.next = null),
-      pm,
-    );
-  } else if (url.includes("/organizer/")) {
-    if (helpers.next == 0) {
-      helpers.next = [0, 0, 0];
-    }
-    wretch(url + "?page=" + helpers.next[0])
-      .get()
-      .setTimeout(10000)
-      .onAbort((e) =>
-        pm({
-          error: e.message,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        }),
-      )
-      .text((html) => {
-        const albumEls = new JSDOM(html, {
-          contentType: "text/html",
-        }).window.document.querySelectorAll(
-          "td.blk_galleries > font > a.blk_galleries",
-        );
-        if (albumEls.length == 0) {
-          let captcha = undefined;
-          if (html.includes("Enter the captcha")) {
-            helpers.count = source.count;
-            captcha =
-              "https://www.imagefap.com/gallery/" +
-              getFileGroup(url, path.sep) +
-              "?view=2";
-            pm({ warning: source.url + " - blocked due to captcha" });
-          }
-          helpers.next = null;
-          pm({
-            captcha: captcha,
-            data: [],
-            allPosts: new Map<string, string>(),
-            weight: weight,
-            helpers: helpers,
-            source: source,
-            timeout: timeout,
-          });
-        } else if (albumEls.length > helpers.next[1]) {
-          let albumEl = albumEls[helpers.next[1]];
-          let albumID = albumEl
-            .getAttribute("href")
-            .substring(albumEl.getAttribute("href").lastIndexOf("/") + 1);
-          let images = new Array<string>();
-          const baseGalleryURL = "https://www.imagefap.com/gallery/" + albumID;
-          loadImageFapGallery(
-            baseGalleryURL + "?gid=" + albumID + "&view=0",
-            source,
-            filter,
-            weight,
-            helpers,
-            timeout,
-            images,
-            baseGalleryURL,
-            (h) => (h.next[1] += 1),
-            pm,
-          );
-        } else {
-          let images = new Array<string>();
-          let captcha = undefined;
-          if (html.includes("Enter the captcha")) {
-            helpers.count = source.count;
-            captcha =
-              "https://www.imagefap.com/gallery/" +
-              getFileGroup(url, path.sep) +
-              "?view=0";
-            images = [];
-            pm({ warning: source.url + " - blocked due to captcha" });
-          } else {
-            helpers.next[0] += 1;
-            helpers.next[1] = 0;
-          }
-          pm({
-            captcha: captcha,
-            data: images,
-            allPosts: new Map<string, string>(),
-            weight: weight,
-            helpers: helpers,
-            source: source,
-            timeout: timeout,
-          });
-        }
-      })
-      .catch((e) => {
-        pm({
-          error: e.message,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        });
-      });
-  } else if (url.includes("/video.php?vid=")) {
-    helpers.next = null;
-    pm({
-      data: [],
-      allPosts: new Map<string, string>(),
-      weight: weight,
-      helpers: helpers,
-      source: source,
-      timeout: timeout,
-    });
-    wretch(url)
-      .get()
-      .setTimeout(10000)
-      .onAbort((e) =>
-        pm({
-          error: e.message,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        }),
-      )
-      .text((html) => {
-        const foundVideoConfigURLs =
-          /url: '(https:\/\/cdn-fck\.moviefap\.com\/moviefap\/.*)',/g.exec(
-            html,
-          );
-        if (foundVideoConfigURLs.length == 2) {
-          const videoConfigURL = foundVideoConfigURLs[1]; // get first group
-          wretch(videoConfigURL)
-            .get()
-            .setTimeout(10000)
-            .onAbort((e) =>
-              pm({
-                error: e.message,
-                helpers: helpers,
-                source: source,
-                timeout: timeout,
-              }),
-            )
-            .text((xml) => {
-              // Get highest resolution video link
-              let res = 0;
-              let videoLink = "";
-              const videoQualities = new JSDOM(xml, {
-                contentType: "application/xml",
-              }).window.document.querySelectorAll("flixV2 > quality > item");
-              for (let i = 0; i < videoQualities.length; i++) {
-                const quality = videoQualities.item(i);
-                const newResText = quality
-                  .querySelector("res")
-                  .innerHTML.slice(0, -1);
-                const newRes = Number(newResText);
-                if (newRes > res) {
-                  res = newRes;
-                  videoLink = quality.querySelector("videoLink").textContent;
-                }
-              }
-
-              const data = videoLink
-                ? filterPathsToJustPlayable(filter, [videoLink], false)
-                : [];
-              if (data.length > 0) {
-                helpers.count = helpers.count + data.length;
-              }
-
-              helpers.next = null;
-              pm({
-                data,
-                allPosts: new Map<string, string>(),
-                weight: weight,
-                helpers: helpers,
-                source: source,
-                timeout: timeout,
-              });
-            });
-        } else {
-          helpers.next = null;
-          pm({
-            data: [],
-            allPosts: new Map<string, string>(),
-            weight: weight,
-            helpers: helpers,
-            source: source,
-            timeout: timeout,
-          });
-        }
-      });
-  } else {
-    helpers.next = null;
-    pm({
-      data: [],
-      allPosts: new Map<string, string>(),
-      weight: weight,
-      helpers: helpers,
-      source: source,
-      timeout: timeout,
-    });
-  }
-};
-
-export const loadSexCom = (
-  config: Config,
-  source: LibrarySource,
-  filter: string,
-  weight: string,
-  helpers: { next: any; count: number; retries: number },
-  pm: (object: any) => void,
-) => {
-  const timeout = 8000;
-  const url = source.url;
-  // This doesn't work anymore due to src url requiring referer
-  helpers.next = null;
-  pm({
-    data: [],
-    allPosts: new Map<string, string>(),
-    weight: weight,
-    helpers: helpers,
-    source: source,
-    timeout: timeout,
-  });
-  /*let requestURL;
-  if (url.includes("/user/")) {
-    requestURL = "https://www.sex.com/user/" + getFileGroup(url, path.sep) + "?page=" + (helpers.next + 1);
-  } else if (url.includes("/gifs/") || url.includes("/pics/") || url.includes("/videos/")) {
-    requestURL = "https://www.sex.com/" + getFileGroup(url, path.sep) + "?page=" + (helpers.next + 1);
-  }
-  wretch(requestURL)
-    .get()
-    .setTimeout(5000)
-    .onAbort((e) => pm({
-      error: e.message,
-      helpers: helpers,
-      source: source,
-      timeout: timeout,
-    }))
-    .notFound((e) => pm({
-      error: e.message,
-      helpers: helpers,
-      source: source,
-      timeout: timeout,
-    }))
-    .text((html) => {
-      let imageEls = domino.createWindow(html).document.querySelectorAll(".small_pin_box > .image_wrapper > img");
-      if (imageEls.length > 0) {
-        let videos = new Array<string>();
-        let images = new Array<string>();
-        for (let i = 0; i < imageEls.length; i++) {
-          const image = imageEls.item(i);
-          if (image.nextElementSibling || image.previousElementSibling) {
-            videos.push(image.parentElement.getAttribute("href"));
-          } else {
-            images.push(image.getAttribute("data-src"));
-          }
-        }
-        if (videos.length == 0) {
-          helpers.next = helpers.next + 1;
-          helpers.count = helpers.count + filterPathsToJustPlayable(IF.any, images, false).length;
-          pm({
-            data: filterPathsToJustPlayable(filter, images, false),
-            allPosts: new Map<string, string>(),
-            weight: weight,
-            helpers: helpers,
-            source: source,
-            timeout: timeout,
-          });
-        } else {
-          const validImages = filterPathsToJustPlayable(filter, images, false);
-          images = [];
-          let count = 0;
-          for (let videoURL of videos) {
-            wretch("https://www.sex.com" + videoURL)
-              .get()
-              .setTimeout(5000)
-              .onAbort((e) => pm({
-                error: e.message,
-                helpers: helpers,
-                source: source,
-                timeout: timeout,
-              }))
-              .notFound((e) => pm({
-                error: e.message,
-                helpers: helpers,
-                source: source,
-                timeout: timeout,
-              }))
-              .text((html) => {
-                count += 1;
-
-                let vidID = null;
-                const vidIDRegex = /\/video\/stream\/(\d+)/g;
-                let regexResult = vidIDRegex.exec(html);
-                if (regexResult != null) {
-                  vidID = regexResult[1];
-                }
-
-                let date = null;
-                const dateRegex = /\d{4}\/\d{2}\/\d{2}/g;
-                regexResult = dateRegex.exec(html);
-                if (regexResult != null) {
-                  date = regexResult[0];
-                }
-
-                if (vidID != null && date != null) {
-                  images.push("https://videos1.sex.com/stream/" + date + "/" + vidID +".mp4");
-                }
-                if (count == videos.length) {
-                  const validVideos = filterPathsToJustPlayable(IF.any, images, true);
-                  const filePaths = validImages.concat(validVideos);
-                  helpers.next = helpers.next + 1;
-                  helpers.count = helpers.count + filePaths.length;
-                  pm({
-                    data: filePaths,
-                    allPosts: new Map<string, string>(),
-                    weight: weight,
-                    helpers: helpers,
-                    source: source,
-                    timeout: timeout,
-                  });
-                }
-              });
-          }
-        }
-      } else {
-        helpers.next = null;
-        pm({
-          data: [],
-          allPosts: new Map<string, string>(),
-          weight: weight,
-          helpers: helpers,
-          source: source,
-          timeout: timeout,
-        });
-      }
-    });*/
-};
-
 export const loadImgur = (
   config: Config,
   source: LibrarySource,
@@ -1034,8 +555,11 @@ export const loadDeviantArt = (
         const contents = items[i].getElementsByTagName("media:content");
         for (let c = 0; c < contents.length; c++) {
           const content = contents[c];
-          if (content.getAttribute("medium") == "image") {
-            images.push(content.getAttribute("url"));
+          if (
+            content.getAttribute("medium") == "image" &&
+            content.hasAttribute("url")
+          ) {
+            images.push(content.getAttribute("url") as string);
           }
         }
       }
@@ -1066,8 +590,19 @@ export const loadE621 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
   let suffix = "";
+  const thisHost = matches[1];
   if (url.includes("/pools/")) {
     suffix =
       "/pools.json?search[id]=" + url.substring(url.lastIndexOf("/") + 1);
@@ -1329,8 +864,19 @@ export const loadDanbooru = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
   let suffix = "";
+  const thisHost = matches[1];
   if (url.includes("/pools/")) {
     suffix = "/pools/" + url.substring(url.lastIndexOf("/") + 1) + ".json";
   } else if (url.includes("favorite_groups")) {
@@ -1553,7 +1099,18 @@ export const loadGelbooru1 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
+  const thisHost = matches[1];
   wretch(url + "&pid=" + helpers.next * 10)
     .get()
     .setTimeout(5000)
@@ -1590,6 +1147,15 @@ export const loadGelbooru1 = (
         let images = new Array<string>();
         const getImage = (index: number) => {
           let link = imageEls.item(index).getAttribute("href");
+          if (!link) {
+            pm({
+              error: "No host found. Source URL: " + url,
+              helpers: helpers,
+              source: source,
+              timeout: timeout,
+            });
+            return;
+          }
           if (!link.startsWith("http")) {
             link = thisHost + "/" + link;
           }
@@ -1689,7 +1255,18 @@ export const loadGelbooru2 = (
   const timeout = 8000;
   const url = source.url;
   const hostRegex = /^(https?:\/\/[^\/]*)\//g;
-  const thisHost = hostRegex.exec(url)[1];
+  const matches = hostRegex.exec(url);
+  if (!matches) {
+    pm({
+      error: "No host found. Source URL: " + url,
+      helpers: helpers,
+      source: source,
+      timeout: timeout,
+    });
+    return;
+  }
+
+  const thisHost = matches[1];
   let suffix =
     "/index.php?page=dapi&s=post&q=index&limit=20&json=1&pid=" +
     (helpers.next + 1);
@@ -1823,7 +1400,12 @@ export const loadEHentai = (
         let images = new Array<string>();
         for (let i = 0; i < imageEls.length; i++) {
           const image = imageEls.item(i);
-          wretch(image.getAttribute("href"))
+          const href = image.getAttribute("href");
+          if (!href) {
+            continue;
+          }
+
+          wretch(href)
             .get()
             .setTimeout(5000)
             .onAbort((e) =>
@@ -2238,15 +1820,16 @@ export const loadBDSMlr = (
         contentType: "application/xml",
       }).window.document.querySelectorAll("item");
       if (itemEls.length > 0) {
-        let imageCount = 0;
         let images = new Array<string>();
         for (let i = 0; i < itemEls.length; i++) {
           const item = itemEls.item(i);
           const embeddedImages = item.querySelectorAll("description > img");
           if (embeddedImages.length > 0) {
             for (let image of embeddedImages) {
-              imageCount++;
-              images.push(image.getAttribute("src"));
+              const src = image.getAttribute("src");
+              if (src) {
+                images.push(src);
+              }
             }
           }
         }

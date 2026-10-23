@@ -10,6 +10,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Switch,
   TextField,
@@ -20,11 +21,10 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, TF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 import { styled } from "@mui/material/styles";
+import { SceneBase } from "../../../common/SceneBase";
 
 const FullWidthCollapse = styled(Collapse)(() => ({
   width: "100%",
@@ -33,29 +33,46 @@ const FullWidthFormControl = styled(FormControl)(() => ({
   width: "100%",
 }));
 
-interface FadeIOCardProps {
-  scene: Scene | SceneSettings;
+interface FadeIOCardProps<T extends SceneBase> {
+  scene: T;
   easingControls: boolean;
   sidebar?: boolean;
   tutorial?: string;
-  onUpdateScene(
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
-class FadeIOCard extends React.Component<FadeIOCardProps> {
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface FadeIOCardState {
+  fadeIOSinRate: number;
+}
 
-  constructor(props: FadeIOCardProps) {
+class FadeIOCard<T extends SceneBase> extends React.Component<
+  FadeIOCardProps<T>,
+  FadeIOCardState
+> {
+  constructor(props: FadeIOCardProps<T>) {
     super(props);
-  }
 
-  render() {
-    const fadeSinRate =
+    const fadeIOSinRate =
       typeof this.props.scene.fadeIOSinRate === "number"
         ? this.props.scene.fadeIOSinRate
         : 0;
+    this.state = {
+      fadeIOSinRate,
+    };
+  }
+
+  componentDidUpdate(props: FadeIOCardProps<T>) {
+    if (props.scene.fadeIOSinRate != this.props.scene.fadeIOSinRate) {
+      const fadeIOSinRate =
+        typeof this.props.scene.fadeIOSinRate === "number"
+          ? this.props.scene.fadeIOSinRate
+          : 0;
+
+      this.setState({ fadeIOSinRate });
+    }
+  }
+
+  render() {
     const fadeBPMMulti =
       typeof this.props.scene.fadeIOBPMMulti === "number"
         ? this.props.scene.fadeIOBPMMulti
@@ -97,7 +114,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
             control={
               <Switch
                 checked={this.props.scene.fadeInOut}
-                onChange={this.onBoolInput.bind(this, "fadeInOut")}
+                onChange={(e) => this.onBoolInput("fadeInOut", e)}
               />
             }
             label="Fade In/Out"
@@ -122,7 +139,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                   <Select
                     variant="standard"
                     value={this.props.scene.fadeIOTF}
-                    onChange={this.onInput.bind(this, "fadeIOTF")}
+                    onChange={(e) => this.onInput("fadeIOTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf == TF.bpm) {
@@ -162,13 +179,13 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
                         min={1}
-                        defaultValue={fadeSinRate}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOSinRate",
-                        )}
+                        max={100}
+                        value={this.state.fadeIOSinRate}
+                        onChange={this.onFadeIOSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="fadeio-sin-rate-slider"
                       />
@@ -180,9 +197,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                     >
                       <TextField
                         variant="standard"
-                        value={fadeSinRate}
-                        onChange={this.onIntInput.bind(this, "fadeIOSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "fadeIOSinRate")}
+                        value={this.state.fadeIOSinRate}
+                        onChange={(e) => this.onIntInput("fadeIOSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("fadeIOSinRate", e)}
                         InputProps={{
                           sx: {
                             pl: 1,
@@ -212,10 +229,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                     min={1}
                     max={100}
                     defaultValue={fadeBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "fadeIOBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("fadeIOBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="fadeio-bpm-multi-slider"
@@ -229,8 +245,8 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                     label="For"
                     margin="dense"
                     value={fadeDuration}
-                    onChange={this.onIntInput.bind(this, "fadeIODuration")}
-                    onBlur={this.blurIntKey.bind(this, "fadeIODuration")}
+                    onChange={(e) => this.onIntInput("fadeIODuration", e)}
+                    onBlur={(e) => this.blurIntKey("fadeIODuration", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -262,8 +278,8 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                   label="Between"
                   margin="dense"
                   value={fadeDurationMin}
-                  onChange={this.onIntInput.bind(this, "fadeIODurationMin")}
-                  onBlur={this.blurIntKey.bind(this, "fadeIODurationMin")}
+                  onChange={(e) => this.onIntInput("fadeIODurationMin", e)}
+                  onBlur={(e) => this.blurIntKey("fadeIODurationMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -282,8 +298,8 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                   label="and"
                   margin="dense"
                   value={fadeDurationMax}
-                  onChange={this.onIntInput.bind(this, "fadeIODurationMax")}
-                  onBlur={this.blurIntKey.bind(this, "fadeIODurationMax")}
+                  onChange={(e) => this.onIntInput("fadeIODurationMax", e)}
+                  onBlur={(e) => this.blurIntKey("fadeIODurationMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -321,7 +337,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       <Select
                         variant="standard"
                         value={this.props.scene.fadeIOStartEase}
-                        onChange={this.onInput.bind(this, "fadeIOStartEase")}
+                        onChange={(e) => this.onInput("fadeIOStartEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -350,10 +366,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeIOStartExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOStartExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOStartExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
@@ -377,10 +392,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeIOStartOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOStartOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOStartOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
@@ -406,10 +420,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.fadeIOStartAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOStartAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOStartAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
@@ -435,10 +448,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.fadeIOStartPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOStartPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOStartPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
@@ -451,7 +463,7 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                       <Select
                         variant="standard"
                         value={this.props.scene.fadeIOEndEase}
-                        onChange={this.onInput.bind(this, "fadeIOEndEase")}
+                        onChange={(e) => this.onInput("fadeIOEndEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -480,10 +492,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeIOEndExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOEndExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOEndExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
@@ -507,10 +518,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.fadeIOEndOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOEndOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOEndOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
@@ -536,10 +546,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.fadeIOEndAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOEndAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOEndAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
@@ -565,10 +574,9 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.fadeIOEndPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "fadeIOEndPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("fadeIOEndPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
@@ -584,55 +592,59 @@ class FadeIOCard extends React.Component<FadeIOCardProps> {
     );
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    let value = (e.currentTarget as any).value;
-    if (min && (this.props.scene as any)[key] < min) {
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    let value = e.currentTarget.value;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       value = max;
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update fadeIOSinRate slider
     if (key == "fadeIOSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ fadeIOSinRate: Number(value) });
     }
-  }
+  };
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onFadeIOSinRateChange = (
+    event: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
+    this.setState({ fadeIOSinRate: value as number });
+  };
+
+  onSliderChange = (
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);

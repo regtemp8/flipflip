@@ -109,7 +109,7 @@ export const timestampRegex =
     define("variable-3", storers);
     define("builtin", actions);
 
-    function rt(type: string, state: any, stream: any) {
+    function rt(type: string | null, state: any, stream: any) {
       if (stream.eol()) {
         if (
           state.tokens.length > 0 &&
@@ -370,11 +370,11 @@ export const timestampRegex =
 });
 
 interface CodeMirrorEditorProps {
-  onGutterClick(editor: any, clickedLine: number): void;
-  onUpdateScript(text: string, changed?: boolean): void;
   addHack?: ChildCallbackHack;
   className?: string;
   overwriteHack?: ChildCallbackHack;
+  onGutterClick: (editor: any, clickedLine: number) => void;
+  onUpdateScript: (text: string, changed?: boolean) => void;
 }
 
 interface CodeMirrorEditorState {
@@ -408,8 +408,8 @@ export default class CodeMirrorEditor extends React.Component<
           lineWrapping: true,
           viewportMargin: Infinity,
         }}
-        onBeforeChange={this.onBeforeChangeScript.bind(this)}
-        onCursorActivity={this.onCursorActivity.bind(this)}
+        onBeforeChange={this.onBeforeChangeScript}
+        onCursorActivity={this.onCursorActivity}
         onGutterClick={this.props.onGutterClick}
       />
     );
@@ -464,23 +464,23 @@ export default class CodeMirrorEditor extends React.Component<
 
   componentWillUnmount() {
     if (this.props.addHack) {
-      this.props.addHack.listener = null;
+      this.props.addHack.listener = undefined;
     }
     if (this.props.overwriteHack) {
-      this.props.overwriteHack.listener = null;
+      this.props.overwriteHack.listener = undefined;
     }
   }
 
-  _sendUpdate: number = null;
-  onBeforeChangeScript(editor: any, data: any, value: any) {
+  _sendUpdateTimeout?: number = undefined;
+  onBeforeChangeScript = (editor: any, data: any, value: any) => {
     if (this.state.scriptText != value) {
       this.onUpdateScript(value, editor, true);
     }
-  }
+  };
 
-  onCursorActivity(editor: any) {
+  onCursorActivity = (editor: any) => {
     this.setState({ cursor: editor.getDoc().getCursor() });
-  }
+  };
 
   onUpdateScript(scriptText: any, editor?: any, changed = false) {
     if (editor) {
@@ -491,9 +491,12 @@ export default class CodeMirrorEditor extends React.Component<
     } else {
       this.setState({ scriptText: scriptText });
     }
-    window.clearTimeout(this._sendUpdate);
-    this._sendUpdate = window.setTimeout(
-      this.props.onUpdateScript.bind(this, scriptText, changed),
+    if (this._sendUpdateTimeout != null) {
+      window.clearTimeout(this._sendUpdateTimeout);
+    }
+
+    this._sendUpdateTimeout = window.setTimeout(
+      () => this.props.onUpdateScript(scriptText, changed),
       500,
     );
   }

@@ -143,14 +143,14 @@ const styles = (theme: Theme) =>
 interface TagManagerProps {
   classes: any;
   tags: Array<Tag>;
-  goBack(): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
-  onUpdateTags(tags: Array<Tag>): void;
+  goBack: () => void;
+  onSort: (algorithm: string, ascending: boolean) => void;
+  onUpdateTags: (tags: Array<Tag>) => void;
 }
 
 interface TagManagerState {
-  openMenu: string;
-  menuAnchorEl: any;
+  openMenu?: string;
+  menuAnchorEl?: any;
   tags: Array<Tag>;
   isEditing: number;
   tagName: string;
@@ -162,8 +162,6 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     super(props);
 
     this.state = {
-      openMenu: null as string,
-      menuAnchorEl: null as any,
       tags: new Array<Tag>(),
       isEditing: -1,
       tagName: "",
@@ -179,7 +177,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
         <AppBar
           enableColorOnDark
           position="absolute"
-          className={clsx(classes.appBar, open && classes.appBarShift)}
+          className={clsx(classes.appBar, classes.appBarShift)}
         >
           <Toolbar className={classes.headerBar}>
             <div className={classes.headerLeft}>
@@ -189,7 +187,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                   color="inherit"
                   aria-label="Back"
                   className={classes.backButton}
-                  onClick={this.goBack.bind(this)}
+                  onClick={this.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -231,7 +229,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                 {this.state.tags.map((tag) => (
                   <Jiggle key={tag.id + tag.name} bounce>
                     <Card className={classes.tag}>
-                      <CardActionArea onClick={this.onEditTag.bind(this, tag)}>
+                      <CardActionArea onClick={() => this.onEditTag(tag)}>
                         <CardContent>
                           <Typography component="h2" variant="h6">
                             {tag.name}
@@ -246,7 +244,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
           </div>
           <Dialog
             open={this.state.isEditing != -1}
-            onClose={this.onCloseEditDialog.bind(this)}
+            onClose={this.onCloseEditDialog}
             aria-labelledby="edit-title"
           >
             <DialogTitle id="edit-title">Edit Tag</DialogTitle>
@@ -259,7 +257,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                 label="Name"
                 value={this.state.tagName}
                 margin="dense"
-                onChange={this.onChangeTitle.bind(this)}
+                onChange={this.onChangeTitle}
               />
               <TextField
                 variant="standard"
@@ -271,26 +269,23 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                 value={this.state.tagPhrase}
                 margin="dense"
                 inputProps={{ className: classes.phraseInput }}
-                onChange={this.onChangePhrase.bind(this)}
+                onChange={this.onChangePhrase}
               />
             </DialogContent>
             <DialogActions>
               <IconButton
-                onClick={this.onRemoveTag.bind(this)}
+                onClick={this.onRemoveTag}
                 style={{ marginRight: "auto" }}
                 size="large"
               >
                 <DeleteIcon color="error" />
               </IconButton>
-              <Button
-                onClick={this.onCloseEditDialog.bind(this)}
-                color="secondary"
-              >
+              <Button onClick={this.onCloseEditDialog} color="secondary">
                 Cancel
               </Button>
               <Button
                 disabled={!this.state.tagName}
-                onClick={this.onFinishEdit.bind(this)}
+                onClick={this.onFinishEdit}
                 color="primary"
               >
                 OK
@@ -304,7 +299,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
             <Tooltip disableInteractive title="Remove All Tags">
               <Fab
                 className={classes.removeAllButton}
-                onClick={this.onRemoveAll.bind(this)}
+                onClick={this.onRemoveAll}
                 size="small"
               >
                 <DeleteSweepIcon className={classes.icon} />
@@ -312,7 +307,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
             </Tooltip>
             <Dialog
               open={this.state.openMenu == MO.removeAllAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="remove-all-title"
               aria-describedby="remove-all-description"
             >
@@ -324,16 +319,10 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={this.onCloseDialog.bind(this)}
-                  color="secondary"
-                >
+                <Button onClick={this.onCloseDialog} color="secondary">
                   Cancel
                 </Button>
-                <Button
-                  onClick={this.onFinishRemoveAll.bind(this)}
-                  color="primary"
-                >
+                <Button onClick={this.onFinishRemoveAll} color="primary">
                   OK
                 </Button>
               </DialogActions>
@@ -348,7 +337,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
               aria-haspopup="true"
               aria-controls="sort-menu"
               aria-label="Sort Tags"
-              onClick={this.onOpenSortMenu.bind(this)}
+              onClick={this.onOpenSortMenu}
               size="medium"
             >
               <SortIcon className={classes.icon} />
@@ -368,7 +357,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
               keepMounted
               classes={{ paper: classes.sortMenu }}
               open={this.state.openMenu == MO.sort}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
             >
               {[SF.alpha, SF.date].map((sf) => (
                 <MenuItem key={sf}>
@@ -376,14 +365,14 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
                   <ListItemSecondaryAction>
                     <IconButton
                       edge="end"
-                      onClick={this.props.onSort.bind(this, sf, true)}
+                      onClick={() => this.props.onSort(sf, true)}
                       size="large"
                     >
                       <ArrowUpwardIcon />
                     </IconButton>
                     <IconButton
                       edge="end"
-                      onClick={this.props.onSort.bind(this, sf, false)}
+                      onClick={() => this.props.onSort(sf, false)}
                       size="large"
                     >
                       <ArrowDownwardIcon />
@@ -397,7 +386,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
 
         <Fab
           className={classes.addMenuButton}
-          onClick={this.onAddTag.bind(this)}
+          onClick={this.onAddTag}
           size="large"
         >
           <AddIcon className={classes.icon} />
@@ -416,22 +405,22 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     this.setState({ tags: newTags });
   }
 
-  goBack() {
+  goBack = () => {
     this.props.onUpdateTags(this.state.tags);
     this.props.goBack();
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       isEditing: -1,
       tagName: "",
       tagPhrase: "",
     });
-  }
+  };
 
-  onAddTag() {
+  onAddTag = () => {
     let id = this.state.tags.length + 1;
     this.state.tags.forEach((s) => {
       id = Math.max(s.id + 1, id);
@@ -448,35 +437,35 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
       }),
     ]);
     this.setState({ isEditing: id, tagName: "", tagPhrase: "", tags: newTags });
-  }
+  };
 
-  onRemoveTag() {
+  onRemoveTag = () => {
     this.setState({
       tags: this.state.tags.filter((t) => t.id != this.state.isEditing),
       isEditing: -1,
       tagName: "",
       tagPhrase: "",
     });
-  }
+  };
 
-  onChangeTitle(e: MouseEvent) {
-    this.setState({ tagName: (e.currentTarget as HTMLInputElement).value });
-  }
+  onChangeTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ tagName: e.currentTarget.value });
+  };
 
-  onChangePhrase(e: MouseEvent) {
-    this.setState({ tagPhrase: (e.currentTarget as HTMLInputElement).value });
-  }
+  onChangePhrase = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ tagPhrase: e.currentTarget.value });
+  };
 
-  onEditTag(tag: Tag) {
+  onEditTag = (tag: Tag) => {
     this.setState({
       isEditing: tag.id,
       tagName: tag.name,
-      tagPhrase: tag.phraseString,
+      tagPhrase: tag.phraseString ?? "",
     });
-  }
+  };
 
-  onFinishEdit() {
-    const tag = this.state.tags.find((t) => t.id == this.state.isEditing);
+  onFinishEdit = () => {
+    const tag = this.state.tags.find((t) => t.id == this.state.isEditing)!;
     tag.name = this.state.tagName;
     tag.phraseString = this.state.tagPhrase;
     this.setState({
@@ -488,17 +477,17 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
       tagName: "",
       tagPhrase: "",
     });
-  }
+  };
 
-  onRemoveAll() {
+  onRemoveAll = () => {
     this.setState({ openMenu: MO.removeAllAlert });
-  }
+  };
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
-  }
+  };
 
-  onCloseEditDialog() {
+  onCloseEditDialog = () => {
     if (
       this.state.isEditing == this.state.tags[this.state.tags.length - 1].id &&
       this.state.tagName === ""
@@ -507,13 +496,13 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     } else {
       this.onCloseDialog();
     }
-  }
+  };
 
-  onFinishRemoveAll() {
+  onFinishRemoveAll = () => {
     this.props.onUpdateTags([]);
     this.onCloseDialog();
-  }
+  };
 }
 
 (TagManager as any).displayName = "TagManager";
-export default withStyles(styles)(TagManager as any);
+export default withStyles(styles)(TagManager);

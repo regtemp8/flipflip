@@ -22,6 +22,7 @@ import {
   Radio,
   RadioGroup,
   Select,
+  SelectChangeEvent,
   Slide,
   Snackbar,
   Switch,
@@ -82,16 +83,16 @@ function TransitionUp(props: any) {
 interface APICardProps {
   classes: any;
   settings: RemoteSettings;
-  onUpdateSettings(fn: (settings: RemoteSettings) => void): void;
-  onUpdateConfig(fn: (config: Config) => void): void;
+  onUpdateSettings: (fn: (settings: RemoteSettings) => void) => void;
+  onUpdateConfig: (fn: (config: Config) => void) => void;
 }
 
 interface APICardState {
-  openMenu: string;
-  menuType: string;
+  openMenu?: string;
+  menuType?: string;
   snackbarOpen: boolean;
-  snackbar: string;
-  snackbarSeverity: string;
+  snackbar?: string;
+  snackbarSeverity?: string;
   input1: string;
   input2: string;
   input3: string;
@@ -103,11 +104,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
     super(props);
 
     this.state = {
-      openMenu: null as string,
-      menuType: null as string,
       snackbarOpen: false,
-      snackbar: null as string,
-      snackbarSeverity: null as string,
       input1: "",
       input2: "",
       input3: "",
@@ -129,20 +126,22 @@ class APICard extends React.Component<APICardProps, APICardState> {
     const indexOf = this.props.settings.tumblrKeys.indexOf(
       this.props.settings.tumblrKey,
     );
-    const menuType = this.state.menuType
-      ? en.get(this.state.menuType)[0].toUpperCase() +
-        en.get(this.state.menuType).slice(1)
-      : "";
-    let menuTypeSignOut = null;
+
+    const menuText = this.state.menuType
+      ? en.get(this.state.menuType)
+      : undefined;
+    const menuType =
+      menuText != null ? menuText[0].toUpperCase() + menuText.slice(1) : "";
+    let menuTypeSignOut = () => {};
     switch (this.state.menuType) {
       case ST.tumblr:
-        menuTypeSignOut = this.onFinishClearTumblr.bind(this);
+        menuTypeSignOut = this.onFinishClearTumblr;
         break;
       case ST.hydrus:
-        menuTypeSignOut = this.onFinishClearHydrus.bind(this);
+        menuTypeSignOut = this.onFinishClearHydrus;
         break;
       case ST.piwigo:
-        menuTypeSignOut = this.onFinishClearPiwigo.bind(this);
+        menuTypeSignOut = this.onFinishClearPiwigo;
         break;
     }
     return (
@@ -168,9 +167,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                   tumblrAuthorized ? classes.authorized : classes.noAuth,
                 )}
                 onClick={
-                  tumblrAuthorized
-                    ? this.onClearTumblr.bind(this)
-                    : this.onAuthTumblr.bind(this)
+                  tumblrAuthorized ? this.onClearTumblr : this.onAuthTumblr
                 }
                 size="large"
               >
@@ -194,9 +191,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                   hydrusConfigured ? classes.authorized : classes.noAuth,
                 )}
                 onClick={
-                  hydrusConfigured
-                    ? this.onClearHydrus.bind(this)
-                    : this.onAuthHydrus.bind(this)
+                  hydrusConfigured ? this.onClearHydrus : this.onAuthHydrus
                 }
                 size="large"
               >
@@ -220,9 +215,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                   piwigoConfigured ? classes.authorized : classes.noAuth,
                 )}
                 onClick={
-                  piwigoConfigured
-                    ? this.onClearPiwigo.bind(this)
-                    : this.onAuthPiwigo.bind(this)
+                  piwigoConfigured ? this.onClearPiwigo : this.onAuthPiwigo
                 }
                 size="large"
               >
@@ -236,7 +229,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 <Switch
                   checked={this.props.settings.silenceTumblrAlert}
                   disabled={!tumblrAuthorized}
-                  onChange={this.onBoolInput.bind(this, "silenceTumblrAlert")}
+                  onChange={(e) => this.onBoolInput("silenceTumblrAlert", e)}
                 />
               }
               label="Silence Tumblr Throttle Alert"
@@ -246,7 +239,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
 
         <Dialog
           open={this.state.openMenu === MO.signOut}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="sign-out-title"
           aria-describedby="sign-out-description"
         >
@@ -263,7 +256,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
             <Button onClick={menuTypeSignOut} color="primary">
@@ -277,7 +270,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
             this.state.openMenu === MO.signIn &&
             this.state.menuType === ST.tumblr
           }
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="sign-in-title"
           aria-describedby="sign-in-description"
         >
@@ -292,7 +285,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               You are about to be directed to{" "}
               <Link
                 href="#"
-                onClick={this.openLink.bind(this, "https://www.tumblr.com")}
+                onClick={() => this.openLink("https://www.tumblr.com")}
                 underline="hover"
               >
                 Tumblr.com
@@ -304,13 +297,10 @@ class APICard extends React.Component<APICardProps, APICardState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={this.onFinishAuthTumblr.bind(this)}
-              color="primary"
-            >
+            <Button onClick={this.onFinishAuthTumblr} color="primary">
               Authorize FlipFlip on Tumblr
             </Button>
           </DialogActions>
@@ -320,7 +310,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
           open={
             this.state.openMenu === MO.new && this.state.menuType === ST.tumblr
           }
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="tumblr-title"
           aria-describedby="tumblr-description"
         >
@@ -336,10 +326,9 @@ class APICard extends React.Component<APICardProps, APICardState> {
               registering and using your own on{" "}
               <Link
                 href="#"
-                onClick={this.openLink.bind(
-                  this,
-                  "https://www.tumblr.com/oauth/apps",
-                )}
+                onClick={() =>
+                  this.openLink("https://www.tumblr.com/oauth/apps")
+                }
                 underline="hover"
               >
                 Tumblr OAuth
@@ -347,10 +336,11 @@ class APICard extends React.Component<APICardProps, APICardState> {
               . Refer to the{" "}
               <Link
                 href="#"
-                onClick={this.openLink.bind(
-                  this,
-                  "https://regtemp8.github.io/flipflip/#/tumblr_api",
-                )}
+                onClick={() =>
+                  this.openLink(
+                    "https://regtemp8.github.io/flipflip/#/tumblr_api",
+                  )
+                }
                 underline="hover"
               >
                 FlipFlip documentation
@@ -362,7 +352,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 <DialogContentText>Choose a key:</DialogContentText>
                 <RadioGroup
                   value={indexOf + 1}
-                  onChange={this.onTumblrKeyInput.bind(this)}
+                  onChange={this.onTumblrKeyInput}
                 >
                   {[""]
                     .concat(Object.values(this.props.settings.tumblrKeys))
@@ -383,7 +373,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                   margin="dense"
                   label="Tumblr OAuth Consumer Key"
                   value={this.state.input1}
-                  onChange={this.onInput1.bind(this)}
+                  onChange={this.onInput1}
                 />
                 <TextField
                   variant="standard"
@@ -391,13 +381,13 @@ class APICard extends React.Component<APICardProps, APICardState> {
                   margin="dense"
                   label="Tumblr OAuth Consumer Secret"
                   value={this.state.input2}
-                  onChange={this.onInput2.bind(this)}
+                  onChange={this.onInput2}
                 />
               </div>
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
             <Button
@@ -405,7 +395,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 this.state.input1.length !== 50 ||
                 this.state.input2.length !== 50
               }
-              onClick={this.onContinueAuthTumblr.bind(this)}
+              onClick={this.onContinueAuthTumblr}
               color="primary"
             >
               Authorize FlipFlip on Tumblr
@@ -418,7 +408,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
             this.state.openMenu === MO.signIn &&
             this.state.menuType === ST.hydrus
           }
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="hydrus-title"
           aria-describedby="hydrus-description"
         >
@@ -440,7 +430,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               <Select
                 variant="standard"
                 value={this.state.input1}
-                onChange={this.onInput1.bind(this)}
+                onChange={this.onInput1Select}
               >
                 <MenuItem key="http" value="http">
                   http
@@ -456,14 +446,14 @@ class APICard extends React.Component<APICardProps, APICardState> {
               margin="dense"
               label="Hydrus Domain"
               value={this.state.input2}
-              onChange={this.onInput2.bind(this)}
+              onChange={this.onInput2}
             />
             <TextField
               variant="standard"
               margin="dense"
               label="Hydrus Port"
               value={this.state.input3}
-              onChange={this.onInput3.bind(this)}
+              onChange={this.onInput3}
             />
             <TextField
               variant="standard"
@@ -471,11 +461,11 @@ class APICard extends React.Component<APICardProps, APICardState> {
               margin="dense"
               label="Hydrus API Key"
               value={this.state.input4}
-              onChange={this.onInput4.bind(this)}
+              onChange={this.onInput4}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
             <Button
@@ -485,7 +475,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
                 this.state.input3.length === 0 ||
                 this.state.input4.length === 0
               }
-              onClick={this.onFinishAuthHydrus.bind(this)}
+              onClick={this.onFinishAuthHydrus}
               color="primary"
             >
               Configure Hydrus
@@ -498,7 +488,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
             this.state.openMenu === MO.signIn &&
             this.state.menuType === ST.piwigo
           }
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="piwigo-title"
           aria-describedby="piwigo-description"
         >
@@ -520,7 +510,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               <Select
                 variant="standard"
                 value={this.state.input1}
-                onChange={this.onInput1.bind(this)}
+                onChange={this.onInput1Select}
               >
                 <MenuItem key="http" value="http">
                   http
@@ -536,7 +526,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               margin="dense"
               label="Piwigo Host"
               value={this.state.input2}
-              onChange={this.onInput2.bind(this)}
+              onChange={this.onInput2}
             />
             <TextField
               variant="standard"
@@ -544,7 +534,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
               margin="dense"
               label="Username"
               value={this.state.input3}
-              onChange={this.onInput3.bind(this)}
+              onChange={this.onInput3}
             />
             <TextField
               variant="standard"
@@ -553,18 +543,18 @@ class APICard extends React.Component<APICardProps, APICardState> {
               label="Password"
               type="password"
               value={this.state.input4}
-              onChange={this.onInput4.bind(this)}
+              onChange={this.onInput4}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
             <Button
               disabled={
                 this.state.input1.length === 0 || this.state.input2.length === 0
               }
-              onClick={this.onFinishAuthPiwigo.bind(this)}
+              onClick={this.onFinishAuthPiwigo}
               color="primary"
             >
               Configure Piwigo
@@ -576,11 +566,11 @@ class APICard extends React.Component<APICardProps, APICardState> {
           open={this.state.snackbarOpen}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           autoHideDuration={20000}
-          onClose={this.onCloseSnack.bind(this)}
+          onClose={this.onCloseSnack}
           TransitionComponent={TransitionUp}
         >
           <Alert
-            onClose={this.onCloseSnack.bind(this)}
+            onClose={this.onCloseSnack}
             severity={this.state.snackbarSeverity as AlertColor}
           >
             {this.state.snackbar}
@@ -590,11 +580,11 @@ class APICard extends React.Component<APICardProps, APICardState> {
     );
   }
 
-  onClearTumblr() {
+  onClearTumblr = () => {
     this.setState({ openMenu: MO.signOut, menuType: ST.tumblr });
-  }
+  };
 
-  onFinishClearTumblr() {
+  onFinishClearTumblr = () => {
     // Update props
     this.props.onUpdateConfig((c) => {
       c.remoteSettings.tumblrOAuthToken = "";
@@ -606,13 +596,13 @@ class APICard extends React.Component<APICardProps, APICardState> {
       s.tumblrOAuthTokenSecret = "";
     });
     this.onCloseDialog();
-  }
+  };
 
-  onClearHydrus() {
+  onClearHydrus = () => {
     this.setState({ openMenu: MO.signOut, menuType: ST.hydrus });
-  }
+  };
 
-  onFinishClearHydrus() {
+  onFinishClearHydrus = () => {
     // Update props
     this.props.onUpdateConfig((c) => {
       c.remoteSettings.hydrusProtocol = "http";
@@ -628,13 +618,13 @@ class APICard extends React.Component<APICardProps, APICardState> {
       s.hydrusAPIKey = "";
     });
     this.onCloseDialog();
-  }
+  };
 
-  onClearPiwigo() {
+  onClearPiwigo = () => {
     this.setState({ openMenu: MO.signOut, menuType: ST.piwigo });
-  }
+  };
 
-  onFinishClearPiwigo() {
+  onFinishClearPiwigo = () => {
     // Update props
     this.props.onUpdateConfig((c) => {
       c.remoteSettings.piwigoProtocol = "http";
@@ -650,28 +640,28 @@ class APICard extends React.Component<APICardProps, APICardState> {
       s.piwigoPassword = "";
     });
     this.onCloseDialog();
-  }
+  };
 
-  onAuthTumblr() {
+  onAuthTumblr = () => {
     this.setState({
       openMenu: MO.new,
       menuType: ST.tumblr,
       input1: this.props.settings.tumblrKey,
       input2: this.props.settings.tumblrSecret,
     });
-  }
+  };
 
-  onContinueAuthTumblr() {
+  onContinueAuthTumblr = () => {
     // Update state
     this.props.onUpdateSettings((s) => {
       s.tumblrKey = this.state.input1;
       s.tumblrSecret = this.state.input2;
     });
     this.setState({ openMenu: MO.signIn, menuType: ST.tumblr });
-  }
+  };
 
-  onTumblrKeyInput(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onTumblrKeyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const value = Number.parseInt(input.value);
     if (value == 0) {
       this.changeKey("tumblrKey", "");
@@ -689,9 +679,9 @@ class APICard extends React.Component<APICardProps, APICardState> {
         input2: this.props.settings.tumblrSecrets[indexOf],
       });
     }
-  }
+  };
 
-  onAuthHydrus() {
+  onAuthHydrus = () => {
     this.setState({
       openMenu: MO.signIn,
       menuType: ST.hydrus,
@@ -700,9 +690,9 @@ class APICard extends React.Component<APICardProps, APICardState> {
       input3: this.props.settings.hydrusPort,
       input4: this.props.settings.hydrusAPIKey,
     });
-  }
+  };
 
-  onAuthPiwigo() {
+  onAuthPiwigo = () => {
     this.setState({
       openMenu: MO.signIn,
       menuType: ST.piwigo,
@@ -711,53 +701,58 @@ class APICard extends React.Component<APICardProps, APICardState> {
       input3: this.props.settings.piwigoUsername,
       input4: this.props.settings.piwigoPassword,
     });
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({
-      openMenu: null,
-      menuType: null,
+      openMenu: undefined,
+      menuType: undefined,
       input1: "",
       input2: "",
       input3: "",
       input4: "",
     });
-  }
+  };
 
-  openLink(url: string) {
+  openLink = (url: string) => {
     window.ipc.openExternal(url);
-  }
+  };
 
-  onCloseSnack() {
+  onCloseSnack = () => {
     this.setState({ snackbarOpen: false });
-  }
+  };
 
-  onInput1(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput1Select = (e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.setState({ input1: input.value });
-  }
+  };
 
-  onInput2(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    this.setState({ input1: input.value });
+  };
+
+  onInput2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ input2: input.value });
-  }
+  };
 
-  onInput3(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput3 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ input3: input.value });
-  }
+  };
 
-  onInput4(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput4 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ input4: input.value });
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.props.onUpdateSettings((s) => (s[key] = checked));
     this.props.onUpdateConfig((s) => (s.remoteSettings[key] = checked));
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
@@ -767,7 +762,7 @@ class APICard extends React.Component<APICardProps, APICardState> {
     this.props.onUpdateSettings(fn);
   }
 
-  onFinishAuthTumblr() {
+  onFinishAuthTumblr = () => {
     this.onCloseDialog();
 
     const { tumblrKey, tumblrSecret } = this.props.settings;
@@ -802,9 +797,9 @@ class APICard extends React.Component<APICardProps, APICardState> {
         });
       }
     });
-  }
+  };
 
-  onFinishAuthHydrus() {
+  onFinishAuthHydrus = () => {
     window.ipc
       .hydrusAuth(
         this.state.input1,
@@ -843,9 +838,9 @@ class APICard extends React.Component<APICardProps, APICardState> {
           this.onCloseDialog();
         }
       });
-  }
+  };
 
-  onFinishAuthPiwigo() {
+  onFinishAuthPiwigo = () => {
     window.ipc
       .piwigoAuth(
         this.state.input1,
@@ -883,8 +878,8 @@ class APICard extends React.Component<APICardProps, APICardState> {
         });
         this.onCloseDialog();
       });
-  }
+  };
 }
 
 (APICard as any).displayName = "APICard";
-export default withStyles(styles)(APICard as any);
+export default withStyles(styles)(APICard);

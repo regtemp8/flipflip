@@ -10,7 +10,7 @@ interface ZoomMoveProps {
   scene: Scene;
   reset: boolean;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   children?: React.ReactNode;
 }
 
@@ -134,13 +134,17 @@ export default class ZoomMove extends React.Component<ZoomMoveProps> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.transBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         transDuration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!transDuration) {
           transDuration = 1000;
         }
         break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.transTF,
+        );
     }
 
     const imageProps = useSpring({

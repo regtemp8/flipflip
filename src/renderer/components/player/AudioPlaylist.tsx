@@ -99,21 +99,21 @@ interface AudioPlaylistProps {
   scene: Scene;
   sidebar: boolean;
   startPlaying: boolean;
-  onAddTracks(playlistIndex: number): void;
-  onSourceOptions(audio: Audio): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
   persist?: boolean;
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
   scenePaths?: Array<any>;
-  goBack?(): void;
-  orderAudioTags?(audio: Audio): void;
-  onPlay?(source: Audio, displaySources: Array<Audio>): void;
-  onPlaying?(position: number, duration: number): void;
-  playTrack?(url: string): void;
-  playNextScene?(): void;
-  setCurrentAudio?(audio: Audio): void;
-  systemMessage?(message: string): void;
+  onAddTracks?: (playlistIndex: number) => void;
+  onSourceOptions: (playlistIndex: number, audio: Audio) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  goBack?: () => void;
+  orderAudioTags?: (audio: Audio) => void;
+  onPlay?: (source: Audio, displaySources: Array<Audio>) => void;
+  onPlaying?: (position: number, duration: number) => void;
+  playTrack?: (url: string) => void;
+  playNextScene?: () => void;
+  setCurrentAudio?: (audio: Audio) => void;
+  systemMessage?: (message: string) => void;
 }
 
 interface AudioPlaylistState {
@@ -146,8 +146,8 @@ class AudioPlaylist extends React.Component<
           <ListItem disableGutters>
             <ListItemIcon>
               <Avatar
-                alt={audio.name}
-                src={audio.thumb}
+                alt={audio.name ?? undefined}
+                src={audio.thumb ?? undefined}
                 className={classes.thumb}
               >
                 {audio.thumb == null && (
@@ -159,7 +159,9 @@ class AudioPlaylist extends React.Component<
           </ListItem>
           <AudioControl
             audio={audio}
-            audioEnabled={this.props.scene.audioEnabled || this.props.persist}
+            audioEnabled={
+              this.props.scene.audioEnabled || (this.props.persist ?? false)
+            }
             singleTrack={this.state.playingAudios.length == 1}
             lastTrack={
               this.state.currentIndex == this.state.playingAudios.length - 1
@@ -170,10 +172,10 @@ class AudioPlaylist extends React.Component<
             showMsTimestamp={this.props.showMsTimestamp}
             startPlaying={this.props.startPlaying}
             playTrack={this.props.playTrack}
-            nextTrack={this.nextTrack.bind(this)}
-            prevTrack={this.prevTrack.bind(this)}
+            nextTrack={this.nextTrack}
+            prevTrack={this.prevTrack}
             onPlaying={this.props.onPlaying}
-            onAudioSliderChange={this.onAudioSliderChange.bind(this)}
+            onAudioSliderChange={this.onAudioSliderChange}
             goBack={this.props.goBack}
             playNextScene={this.props.playNextScene}
           />
@@ -184,7 +186,7 @@ class AudioPlaylist extends React.Component<
                 "Shuffle " + (this.props.playlist.shuffle ? "(On)" : "(Off)")
               }
             >
-              <IconButton onClick={this.toggleShuffle.bind(this)} size="large">
+              <IconButton onClick={this.toggleShuffle} size="large">
                 <ShuffleIcon
                   color={this.props.playlist.shuffle ? "primary" : undefined}
                 />
@@ -201,7 +203,7 @@ class AudioPlaylist extends React.Component<
                     : "(One)")
               }
             >
-              <IconButton onClick={this.changeRepeat.bind(this)} size="large">
+              <IconButton onClick={this.changeRepeat} size="large">
                 {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                 {this.props.playlist.repeat == RP.all && (
                   <RepeatIcon color="primary" />
@@ -247,7 +249,9 @@ class AudioPlaylist extends React.Component<
                         disableInteractive
                         placement={a.comment ? "right" : "bottom"}
                         classes={
-                          a.comment ? { tooltip: classes.bigTooltip } : null
+                          a.comment
+                            ? { tooltip: classes.bigTooltip }
+                            : undefined
                         }
                         arrow={!!a.comment || (a.tags && a.tags.length > 0)}
                         title={
@@ -283,7 +287,7 @@ class AudioPlaylist extends React.Component<
                         }
                       >
                         <div
-                          onClick={this.onSourceIconClick.bind(this, a)}
+                          onClick={(e) => this.onSourceIconClick(a, e)}
                           className={classes.trackThumb}
                         >
                           {a.thumb != null && (
@@ -304,25 +308,25 @@ class AudioPlaylist extends React.Component<
                   <ListItemText primary={a.name} />
                   <ListItemSecondaryAction>
                     <Chip
-                      label={getTimestamp(a.duration)}
+                      label={
+                        a.duration != null ? getTimestamp(a.duration) : "-"
+                      }
                       color="default"
                       size="small"
                       variant="outlined"
                     />
                     <IconButton
                       edge="end"
-                      onClick={this.props.onSourceOptions.bind(
-                        this,
-                        this.props.playlistIndex,
-                        a,
-                      )}
+                      onClick={() =>
+                        this.props.onSourceOptions(this.props.playlistIndex, a)
+                      }
                       size="large"
                     >
                       <BuildIcon />
                     </IconButton>
                     <IconButton
                       edge="end"
-                      onClick={this.removeTrack.bind(this, i)}
+                      onClick={() => this.removeTrack(i)}
                       size="large"
                     >
                       <DeleteIcon color="error" />
@@ -339,10 +343,7 @@ class AudioPlaylist extends React.Component<
                   "Shuffle " + (this.props.playlist.shuffle ? "(On)" : "(Off)")
                 }
               >
-                <IconButton
-                  onClick={this.toggleShuffle.bind(this)}
-                  size="large"
-                >
+                <IconButton onClick={this.toggleShuffle} size="large">
                   <ShuffleIcon
                     color={this.props.playlist.shuffle ? "primary" : undefined}
                   />
@@ -359,7 +360,7 @@ class AudioPlaylist extends React.Component<
                       : "(One)")
                 }
               >
-                <IconButton onClick={this.changeRepeat.bind(this)} size="large">
+                <IconButton onClick={this.changeRepeat} size="large">
                   {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                   {this.props.playlist.repeat == RP.all && (
                     <RepeatIcon color="primary" />
@@ -372,10 +373,12 @@ class AudioPlaylist extends React.Component<
             </div>
             <Tooltip disableInteractive title="Add Tracks">
               <IconButton
-                onClick={this.props.onAddTracks.bind(
-                  this,
-                  this.props.playlistIndex,
-                )}
+                disabled={this.props.onAddTracks == null}
+                onClick={() => {
+                  if (this.props.onAddTracks != null) {
+                    this.props.onAddTracks(this.props.playlistIndex);
+                  }
+                }}
                 size="large"
               >
                 <AddIcon />
@@ -385,7 +388,7 @@ class AudioPlaylist extends React.Component<
               <Chip
                 label={getTimestamp(
                   this.props.playlist.audios.reduce(
-                    (total, a) => total + a.duration,
+                    (total, a) => total + (a.duration ?? 0),
                     0,
                   ),
                 )}
@@ -394,10 +397,7 @@ class AudioPlaylist extends React.Component<
                 variant="outlined"
               />
               <Tooltip disableInteractive title="Remove Playlist">
-                <IconButton
-                  onClick={this.removePlaylist.bind(this)}
-                  size="large"
-                >
+                <IconButton onClick={this.removePlaylist} size="large">
                   <ClearIcon color="error" />
                 </IconButton>
               </Tooltip>
@@ -408,7 +408,7 @@ class AudioPlaylist extends React.Component<
     }
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: AudioPlaylistProps) {
     if (!this.props.persist && this.props.scene !== props.scene) {
       this.restart();
     }
@@ -446,22 +446,26 @@ class AudioPlaylist extends React.Component<
     switch (e.key) {
       case "[":
         e.preventDefault();
-        this.props.orderAudioTags(
-          this.props.playlist.audios[this.state.currentIndex],
-        );
+        if (this.props.orderAudioTags != null) {
+          this.props.orderAudioTags(
+            this.props.playlist.audios[this.state.currentIndex],
+          );
+        }
         this.prevTrack();
         break;
       case "]":
         e.preventDefault();
-        this.props.orderAudioTags(
-          this.props.playlist.audios[this.state.currentIndex],
-        );
+        if (this.props.orderAudioTags != null) {
+          this.props.orderAudioTags(
+            this.props.playlist.audios[this.state.currentIndex],
+          );
+        }
         this.nextTrack();
         break;
     }
   };
 
-  onSourceIconClick(audio: Audio, e: MouseEvent) {
+  onSourceIconClick = (audio: Audio, e: React.MouseEvent<HTMLDivElement>) => {
     const sourceURL = audio.url;
     if (e.shiftKey && !e.ctrlKey) {
       this.openExternalURL(sourceURL);
@@ -475,19 +479,19 @@ class AudioPlaylist extends React.Component<
     ) {
       try {
         this.props.onPlay(audio, this.props.playlist.audios);
-      } catch (e) {
+      } catch {
         this.props.systemMessage(
           "The source " + sourceURL + " isn't in your Library",
         );
       }
     }
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);
   }
 
-  prevTrack() {
+  prevTrack = () => {
     let prevTrack = this.state.currentIndex - 1;
     if (prevTrack < 0) {
       prevTrack = this.state.playingAudios.length - 1;
@@ -496,9 +500,9 @@ class AudioPlaylist extends React.Component<
       this.props.setCurrentAudio(this.state.playingAudios[prevTrack]);
     }
     this.setState({ currentIndex: prevTrack });
-  }
+  };
 
-  nextTrack() {
+  nextTrack = () => {
     let nextTrack = this.state.currentIndex + 1;
     if (nextTrack >= this.state.playingAudios.length) {
       nextTrack = 0;
@@ -507,16 +511,16 @@ class AudioPlaylist extends React.Component<
       this.props.setCurrentAudio(this.state.playingAudios[nextTrack]);
     }
     this.setState({ currentIndex: nextTrack });
-  }
+  };
 
-  toggleShuffle() {
+  toggleShuffle = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.audioPlaylists[this.props.playlistIndex];
       playlist.shuffle = !playlist.shuffle;
     });
-  }
+  };
 
-  changeRepeat() {
+  changeRepeat = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.audioPlaylists[this.props.playlistIndex];
       const repeat = playlist.repeat;
@@ -532,26 +536,26 @@ class AudioPlaylist extends React.Component<
           break;
       }
     });
-  }
+  };
 
-  removePlaylist() {
+  removePlaylist = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       s.audioPlaylists.splice(this.props.playlistIndex, 1);
     });
-  }
+  };
 
-  removeTrack(trackIndex: number) {
+  removeTrack = (trackIndex: number) => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.audioPlaylists[this.props.playlistIndex];
       playlist.audios.splice(trackIndex, 1);
     });
-  }
+  };
 
-  onAudioSliderChange(e: MouseEvent, value: number) {
+  onAudioSliderChange = (e: Event, value: number) => {
     // TODO this is causing playback to skip to the next track
     //this.props.onUpdateScene(this.props.scene, (s) => s.audioPlaylists[this.props.playlistIndex].audios.find((a: Audio) => a.id == this.state.playingAudios[this.state.currentIndex].id).volume = value);
-  }
+  };
 }
 
 (AudioPlaylist as any).displayName = "AudioPlaylist";
-export default withStyles(styles)(AudioPlaylist as any);
+export default withStyles(styles)(AudioPlaylist);

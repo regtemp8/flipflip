@@ -5,6 +5,7 @@ import withStyles from "@mui/styles/withStyles";
 import Masonry from "@mui/lab/Masonry";
 
 import ImageView from "./ImageView";
+import Scene from "../../../common/Scene";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -31,6 +32,8 @@ const styles = (theme: Theme) =>
     },
   });
 
+const PLACEHOLDER_SCENE = new Scene("/", "win32");
+
 interface PictureGridProps {
   classes: any;
   pictures: Array<any>;
@@ -56,7 +59,7 @@ class PictureGrid extends React.Component<PictureGridProps> {
                 fitParent
                 hasStarted
                 removeChild
-                scene={null}
+                scene={PLACEHOLDER_SCENE}
                 pictureGrid
               />
             ))}
@@ -68,4 +71,4 @@ class PictureGrid extends React.Component<PictureGridProps> {
 }
 
 (PictureGrid as any).displayName = "PictureGrid";
-export default withStyles(styles)(PictureGrid as any);
+export default withStyles(styles)(PictureGrid);

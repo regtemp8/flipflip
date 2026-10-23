@@ -3,7 +3,12 @@ import * as React from "react";
 import { CircularProgress, Container, Typography } from "@mui/material";
 
 import { GO, IF, OF, OT, SL, SOF, ST, TF, VO, WF } from "../../../common/const";
-import { flatten, getRandomListItem, getRandomNumber } from "../../data/utils";
+import {
+  assertDefined,
+  flatten,
+  getRandomListItem,
+  getRandomNumber,
+} from "../../data/utils";
 import {
   getSourceType,
   isVideo,
@@ -23,7 +28,7 @@ import content from "./ContentLookup";
 interface ImagePlayerProps {
   config: Config;
   scene: Scene;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   gridView: boolean;
   advanceHack: ChildCallbackHack;
   contentLookupKey: string;
@@ -34,20 +39,20 @@ interface ImagePlayerProps {
   gridCoordinates?: Array<number>;
   isOverlay?: boolean;
   strobeLayer?: string;
-  setHistoryPaths(historyPaths: Array<any>): void;
-  setHistoryOffset(historyOffset: number): void;
-  onLoaded(): void;
-  setVideo(video: HTMLVideoElement): void;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  onEndScene?(): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  setTimeToNextFrame?(timeToNextFrame: number): void;
-  playNextScene?(): void;
+  setHistoryPaths: (historyPaths: Array<any>) => void;
+  setHistoryOffset: (historyOffset: number) => void;
+  onLoaded: () => void;
+  setVideo: (video?: HTMLVideoElement) => void;
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  onEndScene?: () => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  setTimeToNextFrame?: (timeToNextFrame: number) => void;
+  playNextScene?: () => void;
 }
 
 interface ImagePlayerState {
   readyToDisplay: Array<
-    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+    HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | null
   >;
   historyPaths: Array<HTMLImageElement | HTMLVideoElement | HTMLIFrameElement>;
   timeToNextFrame: number;
@@ -65,7 +70,7 @@ export default class ImagePlayer extends React.Component<
 
     this.state = {
       readyToDisplay: Array<
-        HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
+        HTMLImageElement | HTMLVideoElement | HTMLIFrameElement | null
       >(),
       historyPaths: Array<
         HTMLImageElement | HTMLVideoElement | HTMLIFrameElement
@@ -77,23 +82,24 @@ export default class ImagePlayer extends React.Component<
     };
   }
 
-  _backForth: number = null;
-  _isMounted: boolean;
-  _isLooping: boolean;
-  _loadedSources: Array<string>;
-  _loadedURLs: Array<string>;
-  _playedURLs: Array<string>;
-  _nextIndex: number;
-  _nextAdvIndex: number;
-  _sourceComplete: boolean;
-  _count: number;
-  _nextSourceIndex: Map<string, number>;
-  _timeout: number;
-  _waitTimeouts: Array<number>;
-  _imgLoadTimeouts: Array<number>;
-  _toggleStrobe: boolean;
-  _runFetchLoopCallRequests: Array<number>;
-  _animationFrameHandle: number;
+  _backForth?: number;
+  _isMounted: boolean = false;
+  _isLooping: boolean = false;
+  _loadedSources: Array<string> = [];
+  _loadedURLs: Array<string> = [];
+  _playedURLs: Array<string> = [];
+  _nextIndex: number = -1;
+  _nextAdvIndex: number = 0;
+  _sourceComplete: boolean = false;
+  _count: number = 0;
+  _nextSourceIndex: Map<string, number> = new Map<string, number>();
+  _timeout?: number;
+  _waitTimeouts: Array<number> = [];
+  _imgLoadTimeouts: Array<number> = [];
+  _toggleStrobe: boolean = false;
+  _runFetchLoopCallRequests: Array<number> = [];
+  _animationFrameHandle?: number;
+  _lastAdvance?: number;
 
   render() {
     let offset = this.getHistoryOffset();
@@ -210,26 +216,14 @@ export default class ImagePlayer extends React.Component<
     return this.props.historyOffset + this.state.historyOffset;
   }
 
-  _lastAdvance: number = null;
   componentDidMount() {
-    this._runFetchLoopCallRequests = [];
     this._isMounted = true;
-    this._isLooping = false;
-    this._loadedSources = new Array<string>();
-    this._loadedURLs = new Array<string>();
-    this._playedURLs = new Array<string>();
-    this._nextIndex = -1;
-    this._nextAdvIndex = 0;
-    this._sourceComplete = false;
-    this._count = 0;
-    this._nextSourceIndex = new Map<string, number>();
     this._waitTimeouts = new Array<number>(
       this.props.config.displaySettings.maxLoadingAtOnce,
-    ).fill(null);
+    );
     this._imgLoadTimeouts = new Array<number>(
       this.props.config.displaySettings.maxLoadingAtOnce,
-    ).fill(null);
-    this._toggleStrobe = false;
+    );
     this.props.advanceHack.listener = () => {
       let delay = 100;
       if (this.state.historyPaths.length > 0) {
@@ -243,7 +237,9 @@ export default class ImagePlayer extends React.Component<
       }
       if (this._lastAdvance == null || Date.now() - this._lastAdvance > delay) {
         this._lastAdvance = Date.now();
-        window.clearTimeout(this._timeout);
+        if (this._timeout != null) {
+          window.clearTimeout(this._timeout);
+        }
         this.advance(true, true);
       }
     };
@@ -259,37 +255,46 @@ export default class ImagePlayer extends React.Component<
   }
 
   componentWillUnmount() {
-    cancelAnimationFrame(this._animationFrameHandle);
-    window.clearTimeout(this._backForth);
-    window.clearTimeout(this._timeout);
+    if (this._animationFrameHandle != null) {
+      cancelAnimationFrame(this._animationFrameHandle);
+    }
+    if (this._backForth != null) {
+      window.clearTimeout(this._backForth);
+    }
+    if (this._timeout != null) {
+      window.clearTimeout(this._timeout);
+    }
     for (const timeout of this._waitTimeouts) {
       window.clearTimeout(timeout);
     }
     for (const timeout of this._imgLoadTimeouts) {
       window.clearTimeout(timeout);
     }
-    this._backForth = null;
-    this._timeout = null;
-    this._waitTimeouts = null;
-    this._imgLoadTimeouts = null;
-    this._isMounted = null;
-    this._isLooping = null;
-    this._loadedSources = null;
-    this._loadedURLs = null;
-    this._playedURLs = null;
-    this._nextIndex = null;
-    this._nextAdvIndex = null;
-    this._sourceComplete = null;
-    this._count = null;
-    this._nextSourceIndex = null;
-    this._toggleStrobe = null;
-    this.props.advanceHack.listener = null;
+    this._backForth = undefined;
+    this._timeout = undefined;
+    this._waitTimeouts = [];
+    this._imgLoadTimeouts = [];
+    this._isMounted = false;
+    this._isLooping = false;
+    this._loadedSources = [];
+    this._loadedURLs = [];
+    this._playedURLs = [];
+    this._nextIndex = -1;
+    this._nextAdvIndex = 0;
+    this._sourceComplete = false;
+    this._count = 0;
+    this._nextSourceIndex.clear();
+    this._toggleStrobe = false;
+    this.props.advanceHack.listener = undefined;
     if (this.props.deleteHack) {
-      this.props.deleteHack.listener = null;
+      this.props.deleteHack.listener = undefined;
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: ImagePlayerProps,
+    state: ImagePlayerState,
+  ): boolean {
     return (
       state.historyPaths !== this.state.historyPaths ||
       props.scene !== this.props.scene ||
@@ -303,7 +308,7 @@ export default class ImagePlayer extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: ImagePlayerProps) {
     if (
       ((!props.isPlaying && this.props.isPlaying) ||
         (!props.contentLookupKey && this.props.contentLookupKey) ||
@@ -313,7 +318,9 @@ export default class ImagePlayer extends React.Component<
       this.start();
     } else if (!this.props.isPlaying) {
       this._isLooping = false;
-      window.clearTimeout(this._timeout);
+      if (this._timeout != null) {
+        window.clearTimeout(this._timeout);
+      }
     }
     if (
       this.props.scene.orderFunction !== props.scene.orderFunction ||
@@ -327,21 +334,23 @@ export default class ImagePlayer extends React.Component<
       this.props.isPlaying &&
       this.props.hasStarted
     ) {
-      window.clearTimeout(this._backForth);
-      this._backForth = null;
       window.setTimeout(() => this.advance(true, false), 200);
       this._backForth = window.setTimeout(
-        this.backForth.bind(this, -1),
+        () => this.backForth(-1),
         this.getBackForthTiming(),
       );
-    } else if (props.scene.backForth && !this.props.scene.backForth) {
+    } else if (
+      props.scene.backForth &&
+      !this.props.scene.backForth &&
+      this._backForth != null
+    ) {
       window.clearTimeout(this._backForth);
-      this._backForth = null;
+      this._backForth = undefined;
     }
   }
 
   getBackForthTiming(): number {
-    let delay;
+    let delay = 0;
     switch (this.props.scene.backForthTF) {
       case TF.constant:
         delay = this.props.scene.backForthConstant;
@@ -369,7 +378,7 @@ export default class ImagePlayer extends React.Component<
       }
       case TF.bpm: {
         const bpmMulti = this.props.scene.strobeDelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         delay = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!delay) {
@@ -381,11 +390,11 @@ export default class ImagePlayer extends React.Component<
     return delay;
   }
 
-  backForth(newOffset: number) {
+  backForth = (newOffset: number) => {
     if (this.props.isPlaying && this._isMounted) {
       this.setState({ historyOffset: newOffset });
       this._backForth = window.setTimeout(
-        this.backForth.bind(this, newOffset == 0 ? -1 : 0),
+        () => this.backForth(newOffset == 0 ? -1 : 0),
         this.getBackForthTiming(),
       );
     } else {
@@ -393,9 +402,9 @@ export default class ImagePlayer extends React.Component<
         this.setState({ historyOffset: 0 });
       }
       window.clearTimeout(this._backForth);
-      this._backForth = null;
+      this._backForth = undefined;
     }
-  }
+  };
 
   delete() {
     const img =
@@ -420,7 +429,7 @@ export default class ImagePlayer extends React.Component<
     this.setState({
       historyPaths: newHistoryPaths,
       historyOffset: newHistoryOffset,
-      readyToDisplay: this.state.readyToDisplay.filter((i) => i.src != url),
+      readyToDisplay: this.state.readyToDisplay.filter((i) => i?.src != url),
     });
   }
 
@@ -432,23 +441,26 @@ export default class ImagePlayer extends React.Component<
     this.advance(true, true);
   }
 
-  startFetchLoops(max: number, loop = 0) {
+  startFetchLoops = (max: number, loop = 0) => {
     if (loop < max) {
       this.runFetchLoop(loop);
       // Put a small delay between our loops
       this._waitTimeouts[loop] = window.setTimeout(
-        this.startFetchLoops.bind(this, max, loop + 1),
+        () => this.startFetchLoops(max, loop + 1),
         10,
       );
     }
-  }
+  };
 
   animationFrame = () => {
     if (
       !this._isMounted ||
       content().isSingleImage(this.props.contentLookupKey)
     ) {
-      cancelAnimationFrame(this._animationFrameHandle);
+      if (this._animationFrameHandle != null) {
+        cancelAnimationFrame(this._animationFrameHandle);
+      }
+
       return;
     }
     let requestAnimation = false;
@@ -457,9 +469,13 @@ export default class ImagePlayer extends React.Component<
         this.props.config.displaySettings.maxLoadingAtOnce &&
       this.props.contentLookupKey
     ) {
-      while (this._runFetchLoopCallRequests.length > 0) {
+      const requests = this._runFetchLoopCallRequests.splice(
+        0,
+        this._runFetchLoopCallRequests.length,
+      );
+      for (const request of requests) {
         requestAnimation = true;
-        this.runFetchLoop(this._runFetchLoopCallRequests.shift());
+        this.runFetchLoop(request);
       }
     }
     if (requestAnimation) {
@@ -494,7 +510,7 @@ export default class ImagePlayer extends React.Component<
     let collection: string[];
     let url: string;
     let urlIndex: number;
-    let sourceIndex: number = null;
+    let sourceIndex: number | null = null;
     let sourceLength: number;
 
     // For source weighted
@@ -828,9 +844,11 @@ export default class ImagePlayer extends React.Component<
           }
           video.setAttribute("speed", speed.toString());
 
-          if (video.hasAttribute("start") && video.hasAttribute("end")) {
-            const start = Number.parseFloat(video.getAttribute("start"));
-            const end = Number.parseFloat(video.getAttribute("end"));
+          const startAttr = video.getAttribute("start");
+          const endAttr = video.getAttribute("end");
+          if (startAttr && endAttr) {
+            const start = Number.parseFloat(startAttr);
+            const end = Number.parseFloat(endAttr);
             if (
               this.props.scene.randomVideoStart &&
               (!this.props.scene.continueVideo || !video.currentTime)
@@ -849,11 +867,11 @@ export default class ImagePlayer extends React.Component<
           switch (this.props.scene.videoOption) {
             case VO.full: {
               let duration;
-              if (video.hasAttribute("start") && video.hasAttribute("end")) {
+              if (startAttr && endAttr) {
                 const start = video.currentTime
                   ? video.currentTime
-                  : Number.parseFloat(video.getAttribute("start"));
-                const end = Number.parseFloat(video.getAttribute("end"));
+                  : Number.parseFloat(startAttr);
+                const end = Number.parseFloat(endAttr);
                 duration = end - start;
               } else {
                 duration = video.duration - video.currentTime;
@@ -879,9 +897,9 @@ export default class ImagePlayer extends React.Component<
               break;
             case VO.atLeast: {
               let partDuration;
-              if (video.hasAttribute("start") && video.hasAttribute("end")) {
-                const start = Number.parseFloat(video.getAttribute("start"));
-                const end = Number.parseFloat(video.getAttribute("end"));
+              if (startAttr && endAttr) {
+                const start = Number.parseFloat(startAttr);
+                const end = Number.parseFloat(endAttr);
                 partDuration = end - start;
               } else {
                 partDuration = video.duration;
@@ -902,7 +920,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
             let readyToDisplay = this.state.readyToDisplay;
@@ -949,7 +967,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -997,7 +1015,10 @@ export default class ImagePlayer extends React.Component<
 
         video.onended = () => {
           if (this.props.scene.videoOption == VO.full) {
-            window.clearTimeout(this._timeout);
+            if (this._timeout != null) {
+              window.clearTimeout(this._timeout);
+            }
+
             this.advance(true, true);
           } else {
             video.play();
@@ -1051,7 +1072,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -1099,7 +1120,7 @@ export default class ImagePlayer extends React.Component<
               ? Number.parseInt(
                   this.state.historyPaths[
                     this.state.historyPaths.length - 1
-                  ].getAttribute("index"),
+                  ].getAttribute("index")!,
                 )
               : -1;
 
@@ -1221,8 +1242,8 @@ export default class ImagePlayer extends React.Component<
           window.ipc.getGifInfo(url).then((gifInfo) => {
             try {
               processInfo(gifInfo);
-            } catch (e) {
-              console.error(e);
+            } catch (err) {
+              console.error(err);
             }
           });
         } else {
@@ -1235,7 +1256,7 @@ export default class ImagePlayer extends React.Component<
   }
 
   _strictCheckCount = 0;
-  advance(force = false, schedule = true) {
+  advance = (force = false, schedule = true) => {
     // bail if dead
     if (!(
       force ||
@@ -1249,13 +1270,22 @@ export default class ImagePlayer extends React.Component<
     this._isLooping = true;
 
     let nextHistoryPaths = this.state.historyPaths;
-    let nextImg: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
+    let nextImg:
+      | HTMLImageElement
+      | HTMLVideoElement
+      | HTMLIFrameElement
+      | null
+      | undefined;
     if (this.props.historyOffset == 0) {
       if (
         this.props.scene.downloadScene &&
         this._playedURLs.length == this.props.scene.sources[0].count &&
         this.props.hasStarted
       ) {
+        assertDefined(
+          this.props.onEndScene,
+          "ImagePlayer requires onEndScene to be provided.",
+        );
         this.props.onEndScene();
       }
       if (
@@ -1307,7 +1337,7 @@ export default class ImagePlayer extends React.Component<
               this.state.readyToDisplay.shift();
               this._strictCheckCount = 0;
             }
-            nextImg = null;
+            nextImg = undefined;
           } else {
             nextImg =
               this.state.historyPaths[
@@ -1332,13 +1362,16 @@ export default class ImagePlayer extends React.Component<
           this.props.scene.continueVideo &&
           nextImg instanceof HTMLVideoElement
         ) {
+          const nextSrc = nextImg.src;
+          const nextStart = nextImg.getAttribute("start");
+          const nextEnd = nextImg.getAttribute("end");
           const videoFind = Array.from(this.state.historyPaths)
             .reverse()
             .find(
               (i) =>
-                i.src == nextImg.src &&
-                i.getAttribute("start") == nextImg.getAttribute("start") &&
-                i.getAttribute("end") == nextImg.getAttribute("end"),
+                i.src == nextSrc &&
+                i.getAttribute("start") == nextStart &&
+                i.getAttribute("end") == nextEnd,
             );
           if (videoFind) {
             nextImg = videoFind;
@@ -1350,7 +1383,7 @@ export default class ImagePlayer extends React.Component<
       while (
         nextHistoryPaths.length > this.props.config.displaySettings.maxInHistory
       ) {
-        nextHistoryPaths.shift().remove();
+        nextHistoryPaths.shift()!.remove();
       }
 
       if (
@@ -1403,9 +1436,7 @@ export default class ImagePlayer extends React.Component<
           break;
         case TF.bpm: {
           const bpmMulti = this.props.scene.timingBPMMulti / 10;
-          const bpm = this.props.currentAudio
-            ? this.props.currentAudio.bpm
-            : 60;
+          const bpm = this.props.currentAudio?.bpm ?? 60;
           timeToNextFrame = 60000 / (bpm * bpmMulti);
           // If we cannot parse this, default to 1s
           if (!timeToNextFrame) {
@@ -1414,12 +1445,12 @@ export default class ImagePlayer extends React.Component<
           break;
         }
       }
-      if (
-        nextImg &&
-        nextImg.getAttribute("duration") &&
-        timeToNextFrame < Number.parseFloat(nextImg.getAttribute("duration"))
-      ) {
-        timeToNextFrame = Number.parseFloat(nextImg.getAttribute("duration"));
+
+      const duration = Number.parseFloat(
+        nextImg?.getAttribute("duration") ?? "NaN",
+      );
+      if (timeToNextFrame < duration) {
+        timeToNextFrame = duration;
       }
       if (this.props.setTimeToNextFrame) {
         this.props.setTimeToNextFrame(timeToNextFrame);
@@ -1442,12 +1473,12 @@ export default class ImagePlayer extends React.Component<
           getSourceType(
             this.state.historyPaths[
               this.state.historyPaths.length - 1
-            ]?.getAttribute("source"),
+            ]?.getAttribute("source") ?? "",
           ) == ST.nimja
         )
       ) {
         this._timeout = window.setTimeout(
-          this.advance.bind(this, false, true),
+          () => this.advance(false, true),
           timeToNextFrame,
         );
       }
@@ -1457,7 +1488,7 @@ export default class ImagePlayer extends React.Component<
       });
       this.props.setHistoryPaths(nextHistoryPaths);
     }
-  }
+  };
 }
 
 (ImagePlayer as any).displayName = "ImagePlayer";

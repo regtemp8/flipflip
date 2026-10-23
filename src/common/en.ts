@@ -104,8 +104,6 @@ export default new Map<string, string>([
 
   ["st.tumblr", "Tumblr"],
   ["st.redgifs", "RedGifs"],
-  ["st.imagefap", "ImageFap"],
-  ["st.sexcom", "SexCom"],
   ["st.imgur", "Imgur"],
   ["st.deviantart", "DeviantArt"],
   ["st.danbooru", "Danbooru"],

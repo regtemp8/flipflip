@@ -60,31 +60,31 @@ interface ScriptSourceListProps {
   scenes: Array<Scene>;
   showHelp: boolean;
   sources: Array<CaptionScript>;
-  tutorial: string;
-  onEditScript(source: CaptionScript): void;
-  onPlay(
+  tutorial: string | null;
+  specialMode: string | null;
+  selected: Array<string>;
+  yOffset?: number;
+  onEditScript: (source: CaptionScript) => void;
+  onPlay: (
     source: CaptionScript,
     sceneID: number,
     displayed: Array<CaptionScript>,
-  ): void;
-  onUpdateLibrary(fn: (library: Array<CaptionScript>) => void): void;
-  onUpdateScript(script: CaptionScript): void;
-  systemMessage(message: string): void;
-  specialMode?: string;
-  selected?: Array<string>;
-  yOffset?: number;
-  onUpdateSelected?(selected: Array<string>): void;
-  savePosition?(): void;
+  ) => void;
+  onUpdateLibrary: (fn: (library: Array<CaptionScript>) => void) => void;
+  onUpdateScript: (script: CaptionScript) => void;
+  systemMessage: (message: string) => void;
+  onUpdateSelected: (selected: Array<string>) => void;
+  savePosition: () => void;
 }
 
 interface ScriptSourceListState {
-  sourceOptions: CaptionScript;
-  lastSelected: number;
+  sourceOptions?: CaptionScript;
+  lastSelected?: number;
   isEditing: number;
-  mouseX: any;
-  mouseY: any;
-  deleteDialog: CaptionScript;
-  beginPlay: CaptionScript;
+  mouseX?: any;
+  mouseY?: any;
+  deleteDialog?: CaptionScript;
+  beginPlay?: CaptionScript;
   playWithScene: number;
 }
 
@@ -96,14 +96,8 @@ class ScriptSourceList extends React.Component<
     super(props);
 
     this.state = {
-      sourceOptions: null as CaptionScript,
-      lastSelected: null as number,
       isEditing: -1,
-      mouseX: null as any,
-      mouseY: null as any,
-      deleteDialog: null as CaptionScript,
-      beginPlay: null as CaptionScript,
-      playWithScene: null as number,
+      playWithScene: 0,
     };
   }
 
@@ -173,14 +167,16 @@ class ScriptSourceList extends React.Component<
             <List
               id="sortable-list"
               disablePadding
-              onClick={this.clearLastSelected.bind(this)}
+              onClick={this.clearLastSelected}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list")}
+                helperContainer={() =>
+                  document.getElementById("sortable-list") as HTMLElement
+                }
                 distance={5}
                 height={height}
                 width={width}
-                onSortEnd={this.onSortEnd.bind(this)}
+                onSortEnd={this.onSortEnd}
               />
             </List>
           )}
@@ -188,7 +184,7 @@ class ScriptSourceList extends React.Component<
         {this.state.deleteDialog != null && (
           <Dialog
             open={true}
-            onClose={this.onCloseDeleteDialog.bind(this)}
+            onClose={this.onCloseDeleteDialog}
             aria-describedby="delete-description"
           >
             <DialogContent>
@@ -197,13 +193,10 @@ class ScriptSourceList extends React.Component<
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={this.onCloseDeleteDialog.bind(this)}
-                color="secondary"
-              >
+              <Button onClick={this.onCloseDeleteDialog} color="secondary">
                 Cancel
               </Button>
-              <Button onClick={this.onFinishDelete.bind(this)} color="primary">
+              <Button onClick={this.onFinishDelete} color="primary">
                 Delete
               </Button>
             </DialogActions>
@@ -212,14 +205,14 @@ class ScriptSourceList extends React.Component<
         {this.state.sourceOptions != null && (
           <ScriptOptions
             script={this.state.sourceOptions}
-            onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onCancel={this.onCloseSourceOptions}
+            onFinishEdit={this.onFinishSourceOptions}
           />
         )}
         {this.state.beginPlay != null && (
           <Dialog
             open={true}
-            onClose={this.onClosePlayDialog.bind(this)}
+            onClose={this.onClosePlayDialog}
             aria-describedby="play-description"
           >
             <DialogContent className={classes.scenePick}>
@@ -231,23 +224,17 @@ class ScriptSourceList extends React.Component<
                 menuIsOpen
                 allScenes={this.props.scenes}
                 value={this.state.playWithScene}
-                getSceneName={this.getSceneName.bind(this)}
-                onChange={this.onChangeScene.bind(this)}
+                getSceneName={this.getSceneName}
+                onChange={this.onChangeScene}
               />
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={this.onClosePlayDialog.bind(this)}
-                color="secondary"
-              >
+              <Button onClick={this.onClosePlayDialog} color="secondary">
                 Cancel
               </Button>
               <Button
-                disabled={
-                  this.state.playWithScene == null ||
-                  this.state.playWithScene == 0
-                }
-                onClick={this.onFinishPlay.bind(this)}
+                disabled={this.state.playWithScene == 0}
+                onClick={this.onFinishPlay}
                 color="primary"
               >
                 Play
@@ -259,14 +246,17 @@ class ScriptSourceList extends React.Component<
     );
   }
 
+  _shiftDown = false;
+  _lastChecked?: string = undefined;
+
   componentDidMount() {
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
     this._shiftDown = false;
-    this._lastChecked = null;
+    this._lastChecked = undefined;
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: ScriptSourceListProps) {
     if (
       this.props.sources.length != props.sources.length &&
       this.props.sources.length > 0 &&
@@ -279,12 +269,11 @@ class ScriptSourceList extends React.Component<
   componentWillUnmount() {
     removeEventListener("keydown", this.onKeyDown);
     addEventListener("keyup", this.onKeyUp);
-    this._shiftDown = null;
-    this._lastChecked = null;
-    this.savePosition();
+    this._shiftDown = false;
+    this._lastChecked = undefined;
+    this.props.savePosition();
   }
 
-  _shiftDown = false;
   onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = true;
   };
@@ -292,52 +281,53 @@ class ScriptSourceList extends React.Component<
     if (e.key == "Shift") this._shiftDown = false;
   };
 
-  savePosition() {
-    if (this.props.savePosition) {
-      this.props.savePosition();
-    }
-  }
-
-  clearLastSelected() {
+  clearLastSelected = () => {
     if (!this.state.sourceOptions) {
-      this.setState({ lastSelected: null });
+      this.setState({ lastSelected: undefined });
     }
-  }
+  };
 
-  onSourceOptions(source: CaptionScript, e: MouseEvent) {
+  onSourceOptions = (
+    source: CaptionScript,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     e.stopPropagation();
     this.setState({ sourceOptions: source, lastSelected: source.id });
-  }
+  };
 
-  onCloseSourceOptions() {
-    this.setState({ sourceOptions: null });
-  }
+  onCloseSourceOptions = () => {
+    this.setState({ sourceOptions: undefined });
+  };
 
-  onFinishSourceOptions(newScript: CaptionScript) {
+  onFinishSourceOptions = (newScript: CaptionScript) => {
+    const sourceOptions = this.state.sourceOptions!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceOptions.id);
-      Object.assign(editSource, newScript);
+      let editSource = a.find((a) => a.id == sourceOptions.id);
+      if (editSource != null) {
+        Object.assign(editSource, newScript);
+      }
     });
     this.props.onUpdateScript(newScript);
     this.onCloseSourceOptions();
-  }
+  };
 
-  onDelete(source: CaptionScript) {
+  onDelete = (source: CaptionScript) => {
     this.setState({ deleteDialog: source });
-  }
+  };
 
-  onCloseDeleteDialog() {
-    this.setState({ deleteDialog: null });
-  }
+  onCloseDeleteDialog = () => {
+    this.setState({ deleteDialog: undefined });
+  };
 
-  onFinishDelete() {
-    window.ipc.finishDelete(this.state.deleteDialog.url).then(() => {
-      this.onRemove(this.state.deleteDialog);
+  onFinishDelete = () => {
+    const toDelete = this.state.deleteDialog!;
+    window.ipc.finishDelete(toDelete.url).then(() => {
+      this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
-  }
+  };
 
-  onRemove(source: CaptionScript) {
+  onRemove = (source: CaptionScript) => {
     this.props.onUpdateSelected(
       this.props.selected.filter((url) => url != source.url),
     );
@@ -349,11 +339,10 @@ class ScriptSourceList extends React.Component<
         }
       });
     });
-  }
+  };
 
-  _lastChecked: string = null;
-  onToggleSelect(e: MouseEvent) {
-    const source = (e.currentTarget as HTMLInputElement).value;
+  onToggleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const source = e.currentTarget.value;
     if (this.props.specialMode == SP.selectSingle) {
       this.props.onUpdateSelected([source]);
     } else {
@@ -362,6 +351,7 @@ class ScriptSourceList extends React.Component<
         newSelected.splice(newSelected.indexOf(source), 1);
       } else {
         if (
+          this._lastChecked != null &&
           this.props.sources.map((s) => s.url).includes(this._lastChecked) &&
           this._shiftDown
         ) {
@@ -383,15 +373,15 @@ class ScriptSourceList extends React.Component<
       this._lastChecked = source;
       this.props.onUpdateSelected(newSelected);
     }
-  }
+  };
 
-  onStartEdit(id: number) {
+  onStartEdit = (id: number) => {
     this.setState({ isEditing: id });
-  }
+  };
 
-  onEndEdit(newURL: string) {
+  onEndEdit = (newURL: string) => {
     this.props.onUpdateLibrary((l) => {
-      const editSource = l.find((s) => s.id == this.state.isEditing);
+      const editSource = l.find((s) => s.id == this.state.isEditing)!;
       editSource.url = newURL;
 
       const newSources = new Array<CaptionScript>();
@@ -412,42 +402,43 @@ class ScriptSourceList extends React.Component<
         }
       }
       l.splice(0, l.length);
-      Array.prototype.push.apply(l, [].concat(newSources));
+      l.push(...newSources);
     });
     this.setState({ isEditing: -1 });
-  }
+  };
 
-  onPlay(source: CaptionScript) {
+  onPlay = (source: CaptionScript) => {
     this.setState({ beginPlay: source, playWithScene: 0 });
-  }
+  };
 
-  onClosePlayDialog() {
-    this.setState({ beginPlay: null, playWithScene: null });
-  }
+  onClosePlayDialog = () => {
+    this.setState({ beginPlay: undefined, playWithScene: 0 });
+  };
 
-  onFinishPlay() {
+  onFinishPlay = () => {
+    const beginPlay = this.state.beginPlay!;
     this.props.savePosition();
     try {
       this.props.onPlay(
-        this.state.beginPlay,
+        beginPlay,
         this.state.playWithScene,
         this.props.sources,
       );
-    } catch (e) {
+    } catch {
       this.props.systemMessage(
-        "The source " + this.state.beginPlay.url + " isn't in your Library",
+        "The source " + beginPlay.url + " isn't in your Library",
       );
     }
-  }
+  };
 
-  onChangeScene(sceneID: string) {
-    this.setState({ playWithScene: Number(sceneID) });
-  }
+  onChangeScene = (sceneID: number) => {
+    this.setState({ playWithScene: sceneID });
+  };
 
-  getSceneName(id: string): string {
+  getSceneName = (id: string): string => {
     if (id === "0") return "None";
-    return this.props.scenes.find((s) => s.id.toString() === id).name;
-  }
+    return this.props.scenes.find((s) => s.id.toString() === id)!.name;
+  };
 
   SortableVirtualList = SortableContainer<{ height: number; width: number }>(
     this.VirtualList.bind(this),
@@ -480,26 +471,26 @@ class ScriptSourceList extends React.Component<
         <ScriptSourceListItem
           key={index}
           checked={
-            this.props.specialMode && this.props.selected.includes(source.url)
+            this.props.specialMode != null &&
+            this.props.selected.includes(source.url)
           }
           index={index}
           isEditing={this.state.isEditing}
           specialMode={this.props.specialMode}
           lastSelected={source.id == this.state.lastSelected}
           source={source}
-          sources={this.props.sources}
           style={value.style}
           tutorial={this.props.tutorial}
-          onDelete={this.onDelete.bind(this)}
+          onDelete={this.onDelete}
           onEditScript={this.props.onEditScript}
-          onEndEdit={this.onEndEdit.bind(this)}
-          onPlay={this.onPlay.bind(this)}
-          onRemove={this.onRemove.bind(this)}
-          onSourceOptions={this.onSourceOptions.bind(this)}
-          onStartEdit={this.onStartEdit.bind(this)}
-          onToggleSelect={this.onToggleSelect.bind(this)}
-          savePosition={this.savePosition.bind(this)}
-          systemMessage={this.props.systemMessage.bind(this)}
+          onEndEdit={this.onEndEdit}
+          onPlay={this.onPlay}
+          onRemove={this.onRemove}
+          onSourceOptions={this.onSourceOptions}
+          onStartEdit={this.onStartEdit}
+          onToggleSelect={this.onToggleSelect}
+          savePosition={this.props.savePosition}
+          systemMessage={this.props.systemMessage}
         />
       );
     },
@@ -512,4 +503,4 @@ class ScriptSourceList extends React.Component<
 }
 
 (ScriptSourceList as any).displayName = "ScriptSourceList";
-export default withStyles(styles)(ScriptSourceList as any);
+export default withStyles(styles)(ScriptSourceList);

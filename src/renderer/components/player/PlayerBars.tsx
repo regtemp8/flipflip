@@ -59,6 +59,7 @@ import FadeIOCard from "../configGroups/FadeIOCard";
 import PanningCard from "../configGroups/PanningCard";
 import Audio from "../../../common/Audio";
 import SceneGrid from "../../../common/SceneGrid";
+import { assertDefined } from "../../data/utils";
 
 const drawerWidth = 340;
 
@@ -236,8 +237,8 @@ interface PlayerBarsProps {
   imagePlayerDeleteHack: ChildCallbackHack;
   isEmpty: boolean;
   isPlaying: boolean;
-  mainVideo: HTMLVideoElement;
-  overlayVideos: Array<Array<HTMLVideoElement>>;
+  mainVideo?: HTMLVideoElement;
+  overlayVideos: Array<Array<HTMLVideoElement | undefined>>;
   persistAudio: boolean;
   persistText: boolean;
   recentPictureGrid: boolean;
@@ -245,43 +246,44 @@ interface PlayerBarsProps {
   scenes: Array<Scene>;
   sceneGrids: Array<SceneGrid>;
   title: string;
-  tutorial: string;
-  goBack(): void;
-  historyBack(): void;
-  historyForward(): void;
-  navigateTagging(offset: number): void;
-  onGenerate(
+  tutorial?: string;
+  allTags?: Array<Tag>;
+  tags?: Array<Tag>;
+  goBack: () => void;
+  historyBack: () => void;
+  historyForward: () => void;
+  navigateTagging: (offset: number) => void;
+  onGenerate?: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
-  ): void;
-  onRecentPictureGrid(): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
-  playNextScene(): void;
-  play(): void;
-  pause(): void;
-  setCurrentAudio(audio: Audio): void;
-  allTags?: Array<Tag>;
-  tags?: Array<Tag>;
-  blacklistFile?(sourceURL: string, fileToBlacklist: string): void;
-  goToTagSource?(source: LibrarySource): void;
-  goToClipSource?(source: LibrarySource): void;
-  playTrack?(url: string): void;
-  onPlaying?(position: number, duration: number): void;
-  toggleTag?(sourceID: number, tag: Tag): void;
-  inheritTags?(sourceID: number): void;
+  ) => void;
+  onRecentPictureGrid: () => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  playNextScene?: () => void;
+  play: () => void;
+  pause: () => void;
+  setCurrentAudio: (audio: Audio) => void;
+  blacklistFile?: (sourceURL: string, fileToBlacklist: string) => void;
+  goToTagSource?: (source: LibrarySource) => void;
+  goToClipSource?: (source: LibrarySource) => void;
+  playTrack?: (url: string) => void;
+  onPlaying?: (position: number, duration: number) => void;
+  toggleTag?: (sourceID: number | null, tag: Tag) => void;
+  inheritTags?: (sourceID: number | null) => void;
 }
 
 interface PlayerBarsState {
   appBarHover: boolean;
   drawerHover: boolean;
   tagDrawerHover: boolean;
-  blacklistSource: string;
-  blacklistFile: string;
-  deletePath: string;
-  deleteError: string;
+  blacklistSource?: string;
+  blacklistFile?: string;
+  deletePath?: string;
+  deleteError?: string;
 }
 
+// FIXME use discriminator to determine what to show and which props are required
 class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   constructor(props: PlayerBarsProps) {
     super(props);
@@ -290,36 +292,31 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       appBarHover: false,
       drawerHover: false,
       tagDrawerHover: false,
-      blacklistSource: null as string,
-      blacklistFile: null as string,
-      deletePath: null as string,
-      deleteError: null as string,
     };
   }
 
-  _interval: number = null;
-  _appBarTimeout: any = null;
-  _drawerTimeout: any = null;
-  _tagDrawerTimeout: any = null;
+  _appBarTimeout?: number = undefined;
+  _drawerTimeout?: number = undefined;
+  _tagDrawerTimeout?: number = undefined;
   _showVideoControls = false;
   _alwaysOnTop = false;
   _fullScreen = false;
   _showMenu = false;
-  _removeOnPlayPause: () => void = null;
-  _removeOnNavigateBack: () => void = null;
-  _removeOnToggleFullscreen: () => void = null;
-  _removeOnToggleAlwaysOnTop: () => void = null;
-  _removeOnToggleMenuBarDisplay: () => void = null;
-  _removeOnHistoryBack: () => void = null;
-  _removeOnHistoryForward: () => void = null;
-  _removeOnDelete: () => void = null;
-  _removeOnPrevSource: () => void = null;
-  _removeOnNextSource: () => void = null;
-  _removeOnBlacklistFile: () => void = null;
-  _removeOnDeletePath: () => void = null;
-  _removeOnGoToTagSource: () => void = null;
-  _removeOnGoToClipSource: () => void = null;
-  _removeOnShowRecentPictureGrid: () => void = null;
+  _removeOnPlayPause?: () => void = undefined;
+  _removeOnNavigateBack?: () => void = undefined;
+  _removeOnToggleFullscreen?: () => void = undefined;
+  _removeOnToggleAlwaysOnTop?: () => void = undefined;
+  _removeOnToggleMenuBarDisplay?: () => void = undefined;
+  _removeOnHistoryBack?: () => void = undefined;
+  _removeOnHistoryForward?: () => void = undefined;
+  _removeOnDelete?: () => void = undefined;
+  _removeOnPrevSource?: () => void = undefined;
+  _removeOnNextSource?: () => void = undefined;
+  _removeOnBlacklistFile?: () => void = undefined;
+  _removeOnDeletePath?: () => void = undefined;
+  _removeOnGoToTagSource?: () => void = undefined;
+  _removeOnGoToClipSource?: () => void = undefined;
+  _removeOnShowRecentPictureGrid?: () => void = undefined;
 
   render() {
     const classes = this.props.classes;
@@ -328,8 +325,8 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       this.props.historyOffset > -(this.props.historyPaths.length - 1);
     const canGoForward = this.props.historyOffset < 0;
     const tagNames = this.props.tags ? this.props.tags.map((t) => t.name) : [];
-    let clipValue = null;
-    let clipID: number = null;
+    let clipValue: number[] | undefined = undefined;
+    let clipID: number | undefined = undefined;
     let source = null;
     if (
       this.props.mainVideo &&
@@ -337,10 +334,12 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       this.props.mainVideo.hasAttribute("end")
     ) {
       clipValue = [
-        Number.parseFloat(this.props.mainVideo.getAttribute("start")),
-        Number.parseFloat(this.props.mainVideo.getAttribute("end")),
+        Number.parseFloat(this.props.mainVideo.getAttribute("start") ?? "NaN"),
+        Number.parseFloat(this.props.mainVideo.getAttribute("end") ?? "NaN"),
       ];
-      clipID = Number.parseInt(this.props.mainVideo.getAttribute("clip"));
+      clipID = Number.parseInt(
+        this.props.mainVideo.getAttribute("clip") ?? "NaN",
+      );
       const sourceURL = this.props.mainVideo.getAttribute("source");
       source = this.props.scene.sources.find((s) => s.url == sourceURL);
     }
@@ -353,10 +352,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
     return (
       <React.Fragment>
-        <div
-          className={classes.hoverLayer}
-          onMouseMove={this.onMouseMove.bind(this)}
-        />
+        <div className={classes.hoverLayer} onMouseMove={this.onMouseMove} />
 
         <AppBar
           enableColorOnDark
@@ -379,7 +375,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                   edge="start"
                   color="inherit"
                   aria-label="Back"
-                  onClick={this.navigateBack.bind(this)}
+                  onClick={this.navigateBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -405,7 +401,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                   edge="start"
                   color="inherit"
                   aria-label="FullScreen"
-                  onClick={this.toggleFull.bind(this)}
+                  onClick={this.toggleFull}
                   size="large"
                 >
                   <FullscreenIcon fontSize="large" />
@@ -423,7 +419,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                     edge="start"
                     color="inherit"
                     aria-label="Backward"
-                    onClick={this.historyBack.bind(this)}
+                    onClick={this.historyBack}
                     size="large"
                   >
                     <ForwardIcon
@@ -435,10 +431,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                     edge="start"
                     color="inherit"
                     aria-label={this.props.isPlaying ? "Pause" : "Play"}
-                    onClick={this.setPlayPause.bind(
-                      this,
-                      !this.props.isPlaying,
-                    )}
+                    onClick={this.setPlayPause}
                     size="large"
                   >
                     {this.props.isPlaying ? (
@@ -451,7 +444,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                     edge="start"
                     color="inherit"
                     aria-label="Forward"
-                    onClick={this.historyForward.bind(this)}
+                    onClick={this.historyForward}
                     size="large"
                   >
                     <ForwardIcon
@@ -513,14 +506,16 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                       isPlaying={this.props.isPlaying}
                       mainVideo={this.props.mainVideo}
                       mainClip={
-                        source ? source.clips.find((c) => c.id == clipID) : null
+                        source
+                          ? source.clips.find((c) => c.id == clipID)
+                          : undefined
                       }
-                      mainClipValue={clipValue ? clipValue : null}
+                      mainClipValue={clipValue}
                       otherVideos={this.props.overlayVideos}
                       imagePlayerAdvanceHacks={
                         this.props.imagePlayerAdvanceHacks
                       }
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      onUpdateScene={this.props.onUpdateScene}
                     />
                   </AccordionDetails>
                 </Accordion>
@@ -539,7 +534,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         allSceneGrids={this.props.sceneGrids}
                         isTagging={this.props.allTags != null}
                         scene={this.props.scene}
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                         onGenerate={this.props.onGenerate}
                       />
                     </AccordionDetails>
@@ -555,7 +550,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         isPlayer
                         isConfig={false}
                         scene={this.props.scene}
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -571,7 +566,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -587,7 +582,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -603,7 +598,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -619,7 +614,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -635,7 +630,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -651,7 +646,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                         easingControls={
                           this.props.config.displaySettings.easingControls
                         }
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -677,13 +672,13 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                       scenePaths={this.props.historyPaths}
                       startPlaying
                       persist={this.props.persistAudio}
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
-                      goBack={this.navigateBack.bind(this)}
-                      orderAudioTags={this.orderAudioTags.bind(this)}
+                      onUpdateScene={this.props.onUpdateScene}
+                      goBack={this.navigateBack}
+                      orderAudioTags={this.orderAudioTags}
                       onPlaying={this.props.onPlaying}
                       playTrack={this.props.playTrack}
                       playNextScene={this.props.playNextScene}
-                      setCurrentAudio={this.props.setCurrentAudio.bind(this)}
+                      setCurrentAudio={this.props.setCurrentAudio}
                     />
                   </AccordionDetails>
                 </Accordion>
@@ -700,7 +695,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                       <TextCard
                         sidebar
                         scene={this.props.scene}
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onUpdateScene={this.props.onUpdateScene}
                       />
                     </AccordionDetails>
                   </Accordion>
@@ -739,11 +734,16 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                             key={tag.id}
                           >
                             <CardActionArea
-                              onClick={this.props.toggleTag.bind(
-                                this,
-                                this.props.scene.libraryID,
-                                tag,
-                              )}
+                              onClick={() => {
+                                if (this.props.toggleTag == null) {
+                                  return;
+                                }
+
+                                this.props.toggleTag(
+                                  this.props.scene.libraryID,
+                                  tag,
+                                );
+                              }}
                             >
                               <CardContent className={classes.tagContent}>
                                 <Typography component="h6" variant="body2">
@@ -766,10 +766,15 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                             <Fab
                               color="primary"
                               size="small"
-                              onClick={this.props.inheritTags.bind(
-                                this,
-                                this.props.scene.libraryID,
-                              )}
+                              onClick={() => {
+                                if (this.props.inheritTags == null) {
+                                  return;
+                                }
+
+                                this.props.inheritTags(
+                                  this.props.scene.libraryID,
+                                );
+                              }}
                             >
                               <SystemUpdateAltIcon />
                             </Fab>
@@ -784,12 +789,8 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                       ST.video && (
                       <VideoControl
                         video={this.props.mainVideo}
-                        clip={
-                          source
-                            ? source.clips.find((c) => c.id == clipID)
-                            : null
-                        }
-                        clipValue={clipValue ? clipValue : null}
+                        clip={source?.clips.find((c) => c.id == clipID)}
+                        clipValue={clipValue}
                         useHotkeys
                         skip={this.props.scene.videoSkip}
                         onChangeVolume={() => {}}
@@ -802,33 +803,32 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
         <Dialog
           open={!!this.state.blacklistFile}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="blacklist-title"
           aria-describedby="blacklist-description"
         >
           <DialogTitle id="blacklist-title">Blacklist File</DialogTitle>
           <DialogContent>
-            <DialogContentText id="blacklist-description">
-              Are you sure you want to blacklist{" "}
-              <Link
-                className={classes.wordWrap}
-                href="#"
-                onClick={this.openLink.bind(this, this.state.blacklistFile)}
-                underline="hover"
-              >
-                {this.state.blacklistFile}
-              </Link>{" "}
-              ?
-            </DialogContentText>
+            {this.state.blacklistFile && (
+              <DialogContentText id="blacklist-description">
+                Are you sure you want to blacklist{" "}
+                <Link
+                  className={classes.wordWrap}
+                  href="#"
+                  onClick={() => this.openLink(this.state.blacklistFile!)}
+                  underline="hover"
+                >
+                  {this.state.blacklistFile}
+                </Link>{" "}
+                ?
+              </DialogContentText>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={this.onFinishBlacklistFile.bind(this)}
-              color="primary"
-            >
+            <Button onClick={this.onFinishBlacklistFile} color="primary">
               Yes
             </Button>
           </DialogActions>
@@ -836,7 +836,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
         <Dialog
           open={!!this.state.deletePath}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="delete-title"
           aria-describedby="delete-description"
         >
@@ -848,7 +848,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
                 <Link
                   className={classes.wordWrap}
                   href="#"
-                  onClick={this.openLink.bind(this, this.state.deletePath)}
+                  onClick={() => this.openLink(this.state.deletePath!)}
                   underline="hover"
                 >
                   {this.state.deletePath}
@@ -857,13 +857,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onCloseDialog.bind(this)} color="secondary">
+            <Button onClick={this.onCloseDialog} color="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={this.onFinishDeletePath.bind(this)}
-              color="primary"
-            >
+            <Button onClick={this.onFinishDeletePath} color="primary">
               Yes
             </Button>
           </DialogActions>
@@ -871,7 +868,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
         <Dialog
           open={!!this.state.deleteError}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-describedby="delete-error-description"
         >
           <DialogContent>
@@ -902,14 +899,18 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   }
 
   componentWillUnmount() {
-    clearInterval(this._interval);
-    this._interval = null;
-    clearTimeout(this._appBarTimeout);
-    clearTimeout(this._drawerTimeout);
-    clearTimeout(this._tagDrawerTimeout);
-    this._appBarTimeout = null;
-    this._drawerTimeout = null;
-    this._tagDrawerTimeout = null;
+    if (this._appBarTimeout != null) {
+      window.clearTimeout(this._appBarTimeout);
+      this._appBarTimeout = undefined;
+    }
+    if (this._drawerTimeout != null) {
+      window.clearTimeout(this._drawerTimeout);
+      this._drawerTimeout = undefined;
+    }
+    if (this._tagDrawerTimeout != null) {
+      window.clearTimeout(this._tagDrawerTimeout);
+      this._tagDrawerTimeout = undefined;
+    }
 
     if (this._removeOnPlayPause != null) {
       this._removeOnPlayPause();
@@ -1016,66 +1017,76 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     );
   };
 
-  getScene(id: number): Scene | SceneGrid {
-    if (id == null) return null;
+  getScene(id?: number): Scene | SceneGrid | undefined {
+    if (id == null) {
+      return undefined;
+    }
+
     if (id.toString().startsWith("999")) {
-      return this.props.sceneGrids.find(
-        (s) => s.id.toString() == id.toString().replace("999", ""),
-      );
+      const gridID = id.toString().replace("999", "");
+      return this.props.sceneGrids.find((s) => s.id.toString() == gridID);
     } else {
       return this.props.scenes.find((s) => s.id == id);
     }
   }
 
-  openLink(url: string) {
+  openLink = (url: string) => {
     window.ipc.openExternal(url);
-  }
+  };
 
-  onMouseMove() {
-    clearTimeout(this._appBarTimeout);
+  onMouseMove = () => {
+    window.clearTimeout(this._appBarTimeout);
     this.setState({
       appBarHover: true,
       drawerHover: true,
       tagDrawerHover: true,
     });
-    this._appBarTimeout = setTimeout(() => {
+    this._appBarTimeout = window.setTimeout(() => {
       this.setState({
         appBarHover: false,
         drawerHover: false,
         tagDrawerHover: false,
       });
     }, 3000);
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({
-      blacklistSource: null,
-      blacklistFile: null,
-      deletePath: null,
-      deleteError: null,
+      blacklistSource: undefined,
+      blacklistFile: undefined,
+      deletePath: undefined,
+      deleteError: undefined,
     });
-  }
+  };
 
-  onBlacklistFile(source: string, fileToBlacklist: string) {
+  onBlacklistFile = (source: string, fileToBlacklist: string) => {
     if (this.props.config.generalSettings.confirmBlacklist) {
       this.setState({
         blacklistSource: source,
         blacklistFile: fileToBlacklist,
       });
     } else {
+      assertDefined(
+        this.props.blacklistFile,
+        "PlayerBars requires blacklistFile to be provided.",
+      );
       this.props.blacklistFile(source, fileToBlacklist);
     }
-  }
+  };
 
-  onFinishBlacklistFile() {
-    this.props.blacklistFile(
-      this.state.blacklistSource,
-      this.state.blacklistFile,
+  onFinishBlacklistFile = () => {
+    assertDefined(
+      this.props.blacklistFile,
+      "PlayerBars requires blacklistFile to be provided.",
     );
-    this.onCloseDialog();
-  }
 
-  onDeletePath(path: string) {
+    const blacklistSource = this.state.blacklistSource!;
+    const blacklistFile = this.state.blacklistFile!;
+    this.props.blacklistFile(blacklistSource, blacklistFile);
+    this.onCloseDialog();
+  };
+
+  onDeletePath = (path: string) => {
     window.ipc.fileExists(path).then((exists) => {
       if (exists) {
         if (this.props.config.generalSettings.confirmFileDeletion) {
@@ -1085,18 +1096,18 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         }
       } else {
         this.setState({
-          deletePath: null,
+          deletePath: undefined,
           deleteError: "This file doesn't exist, cannot delete",
         });
       }
     });
-  }
+  };
 
   doDelete(path: string) {
     window.ipc.finishDelete(path).then((err) => {
       if (err) {
         this.setState({
-          deletePath: null,
+          deletePath: undefined,
           deleteError: "An error occurred while deleting the file: " + err,
         });
       } else {
@@ -1106,31 +1117,31 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     });
   }
 
-  onFinishDeletePath() {
-    this.doDelete(this.state.deletePath);
-  }
+  onFinishDeletePath = () => {
+    this.doDelete(this.state.deletePath!);
+  };
 
-  toggleFull() {
+  toggleFull = () => {
     const toggleFull = !this._fullScreen;
     this.setFullscreen(toggleFull);
     this.setMenuBarVisibility(toggleFull);
-  }
+  };
 
-  historyBack() {
+  historyBack = () => {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       if (this.props.historyOffset > -(this.props.historyPaths.length - 1)) {
         this.props.historyBack();
       }
     }
-  }
+  };
 
-  historyForward() {
+  historyForward = () => {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       if (this.props.historyOffset >= 0) {
         this.props.imagePlayerAdvanceHacks[0][0].fire();
@@ -1138,7 +1149,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         this.props.historyForward();
       }
     }
-  }
+  };
 
   setMenuBarVisibility(showMenu: boolean) {
     this._showMenu = showMenu;
@@ -1155,36 +1166,30 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       return;
     }
 
-    this._removeOnPlayPause = window.ipc.onPlayerMenuPlayPause(
-      this.playPause.bind(this),
-    );
+    this._removeOnPlayPause = window.ipc.onPlayerMenuPlayPause(this.playPause);
     this._removeOnNavigateBack = window.ipc.onPlayerMenuNavigateBack(
-      this.navigateBack.bind(this),
+      this.navigateBack,
     );
     this._removeOnToggleFullscreen = window.ipc.onPlayerMenuToggleFullscreen(
-      this.toggleFullscreen.bind(this),
+      this.toggleFullscreen,
     );
     this._removeOnToggleAlwaysOnTop = window.ipc.onPlayerMenuToggleAlwaysOnTop(
-      this.toggleAlwaysOnTop.bind(this),
+      this.toggleAlwaysOnTop,
     );
     this._removeOnToggleMenuBarDisplay =
-      window.ipc.onPlayerMenuToggleMenuBarDisplay(
-        this.toggleMenuBarDisplay.bind(this),
-      );
+      window.ipc.onPlayerMenuToggleMenuBarDisplay(this.toggleMenuBarDisplay);
     this._removeOnHistoryBack = window.ipc.onPlayerMenuHistoryBack(
-      this.historyBack.bind(this),
+      this.historyBack,
     );
     this._removeOnHistoryForward = window.ipc.onPlayerMenuHistoryForward(
-      this.historyForward.bind(this),
+      this.historyForward,
     );
-    this._removeOnDelete = window.ipc.onPlayerMenuOnDelete(
-      this.onDelete.bind(this),
-    );
+    this._removeOnDelete = window.ipc.onPlayerMenuOnDelete(this.onDelete);
     this._removeOnPrevSource = window.ipc.onPlayerMenuPrevSource(
-      this.prevSource.bind(this),
+      this.prevSource,
     );
     this._removeOnNextSource = window.ipc.onPlayerMenuNextSource(
-      this.nextSource.bind(this),
+      this.nextSource,
     );
 
     const { fullScreen, alwaysOnTop, showMenu } =
@@ -1209,28 +1214,46 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
       return;
     }
 
-    const goToTagSource = (source: string) =>
+    const goToTagSource = (source: string) => {
+      assertDefined(
+        this.props.goToTagSource,
+        "PlayerBars requires goToTagSource to be provided.",
+      );
       this.props.goToTagSource(new LibrarySource({ url: source }));
-    const goToClipSource = (source: string) =>
+    };
+    const goToClipSource = (source: string) => {
+      assertDefined(
+        this.props.goToClipSource,
+        "PlayerBars requires goToClipSource to be provided.",
+      );
       this.props.goToClipSource(new LibrarySource({ url: source }));
+    };
 
     this._removeOnBlacklistFile = window.ipc.onBlacklistFile(
-      this.onBlacklistFile.bind(this),
+      this.onBlacklistFile,
     );
-    this._removeOnDeletePath = window.ipc.onDeletePath(
-      this.onDeletePath.bind(this),
-    );
+    this._removeOnDeletePath = window.ipc.onDeletePath(this.onDeletePath);
     this._removeOnGoToTagSource = window.ipc.onGoToTagSource(goToTagSource);
     this._removeOnGoToClipSource = window.ipc.onGoToClipSource(goToClipSource);
     this._removeOnShowRecentPictureGrid = window.ipc.onShowRecentPictureGrid(
-      this.props.onRecentPictureGrid.bind(this),
+      this.props.onRecentPictureGrid,
     );
     window.ipc.onClosePlayerContextMenu(() => {
-      this._removeOnBlacklistFile();
-      this._removeOnDeletePath();
-      this._removeOnGoToTagSource();
-      this._removeOnGoToClipSource();
-      this._removeOnShowRecentPictureGrid();
+      if (this._removeOnBlacklistFile != null) {
+        this._removeOnBlacklistFile();
+      }
+      if (this._removeOnDeletePath != null) {
+        this._removeOnDeletePath();
+      }
+      if (this._removeOnGoToTagSource != null) {
+        this._removeOnGoToTagSource();
+      }
+      if (this._removeOnGoToClipSource != null) {
+        this._removeOnGoToClipSource();
+      }
+      if (this._removeOnShowRecentPictureGrid != null) {
+        this._removeOnShowRecentPictureGrid();
+      }
     });
 
     const doShowGotoTagSource = !this.props.allTags;
@@ -1255,7 +1278,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
     switch (e.key) {
       case " ":
         if ((!this.state.drawerHover || focus != "input") && !e.shiftKey) {
@@ -1342,7 +1365,11 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     }
   };
 
-  orderAudioTags(audio: Audio) {
+  orderAudioTags = (audio: Audio) => {
+    assertDefined(
+      this.props.allTags,
+      "PlayerBars requires allTags to be provided.",
+    );
     const tagNames = this.props.allTags.map((t: Tag) => t.name);
     // Re-order the tags of the audio we were playing
     audio.tags = audio.tags.sort((a: Tag, b: Tag) => {
@@ -1356,9 +1383,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         return 0;
       }
     });
-  }
+  };
 
-  setPlayPause(play: boolean) {
+  setPlayPause = () => {
+    const play = !this.props.isPlaying;
     if (play) {
       this.props.play();
     } else {
@@ -1366,18 +1394,18 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     }
 
     window.ipc.playerMenuSetPlayPause(play);
-  }
+  };
 
   setAlwaysOnTop(alwaysOnTop: boolean) {
     this._alwaysOnTop = alwaysOnTop;
     window.ipc.setAllwaysOnTop(alwaysOnTop);
   }
 
-  navigateBack() {
+  navigateBack = () => {
     this.setFullscreen(false);
     this.setMenuBarVisibility(true);
     this.props.goBack();
-  }
+  };
 
   copyImageToClipboard() {
     const { src } =
@@ -1391,10 +1419,10 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
 
   /* Menu and hotkey options DON'T DELETE */
 
-  onDelete() {
+  onDelete = () => {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
       const img =
         this.props.historyPaths[
@@ -1407,7 +1435,7 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
         this.onDeletePath(path);
       }
     }
-  }
+  };
 
   onBlacklist() {
     const img =
@@ -1428,35 +1456,35 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     }
   }
 
-  playPause() {
+  playPause = () => {
     if (
       !this.state.drawerHover ||
-      document.activeElement.tagName.toLocaleLowerCase() != "input"
+      document.activeElement?.tagName?.toLocaleLowerCase() != "input"
     ) {
-      this.setPlayPause(!this.props.isPlaying);
+      this.setPlayPause();
     }
-  }
+  };
 
-  toggleAlwaysOnTop() {
+  toggleAlwaysOnTop = () => {
     this.setAlwaysOnTop(!this._alwaysOnTop);
-  }
+  };
 
-  toggleMenuBarDisplay() {
+  toggleMenuBarDisplay = () => {
     this.setMenuBarVisibility(!this._showMenu);
-  }
+  };
 
-  toggleFullscreen() {
+  toggleFullscreen = () => {
     this.setFullscreen(!this._fullScreen);
-  }
+  };
 
-  prevSource() {
+  prevSource = () => {
     this.props.navigateTagging(-1);
-  }
+  };
 
-  nextSource() {
+  nextSource = () => {
     this.props.navigateTagging(1);
-  }
+  };
 }
 
 (PlayerBars as any).displayName = "PlayerBars";
-export default withStyles(styles)(PlayerBars as any);
+export default withStyles(styles)(PlayerBars);

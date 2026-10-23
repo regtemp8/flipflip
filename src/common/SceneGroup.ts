@@ -1,6 +1,6 @@
 export default class SceneGroup {
   id: number = 0;
-  type: string;
+  type: string | null = null;
   name: string = "New Group";
   scenes: Array<number> = [];
 

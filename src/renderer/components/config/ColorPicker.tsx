@@ -40,22 +40,19 @@ const COLORS = [
 interface ColorPickerProps {
   currentColor: string;
   sidebar?: boolean;
-  onChangeColor(e: any): void;
+  onChangeColor: (color: string) => void;
 }
 
 interface ColorPickerState {
-  pickerColor: any;
-  pickerAnchorEl: any;
+  pickerColor?: any;
+  pickerAnchorEl?: any;
 }
 
 class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
   constructor(props: ColorPickerProps) {
     super(props);
 
-    this.state = {
-      pickerColor: null as any,
-      pickerAnchorEl: null as any,
-    };
+    this.state = {};
   }
 
   render() {
@@ -75,7 +72,7 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
                   this.state?.pickerColor ??
                   this.props.currentColor,
               }}
-              onClick={this.onToggleColorPicker.bind(this)}
+              onClick={this.onToggleColorPicker}
               size="medium"
             >
               <div />
@@ -90,7 +87,7 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
               this.state?.pickerColor ??
               this.props.currentColor
             }
-            onChange={this.props.onChangeColor.bind(this)}
+            onChange={(e) => this.props.onChangeColor(e.currentTarget.value)}
           />
           <Menu
             id="color-picker"
@@ -106,13 +103,13 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
             anchorEl={this.state.pickerAnchorEl}
             keepMounted
             open={!!this.state.pickerColor}
-            onClose={this.onToggleColorPicker.bind(this)}
+            onClose={this.onToggleColorPicker}
           >
             <SketchPicker
               color={this.state?.pickerColor ?? this.props.currentColor}
               disableAlpha={false}
               presetColors={[]}
-              onChange={this.onChangePickerColor.bind(this)}
+              onChange={this.onChangePickerColor}
             />
           </Menu>
         </Grid>
@@ -122,8 +119,7 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
               <Grid key={c} item>
                 <StyledColorPickerButton
                   style={{ backgroundColor: c }}
-                  value={c}
-                  onClick={this.props.onChangeColor.bind(this)}
+                  onClick={() => this.props.onChangeColor(c)}
                   size="small"
                 >
                   <div />
@@ -136,25 +132,21 @@ class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
     );
   }
 
-  onToggleColorPicker(e: MouseEvent) {
+  onToggleColorPicker = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (this.state.pickerColor) {
-      this.onChangeColor(this.state.pickerColor);
-      this.setState({ pickerColor: null, pickerAnchorEl: null });
+      this.props.onChangeColor(this.state.pickerColor.hex);
+      this.setState({ pickerColor: undefined, pickerAnchorEl: undefined });
     } else {
       this.setState({
         pickerColor: this.props.currentColor,
         pickerAnchorEl: e.currentTarget,
       });
     }
-  }
+  };
 
-  onChangePickerColor(color: any) {
+  onChangePickerColor = (color: any) => {
     this.setState({ pickerColor: color });
-  }
-
-  onChangeColor(color: any) {
-    this.props.onChangeColor({ target: { value: color.hex } });
-  }
+  };
 }
 
 export default ColorPicker;

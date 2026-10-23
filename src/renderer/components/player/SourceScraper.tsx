@@ -15,7 +15,7 @@ import content from "./ContentLookup";
 interface SourceScraperProps {
   config: Config;
   scene: Scene;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   opacity: number;
   isPlaying: boolean;
   gridView: boolean;
@@ -27,27 +27,27 @@ interface SourceScraperProps {
   isOverlay?: boolean;
   nextScene?: Scene;
   strobeLayer?: string;
-  setHistoryOffset(historyOffset: number): void;
-  setHistoryPaths(historyPaths: Array<any>): void;
-  firstImageLoaded(): void;
-  finishedLoading(empty: boolean): void;
-  setProgress(total: number, current: number, message: string[]): void;
-  setVideo(video: HTMLVideoElement): void;
-  setCount(sourceURL: string, count: number, countComplete: boolean): void;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  systemMessage(message: string): void;
-  onEndScene?(): void;
-  setTimeToNextFrame?(timeToNextFrame: number): void;
-  setSceneCopy?(children: React.ReactNode): void;
-  playNextScene?(): void;
+  setHistoryOffset: (historyOffset: number) => void;
+  setHistoryPaths: (historyPaths: Array<any>) => void;
+  firstImageLoaded: () => void;
+  finishedLoading: (empty: boolean) => void;
+  setProgress: (total: number, current: number, message: string[]) => void;
+  setVideo: (video?: HTMLVideoElement) => void;
+  setCount: (sourceURL: string, count: number, countComplete: boolean) => void;
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  systemMessage: (message: string) => void;
+  onEndScene?: () => void;
+  setTimeToNextFrame?: (timeToNextFrame: number) => void;
+  setSceneCopy?: (children: React.ReactNode) => void;
+  playNextScene?: () => void;
 }
 
 interface SourceScraperState {
-  contentLookupKey?: string;
+  contentLookupKey: string;
   restart: boolean;
   preload: boolean;
   videoVolume: number;
-  captcha: any;
+  captcha?: any;
   load: boolean;
 }
 
@@ -58,33 +58,34 @@ export default class SourceScraper extends React.Component<
   constructor(props: SourceScraperProps) {
     super(props);
 
+    const contentLookupKey = uuidv4();
+    content().initContent(contentLookupKey);
     this.state = {
       restart: false,
       preload: false,
       videoVolume: props.scene.videoVolume,
-      captcha: null as any,
       load: false,
+      contentLookupKey,
     };
   }
 
   _isMounted = false;
-  _backForth: number = null;
   _sourceQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
+  }> = [];
   _promiseQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
+  }> = [];
   _nextPromiseQueue: Array<{
     source: LibrarySource;
     helpers: { next: any; count: number; retries: number };
-  }> = null;
-  _nextContentLookupKey: string = null;
-  _sourceTimeoutID: number = null;
-  _promiseTimeoutID: number = null;
-  _nextSourceTimeoutID: number = null;
+  }> = [];
+  _nextContentLookupKey: string = "";
+  _sourceTimeoutID?: number = undefined;
+  _promiseTimeoutID?: number = undefined;
+  _nextSourceTimeoutID?: number = undefined;
   _totalSources: number = 0;
 
   render() {
@@ -117,7 +118,7 @@ export default class SourceScraper extends React.Component<
             deleteHack={this.props.deleteHack}
             strobeLayer={this.props.strobeLayer}
             hasStarted={this.props.hasStarted}
-            onLoaded={this.props.firstImageLoaded.bind(this)}
+            onLoaded={this.props.firstImageLoaded}
             setVideo={this.props.setVideo}
             cache={this.props.cache}
             onEndScene={this.props.onEndScene}
@@ -129,13 +130,13 @@ export default class SourceScraper extends React.Component<
           />
         )}
         {this.state.captcha != null && (
-          <Dialog open={true} onClose={this.onCloseDialog.bind(this)}>
+          <Dialog open={true} onClose={this.onCloseDialog}>
             <DialogContent style={{ height: 600 }}>
               <iframe
                 sandbox="allow-forms"
                 src={this.state.captcha.captcha}
                 height="100%"
-                onLoad={this.onIFrameLoad.bind(this)}
+                onLoad={this.onIFrameLoad}
               />
             </DialogContent>
           </Dialog>
@@ -144,17 +145,17 @@ export default class SourceScraper extends React.Component<
     );
   }
 
-  onIFrameLoad() {
+  onIFrameLoad = () => {
     if (this.state.load) {
       this.onCloseDialog();
     } else {
       this.setState({ load: true });
     }
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ captcha: null, load: false });
-  }
+  };
 
   async componentDidMount(restart = false) {
     this._isMounted = true;
@@ -174,17 +175,15 @@ export default class SourceScraper extends React.Component<
       }>();
       this._nextContentLookupKey = uuidv4();
       content().initContent(this._nextContentLookupKey);
-      const contentLookupKey = uuidv4();
-      content().initContent(contentLookupKey);
-      this.setState({ contentLookupKey });
     }
 
     const sourceLoop = () => {
-      if (!this._isMounted || this._sourceQueue.length == 0) return;
+      if (!this._isMounted) {
+        return;
+      }
 
-      const d = this._sourceQueue.shift();
-
-      let message = d ? [d.source.url] : [""];
+      const d = this._sourceQueue.shift()!;
+      let message = [d.source.url];
       if (this.props.isOverlay) {
         message = ["Loading '" + this.props.scene.name + "'", ...message];
       }
@@ -278,11 +277,15 @@ export default class SourceScraper extends React.Component<
     };
 
     const nextSourceLoop = () => {
-      if (!this._isMounted || this._nextPromiseQueue.length == 0) {
+      if (!this._isMounted || this.props.nextScene == null) {
         return;
       }
 
       const promiseData = this._nextPromiseQueue.shift();
+      if (promiseData == null) {
+        return;
+      }
+
       if (!this.props.nextScene.playVideoClips && promiseData.source.clips) {
         promiseData.source.clips = [];
       }
@@ -349,11 +352,15 @@ export default class SourceScraper extends React.Component<
         this._promiseTimeoutID = window.setTimeout(promiseLoop, 2000);
       }
       // Process until queue is empty or player has been stopped
-      if (!this._isMounted || this._promiseQueue.length == 0) {
+      if (!this._isMounted) {
         return;
       }
 
       const promiseData = this._promiseQueue.shift();
+      if (promiseData == null) {
+        return;
+      }
+
       window.ipc.scrapeFiles(
         this.props.config,
         promiseData.source,
@@ -423,12 +430,15 @@ export default class SourceScraper extends React.Component<
 
     if (this._sourceTimeoutID != null) {
       window.clearTimeout(this._sourceTimeoutID);
+      this._sourceTimeoutID = undefined;
     }
     if (this._promiseTimeoutID != null) {
       window.clearTimeout(this._promiseTimeoutID);
+      this._promiseTimeoutID = undefined;
     }
     if (this._nextSourceTimeoutID != null) {
       window.clearTimeout(this._nextSourceTimeoutID);
+      this._nextSourceTimeoutID = undefined;
     }
     if (this.state.preload) {
       this.setState({ preload: false });
@@ -471,7 +481,10 @@ export default class SourceScraper extends React.Component<
     }
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: SourceScraperProps,
+    state: SourceScraperState,
+  ): boolean {
     return (
       props.scene !== this.props.scene ||
       (props.nextScene &&
@@ -489,7 +502,7 @@ export default class SourceScraper extends React.Component<
     );
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: SourceScraperProps, state: SourceScraperState) {
     if (this.props.scene.videoVolume !== this.state.videoVolume) {
       this.setState({ videoVolume: this.props.scene.videoVolume });
     }
@@ -560,13 +573,11 @@ export default class SourceScraper extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._sourceQueue = null;
-    this._promiseQueue = null;
-    this._nextPromiseQueue = null;
+    this._sourceQueue = [];
+    this._promiseQueue = [];
+    this._nextPromiseQueue = [];
     content().delete(this.state.contentLookupKey);
     content().delete(this._nextContentLookupKey);
-    window.clearTimeout(this._backForth);
-    this._backForth = null;
   }
 }
 

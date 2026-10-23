@@ -9,7 +9,7 @@ import Audio from "../../../common/Audio";
 interface StrobeImageProps {
   scene: Scene;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   children?: React.ReactNode;
 }
 
@@ -50,7 +50,7 @@ export default class StrobeImage extends React.Component<StrobeImageProps> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.strobeBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         duration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!duration) {
@@ -59,6 +59,11 @@ export default class StrobeImage extends React.Component<StrobeImageProps> {
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.strobeTF,
+        );
     }
 
     const imageProps = useSpring({

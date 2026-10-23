@@ -35,9 +35,7 @@ export const mainConfig: Configuration = {
   plugins: [
     ...plugins,
     new DefinePlugin({
-      "process.env.APP_VERSION": JSON.stringify(
-        require("./package.json").version,
-      ),
+      __APP_VERSION__: JSON.stringify(require("./package.json").version),
     }),
   ],
   resolve: {

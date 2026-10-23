@@ -18,6 +18,7 @@ import {
   Link,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Typography,
 } from "@mui/material";
 
@@ -26,17 +27,18 @@ import { convertFromEpoch } from "../data/utils";
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   version: string;
-  goBack(): void;
-  onRestore(backupFile: string): void;
+  goBack: () => void;
+  onRestore: (backupFile: string) => void;
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error;
-  info: React.ErrorInfo;
+  catch?: {
+    error: Error;
+    info: React.ErrorInfo;
+  };
   resetCheck: boolean;
   backupCheck: boolean;
-  backup: { url: string; size: number };
+  backup?: { url: string; size: number };
   backups: Array<{ url: string; size: number }>;
 }
 
@@ -48,23 +50,19 @@ export default class ErrorBoundary extends React.Component<
     super(props);
 
     this.state = {
-      hasError: false,
-      error: null as Error,
-      info: null as React.ErrorInfo,
       resetCheck: false,
       backupCheck: false,
-      backup: null as { url: string; size: number },
       backups: new Array<{ url: string; size: number }>(),
     };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     // Display fallback UI
-    this.setState({ hasError: true, error: error, info: info });
+    this.setState({ catch: { error, info } });
   }
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.catch) {
       return (
         <Box
           style={{
@@ -88,7 +86,7 @@ export default class ErrorBoundary extends React.Component<
             variant="h5"
             color="error"
           >
-            {this.state.error.name}: {this.state.error.message}
+            {this.state.catch.error.name}: {this.state.catch.error.message}
           </Typography>
           <Typography
             style={{ whiteSpace: "pre", marginBottom: 20 }}
@@ -96,17 +94,13 @@ export default class ErrorBoundary extends React.Component<
             variant="body2"
             color="error"
           >
-            {this.state.info.componentStack
+            {this.state.catch.info.componentStack
               .trim()
               .replace(/\s*in (ForwardRef|div)/g, "")}
           </Typography>
           <Typography component="h6" variant="h6">
             Please consider reporting this bug to our{" "}
-            <Link
-              href="#"
-              onClick={this.onSubmitIssue.bind(this)}
-              underline="hover"
-            >
+            <Link href="#" onClick={this.onSubmitIssue} underline="hover">
               GitHub
             </Link>
           </Typography>
@@ -115,7 +109,7 @@ export default class ErrorBoundary extends React.Component<
             variant="contained"
             size="large"
             color="primary"
-            onClick={this.goBack.bind(this)}
+            onClick={this.goBack}
             startIcon={<ArrowBackIcon />}
           >
             Go Back
@@ -125,7 +119,7 @@ export default class ErrorBoundary extends React.Component<
             variant="contained"
             size="large"
             color="secondary"
-            onClick={this.backupCheck.bind(this)}
+            onClick={this.backupCheck}
             startIcon={<RestoreIcon />}
           >
             Restore Backup
@@ -134,17 +128,14 @@ export default class ErrorBoundary extends React.Component<
             style={{ margin: 10 }}
             variant="contained"
             size="large"
-            onClick={this.resetCheck.bind(this)}
+            onClick={this.resetCheck}
             startIcon={<HighlightOffIcon />}
           >
             Reset
           </Button>
 
           {this.state.resetCheck && (
-            <Dialog
-              open={this.state.resetCheck}
-              onClose={this.onCloseDialog.bind(this)}
-            >
+            <Dialog open={this.state.resetCheck} onClose={this.onCloseDialog}>
               <DialogTitle>Confirm FlipFlip Reset</DialogTitle>
               <DialogContent>
                 <DialogContentText>
@@ -157,13 +148,10 @@ export default class ErrorBoundary extends React.Component<
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={this.onCloseDialog.bind(this)}
-                  color="secondary"
-                >
+                <Button onClick={this.onCloseDialog} color="secondary">
                   Cancel
                 </Button>
-                <Button onClick={this.reset.bind(this)} color="primary">
+                <Button onClick={this.reset} color="primary">
                   Reset FlipFlip
                 </Button>
               </DialogActions>
@@ -173,7 +161,7 @@ export default class ErrorBoundary extends React.Component<
           {this.state.backupCheck && (
             <Dialog
               open={this.state.backupCheck}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="restore-title"
               aria-describedby="restore-description"
             >
@@ -197,7 +185,7 @@ export default class ErrorBoundary extends React.Component<
                               },
                             },
                           }}
-                          onChange={this.onChangeBackup.bind(this)}
+                          onChange={this.onChangeBackup}
                         >
                           {this.state.backups.map((b) => (
                             <MenuItem value={b.url} key={b.url}>
@@ -210,16 +198,10 @@ export default class ErrorBoundary extends React.Component<
                     )}
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button
-                      onClick={this.onFinishRestore.bind(this)}
-                      color="primary"
-                    >
+                    <Button onClick={this.onFinishRestore} color="primary">
                       Restore
                     </Button>
                   </DialogActions>
@@ -233,10 +215,7 @@ export default class ErrorBoundary extends React.Component<
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                   </DialogActions>
@@ -253,37 +232,39 @@ export default class ErrorBoundary extends React.Component<
 
   clearError() {
     this.setState({
-      hasError: false,
-      error: null,
-      info: null,
+      catch: undefined,
       resetCheck: false,
       backupCheck: false,
-      backup: null,
+      backup: undefined,
       backups: new Array<{ url: string; size: number }>(),
     });
   }
 
-  goBack() {
+  goBack = () => {
     this.clearError();
     this.props.goBack();
-  }
+  };
 
-  reset() {
+  reset = () => {
     window.ipc.reset();
-  }
+  };
 
-  resetCheck() {
+  resetCheck = () => {
     this.setState({ resetCheck: true });
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({ resetCheck: false, backupCheck: false });
-  }
+  };
 
-  backupCheck() {
+  backupCheck = () => {
     window.ipc.getBackups().then((backups) => {
       if (backups.length == 0) {
-        this.setState({ backupCheck: true, backups: backups, backup: null });
+        this.setState({
+          backupCheck: true,
+          backups: backups,
+          backup: undefined,
+        });
       } else {
         this.setState({
           backupCheck: true,
@@ -292,39 +273,48 @@ export default class ErrorBoundary extends React.Component<
         });
       }
     });
-  }
+  };
 
-  onChangeBackup(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeBackup = (e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.setState({
       backup: this.state.backups.find((b) => b.url == input.value),
     });
-  }
+  };
 
-  onFinishRestore() {
+  onFinishRestore = () => {
+    if (!this.state.backup) {
+      return;
+    }
+
     this.onCloseDialog();
     window.ipc.getBackupFile(this.state.backup.url).then((backupFile) => {
       try {
         this.props.onRestore(backupFile);
         this.clearError();
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     });
-  }
+  };
 
-  onSubmitIssue() {
-    const componentStack = this.state.info.componentStack
+  onSubmitIssue = () => {
+    if (!this.state.catch) {
+      return;
+    }
+
+    const { error, info } = this.state.catch;
+    const componentStack = info.componentStack
       .trim()
       .replace(/\s*in (ForwardRef|div)/g, "");
-    let title = this.state.error.name + ": " + this.state.error.message;
+    let title = error.name + ": " + error.message;
     let body =
       "[[Please describe the bug and how to reproduce it]]%0D%0A%0D%0A%0D%0AFlipFlip Version: " +
       this.props.version +
       "%0D%0A```%0D%0A" +
-      this.state.error.name +
+      error.name +
       ": " +
-      this.state.error.message +
+      error.message +
       "%0D%0A" +
       componentStack.replace(/(\r\n|\r|\n)/g, "%0D%0A") +
       "%0D%0A```";
@@ -339,7 +329,7 @@ export default class ErrorBoundary extends React.Component<
         "&body=" +
         body,
     );
-  }
+  };
 }
 
 (ErrorBoundary as any).displayName = "ErrorBoundary";

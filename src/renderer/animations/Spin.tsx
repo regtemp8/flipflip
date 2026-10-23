@@ -5,8 +5,8 @@ interface SpinProps {
   className?: string;
   title?: string;
   style?: any;
-  onClick?(): void;
   children?: React.ReactNode;
+  onClick?: () => void;
 }
 
 interface SpinState {

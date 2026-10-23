@@ -45,6 +45,8 @@ import {
   getCachePath,
   portablePath,
   saveDir,
+  getCacheDir,
+  getErrorMessage,
 } from "./utils";
 import {
   createNewAppStorage,
@@ -131,35 +133,38 @@ async function onSaveExport(ev: IpcMainEvent, filePath: string, json: string) {
   await saveExport(ev.sender.id, filePath, json);
 }
 
-async function onOpenImport(ev: IpcMainEvent) {
+async function onOpenImport(ev: IpcMainInvokeEvent) {
   return await openImport(ev.sender.id);
 }
 
-async function onOpenDirectory(ev: IpcMainEvent, multiSelections?: boolean) {
+async function onOpenDirectory(
+  ev: IpcMainInvokeEvent,
+  multiSelections?: boolean,
+) {
   return await openDirectory(ev.sender.id, multiSelections);
 }
 
-async function onOpenVideoDirs(ev: IpcMainEvent) {
+async function onOpenVideoDirs(ev: IpcMainInvokeEvent) {
   return await openVideoDirs(ev.sender.id);
 }
 
-async function onOpenVideos(ev: IpcMainEvent) {
+async function onOpenVideos(ev: IpcMainInvokeEvent) {
   return await openVideos(ev.sender.id);
 }
 
-async function onOpenAudios(ev: IpcMainEvent, shiftKey: boolean) {
+async function onOpenAudios(ev: IpcMainInvokeEvent, shiftKey: boolean) {
   return await openAudios(ev.sender.id, shiftKey);
 }
 
-async function onOpenScripts(ev: IpcMainEvent, shiftKey: boolean) {
+async function onOpenScripts(ev: IpcMainInvokeEvent, shiftKey: boolean) {
   return await openScripts(ev.sender.id, shiftKey);
 }
 
-async function onOpenSubtitle(ev: IpcMainEvent) {
+async function onOpenSubtitle(ev: IpcMainInvokeEvent) {
   return await openSubtitle(ev.sender.id);
 }
 
-async function onOpenScript(ev: IpcMainEvent) {
+async function onOpenScript(ev: IpcMainInvokeEvent) {
   const filePath = await openScript(ev.sender.id);
   if (filePath != null) {
     try {
@@ -175,14 +180,14 @@ async function onOpenScript(ev: IpcMainEvent) {
 }
 
 async function onSaveScriptAs(
-  ev: IpcMainEvent,
+  ev: IpcMainInvokeEvent,
   script: string,
   defaultPath: string,
 ) {
   return await saveScriptAs(ev.sender.id, script, defaultPath);
 }
 
-function onSaveScript(ev: IpcMainEvent, url: string, script: string) {
+function onSaveScript(ev: IpcMainInvokeEvent, url: string, script: string) {
   fs.writeFileSync(url, script);
 }
 
@@ -327,7 +332,7 @@ function onSetFullScreen(ev: IpcMainEvent, fullScreen: boolean) {
   PlayerMenu.setFullScreen(fullScreen);
 }
 
-function onCopyImageToClipboard(ev: IpcMainEvent, url: string) {
+function copyImageToClipboard(url: string) {
   const isFile = url.startsWith("file://");
   const path = urlToPath(url, process.platform);
   const imagePath = isFile ? path : url;
@@ -356,6 +361,10 @@ function onCopyImageToClipboard(ev: IpcMainEvent, url: string) {
   }
 }
 
+function onCopyImageToClipboard(ev: IpcMainEvent, url: string) {
+  copyImageToClipboard(url);
+}
+
 function onShowPlayerContextMenu(
   ev: IpcMainEvent,
   config: Config,
@@ -370,7 +379,7 @@ function onShowPlayerContextMenu(
     return;
   }
 
-  let contextMenu = new Menu();
+  let contextMenu: Menu | null = new Menu();
   const literalSource = source;
   if (/^https?:\/\//g.exec(source) == null) {
     source = urlToPath(pathToFileURL(source).toString(), process.platform);
@@ -413,7 +422,7 @@ function onShowPlayerContextMenu(
       new MenuItem({
         label: "Copy Image",
         click: () => {
-          this.copyImageToClipboard(url);
+          copyImageToClipboard(url);
         },
       }),
     );
@@ -559,7 +568,7 @@ async function onClearBrowserCaches(ev: IpcMainEvent) {
   await window.webContents?.session?.clearCache();
 }
 
-function onGetFileSize(ev: IpcMainEvent, path: string) {
+function onGetFileSize(ev: IpcMainInvokeEvent, path: string) {
   try {
     return fs.statSync(path)?.size ?? -1;
   } catch {
@@ -577,9 +586,9 @@ function onCacheImage(
   url: string,
   source: string,
 ) {
-  const cachePath = getCachePath(null, config);
-  if (!fs.existsSync(cachePath)) {
-    fs.mkdirSync(cachePath);
+  const cacheDir = getCacheDir(config);
+  if (!fs.existsSync(cacheDir)) {
+    fs.mkdirSync(cacheDir);
   }
 
   const maxSize = config.caching.maxSize;
@@ -598,7 +607,7 @@ function onCacheImage(
   if (maxSize == 0) {
     downloadImage();
   } else {
-    getFolderSize(cachePath, (err: string, size: number) => {
+    getFolderSize(cacheDir, (err: string, size: number) => {
       if (err) {
         return;
       }
@@ -611,15 +620,15 @@ function onCacheImage(
   }
 }
 
-function onGetCacheSize(ev: IpcMainEvent, config: Config) {
+function onGetCacheSize(ev: IpcMainInvokeEvent, config: Config) {
   return new Promise((resolve) => {
-    const cachePath = getCachePath(null, config);
-    if (!fs.existsSync(cachePath)) {
+    const cacheDir = getCacheDir(config);
+    if (!fs.existsSync(cacheDir)) {
       resolve(0);
       return;
     }
 
-    getFolderSize(cachePath, (err: string, size: number) => {
+    getFolderSize(cacheDir, (err: string, size: number) => {
       if (err) {
         resolve(0);
       } else {
@@ -710,14 +719,13 @@ function onDeleteLibrarySource(
     } else {
       rimrafSync(getCachePath(sourceURL, config));
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
 function onClearCache(ev: IpcMainInvokeEvent, config: Config) {
-  const cachePath = getCachePath(null, config);
-  rimrafSync(cachePath);
+  rimrafSync(getCacheDir(config));
 }
 
 async function onLibraryMove(
@@ -729,8 +737,8 @@ async function onLibraryMove(
   const cachePath = getCachePath(sourceURL, config);
   try {
     files = await fs.promises.readdir(cachePath);
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     files = [];
   }
 
@@ -786,8 +794,8 @@ function deleteSource(sourceURL: string) {
     ) {
       fs.unlinkSync(sourceURL);
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -799,7 +807,7 @@ function onFilterNewScriptSources(
 }
 
 function onGetCachePath(ev: IpcMainInvokeEvent, config: Config) {
-  return getCachePath(null, config);
+  return getCacheDir(config);
 }
 
 function onGetSourceCachePath(
@@ -840,11 +848,7 @@ function onCleanCache(ev: IpcMainInvokeEvent, cachePath: string) {
   rimrafSync(cachePath);
 }
 
-function onRevealFile(
-  ev: IpcMainEvent,
-  sourceURL: string,
-  config: Config,
-) {
+function onRevealFile(ev: IpcMainEvent, sourceURL: string, config: Config) {
   const fileType = getSourceType(sourceURL);
   let cachePath;
   if (fileType == ST.video || fileType == ST.playlist) {
@@ -875,7 +879,7 @@ function onFinishDelete(ev: IpcMainInvokeEvent, filePath: string) {
     return fs.unlinkSync(filePath);
   } catch (err) {
     console.error(err);
-    return err.message;
+    return getErrorMessage(err);
   }
 }
 
@@ -960,8 +964,8 @@ function onGetScraperSources(ev: IpcMainInvokeEvent, sources: LibrarySource[]) {
           sceneSources.push(...dirSources);
           addSelf = false;
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     }
     if (addSelf) {
@@ -978,10 +982,7 @@ async function onGetAudioThumbnail(ev: IpcMainInvokeEvent, config: Config) {
     return imagePath;
   }
 
-  return generateThumbnailFile(
-    getCachePath(null, config),
-    fs.readFileSync(imagePath),
-  );
+  return generateThumbnailFile(getCacheDir(config), fs.readFileSync(imagePath));
 }
 
 async function onAddAudioSource(
@@ -990,18 +991,14 @@ async function onAddAudioSource(
   id: number,
   config: Config,
 ) {
-  let newAudio = new Audio({
+  let newAudio: Audio | undefined = new Audio({
     url: url,
     id: id,
     tags: [],
   });
 
   newAudio = await getAudioMetadata(newAudio, config);
-  if (newAudio == null) {
-    return undefined;
-  }
-
-  if (!newAudio.name) {
+  if (newAudio != null && !newAudio.name) {
     newAudio.name = url.substring(
       url.lastIndexOf(path.sep) + 1,
       url.lastIndexOf("."),
@@ -1040,10 +1037,10 @@ async function getAudioMetadata(audio: Audio, config: Config) {
   try {
     const newAudio = new Audio(audio);
     const metadata = await parseMusicMetadata(newAudio.url);
-    extractMusicMetadata(newAudio, metadata, getCachePath(null, config));
+    extractMusicMetadata(newAudio, metadata, getCacheDir(config));
     return newAudio;
   } catch (err) {
-    console.error("Error reading metadata:", err.message);
+    console.error("Error reading metadata:", getErrorMessage(err));
     return undefined;
   }
 }
@@ -1053,7 +1050,7 @@ async function onGetAudioBPMMetadata(ev: IpcMainInvokeEvent, url: string) {
     const metadata = await parseMusicMetadata(url);
     return metadata?.common?.bpm ?? -1;
   } catch (err) {
-    console.error("Error reading metadata:", err.message);
+    console.error("Error reading metadata:", getErrorMessage(err));
     return -1;
   }
 }
@@ -1092,7 +1089,7 @@ async function onGetAudioBuffer(
 
       return { arrayBuffer };
     } catch (err) {
-      return { error: err.message };
+      return { error: getErrorMessage(err) };
     }
   }
 }
@@ -1155,7 +1152,7 @@ async function onHydrusAuth(
     }
   } catch (err) {
     console.error(err);
-    response.error = `Error: ${err.message}`;
+    response.error = `Error: ${getErrorMessage(err)}`;
   }
 
   return response;
@@ -1198,7 +1195,7 @@ async function onPiwigoAuth(
     }
   } catch (err) {
     console.error(err);
-    return err.message;
+    return getErrorMessage(err);
   }
 }
 

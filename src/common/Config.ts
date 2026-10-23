@@ -20,197 +20,9 @@ import {
 import Overlay from "./Overlay";
 import LibrarySource from "./LibrarySource";
 import Audio from "./Audio";
+import { SceneBase } from "./SceneBase";
 
-interface SceneSettingsI {
-  [key: string]: string | number | boolean | Array<any>;
-
-  sources: Array<LibrarySource>;
-  timingFunction: string;
-  timingConstant: number;
-  timingMin: number;
-  timingMax: number;
-  timingSinRate: number;
-  timingBPMMulti: number;
-  backForth: boolean;
-  backForthTF: string;
-  backForthConstant: number;
-  backForthMin: number;
-  backForthMax: number;
-  backForthSinRate: number;
-  backForthBPMMulti: number;
-  imageTypeFilter: string;
-  weightFunction: string;
-  sourceOrderFunction: string;
-  orderFunction: string;
-  forceAll: boolean;
-  forceAllSource: boolean;
-  fullSource: boolean;
-
-  zoom: boolean;
-  zoomStart: number;
-  zoomStartMax: number;
-  zoomStartMin: number;
-  zoomEnd: number;
-  zoomEndMax: number;
-  zoomEndMin: number;
-  zoomRandom: boolean;
-  horizTransType: string;
-  horizTransLevel: number;
-  horizTransLevelMax: number;
-  horizTransLevelMin: number;
-  horizTransRandom: boolean;
-  vertTransType: string;
-  vertTransLevel: number;
-  vertTransLevelMax: number;
-  vertTransLevelMin: number;
-  vertTransRandom: boolean;
-  transTF: string;
-  transDuration: number;
-  transDurationMin: number;
-  transDurationMax: number;
-  transSinRate: number;
-  transBPMMulti: number;
-  transEase: string;
-  transExp: number;
-  transAmp: number;
-  transPer: number;
-  transOv: number;
-  crossFade: boolean;
-  crossFadeAudio: boolean;
-  fadeTF: string;
-  fadeDuration: number;
-  fadeDurationMin: number;
-  fadeDurationMax: number;
-  fadeSinRate: number;
-  fadeBPMMulti: number;
-  fadeEase: string;
-  fadeExp: number;
-  fadeAmp: number;
-  fadePer: number;
-  fadeOv: number;
-  slide: boolean;
-  slideTF: string;
-  slideType: string;
-  slideDistance: number;
-  slideDuration: number;
-  slideDurationMin: number;
-  slideDurationMax: number;
-  slideSinRate: number;
-  slideBPMMulti: number;
-  slideEase: string;
-  slideExp: number;
-  slideAmp: number;
-  slidePer: number;
-  slideOv: number;
-  fadeInOut: boolean;
-  fadeIOPulse: boolean;
-  fadeIOTF: string;
-  fadeIODuration: number;
-  fadeIODurationMin: number;
-  fadeIODurationMax: number;
-  fadeIOSinRate: number;
-  fadeIOBPMMulti: number;
-  fadeIODelayTF: string;
-  fadeIODelay: number;
-  fadeIODelayMin: number;
-  fadeIODelayMax: number;
-  fadeIODelaySinRate: number;
-  fadeIODelayBPMMulti: number;
-  fadeIOStartEase: string;
-  fadeIOStartExp: number;
-  fadeIOStartAmp: number;
-  fadeIOStartPer: number;
-  fadeIOStartOv: number;
-  fadeIOEndEase: string;
-  fadeIOEndExp: number;
-  fadeIOEndAmp: number;
-  fadeIOEndPer: number;
-  fadeIOEndOv: number;
-  panning: boolean;
-  panTF: string;
-  panDuration: number;
-  panDurationMin: number;
-  panDurationMax: number;
-  panSinRate: number;
-  panBPMMulti: number;
-  panHorizTransType: string;
-  panHorizTransImg: boolean;
-  panHorizTransLevel: number;
-  panHorizTransLevelMax: number;
-  panHorizTransLevelMin: number;
-  panHorizTransRandom: boolean;
-  panVertTransType: string;
-  panVertTransImg: boolean;
-  panVertTransLevel: number;
-  panVertTransLevelMax: number;
-  panVertTransLevelMin: number;
-  panVertTransRandom: boolean;
-  panStartEase: string;
-  panStartExp: number;
-  panStartAmp: number;
-  panStartPer: number;
-  panStartOv: number;
-  panEndEase: string;
-  panEndExp: number;
-  panEndAmp: number;
-  panEndPer: number;
-  panEndOv: number;
-
-  imageType: string;
-  imageOrientation: string;
-  videoOrientation: string;
-  backgroundType: string;
-  backgroundColor: string;
-  backgroundColorSet: Array<string>;
-  backgroundBlur: number;
-  gifOption: string;
-  gifTimingConstant: number;
-  gifTimingMin: number;
-  gifTimingMax: number;
-  videoOption: string;
-  videoTimingConstant: number;
-  videoTimingMin: number;
-  videoTimingMax: number;
-  randomVideoStart: boolean;
-  continueVideo: boolean;
-  playVideoClips: boolean;
-  skipVideoStart: number;
-  skipVideoEnd: number;
-  videoVolume: number;
-  videoSpeed: number;
-  videoRandomSpeed: boolean;
-  videoSpeedMin: number;
-  videoSpeedMax: number;
-  videoSkip: number;
-  generatorMax: number;
-  overlayEnabled: boolean;
-  overlays: Array<Overlay>;
-
-  strobe: boolean;
-  strobePulse: boolean;
-  strobeLayer: string;
-  strobeOpacity: number;
-  strobeTF: string;
-  strobeTime: number;
-  strobeTimeMin: number;
-  strobeTimeMax: number;
-  strobeSinRate: number;
-  strobeBPMMulti: number;
-  strobeDelayTF: string;
-  strobeDelay: number;
-  strobeDelayMin: number;
-  strobeDelayMax: number;
-  strobeDelaySinRate: number;
-  strobeDelayBPMMulti: number;
-  strobeColorType: string;
-  strobeColor: string;
-  strobeColorSet: Array<string>;
-  strobeEase: string;
-  strobeExp: number;
-  strobeAmp: number;
-  strobePer: number;
-  strobeOv: number;
-
+interface SceneSettingsI extends SceneBase {
   // migration only
   overlaySceneID: number;
   overlaySceneOpacity: number;
@@ -292,21 +104,6 @@ interface GeneralSettingsI {
   watermarkFontFamily: string;
   watermarkFontSize: number;
   watermarkColor: string;
-}
-
-interface TutorialsI {
-  [key: string]: string;
-
-  scenePicker: string;
-  sceneDetail: string;
-  sceneGenerator: string;
-  sceneGrid: string;
-  library: string;
-  audios: string;
-  scripts: string;
-  player: string;
-  scriptor: string;
-  videoClipper: string;
 }
 
 export class SceneSettings implements SceneSettingsI {
@@ -472,7 +269,7 @@ export class SceneSettings implements SceneSettingsI {
   videoSpeedMax = 20;
   videoSkip = 10;
   generatorMax = 100;
-  overlayEnabled: false;
+  overlayEnabled: boolean = false;
   overlays: Array<Overlay> = [];
   nextSceneID = 0;
   nextSceneTime = 900000;
@@ -605,19 +402,19 @@ export class GeneralSettings implements GeneralSettingsI {
   watermarkColor = "#FFFFFF";
 }
 
-export class Tutorials implements TutorialsI {
-  [key: string]: string;
+export class Tutorials {
+  [key: string]: string | null;
 
-  scenePicker = null as string;
-  sceneDetail = null as string;
-  player = null as string;
-  library = null as string;
-  audios = null as string;
-  scripts = null as string;
-  scriptor = null as string;
-  sceneGenerator = null as string;
-  sceneGrid = null as string;
-  videoClipper = null as string;
+  scenePicker: string | null = null;
+  sceneDetail: string | null = null;
+  player: string | null = null;
+  library: string | null = null;
+  audios: string | null = null;
+  scripts: string | null = null;
+  scriptor: string | null = null;
+  sceneGenerator: string | null = null;
+  sceneGrid: string | null = null;
+  videoClipper: string | null = null;
 }
 
 export default class Config {

@@ -12,7 +12,7 @@ import { DisplaySettings } from "../../../common/Config";
 
 interface PlayerBoolCardProps {
   displaySettings: DisplaySettings;
-  onUpdateDisplaySettings(fn: (settings: DisplaySettings) => void): void;
+  onUpdateDisplaySettings: (fn: (settings: DisplaySettings) => void) => void;
 }
 
 export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps> {
@@ -28,7 +28,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
             control={
               <Switch
                 checked={this.props.displaySettings.alwaysOnTop}
-                onChange={this.onBoolInput.bind(this, "alwaysOnTop")}
+                onChange={(e) => this.onBoolInput("alwaysOnTop", e)}
               />
             }
             label="Always On Top"
@@ -39,7 +39,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
             control={
               <Switch
                 checked={this.props.displaySettings.showMenu}
-                onChange={this.onBoolInput.bind(this, "showMenu")}
+                onChange={(e) => this.onBoolInput("showMenu", e)}
               />
             }
             label="Show Menu"
@@ -50,7 +50,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
             control={
               <Switch
                 checked={this.props.displaySettings.fullScreen}
-                onChange={this.onBoolInput.bind(this, "fullScreen")}
+                onChange={(e) => this.onBoolInput("fullScreen", e)}
               />
             }
             label="Fullscreen"
@@ -65,7 +65,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
               control={
                 <Switch
                   checked={this.props.displaySettings.startImmediately}
-                  onChange={this.onBoolInput.bind(this, "startImmediately")}
+                  onChange={(e) => this.onBoolInput("startImmediately", e)}
                 />
               }
               label="Start Immediately"
@@ -81,7 +81,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
               control={
                 <Switch
                   checked={this.props.displaySettings.clickToProgress}
-                  onChange={this.onBoolInput.bind(this, "clickToProgress")}
+                  onChange={(e) => this.onBoolInput("clickToProgress", e)}
                 />
               }
               label="Click to Progress"
@@ -108,10 +108,9 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
                     checked={
                       this.props.displaySettings.clickToProgressWhilePlaying
                     }
-                    onChange={this.onBoolInput.bind(
-                      this,
-                      "clickToProgressWhilePlaying",
-                    )}
+                    onChange={(e) =>
+                      this.onBoolInput("clickToProgressWhilePlaying", e)
+                    }
                     size="small"
                   />
                 }
@@ -129,7 +128,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
               control={
                 <Switch
                   checked={this.props.displaySettings.easingControls}
-                  onChange={this.onBoolInput.bind(this, "easingControls")}
+                  onChange={(e) => this.onBoolInput("easingControls", e)}
                 />
               }
               label="Show Adv Easing Controls"
@@ -145,7 +144,7 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
               control={
                 <Switch
                   checked={this.props.displaySettings.audioAlert}
-                  onChange={this.onBoolInput.bind(this, "audioAlert")}
+                  onChange={(e) => this.onBoolInput("audioAlert", e)}
                 />
               }
               label="Show Audio Info"
@@ -161,10 +160,9 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
               control={
                 <Switch
                   checked={this.props.displaySettings.cloneGridVideoElements}
-                  onChange={this.onBoolInput.bind(
-                    this,
-                    "cloneGridVideoElements",
-                  )}
+                  onChange={(e) =>
+                    this.onBoolInput("cloneGridVideoElements", e)
+                  }
                 />
               }
               label="Clone Grid Videos Directly"
@@ -175,11 +173,11 @@ export default class PlayerBoolCard extends React.Component<PlayerBoolCardProps>
     );
   }
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));

@@ -9,6 +9,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Switch,
   TextField,
   Theme,
@@ -46,7 +47,7 @@ interface FontOptionsProps {
   name: string;
   options: FontSettingsI;
   systemFonts: Array<string>;
-  onUpdateOptions(fn: (options: FontSettingsI) => void): void;
+  onUpdateOptions: (fn: (options: FontSettingsI) => void) => void;
 }
 
 class FontOptions extends React.Component<FontOptionsProps> {
@@ -86,7 +87,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
                   },
                 },
               }}
-              onChange={this.onInput.bind(this, "fontFamily")}
+              onChange={(e) => this.onInput("fontFamily", e)}
             >
               {this.props.systemFonts.map((f) => (
                 <MenuItem key={f} value={f} style={{ fontFamily: f }}>
@@ -102,8 +103,8 @@ class FontOptions extends React.Component<FontOptionsProps> {
             label="Size"
             margin="dense"
             value={this.props.options.fontSize}
-            onChange={this.onIntInput.bind(this, "fontSize")}
-            onBlur={this.blurIntKey.bind(this, "fontSize")}
+            onChange={(e) => this.onIntInput("fontSize", e)}
+            onBlur={(e) => this.blurIntKey("fontSize", e)}
             InputProps={{
               endAdornment: <InputAdornment position="end">px</InputAdornment>,
             }}
@@ -116,7 +117,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
         <Grid item xs={12}>
           <ColorPicker
             currentColor={this.props.options.color}
-            onChangeColor={this.onInput.bind(this, "color")}
+            onChangeColor={(color) => this.changeKey("color", color)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -125,7 +126,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
               <Switch
                 checked={this.props.options.border}
                 size="small"
-                onChange={this.onBoolInput.bind(this, "border")}
+                onChange={(e) => this.onBoolInput("border", e)}
               />
             }
             label="Border"
@@ -138,8 +139,8 @@ class FontOptions extends React.Component<FontOptionsProps> {
               label="Width"
               margin="dense"
               value={this.props.options.borderpx}
-              onChange={this.onIntInput.bind(this, "borderpx")}
-              onBlur={this.blurIntKey.bind(this, "borderpx")}
+              onChange={(e) => this.onIntInput("borderpx", e)}
+              onBlur={(e) => this.blurIntKey("borderpx", e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">px</InputAdornment>
@@ -158,7 +159,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
             {this.props.options.border && (
               <ColorPicker
                 currentColor={this.props.options.borderColor}
-                onChangeColor={this.onInput.bind(this, "borderColor")}
+                onChangeColor={(color) => this.changeKey("borderColor", color)}
               />
             )}
           </Collapse>
@@ -167,42 +168,43 @@ class FontOptions extends React.Component<FontOptionsProps> {
     );
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(props: FontOptionsProps): boolean {
     return (
       this.props.options !== props.options ||
       this.props.systemFonts !== props.systemFonts
     );
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.props.options as any)[key] < min) {
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    if (min && (this.props.options as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
-    } else if (max && (this.props.options as any)[key] > max) {
+    } else if (max && (this.props.options as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
@@ -218,4 +220,4 @@ class FontOptions extends React.Component<FontOptionsProps> {
 }
 
 (FontOptions as any).displayName = "FontOptions";
-export default withStyles(styles)(FontOptions as any);
+export default withStyles(styles)(FontOptions);

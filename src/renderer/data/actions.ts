@@ -78,7 +78,7 @@ export function isRoute(state: State, kind: string): Boolean {
 export function getActiveScene(state: State): Scene | null {
   for (const r of state.route.slice().reverse()) {
     if (r.kind == "scene") {
-      return state.scenes.find((s: Scene) => s.id === r.value);
+      return state.scenes.find((s: Scene) => s.id === r.value) ?? null;
     }
   }
   return null;
@@ -87,7 +87,7 @@ export function getActiveScene(state: State): Scene | null {
 export function getActiveGrid(state: State): SceneGrid | null {
   for (const r of state.route.slice().reverse()) {
     if (r.kind == "grid") {
-      return state.grids.find((g: SceneGrid) => g.id === r.value);
+      return state.grids.find((g: SceneGrid) => g.id === r.value) ?? null;
     }
   }
   return null;
@@ -103,24 +103,27 @@ export function getActiveSource(state: State): LibrarySource | null {
 }
 
 // Returns the active library source, or null if the current route isn't a library source
-export function getLibrarySource(state: State): LibrarySource | null {
-  const activeScene = getActiveScene(state);
+export function getLibrarySource(
+  state: State,
+  scene?: Scene,
+): LibrarySource | null {
+  const activeScene = scene ?? getActiveScene(state);
   if (activeScene == null) return null;
-  return state.library.find((s) => s.id == activeScene.libraryID);
+  return state.library.find((s) => s.id == activeScene.libraryID) ?? null;
 }
 
 // Returns the active audio source, or null if the current route isn't a audio source
 export function getAudioSource(state: State): Audio | null {
   const activeScene = getActiveScene(state);
   if (activeScene == null) return null;
-  return state.audios.find((a) => a.id == activeScene.libraryID);
+  return state.audios.find((a) => a.id == activeScene.libraryID) ?? null;
 }
 
 // Returns the active script source, or null if the current route isn't a script source
 export function getScriptSource(state: State): CaptionScript | null {
   const activeScene = getActiveScene(state);
   if (activeScene == null) return null;
-  return state.scripts.find((s) => s.id == activeScene.libraryID);
+  return state.scripts.find((s) => s.id == activeScene.libraryID) ?? null;
 }
 
 export function getSelectScript(state: State): CaptionScript | null {
@@ -208,7 +211,7 @@ export function startVCTutorial(state: State): Object {
   }
 }
 
-export function setTutorial(state: State, tutorial: string): Object {
+export function setTutorial(state: State, tutorial: string | null): Object {
   return { tutorial: tutorial };
 }
 
@@ -244,7 +247,7 @@ export function resetTutorials(state: State): Object {
 
 export function doneTutorial(state: State, tutorial: string): Object {
   const newConfig = state.config;
-  let newTutorial = state.tutorial;
+  let newTutorial: string | null = state.tutorial;
   if (state.route.length == 0) {
     if (tutorial == SPT.add2) {
       newTutorial = null;
@@ -253,7 +256,7 @@ export function doneTutorial(state: State, tutorial: string): Object {
       state.config.tutorials.scenePicker = tutorial;
     }
   } else if (isRoute(state, "scene")) {
-    if (getActiveScene(state).generatorWeights) {
+    if (getActiveScene(state)?.generatorWeights) {
       if (tutorial == SDGT.final || tutorial == SDGT.finalError) {
         newTutorial = null;
         state.config.tutorials.sceneGenerator = DONE;
@@ -339,12 +342,13 @@ export function cacheImage(
   i: HTMLImageElement | HTMLVideoElement,
 ) {
   if (state.config.caching.enabled) {
-    const fileType = getSourceType(i.getAttribute("source"));
+    const source = i.getAttribute("source")!;
+    const fileType = getSourceType(source);
     if (fileType == ST.hydrus || fileType == ST.piwigo) return;
 
     const url = unproxy(i.src);
     if (fileType != ST.local && url.startsWith("http")) {
-      window.ipc.cacheImage(state.config, url, i.getAttribute("source"));
+      window.ipc.cacheImage(state.config, url, source);
     }
   }
 }
@@ -434,10 +438,10 @@ export function addScene(state: State): Object {
     id = Math.max(s.id + 1, id);
   });
   const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    ...state.config.defaultScene,
     id: id,
     name: "New scene",
     sources: new Array<LibrarySource>(),
-    ...state.config.defaultScene,
   });
   if (tutorial) {
     scene.name = "Cute Stuff";
@@ -592,6 +596,8 @@ export function nextScene(state: State): Object {
       };
     }
   }
+
+  return {};
 }
 
 export function startFromScene(state: State, sceneName: string) {
@@ -694,9 +700,14 @@ export function importAudioFromLibrary(
   state: State,
   sources: Array<Audio>,
 ): Object {
+  const activeScene = getActiveScene(state);
+  if (activeScene == null) {
+    return {};
+  }
+
   const playlistIndex = state.route[state.route.length - 1].value;
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, activeScene, (s: Scene) => {
       s.audioPlaylists[playlistIndex].audios =
         s.audioPlaylists[playlistIndex].audios.concat(sources);
     }),
@@ -708,9 +719,14 @@ export function importScriptFromLibrary(
   state: State,
   sources: Array<CaptionScript>,
 ): Object {
+  const activeScene = getActiveScene(state);
+  if (activeScene == null) {
+    return {};
+  }
+
   const playlistIndex = state.route[state.route.length - 1].value;
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, activeScene, (s: Scene) => {
       s.scriptPlaylists[playlistIndex].scripts =
         s.scriptPlaylists[playlistIndex].scripts.concat(sources);
     }),
@@ -732,9 +748,13 @@ export function importFromLibrary(
   sources: Array<LibrarySource>,
 ): Object {
   const scene = getActiveScene(state);
+  if (scene == null) {
+    return {};
+  }
+
   const sceneSources = mergeSources(scene.sources, sources);
   return {
-    ...updateScene(state, getActiveScene(state), (s: Scene) => {
+    ...updateScene(state, scene, (s: Scene) => {
       s.sources = sceneSources;
     }),
     ...goBack(state),
@@ -849,9 +869,7 @@ export function playAudio(
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  const startIndex = displayed.indexOf(
-    displayed.find((a) => a.url == source.url),
-  );
+  const startIndex = displayed.findIndex((a) => a.url == source.url);
   const tempScene = new Scene(window.constants.pathSep, window.ipc.platform(), {
     id: id,
     name: "audio_scene_temp",
@@ -901,9 +919,7 @@ export function playScript(
   state.scenes.forEach((s: Scene) => {
     id = Math.max(s.id + 1, id);
   });
-  const startIndex = displayed.indexOf(
-    displayed.find((s) => s.url == source.url),
-  );
+  const startIndex = displayed.findIndex((s) => s.url == source.url);
   const tempScene = JSON.parse(
     JSON.stringify(state.scenes.find((s) => s.id == sceneID)),
   );
@@ -967,8 +983,9 @@ export function playSceneFromLibrary(
         videoSkip: state.config.defaultScene.videoSkip,
       },
     );
-    if (getActiveScene(state)?.libraryID != -1) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene != null && activeScene.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -1014,8 +1031,9 @@ export function playSceneFromLibrary(
     videoSkip: state.config.defaultScene.videoSkip,
     orderFunction: state.config.defaultScene.orderFunction,
   });
-  if (getLibrarySource(state) != null) {
-    const activeScene = getActiveScene(state);
+
+  const activeScene = getActiveScene(state);
+  if (activeScene != null && getLibrarySource(state, activeScene) != null) {
     applyEffects(tempScene, getEffects(activeScene));
     tempScene.overlayEnabled = activeScene.overlayEnabled;
     tempScene.overlays = activeScene.overlays;
@@ -1023,6 +1041,7 @@ export function playSceneFromLibrary(
     state.route.pop();
     state.scenes.pop();
   }
+
   return {
     displayedSources: displayed,
     scenes: state.scenes.concat([tempScene]),
@@ -1083,11 +1102,10 @@ export function clipVideo(
 
 export function setDisabledClips(state: State, disabled: Array<number>) {
   const activeScene = getActiveScene(state);
-  if (activeScene) {
+  const activeSource = getActiveSource(state);
+  if (activeScene && activeSource) {
     return updateScene(state, activeScene, (s) => {
-      const source = s.sources.find(
-        (ls) => ls.url == getActiveSource(state).url,
-      );
+      const source = s.sources.find((ls) => ls.url == activeSource.url);
       if (source) {
         source.disabledClips = disabled;
       }
@@ -1096,10 +1114,13 @@ export function setDisabledClips(state: State, disabled: Array<number>) {
 }
 
 export function navigateClipping(state: State, offset: number): Object {
+  const activeSourceURL = getActiveSource(state)?.url;
+  if (activeSourceURL == null) {
+    return {};
+  }
+
   const displayed = Array.from(state.displayedSources);
-  let newIndexOf = displayed
-    .map((s) => s.url)
-    .indexOf(getActiveSource(state).url);
+  let newIndexOf = displayed.map((s) => s.url).indexOf(activeSourceURL);
   let newSource;
   do {
     newIndexOf = newIndexOf + offset;
@@ -1115,7 +1136,11 @@ export function navigateClipping(state: State, offset: number): Object {
 
 export function navigateDisplayedLibrary(state: State, offset: number): Object {
   const activeScene = getActiveScene(state);
-  const librarySource = getLibrarySource(state);
+  if (activeScene == null) {
+    return {};
+  }
+
+  const librarySource = getLibrarySource(state, activeScene);
   if (librarySource != null) {
     const tagNames = state.tags.map((t: Tag) => t.name);
     // Re-order the tags of the source we were playing
@@ -1146,9 +1171,9 @@ export function navigateDisplayedLibrary(state: State, offset: number): Object {
 
 export function endPlaySceneFromLibrary(state: State): Object {
   let librarySource;
-  if (getActiveScene(state).audioScene) {
+  if (getActiveScene(state)?.audioScene) {
     librarySource = getAudioSource(state);
-  } else if (getActiveScene(state).scriptScene) {
+  } else if (getActiveScene(state)?.scriptScene) {
     librarySource = getScriptSource(state);
   } else {
     librarySource = getLibrarySource(state);
@@ -1211,12 +1236,12 @@ export function addGenerator(state: State): Object {
     id = Math.max(s.id + 1, id);
   });
   const scene = new Scene(window.constants.pathSep, window.ipc.platform(), {
+    ...state.config.defaultScene,
     id: id,
     name: "New Generator",
     sources: new Array<LibrarySource>(),
     generatorWeights: [],
     openTab: 4,
-    ...state.config.defaultScene,
   });
   return {
     scenes: state.scenes.concat([scene]),
@@ -1284,6 +1309,10 @@ export function generateScenes(
         if (overlay.sceneID.toString().startsWith("999")) {
           const id = overlay.sceneID.toString().replace("999", "");
           const oScene = state.grids.find((s) => s.id.toString() == id);
+          if (!oScene) {
+            continue;
+          }
+
           for (const row of oScene.grid) {
             for (const cell of row) {
               const gScene = state.scenes.find((s) => s.id == cell.sceneID);
@@ -1313,8 +1342,8 @@ export function generateScenes(
   }
   const newScenes = Array.from(state.scenes);
   for (const scene of generateScenes) {
-    const newScene = state.scenes.find((s) => s.id == scene.id);
-    let generatorWeights = newScene.generatorWeights;
+    const newScene = state.scenes.find((s) => s.id == scene.id)!;
+    let generatorWeights = newScene.generatorWeights ?? [];
 
     // Add globally ignored tags/types if not overridden by generator
     if (!newScene.overrideIgnore) {
@@ -1340,9 +1369,9 @@ export function generateScenes(
       .map((wg) => wg.search);
 
     // Sources to require
-    let reqAdvSources: Array<LibrarySource> = null;
+    let reqAdvSources: Array<LibrarySource> = [];
     // Sources to exclude
-    let excAdvSources: Array<LibrarySource> = null;
+    let excAdvSources: Array<LibrarySource> = [];
 
     // Build generator's list of sources
     let genSources = new Array<LibrarySource>();
@@ -1449,14 +1478,14 @@ export function generateScenes(
 
             // Filter out sources which don't have ruleAllSearches/allSearches
             for (const as of ruleAllSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
             for (const as of allSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
@@ -1466,7 +1495,7 @@ export function generateScenes(
             // Filter out sources which don't have any ruleOrSearches
             let anyRos = ruleOrSearches.length == 0;
             for (const os of ruleOrSearches) {
-              if (filterSource(os, s, null)) {
+              if (filterSource(os, s)) {
                 anyRos = true;
                 break;
               }
@@ -1477,14 +1506,14 @@ export function generateScenes(
 
             // Filter out sources which have ruleNoneSearches/noneSearches
             for (const ns of ruleNoneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }
             }
             if (b) continue;
             for (const ns of noneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }
@@ -1581,20 +1610,20 @@ export function generateScenes(
                 let b = false;
 
                 // Filter out sources which don't match this search
-                if (!filterSource(rule.search, s, null)) {
+                if (!filterSource(rule.search, s)) {
                   continue;
                 }
 
                 // Filter out sources which don't have ruleAllSearches/allSearches
                 for (const as of ruleAllSearches) {
-                  if (!filterSource(as, s, null)) {
+                  if (!filterSource(as, s)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
                 for (const as of allSearches) {
-                  if (!filterSource(as, s, null)) {
+                  if (!filterSource(as, s)) {
                     b = true;
                     break;
                   }
@@ -1604,7 +1633,7 @@ export function generateScenes(
                 // Filter out sources which don't have any ruleOrSearches
                 let anyRos = ruleOrSearches.length == 0;
                 for (const os of ruleOrSearches) {
-                  if (filterSource(os, s, null)) {
+                  if (filterSource(os, s)) {
                     anyRos = true;
                     break;
                   }
@@ -1615,14 +1644,14 @@ export function generateScenes(
 
                 // Filter out sources which have ruleNoneSearches/noneSearches
                 for (const ns of ruleNoneSearches) {
-                  if (filterSource(ns, s, null)) {
+                  if (filterSource(ns, s)) {
                     b = true;
                     break;
                   }
                 }
                 if (b) continue;
                 for (const ns of noneSearches) {
-                  if (filterSource(ns, s, null)) {
+                  if (filterSource(ns, s)) {
                     b = true;
                     break;
                   }
@@ -1650,7 +1679,7 @@ export function generateScenes(
         }
         // If this adv rule is all, add the sources to the require list
         case TT.all:
-          if (reqAdvSources) {
+          if (reqAdvSources.length > 0) {
             reqAdvSources = reqAdvSources.filter((s) =>
               rulesSources.some((source) => source.url == s.url),
             );
@@ -1660,7 +1689,7 @@ export function generateScenes(
           break;
         // If this adv rule is none, add the sources to the excl list
         case TT.none:
-          if (excAdvSources) {
+          if (excAdvSources.length > 0) {
             excAdvSources = excAdvSources.concat(rulesSources);
           } else {
             excAdvSources = rulesSources;
@@ -1682,14 +1711,14 @@ export function generateScenes(
       for (const s of state.library) {
         // Filter out sources which are not in required list
         if (
-          reqAdvSources &&
+          reqAdvSources.length > 0 &&
           !reqAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
         }
         // Filter out sources which are in exclude list
         if (
-          excAdvSources &&
+          excAdvSources.length > 0 &&
           excAdvSources.some((source) => source.id == s.id)
         ) {
           continue;
@@ -1737,7 +1766,7 @@ export function generateScenes(
 
           // Filter out sources which don't have allSearches
           for (const as of allSearches) {
-            if (!filterSource(as, s, null)) {
+            if (!filterSource(as, s)) {
               b = true;
               break;
             }
@@ -1746,7 +1775,7 @@ export function generateScenes(
 
           // Filter out sources which have noneSearches
           for (const ns of noneSearches) {
-            if (filterSource(ns, s, null)) {
+            if (filterSource(ns, s)) {
               b = true;
               break;
             }
@@ -1766,14 +1795,14 @@ export function generateScenes(
         for (const s of state.library) {
           // Filter out sources which are not in required list
           if (
-            reqAdvSources &&
+            reqAdvSources.length > 0 &&
             !reqAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
           }
           // Filter out sources which are in exclude list
           if (
-            excAdvSources &&
+            excAdvSources.length > 0 &&
             excAdvSources.some((source) => source.id == s.id)
           ) {
             continue;
@@ -1830,13 +1859,13 @@ export function generateScenes(
             let b = false;
 
             // Filter out sources which don't match this search
-            if (!filterSource(wg.search, s, null)) {
+            if (!filterSource(wg.search, s)) {
               continue;
             }
 
             // Filter out sources which don't have allSearches
             for (const as of allSearches) {
-              if (!filterSource(as, s, null)) {
+              if (!filterSource(as, s)) {
                 b = true;
                 break;
               }
@@ -1845,7 +1874,7 @@ export function generateScenes(
 
             // Filter out sources which have noneSearches
             for (const ns of noneSearches) {
-              if (filterSource(ns, s, null)) {
+              if (filterSource(ns, s)) {
                 b = true;
                 break;
               }
@@ -2000,7 +2029,7 @@ export function updateLibrary(
 }
 
 export function clearBlacklist(state: State, sourceURL: string): Object {
-  return blacklistFile(state, sourceURL, null);
+  return blacklistFile(state, sourceURL);
 }
 
 export function editBlacklist(
@@ -2029,7 +2058,7 @@ export function editBlacklist(
 export function blacklistFile(
   state: State,
   sourceURL: string,
-  fileToBlacklist: string,
+  fileToBlacklist?: string,
 ): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
@@ -2104,27 +2133,31 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
   const tagIDs = tags.map((t) => t.id);
   for (const source of newLibrary) {
     // Remove deleted tags, update any edited tags, and order the same as tags
-    source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-    source.tags = source.tags.map((t: Tag) => {
-      for (const tag of tags) {
-        if (t.id == tag.id) {
-          t.name = tag.name;
-          t.phraseString = tag.phraseString;
-          return t;
+    source.tags = source.tags
+      .filter((t: Tag) => tagIDs.includes(t.id))
+      .map((t: Tag) => {
+        for (const tag of tags) {
+          if (t.id == tag.id) {
+            t.name = tag.name;
+            t.phraseString = tag.phraseString;
+            return t;
+          }
         }
-      }
-    });
-    source.tags = source.tags.sort((a: Tag, b: Tag) => {
-      const aIndex = tagIDs.indexOf(a.id);
-      const bIndex = tagIDs.indexOf(b.id);
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+
+        return undefined;
+      })
+      .filter((value) => value != null)
+      .sort((a: Tag, b: Tag) => {
+        const aIndex = tagIDs.indexOf(a.id);
+        const bIndex = tagIDs.indexOf(b.id);
+        if (aIndex < bIndex) {
+          return -1;
+        } else if (aIndex > bIndex) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
     if (source.clips) {
       for (const clip of source.clips) {
         // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2133,52 +2166,60 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
         } else {
           clip.tags = [];
         }
-        clip.tags = clip.tags.map((t: Tag) => {
-          for (const tag of tags) {
-            if (t.id == tag.id) {
-              t.name = tag.name;
-              t.phraseString = tag.phraseString;
-              return t;
+        clip.tags = clip.tags
+          .map((t: Tag) => {
+            for (const tag of tags) {
+              if (t.id == tag.id) {
+                t.name = tag.name;
+                t.phraseString = tag.phraseString;
+                return t;
+              }
             }
-          }
-        });
-        clip.tags = clip.tags.sort((a: Tag, b: Tag) => {
-          const aIndex = tagIDs.indexOf(a.id);
-          const bIndex = tagIDs.indexOf(b.id);
-          if (aIndex < bIndex) {
-            return -1;
-          } else if (aIndex > bIndex) {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
+
+            return undefined;
+          })
+          .filter((value) => value != null)
+          .sort((a: Tag, b: Tag) => {
+            const aIndex = tagIDs.indexOf(a.id);
+            const bIndex = tagIDs.indexOf(b.id);
+            if (aIndex < bIndex) {
+              return -1;
+            } else if (aIndex > bIndex) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
       }
     }
   }
   for (const source of newAudios) {
     // Remove deleted tags, update any edited tags, and order the same as tags
-    source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-    source.tags = source.tags.map((t: Tag) => {
-      for (const tag of tags) {
-        if (t.id == tag.id) {
-          t.name = tag.name;
-          t.phraseString = tag.phraseString;
-          return t;
+    source.tags = source.tags
+      .filter((t: Tag) => tagIDs.includes(t.id))
+      .map((t: Tag) => {
+        for (const tag of tags) {
+          if (t.id == tag.id) {
+            t.name = tag.name;
+            t.phraseString = tag.phraseString;
+            return t;
+          }
         }
-      }
-    });
-    source.tags = source.tags.sort((a: Tag, b: Tag) => {
-      const aIndex = tagIDs.indexOf(a.id);
-      const bIndex = tagIDs.indexOf(b.id);
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+
+        return undefined;
+      })
+      .filter((value) => value != null)
+      .sort((a: Tag, b: Tag) => {
+        const aIndex = tagIDs.indexOf(a.id);
+        const bIndex = tagIDs.indexOf(b.id);
+        if (aIndex < bIndex) {
+          return -1;
+        } else if (aIndex > bIndex) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
   }
   for (const source of newScripts) {
     // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2188,9 +2229,11 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
         if (t.id == tag.id) {
           t.name = tag.name;
           t.phraseString = tag.phraseString;
-          return t;
+          break;
         }
       }
+
+      return t;
     });
     source.tags = source.tags.sort((a: Tag, b: Tag) => {
       const aIndex = tagIDs.indexOf(a.id);
@@ -2207,27 +2250,31 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
   for (const scene of newScenes) {
     for (const source of scene.sources) {
       // Remove deleted tags, update any edited tags, and order the same as tags
-      source.tags = source.tags.filter((t: Tag) => tagIDs.includes(t.id));
-      source.tags = source.tags.map((t: Tag) => {
-        for (const tag of tags) {
-          if (t.id == tag.id) {
-            t.name = tag.name;
-            t.phraseString = tag.phraseString;
-            return t;
+      source.tags = source.tags
+        .filter((t: Tag) => tagIDs.includes(t.id))
+        .map((t: Tag) => {
+          for (const tag of tags) {
+            if (t.id == tag.id) {
+              t.name = tag.name;
+              t.phraseString = tag.phraseString;
+              return t;
+            }
           }
-        }
-      });
-      source.tags = source.tags.sort((a: Tag, b: Tag) => {
-        const aIndex = tagIDs.indexOf(a.id);
-        const bIndex = tagIDs.indexOf(b.id);
-        if (aIndex < bIndex) {
-          return -1;
-        } else if (aIndex > bIndex) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
+
+          return undefined;
+        })
+        .filter((value) => value != null)
+        .sort((a: Tag, b: Tag) => {
+          const aIndex = tagIDs.indexOf(a.id);
+          const bIndex = tagIDs.indexOf(b.id);
+          if (aIndex < bIndex) {
+            return -1;
+          } else if (aIndex > bIndex) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
       if (source.clips) {
         for (const clip of source.clips) {
           // Remove deleted tags, update any edited tags, and order the same as tags
@@ -2236,26 +2283,30 @@ export function updateTags(state: State, tags: Array<Tag>): Object {
           } else {
             clip.tags = [];
           }
-          clip.tags = clip.tags.map((t: Tag) => {
-            for (const tag of tags) {
-              if (t.id == tag.id) {
-                t.name = tag.name;
-                t.phraseString = tag.phraseString;
-                return t;
+          clip.tags = clip.tags
+            .map((t: Tag) => {
+              for (const tag of tags) {
+                if (t.id == tag.id) {
+                  t.name = tag.name;
+                  t.phraseString = tag.phraseString;
+                  return t;
+                }
               }
-            }
-          });
-          clip.tags = clip.tags.sort((a: Tag, b: Tag) => {
-            const aIndex = tagIDs.indexOf(a.id);
-            const bIndex = tagIDs.indexOf(b.id);
-            if (aIndex < bIndex) {
-              return -1;
-            } else if (aIndex > bIndex) {
-              return 1;
-            } else {
-              return 0;
-            }
-          });
+
+              return undefined;
+            })
+            .filter((value) => value != null)
+            .sort((a: Tag, b: Tag) => {
+              const aIndex = tagIDs.indexOf(a.id);
+              const bIndex = tagIDs.indexOf(b.id);
+              if (aIndex < bIndex) {
+                return -1;
+              } else if (aIndex > bIndex) {
+                return 1;
+              } else {
+                return 0;
+              }
+            });
         }
       }
     }
@@ -2297,7 +2348,7 @@ export function batchEdit(state: State): Object {
 
 export function toggleAudioTag(
   state: State,
-  sourceID: number,
+  sourceID: number | null,
   tag: Tag,
 ): Object {
   const newAudios = state.audios;
@@ -2314,7 +2365,7 @@ export function toggleAudioTag(
 
 export function toggleScriptTag(
   state: State,
-  sourceID: number,
+  sourceID: number | null,
   tag: Tag,
 ): Object {
   const newScripts = state.scripts;
@@ -2329,7 +2380,11 @@ export function toggleScriptTag(
   return { scripts: newScripts };
 }
 
-export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
+export function toggleTag(
+  state: State,
+  sourceID: number | null,
+  tag: Tag,
+): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
   const source = newLibrary.find((s) => s.id == sourceID);
@@ -2349,7 +2404,7 @@ export function toggleTag(state: State, sourceID: number, tag: Tag): Object {
   return { library: newLibrary, scenes: newScenes };
 }
 
-export function inheritTags(state: State, sourceID: number): Object {
+export function inheritTags(state: State, sourceID: number | null): Object {
   const newLibrary = state.library;
   const newScenes = state.scenes;
   const source = newLibrary.find((s) => s.id == sourceID);
@@ -2404,7 +2459,7 @@ export function addScriptSingle(state: State) {
 
 export function addSource(
   state: State,
-  scene: Scene,
+  scene: Scene | null,
   type: string,
   ...args: any[]
 ): Object {
@@ -2432,7 +2487,7 @@ export function addSource(
 
   switch (type) {
     case "tutorial":
-      return updateScene(state, scene, (s) => {
+      return updateScene(state, scene!, (s) => {
         let id = s.sources.length + 1;
         s.sources.forEach((s) => {
           id = Math.max(s.id + 1, id);
@@ -2482,9 +2537,9 @@ export function addSource(
         });
       }
     case AF.list: {
-      const newSources = Array.from(args[0].trim().split("\n")).filter(
-        (s: string) => s.length > 0,
-      ) as Array<string>;
+      const newSources = Array.from(
+        (args[0] as string).trim().split("\n"),
+      ).filter((s) => s.length > 0);
       if (scene == null) {
         return updateLibrary(state, (l) =>
           addSources(l, newSources, state.library),
@@ -2548,7 +2603,7 @@ export function addSource(
       });
     case GT.local: {
       if (!args || args.length < 2) {
-        return;
+        return {};
       }
       let rootDir = args[1];
       if (!rootDir.endsWith(window.constants.pathSep)) {
@@ -2567,7 +2622,7 @@ export function addSource(
     }
     case GT.tumblr:
       if (!args || args.length < 1) {
-        return;
+        return {};
       }
       if (scene == null) {
         return updateLibrary(state, (l) =>
@@ -2579,6 +2634,8 @@ export function addSource(
           handleArgs(s);
         });
       }
+    default:
+      return {};
   }
 }
 
@@ -2694,15 +2751,16 @@ export function sortScene(
     }
     return "0";
   };
+  const noText = () => "";
   const newScenes = state.scenes.sort(
     sortFunction(
       algorithm,
       ascending,
       getName,
-      null,
+      noText,
       getCount,
       getType,
-      algorithm == SF.type ? SF.alpha : null,
+      algorithm == SF.type ? SF.alpha : undefined,
     ),
   );
   return { scenes: newScenes };
@@ -2719,7 +2777,7 @@ export function sortPlaylist(
   if (playlist) {
     playlist.audios = playlist.audios
       .map((aID) => state.audios.find((a) => a.id == aID))
-      .concat()
+      .filter((audio) => audio != null)
       .sort(audioSortFunction(algorithm, ascending))
       .map((a) => a.id);
     return { playlists: newPlaylists };
@@ -2756,9 +2814,8 @@ function audioSortFunction(
         break;
       case ASF.name: {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
-        aValue = a.name.replace(reA, "");
-        bValue = b.name.replace(reA, "");
-
+        const aValue = a.name ? a.name.replace(reA, "") : "";
+        const bValue = b.name ? b.name.replace(reA, "") : "";
         const compare = aValue.localeCompare(bValue, "en", { numeric: true });
         return ascending ? compare : compare * -1;
       }
@@ -2855,9 +2912,9 @@ function scriptSortFunction(
 
 export function sortSources(
   state: State,
-  scene: Scene,
   algorithm: string,
   ascending: boolean,
+  scene?: Scene,
 ): Object {
   if (algorithm == SF.random) {
     if (scene == null) {
@@ -2891,7 +2948,7 @@ export function sortSources(
   const getType = (a: LibrarySource) => {
     return getSourceType(a.url);
   };
-  let secondary: string = null;
+  let secondary: string | undefined = undefined;
   if (algorithm == SF.alpha) {
     secondary = SF.type;
   }
@@ -2941,8 +2998,10 @@ export function sortTags(
   const getName = (a: Tag) => {
     return a.name.toLowerCase();
   };
+  const noText = () => "";
+  const noNumber = () => -1;
   const newTags = state.tags.sort(
-    sortFunction(algorithm, ascending, getName, null, null, null, null),
+    sortFunction(algorithm, ascending, getName, noText, noNumber, noText),
   );
   return { tags: newTags };
 }
@@ -2954,7 +3013,7 @@ function sortFunction(
   getFullName: (a: any) => string,
   getCount: (a: any) => number,
   getType: (a: any) => string,
-  secondary: string,
+  secondary?: string,
 ): (a: any, b: any) => number {
   return (a, b) => {
     let aValue: any, bValue: any;
@@ -3013,7 +3072,7 @@ function sortFunction(
       return ascending ? -1 : 1;
     } else if (aValue > bValue) {
       return ascending ? 1 : -1;
-    } else if (secondary) {
+    } else if (secondary != null) {
       return sortFunction(
         secondary,
         true,
@@ -3021,7 +3080,6 @@ function sortFunction(
         getFullName,
         getCount,
         getType,
-        null,
       )(a, b);
     } else {
       return 0;
@@ -3047,7 +3105,6 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         id: id,
         name: "download_scene_temp",
         sources: [source],
-        libraryID: null,
         timingFunction: TF.constant,
         timingConstant: 1,
         backgroundType: state.config.defaultScene.backgroundType,
@@ -3062,8 +3119,9 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         downloadScene: true,
       },
     );
-    if (getActiveScene(state)?.libraryID != -1) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene != null && activeScene.libraryID != -1) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -3106,8 +3164,9 @@ export function downloadSource(state: State, source: LibrarySource): Object {
         downloadScene: true,
       },
     );
-    if (getLibrarySource(state) != null) {
-      const activeScene = getActiveScene(state);
+
+    const activeScene = getActiveScene(state);
+    if (activeScene != null && getLibrarySource(state, activeScene) != null) {
       applyEffects(tempScene, getEffects(activeScene));
       tempScene.overlayEnabled = activeScene.overlayEnabled;
       tempScene.overlays = activeScene.overlays;
@@ -3258,16 +3317,18 @@ export function importScene(
     for (const o of scene.overlays) {
       if (o.sceneID.toString().startsWith("999")) {
         const sID = Number.parseInt(o.sceneID.toString().replace("999", ""));
-        if (newGridMap.has(sID)) {
-          o.sceneID = Number.parseInt("999" + newGridMap.get(sID));
+        const newGridID = newGridMap.get(sID);
+        if (newGridID != null) {
+          o.sceneID = Number.parseInt("999" + newGridID);
         } else {
           o.sceneID = Number.parseInt("999" + gid);
           newGridMap.set(sID, gid++);
         }
       } else {
         const sID = Number.parseInt(o.sceneID as any);
-        if (newSceneMap.has(sID)) {
-          o.sceneID = newSceneMap.get(sID);
+        const newSceneID = newSceneMap.get(sID);
+        if (newSceneID != null) {
+          o.sceneID = newSceneID;
         } else {
           o.sceneID = id++;
           newSceneMap.set(sID, o.sceneID);
@@ -3280,15 +3341,22 @@ export function importScene(
     for (let i = 1; i < importScenes.length; i++) {
       if (importScenes[i].grid) {
         const grid = new SceneGrid(importScenes[i]);
-        grid.id = newGridMap.get(grid.id);
+        const newGridID = newGridMap.get(grid.id);
+        if (newGridID == null) {
+          continue;
+        }
+
+        grid.id = newGridID;
         for (let r = 0; r < grid.grid.length; r++) {
           for (let c = 0; c < grid.grid[r].length; c++) {
             const cellID = Number.parseInt(grid.grid[r][c].sceneID as any);
             if (cellID != -1) {
-              if (!newSceneMap.has(cellID)) {
-                newSceneMap.set(cellID, id++);
+              let newSceneID = newSceneMap.get(cellID);
+              if (newSceneID == null) {
+                newSceneID = id++;
+                newSceneMap.set(cellID, newSceneID);
               }
-              grid.grid[r][c].sceneID = newSceneMap.get(cellID);
+              grid.grid[r][c].sceneID = newSceneID;
             }
           }
         }
@@ -3299,10 +3367,13 @@ export function importScene(
           window.ipc.platform(),
           importScenes[i],
         );
-        if (!newSceneMap.has(scene.id)) {
-          newSceneMap.set(scene.id, id++);
+
+        let newSceneId = newSceneMap.get(scene.id);
+        if (newSceneId == null) {
+          newSceneId = id++;
+          newSceneMap.set(scene.id, newSceneId);
         }
-        scene.id = newSceneMap.get(scene.id);
+        scene.id = newSceneId;
         for (const o of scene.overlays) {
           if (o.sceneID.toString().startsWith("999")) {
             const sID = Number.parseInt(
@@ -3316,8 +3387,9 @@ export function importScene(
             }
           } else {
             const sID = Number.parseInt(o.sceneID as any);
-            if (newSceneMap.has(sID)) {
-              o.sceneID = newSceneMap.get(sID);
+            const existingSceneID = newSceneMap.get(sID);
+            if (existingSceneID != null) {
+              o.sceneID = existingSceneID;
             } else {
               o.sceneID = id++;
               newSceneMap.set(sID, o.sceneID);
@@ -3458,12 +3530,11 @@ export function importLibrary(
   backup: Function,
   libraryImport: any,
 ): Object {
-  if (!libraryImport || !libraryImport.length) return;
+  if (!libraryImport || !libraryImport.length) return {};
   backup();
   const newLibrary = Array.from(state.library);
   const newTags = Array.from(state.tags);
   const myLibrary = newLibrary.map((s) => s.url);
-  const myTags = newTags.map((t) => t.name);
   let tagID = newTags.length + 1;
   newTags.forEach((t) => {
     tagID = Math.max(t.id + 1, tagID);
@@ -3476,13 +3547,13 @@ export function importLibrary(
     if (source.tags) {
       for (const tag of source.tags) {
         // Make sure we have all of these tags
-        if (myTags.includes(tag.name)) {
-          tag.id = newTags.find((t) => t.name == tag.name).id; // Map tags we already have
+        const myTag = newTags.find((t) => t.name == tag.name);
+        if (myTag != null) {
+          tag.id = myTag.id; // Map tags we already have
         } else {
           // Add tags we don't have yet
           tag.id = tagID++;
           newTags.push(tag);
-          myTags.push(tag.name);
         }
       }
     } else {
@@ -3545,7 +3616,10 @@ export function markOffline(getState: () => State, setState: Function) {
   const state = getState();
   const actionableLibrary = state.library.filter((ls) => {
     // If this link was checked within the last week, skip
-    return Date.now() - new Date(ls.lastCheck).getTime() >= 604800000;
+    return (
+      ls.lastCheck != null &&
+      Date.now() - new Date(ls.lastCheck).getTime() >= 604800000
+    );
   });
   const offlineLoop = () => {
     const state = getState();
@@ -3601,14 +3675,14 @@ export function markOffline(getState: () => State, setState: Function) {
           window.ipc.setProgressBar(
             state.progressCurrent / state.progressTotal,
           );
-          setTimeout(offlineLoop, timeout);
+          window.setTimeout(offlineLoop, timeout);
         });
       } else {
         // Skip if removed from library during check
         state.progressCurrent = offset + 1;
         setState({ progressCurrent: state.progressCurrent });
         window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-        setTimeout(offlineLoop, 100);
+        window.setTimeout(offlineLoop, 100);
       }
     } else {
       const actionSource = actionableLibrary[offset];
@@ -3624,7 +3698,7 @@ export function markOffline(getState: () => State, setState: Function) {
         if (!exists) {
           actionSource.offline = true;
         }
-        setTimeout(offlineLoop, 10);
+        window.setTimeout(offlineLoop, 10);
       });
     }
   };
@@ -3656,7 +3730,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
       state.progressCurrent = offset + 1;
       setState({ progressCurrent: state.progressCurrent });
       window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-      setTimeout(detectBPMLoop, 100);
+      window.setTimeout(detectBPMLoop, 100);
     });
   };
 
@@ -3668,7 +3742,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
       state.progressCurrent = offset + 1;
       setState({ progressCurrent: state.progressCurrent });
       window.ipc.setProgressBar(state.progressCurrent / state.progressTotal);
-      setTimeout(detectBPMLoop, 100);
+      window.setTimeout(detectBPMLoop, 100);
     };
 
     const detectBPM = (data: ArrayBuffer) => {
@@ -3685,7 +3759,7 @@ export function detectBPMs(getState: () => State, setState: Function) {
               window.ipc.setProgressBar(
                 state.progressCurrent / state.progressTotal,
               );
-              setTimeout(detectBPMLoop, 100);
+              window.setTimeout(detectBPMLoop, 100);
             })
             .catch((e: any) => {
               bpmError(e);
@@ -3818,7 +3892,7 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
             window.ipc.setProgressBar(
               state.progressCurrent / state.progressTotal,
             );
-            setTimeout(videoMetadataLoop, 100);
+            window.setTimeout(videoMetadataLoop, 100);
           });
         };
         video.onerror = () => {
@@ -3828,7 +3902,7 @@ export function updateVideoMetadata(getState: () => State, setState: Function) {
           window.ipc.setProgressBar(
             state.progressCurrent / state.progressTotal,
           );
-          setTimeout(videoMetadataLoop, 100);
+          window.setTimeout(videoMetadataLoop, 100);
         };
         video.src = proxyVideo(librarySource.url);
       } else {
@@ -3929,7 +4003,7 @@ export function importTumblr(getState: () => State, setState: Function) {
         window.ipc.setProgressBar(nextOffset / state.progressTotal);
         // Loop until we run out of blogs
         if (nextOffset < state.progressTotal) {
-          setTimeout(tumblrImportLoop, 1500);
+          window.setTimeout(tumblrImportLoop, 1500);
         } else {
           window.ipc.setProgressBar(-1);
           setState({

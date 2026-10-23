@@ -317,32 +317,32 @@ interface ScriptLibraryProps {
   filters: Array<string>;
   library: Array<CaptionScript>;
   selected: Array<string>;
-  specialMode: string;
+  specialMode: string | null;
   tags: Array<Tag>;
-  tutorial: string;
+  tutorial: string | null;
   yOffset: number;
-  goBack(): void;
-  onBatchTag(): void;
-  onEditScript(source: CaptionScript): void;
-  onImportFromLibrary(sources: Array<CaptionScript>): void;
-  onImportToScriptor(source: CaptionScript): void;
-  onManageTags(): void;
-  onPlay(
+  goBack: () => void;
+  onBatchTag: () => void;
+  onEditScript: (source: CaptionScript) => void;
+  onImportFromLibrary: (sources: Array<CaptionScript>) => void;
+  onImportToScriptor: (source: CaptionScript) => void;
+  onManageTags: () => void;
+  onPlay: (
     source: CaptionScript,
-    sceneID: string,
+    sceneID: number,
     displayed: Array<CaptionScript>,
-  ): void;
-  onSort(algorithm: string, ascending: boolean): void;
-  onTutorial(tutorial: string): void;
-  onUpdateLibrary(fn: (library: Array<CaptionScript>) => void): void;
-  onUpdateMode(mode: string): void;
-  onUpdateScript(script: CaptionScript): void;
-  savePosition(
+  ) => void;
+  onSort: (algorithm: string, ascending: boolean) => void;
+  onTutorial: (tutorial: string) => void;
+  onUpdateLibrary: (fn: (library: Array<CaptionScript>) => void) => void;
+  onUpdateMode: (mode: string) => void;
+  onUpdateScript: (script: CaptionScript) => void;
+  savePosition: (
     yOffset: number,
     filters: Array<string>,
     selected: Array<string>,
-  ): void;
-  systemMessage(message: string): void;
+  ) => void;
+  systemMessage: (message: string) => void;
 }
 
 interface ScriptLibraryState {
@@ -351,8 +351,8 @@ interface ScriptLibraryState {
   filters: Array<string>;
   selected: Array<string>;
   selectedTags: Array<string>;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
 }
 
 class ScriptLibrary extends React.Component<
@@ -368,8 +368,6 @@ class ScriptLibrary extends React.Component<
       filters: props.filters,
       selected: props.selected,
       selectedTags: new Array<string>(),
-      menuAnchorEl: null as any,
-      openMenu: null as string,
     };
   }
 
@@ -406,7 +404,7 @@ class ScriptLibrary extends React.Component<
                   color="inherit"
                   aria-label="Back"
                   className={classes.backButton}
-                  onClick={this.goBack.bind(this)}
+                  onClick={this.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -454,7 +452,7 @@ class ScriptLibrary extends React.Component<
                   isCreatable
                   onlyUsed
                   noTypes
-                  onUpdateFilters={this.onUpdateFilters.bind(this)}
+                  onUpdateFilters={this.onUpdateFilters}
                 />
               </div>
             </div>
@@ -491,7 +489,7 @@ class ScriptLibrary extends React.Component<
               className={clsx(
                 this.props.tutorial == SLT.sidebar1 && classes.highlight,
               )}
-              onClick={this.onToggleDrawer.bind(this)}
+              onClick={this.onToggleDrawer}
               size="large"
             >
               <MenuIcon className={classes.drawerIcon} />
@@ -505,7 +503,7 @@ class ScriptLibrary extends React.Component<
               disableInteractive
               title={this.state.drawerOpen ? "" : "Manage Tags"}
             >
-              <ListItem button onClick={this.props.onManageTags.bind(this)}>
+              <ListItem button onClick={this.props.onManageTags}>
                 <ListItemIcon>
                   <LocalOfferIcon />
                 </ListItemIcon>
@@ -525,7 +523,7 @@ class ScriptLibrary extends React.Component<
               disableInteractive
               title={this.state.drawerOpen ? "" : "Batch Tag"}
             >
-              <ListItem button onClick={this.onBatchTag.bind(this)}>
+              <ListItem button onClick={this.onBatchTag}>
                 <ListItemIcon>
                   <FormatListBulletedIcon />
                 </ListItemIcon>
@@ -550,6 +548,7 @@ class ScriptLibrary extends React.Component<
               )}
             >
               <ScriptSourceList
+                tutorial={this.props.tutorial}
                 specialMode={this.props.specialMode}
                 library={this.props.library}
                 scenes={this.props.allScenes}
@@ -560,12 +559,12 @@ class ScriptLibrary extends React.Component<
                 sources={this.state.displaySources}
                 yOffset={this.props.yOffset}
                 onEditScript={this.props.onEditScript}
-                onPlay={this.props.onPlay.bind(this)}
-                onUpdateSelected={this.onUpdateSelected.bind(this)}
-                onUpdateLibrary={this.props.onUpdateLibrary.bind(this)}
-                onUpdateScript={this.props.onUpdateScript.bind(this)}
-                savePosition={this.savePosition.bind(this)}
-                systemMessage={this.props.systemMessage.bind(this)}
+                onPlay={this.props.onPlay}
+                onUpdateSelected={this.onUpdateSelected}
+                onUpdateLibrary={this.props.onUpdateLibrary}
+                onUpdateScript={this.props.onUpdateScript}
+                savePosition={this.savePosition}
+                systemMessage={this.props.systemMessage}
               />
             </Container>
           </div>
@@ -573,7 +572,7 @@ class ScriptLibrary extends React.Component<
 
         <Backdrop
           className={classes.backdrop}
-          onClick={this.onCloseDialog.bind(this)}
+          onClick={this.onCloseDialog}
           open={
             this.props.tutorial == null &&
             (this.state.openMenu == MO.new || this.state.drawerOpen)
@@ -585,7 +584,7 @@ class ScriptLibrary extends React.Component<
             <Tooltip disableInteractive title="Clear" placement="top-end">
               <Fab
                 className={classes.selectNoneButton}
-                onClick={this.onSelectNone.bind(this)}
+                onClick={this.onSelectNone}
                 size="small"
               >
                 <ClearIcon className={classes.icon} />
@@ -594,7 +593,7 @@ class ScriptLibrary extends React.Component<
             <Tooltip disableInteractive title="Select All" placement="top-end">
               <Fab
                 className={classes.selectAllButton}
-                onClick={this.onSelectAll.bind(this)}
+                onClick={this.onSelectAll}
                 size="medium"
               >
                 <SelectAllIcon className={classes.icon} />
@@ -621,10 +620,10 @@ class ScriptLibrary extends React.Component<
                   disabled={this.state.selected.length == 0}
                   onClick={
                     this.props.specialMode == SP.batchTag
-                      ? this.onToggleBatchTagModal.bind(this)
+                      ? this.onToggleBatchTagModal
                       : this.props.specialMode == SP.select
-                        ? this.onImportFromLibrary.bind(this)
-                        : this.onImportSingleFromLibrary.bind(this)
+                        ? this.onImportFromLibrary
+                        : this.onImportSingleFromLibrary
                   }
                   size="large"
                 >
@@ -655,7 +654,7 @@ class ScriptLibrary extends React.Component<
               >
                 <Fab
                   className={classes.removeAllButton}
-                  onClick={this.onRemoveAll.bind(this)}
+                  onClick={this.onRemoveAll}
                   size="small"
                 >
                   <DeleteSweepIcon className={classes.icon} />
@@ -664,7 +663,7 @@ class ScriptLibrary extends React.Component<
             )}
             <Dialog
               open={this.state.openMenu == MO.removeAllAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="remove-all-title"
               aria-describedby="remove-all-description"
             >
@@ -680,16 +679,10 @@ class ScriptLibrary extends React.Component<
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button
-                      onClick={this.onFinishRemoveAll.bind(this)}
-                      color="primary"
-                    >
+                    <Button onClick={this.onFinishRemoveAll} color="primary">
                       Yea... I'm sure
                     </Button>
                   </DialogActions>
@@ -707,14 +700,11 @@ class ScriptLibrary extends React.Component<
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                     <Button
-                      onClick={this.onFinishRemoveVisible.bind(this)}
+                      onClick={this.onFinishRemoveVisible}
                       color="primary"
                     >
                       Confirm
@@ -737,7 +727,7 @@ class ScriptLibrary extends React.Component<
                   this.state.filters.length > 0 && classes.hidden,
                 )}
                 disabled={this.state.filters.length > 0}
-                onClick={this.onAddSource.bind(this, AF.script)}
+                onClick={(e) => this.onAddSource(AF.script, e)}
                 size="small"
               >
                 <DescriptionIcon className={classes.icon} />
@@ -757,7 +747,7 @@ class ScriptLibrary extends React.Component<
                   this.state.filters.length > 0 && classes.hidden,
                 )}
                 disabled={this.state.filters.length > 0}
-                onClick={this.onAddSource.bind(this, AF.url)}
+                onClick={(e) => this.onAddSource(AF.url, e)}
                 size="small"
               >
                 <HttpIcon className={classes.icon} />
@@ -769,7 +759,7 @@ class ScriptLibrary extends React.Component<
                 this.state.openMenu == MO.new && classes.backdropTop,
               )}
               disabled={this.state.filters.length > 0}
-              onClick={this.onToggleNewMenu.bind(this)}
+              onClick={this.onToggleNewMenu}
               size="large"
             >
               <AddIcon className={classes.icon} />
@@ -783,7 +773,7 @@ class ScriptLibrary extends React.Component<
           aria-haspopup="true"
           aria-controls="sort-menu"
           aria-label="Sort Sources"
-          onClick={this.onOpenSortMenu.bind(this)}
+          onClick={this.onOpenSortMenu}
           size="medium"
         >
           <SortIcon className={classes.icon} />
@@ -803,7 +793,7 @@ class ScriptLibrary extends React.Component<
           keepMounted
           classes={{ paper: classes.sortMenu }}
           open={this.state.openMenu == MO.sort}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
         >
           {[SF.alpha, SF.alphaFull, SF.date].map((sf) => (
             <MenuItem key={sf}>
@@ -811,14 +801,14 @@ class ScriptLibrary extends React.Component<
               <ListItemSecondaryAction>
                 <IconButton
                   edge="end"
-                  onClick={this.props.onSort.bind(this, sf, true)}
+                  onClick={() => this.props.onSort(sf, true)}
                   size="large"
                 >
                   <ArrowUpwardIcon />
                 </IconButton>
                 <IconButton
                   edge="end"
-                  onClick={this.props.onSort.bind(this, sf, false)}
+                  onClick={() => this.props.onSort(sf, false)}
                   size="large"
                 >
                   <ArrowDownwardIcon />
@@ -831,7 +821,7 @@ class ScriptLibrary extends React.Component<
             <ListItemSecondaryAction>
               <IconButton
                 edge="end"
-                onClick={this.props.onSort.bind(this, SF.random, true)}
+                onClick={() => this.props.onSort(SF.random, true)}
                 size="large"
               >
                 <ShuffleIcon />
@@ -843,7 +833,7 @@ class ScriptLibrary extends React.Component<
         <Dialog
           classes={{ paper: classes.noScroll }}
           open={this.state.openMenu == MO.batchTag}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="batch-tag-title"
           aria-describedby="batch-tag-description"
         >
@@ -862,7 +852,7 @@ class ScriptLibrary extends React.Component<
                 onlyTags
                 showCheckboxes
                 hideSelectedOptions={false}
-                onUpdateFilters={this.onSelectTags.bind(this)}
+                onUpdateFilters={this.onSelectTags}
               />
             )}
           </DialogContent>
@@ -871,7 +861,7 @@ class ScriptLibrary extends React.Component<
               disabled={
                 this.state.selectedTags && this.state.selectedTags.length == 0
               }
-              onClick={this.batchTagRemove.bind(this)}
+              onClick={this.batchTagRemove}
               color="secondary"
             >
               - Remove
@@ -880,12 +870,12 @@ class ScriptLibrary extends React.Component<
               disabled={
                 this.state.selectedTags && this.state.selectedTags.length == 0
               }
-              onClick={this.batchTagAdd.bind(this)}
+              onClick={this.batchTagAdd}
               color="secondary"
             >
               + Add
             </Button>
-            <Button onClick={this.batchTagOverwrite.bind(this)} color="primary">
+            <Button onClick={this.batchTagOverwrite} color="primary">
               Overwrite
             </Button>
           </DialogActions>
@@ -899,7 +889,7 @@ class ScriptLibrary extends React.Component<
     window.addEventListener("keydown", this.onKeyDown, false);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: ScriptLibraryProps, state: ScriptLibraryState) {
     if (
       state.filters != this.state.filters ||
       props.library != this.props.library
@@ -943,28 +933,28 @@ class ScriptLibrary extends React.Component<
     }
   };
 
-  onBatchTag() {
+  onBatchTag = () => {
     this.onCloseDialog();
     this.props.onBatchTag();
-  }
+  };
 
-  goBack() {
+  goBack = () => {
     if (this.props.specialMode == SP.batchTag) {
       this.setState({ selected: [], selectedTags: [] });
       this.props.onBatchTag();
     } else {
       this.props.goBack();
     }
-  }
+  };
 
-  onUpdateFilters(filters: Array<string>) {
+  onUpdateFilters = (filters: Array<string>) => {
     this.setState({
       filters: filters,
       displaySources: this.getDisplaySources(),
     });
-  }
+  };
 
-  onAddSource(type: string, e: MouseEvent) {
+  onAddSource = (type: string, e: React.MouseEvent<HTMLButtonElement>) => {
     this.onCloseDialog();
     switch (type) {
       case AF.url:
@@ -995,7 +985,7 @@ class ScriptLibrary extends React.Component<
         });
         break;
     }
-  }
+  };
 
   addScriptSources(newSources: Array<string>) {
     const originalSources = Array.from(this.props.library);
@@ -1026,52 +1016,58 @@ class ScriptLibrary extends React.Component<
     });
   }
 
-  onToggleBatchTagModal() {
+  onToggleBatchTagModal = () => {
     if (this.state.openMenu == MO.batchTag) {
-      this.setState({ openMenu: null, selectedTags: [] });
+      this.setState({ openMenu: undefined, selectedTags: [] });
     } else {
       this.setState({
         openMenu: MO.batchTag,
         selectedTags: this.getSelectedTags(),
       });
     }
-  }
+  };
 
-  onSelectTags(selectedTags: Array<string>) {
+  onSelectTags = (selectedTags: Array<string>) => {
     this.setState({ selectedTags: selectedTags });
-  }
+  };
 
-  onToggleDrawer() {
+  onToggleDrawer = () => {
     if (this.props.tutorial == SLT.sidebar1) {
       this.props.onTutorial(SLT.sidebar1);
     }
     this.setState({ drawerOpen: !this.state.drawerOpen });
-  }
+  };
 
-  onToggleNewMenu() {
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
-  }
+  onToggleNewMenu = () => {
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
+  };
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
-  }
+  };
 
-  onCloseDialog() {
-    this.setState({ menuAnchorEl: null, openMenu: null, drawerOpen: false });
-  }
+  onCloseDialog = () => {
+    this.setState({
+      menuAnchorEl: undefined,
+      openMenu: undefined,
+      drawerOpen: false,
+    });
+  };
 
-  onRemoveAll() {
+  onRemoveAll = () => {
     this.setState({ openMenu: MO.removeAllAlert });
-  }
+  };
 
-  onFinishRemoveAll() {
+  onFinishRemoveAll = () => {
     this.props.onUpdateLibrary((l) => {
       l.splice(0, l.length);
     });
     this.onCloseDialog();
-  }
+  };
 
-  onFinishRemoveVisible() {
+  onFinishRemoveVisible = () => {
     this.props.onUpdateLibrary((l) => {
       const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
       for (let i = l.length - 1; i >= 0; i--) {
@@ -1082,9 +1078,9 @@ class ScriptLibrary extends React.Component<
     });
     this.onCloseDialog();
     this.setState({ filters: [] });
-  }
+  };
 
-  onImportFromLibrary() {
+  onImportFromLibrary = () => {
     const selected = this.state.selected;
     const sources = new Array<CaptionScript>();
     for (let url of selected) {
@@ -1094,9 +1090,9 @@ class ScriptLibrary extends React.Component<
       }
     }
     this.props.onImportFromLibrary(sources);
-  }
+  };
 
-  onImportSingleFromLibrary() {
+  onImportSingleFromLibrary = () => {
     for (let url of this.state.selected) {
       const source = this.props.library.find((s) => s.url == url);
       if (source) {
@@ -1104,13 +1100,13 @@ class ScriptLibrary extends React.Component<
         break;
       }
     }
-  }
+  };
 
-  onUpdateSelected(selected: Array<string>) {
+  onUpdateSelected = (selected: Array<string>) => {
     this.setState({ selected: selected });
-  }
+  };
 
-  onSelectAll() {
+  onSelectAll = () => {
     const displaySources = this.state.displaySources;
     const newSelected = Array.from(this.state.selected);
     for (let source of displaySources.map((s) => s.url)) {
@@ -1119,9 +1115,9 @@ class ScriptLibrary extends React.Component<
       }
     }
     this.setState({ selected: newSelected });
-  }
+  };
 
-  onSelectNone() {
+  onSelectNone = () => {
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
     for (let source of displaySources.map((s) => s.url)) {
@@ -1130,9 +1126,9 @@ class ScriptLibrary extends React.Component<
       }
     }
     this.setState({ selected: newSelected });
-  }
+  };
 
-  savePosition() {
+  savePosition = () => {
     const sortableList = document.getElementById("sortable-list");
     if (sortableList) {
       const scrollElement = sortableList.firstElementChild;
@@ -1143,7 +1139,7 @@ class ScriptLibrary extends React.Component<
         this.state.selected,
       );
     }
-  }
+  };
 
   toggleMarked(taggingMode?: boolean) {
     if (taggingMode == null) {
@@ -1154,7 +1150,7 @@ class ScriptLibrary extends React.Component<
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
         for (let source of this.state.displaySources) {
-          l.find((s) => s.id == source.id).marked = true;
+          l.find((s) => s.id == source.id)!.marked = true;
         }
       });
     } else {
@@ -1175,35 +1171,35 @@ class ScriptLibrary extends React.Component<
     this.toggleMarked(false);
   }
 
-  batchTagOverwrite() {
+  batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         source.tags = new Array<Tag>();
         for (let tag of this.state.selectedTags) {
           source.tags.push(
             new Tag({
               name: tag,
-              id: this.props.tags.find((t) => t.name == tag).id,
+              id: this.props.tags.find((t) => t.name == tag)!.id,
             }),
           );
         }
       }
     });
     this.onCloseDialog();
-  }
+  };
 
-  batchTagAdd() {
+  batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = new Set(source.tags.map((t) => t.name));
         for (let tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
                 name: tag,
-                id: this.props.tags.find((t) => t.name == tag).id,
+                id: this.props.tags.find((t) => t.name == tag)!.id,
               }),
             );
           }
@@ -1211,12 +1207,12 @@ class ScriptLibrary extends React.Component<
       }
     });
     this.onCloseDialog();
-  }
+  };
 
-  batchTagRemove() {
+  batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
       for (let sourceURL of this.state.selected) {
-        const source = l.find((s) => s.url === sourceURL);
+        const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = source.tags.map((t) => t.name);
         for (let tag of this.state.selectedTags) {
           const indexOf = sourceTags.indexOf(tag);
@@ -1228,13 +1224,13 @@ class ScriptLibrary extends React.Component<
       }
     });
     this.onCloseDialog();
-  }
+  };
 
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
     for (let sourceURL of this.state.selected) {
-      const source = this.props.library.find((s) => s.url === sourceURL);
+      const source = this.props.library.find((s) => s.url === sourceURL)!;
       const tags = source.tags;
       if (commonTags.length == 0) {
         commonTags = tags;
@@ -1319,4 +1315,4 @@ class ScriptLibrary extends React.Component<
 }
 
 (ScriptLibrary as any).displayName = "ScriptLibrary";
-export default withStyles(styles)(ScriptLibrary as any);
+export default withStyles(styles)(ScriptLibrary);

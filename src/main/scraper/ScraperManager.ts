@@ -17,13 +17,11 @@ import {
   loadGelbooru1,
   loadGelbooru2,
   loadHydrus,
-  loadImageFap,
   loadImgur,
   loadLuscious,
   loadPiwigo,
   loadRedGifs,
   loadRemoteImageURLList,
-  loadSexCom,
   loadTumblr,
 } from "./Scrapers";
 import {
@@ -40,7 +38,7 @@ const loadNimja = (
   filter: string,
   weight: string,
   helpers: { next: any; count: number; retries: number },
-  cachePath: string,
+  cachePath?: string,
 ) => {
   let sources = [source.url];
   helpers.next = null;
@@ -61,10 +59,10 @@ const loadLocalDirectory = (
   filter: string,
   weight: string,
   helpers: { next: any; count: number; retries: number },
-  cachePath: string,
+  cachePath?: string,
 ) => {
   const blacklist = ["*.css", "*.html", "avatar.png", "*.txt"];
-  const url = cachePath ? cachePath : source.url;
+  const url = cachePath ?? source.url;
 
   recursiveReaddir(url, blacklist, (err: any, rawFiles: Array<string>) => {
     if (err) {
@@ -120,7 +118,7 @@ const loadVideo = (
   filter: string,
   weight: string,
   helpers: { next: any; count: number; retries: number },
-  cachePath: string,
+  cachePath?: string,
 ) => {
   const url = cachePath ? cachePath : source.url;
   const missingVideo = () => {
@@ -214,7 +212,7 @@ const loadPlaylist = (
   filter: string,
   weight: string,
   helpers: { next: any; count: number; retries: number },
-  cachePath: string,
+  cachePath?: string,
 ) => {
   const url = cachePath ? cachePath : source.url;
   const promise = url.startsWith("http")
@@ -222,14 +220,17 @@ const loadPlaylist = (
     : fs.promises.readFile(url, "utf-8");
   promise
     .then((data) => {
-      let urls = [];
+      let urls: string[] = [];
       if (url.endsWith(".asx")) {
         const refs = new DOMParser()
           .parseFromString(data, "text/xml")
           .getElementsByTagName("Ref");
         for (let r = 0; r < refs.length; r++) {
           const l = refs[r];
-          urls.push(l.getAttribute("href"));
+          const href = l.getAttribute("href");
+          if (href != null) {
+            urls.push(href);
+          }
         }
       } else if (url.endsWith(".m3u8")) {
         for (let l of data.split("\n")) {
@@ -249,7 +250,9 @@ const loadPlaylist = (
           .getElementsByTagName("location");
         for (let r = 0; r < locations.length; r++) {
           const l = locations[r];
-          urls.push(l.textContent);
+          if (l.textContent != null) {
+            urls.push(l.textContent);
+          }
         }
       }
 
@@ -309,7 +312,7 @@ export function loadSources(
   const sourceType = getSourceType(source.url);
   if (sourceType == ST.local) {
     // Local files
-    loadLocalDirectory(pm, config, source, filter, weight, helpers, null);
+    loadLocalDirectory(pm, config, source, filter, weight, helpers);
   } else if (sourceType == ST.list) {
     // Image List
     helpers.next = null;
@@ -323,7 +326,9 @@ export function loadSources(
       filter,
       weight,
       helpers,
-      config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null,
+      config.caching.enabled && fs.existsSync(cachePath)
+        ? cachePath
+        : undefined,
     );
   } else if (sourceType == ST.playlist) {
     const cachePath = cacheDir + getFileName(source.url, path.sep);
@@ -334,10 +339,12 @@ export function loadSources(
       filter,
       weight,
       helpers,
-      config.caching.enabled && fs.existsSync(cachePath) ? cachePath : null,
+      config.caching.enabled && fs.existsSync(cachePath)
+        ? cachePath
+        : undefined,
     );
   } else if (sourceType == ST.nimja) {
-    loadNimja(pm, config, source, filter, weight, helpers, null);
+    loadNimja(pm, config, source, filter, weight, helpers);
   } else {
     // Paging sources
     let workerFunction: any;
@@ -345,10 +352,6 @@ export function loadSources(
       workerFunction = loadTumblr;
     } else if (sourceType == ST.redgifs) {
       workerFunction = loadRedGifs;
-    } else if (sourceType == ST.imagefap) {
-      workerFunction = loadImageFap;
-    } else if (sourceType == ST.sexcom) {
-      workerFunction = loadSexCom;
     } else if (sourceType == ST.imgur) {
       workerFunction = loadImgur;
     } else if (sourceType == ST.deviantart) {

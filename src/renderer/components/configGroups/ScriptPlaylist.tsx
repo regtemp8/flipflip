@@ -80,15 +80,15 @@ interface ScriptPlaylistProps {
     repeat: string;
   };
   scene: Scene;
-  onAddScript(playlistIndex: number): void;
-  onPlay(
+  onAddScript?: (playlistIndex: number) => void;
+  onPlay?: (
     source: CaptionScript,
     sceneID: number,
     displaySources: Array<CaptionScript>,
-  ): void;
-  onSourceOptions(script: CaptionScript): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
-  systemMessage(message: string): void;
+  ) => void;
+  onSourceOptions: (playlistIndex: number, script: CaptionScript) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  systemMessage?: (message: string) => void;
 }
 
 class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
@@ -133,7 +133,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
                   }
                 >
                   <div
-                    onClick={this.onSourceIconClick.bind(this, s)}
+                    onClick={(e) => this.onSourceIconClick(s, e)}
                     className={classes.scriptThumb}
                   >
                     <Fab size="small" className={classes.avatar}>
@@ -146,18 +146,16 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
               <ListItemSecondaryAction>
                 <IconButton
                   edge="end"
-                  onClick={this.props.onSourceOptions.bind(
-                    this,
-                    this.props.playlistIndex,
-                    s,
-                  )}
+                  onClick={() =>
+                    this.props.onSourceOptions(this.props.playlistIndex, s)
+                  }
                   size="large"
                 >
                   <BuildIcon />
                 </IconButton>
                 <IconButton
                   edge="end"
-                  onClick={this.removeScript.bind(this, i)}
+                  onClick={() => this.removeScript(i)}
                   size="large"
                 >
                   <DeleteIcon color="error" />
@@ -174,7 +172,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
                 "Shuffle " + (this.props.playlist.shuffle ? "(On)" : "(Off)")
               }
             >
-              <IconButton onClick={this.toggleShuffle.bind(this)} size="large">
+              <IconButton onClick={this.toggleShuffle} size="large">
                 <ShuffleIcon
                   color={this.props.playlist.shuffle ? "primary" : undefined}
                 />
@@ -191,7 +189,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
                     : "(One)")
               }
             >
-              <IconButton onClick={this.changeRepeat.bind(this)} size="large">
+              <IconButton onClick={this.changeRepeat} size="large">
                 {this.props.playlist.repeat == RP.none && <RepeatIcon />}
                 {this.props.playlist.repeat == RP.all && (
                   <RepeatIcon color="primary" />
@@ -204,10 +202,12 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           </div>
           <Tooltip disableInteractive title="Add Tracks">
             <IconButton
-              onClick={this.props.onAddScript.bind(
-                this,
-                this.props.playlistIndex,
-              )}
+              disabled={this.props.onAddScript == null}
+              onClick={() => {
+                if (this.props.onAddScript != null) {
+                  this.props.onAddScript(this.props.playlistIndex);
+                }
+              }}
               size="large"
             >
               <AddIcon />
@@ -215,7 +215,7 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           </Tooltip>
           <div className={classes.right}>
             <Tooltip disableInteractive title="Remove Playlist">
-              <IconButton onClick={this.removePlaylist.bind(this)} size="large">
+              <IconButton onClick={this.removePlaylist} size="large">
                 <ClearIcon color="error" />
               </IconButton>
             </Tooltip>
@@ -225,39 +225,47 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
     );
   }
 
-  onSourceIconClick(script: CaptionScript, e: MouseEvent) {
+  onSourceIconClick = (
+    script: CaptionScript,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
     const sourceURL = script.url;
     if (e.shiftKey && !e.ctrlKey) {
       this.openExternalURL(sourceURL);
     } else if (!e.shiftKey && e.ctrlKey) {
       window.ipc.showItemInFolder(sourceURL);
-    } else if (!e.shiftKey && !e.ctrlKey && this.props.systemMessage) {
+    } else if (
+      !e.shiftKey &&
+      !e.ctrlKey &&
+      this.props.onPlay &&
+      this.props.systemMessage
+    ) {
       try {
         this.props.onPlay(
           script,
           this.props.scene.id,
           this.props.playlist.scripts,
         );
-      } catch (e) {
+      } catch {
         this.props.systemMessage(
           "The source " + sourceURL + " isn't in your Library",
         );
       }
     }
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);
   }
 
-  toggleShuffle() {
+  toggleShuffle = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.scriptPlaylists[this.props.playlistIndex];
       playlist.shuffle = !playlist.shuffle;
     });
-  }
+  };
 
-  changeRepeat() {
+  changeRepeat = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.scriptPlaylists[this.props.playlistIndex];
       const repeat = playlist.repeat;
@@ -273,21 +281,21 @@ class ScriptPlaylist extends React.Component<ScriptPlaylistProps> {
           break;
       }
     });
-  }
+  };
 
-  removePlaylist() {
+  removePlaylist = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       s.scriptPlaylists.splice(this.props.playlistIndex, 1);
     });
-  }
+  };
 
-  removeScript(scriptIndex: number) {
+  removeScript = (scriptIndex: number) => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       const playlist = s.scriptPlaylists[this.props.playlistIndex];
       playlist.scripts.splice(scriptIndex, 1);
     });
-  }
+  };
 }
 
 (ScriptPlaylist as any).displayName = "ScriptPlaylist";
-export default withStyles(styles)(ScriptPlaylist as any);
+export default withStyles(styles)(ScriptPlaylist);

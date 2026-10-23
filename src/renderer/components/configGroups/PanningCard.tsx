@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 
 import {
   Collapse,
@@ -11,86 +10,107 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Switch,
   TextField,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
-
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { EA, HTF, TF, VTF } from "../../../common/const";
-import { SceneSettings } from "../../../common/Config";
 import en from "../../../common/en";
-import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
+import { SceneBase } from "../../../common/SceneBase";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    fullWidth: {
-      width: "100%",
-    },
-    paddingLeft: {
-      [theme.breakpoints.up("sm")]: {
-        paddingLeft: theme.spacing(1),
-      },
-    },
-    endInput: {
-      paddingLeft: theme.spacing(1),
-      paddingTop: 0,
-    },
-    percentInput: {
-      minWidth: theme.spacing(11),
-    },
-    backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
-    },
-    highlight: {
-      borderWidth: 2,
-      borderColor: theme.palette.secondary.main,
-      borderStyle: "solid",
-    },
-    disable: {
-      pointerEvents: "none",
-    },
-    noPadding: {
-      padding: "0 !important",
-    },
-  });
+const FullWidthCollapse = styled(Collapse)(() => ({
+  width: "100%",
+}));
+const FullWidthPaddedCollapse = styled(FullWidthCollapse)(({ theme }) => ({
+  [theme.breakpoints.up("sm")]: {
+    paddingLeft: theme.spacing(1),
+  },
+}));
+const FullWidthFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
+const PercentInputGrid = styled(Grid)(({ theme }) => ({
+  minWidth: theme.spacing(11),
+}));
 
-interface PanningCardProps {
-  classes: any;
-  scene: Scene | SceneSettings;
-  sidebar: boolean;
+interface PanningCardProps<T extends SceneBase> {
+  scene: T;
+  sidebar?: boolean;
   easingControls: boolean;
-  tutorial: string;
-  onUpdateScene(
-    scene: Scene | SceneSettings,
-    fn: (scene: Scene | SceneSettings) => void,
-  ): void;
+  tutorial?: string;
+  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
 }
 
-class PanningCard extends React.Component<PanningCardProps> {
-  readonly horizInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly vertInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  readonly sinInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+interface PanningCardState {
+  panHorizTransLevel: number;
+  panVertTransLevel: number;
+  panSinRate: number;
+}
 
-  constructor(props: PanningCardProps) {
+class PanningCard<T extends SceneBase> extends React.Component<
+  PanningCardProps<T>,
+  PanningCardState
+> {
+  constructor(props: PanningCardProps<T>) {
     super(props);
-  }
 
-  render() {
-    const classes = this.props.classes;
+    const panHorizTransLevel =
+      typeof this.props.scene.panHorizTransLevel === "number"
+        ? this.props.scene.panHorizTransLevel
+        : 0;
+
+    const panVertTransLevel =
+      typeof this.props.scene.panVertTransLevel === "number"
+        ? this.props.scene.panVertTransLevel
+        : 0;
 
     const panSinRate =
       typeof this.props.scene.panSinRate === "number"
         ? this.props.scene.panSinRate
         : 0;
+
+    this.state = {
+      panHorizTransLevel,
+      panVertTransLevel,
+      panSinRate,
+    };
+  }
+
+  componentDidUpdate(props: PanningCardProps<T>) {
+    if (props.scene.panHorizTransLevel != this.props.scene.panHorizTransLevel) {
+      const panHorizTransLevel =
+        typeof this.props.scene.panHorizTransLevel === "number"
+          ? this.props.scene.panHorizTransLevel
+          : 0;
+
+      this.setState({ panHorizTransLevel });
+    }
+    if (props.scene.panVertTransLevel != this.props.scene.panVertTransLevel) {
+      const panVertTransLevel =
+        typeof this.props.scene.panVertTransLevel === "number"
+          ? this.props.scene.panVertTransLevel
+          : 0;
+
+      this.setState({ panVertTransLevel });
+    }
+    if (props.scene.panSinRate != this.props.scene.panSinRate) {
+      const panSinRate =
+        typeof this.props.scene.panSinRate === "number"
+          ? this.props.scene.panSinRate
+          : 0;
+
+      this.setState({ panSinRate });
+    }
+  }
+
+  render() {
     const panBPMMulti =
       typeof this.props.scene.panBPMMulti === "number"
         ? this.props.scene.panBPMMulti
@@ -107,10 +127,6 @@ class PanningCard extends React.Component<PanningCardProps> {
       typeof this.props.scene.panDurationMax === "number"
         ? this.props.scene.panDurationMax
         : 0;
-    const horizTransLevel =
-      typeof this.props.scene.panHorizTransLevel === "number"
-        ? this.props.scene.panHorizTransLevel
-        : 0;
     const horizTransLevelMax =
       typeof this.props.scene.panHorizTransLevelMax === "number"
         ? this.props.scene.panHorizTransLevelMax
@@ -118,10 +134,6 @@ class PanningCard extends React.Component<PanningCardProps> {
     const horizTransLevelMin =
       typeof this.props.scene.panHorizTransLevelMin === "number"
         ? this.props.scene.panHorizTransLevelMin
-        : 0;
-    const vertTransLevel =
-      typeof this.props.scene.panVertTransLevel === "number"
-        ? this.props.scene.panVertTransLevel
         : 0;
     const vertTransLevelMax =
       typeof this.props.scene.panVertTransLevelMax === "number"
@@ -147,23 +159,25 @@ class PanningCard extends React.Component<PanningCardProps> {
         container
         spacing={this.props.scene.panning ? 2 : 0}
         alignItems="center"
-        className={clsx(this.props.tutorial != null && classes.disable)}
+        sx={{
+          pointerEvents: this.props.tutorial != null ? "none" : undefined,
+        }}
       >
         <Grid item xs={12}>
           <FormControlLabel
             control={
               <Switch
                 checked={this.props.scene.panning}
-                onChange={this.onBoolInput.bind(this, "panning")}
+                onChange={(e) => this.onBoolInput("panning", e)}
               />
             }
             label="Panning"
           />
         </Grid>
         <Grid item xs={12}>
-          <Collapse in={this.props.scene.panning} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.panning}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
@@ -177,16 +191,13 @@ class PanningCard extends React.Component<PanningCardProps> {
                   : 12
               }
             >
-              <Collapse
-                in={this.props.scene.panning}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
-              >
-                <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthPaddedCollapse in={this.props.scene.panning}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Move Horizontally</InputLabel>
                   <Select
                     variant="standard"
                     value={this.props.scene.panHorizTransType}
-                    onChange={this.onInput.bind(this, "panHorizTransType")}
+                    onChange={(e) => this.onInput("panHorizTransType", e)}
                   >
                     {Object.values(HTF).map((tf) => {
                       switch (tf) {
@@ -217,8 +228,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                       }
                     })}
                   </Select>
-                </FormControl>
-              </Collapse>
+                </FullWidthFormControl>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               item
@@ -229,102 +240,101 @@ class PanningCard extends React.Component<PanningCardProps> {
                   ? 7
                   : 12
               }
-              className={clsx(
-                (!this.props.scene.panning ||
-                  this.props.scene.panHorizTransType == HTF.none) &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  !this.props.scene.panning ||
+                  this.props.scene.panHorizTransType == HTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthPaddedCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panHorizTransImg &&
                   this.props.scene.panHorizTransType != HTF.none
                 }
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
                     <Switch
                       checked={this.props.scene.panHorizTransRandom}
                       size="small"
-                      onChange={this.onBoolInput.bind(
-                        this,
-                        "panHorizTransRandom",
-                      )}
+                      onChange={(e) =>
+                        this.onBoolInput("panHorizTransRandom", e)
+                      }
                     />
                   }
                   label="Randomize"
                 />
-              </Collapse>
-              <Collapse
+              </FullWidthPaddedCollapse>
+              <FullWidthPaddedCollapse
                 in={
                   this.props.scene.panning &&
                   this.props.scene.panHorizTransType != HTF.none
                 }
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
                     <Switch
                       checked={this.props.scene.panHorizTransImg}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "panHorizTransImg")}
+                      onChange={(e) => this.onBoolInput("panHorizTransImg", e)}
                     />
                   }
                   label="Use Img Width"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               item
               xs={12}
-              className={clsx(
-                (!this.props.scene.panning ||
-                  this.props.scene.panHorizTransType == HTF.none) &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  !this.props.scene.panning ||
+                  this.props.scene.panHorizTransType == HTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panHorizTransImg &&
                   this.props.scene.panHorizTransType != HTF.none &&
                   !this.props.scene.panHorizTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.horizInputRef}
-                      defaultValue={horizTransLevel}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevel",
-                      )}
+                      value={this.state.panHorizTransLevel}
+                      onChange={this.onPanHorizTransLevelChange}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevel", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-level-slider"
                     />
                   </Grid>
-                  <Grid item xs={3} className={classes.percentInput}>
+                  <PercentInputGrid item xs={3}>
                     <TextField
                       variant="standard"
-                      value={horizTransLevel}
+                      value={this.state.panHorizTransLevel}
                       margin="dense"
-                      onChange={this.onIntInput.bind(
-                        this,
-                        "panHorizTransLevel",
-                      )}
-                      onBlur={this.blurIntKey.bind(this, "panHorizTransLevel")}
+                      onChange={(e) => this.onIntInput("panHorizTransLevel", e)}
+                      onBlur={(e) => this.blurIntKey("panHorizTransLevel", e)}
                       InputProps={{
+                        sx: {
+                          pl: 1,
+                          pt: 0,
+                        },
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
                         ),
                       }}
                       inputProps={{
-                        className: classes.endInput,
                         step: 5,
                         min: 0,
                         max: 100,
@@ -332,27 +342,25 @@ class PanningCard extends React.Component<PanningCardProps> {
                         "aria-labelledby": "horiz-trans-level-slider",
                       }}
                     />
-                  </Grid>
+                  </PercentInputGrid>
                 </Grid>
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panHorizTransImg &&
                   this.props.scene.panHorizTransType != HTF.none &&
                   this.props.scene.panHorizTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
                     <Typography>Min: {horizTransLevelMin}%</Typography>
                     <Slider
                       defaultValue={horizTransLevelMin}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevelMin",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevelMin", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-min-slider"
@@ -362,28 +370,29 @@ class PanningCard extends React.Component<PanningCardProps> {
                     <Typography>Max: {horizTransLevelMax}%</Typography>
                     <Slider
                       defaultValue={horizTransLevelMax}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panHorizTransLevelMax",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panHorizTransLevelMax", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="horiz-trans-max-slider"
                     />
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.panning && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.panning ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={this.props.scene.panning} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.panning}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
@@ -397,16 +406,13 @@ class PanningCard extends React.Component<PanningCardProps> {
                   : 12
               }
             >
-              <Collapse
-                in={this.props.scene.panning}
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
-              >
-                <FormControl variant="standard" className={classes.fullWidth}>
+              <FullWidthPaddedCollapse in={this.props.scene.panning}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Move Vertically</InputLabel>
                   <Select
                     variant="standard"
                     value={this.props.scene.panVertTransType}
-                    onChange={this.onInput.bind(this, "panVertTransType")}
+                    onChange={(e) => this.onInput("panVertTransType", e)}
                   >
                     {Object.values(VTF).map((tf) => {
                       switch (tf) {
@@ -437,8 +443,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                       }
                     })}
                   </Select>
-                </FormControl>
-              </Collapse>
+                </FullWidthFormControl>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               item
@@ -449,100 +455,102 @@ class PanningCard extends React.Component<PanningCardProps> {
                   ? 7
                   : 12
               }
-              className={clsx(
-                (!this.props.scene.panning ||
-                  this.props.scene.panVertTransType == VTF.none) &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  !this.props.scene.panning ||
+                  this.props.scene.panVertTransType == VTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthPaddedCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panVertTransImg &&
                   this.props.scene.panVertTransType != VTF.none
                 }
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
                     <Switch
                       checked={this.props.scene.panVertTransRandom}
                       size="small"
-                      onChange={this.onBoolInput.bind(
-                        this,
-                        "panVertTransRandom",
-                      )}
+                      onChange={(e) =>
+                        this.onBoolInput("panVertTransRandom", e)
+                      }
                     />
                   }
                   label="Randomize"
                 />
-              </Collapse>
-              <Collapse
+              </FullWidthPaddedCollapse>
+              <FullWidthPaddedCollapse
                 in={
                   this.props.scene.panning &&
                   this.props.scene.panVertTransType != VTF.none
                 }
-                className={clsx(classes.fullWidth, classes.paddingLeft)}
               >
                 <FormControlLabel
                   control={
                     <Switch
                       checked={this.props.scene.panVertTransImg}
                       size="small"
-                      onChange={this.onBoolInput.bind(this, "panVertTransImg")}
+                      onChange={(e) => this.onBoolInput("panVertTransImg", e)}
                     />
                   }
                   label="Use Img Height"
                 />
-              </Collapse>
+              </FullWidthPaddedCollapse>
             </Grid>
             <Grid
               id="test"
               item
               xs={12}
-              className={clsx(
-                (!this.props.scene.panning ||
-                  this.props.scene.panVertTransType == VTF.none) &&
-                  classes.noPadding,
-              )}
+              sx={{
+                p:
+                  !this.props.scene.panning ||
+                  this.props.scene.panVertTransType == VTF.none
+                    ? "0 !important"
+                    : undefined,
+              }}
             >
-              <Collapse
+              <FullWidthCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panVertTransImg &&
                   this.props.scene.panVertTransType != VTF.none &&
                   !this.props.scene.panVertTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs>
                     <Slider
-                      ref={this.vertInputRef}
-                      defaultValue={vertTransLevel}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevel",
-                      )}
+                      value={this.state.panVertTransLevel}
+                      onChange={this.onPanVertTransLevelChange}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevel", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-level-slider"
                     />
                   </Grid>
-                  <Grid item xs={3} className={classes.percentInput}>
+                  <PercentInputGrid item xs={3}>
                     <TextField
                       variant="standard"
-                      value={vertTransLevel}
+                      value={this.state.panVertTransLevel}
                       margin="dense"
-                      onChange={this.onIntInput.bind(this, "panVertTransLevel")}
-                      onBlur={this.blurIntKey.bind(this, "panVertTransLevel")}
+                      onChange={(e) => this.onIntInput("panVertTransLevel", e)}
+                      onBlur={(e) => this.blurIntKey("panVertTransLevel", e)}
                       InputProps={{
+                        sx: {
+                          pl: 1,
+                          pt: 0,
+                        },
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
                         ),
                       }}
                       inputProps={{
-                        className: classes.endInput,
                         step: 5,
                         min: 0,
                         max: 100,
@@ -550,27 +558,25 @@ class PanningCard extends React.Component<PanningCardProps> {
                         "aria-labelledby": "vert-trans-level-slider",
                       }}
                     />
-                  </Grid>
+                  </PercentInputGrid>
                 </Grid>
-              </Collapse>
-              <Collapse
+              </FullWidthCollapse>
+              <FullWidthCollapse
                 in={
                   this.props.scene.panning &&
                   !this.props.scene.panVertTransImg &&
                   this.props.scene.panVertTransType != VTF.none &&
                   this.props.scene.panVertTransRandom
                 }
-                className={classes.fullWidth}
               >
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
                     <Typography>Min: {vertTransLevelMin}%</Typography>
                     <Slider
                       defaultValue={vertTransLevelMin}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevelMin",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevelMin", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-min-slider"
@@ -580,31 +586,32 @@ class PanningCard extends React.Component<PanningCardProps> {
                     <Typography>Max: {vertTransLevelMax}%</Typography>
                     <Slider
                       defaultValue={vertTransLevelMax}
-                      onChangeCommitted={this.onSliderChange.bind(
-                        this,
-                        "panVertTransLevelMax",
-                      )}
+                      onChangeCommitted={(e, value) =>
+                        this.onSliderChange("panVertTransLevelMax", e, value)
+                      }
                       valueLabelDisplay="auto"
                       valueLabelFormat={(v) => v + "%"}
                       aria-labelledby="vert-trans-max-slider"
                     />
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </Grid>
         </Grid>
         <Grid
           item
           xs={12}
-          className={clsx(!this.props.scene.panning && classes.noPadding)}
+          sx={{
+            p: !this.props.scene.panning ? "0 !important" : undefined,
+          }}
         >
-          <Collapse in={this.props.scene.panning} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.panning}>
             <Divider />
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
-          <Collapse in={this.props.scene.panning} className={classes.fullWidth}>
+          <FullWidthCollapse in={this.props.scene.panning}>
             <Grid container spacing={2} alignItems="center">
               <Grid
                 item
@@ -612,12 +619,12 @@ class PanningCard extends React.Component<PanningCardProps> {
                 sm={this.props.sidebar ? 12 : 4}
                 style={{ paddingTop: 10 }}
               >
-                <FormControl variant="standard" className={classes.fullWidth}>
+                <FullWidthFormControl variant="standard">
                   <InputLabel>Timing</InputLabel>
                   <Select
                     variant="standard"
                     value={this.props.scene.panTF}
-                    onChange={this.onInput.bind(this, "panTF")}
+                    onChange={(e) => this.onInput("panTF", e)}
                   >
                     {Object.values(TF).map((tf) => {
                       if (tf == TF.bpm) {
@@ -643,14 +650,13 @@ class PanningCard extends React.Component<PanningCardProps> {
                       }
                     })}
                   </Select>
-                </FormControl>
+                </FullWidthFormControl>
               </Grid>
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 8}>
-                <Collapse
+                <FullWidthCollapse
                   in={
                     this.props.scene.panning && this.props.scene.panTF == TF.sin
                   }
-                  className={classes.fullWidth}
                 >
                   <Typography
                     variant="caption"
@@ -662,25 +668,28 @@ class PanningCard extends React.Component<PanningCardProps> {
                   <Grid container alignItems="center">
                     <Grid item xs>
                       <Slider
-                        ref={this.sinInputRef}
-                        min={1}
-                        defaultValue={panSinRate}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panSinRate",
-                        )}
+                        value={this.state.panSinRate}
+                        onChange={this.onPanSinRateChange}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panSinRate", e, value)
+                        }
                         valueLabelDisplay="auto"
                         aria-labelledby="pan-sin-rate-slider"
                       />
                     </Grid>
-                    <Grid item xs={3} className={classes.percentInput}>
+                    <PercentInputGrid item xs={3}>
                       <TextField
                         variant="standard"
-                        value={panSinRate}
-                        onChange={this.onIntInput.bind(this, "panSinRate")}
-                        onBlur={this.blurIntKey.bind(this, "panSinRate")}
+                        value={this.state.panSinRate}
+                        onChange={(e) => this.onIntInput("panSinRate", e)}
+                        onBlur={(e) => this.blurIntKey("panSinRate", e)}
+                        InputProps={{
+                          sx: {
+                            pl: 1,
+                            pt: 0,
+                          },
+                        }}
                         inputProps={{
-                          className: classes.endInput,
                           step: 5,
                           min: 0,
                           max: 100,
@@ -688,14 +697,13 @@ class PanningCard extends React.Component<PanningCardProps> {
                           "aria-labelledby": "pan-sin-rate-slider",
                         }}
                       />
-                    </Grid>
+                    </PercentInputGrid>
                   </Grid>
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={
                     this.props.scene.panning && this.props.scene.panTF == TF.bpm
                   }
-                  className={classes.fullWidth}
                 >
                   <Typography
                     variant="caption"
@@ -708,29 +716,27 @@ class PanningCard extends React.Component<PanningCardProps> {
                     min={1}
                     max={100}
                     defaultValue={panBPMMulti}
-                    onChangeCommitted={this.onSliderChange.bind(
-                      this,
-                      "panBPMMulti",
-                    )}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("panBPMMulti", e, value)
+                    }
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => v / 10 + "x"}
                     aria-labelledby="pan-bpm-multi-slider"
                   />
-                </Collapse>
-                <Collapse
+                </FullWidthCollapse>
+                <FullWidthCollapse
                   in={
                     this.props.scene.panning &&
                     this.props.scene.panTF == TF.constant
                   }
-                  className={classes.fullWidth}
                 >
                   <TextField
                     variant="outlined"
                     label="For"
                     margin="dense"
                     value={panDuration}
-                    onChange={this.onIntInput.bind(this, "panDuration")}
-                    onBlur={this.blurIntKey.bind(this, "panDuration")}
+                    onChange={(e) => this.onIntInput("panDuration", e)}
+                    onBlur={(e) => this.blurIntKey("panDuration", e)}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">ms</InputAdornment>
@@ -742,19 +748,18 @@ class PanningCard extends React.Component<PanningCardProps> {
                       type: "number",
                     }}
                   />
-                </Collapse>
+                </FullWidthCollapse>
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         <Grid item xs={12}>
-          <Collapse
+          <FullWidthCollapse
             in={
               this.props.scene.panning &&
               (this.props.scene.panTF == TF.random ||
                 this.props.scene.panTF == TF.sin)
             }
-            className={classes.fullWidth}
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
@@ -763,8 +768,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                   label="Between"
                   margin="dense"
                   value={panDurationMin}
-                  onChange={this.onIntInput.bind(this, "panDurationMin")}
-                  onBlur={this.blurIntKey.bind(this, "panDurationMin")}
+                  onChange={(e) => this.onIntInput("panDurationMin", e)}
+                  onBlur={(e) => this.blurIntKey("panDurationMin", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -783,8 +788,8 @@ class PanningCard extends React.Component<PanningCardProps> {
                   label="and"
                   margin="dense"
                   value={panDurationMax}
-                  onChange={this.onIntInput.bind(this, "panDurationMax")}
-                  onBlur={this.blurIntKey.bind(this, "panDurationMax")}
+                  onChange={(e) => this.onIntInput("panDurationMax", e)}
+                  onBlur={(e) => this.blurIntKey("panDurationMax", e)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">ms</InputAdornment>
@@ -798,38 +803,31 @@ class PanningCard extends React.Component<PanningCardProps> {
                 />
               </Grid>
             </Grid>
-          </Collapse>
+          </FullWidthCollapse>
         </Grid>
         {this.props.easingControls && (
           <React.Fragment>
             <Grid
               item
               xs={12}
-              className={clsx(!this.props.scene.panning && classes.noPadding)}
+              sx={{
+                p: !this.props.scene.panning ? "0 !important" : undefined,
+              }}
             >
-              <Collapse
-                in={this.props.scene.panning}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.panning}>
                 <Divider />
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
             <Grid item xs={12}>
-              <Collapse
-                in={this.props.scene.panning}
-                className={classes.fullWidth}
-              >
+              <FullWidthCollapse in={this.props.scene.panning}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>Start Easing</InputLabel>
                       <Select
                         variant="standard"
                         value={this.props.scene.panStartEase}
-                        onChange={this.onInput.bind(this, "panStartEase")}
+                        onChange={(e) => this.onInput("panStartEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -837,16 +835,15 @@ class PanningCard extends React.Component<PanningCardProps> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panStartEase == EA.polyIn ||
                         this.props.scene.panStartEase == EA.polyOut ||
                         this.props.scene.panStartEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -859,22 +856,20 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panStartExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panStartEase == EA.backIn ||
                         this.props.scene.panStartEase == EA.backOut ||
                         this.props.scene.panStartEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -887,24 +882,22 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panStartOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="start-ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panStartEase == EA.elasticIn ||
                         this.props.scene.panStartEase == EA.elasticOut ||
                         this.props.scene.panStartEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -917,24 +910,22 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.panStartAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panStartEase == EA.elasticIn ||
                         this.props.scene.panStartEase == EA.elasticOut ||
                         this.props.scene.panStartEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -947,26 +938,22 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.panStartPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panStartPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panStartPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="start-per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <FormControl
-                      variant="standard"
-                      className={classes.fullWidth}
-                    >
+                    <FullWidthFormControl variant="standard">
                       <InputLabel>End Easing</InputLabel>
                       <Select
                         variant="standard"
                         value={this.props.scene.panEndEase}
-                        onChange={this.onInput.bind(this, "panEndEase")}
+                        onChange={(e) => this.onInput("panEndEase", e)}
                       >
                         {Object.values(EA).map((rf) => (
                           <MenuItem key={rf} value={rf}>
@@ -974,16 +961,15 @@ class PanningCard extends React.Component<PanningCardProps> {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FullWidthFormControl>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panEndEase == EA.polyIn ||
                         this.props.scene.panEndEase == EA.polyOut ||
                         this.props.scene.panEndEase == EA.polyInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -996,22 +982,20 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panEndExp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndExp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndExp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-exp-slider"
                       />
-                    </Collapse>
-                    <Collapse
+                    </FullWidthCollapse>
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panEndEase == EA.backIn ||
                         this.props.scene.panEndEase == EA.backOut ||
                         this.props.scene.panEndEase == EA.backInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -1024,24 +1008,22 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={10}
                         defaultValue={this.props.scene.panEndOv}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndOv",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndOv", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 2}
                         aria-labelledby="end-ov-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panEndEase == EA.elasticIn ||
                         this.props.scene.panEndEase == EA.elasticOut ||
                         this.props.scene.panEndEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -1054,24 +1036,22 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={40}
                         defaultValue={this.props.scene.panEndAmp}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndAmp",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndAmp", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-amp-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                   <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
-                    <Collapse
+                    <FullWidthCollapse
                       in={
                         this.props.scene.panEndEase == EA.elasticIn ||
                         this.props.scene.panEndEase == EA.elasticOut ||
                         this.props.scene.panEndEase == EA.elasticInOut
                       }
-                      className={classes.fullWidth}
                     >
                       <Typography
                         variant="caption"
@@ -1084,18 +1064,17 @@ class PanningCard extends React.Component<PanningCardProps> {
                         min={1}
                         max={20}
                         defaultValue={this.props.scene.panEndPer}
-                        onChangeCommitted={this.onSliderChange.bind(
-                          this,
-                          "panEndPer",
-                        )}
+                        onChangeCommitted={(e, value) =>
+                          this.onSliderChange("panEndPer", e, value)
+                        }
                         valueLabelDisplay="auto"
                         valueLabelFormat={(v) => v / 20}
                         aria-labelledby="end-per-slider"
                       />
-                    </Collapse>
+                    </FullWidthCollapse>
                   </Grid>
                 </Grid>
-              </Collapse>
+              </FullWidthCollapse>
             </Grid>
           </React.Fragment>
         )}
@@ -1103,75 +1082,77 @@ class PanningCard extends React.Component<PanningCardProps> {
     );
   }
 
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    let value = (e.currentTarget as any).value;
-    if (min && (this.props.scene as any)[key] < min) {
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    let value = e.currentTarget.value;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       value = min;
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       value = max;
       this.changeIntKey(key, max);
     }
 
-    // Update uncontrolled slider
+    // Update sliders
     if (key == "panHorizTransLevel") {
-      (this.horizInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.horizInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.horizInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panHorizTransLevel: Number(value) });
     } else if (key == "panVertTransLevel") {
-      (this.vertInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.vertInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.vertInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panVertTransLevel: Number(value) });
     } else if (key == "panSinRate") {
-      (this.sinInputRef.current.children.item(1) as any).style.width =
-        value + "%";
-      (this.sinInputRef.current.children.item(3) as any).style.left =
-        value + "%";
-      this.sinInputRef.current.children
-        .item(3)
-        .children.item(0)
-        .children.item(0)
-        .children.item(0).innerHTML = value;
+      this.setState({ panSinRate: Number(value) });
     }
-  }
+  };
 
-  onSliderChange(key: string, e: MouseEvent, value: number) {
+  onPanHorizTransLevelChange = (
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
+    this.setState({ panHorizTransLevel: value as number });
+  };
+
+  onPanVertTransLevelChange = (
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
+    this.setState({ panVertTransLevel: value as number });
+  };
+
+  onPanSinRateChange = (
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
+    this.setState({ panSinRate: value as number });
+  };
+
+  onSliderChange = (
+    key: string,
+    e: Event | React.SyntheticEvent<Element, Event>,
+    value: number | number[],
+  ) => {
     this.changeKey(key, value);
-  }
+  };
 
-  onBoolInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     const checked = input.checked;
     this.changeKey(key, checked);
-  }
+  };
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
-  onInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onInput = (key: string, e: SelectChangeEvent<string>) => {
+    const input = e.target;
     this.changeKey(key, input.value);
-  }
+  };
 
   update(fn: (scene: any) => void) {
     this.props.onUpdateScene(this.props.scene, fn);
@@ -1186,5 +1167,4 @@ class PanningCard extends React.Component<PanningCardProps> {
   }
 }
 
-(PanningCard as any).displayName = "PanningCard";
-export default withStyles(styles)(PanningCard as any);
+export default PanningCard;

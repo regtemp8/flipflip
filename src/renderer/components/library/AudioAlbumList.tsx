@@ -56,17 +56,24 @@ const styles = (theme: Theme) =>
     },
   });
 
+interface Album {
+  name: string;
+  artist: string;
+  thumb: string;
+  count: number;
+}
+
 interface AudioAlbumListProps {
   classes: any;
   sources: Array<Audio>;
   showHelp: boolean;
-  onClickAlbum(album: string): void;
-  onClickArtist(artist: string): void;
+  onClickAlbum: (album: string) => void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
 }
 
 interface AudioAlbumListState {
-  albums: Map<string, { artist: string; thumb: string; count: number }>;
-  hover: any;
+  albums: Album[];
+  hover?: any;
 }
 
 class AudioAlbumList extends React.Component<
@@ -78,13 +85,12 @@ class AudioAlbumList extends React.Component<
 
     this.state = {
       albums: this.getAlbums(),
-      hover: null as any,
     };
   }
 
   render() {
     const classes = this.props.classes;
-    if (this.state.albums.size == 0) {
+    if (this.state.albums.length == 0) {
       return (
         <React.Fragment>
           <Typography
@@ -121,57 +127,59 @@ class AudioAlbumList extends React.Component<
     }
 
     const va = "Various Artists";
-    const albums = Array.from(this.state.albums.keys());
     return (
       <Grid container spacing={2}>
-        {albums.map((a) => {
-          const data = this.state.albums.get(a);
-          let thumb: string = data.thumb;
+        {this.state.albums.map((data) => {
+          let thumb = data.thumb;
           if (thumb) thumb = thumb.replace(/\\/g, "/");
           const artist = data.artist;
           const count = data.count;
           return (
             <Grid
-              key={a}
+              key={data.name}
               item
               xs={6}
               sm={4}
               md={3}
               lg={2}
               className={classes.pointer}
-              onClick={this.props.onClickAlbum.bind(this, a)}
-              onMouseEnter={this.onMouseEnter.bind(this, a)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onClick={() => this.props.onClickAlbum(data.name)}
+              onMouseEnter={() => this.onMouseEnter(data.name)}
+              onMouseLeave={this.onMouseLeave}
             >
               <Card classes={{ root: classes.root }}>
                 {thumb && (
                   <CardMedia
                     className={classes.media}
                     image={thumb}
-                    title={a}
+                    title={data.name}
                   />
                 )}
                 {!thumb && <AudiotrackIcon className={classes.mediaIcon} />}
                 <CardContent classes={{ root: classes.cardContent }}>
-                  <Tooltip disableInteractive title={a} enterDelay={800}>
+                  <Tooltip
+                    disableInteractive
+                    title={data.name}
+                    enterDelay={800}
+                  >
                     <Typography
                       className={clsx(
-                        this.state.hover == a && classes.underlineTitle,
+                        this.state.hover == data.name && classes.underlineTitle,
                       )}
                       noWrap
                       variant="body1"
                     >
-                      {a}
+                      {data.name}
                     </Typography>
                   </Tooltip>
                   <Typography
                     id="artist-link"
                     noWrap
-                    onClick={
-                      artist == va
-                        ? this.nop
-                        : this.props.onClickArtist.bind(this, artist)
-                    }
+                    onClick={(e) => {
+                      if (artist != va) {
+                        this.props.onClickArtist(artist, e);
+                      }
+                    }}
                     className={clsx(artist != va && classes.artist)}
                     color="textSecondary"
                     variant="body2"
@@ -197,77 +205,80 @@ class AudioAlbumList extends React.Component<
 
   nop() {}
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: AudioAlbumListProps) {
     if (props.sources != this.props.sources) {
       this.setState({ albums: this.getAlbums() });
     }
   }
 
-  onMouseEnter(album: string) {
+  onMouseEnter = (album: string) => {
     this.setState({ hover: album });
-  }
+  };
 
-  onMouseLeave() {
-    this.setState({ hover: null });
-  }
+  onMouseLeave = () => {
+    this.setState({ hover: undefined });
+  };
 
-  getAlbums(): Map<string, { artist: string; thumb: string; count: number }> {
+  getAlbums(): Album[] {
     const va = "Various Artists";
     const albumMap = new Map<
       string,
       { artist: string; thumb: string; count: number }
     >();
     const songs = Array.from(this.props.sources).sort((a, b) => {
-      if (a.album > b.album) {
+      if ((a.album ?? "") > (b.album ?? "")) {
         return 1;
-      } else if (a.album < b.album) {
+      } else if ((a.album ?? "") < (b.album ?? "")) {
         return -1;
-      } else if (a.trackNum > b.trackNum) {
+      } else if ((a.trackNum ?? 0) > (b.trackNum ?? 0)) {
         return 1;
-      } else if (a.trackNum < b.trackNum) {
+      } else if ((a.trackNum ?? 0) < (b.trackNum ?? 0)) {
         return -1;
       } else {
         const reA = /^(A\s|a\s|The\s|the\s)/g;
-        const aValue = a.name.replace(reA, "");
-        const bValue = b.name.replace(reA, "");
+        const aValue = a.name ? a.name.replace(reA, "") : "";
+        const bValue = b.name ? b.name.replace(reA, "") : "";
         return aValue.localeCompare(bValue, "en", { numeric: true });
       }
     });
-    for (let song of songs) {
-      if (
-        song.album &&
-        (!albumMap.has(song.album) ||
-          !albumMap.get(song.album).thumb ||
-          (albumMap.get(song.album).artist != song.artist &&
-            albumMap.get(song.album).artist != va))
-      ) {
-        if (
-          albumMap.has(song.album) &&
-          albumMap.get(song.album).artist != song.artist
-        ) {
-          albumMap.set(song.album, { artist: va, thumb: song.thumb, count: 0 });
-        } else {
-          albumMap.set(song.album, {
-            artist: song.artist,
-            thumb: song.thumb,
-            count: 0,
-          });
-        }
+    for (const song of songs) {
+      if (!song.album) {
+        continue;
       }
-    }
-    for (let song of songs) {
-      if (song.album) {
-        const album = albumMap.get(song.album);
+
+      const album = albumMap.get(song.album);
+      if (!album) {
         albumMap.set(song.album, {
-          artist: album.artist,
-          thumb: album.thumb,
-          count: album.count + 1,
+          artist: song.artist ?? "",
+          thumb: song.thumb ?? "",
+          count: 1,
         });
+      } else {
+        if (!album.thumb && song.thumb) {
+          album.thumb = song.thumb;
+        }
+        if (!album.artist && song.artist) {
+          album.artist = song.artist;
+        } else if (
+          album.artist &&
+          album.artist != song.artist &&
+          album.artist != va
+        ) {
+          album.artist = va;
+        }
+
+        album.count++;
+        albumMap.set(song.album, album);
       }
     }
-    return albumMap;
+
+    const albums: Album[] = [];
+    for (const [key, value] of albumMap) {
+      albums.push({ ...value, name: key });
+    }
+    return albums;
   }
 }
 
 (AudioAlbumList as any).displayName = "AudioAlbumList";
-export default withStyles(styles)(AudioAlbumList as any);
+export default withStyles(styles)(AudioAlbumList);

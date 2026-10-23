@@ -405,7 +405,7 @@ const styles = (theme: Theme) =>
       width: "100%",
     },
     backdropTop: {
-      zIndex: `${theme.zIndex.modal + 1} !important` as any,
+      zIndex: `${theme.zIndex.modal + 1} !important`,
     },
     highlight: {
       borderWidth: 2,
@@ -442,47 +442,47 @@ interface SceneDetailProps {
   library: Array<LibrarySource>;
   scene: Scene;
   tags: Array<Tag>;
-  tutorial: string;
-  goBack(): void;
-  onAddSource(scene: Scene, type: string, ...args: any[]): void;
-  onAddScript(playlistIndex: number): void;
-  onAddTracks(playlistIndex: number): void;
-  onClearBlacklist(sourceURL: string): void;
-  onClip(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onCloneScene(scene: Scene): void;
-  onDelete(scene: Scene): void;
-  onDownload(source: LibrarySource): void;
-  onEditBlacklist(sourceURL: string, blacklist: string): void;
-  onExport(scene: Scene): void;
-  onGenerate(
+  tutorial?: string;
+  goBack: () => void;
+  onAddSource: (scene: Scene, type: string, ...args: any[]) => void;
+  onAddScript: (playlistIndex: number) => void;
+  onAddTracks: (playlistIndex: number) => void;
+  onClearBlacklist: (sourceURL: string) => void;
+  onClip: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  onCloneScene: (scene: Scene) => void;
+  onDelete: (scene: Scene) => void;
+  onDownload: (source: LibrarySource) => void;
+  onEditBlacklist: (sourceURL: string, blacklist: string) => void;
+  onExport: (scene: Scene) => void;
+  onGenerate: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
-  ): void;
-  onPlayScene(scene: Scene): void;
-  onPlay(source: LibrarySource, displayed: Array<LibrarySource>): void;
-  onPlayAudio(source: Audio, displayed: Array<Audio>): void;
-  onPlayScript(
+  ) => void;
+  onPlayScene: (scene: Scene) => void;
+  onPlay: (source: LibrarySource, displayed: Array<LibrarySource>) => void;
+  onPlayAudio: (source: Audio, displayed: Array<Audio>) => void;
+  onPlayScript: (
     source: CaptionScript,
     sceneID: number,
     displayed: Array<CaptionScript>,
-  ): void;
-  onResetScene(scene: Scene): void;
-  onSaveAsScene(scene: Scene): void;
-  onSort(scene: Scene, algorithm: string, ascending: boolean): void;
-  onTutorial(tutorial: string): void;
-  onUpdateScene(scene: Scene, fn: (scene: Scene) => void): void;
-  systemMessage(message: string): void;
+  ) => void;
+  onResetScene: (scene: Scene) => void;
+  onSaveAsScene: (scene: Scene) => void;
+  onSort: (algorithm: string, ascending: boolean, scene?: Scene) => void;
+  onTutorial: (tutorial: string) => void;
+  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  systemMessage: (message: string) => void;
 }
 
 interface SceneDetailState {
-  isEditingName: string;
+  isEditingName?: string;
   drawerOpen: boolean;
-  menuAnchorEl: any;
-  openMenu: string;
+  menuAnchorEl?: any;
+  openMenu?: string;
   snackbarOpen: boolean;
-  snackbar: string;
-  snackbarSeverity: string;
+  snackbar?: string;
+  snackbarSeverity?: string;
   sceneEffects: string;
   confirmCopy: boolean;
   displaySources: Array<LibrarySource>;
@@ -494,13 +494,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     super(props);
 
     this.state = {
-      isEditingName: props.autoEdit ? props.scene.name : (null as string),
+      isEditingName: props.autoEdit ? props.scene.name : undefined,
       drawerOpen: false,
-      menuAnchorEl: null as any,
-      openMenu: null as string,
       snackbarOpen: false,
-      snackbar: null as string,
-      snackbarSeverity: null as string,
       sceneEffects: "",
       confirmCopy: false,
       displaySources: new Array<LibrarySource>(),
@@ -534,7 +530,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 edge="start"
                 color="inherit"
                 aria-label="Back"
-                onClick={this.props.goBack.bind(this)}
+                onClick={this.props.goBack}
                 size="large"
               >
                 <ArrowBackIcon />
@@ -543,7 +539,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
             {this.state.isEditingName != null && (
               <form
-                onSubmit={this.endEditingName.bind(this)}
+                onSubmit={this.endEditingName}
                 className={classes.titleField}
               >
                 <TextField
@@ -554,8 +550,8 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   value={this.state.isEditingName}
                   margin="none"
                   inputProps={{ className: classes.titleInput }}
-                  onBlur={this.endEditingName.bind(this)}
-                  onChange={this.onChangeName.bind(this)}
+                  onBlur={this.endEditingName}
+                  onChange={this.onChangeName}
                 />
               </form>
             )}
@@ -572,7 +568,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     this.props.scene.name.length == 0 && classes.noTitle,
                     this.props.tutorial == SDT.title && classes.highlight,
                   )}
-                  onClick={this.beginEditingName.bind(this)}
+                  onClick={this.beginEditingName}
                 >
                   {this.props.scene.name}
                 </Typography>
@@ -589,7 +585,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   placeholder="Search ..."
                   isCreatable
                   onlyUsed
-                  onUpdateFilters={this.onUpdateFilters.bind(this)}
+                  onUpdateFilters={this.onUpdateFilters}
                 />
               </div>
             )}
@@ -606,7 +602,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
               }
               color="secondary"
               aria-label="Play"
-              onClick={this.onPlayScene.bind(this)}
+              onClick={this.onPlayScene}
             >
               <PlayCircleOutlineIcon fontSize="large" />
             </Fab>
@@ -634,7 +630,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
           </div>
 
           <ListItem className={classes.drawerButton}>
-            <IconButton onClick={this.onToggleDrawer.bind(this)} size="large">
+            <IconButton onClick={this.onToggleDrawer} size="large">
               <MenuIcon className={classes.drawerIcon} />
             </IconButton>
           </ListItem>
@@ -645,7 +641,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             <Tabs
               orientation="vertical"
               value={this.props.scene.openTab}
-              onChange={this.onChangeTab.bind(this)}
+              onChange={this.onChangeTab}
               aria-label="scene detail tabs"
               className={classes.tabs}
             >
@@ -731,7 +727,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             {this.props.scene.generatorWeights && (
               <ListItem
                 button
-                onClick={this.props.onSaveAsScene.bind(this, this.props.scene)}
+                onClick={() => this.props.onSaveAsScene(this.props.scene)}
                 className={clsx(
                   (this.props.tutorial == SDT.options1 ||
                     this.props.tutorial == SDT.effects1) &&
@@ -754,7 +750,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             >
               <ListItem
                 button
-                onClick={this.props.onCloneScene.bind(this, this.props.scene)}
+                onClick={() => this.props.onCloneScene(this.props.scene)}
                 className={clsx(
                   (this.props.tutorial == SDT.options1 ||
                     this.props.tutorial == SDT.effects1) &&
@@ -775,7 +771,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             >
               <ListItem
                 button
-                onClick={this.onOpenSceneEffectsMenu.bind(this)}
+                onClick={this.onOpenSceneEffectsMenu}
                 className={clsx(
                   (this.props.tutorial == SDT.options1 ||
                     this.props.tutorial == SDT.effects1) &&
@@ -799,7 +795,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             >
               <ListItem
                 button
-                onClick={this.props.onExport.bind(this, this.props.scene)}
+                onClick={() => this.props.onExport(this.props.scene)}
                 className={clsx(
                   (this.props.tutorial == SDT.options1 ||
                     this.props.tutorial == SDT.effects1) &&
@@ -818,7 +814,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             >
               <ListItem
                 button
-                onClick={this.props.onResetScene.bind(this, this.props.scene)}
+                onClick={() => this.props.onResetScene(this.props.scene)}
                 className={clsx(
                   (this.props.tutorial == SDT.options1 ||
                     this.props.tutorial == SDT.effects1) &&
@@ -837,7 +833,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             >
               <ListItem
                 button
-                onClick={this.onDeleteScene.bind(this, this.props.scene)}
+                onClick={this.onDeleteScene}
                 className={clsx(
                   classes.deleteItem,
                   (this.props.tutorial == SDT.options1 ||
@@ -853,7 +849,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             </Tooltip>
             <Dialog
               open={this.state.openMenu == MO.deleteAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="delete-title"
               aria-describedby="delete-description"
             >
@@ -867,16 +863,10 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={this.onCloseDialog.bind(this)}
-                  color="secondary"
-                >
+                <Button onClick={this.onCloseDialog} color="secondary">
                   Cancel
                 </Button>
-                <Button
-                  onClick={this.onFinishDeleteScene.bind(this)}
-                  color="primary"
-                >
+                <Button onClick={this.onFinishDeleteScene} color="primary">
                   OK
                 </Button>
               </DialogActions>
@@ -897,7 +887,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                       allSceneGrids={this.props.allSceneGrids}
                       scene={this.props.scene}
                       tutorial={this.props.tutorial}
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      onUpdateScene={this.props.onUpdateScene}
                     />
                   </Box>
                 </div>
@@ -915,7 +905,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                       }
                       scene={this.props.scene}
                       tutorial={this.props.tutorial}
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
+                      onUpdateScene={this.props.onUpdateScene}
                     />
                   </Box>
                 </div>
@@ -929,12 +919,12 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   <Box p={2} className={classes.fill}>
                     <AudioTextEffects
                       scene={this.props.scene}
-                      onPlayAudio={this.props.onPlayAudio.bind(this)}
-                      onPlayScript={this.props.onPlayScript.bind(this)}
-                      onAddTracks={this.props.onAddTracks.bind(this)}
-                      onAddScript={this.props.onAddScript.bind(this)}
-                      onUpdateScene={this.props.onUpdateScene.bind(this)}
-                      systemMessage={this.props.systemMessage.bind(this)}
+                      onPlayAudio={this.props.onPlayAudio}
+                      onPlayScript={this.props.onPlayScript}
+                      onAddTracks={this.props.onAddTracks}
+                      onAddScript={this.props.onAddScript}
+                      onUpdateScene={this.props.onUpdateScene}
+                      systemMessage={this.props.systemMessage}
                     />
                   </Box>
                 </div>
@@ -958,19 +948,19 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                       tutorial={
                         this.props.tutorial == SDGT.final
                           ? null
-                          : this.props.tutorial
+                          : (this.props.tutorial ?? null)
                       }
                       useWeights={
                         this.props.scene.weightFunction == WF.sources &&
                         this.props.scene.useWeights
                       }
-                      onClearBlacklist={this.props.onClearBlacklist.bind(this)}
-                      onClip={this.props.onClip.bind(this)}
-                      onDownload={this.props.onDownload.bind(this)}
-                      onEditBlacklist={this.props.onEditBlacklist.bind(this)}
-                      onPlay={this.props.onPlay.bind(this)}
-                      onUpdateScene={this.update.bind(this)}
-                      systemMessage={this.props.systemMessage.bind(this)}
+                      onClearBlacklist={this.props.onClearBlacklist}
+                      onClip={this.props.onClip}
+                      onDownload={this.props.onDownload}
+                      onEditBlacklist={this.props.onEditBlacklist}
+                      onPlay={this.props.onPlay}
+                      onUpdateScene={this.update}
+                      systemMessage={this.props.systemMessage}
                     />
                   </Box>
                 </div>
@@ -985,11 +975,13 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     <Box p={1} className={classes.fill}>
                       <SceneGenerator
                         library={this.props.library}
-                        scene={this.props.scene}
+                        generatorWeights={this.props.scene.generatorWeights}
                         tags={this.props.tags}
                         tutorial={this.props.tutorial}
-                        onTutorial={this.props.onTutorial.bind(this)}
-                        onUpdateScene={this.props.onUpdateScene.bind(this)}
+                        onTutorial={this.props.onTutorial}
+                        onUpdateScene={(fn) =>
+                          this.props.onUpdateScene(this.props.scene, fn)
+                        }
                       />
                     </Box>
                   </div>
@@ -1000,7 +992,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
         <Backdrop
           className={classes.backdrop}
-          onClick={this.onCloseDialog.bind(this)}
+          onClick={this.onCloseDialog}
           open={
             !this.props.tutorial &&
             (this.state.openMenu == MO.new || this.state.drawerOpen)
@@ -1009,7 +1001,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
         <Dialog
           open={this.state.openMenu == MO.effects}
-          onClose={this.onCloseDialog.bind(this)}
+          onClose={this.onCloseDialog}
           aria-labelledby="effects-all-title"
           aria-describedby="effects-all-description"
         >
@@ -1027,23 +1019,17 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
               value={this.state.sceneEffects}
               margin="dense"
               inputProps={{ className: classes.phraseInput }}
-              onChange={this.onChangeSceneEffects.bind(this)}
+              onChange={this.onChangeSceneEffects}
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={this.onCopySceneEffects.bind(this)}
-              color="secondary"
-            >
+            <Button onClick={this.onCopySceneEffects} color="secondary">
               {this.state.confirmCopy && (
                 <CheckCircleIcon className={classes.confirmCopy} />
               )}
               Copy to Clipboard
             </Button>
-            <Button
-              onClick={this.onApplySceneEffects.bind(this)}
-              color="primary"
-            >
+            <Button onClick={this.onApplySceneEffects} color="primary">
               Apply
             </Button>
           </DialogActions>
@@ -1077,7 +1063,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     this.state.openMenu == MO.new && classes.backdropTop,
                     this.props.tutorial && classes.disable,
                   )}
-                  onClick={this.onRemoveAll.bind(this)}
+                  onClick={this.onRemoveAll}
                   size="small"
                 >
                   <DeleteSweepIcon className={classes.icon} />
@@ -1086,7 +1072,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
             )}
             <Dialog
               open={this.state.openMenu == MO.removeAllAlert}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
               aria-labelledby="remove-all-title"
               aria-describedby="remove-all-description"
             >
@@ -1102,16 +1088,10 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button
-                      onClick={this.onFinishRemoveAll.bind(this)}
-                      color="primary"
-                    >
+                    <Button onClick={this.onFinishRemoveAll} color="primary">
                       OK
                     </Button>
                   </DialogActions>
@@ -1129,14 +1109,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                     <Button
-                      onClick={this.onFinishRemoveVisible.bind(this)}
+                      onClick={this.onFinishRemoveVisible}
                       color="primary"
                     >
                       OK
@@ -1155,7 +1132,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     this.state.openMenu == MO.new && classes.backdropTop,
                     this.props.tutorial && classes.disable,
                   )}
-                  onClick={this.onOpenPiwigoMenu.bind(this)}
+                  onClick={this.onOpenPiwigoMenu}
                   size="small"
                 >
                   <SourceIcon type={ST.piwigo} className={classes.icon} />
@@ -1174,7 +1151,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     this.state.openMenu == MO.new && classes.backdropTop,
                     this.props.tutorial && classes.disable,
                   )}
-                  onClick={this.onOpenHydrusMenu.bind(this)}
+                  onClick={this.onOpenHydrusMenu}
                   size="small"
                 >
                   <SourceIcon type={ST.hydrus} className={classes.icon} />
@@ -1190,7 +1167,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={this.onAddSource.bind(this, AF.library)}
+                onClick={(e) => this.onAddSource(AF.library, e.shiftKey)}
                 size="small"
               >
                 <LocalLibraryIcon className={classes.icon} />
@@ -1209,7 +1186,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={this.onAddSource.bind(this, AF.videos)}
+                onClick={(e) => this.onAddSource(AF.videos, e.shiftKey)}
                 size="small"
               >
                 <MovieIcon className={classes.icon} />
@@ -1228,7 +1205,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu == MO.new && classes.backdropTop,
                   this.props.tutorial && classes.disable,
                 )}
-                onClick={this.onAddSource.bind(this, AF.directory)}
+                onClick={(e) => this.onAddSource(AF.directory, e.shiftKey)}
                 size="small"
               >
                 <FolderIcon className={classes.icon} />
@@ -1244,7 +1221,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.state.openMenu != MO.new && classes.addButtonClose,
                   this.props.tutorial == SDT.add2 && classes.highlight,
                 )}
-                onClick={this.onAddSource.bind(this, AF.url)}
+                onClick={(e) => this.onAddSource(AF.url, e.shiftKey)}
                 size="small"
               >
                 <HttpIcon className={classes.icon} />
@@ -1259,7 +1236,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   classes.backdropTop,
                 this.props.tutorial == SDT.add1 && classes.highlight,
               )}
-              onClick={this.onToggleNewMenu.bind(this)}
+              onClick={this.onToggleNewMenu}
               size="large"
             >
               <AddIcon className={classes.icon} />
@@ -1267,26 +1244,26 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
             <GooninatorDialog
               open={this.state.openMenu == MO.gooninatorImport}
-              onImportURL={this.onAddSource.bind(this)}
-              onClose={this.onCloseDialog.bind(this)}
+              onImportURL={this.onAddSource}
+              onClose={this.onCloseDialog}
             />
             <URLDialog
               open={this.state.openMenu == MO.urlImport}
-              onImportURL={this.onAddSource.bind(this)}
-              onClose={this.onCloseDialog.bind(this)}
+              onImportURL={this.onAddSource}
+              onClose={this.onCloseDialog}
             />
             <PiwigoDialog
               config={this.props.config}
               open={this.state.openMenu == MO.piwigo}
-              onClose={this.onCloseDialog.bind(this)}
-              onImportURL={this.onAddSource.bind(this)}
+              onClose={this.onCloseDialog}
+              onImportURL={this.onAddSource}
             />
             <HydrusDialog
               config={this.props.config}
               tags={this.props.tags}
               open={this.state.openMenu == MO.hydrus}
-              onClose={this.onCloseDialog.bind(this)}
-              onImportURL={this.onAddSource.bind(this)}
+              onClose={this.onCloseDialog}
+              onImportURL={this.onAddSource}
             />
 
             {this.props.scene.sources.length >= 2 && (
@@ -1294,7 +1271,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 {this.props.scene.weightFunction == WF.sources && (
                   <Fab
                     className={classes.weightButton}
-                    onClick={this.onToggleWeight.bind(this)}
+                    onClick={this.onToggleWeight}
                     size="medium"
                   >
                     <SvgIcon viewBox="0 0 489.183 489.183" fontSize="small">
@@ -1318,7 +1295,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   aria-haspopup="true"
                   aria-controls="sort-menu"
                   aria-label="Sort Sources"
-                  onClick={this.onOpenSortMenu.bind(this)}
+                  onClick={this.onOpenSortMenu}
                   size="medium"
                 >
                   <SortIcon className={classes.icon} />
@@ -1338,7 +1315,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   keepMounted
                   classes={{ paper: classes.sortMenu }}
                   open={this.state.openMenu == MO.sort}
-                  onClose={this.onCloseDialog.bind(this)}
+                  onClose={this.onCloseDialog}
                 >
                   {Object.values(SF)
                     .filter((sf) => sf != SF.random)
@@ -1348,24 +1325,18 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                         <ListItemSecondaryAction>
                           <IconButton
                             edge="end"
-                            onClick={this.props.onSort.bind(
-                              this,
-                              this.props.scene,
-                              sf,
-                              true,
-                            )}
+                            onClick={() =>
+                              this.props.onSort(sf, true, this.props.scene)
+                            }
                             size="large"
                           >
                             <ArrowUpwardIcon />
                           </IconButton>
                           <IconButton
                             edge="end"
-                            onClick={this.props.onSort.bind(
-                              this,
-                              this.props.scene,
-                              sf,
-                              false,
-                            )}
+                            onClick={() =>
+                              this.props.onSort(sf, false, this.props.scene)
+                            }
                             size="large"
                           >
                             <ArrowDownwardIcon />
@@ -1378,12 +1349,9 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
-                        onClick={this.props.onSort.bind(
-                          this,
-                          this.props.scene,
-                          SF.random,
-                          true,
-                        )}
+                        onClick={() =>
+                          this.props.onSort(SF.random, true, this.props.scene)
+                        }
                         size="large"
                       >
                         <ShuffleIcon />
@@ -1398,7 +1366,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
         {this.props.scene.openTab == 4 && (
           <React.Fragment>
-            {this.props.scene.generatorWeights.length > 0 && (
+            {this.props.scene.generatorWeights!.length > 0 && (
               <React.Fragment>
                 <Tooltip
                   disableInteractive
@@ -1407,7 +1375,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 >
                   <Fab
                     className={classes.removeAllWGButton}
-                    onClick={this.onRemoveAll.bind(this)}
+                    onClick={this.onRemoveAll}
                     size="small"
                   >
                     <DeleteSweepIcon className={classes.icon} />
@@ -1415,7 +1383,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 </Tooltip>
                 <Dialog
                   open={this.state.openMenu == MO.removeAllAlert}
-                  onClose={this.onCloseDialog.bind(this)}
+                  onClose={this.onCloseDialog}
                   aria-labelledby="remove-all-title"
                   aria-describedby="remove-all-description"
                 >
@@ -1426,14 +1394,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
-                      onClick={this.onCloseDialog.bind(this)}
-                      color="secondary"
-                    >
+                    <Button onClick={this.onCloseDialog} color="secondary">
                       Cancel
                     </Button>
                     <Button
-                      onClick={this.onFinishRemoveAllRules.bind(this)}
+                      onClick={this.onFinishRemoveAllRules}
                       color="primary"
                     >
                       OK
@@ -1457,7 +1422,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.props.scene.overrideIgnore && classes.overrideOn,
                   !this.props.scene.overrideIgnore && classes.overrideOff,
                 )}
-                onClick={this.onToggleOverrideIgnore.bind(this)}
+                onClick={this.onToggleOverrideIgnore}
                 size="medium"
               >
                 {this.props.scene.overrideIgnore && (
@@ -1475,7 +1440,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.props.tutorial == SDGT.buttons &&
                     clsx(classes.backdropTop, classes.disable),
                 )}
-                onClick={this.onOpenMaxMenu.bind(this)}
+                onClick={this.onOpenMaxMenu}
                 size="medium"
               >
                 {this.props.scene.generatorMax}
@@ -1496,15 +1461,15 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
               keepMounted
               classes={{ paper: classes.maxMenu }}
               open={this.state.openMenu == MO.max}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
             >
               <TextField
                 variant="standard"
                 label="Max"
                 margin="dense"
                 value={this.props.scene.generatorMax}
-                onChange={this.onIntInput.bind(this, "generatorMax")}
-                onBlur={this.blurIntKey.bind(this, "generatorMax")}
+                onChange={(e) => this.onIntInput("generatorMax", e)}
+                onBlur={(e) => this.blurIntKey("generatorMax", e)}
                 inputProps={{
                   min: 1,
                   type: "number",
@@ -1519,7 +1484,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.props.tutorial == SDGT.buttons &&
                     clsx(classes.backdropTop, classes.disable),
                 )}
-                onClick={this.onAddAdvRule.bind(this)}
+                onClick={this.onAddAdvRule}
                 size="small"
               >
                 <AddCircleOutlineIcon className={classes.icon} />
@@ -1533,7 +1498,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   this.props.tutorial == SDGT.buttons &&
                     clsx(classes.backdropTop, classes.highlight),
                 )}
-                onClick={this.onOpenTagMenu.bind(this)}
+                onClick={this.onOpenTagMenu}
                 size="small"
               >
                 <AddIcon className={classes.icon} />
@@ -1563,7 +1528,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                     classes.addMenuButton,
                     this.props.tutorial == SDGT.generate && classes.highlight,
                   )}
-                  onClick={this.onGenerate.bind(this)}
+                  onClick={this.onGenerate}
                   size="large"
                 >
                   <Badge
@@ -1604,13 +1569,13 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                 ),
               }}
               open={this.state.openMenu == MO.simpleRule}
-              onClose={this.onCloseDialog.bind(this)}
+              onClose={this.onCloseDialog}
             >
               {this.state.openMenu == MO.simpleRule && (
                 <LibrarySearch
                   displaySources={this.props.library}
-                  filters={this.props.scene.generatorWeights
-                    .filter((wg) => !wg.rules)
+                  filters={this.props.scene
+                    .generatorWeights!.filter((wg) => !wg.rules)
                     .map((wg) => wg.search)}
                   tags={this.props.tags}
                   placeholder="Search ..."
@@ -1620,7 +1585,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
                   onlyUsed
                   menuIsOpen
                   controlShouldRenderValue={false}
-                  onUpdateFilters={this.onAddRule.bind(this)}
+                  onUpdateFilters={this.onAddRule}
                 />
               )}
             </Menu>
@@ -1630,11 +1595,11 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
           open={this.state.snackbarOpen}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           autoHideDuration={5000}
-          onClose={this.onCloseSnackbar.bind(this)}
+          onClose={this.onCloseSnackbar}
           TransitionComponent={TransitionUp}
         >
           <Alert
-            onClose={this.onCloseSnackbar.bind(this)}
+            onClose={this.onCloseSnackbar}
             severity={this.state.snackbarSeverity as AlertColor}
           >
             {this.state.snackbar}
@@ -1653,7 +1618,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     window.removeEventListener("keydown", this.onKeyDown);
   }
 
-  componentDidUpdate(props: any, state: any) {
+  componentDidUpdate(props: SceneDetailProps, state: SceneDetailState) {
     if (
       state.filters != this.state.filters ||
       props.scene.sources != this.props.scene.sources
@@ -1665,12 +1630,12 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     }
   }
 
-  onUpdateFilters(filters: Array<string>) {
+  onUpdateFilters = (filters: Array<string>) => {
     this.setState({
       filters: filters,
       displaySources: this.getDisplaySources(),
     });
-  }
+  };
 
   // Use alt+P to access import modal
   // Use alt+U to toggle highlighting untagged sources
@@ -1684,21 +1649,21 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       this.setState({
         openMenu:
           this.state.openMenu == MO.gooninatorImport
-            ? null
+            ? undefined
             : MO.gooninatorImport,
       });
     }
   };
 
-  onCloseSnackbar() {
+  onCloseSnackbar = () => {
     this.setState({ snackbarOpen: false });
-  }
+  };
 
-  onOpenMaxMenu(e: MouseEvent) {
+  onOpenMaxMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.max });
-  }
+  };
 
-  onPlayScene() {
+  onPlayScene = () => {
     if (this.props.tutorial == SDT.play) {
       this.props.onTutorial(SDT.play);
     }
@@ -1706,15 +1671,15 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     // Regenerate scene(s) before playback
     this.props.onGenerate(this.props.scene);
     this.props.onPlayScene(this.props.scene);
-  }
+  };
 
-  onToggleOverrideIgnore() {
+  onToggleOverrideIgnore = () => {
     this.changeKey("overrideIgnore", !this.props.scene.overrideIgnore);
-  }
+  };
 
   getRemainingPercent(): number {
     let remaining = 100;
-    for (let wg of this.props.scene.generatorWeights) {
+    for (let wg of this.props.scene.generatorWeights!) {
       if (wg.type == TT.weight) {
         remaining = remaining - wg.percent;
       }
@@ -1722,10 +1687,10 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     return remaining;
   }
 
-  onGenerate() {
+  onGenerate = () => {
     this.props.onGenerate(this.props.scene, false, true);
     this.generateCallback();
-  }
+  };
 
   generateCallback() {
     if (this.props.scene.sources.length == 0) {
@@ -1752,21 +1717,21 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     }
   }
 
-  onAddAdvRule() {
+  onAddAdvRule = () => {
     const wg = new WeightGroup();
     wg.percent = 0;
     wg.type = TT.weight;
     wg.rules = [];
-    const generatorWeights = this.props.scene.generatorWeights.concat([wg]);
+    const generatorWeights = this.props.scene.generatorWeights!.concat([wg]);
     this.changeKey("generatorWeights", generatorWeights);
-  }
+  };
 
-  onAddRule(filters: Array<string>) {
+  onAddRule = (filters: Array<string>) => {
     if (this.props.tutorial == SDGT.buttons) {
       this.props.onTutorial(SDGT.buttons);
       this.onCloseDialog();
     }
-    let generatorWeights = this.props.scene.generatorWeights;
+    let generatorWeights = this.props.scene.generatorWeights!;
     for (let search of filters) {
       if (
         search.length > 0 &&
@@ -1780,94 +1745,96 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       }
     }
     this.changeKey("generatorWeights", generatorWeights);
-  }
+  };
 
-  onFinishRemoveAllRules() {
+  onFinishRemoveAllRules = () => {
     this.changeKey("generatorWeights", []);
-  }
+  };
 
-  onOpenTagMenu(e: MouseEvent) {
+  onOpenTagMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.simpleRule });
-  }
+  };
 
-  onAddSource(addFunction: string, e: MouseEvent, ...args: any[]) {
+  onAddSource = (addFunction: string, shiftKey: boolean, ...args: any[]) => {
     this.onCloseDialog();
     if (this.props.tutorial == SDT.add2) {
       this.props.onTutorial(SDT.add2);
       this.props.onAddSource(this.props.scene, "tutorial");
-    } else if (addFunction == AF.videos && e.shiftKey) {
+    } else if (addFunction == AF.videos && shiftKey) {
       this.props.onAddSource(this.props.scene, AF.videoDir, ...args);
-    } else if (addFunction == AF.url && e.shiftKey) {
+    } else if (addFunction == AF.url && shiftKey) {
       this.setState({ openMenu: MO.urlImport });
     } else {
       this.props.onAddSource(this.props.scene, addFunction, ...args);
     }
-  }
+  };
 
-  onToggleDrawer() {
+  onToggleDrawer = () => {
     this.setState({ drawerOpen: !this.state.drawerOpen });
-  }
+  };
 
-  onToggleNewMenu() {
+  onToggleNewMenu = () => {
     if (this.props.tutorial == SDT.add1) {
       this.props.onTutorial(SDT.add1);
     }
-    this.setState({ openMenu: this.state.openMenu == MO.new ? null : MO.new });
-  }
+    this.setState({
+      openMenu: this.state.openMenu == MO.new ? undefined : MO.new,
+    });
+  };
 
-  onOpenSortMenu(e: MouseEvent) {
+  onOpenSortMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.setState({ menuAnchorEl: e.currentTarget, openMenu: MO.sort });
-  }
+  };
 
-  onToggleWeight() {
+  onToggleWeight = () => {
     this.changeKey("useWeights", !this.props.scene.useWeights);
-  }
+  };
 
-  onOpenPiwigoMenu() {
+  onOpenPiwigoMenu = () => {
     this.setState({ openMenu: MO.piwigo });
-  }
+  };
 
-  onOpenHydrusMenu() {
+  onOpenHydrusMenu = () => {
     this.setState({ openMenu: MO.hydrus });
-  }
+  };
 
-  onOpenSceneEffectsMenu() {
+  onOpenSceneEffectsMenu = () => {
     this.setState({
       openMenu: MO.effects,
       sceneEffects: getEffects(this.props.scene),
     });
-  }
+  };
 
-  onCopySceneEffects() {
+  onCopySceneEffects = () => {
     navigator.clipboard.writeText(this.state.sceneEffects);
     this.setState({ confirmCopy: true });
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.setState({ confirmCopy: false });
     }, 1000);
-  }
+  };
 
-  onChangeSceneEffects(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeSceneEffects = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ sceneEffects: input.value });
-  }
+  };
 
-  onApplySceneEffects() {
+  onApplySceneEffects = () => {
     this.props.onUpdateScene(this.props.scene, (s) => {
       applyEffects(s, this.state.sceneEffects);
     });
     this.onCloseDialog();
-  }
+  };
 
-  onCloseDialog() {
+  onCloseDialog = () => {
     this.setState({
-      menuAnchorEl: null,
-      openMenu: null,
+      menuAnchorEl: undefined,
+      openMenu: undefined,
       drawerOpen: false,
       sceneEffects: "",
     });
-  }
+  };
 
-  onChangeTab(e: any, newTab: number) {
+  onChangeTab = (e: any, newTab: number) => {
     if (this.props.tutorial == SDT.options1) {
       this.props.onTutorial(SDT.options1);
       this.setState({ drawerOpen: false });
@@ -1877,75 +1844,76 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       this.setState({ drawerOpen: false });
     }
     this.changeKey("openTab", newTab);
-  }
+  };
 
-  blurIntKey(key: string, e: MouseEvent) {
-    const min = (e.currentTarget as any).min
-      ? (e.currentTarget as any).min
-      : null;
-    const max = (e.currentTarget as any).max
-      ? (e.currentTarget as any).max
-      : null;
-    if (min && (this.props.scene as any)[key] < min) {
+  blurIntKey = (
+    key: string,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    if (min && (this.props.scene as any)[key] < Number(min)) {
       this.changeIntKey(key, min);
-    } else if (max && (this.props.scene as any)[key] > max) {
+    } else if (max && (this.props.scene as any)[key] > Number(max)) {
       this.changeIntKey(key, max);
     }
-  }
+  };
 
   changeIntKey(key: string, intString: string) {
     this.changeKey(key, intString === "" ? "" : Number(intString));
   }
 
-  onIntInput(key: string, e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onIntInput = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const input = e.target;
     this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  }
+  };
 
   changeKey(key: string, value: any) {
     this.update((s) => (s[key] = value));
   }
 
-  update(fn: (scene: any) => void) {
+  update = (fn: (scene: any) => void) => {
     this.props.onUpdateScene(this.props.scene, fn);
-  }
+  };
 
-  beginEditingName() {
+  beginEditingName = () => {
     this.setState({ isEditingName: this.props.scene.name });
-  }
+  };
 
-  endEditingName(e: Event) {
+  endEditingName = (e: React.SyntheticEvent<Element, Event>) => {
     e.preventDefault();
     this.changeKey("name", this.state.isEditingName);
-    this.setState({ isEditingName: null });
-  }
+    this.setState({ isEditingName: undefined });
+  };
 
-  onChangeName(e: React.FormEvent<HTMLInputElement>) {
+  onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ isEditingName: e.currentTarget.value });
-  }
+  };
 
-  onDeleteScene() {
+  onDeleteScene = () => {
     if (this.props.config.generalSettings.confirmSceneDeletion) {
       this.setState({ openMenu: MO.deleteAlert });
     } else {
       this.props.onDelete(this.props.scene);
     }
-  }
+  };
 
-  onFinishDeleteScene() {
+  onFinishDeleteScene = () => {
     this.props.onDelete(this.props.scene);
-  }
+  };
 
-  onRemoveAll() {
+  onRemoveAll = () => {
     this.setState({ openMenu: MO.removeAllAlert });
-  }
+  };
 
-  onFinishRemoveAll() {
+  onFinishRemoveAll = () => {
     this.update((s) => (s.sources = []));
     this.onCloseDialog();
-  }
+  };
 
-  onFinishRemoveVisible() {
+  onFinishRemoveVisible = () => {
     const displayIDs = new Set(this.state.displaySources.map((s) => s.id));
     this.update(
       (s) =>
@@ -1954,7 +1922,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
         )),
     );
     this.onCloseDialog();
-  }
+  };
 
   getDisplaySources() {
     let displaySources = [];
@@ -2025,18 +1993,15 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
           } else if (
             (countRegex = /^duration([>=<])([\d:]*)$/.exec(filter)) != null
           ) {
-            const symbol = countRegex[1];
-            let value;
-            if (countRegex[2].includes(":")) {
-              value = getTimestampValue(countRegex[2]);
-            } else {
-              value = Number.parseInt(countRegex[2]);
-            }
             const type = getSourceType(source.url);
             if (type == ST.video) {
-              if (source.duration == null) {
+              const value = countRegex[2].includes(":")
+                ? getTimestampValue(countRegex[2])
+                : Number.parseInt(countRegex[2]);
+              if (value == null || source.duration == null) {
                 matchesFilter = false;
               } else {
+                const symbol = countRegex[1];
                 switch (symbol) {
                   case "=":
                     matchesFilter = Math.floor(source.duration) == value;
@@ -2119,4 +2084,4 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 }
 
 (SceneDetail as any).displayName = "SceneDetail";
-export default withStyles(styles)(SceneDetail as any);
+export default withStyles(styles)(SceneDetail);

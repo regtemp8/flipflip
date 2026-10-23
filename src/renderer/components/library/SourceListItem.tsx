@@ -149,24 +149,31 @@ interface SourceListItemProps {
   source: LibrarySource;
   sources: Array<LibrarySource>;
   style: any;
-  tutorial: string;
+  tutorial: string | null;
   useWeights?: boolean;
-  onClean(source: LibrarySource): void;
-  onClearBlacklist(sourceURL: string): void;
-  onClip(source: LibrarySource, displaySources: Array<LibrarySource>): void;
-  onDelete(source: LibrarySource): void;
-  onDownload(source: LibrarySource): void;
-  onEditBlacklist(source: LibrarySource): void;
-  onEndEdit(newURL: string): void;
-  onOpenClipMenu(source: LibrarySource): void;
-  onOpenWeightMenu(source: LibrarySource): void;
-  onPlay(source: LibrarySource, displaySources: Array<LibrarySource>): void;
-  onRemove(source: LibrarySource): void;
-  onSourceOptions(source: LibrarySource): void;
-  onStartEdit(id: number): void;
-  onToggleSelect(): void;
-  savePosition(): void;
-  systemMessage(message: string): void;
+  canClip: boolean;
+  onClean: (source: LibrarySource) => void;
+  onClearBlacklist: (sourceURL: string) => void;
+  onClip: (source: LibrarySource, displaySources: Array<LibrarySource>) => void;
+  onDelete: (source: LibrarySource) => void;
+  onDownload: (source: LibrarySource) => void;
+  onEditBlacklist: (source: LibrarySource) => void;
+  onEndEdit: (newURL: string) => void;
+  onOpenClipMenu: (
+    source: LibrarySource,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => void;
+  onOpenWeightMenu: (
+    source: LibrarySource,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => void;
+  onPlay: (source: LibrarySource, displaySources: Array<LibrarySource>) => void;
+  onRemove: (source: LibrarySource) => void;
+  onSourceOptions: (source: LibrarySource) => void;
+  onStartEdit: (id: number) => void;
+  onToggleSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  savePosition: () => void;
+  systemMessage: (message: string) => void;
 }
 
 interface SourceListItemState {
@@ -201,7 +208,7 @@ class SourceListItem extends React.Component<
           {this.props.isSelect && (
             <Checkbox
               value={this.props.source.url}
-              onChange={this.props.onToggleSelect.bind(this)}
+              onChange={this.props.onToggleSelect}
               checked={this.props.checked}
             />
           )}
@@ -244,7 +251,7 @@ class SourceListItem extends React.Component<
               >
                 <Fab
                   size="small"
-                  onClick={this.onSourceIconClick.bind(this)}
+                  onClick={this.onSourceIconClick}
                   className={clsx(
                     classes.avatar,
                     this.props.source.marked && classes.markedSource,
@@ -266,10 +273,7 @@ class SourceListItem extends React.Component<
 
           <ListItemText classes={{ primary: classes.root }}>
             {this.props.isEditing == this.props.source.id && (
-              <form
-                onSubmit={this.onEndEdit.bind(this)}
-                className={classes.urlField}
-              >
+              <form onSubmit={this.onEndEdit} className={classes.urlField}>
                 <TextField
                   variant="standard"
                   autoFocus
@@ -277,8 +281,8 @@ class SourceListItem extends React.Component<
                   value={this.state.urlInput}
                   margin="none"
                   className={classes.urlField}
-                  onBlur={this.onEndEdit.bind(this)}
-                  onChange={this.onEditSource.bind(this)}
+                  onBlur={this.onEndEdit}
+                  onChange={this.onEditSource}
                 />
               </form>
             )}
@@ -290,7 +294,7 @@ class SourceListItem extends React.Component<
                     classes.noUserSelect,
                     this.props.tutorial == SDT.sourceTitle && classes.highlight,
                   )}
-                  onClick={this.onStartEdit.bind(this, this.props.source)}
+                  onClick={this.onStartEdit}
                 >
                   {this.props.source.url}
                 </Typography>
@@ -344,10 +348,9 @@ class SourceListItem extends React.Component<
                     label={this.props?.source?.weight || "1"}
                     color="default"
                     size="small"
-                    onClick={this.props.onOpenWeightMenu.bind(
-                      this,
-                      this.props.source,
-                    )}
+                    onClick={(e) =>
+                      this.props.onOpenWeightMenu(this.props.source, e)
+                    }
                   />
                 </React.Fragment>
               )}
@@ -403,10 +406,9 @@ class SourceListItem extends React.Component<
                       "/" +
                       this.props.source.clips.length
                     }
-                    onClick={this.props.onOpenClipMenu.bind(
-                      this,
-                      this.props.source,
-                    )}
+                    onClick={(e) =>
+                      this.props.onOpenClipMenu(this.props.source, e)
+                    }
                     color="primary"
                     size="small"
                   />
@@ -424,10 +426,7 @@ class SourceListItem extends React.Component<
                 )}
               {(sourceType == ST.local || sourceType == ST.video) && (
                 <IconButton
-                  onClick={this.props.onSourceOptions.bind(
-                    this,
-                    this.props.source,
-                  )}
+                  onClick={() => this.props.onSourceOptions(this.props.source)}
                   className={classes.actionButton}
                   edge="end"
                   size="small"
@@ -436,9 +435,9 @@ class SourceListItem extends React.Component<
                   <BuildIcon />
                 </IconButton>
               )}
-              {sourceType == ST.video && (
+              {this.props.canClip && sourceType == ST.video && (
                 <IconButton
-                  onClick={this.onClip.bind(this)}
+                  onClick={this.onClip}
                   className={classes.actionButton}
                   edge="end"
                   size="small"
@@ -462,7 +461,7 @@ class SourceListItem extends React.Component<
               {this.props.source.blacklist &&
                 this.props.source.blacklist.length > 0 && (
                   <IconButton
-                    onClick={this.onClickBlacklist.bind(this)}
+                    onClick={this.onClickBlacklist}
                     className={classes.actionButton}
                     edge="end"
                     size="small"
@@ -483,7 +482,7 @@ class SourceListItem extends React.Component<
                   /^https?:\/\//g.exec(this.props.source.url) != null) && (
                   <React.Fragment>
                     <IconButton
-                      onClick={this.props.onClean.bind(this, this.props.source)}
+                      onClick={() => this.props.onClean(this.props.source)}
                       className={classes.actionButton}
                       edge="end"
                       size="small"
@@ -500,7 +499,7 @@ class SourceListItem extends React.Component<
                   </React.Fragment>
                 )}
               <IconButton
-                onClick={this.props.onRemove.bind(this, this.props.source)}
+                onClick={() => this.props.onRemove(this.props.source)}
                 className={clsx(classes.deleteButton, classes.actionButton)}
                 edge="end"
                 size="small"
@@ -520,7 +519,7 @@ class SourceListItem extends React.Component<
     return tagName;
   }
 
-  onSourceIconClick(e: MouseEvent) {
+  onSourceIconClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const sourceURL = this.props.source.url;
     const sourceType = getSourceType(sourceURL);
     if (e.shiftKey && e.ctrlKey && e.altKey) {
@@ -544,39 +543,39 @@ class SourceListItem extends React.Component<
       this.props.savePosition();
       try {
         this.props.onPlay(this.props.source, this.props.sources);
-      } catch (e) {
+      } catch {
         this.props.systemMessage(
           "The source " + sourceURL + " isn't in your Library",
         );
       }
     }
-  }
+  };
 
-  onClip() {
+  onClip = () => {
     this.props.savePosition();
     this.props.onClip(this.props.source, this.props.sources);
-  }
+  };
 
-  onClickBlacklist(e: MouseEvent) {
+  onClickBlacklist = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.shiftKey) {
       this.props.onClearBlacklist(this.props.source.url);
     } else {
       this.props.onEditBlacklist(this.props.source);
     }
-  }
+  };
 
-  onStartEdit(s: LibrarySource) {
-    this.props.onStartEdit(s.id);
-  }
+  onStartEdit = () => {
+    this.props.onStartEdit(this.props.source.id);
+  };
 
-  onEditSource(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onEditSource = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ urlInput: input.value });
-  }
+  };
 
-  onEndEdit() {
+  onEndEdit = () => {
     this.props.onEndEdit(this.state.urlInput);
-  }
+  };
 
   openExternalURL(url: string) {
     window.ipc.openExternal(url);
@@ -618,4 +617,4 @@ class SourceListItem extends React.Component<
 }
 
 (SourceListItem as any).displayName = "SourceListItem";
-export default withStyles(styles)(SourceListItem as any);
+export default withStyles(styles)(SourceListItem);

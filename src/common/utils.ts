@@ -114,12 +114,8 @@ export function getSourceType(url: string): string {
     return ST.tumblr;
   } else if (/^https?:\/\/(www\.)?redgifs\.com\//.exec(url) != null) {
     return ST.redgifs;
-  } else if (/^https?:\/\/(www\.)?imagefap\.com\//.exec(url) != null) {
-    return ST.imagefap;
   } else if (/^https?:\/\/(www\.)?imgur\.com\//.exec(url) != null) {
     return ST.imgur;
-  } else if (/^https?:\/\/(www\.)?(cdn\.)?sex\.com\//.exec(url) != null) {
-    return ST.sexcom;
   } else if (/^https?:\/\/(www\.)?deviantart\.com\//.exec(url) != null) {
     return ST.deviantart;
   } else if (
@@ -167,19 +163,19 @@ export function getSourceType(url: string): string {
   }
 }
 
-export function getFileGroup(url: string, pathSep: string) {
+export function getFileGroup(url: string, pathSep: string): string {
   let sep;
   switch (getSourceType(url)) {
     case ST.tumblr:
       return url.replace(/https?:\/\//, "").replace(/\.tumblr\.com\/?/, "");
     case ST.redgifs: {
-      let redgifID;
+      let redgifID = "";
       if (url.includes("/browse?")) {
         const redgifRegex =
           /^https?:\/\/(?:www\.)?redgifs\.com\/browse\?.*tags=([^&]*)/.exec(
             url,
           );
-        return redgifRegex.length ? redgifRegex[1] : "all";
+        return redgifRegex && redgifRegex.length ? redgifRegex[1] : "all";
       } else if (url.includes("/users/")) {
         redgifID = url.replace(/^https?:\/\/(www\.)?redgifs\.com\/users\//, "");
         if (redgifID.includes("/")) {
@@ -187,23 +183,6 @@ export function getFileGroup(url: string, pathSep: string) {
         }
       }
       return redgifID;
-    }
-    case ST.imagefap:
-      return url
-        .replace(/https?:\/\/www\.imagefap\.com\//, "")
-        .replace(/pictures\//, "")
-        .replace(/gallery\//, "")
-        .replace(/organizer\//, "")
-        .replace(/video\.php\?vid=/, "")
-        .split("/")[0];
-    case ST.sexcom: {
-      let sexcomID = url.replace(/https?:\/\/www\.sex\.com\//, "");
-      sexcomID = sexcomID.replace(/user\//, "");
-      sexcomID = sexcomID.split("?")[0];
-      if (sexcomID.endsWith("/")) {
-        sexcomID = sexcomID.substring(0, sexcomID.length - 1);
-      }
-      return sexcomID;
     }
     case ST.imgur:
       return url.replace(/https?:\/\/imgur\.com\//, "").replace(/a\//, "");
@@ -215,8 +194,9 @@ export function getFileGroup(url: string, pathSep: string) {
       return authorID;
     }
     case ST.e621: {
-      const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g;
-      const hostE621 = hostRegexE621.exec(url)[1];
+      const hostRegexE621 = /^https?:\/\/(?:www\.)?([^.]*)\./g.exec(url);
+      const hostE621 =
+        hostRegexE621 && hostRegexE621.length ? hostRegexE621[1] : "";
       let E621ID = "";
       if (url.includes("/pools/")) {
         E621ID = "pool" + url.substring(url.lastIndexOf("/"));
@@ -245,8 +225,8 @@ export function getFileGroup(url: string, pathSep: string) {
     case ST.danbooru:
     case ST.gelbooru1:
     case ST.gelbooru2: {
-      const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g;
-      const host = hostRegex.exec(url)[1];
+      const hostRegex = /^https?:\/\/(?:www\.)?([^.]*)\./g.exec(url);
+      const host = hostRegex && hostRegex.length ? hostRegex[1] : "";
       let danbooruID = "";
       if (url.includes("/pools/")) {
         danbooruID = "pools/" + url.substring(url.lastIndexOf("/"));
@@ -275,9 +255,9 @@ export function getFileGroup(url: string, pathSep: string) {
       return host + "/" + decodeURIComponent(danbooruID);
     }
     case ST.ehentai: {
-      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^\/]*)/g;
+      const galleryRegex = /^https?:\/\/(?:www\.)?e-hentai\.org\/g\/([^/]*)/g;
       const gallery = galleryRegex.exec(url);
-      return gallery[1];
+      return gallery && gallery.length ? gallery[1] : "";
     }
     case ST.list:
       if (/^https?:\/\//g.exec(url) == null) {
@@ -329,6 +309,8 @@ export function getFileGroup(url: string, pathSep: string) {
 
       return "piwigo";
     }
+    default:
+      return "";
   }
 }
 

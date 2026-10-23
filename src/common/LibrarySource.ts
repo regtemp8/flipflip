@@ -3,10 +3,10 @@ import Clip from "./Clip";
 
 export default class LibrarySource {
   id: number = 0;
-  url: string;
+  url: string = "";
   offline: boolean = false;
   marked: boolean = false;
-  lastCheck: Date = null;
+  lastCheck: Date | null = null;
   tags: Array<Tag> = [];
   clips: Array<Clip> = [];
   disabledClips: Array<number> = [];
@@ -19,10 +19,10 @@ export default class LibrarySource {
   // Local
   dirOfSources: boolean = false;
   // Video
-  subtitleFile: string;
-  duration: number;
-  resolution: number;
-  fileSize: number;
+  subtitleFile: string | null = null;
+  duration: number | null = null;
+  resolution: number | null = null;
+  fileSize: number | null = null;
 
   constructor(init?: Partial<LibrarySource>) {
     Object.assign(this, init);

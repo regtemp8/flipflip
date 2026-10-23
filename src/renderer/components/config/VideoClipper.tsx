@@ -191,21 +191,21 @@ interface VideoClipperProps {
   allTags: Array<Tag>;
   isLibrary: boolean;
   source: LibrarySource;
-  tutorial: string;
+  tutorial: string | null;
   videoVolume: number;
-  cache(video: HTMLVideoElement): void;
-  goBack(): void;
-  navigateClipping(offset: number): void;
-  onTutorial(tutorial: string): void;
-  onStartVCTutorial(): void;
-  onSetDisabledClips(disabledClips: Array<number>): void;
-  onUpdateClips(url: string, clips: Array<Clip>): void;
+  cache: (video: HTMLVideoElement) => void;
+  goBack: () => void;
+  navigateClipping: (offset: number) => void;
+  onTutorial: (tutorial: string) => void;
+  onStartVCTutorial: () => void;
+  onSetDisabledClips: (disabledClips: Array<number>) => void;
+  onUpdateClips: (url: string, clips: Array<Clip>) => void;
 }
 
 interface VideoClipperState {
   scene: Scene;
   empty: boolean;
-  isEditing: Clip;
+  isEditing?: Clip;
   isEditingValue: number[];
   isEditingStartText: string;
   isEditingEndText: string;
@@ -226,7 +226,6 @@ class VideoClipper extends React.Component<
     this.state = {
       scene: new Scene(window.constants.pathSep, window.ipc.platform()),
       empty: false,
-      isEditing: null as Clip,
       isEditingValue: [0, 0],
       isEditingStartText: "",
       isEditingEndText: "",
@@ -253,7 +252,7 @@ class VideoClipper extends React.Component<
                   edge="start"
                   color="inherit"
                   aria-label="Back"
-                  onClick={this.props.goBack.bind(this)}
+                  onClick={this.props.goBack}
                   size="large"
                 >
                   <ArrowBackIcon />
@@ -319,7 +318,7 @@ class VideoClipper extends React.Component<
               <div className={classes.appBar} />
               <Container maxWidth={false} className={classes.container}>
                 <ImageView
-                  image={this.video}
+                  image={this.video as HTMLVideoElement}
                   scene={this.state.scene}
                   fitParent
                   hasStarted
@@ -346,9 +345,7 @@ class VideoClipper extends React.Component<
                           )}
                           key={tag.id}
                         >
-                          <CardActionArea
-                            onClick={this.toggleTag.bind(this, tag)}
-                          >
+                          <CardActionArea onClick={() => this.toggleTag(tag)}>
                             <CardContent className={classes.tagContent}>
                               <Typography component="h6" variant="body2">
                                 {tag.name}
@@ -364,7 +361,7 @@ class VideoClipper extends React.Component<
                       <Fab
                         color="primary"
                         size="small"
-                        onClick={this.onInherit.bind(this)}
+                        onClick={this.onInherit}
                       >
                         <SystemUpdateAltIcon />
                       </Fab>
@@ -374,7 +371,7 @@ class VideoClipper extends React.Component<
                       title="End Tagging"
                       placement="top"
                     >
-                      <IconButton onClick={this.onTag.bind(this)} size="large">
+                      <IconButton onClick={this.onTag} size="large">
                         <KeyboardReturnIcon />
                       </IconButton>
                     </Tooltip>
@@ -387,14 +384,16 @@ class VideoClipper extends React.Component<
                     )}
                   >
                     <VideoControl
-                      video={this.video}
+                      video={this.video as HTMLVideoElement}
                       volume={this.state.scene.videoVolume}
-                      clip={this.state.isEditing || null}
+                      clip={this.state.isEditing}
                       clipValue={
-                        this.state.isEditing ? this.state.isEditingValue : null
+                        this.state.isEditing
+                          ? this.state.isEditingValue
+                          : undefined
                       }
                       useHotkeys
-                      onChangeVolume={this.onChangeVolume.bind(this)}
+                      onChangeVolume={this.onChangeVolume}
                     />
                   </Grid>
                 </Grid>
@@ -442,7 +441,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clips &&
                                   classes.highlight,
                               )}
-                              onClick={this.onAdd.bind(this)}
+                              onClick={this.onAdd}
                             >
                               <AddIcon />
                             </Fab>
@@ -458,7 +457,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clips &&
                                   classes.disable,
                               )}
-                              onClick={this.onEdit.bind(this, c)}
+                              onClick={() => this.onEdit(c)}
                             >
                               {index + 1}
                             </Button>
@@ -478,7 +477,7 @@ class VideoClipper extends React.Component<
                         {!this.props.isLibrary &&
                           this.state.isEditing &&
                           this.props.source.clips.find(
-                            (c) => c.id == this.state.isEditing.id,
+                            (c) => c.id == this.state.isEditing?.id,
                           ) && (
                             <Grid item>
                               <Tooltip
@@ -508,7 +507,7 @@ class VideoClipper extends React.Component<
                                       ) &&
                                       classes.disabledClip,
                                   )}
-                                  onClick={this.onToggleClip.bind(this)}
+                                  onClick={this.onToggleClip}
                                 >
                                   {this.props.source.disabledClips &&
                                   this.props.source.disabledClips.includes(
@@ -541,7 +540,7 @@ class VideoClipper extends React.Component<
                                 label: getTimestamp(this.state.videoDuration),
                               },
                             ]}
-                            onChange={this.onChangePosition.bind(this)}
+                            onChange={this.onChangePosition}
                           />
                         </Grid>
                         <Grid item>
@@ -551,8 +550,8 @@ class VideoClipper extends React.Component<
                             className={classes.clipField}
                             label="Start"
                             value={this.state.isEditingStartText}
-                            onDoubleClick={this.onClickStartText.bind(this)}
-                            onChange={this.onChangeStartText.bind(this)}
+                            onDoubleClick={this.onClickStartText}
+                            onChange={this.onChangeStartText}
                           />
                         </Grid>
                         <Grid item>
@@ -562,8 +561,8 @@ class VideoClipper extends React.Component<
                             className={classes.clipField}
                             label="End"
                             value={this.state.isEditingEndText}
-                            onDoubleClick={this.onClickEndText.bind(this)}
-                            onChange={this.onChangeEndText.bind(this)}
+                            onDoubleClick={this.onClickEndText}
+                            onChange={this.onChangeEndText}
                           />
                         </Grid>
                         <Grid item>
@@ -580,7 +579,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.highlight,
                               )}
-                              onClick={this.onSave.bind(this)}
+                              onClick={() => this.onSave(true)}
                             >
                               <SaveIcon />
                             </Fab>
@@ -600,7 +599,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onTag.bind(this)}
+                              onClick={this.onTag}
                             >
                               <LocalOfferIcon />
                             </Fab>
@@ -620,8 +619,8 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onSetVolume.bind(this)}
-                              onContextMenu={this.onClearVolume.bind(this)}
+                              onClick={this.onSetVolume}
+                              onContextMenu={this.onClearVolume}
                             >
                               <SvgIcon viewBox="0 0 24 24">
                                 <path d="M3 9V15H7L12 20V4L7 9H3M16 15H14V9H16V15M20 19H18V5H20V19Z" />
@@ -631,7 +630,7 @@ class VideoClipper extends React.Component<
                         </Grid>
                         {this.state.isEditing &&
                           this.props.source.clips.find(
-                            (c) => c.id == this.state.isEditing.id,
+                            (c) => c.id == this.state.isEditing?.id,
                           ) && (
                             <Grid item>
                               <Tooltip
@@ -647,7 +646,7 @@ class VideoClipper extends React.Component<
                                     this.props.tutorial == VCT.clip &&
                                       classes.disable,
                                   )}
-                                  onClick={this.onRemove.bind(this)}
+                                  onClick={this.onRemove}
                                 >
                                   <DeleteIcon color="inherit" />
                                 </Fab>
@@ -665,7 +664,7 @@ class VideoClipper extends React.Component<
                                 this.props.tutorial == VCT.clip &&
                                   classes.disable,
                               )}
-                              onClick={this.onCancel.bind(this)}
+                              onClick={this.onCancel}
                               size="large"
                             >
                               <KeyboardReturnIcon />
@@ -683,15 +682,17 @@ class VideoClipper extends React.Component<
                     )}
                   >
                     <VideoControl
-                      video={this.video}
+                      video={this.video as HTMLVideoElement}
                       volume={this.state.scene.videoVolume}
-                      clip={this.state.isEditing || null}
+                      clip={this.state.isEditing}
                       clipValue={
-                        this.state.isEditing ? this.state.isEditingValue : null
+                        this.state.isEditing
+                          ? this.state.isEditingValue
+                          : undefined
                       }
                       clips={this.props.source.clips}
                       useHotkeys
-                      onChangeVolume={this.onChangeVolume.bind(this)}
+                      onChangeVolume={this.onChangeVolume}
                     />
                   </Grid>
                 </Grid>
@@ -720,13 +721,13 @@ class VideoClipper extends React.Component<
     window.removeEventListener("wheel", this.onScroll);
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: VideoClipperProps) {
     if (this.props.source.url !== props.source.url) {
       this.setState({
         hasVideo: false,
         videoDuration: 0,
         empty: false,
-        isEditing: null,
+        isEditing: undefined,
         isEditingValue: [0, 0],
         isEditingStartText: "",
         isEditingEndText: "",
@@ -763,7 +764,7 @@ class VideoClipper extends React.Component<
     video.load();
   }
 
-  onAdd() {
+  onAdd = () => {
     if (this.props.tutorial == VCT.clips) {
       this.props.onTutorial(VCT.clips);
     }
@@ -777,15 +778,16 @@ class VideoClipper extends React.Component<
     newClip.start = this.state.isEditingValue[0];
     newClip.end = this.state.isEditingValue[1];
     newClip.tags = source.tags.concat();
+    const video = this.video as HTMLVideoElement;
     this.setState({
       isEditing: newClip,
-      isEditingValue: [0, this.video.duration],
+      isEditingValue: [0, video.duration],
       isEditingStartText: getTimestamp(0),
-      isEditingEndText: getTimestamp(this.video.duration),
+      isEditingEndText: getTimestamp(video.duration),
     });
-  }
+  };
 
-  onEdit(clip: Clip) {
+  onEdit = (clip: Clip) => {
     if (clip.volume != null) {
       this.onChangeVolume(clip.volume);
     }
@@ -795,18 +797,18 @@ class VideoClipper extends React.Component<
       isEditingStartText: getTimestamp(clip.start),
       isEditingEndText: getTimestamp(clip.end),
     });
-  }
+  };
 
-  onCancel() {
+  onCancel = () => {
     this.closeEdit();
-  }
+  };
 
-  onSave(close: boolean = true) {
+  onSave = (close: boolean) => {
     if (this.props.tutorial == VCT.clip) {
       this.props.onTutorial(VCT.clip);
     }
     const source = this.props.source;
-    let clip = source.clips.find((c) => c.id == this.state.isEditing.id);
+    let clip = source.clips.find((c) => c.id == this.state.isEditing?.id);
     if (clip) {
       clip.start = this.state.isEditingValue[0];
       clip.end = this.state.isEditingValue[1];
@@ -814,72 +816,68 @@ class VideoClipper extends React.Component<
       const start = this.state.isEditingValue[0];
       const end = this.state.isEditingValue[1];
       source.clips = source.clips.concat([
-        { ...this.state.isEditing, start, end },
+        { ...(this.state.isEditing as Clip), start, end },
       ]);
     }
     this.props.onUpdateClips(source.url, source.clips);
     if (close) {
       this.closeEdit();
     }
-  }
+  };
 
-  onToggleClip() {
+  onToggleClip = () => {
+    const isEditing = this.state.isEditing as Clip;
     this.props.onSetDisabledClips(
       this.props.source.disabledClips
-        ? this.props.source.disabledClips.concat(this.state.isEditing.id)
-        : [this.state.isEditing.id],
+        ? this.props.source.disabledClips.concat(isEditing.id)
+        : [isEditing.id],
     );
-  }
+  };
 
-  onTag() {
+  onTag = () => {
     this.setState({ isTagging: !this.state.isTagging });
-  }
+  };
 
-  onClearVolume() {
+  onClearVolume = () => {
     const source = this.props.source;
-    let fn = (c: Clip): Clip => {
-      c.volume = null;
-      return c;
-    };
-    this.setState({ isEditing: fn(this.state.isEditing) });
-    let clip = source.clips.find((c) => c.id === this.state.isEditing.id);
+    const isEditing = this.state.isEditing as Clip;
+    isEditing.volume = null;
+    this.setState({ isEditing });
+    let clip = source.clips.find((c) => c.id === isEditing.id);
     if (clip) {
       clip.volume = null;
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  onSetVolume() {
+  onSetVolume = () => {
     const source = this.props.source;
-    let fn = (c: Clip): Clip => {
-      c.volume = Number.parseInt(this.state.scene.videoVolume as any);
-      return c;
-    };
-    this.setState({ isEditing: fn(this.state.isEditing) });
-    let clip = source.clips.find((c) => c.id === this.state.isEditing.id);
+    const isEditing = this.state.isEditing as Clip;
+    isEditing.volume = Number.parseInt(this.state.scene.videoVolume as any);
+    this.setState({ isEditing });
+    let clip = source.clips.find((c) => c.id === isEditing.id);
     if (clip) {
       clip.volume = this.state.scene.videoVolume;
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  onInherit() {
+  onInherit = () => {
     const source = this.props.source;
-    let fn = (c: Clip): Clip => {
-      c.tags = source.tags;
-      return c;
-    };
-    this.setState({ isEditing: fn(this.state.isEditing) });
-    let clip = source.clips.find((c) => c.id === this.state.isEditing.id);
+    const isEditing = this.state.isEditing as Clip;
+    isEditing.tags = source.tags;
+    this.setState({ isEditing });
+    let clip = source.clips.find((c) => c.id === isEditing.id);
     if (clip) {
       clip.tags = source.tags.concat();
       this.props.onUpdateClips(source.url, source.clips);
     }
-  }
+  };
 
-  toggleTag(tag: Tag) {
+  toggleTag = (tag: Tag) => {
     const source = this.props.source;
-    let clip = source.clips.find((c) => c.id === this.state.isEditing.id);
+    const isEditing = this.state.isEditing as Clip;
+    let clip = source.clips.find((c) => c.id === isEditing.id);
     if (clip) {
       const tagIndex = clip.tags.findIndex((t) => t.name === tag.name);
       clip.tags =
@@ -888,73 +886,80 @@ class VideoClipper extends React.Component<
           : clip.tags.toSpliced(tagIndex, 1);
       this.props.onUpdateClips(source.url, source.clips);
     } else {
-      const isEditing = this.state.isEditing;
       const tagIndex = isEditing.tags.findIndex((t) => t.name === tag.name);
       isEditing.tags =
         tagIndex === -1
           ? isEditing.tags.concat([tag])
           : isEditing.tags.toSpliced(tagIndex, 1);
-      this.setState({ isEditing: isEditing });
+      this.setState({ isEditing });
     }
-  }
+  };
 
-  onRemove() {
+  onRemove = () => {
     const source = this.props.source;
-    const clip = source.clips.find((c) => c.id === this.state.isEditing.id);
+    const isEditing = this.state.isEditing as Clip;
+    const clip = source.clips.find((c) => c.id === isEditing.id);
     if (clip) {
-      source.clips = source.clips.filter(
-        (c) => c.id !== this.state.isEditing.id,
-      );
+      source.clips = source.clips.filter((c) => c.id !== isEditing.id);
       this.props.onUpdateClips(source.url, source.clips);
       this.props.onSetDisabledClips(
         this.props.source.disabledClips
-          ? this.props.source.disabledClips.filter(
-              (n) => n != this.state.isEditing.id,
-            )
+          ? this.props.source.disabledClips.filter((n) => n != isEditing.id)
           : [],
       );
     }
     this.closeEdit();
-  }
+  };
 
   closeEdit() {
     this.setState({
-      isEditing: null,
+      isEditing: undefined,
       isEditingValue: [0, 0],
       isEditingStartText: "",
       isEditingEndText: "",
     });
   }
 
-  onChangeVolume(volume: number) {
+  onChangeVolume = (volume: number) => {
     const scene = this.state.scene;
     scene.videoVolume = volume;
     this.setState({ scene: scene });
-  }
+  };
 
-  onChangePosition(
-    e: MouseEvent,
-    values: Array<number>,
+  onChangePosition = (
+    e: Event,
+    value: number | number[],
+    activeThumb: number,
+    forceStart = false,
+    forceEnd = false,
+  ) => {
+    this.changePosition(value, forceStart, forceEnd);
+  };
+
+  private changePosition(
+    value: number | number[],
     forceStart = false,
     forceEnd = false,
   ) {
+    const video = this.video as HTMLVideoElement;
+    const values = value as number[];
     let min = values[0];
     let max = values[1];
     if (min < 0) min = 0;
     if (max < 0) max = 0;
-    if (min > this.video.duration) min = this.video.duration;
-    if (max > this.video.duration) max = this.video.duration;
+    if (min > video.duration) min = video.duration;
+    if (max > video.duration) max = video.duration;
 
-    if (this.video.paused) {
+    if (video.paused) {
       if (forceStart || values[0] != this.state.isEditingValue[0]) {
-        this.video.currentTime = min;
+        video.currentTime = min;
       } else if (forceEnd || values[1] != this.state.isEditingValue[1]) {
-        this.video.currentTime = max;
+        video.currentTime = max;
       }
-    } else if (this.video.currentTime < min) {
-      this.video.currentTime = min;
-    } else if (this.video.currentTime > max) {
-      this.video.currentTime = max;
+    } else if (video.currentTime < min) {
+      video.currentTime = min;
+    } else if (video.currentTime > max) {
+      video.currentTime = max;
     }
 
     this.setState({
@@ -964,17 +969,18 @@ class VideoClipper extends React.Component<
     });
   }
 
-  onChangeStartText(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeStartText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ isEditingStartText: input.value });
-    let timestampValue = getTimestampValue(input.value);
-    this.onChangeStartTextValue(timestampValue);
-  }
+    const timestampValue = getTimestampValue(input.value);
+    if (timestampValue != null) {
+      this.onChangeStartTextValue(timestampValue);
+    }
+  };
 
   onChangeStartTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
-      this.onChangePosition(
-        null,
+      this.changePosition(
         [timestampValue, this.state.isEditingValue[1]],
         force,
         false,
@@ -982,27 +988,26 @@ class VideoClipper extends React.Component<
     }
   }
 
-  onClickStartText() {
+  onClickStartText = () => {
+    const video = this.video as HTMLVideoElement;
     this.setState({
-      isEditingStartText: getTimestamp(this.video.currentTime),
+      isEditingStartText: getTimestamp(video.currentTime),
     });
-    this.onChangePosition(null, [
-      this.video.currentTime,
-      this.state.isEditingValue[1],
-    ]);
-  }
+    this.changePosition([video.currentTime, this.state.isEditingValue[1]]);
+  };
 
-  onChangeEndText(e: MouseEvent) {
-    const input = e.target as HTMLInputElement;
+  onChangeEndText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     this.setState({ isEditingEndText: input.value });
-    let timestampValue = getTimestampValue(input.value);
-    this.onChangeStartTextValue(timestampValue);
-  }
+    const timestampValue = getTimestampValue(input.value);
+    if (timestampValue != null) {
+      this.onChangeEndTextValue(timestampValue);
+    }
+  };
 
   onChangeEndTextValue(timestampValue: number, force = false) {
     if (timestampValue != null) {
-      this.onChangePosition(
-        null,
+      this.changePosition(
         [this.state.isEditingValue[0], timestampValue],
         false,
         force,
@@ -1010,15 +1015,13 @@ class VideoClipper extends React.Component<
     }
   }
 
-  onClickEndText() {
+  onClickEndText = () => {
+    const video = this.video as HTMLVideoElement;
     this.setState({
-      isEditingEndText: getTimestamp(this.video.currentTime),
+      isEditingEndText: getTimestamp(video.currentTime),
     });
-    this.onChangePosition(null, [
-      this.state.isEditingValue[0],
-      this.video.currentTime,
-    ]);
-  }
+    this.changePosition([this.state.isEditingValue[0], video.currentTime]);
+  };
 
   onScroll = (e: WheelEvent) => {
     const volumeChange = (e.deltaY / 100) * -5;
@@ -1032,9 +1035,9 @@ class VideoClipper extends React.Component<
   };
 
   onKeyDown = (e: KeyboardEvent) => {
-    const focus = document.activeElement.tagName.toLocaleLowerCase();
-    const start = document.activeElement.id == "start";
-    const end = document.activeElement.id == "end";
+    const focus = document.activeElement?.tagName?.toLocaleLowerCase();
+    const start = document.activeElement?.id == "start";
+    const end = document.activeElement?.id == "end";
     switch (e.key) {
       case "Escape":
         e.preventDefault();
@@ -1042,10 +1045,10 @@ class VideoClipper extends React.Component<
           this.onTag();
         } else if (this.state.isEditing) {
           const clip = this.props.source.clips.find(
-            (c) => c.id == this.state.isEditing.id,
+            (c) => c.id == this.state.isEditing?.id,
           );
           if (clip) {
-            this.onSave();
+            this.onSave(true);
           } else {
             this.closeEdit();
           }
@@ -1073,15 +1076,13 @@ class VideoClipper extends React.Component<
         if (focus == "input") {
           e.preventDefault();
           if (start) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingStartText,
-            );
+            const text = this.state.isEditingStartText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const startValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0;
             this.onChangeStartTextValue(startValue, true);
           } else if (end) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingEndText,
-            );
+            const text = this.state.isEditingEndText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const endValue = timestampValue - 1 >= 0 ? timestampValue - 1 : 0;
             this.onChangeEndTextValue(endValue, true);
           }
@@ -1091,22 +1092,22 @@ class VideoClipper extends React.Component<
         if (focus == "input") {
           e.preventDefault();
           if (start) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingStartText,
-            );
+            const video = this.video as HTMLVideoElement;
+            const text = this.state.isEditingStartText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const startValue =
-              timestampValue + 1 <= this.video.duration
+              timestampValue + 1 <= video.duration
                 ? timestampValue + 1
-                : Math.floor(this.video.duration);
+                : Math.floor(video.duration);
             this.onChangeStartTextValue(startValue, true);
           } else if (end) {
-            const timestampValue = getTimestampValue(
-              this.state.isEditingEndText,
-            );
+            const video = this.video as HTMLVideoElement;
+            const text = this.state.isEditingEndText;
+            const timestampValue = getTimestampValue(text) ?? 0;
             const endValue =
-              timestampValue + 1 <= this.video.duration
+              timestampValue + 1 <= video.duration
                 ? timestampValue + 1
-                : Math.floor(this.video.duration);
+                : Math.floor(video.duration);
             this.onChangeEndTextValue(endValue, true);
           }
         }
@@ -1116,8 +1117,9 @@ class VideoClipper extends React.Component<
 
   prevClip() {
     this.onSave(false);
+    const isEditing = this.state.isEditing as Clip;
     let indexOf = this.props.source.clips.findIndex(
-      (c) => c.id == this.state.isEditing.id,
+      (c) => c.id == isEditing.id,
     );
     indexOf -= 1;
     if (indexOf < 0) {
@@ -1128,8 +1130,9 @@ class VideoClipper extends React.Component<
 
   nextClip() {
     this.onSave(false);
+    const isEditing = this.state.isEditing as Clip;
     let indexOf = this.props.source.clips.findIndex(
-      (c) => c.id == this.state.isEditing.id,
+      (c) => c.id == isEditing.id,
     );
     indexOf += 1;
     if (indexOf >= this.props.source.clips.length) {
@@ -1148,4 +1151,4 @@ class VideoClipper extends React.Component<
 }
 
 (VideoClipper as any).displayName = "VideoClipper";
-export default withStyles(styles)(VideoClipper as any);
+export default withStyles(styles)(VideoClipper);

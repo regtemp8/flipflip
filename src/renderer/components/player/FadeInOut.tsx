@@ -7,8 +7,8 @@ import Scene from "../../../common/Scene";
 import Audio from "../../../common/Audio";
 
 interface FadeInOutProps {
-  toggleFade: boolean;
-  currentAudio: Audio;
+  toggleFade?: boolean;
+  currentAudio?: Audio;
   timeToNextFrame: number;
   scene: Scene;
   fadeFunction: Function;
@@ -35,25 +35,26 @@ export default class FadeInOut extends React.Component<
     };
   }
 
-  _fadeTimeout: number = null;
+  _fadeTimeout?: number = undefined;
   _fadeOut = false;
+  _lastToggle = false;
 
   render() {
     // TODO Fix with TF.scene
     return <this.FadeInOutLayer>{this.props.children}</this.FadeInOutLayer>;
   }
 
-  _lastToggle: any = null;
   FadeInOutLayer = (data: { children: React.ReactNode }) => {
     const sceneTiming = this.props.scene.fadeIOTF == TF.scene;
-    if (this.props.toggleFade != this._lastToggle) {
+    const toggleFade = this.props.toggleFade ?? false;
+    if (toggleFade != this._lastToggle) {
       this._fadeOut = false;
-      this._lastToggle = this.props.toggleFade;
+      this._lastToggle = toggleFade;
     }
     let fadeTransitions: [{ item: any; props: any; key: any }];
     if (sceneTiming) {
       fadeTransitions = useTransition(
-        this._fadeOut ? null : this.props.toggleFade,
+        this._fadeOut ? null : toggleFade,
         (toggle: any) => {
           return toggle;
         },
@@ -88,7 +89,9 @@ export default class FadeInOut extends React.Component<
           },
         },
       );
-      window.clearTimeout(this._fadeTimeout);
+      if (this._fadeTimeout != null) {
+        window.clearTimeout(this._fadeTimeout);
+      }
       if (this._fadeOut) {
         this.props.fadeFunction();
         this._fadeTimeout = window.setTimeout(() => {
@@ -175,10 +178,10 @@ export default class FadeInOut extends React.Component<
     return delay;
   }
 
-  fadeLoop() {
+  fadeLoop = () => {
     const delay = this.fade();
-    this._fadeTimeout = window.setTimeout(this.fadeLoop.bind(this), delay);
-  }
+    this._fadeTimeout = window.setTimeout(this.fadeLoop, delay);
+  };
 
   componentDidMount() {
     this._fadeOut = false;
@@ -193,14 +196,17 @@ export default class FadeInOut extends React.Component<
     }
   }
 
-  componentDidUpdate(props: any) {
+  componentDidUpdate(props: FadeInOutProps) {
     if (this.props.scene.fadeInOut) {
       if (
         this.props.scene.fadeIOTF != props.scene.fadeIOTF ||
         this.props.scene.fadeIODelayTF != props.scene.fadeIODelayTF ||
         this.props.scene.fadeIOPulse != props.scene.fadeIOPulse
       ) {
-        window.clearTimeout(this._fadeTimeout);
+        if (this._fadeTimeout != null) {
+          window.clearTimeout(this._fadeTimeout);
+          this._fadeTimeout = undefined;
+        }
         if (
           this.props.scene.fadeIOPulse
             ? this.props.scene.fadeIODelayTF != TF.scene
@@ -212,18 +218,21 @@ export default class FadeInOut extends React.Component<
     }
   }
 
-  shouldComponentUpdate(props: any, state: any) {
+  shouldComponentUpdate(props: FadeInOutProps, state: FadeInOutState) {
     return (
-      !props.fadeInOut ||
+      !props.scene.fadeInOut ||
       this.props.toggleFade != props.toggleFade ||
       this.state.toggleFade != state.toggleFade
     );
   }
 
   componentWillUnmount() {
-    window.clearTimeout(this._fadeTimeout);
-    this._fadeTimeout = null;
-    this._fadeOut = null;
+    if (this._fadeTimeout != null) {
+      window.clearTimeout(this._fadeTimeout);
+      this._fadeTimeout = undefined;
+    }
+
+    this._fadeOut = false;
   }
 
   getDuration() {
@@ -254,7 +263,7 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.fadeIOBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         duration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!duration) {
@@ -263,6 +272,11 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.scene:
         duration = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.fadeIOTF,
+        );
     }
     duration = duration / 2;
     return duration;
@@ -296,7 +310,7 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.fadeIODelayBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         delay = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!delay) {
@@ -305,6 +319,11 @@ export default class FadeInOut extends React.Component<
         break;
       case TF.scene:
         delay = this.props.timeToNextFrame;
+        break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.fadeIODelayTF,
+        );
     }
     return delay;
   }

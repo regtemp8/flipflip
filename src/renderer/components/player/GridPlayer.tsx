@@ -66,26 +66,26 @@ interface GridPlayerProps {
   theme: Theme;
   advanceHacks?: Array<ChildCallbackHack>;
   hasStarted?: boolean;
-  cache(i: HTMLImageElement | HTMLVideoElement): void;
-  getTags(source: string): Array<Tag>;
-  goBack(): void;
-  onGenerate(
+  cache: (i: HTMLImageElement | HTMLVideoElement) => void;
+  getTags: (source: string) => Array<Tag>;
+  goBack: () => void;
+  onGenerate?: (
     scene: Scene | SceneGrid,
     children?: boolean,
     force?: boolean,
-  ): void;
-  setCount(sourceURL: string, count: number, countComplete: boolean): void;
-  systemMessage(message: string): void;
-  finishedLoading?(empty: boolean): void;
-  setProgress?(total: number, current: number, message: string[]): void;
-  setVideo?(index: number, video: HTMLVideoElement): void;
+  ) => void;
+  setCount: (sourceURL: string, count: number, countComplete: boolean) => void;
+  systemMessage: (message: string) => void;
+  finishedLoading?: (empty: boolean) => void;
+  setProgress?: (total: number, current: number, message: string[]) => void;
+  setVideo?: (index: number, video?: HTMLVideoElement) => void;
 }
 
 interface GridPlayerState {
   scene: SceneGrid;
   height: number;
   width: number;
-  sceneCopyGrid: Array<Array<React.ReactNode>>;
+  sceneCopyGrid: Array<Array<React.ReactNode | null>>;
   isLoaded: Array<Array<boolean>>;
   hideCursor: boolean;
 }
@@ -111,7 +111,9 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
           ? props.scene.grid[0].length
           : 1,
       sceneCopyGrid: props.scene.grid.map((r) =>
-        r.map(() => null as React.ReactNode),
+        r.map(() => {
+          return null;
+        }),
       ),
       isLoaded: props.scene.grid.map((r) =>
         r.map((c) => c.sceneCopy && c.sceneCopy.length > 0),
@@ -146,6 +148,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
       gridTemplateRows += rowSize.toString() + "% ";
     }
 
+    const setVideo = this.props.setVideo;
     return (
       <div className={classes.root}>
         <main
@@ -160,8 +163,8 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
             ref={() => {
               return this.idleTimerRef;
             }}
-            onActive={this.onActive.bind(this)}
-            onIdle={this.onIdle.bind(this)}
+            onActive={this.onActive}
+            onIdle={this.onIdle}
             timeout={2000}
           />
           <Container maxWidth={false} className={classes.container}>
@@ -260,11 +263,10 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               config={this.props.config}
                               hasStarted={this.props.hasStarted}
                               scene={scene}
-                              nextScene={this.nextScene.bind(
-                                this,
-                                rowIndex,
-                                colIndex,
-                              )}
+                              nextScene={() =>
+                                this.nextScene(rowIndex, colIndex)
+                              }
+                              onUpdateScene={() => {}}
                               gridView
                               gridCoordinates={
                                 this.state.scene.grid.some((r) =>
@@ -280,7 +282,6 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               scenes={this.props.allScenes}
                               sceneGrids={this.props.sceneGrids}
                               theme={this.props.theme}
-                              tutorial={null}
                               captionScale={
                                 1 /
                                 Math.sqrt(
@@ -288,35 +289,27 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                                 )
                               }
                               allLoaded={allLoaded}
-                              cache={this.props.cache.bind(this)}
-                              getTags={this.props.getTags.bind(this)}
-                              goBack={this.props.goBack.bind(this)}
+                              cache={this.props.cache}
+                              getTags={this.props.getTags}
+                              goBack={this.props.goBack}
                               onGenerate={this.props.onGenerate}
-                              onLoaded={this.setCellLoaded.bind(
-                                this,
-                                rowIndex,
-                                colIndex,
-                              )}
-                              setCount={this.props.setCount.bind(this)}
+                              onLoaded={() =>
+                                this.setCellLoaded(rowIndex, colIndex)
+                              }
+                              setCount={this.props.setCount}
                               setProgress={
                                 showProgress ? this.props.setProgress : this.nop
                               }
-                              setSceneCopy={this.setSceneCopy.bind(
-                                this,
-                                rowIndex,
-                                colIndex,
-                              )}
+                              setSceneCopy={(children) =>
+                                this.setSceneCopy(rowIndex, colIndex, children)
+                              }
                               setVideo={
-                                this.props.setVideo
-                                  ? this.props.setVideo.bind(
-                                      this,
-                                      rowIndex * row.length + colIndex,
-                                    )
+                                setVideo
+                                  ? () =>
+                                      setVideo(rowIndex * row.length + colIndex)
                                   : undefined
                               }
-                              systemMessage={this.props.systemMessage.bind(
-                                this,
-                              )}
+                              systemMessage={this.props.systemMessage}
                             />
                           )}
                         </div>
@@ -334,15 +327,23 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
 
   nop() {}
 
-  setSceneCopy(rowIndex: number, colIndex: number, children: React.ReactNode) {
+  setSceneCopy = (
+    rowIndex: number,
+    colIndex: number,
+    children: React.ReactNode,
+  ) => {
     const newSceneCopyGrid = this.state.sceneCopyGrid;
     newSceneCopyGrid[rowIndex][colIndex] = children;
     this.setState({ sceneCopyGrid: newSceneCopyGrid });
-  }
+  };
 
-  nextScene(rowIndex: number, colIndex: number) {
+  nextScene = (rowIndex: number, colIndex: number) => {
     const cell = this.state.scene.grid[rowIndex][colIndex];
     const scene = this.props.allScenes.find((s) => s.id == cell.sceneID);
+    if (scene == null) {
+      return;
+    }
+
     const newSceneGrid = this.state.scene;
     if (scene.nextSceneID == -1) {
       newSceneGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneRandomID;
@@ -350,17 +351,17 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
       newSceneGrid.grid[rowIndex][colIndex].sceneID = scene.nextSceneID;
     }
     this.setState({ scene: newSceneGrid });
-  }
+  };
 
-  onActive() {
+  onActive = () => {
     this.setState({ hideCursor: false });
-  }
+  };
 
-  onIdle() {
+  onIdle = () => {
     this.setState({ hideCursor: true });
-  }
+  };
 
-  setCellLoaded(rowIndex: number, colIndex: number) {
+  setCellLoaded = (rowIndex: number, colIndex: number) => {
     const newLoaded = this.state.isLoaded;
     newLoaded[rowIndex][colIndex] = true;
     if (
@@ -370,8 +371,8 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
       this.props.finishedLoading(false);
     }
     this.setState({ isLoaded: newLoaded });
-  }
+  };
 }
 
 (GridPlayer as any).displayName = "GridPlayer";
-export default withStyles(styles)(GridPlayer as any);
+export default withStyles(styles)(GridPlayer);

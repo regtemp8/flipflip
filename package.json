@@ -1,7 +1,7 @@
 {
   "name": "flipflip",
   "productName": "flipflip",
-  "version": "5.2.1",
+  "version": "5.2.2",
   "description": "Random slideshow of images. Electron app for Mac/Windows/Linux",
   "main": ".webpack/main",
   "private": true,
@@ -46,7 +46,7 @@
     "prettier": "^3.9.9",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.6.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
     "webpack": "^5.111.1"
   },

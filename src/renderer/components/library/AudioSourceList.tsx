@@ -59,23 +59,23 @@ interface AudioSourceListProps {
   showHelp: boolean;
   sources: Array<Audio>;
   yOffset: number;
-  tutorial: string;
+  tutorial: string | null;
   playlist?: string;
-  onClickAlbum(album: string): void;
-  onClickArtist(artist: string): void;
-  onPlay(source: Audio, displayed: Array<Audio>): void;
-  onUpdateSelected(selected: Array<string>): void;
-  onUpdateLibrary(fn: (library: Array<Audio>) => void): void;
-  onUpdatePlaylists(fn: (playlists: Array<Playlist>) => void): void;
-  savePosition(): void;
-  systemMessage(message: string): void;
+  onClickAlbum: (album: string) => void;
+  onClickArtist: (artist: string, event: React.MouseEvent) => void;
+  onPlay: (source: Audio, displayed: Array<Audio>) => void;
+  onUpdateSelected: (selected: Array<string>) => void;
+  onUpdateLibrary: (fn: (library: Array<Audio>) => void) => void;
+  onUpdatePlaylists: (fn: (playlists: Array<Playlist>) => void) => void;
+  savePosition: () => void;
+  systemMessage: (message: string) => void;
 }
 
 interface AudioSourceListState {
-  sourceOptions: Audio;
-  deleteDialog: Audio;
-  sourceEdit: Audio;
-  lastSelected: number;
+  sourceOptions?: Audio;
+  deleteDialog?: Audio;
+  sourceEdit?: Audio;
+  lastSelected?: number;
 }
 
 class AudioSourceList extends React.Component<
@@ -85,12 +85,7 @@ class AudioSourceList extends React.Component<
   constructor(props: AudioSourceListProps) {
     super(props);
 
-    this.state = {
-      sourceOptions: null as Audio,
-      deleteDialog: null as Audio,
-      sourceEdit: null as Audio,
-      lastSelected: null as number,
-    };
+    this.state = {};
   }
 
   onSortEnd = ({
@@ -103,6 +98,10 @@ class AudioSourceList extends React.Component<
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
+        if (!playlist) {
+          return;
+        }
+
         const oldIndexSource = this.props.sources[oldIndex];
         const newIndexSource = this.props.sources[newIndex];
         const oldPlaylistIndex = playlist.audios.indexOf(oldIndexSource.id);
@@ -170,14 +169,16 @@ class AudioSourceList extends React.Component<
             <List
               id="sortable-list"
               disablePadding
-              onClick={this.clearLastSelected.bind(this)}
+              onClick={this.clearLastSelected}
             >
               <this.SortableVirtualList
-                helperContainer={() => document.getElementById("sortable-list")}
+                helperContainer={() =>
+                  document.getElementById("sortable-list") as HTMLElement
+                }
                 distance={5}
                 height={height}
                 width={width}
-                onSortEnd={this.onSortEnd.bind(this)}
+                onSortEnd={this.onSortEnd}
               />
             </List>
           )}
@@ -185,7 +186,7 @@ class AudioSourceList extends React.Component<
         {this.state.deleteDialog != null && (
           <Dialog
             open={true}
-            onClose={this.onCloseDeleteDialog.bind(this)}
+            onClose={this.onCloseDeleteDialog}
             aria-describedby="delete-description"
           >
             <DialogContent>
@@ -194,13 +195,10 @@ class AudioSourceList extends React.Component<
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={this.onCloseDeleteDialog.bind(this)}
-                color="secondary"
-              >
+              <Button onClick={this.onCloseDeleteDialog} color="secondary">
                 Cancel
               </Button>
-              <Button onClick={this.onFinishDelete.bind(this)} color="primary">
+              <Button onClick={this.onFinishDelete} color="primary">
                 Delete
               </Button>
             </DialogActions>
@@ -209,8 +207,8 @@ class AudioSourceList extends React.Component<
         {this.state.sourceOptions != null && (
           <AudioOptions
             audio={this.state.sourceOptions}
-            onCancel={this.onCloseSourceOptions.bind(this)}
-            onFinishEdit={this.onFinishSourceOptions.bind(this)}
+            onCancel={this.onCloseSourceOptions}
+            onFinishEdit={this.onFinishSourceOptions}
           />
         )}
         {this.state.sourceEdit != null && (
@@ -219,30 +217,36 @@ class AudioSourceList extends React.Component<
             config={this.props.config}
             title="Edit song info"
             allowSuggestion
-            onCancel={this.onCloseSourceEditDialog.bind(this)}
-            onFinishEdit={this.onFinishSourceEdit.bind(this)}
+            onCancel={this.onCloseSourceEditDialog}
+            onFinishEdit={this.onFinishSourceEdit}
           />
         )}
       </React.Fragment>
     );
   }
 
+  _shiftDown = false;
+  _lastChecked: string | undefined = undefined;
+
   componentDidMount() {
     addEventListener("keydown", this.onKeyDown, false);
     addEventListener("keyup", this.onKeyUp, false);
     this._shiftDown = false;
-    this._lastChecked = null;
+    this._lastChecked = undefined;
   }
 
   componentWillUnmount() {
     removeEventListener("keydown", this.onKeyDown);
     addEventListener("keyup", this.onKeyUp);
-    this._shiftDown = null;
-    this._lastChecked = null;
+    this._shiftDown = false;
+    this._lastChecked = undefined;
     this.savePosition();
   }
 
-  shouldComponentUpdate(props: any, state: any): boolean {
+  shouldComponentUpdate(
+    props: AudioSourceListProps,
+    state: AudioSourceListState,
+  ): boolean {
     return (
       this.props.isSelect != props.isSelect ||
       this.props.playlist != props.playlist ||
@@ -256,7 +260,6 @@ class AudioSourceList extends React.Component<
     );
   }
 
-  _shiftDown = false;
   onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Shift") this._shiftDown = true;
   };
@@ -264,31 +267,36 @@ class AudioSourceList extends React.Component<
     if (e.key == "Shift") this._shiftDown = false;
   };
 
-  savePosition() {
+  savePosition = () => {
     if (this.props.savePosition) {
       this.props.savePosition();
     }
-  }
+  };
 
-  onDelete(source: Audio) {
+  onDelete = (source: Audio) => {
     this.setState({ deleteDialog: source });
-  }
+  };
 
-  onCloseDeleteDialog() {
-    this.setState({ deleteDialog: null });
-  }
+  onCloseDeleteDialog = () => {
+    this.setState({ deleteDialog: undefined });
+  };
 
-  onFinishDelete() {
-    window.ipc.finishDelete(this.state.deleteDialog.url).then(() => {
-      this.onRemove(this.state.deleteDialog);
+  onFinishDelete = () => {
+    const toDelete = this.state.deleteDialog!;
+    window.ipc.finishDelete(toDelete.url).then(() => {
+      this.onRemove(toDelete);
       this.onCloseDeleteDialog();
     });
-  }
+  };
 
-  onRemove(source: Audio) {
+  onRemove = (source: Audio) => {
     if (this.props.playlist) {
       this.props.onUpdatePlaylists((pl) => {
         const playlist = pl.find((p) => p.name == this.props.playlist);
+        if (!playlist) {
+          return;
+        }
+
         playlist.audios.forEach((a, index) => {
           if (a == source.id) {
             playlist.audios.splice(index, 1);
@@ -319,16 +327,16 @@ class AudioSourceList extends React.Component<
         });
       });
     }
-  }
+  };
 
-  _lastChecked: string = null;
-  onToggleSelect(e: MouseEvent) {
-    const source = (e.currentTarget as HTMLInputElement).value;
+  onToggleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const source = e.currentTarget.value;
     let newSelected = Array.from(this.props.selected);
     if (newSelected.includes(source)) {
       newSelected.splice(newSelected.indexOf(source), 1);
     } else {
       if (
+        this._lastChecked != null &&
         this.props.sources.map((s) => s.url).includes(this._lastChecked) &&
         this._shiftDown
       ) {
@@ -349,47 +357,49 @@ class AudioSourceList extends React.Component<
     }
     this._lastChecked = source;
     this.props.onUpdateSelected(newSelected);
-  }
+  };
 
-  clearLastSelected() {
+  clearLastSelected = () => {
     if (!this.state.sourceEdit && !this.state.sourceOptions) {
-      this.setState({ lastSelected: null });
+      this.setState({ lastSelected: undefined });
     }
-  }
+  };
 
-  onEditSource(audio: Audio, e: MouseEvent) {
+  onEditSource = (audio: Audio, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     this.setState({ sourceEdit: new Audio(audio), lastSelected: audio.id });
-  }
+  };
 
-  onCloseSourceEditDialog() {
-    this.setState({ sourceEdit: null });
-  }
+  onCloseSourceEditDialog = () => {
+    this.setState({ sourceEdit: undefined });
+  };
 
-  onSourceOptions(source: Audio, e: MouseEvent) {
+  onSourceOptions = (source: Audio, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     this.setState({ sourceOptions: source, lastSelected: source.id });
-  }
+  };
 
-  onCloseSourceOptions() {
-    this.setState({ sourceOptions: null });
-  }
+  onCloseSourceOptions = () => {
+    this.setState({ sourceOptions: undefined });
+  };
 
-  onFinishSourceEdit(newAudio: Audio) {
+  onFinishSourceEdit = (newAudio: Audio) => {
+    const sourceEdit = this.state.sourceEdit!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceEdit.id);
+      let editSource = a.find((a) => a.id == sourceEdit.id)!;
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceEditDialog();
-  }
+  };
 
-  onFinishSourceOptions(newAudio: Audio) {
+  onFinishSourceOptions = (newAudio: Audio) => {
+    const sourceOptions = this.state.sourceOptions!;
     this.props.onUpdateLibrary((a) => {
-      let editSource = a.find((a) => a.id == this.state.sourceOptions.id);
+      let editSource = a.find((a) => a.id == sourceOptions.id)!;
       Object.assign(editSource, newAudio);
     });
     this.onCloseSourceOptions();
-  }
+  };
 
   SortableVirtualList = SortableContainer<{ height: number; width: number }>(
     this.VirtualList.bind(this),
@@ -432,16 +442,16 @@ class AudioSourceList extends React.Component<
           source={source}
           sources={this.props.sources}
           style={value.style}
-          onClickAlbum={this.props.onClickAlbum.bind(this)}
-          onClickArtist={this.props.onClickArtist.bind(this)}
-          onDelete={this.onDelete.bind(this)}
-          onEditSource={this.onEditSource.bind(this)}
-          onPlay={this.props.onPlay.bind(this)}
-          onRemove={this.onRemove.bind(this)}
-          onSourceOptions={this.onSourceOptions.bind(this)}
-          onToggleSelect={this.onToggleSelect.bind(this)}
-          savePosition={this.savePosition.bind(this)}
-          systemMessage={this.props.systemMessage.bind(this)}
+          onClickAlbum={this.props.onClickAlbum}
+          onClickArtist={this.props.onClickArtist}
+          onDelete={this.onDelete}
+          onEditSource={this.onEditSource}
+          onPlay={this.props.onPlay}
+          onRemove={this.onRemove}
+          onSourceOptions={this.onSourceOptions}
+          onToggleSelect={this.onToggleSelect}
+          savePosition={this.savePosition}
+          systemMessage={this.props.systemMessage}
         />
       );
     },
@@ -454,4 +464,4 @@ class AudioSourceList extends React.Component<
 }
 
 (AudioSourceList as any).displayName = "AudioSourceList";
-export default withStyles(styles)(AudioSourceList as any);
+export default withStyles(styles)(AudioSourceList);

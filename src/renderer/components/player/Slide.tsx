@@ -10,7 +10,7 @@ interface SlideProps {
   image: HTMLImageElement | HTMLVideoElement | HTMLIFrameElement;
   scene: Scene;
   timeToNextFrame: number;
-  currentAudio: Audio;
+  currentAudio?: Audio;
   children?: React.ReactNode;
 }
 
@@ -54,13 +54,17 @@ export default class Slide extends React.Component<SlideProps> {
         break;
       case TF.bpm:
         const bpmMulti = this.props.scene.slideBPMMulti / 10;
-        const bpm = this.props.currentAudio ? this.props.currentAudio.bpm : 60;
+        const bpm = this.props.currentAudio?.bpm ?? 60;
         slideDuration = 60000 / (bpm * bpmMulti);
         // If we cannot parse this, default to 1s
         if (!slideDuration) {
           slideDuration = 1000;
         }
         break;
+      default:
+        throw new Error(
+          "Unsupported timing function: " + this.props.scene.slideTF,
+        );
     }
 
     let slideHStart, slideHEnd, slideVStart, slideVEnd;

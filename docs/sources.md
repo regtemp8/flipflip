@@ -106,7 +106,6 @@ local video/playlist file, add a `Local video/playlsit` and choose the video(s) 
 * <img style="vertical-align: -2px" src="doc_icons/tumblr.svg" alt="Tumblr" width="15" height="15"> Tumblr Blog
 * <img style="vertical-align: -2px" src="doc_icons/imgur.svg" alt="Imgur" width="15" height="15"> Imgur Album
 * <img style="vertical-align: -2px" src="doc_icons/deviantart.svg" alt="DeviantArt" width="15" height="15"> DeviantArt User
-* <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/imagefap.png" alt="ImageFap" width="15" height="15">ImageFap Gallery/Organizer
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/danbooru.png" alt="Danbooru" width="15" height="15">Danbooru Tag/User/Pool
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/gelbooru.png" alt="Gelbooru" width="15" height="15">Gelbooru Tag
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/ehentai.png" alt="E-Hentai" width="15" height="15">E-Hentai Gallery
@@ -115,7 +114,6 @@ local video/playlist file, add a `Local video/playlsit` and choose the video(s) 
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/b.svg" alt="BDSMlr" width="15" height="15">BDSMlr Blog (Only works for blogs with images in RSS feed)
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/nimja.svg" alt="Nimja" width="15" height="15">Nimja Spiral
 * <img style="vertical-align: -2px; margin-right: 5px" src="doc_icons/luscious.svg" alt="Luscious" width="15" height="15">Luscious Album/User
-* ~~<img style="vertical-align: -2px" src="doc_icons/sexcom.svg" alt="Sex.com" width="15" height="15"> Sex.com Gallery/User~~ _Currently broken_
 
 #### Gooninator import
 If you have some saved links from the beloved, retired web app Gooninator, you can import them into FlipFlip either as 

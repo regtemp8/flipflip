@@ -7,9 +7,9 @@ interface SoundTickProps {
   speed: number;
   volume: number;
   tick: boolean;
-  onPlaying(soundData: any): void;
-  onError(errorCode: number, description: string): void;
-  onFinishedPlaying(): void;
+  onPlaying: (soundData: { position: number; duration: number }) => void;
+  onError: (errorCode: number, description: string) => void;
+  onFinishedPlaying: () => void;
 }
 
 export default class SoundTick extends React.Component<SoundTickProps> {
@@ -17,7 +17,7 @@ export default class SoundTick extends React.Component<SoundTickProps> {
     super(props);
   }
 
-  shouldComponentUpdate(props: any) {
+  shouldComponentUpdate(props: SoundTickProps) {
     return this.props.tick !== props.tick;
   }
 
@@ -30,9 +30,9 @@ export default class SoundTick extends React.Component<SoundTickProps> {
         autoLoad
         loop={false}
         volume={this.props.volume}
-        onPlaying={this.props.onPlaying.bind(this)}
-        onError={this.props.onError.bind(this)}
-        onFinishedPlaying={this.props.onFinishedPlaying.bind(this)}
+        onPlaying={this.props.onPlaying}
+        onError={this.props.onError}
+        onFinishedPlaying={this.props.onFinishedPlaying}
         playFromPosition={this.props.tick ? 0 : 1}
       />
     );
