@@ -7,11 +7,11 @@ import {
   IpcMainInvokeEvent,
   shell,
   clipboard,
-  nativeImage,
   Menu,
   MenuItem,
   powerSaveBlocker,
   webFrame,
+  ClipboardItem,
 } from "electron";
 import { urlToPath, getFileName, getSourceType } from "../common/utils";
 import getFolderSize from "get-folder-size";
@@ -336,23 +336,27 @@ function copyImageToClipboard(url: string) {
   const isFile = url.startsWith("file://");
   const path = urlToPath(url, process.platform);
   const imagePath = isFile ? path : url;
-  if (
-    imagePath.toLocaleLowerCase().endsWith(".png") ||
+  const isPng = imagePath.toLocaleLowerCase().endsWith(".png");
+  const isJpg =
     imagePath.toLocaleLowerCase().endsWith(".jpg") ||
-    imagePath.toLocaleLowerCase().endsWith(".jpeg")
-  ) {
+    imagePath.toLocaleLowerCase().endsWith(".jpeg");
+  if (isPng || isJpg) {
+    const type = isPng ? "image/png" : "image/jpeg";
     if (isFile) {
-      clipboard.writeImage(nativeImage.createFromPath(imagePath));
+      const file = fs.readFileSync(imagePath);
+      const items: Record<string, Blob> = {};
+      items[type] = new Blob([file], { type });
+      clipboard.write([new ClipboardItem(items)]);
     } else {
       wretch(imagePath)
         .get()
         .arrayBuffer((arrayBuffer) => {
-          const buffer = Buffer.from(arrayBuffer);
-          const bufferImage = nativeImage.createFromBuffer(buffer);
-          if (bufferImage.isEmpty()) {
+          if (arrayBuffer.byteLength === 0) {
             clipboard.writeText(imagePath);
           } else {
-            clipboard.writeImage(bufferImage);
+            const items: Record<string, Blob> = {};
+            items[type] = new Blob([arrayBuffer], { type });
+            clipboard.write([new ClipboardItem(items)]);
           }
         });
     }
