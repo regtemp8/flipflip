@@ -2033,6 +2033,7 @@ export const loadHydrus = (
   helpers: { next: any; count: number; retries: number },
   pm: (object: any) => void,
 ) => {
+  helpers.next = null;
   const timeout = 8000;
   const chunk = 1000;
   const apiKey = config.remoteSettings.hydrusAPIKey;
