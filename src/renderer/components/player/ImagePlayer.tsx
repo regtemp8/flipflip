@@ -1020,7 +1020,14 @@ export default class ImagePlayer extends React.Component<
         video.preload = "auto";
 
         window.clearTimeout(this._imgLoadTimeouts[i]);
-        this._imgLoadTimeouts[i] = window.setTimeout(errorCallback, 15000);
+        this._imgLoadTimeouts[i] = window.setTimeout(() => {
+          video.onloadeddata = null;
+          video.onerror = null;
+          video.onabort = null;
+          video.onended = null;
+          video.src = "";
+          errorCallback();
+        }, 15000);
 
         video.load();
       } else {
@@ -1213,7 +1220,13 @@ export default class ImagePlayer extends React.Component<
 
           img.src = proxy(url);
           window.clearTimeout(this._imgLoadTimeouts[i]);
-          this._imgLoadTimeouts[i] = window.setTimeout(errorCallback, 5000);
+          this._imgLoadTimeouts[i] = window.setTimeout(() => {
+            img.onload = null;
+            img.onerror = null;
+            img.onabort = null;
+            img.src = "";
+            errorCallback();
+          }, 5000);
         };
 
         // Get gifinfo if we need for imageFilter or playing full gif
@@ -1233,7 +1246,13 @@ export default class ImagePlayer extends React.Component<
         } else {
           img.src = proxy(url);
           window.clearTimeout(this._imgLoadTimeouts[i]);
-          this._imgLoadTimeouts[i] = window.setTimeout(errorCallback, 5000);
+          this._imgLoadTimeouts[i] = window.setTimeout(() => {
+            img.onload = null;
+            img.onerror = null;
+            img.onabort = null;
+            img.src = "";
+            errorCallback();
+          }, 5000);
         }
       }
     });
