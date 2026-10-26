@@ -1,13 +1,18 @@
 # Changelog
 
-#### v5.2.2 <small>(unreleased)</small>
+#### v5.2.2 <small>(10/26/2026)</small>
 - Remove ImageFap
+- Remove experimental VR controller mode
 - Uncover new tutorials
 - Refactor getAlbums in AudioAlbumList
 - Adjusted video cross-fade logic
 - Assume timeToNextFrame has value when strobe is active in ImageView
 - Removed attribute copy when cloning video in ImageView
+- Fix fetch loop image load timeout
+- Fix Hydrus returning next URL when it never has a next URL
+- Upgrade Electron to 45.0.0
 - Upgrade TypeScript to 6.0.3
+- Upgrade 3rd party libraries
 
 #### v5.2.1 <small>(09/25/2026)</small>
 - Fix SourceList being cleared on edit
