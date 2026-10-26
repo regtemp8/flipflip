@@ -733,9 +733,7 @@ export default class ImagePlayer extends React.Component<
         }
 
         const successCallback = () => {
-          if (this._imgLoadTimeouts) {
-            window.clearTimeout(this._imgLoadTimeouts[i]);
-          }
+          window.clearTimeout(this._imgLoadTimeouts[i]);
           if (!this._isMounted) return;
 
           (iframe as any).key = this.state.nextImageID;
@@ -789,9 +787,7 @@ export default class ImagePlayer extends React.Component<
         }
 
         const successCallback = () => {
-          if (this._imgLoadTimeouts) {
-            window.clearTimeout(this._imgLoadTimeouts[i]);
-          }
+          window.clearTimeout(this._imgLoadTimeouts[i]);
           if (!this._isMounted) return;
           this.props.cache(video);
 
@@ -943,9 +939,7 @@ export default class ImagePlayer extends React.Component<
         };
 
         const errorCallback = () => {
-          if (this._imgLoadTimeouts) {
-            window.clearTimeout(this._imgLoadTimeouts[i]);
-          }
+          window.clearTimeout(this._imgLoadTimeouts[i]);
           if (!this._isMounted) return;
           if (
             this.props.scene.downloadScene ||
@@ -1044,9 +1038,7 @@ export default class ImagePlayer extends React.Component<
         }
 
         const successCallback = () => {
-          if (this._imgLoadTimeouts) {
-            window.clearTimeout(this._imgLoadTimeouts[i]);
-          }
+          window.clearTimeout(this._imgLoadTimeouts[i]);
           if (!this._isMounted) return;
           this.props.cache(img);
 
@@ -1094,9 +1086,7 @@ export default class ImagePlayer extends React.Component<
         };
 
         const errorCallback = () => {
-          if (this._imgLoadTimeouts) {
-            window.clearTimeout(this._imgLoadTimeouts[i]);
-          }
+          window.clearTimeout(this._imgLoadTimeouts[i]);
           if (!this._isMounted) return;
           if (
             this.props.scene.downloadScene ||
