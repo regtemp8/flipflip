@@ -47,6 +47,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
   _timeouts?: Array<number> = undefined;
 
   componentDidMount() {
+    this._timeouts = new Array<number>();
     this._applyImage();
   }
 
