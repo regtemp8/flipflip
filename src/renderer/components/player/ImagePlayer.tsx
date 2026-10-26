@@ -86,7 +86,7 @@ export default class ImagePlayer extends React.Component<
   _isMounted: boolean = false;
   _isLooping: boolean = false;
   _loadedSources: Array<string> = [];
-  _loadedURLs: Array<string> = [];
+  _loadedURLs: Set<string> = new Set<string>();
   _playedURLs: Array<string> = [];
   _nextIndex: number = -1;
   _nextAdvIndex: number = 0;
@@ -277,7 +277,7 @@ export default class ImagePlayer extends React.Component<
     this._isMounted = false;
     this._isLooping = false;
     this._loadedSources = [];
-    this._loadedURLs = [];
+    this._loadedURLs = new Set<string>();
     this._playedURLs = [];
     this._nextIndex = -1;
     this._nextAdvIndex = 0;
@@ -591,11 +591,11 @@ export default class ImagePlayer extends React.Component<
         (this.props.scene.forceAll || this.props.scene.fullSource)
       ) {
         // Filter the available urls to those not played yet
-        collection = collection.filter((u) => !this._loadedURLs.includes(u));
+        collection = collection.filter((u) => !this._loadedURLs.has(u));
         // If there are no remaining urls for this source
         if (!(collection && collection.length)) {
           if (this.props.scene.fullSource) {
-            this._loadedURLs = new Array<string>();
+            this._loadedURLs = new Set<string>();
             this._sourceComplete = true;
             this.queueRunFetchLoop(i);
             return;
@@ -603,10 +603,10 @@ export default class ImagePlayer extends React.Component<
             // Make sure all the other sources are also extinguished
             const remainingLibrary = flatten(
               content().getAllURLValues(this.props.contentLookupKey),
-            ).filter((u: string) => !this._loadedURLs.includes(u));
+            ).filter((u: string) => !this._loadedURLs.has(u));
             // If they are, clear loadedURLs
             if (remainingLibrary.length === 0) {
-              this._loadedURLs = new Array<string>();
+              this._loadedURLs = new Set<string>();
               collection = content().getURLValues(
                 this.props.contentLookupKey,
                 source,
@@ -666,12 +666,10 @@ export default class ImagePlayer extends React.Component<
         this.props.scene.forceAll
       ) {
         // Filter the available ulls to those not played yet
-        collection = collection.filter(
-          (u: string) => !this._loadedURLs.includes(u),
-        );
+        collection = collection.filter((u: string) => !this._loadedURLs.has(u));
         // If there are no remaining urls, clear loadedURLs
         if (!(collection && collection.length)) {
-          this._loadedURLs = new Array<string>();
+          this._loadedURLs = new Set<string>();
           collection = urlKeys;
         }
       }
@@ -700,7 +698,7 @@ export default class ImagePlayer extends React.Component<
         (this.props.scene.weightFunction == WF.sources &&
           this.props.scene.fullSource))
     ) {
-      this._loadedURLs.push(url);
+      this._loadedURLs.add(url);
     }
 
     // Don't bother loading files we've already cached locally
