@@ -85,7 +85,7 @@ interface GridPlayerState {
   scene: SceneGrid;
   height: number;
   width: number;
-  sceneCopyGrid: Array<Array<React.ReactNode | null>>;
+  sceneCopyGrid: Array<Array<React.ReactNode>>;
   isLoaded: Array<Array<boolean>>;
   hideCursor: boolean;
 }
@@ -111,7 +111,7 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
           ? props.scene.grid[0].length
           : 1,
       sceneCopyGrid: props.scene.grid.map((r) =>
-        r.map(() => {
+        r.map((): React.ReactNode => {
           return null;
         }),
       ),
