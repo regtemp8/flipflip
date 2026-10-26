@@ -61,22 +61,22 @@ export default class ImageView extends React.Component<ImageViewProps> {
         forceBG = true;
       } else if (
         props.scene.backgroundType === BT.blur &&
-        this.backgroundRef.current?.firstChild
+        this.backgroundRef.current?.firstElementChild
       ) {
         this.backgroundRef.current.removeChild(
-          this.backgroundRef.current.firstChild,
+          this.backgroundRef.current.firstElementChild,
         );
       }
     }
     this._applyImage(forceBG);
     if (!props.hasStarted && this.props.hasStarted) {
       const el = this.contentRef.current;
-      if (el && el.firstChild && el.firstChild instanceof HTMLVideoElement) {
-        const volumeAttribute = el.firstChild.getAttribute("volume");
+      if (el && el.firstElementChild && el.firstElementChild instanceof HTMLVideoElement) {
+        const volumeAttribute = el.firstElementChild.getAttribute("volume");
         const volume = volumeAttribute
           ? Number.parseInt(volumeAttribute)
           : this.props.scene.videoVolume;
-        el.firstChild.volume = volume / 100;
+        el.firstElementChild.volume = volume / 100;
       }
     }
   }
@@ -884,7 +884,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         }}
       />
     );
-    let backgroundDiv = (
+    const backgroundDiv = (
       <animated.div
         ref={this.backgroundRef}
         className={backgroundClassName}
