@@ -97,7 +97,7 @@ export default class ImagePlayer extends React.Component<
   _waitTimeouts: Array<number> = [];
   _imgLoadTimeouts: Array<number> = [];
   _toggleStrobe: boolean = false;
-  _runFetchLoopCallRequests: Array<number> = [];
+  _runFetchLoopCallRequests: Set<number> = new Set<number>();
   _animationFrameHandle?: number;
   _lastAdvance?: number;
 
@@ -466,14 +466,13 @@ export default class ImagePlayer extends React.Component<
     if (
       this.state.readyToDisplay.length <
         this.props.config.displaySettings.maxLoadingAtOnce &&
-      this.props.contentLookupKey
+      this.props.contentLookupKey &&
+      this._runFetchLoopCallRequests.size > 0
     ) {
-      const requests = this._runFetchLoopCallRequests.splice(
-        0,
-        this._runFetchLoopCallRequests.length,
-      );
+      requestAnimation = true;
+      const requests = Array.from(this._runFetchLoopCallRequests);
+      this._runFetchLoopCallRequests.clear();
       for (const request of requests) {
-        requestAnimation = true;
         this.runFetchLoop(request);
       }
     }
@@ -484,8 +483,11 @@ export default class ImagePlayer extends React.Component<
     }
   };
 
-  queueRunFetchLoop(i: number) {
-    this._runFetchLoopCallRequests.push(i);
+  queueRunFetchLoop(i: number, debugPath: string) {
+    if (this._runFetchLoopCallRequests.has(i)) {
+      console.error("DUPLICATE_CALL", debugPath, i);
+    }
+    this._runFetchLoopCallRequests.add(i);
   }
 
   runFetchLoop(i: number) {
@@ -498,10 +500,9 @@ export default class ImagePlayer extends React.Component<
       !content().hasURLs(this.props.contentLookupKey)
     ) {
       // Wait for the display loop to use an image
-      this._waitTimeouts[i] = window.setTimeout(
-        () => this.queueRunFetchLoop(i),
-        100,
-      );
+      this._waitTimeouts[i] = window.setTimeout(() => {
+        this.queueRunFetchLoop(i, "WAIT_QUEUE_FETCH");
+      }, 100);
       return;
     }
 
@@ -580,7 +581,7 @@ export default class ImagePlayer extends React.Component<
 
       // If we have no urls, loop again
       if (!(collection && collection.length)) {
-        this.queueRunFetchLoop(i);
+        this.queueRunFetchLoop(i, "NO_URLS_QUEUE_FETCH");
         return;
       }
 
@@ -596,7 +597,7 @@ export default class ImagePlayer extends React.Component<
           if (this.props.scene.fullSource) {
             this._loadedURLs = new Set<string>();
             this._sourceComplete = true;
-            this.queueRunFetchLoop(i);
+            this.queueRunFetchLoop(i, "SOURCE_COMPLETE_QUEUE_FETCH");
             return;
           } else {
             // Make sure all the other sources are also extinguished
@@ -612,7 +613,7 @@ export default class ImagePlayer extends React.Component<
               );
             } else {
               // Else loop again
-              this.queueRunFetchLoop(i);
+              this.queueRunFetchLoop(i, "LOOP_AGAIN_QUEUE_FETCH");
               return;
             }
           }
@@ -655,7 +656,7 @@ export default class ImagePlayer extends React.Component<
       collection = urlKeys;
       // If there are none, loop again
       if (!(collection && collection.length)) {
-        this.queueRunFetchLoop(i);
+        this.queueRunFetchLoop(i, "WEIGHTED_NONE_QUEUE_FETCH");
         return;
       }
 
@@ -745,7 +746,7 @@ export default class ImagePlayer extends React.Component<
           if (this.state.historyPaths.length === 0) {
             this.advance(false, false);
           }
-          this.queueRunFetchLoop(i);
+          this.queueRunFetchLoop(i, "NIMJA_SUCCESS_QUEUE_FETCH");
         };
 
         iframe.oncontextmenu = () => {
@@ -938,7 +939,7 @@ export default class ImagePlayer extends React.Component<
           if (this.state.historyPaths.length === 0) {
             this.advance(false, false);
           }
-          this.queueRunFetchLoop(i);
+          this.queueRunFetchLoop(i, "VIDEO_SUCCESS_QUEUE_FETCH");
         };
 
         const errorCallback = () => {
@@ -983,7 +984,7 @@ export default class ImagePlayer extends React.Component<
               nextImageID: this.state.nextImageID + 1,
             });
           }
-          this.queueRunFetchLoop(i);
+          this.queueRunFetchLoop(i, "VIDEO_ERROR_QUEUE_FETCH");
         };
 
         video.onloadeddata = () => {
@@ -1089,7 +1090,7 @@ export default class ImagePlayer extends React.Component<
           if (this.state.historyPaths.length === 0) {
             this.advance(false, false);
           }
-          this.queueRunFetchLoop(i);
+          this.queueRunFetchLoop(i, "IMG_SUCCESS_QUEUE_FETCH");
         };
 
         const errorCallback = () => {
@@ -1134,7 +1135,7 @@ export default class ImagePlayer extends React.Component<
               nextImageID: this.state.nextImageID + 1,
             });
           }
-          this.queueRunFetchLoop(i);
+          this.queueRunFetchLoop(i, "IMG_ERROR_QUEUE_FETCH");
         };
 
         img.onload = () => {
@@ -1160,7 +1161,7 @@ export default class ImagePlayer extends React.Component<
 
         const processInfo = (info: GifInfo) => {
           if (info == null) {
-            this.queueRunFetchLoop(i);
+            this.queueRunFetchLoop(i, "NO_GIF_QUEUE_FETCH");
             return;
           }
 
@@ -1208,7 +1209,7 @@ export default class ImagePlayer extends React.Component<
             info &&
             !info.animated
           ) {
-            this.queueRunFetchLoop(i);
+            this.queueRunFetchLoop(i, "NO_ANIMATION_QUEUE_FETCH");
             return;
             // Exclude animated gifs from stills
           } else if (
@@ -1216,7 +1217,7 @@ export default class ImagePlayer extends React.Component<
             info &&
             info.animated
           ) {
-            this.queueRunFetchLoop(i);
+            this.queueRunFetchLoop(i, "ANIMATION_QUEUE_FETCH");
             return;
           }
 
