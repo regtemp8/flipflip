@@ -399,7 +399,7 @@ class TagManager extends React.Component<TagManagerProps, TagManagerState> {
     // Make a deep copy of Tags
     // For some reason, shallow copy was still modifying props' Tags
     let newTags = new Array<Tag>();
-    for (let tag of this.props.tags) {
+    for (const tag of this.props.tags) {
       newTags.push(JSON.parse(JSON.stringify(tag)));
     }
     this.setState({ tags: newTags });

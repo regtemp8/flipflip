@@ -1036,11 +1036,11 @@ class PlayerBars extends React.Component<PlayerBarsProps, PlayerBarsState> {
     ) {
       this.props.imagePlayerAdvanceHacks[0][0].fire();
       // TODO Improve this to be able to advance specific grids
-      /*for (let x of this.props.imagePlayerAdvanceHacks) {
-        for (let y of x) {
-          y.fire();
-        }
-      }*/
+      // for (const x of this.props.imagePlayerAdvanceHacks) {
+      //   for (const y of x) {
+      //     y.fire();
+      //   }
+      // }
     }
   };
 

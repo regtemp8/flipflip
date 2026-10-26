@@ -39,7 +39,7 @@ export function cleanBackups(config: Config) {
       return new Date(Number.parseInt(epochString));
     };
 
-    for (let backup of backups) {
+    for (const backup of backups) {
       let backupDate = convertFromEpoch(backup.url);
       let lastDay = convertFromEpoch(keepDays[keepDays.length - 1].url);
       let lastWeek = convertFromEpoch(keepWeeks[keepWeeks.length - 1].url);
@@ -97,7 +97,7 @@ export function cleanBackups(config: Config) {
 }
 
 function unlinkBackups(backups: Array<Backup>) {
-  for (let backup of backups) {
+  for (const backup of backups) {
     try {
       fs.unlinkSync(path.join(saveDir, backup.url));
     } catch (err) {

@@ -188,9 +188,9 @@ class PlaylistList extends React.Component<
 
   getPlaylists(): Map<string, Array<string>> {
     const playlistsMap = new Map<string, Array<string>>();
-    for (let playlist of this.props.playlists) {
+    for (const playlist of this.props.playlists) {
       let thumbs: Array<string> = [];
-      for (let aID of playlist.audios) {
+      for (const aID of playlist.audios) {
         const audio = this.props.audios.find((a) => a.id == aID);
         if (audio && audio.thumb && !thumbs.includes(audio.thumb)) {
           thumbs.push(audio.thumb);

@@ -527,7 +527,7 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         this._shiftDown
       ) {
         let start = false;
-        for (let s of this.props.sources) {
+        for (const s of this.props.sources) {
           if (start && (s.url == source || s.url == this._lastChecked)) {
             break;
           }
@@ -648,10 +648,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
             : editSource.resolution;
 
         const newSources = new Array<LibrarySource>();
-        for (let source of s.sources) {
+        for (const source of s.sources) {
           if (/^\s*$/.exec(source.url) == null) {
             if (newSources.map((s) => s.url).includes(source.url)) {
-              for (let existingSource of newSources) {
+              for (const existingSource of newSources) {
                 if (existingSource.url == source.url) {
                   if (existingSource.id > source.id) {
                     newSources[newSources.indexOf(existingSource)] = source;
@@ -685,10 +685,10 @@ class SourceList extends React.Component<SourceListProps, SourceListState> {
         editSource.resolution = sourceChanged ? null : editSource.resolution;
 
         const newSources = new Array<LibrarySource>();
-        for (let source of l) {
+        for (const source of l) {
           if (/^\s*$/.exec(source.url) == null) {
             if (newSources.map((s) => s.url).includes(source.url)) {
-              for (let existingSource of newSources) {
+              for (const existingSource of newSources) {
                 if (existingSource.url == source.url) {
                   if (existingSource.id > source.id) {
                     newSources[newSources.indexOf(existingSource)] = source;

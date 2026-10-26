@@ -476,15 +476,15 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     let groupedScenes: Array<number> = [];
     let groupedGenerators: Array<number> = [];
     let groupedGrids: Array<number> = [];
-    for (let g of this.props.sceneGroups.filter((g) => g.type == SG.scene)) {
+    for (const g of this.props.sceneGroups.filter((g) => g.type == SG.scene)) {
       groupedScenes = groupedScenes.concat(g.scenes);
     }
-    for (let g of this.props.sceneGroups.filter(
+    for (const g of this.props.sceneGroups.filter(
       (g) => g.type == SG.generator,
     )) {
       groupedGenerators = groupedGenerators.concat(g.scenes);
     }
-    for (let g of this.props.sceneGroups.filter((g) => g.type == SG.grid)) {
+    for (const g of this.props.sceneGroups.filter((g) => g.type == SG.grid)) {
       groupedGrids = groupedGrids.concat(g.scenes);
     }
     return (
@@ -2231,7 +2231,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     let displayScenes = [];
     const filtering = this.state.filters.length > 0;
     if (filtering) {
-      for (let scene of this.props.scenes) {
+      for (const scene of this.props.scenes) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {
           if (
@@ -2278,7 +2278,7 @@ class ScenePicker extends React.Component<ScenePickerProps, ScenePickerState> {
     let displayGrids = [];
     const filtering = this.state.filters.length > 0;
     if (filtering) {
-      for (let grid of this.props.grids) {
+      for (const grid of this.props.grids) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {
           if (

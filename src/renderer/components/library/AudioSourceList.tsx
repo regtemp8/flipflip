@@ -341,7 +341,7 @@ class AudioSourceList extends React.Component<
         this._shiftDown
       ) {
         let start = false;
-        for (let s of this.props.sources) {
+        for (const s of this.props.sources) {
           if (start && (s.url == source || s.url == this._lastChecked)) {
             break;
           }

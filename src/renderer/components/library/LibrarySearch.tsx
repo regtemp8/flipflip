@@ -180,7 +180,7 @@ class LibrarySearch extends React.Component<
       let untagged = true;
       if (source.tags.length > 0) {
         untagged = false;
-        for (let tag of source.tags) {
+        for (const tag of source.tags) {
           const count = tags.get(tag.name) ?? 0;
           tags.set(tag.name, count + 1);
         }
@@ -191,8 +191,8 @@ class LibrarySearch extends React.Component<
           offlineCount++;
         }
 
-        for (let clip of source.clips) {
-          for (let tag of clip.tags) {
+        for (const clip of source.clips) {
+          for (const tag of clip.tags) {
             untagged = false;
             if (!source.tags.includes(tag)) {
               const count = tags.get(tag.name) ?? 0;
@@ -239,7 +239,7 @@ class LibrarySearch extends React.Component<
         return 0;
       }
     });
-    for (let filter of this.props.filters) {
+    for (const filter of this.props.filters) {
       const opt = { label: filter, value: filter };
       options.push(opt);
       defaultValues.push(opt);
@@ -322,7 +322,7 @@ class LibrarySearch extends React.Component<
       this.props.onUpdateFilters([]);
     } else {
       let filters = new Array<string>();
-      for (let s of search) {
+      for (const s of search) {
         if (
           !this.props.isCreatable ||
           ((s.value.startsWith("[") || s.value.startsWith("-[")) &&

@@ -27,7 +27,7 @@ export const processAllURLs = (
     if (weight == WF.sources) {
       newAllURLs.set(source.url, data);
     } else {
-      for (let d of data) {
+      for (const d of data) {
         newAllURLs.set(d, [source.url]);
       }
     }
@@ -54,7 +54,7 @@ export const processAllURLs = (
         .includes(fileName);
       return !found;
     });
-    for (let d of data) {
+    for (const d of data) {
       newAllURLs.set(d, [source.url]);
     }
   }
@@ -96,7 +96,7 @@ export const loadRemoteImageURLList = (
       if (lines.length > 0) {
         let convertedSource = new Array<string>();
         let convertedCount = 0;
-        for (let url of lines) {
+        for (const url of lines) {
           convertURL(url, pm)
             .then((urls: Array<string>) => {
               convertedSource = convertedSource.concat(urls);
@@ -232,15 +232,15 @@ export const loadTumblr = (
         return;
       }
       let images = [];
-      for (let post of data.posts) {
+      for (const post of data.posts) {
         // Sometimes photos are listed separately
         if (post.photos) {
-          for (let photo of post.photos) {
+          for (const photo of post.photos) {
             images.push(photo.original_size.url);
           }
         }
         if (post.player) {
-          for (let embed of post.player) {
+          for (const embed of post.player) {
             const regex =
               /<iframe[^(?:src|\/>)]*src=["']([^"']*)[^(?:\/>)]*\/?>/g;
             let imageSource;
@@ -267,7 +267,7 @@ export const loadTumblr = (
       if (images.length > 0) {
         let convertedSource = new Array<string>();
         let convertedCount = 0;
-        for (let url of images) {
+        for (const url of images) {
           convertURL(url, pm)
             .then((urls: Array<string>) => {
               convertedSource = convertedSource.concat(urls);
@@ -666,7 +666,7 @@ export const loadE621 = (
 
         const count = json[0].post_count;
         const images = new Array<string>();
-        for (let postID of json[0].post_ids) {
+        for (const postID of json[0].post_ids) {
           suffix = "/posts/" + postID + ".json";
           wretch(thisHost + suffix)
             .get()
@@ -819,7 +819,7 @@ export const loadE621 = (
 
         let list = json.posts;
         const images = new Array<string>();
-        for (let p of list) {
+        for (const p of list) {
           if (p.file.url) {
             let fileURL = p.file.url;
             if (!fileURL.startsWith("http")) {
@@ -1054,7 +1054,7 @@ export const loadDanbooru = (
         setTimeout(getPost, 200);
       } else {
         const images = new Array<string>();
-        for (let p of json) {
+        for (const p of json) {
           if (p.file_url) {
             let fileURL = p.file_url;
             if (!p.file_url.startsWith("http")) {
@@ -1332,7 +1332,7 @@ export const loadGelbooru2 = (
       }
 
       const images = new Array<string>();
-      for (let p of json.post) {
+      for (const p of json.post) {
         if (p.file_url) {
           images.push(p.file_url);
         } else if (p.image) {
@@ -1537,7 +1537,7 @@ export const loadLuscious = (
         const totalItems = json.data.picture.list.info.total_items;
         if (items.length > 0) {
           const images = [];
-          for (let item of items) {
+          for (const item of items) {
             images.push(item.url_to_original);
           }
           helpers.next = hasNextPage ? helpers.next + 1 : null;
@@ -1712,7 +1712,7 @@ export const loadLuscious = (
               const items = json.data.picture.list.items;
               if (items.length > 0) {
                 const images = [];
-                for (let item of items) {
+                for (const item of items) {
                   images.push(item.url_to_original);
                 }
                 helpers.count =
@@ -1825,7 +1825,7 @@ export const loadBDSMlr = (
           const item = itemEls.item(i);
           const embeddedImages = item.querySelectorAll("description > img");
           if (embeddedImages.length > 0) {
-            for (let image of embeddedImages) {
+            for (const image of embeddedImages) {
               const src = image.getAttribute("src");
               if (src) {
                 images.push(src);
@@ -2128,7 +2128,7 @@ export const loadHydrus = (
           });
         })
         .json((json) => {
-          for (let metadata of json.metadata) {
+          for (const metadata of json.metadata) {
             if (
               (filter == IF.any && isImageOrVideo(metadata.ext, true)) ||
               ((filter == IF.stills || filter == IF.images) &&
@@ -2258,13 +2258,13 @@ async function convertURL(
       "#video-" + gfycatMatch[1].toLocaleLowerCase() + " > source",
     );
     if (gfycat.length > 0) {
-      for (let source of gfycat) {
+      for (const source of gfycat) {
         if ((source as any).type == "video/webm") {
           return [(source as any).src];
         }
       }
       // Fallback to MP4
-      for (let source of gfycat) {
+      for (const source of gfycat) {
         if (
           (source as any).type == "video/mp4" &&
           !(source as any).src.endsWith("-mobile.mp4")
@@ -2273,7 +2273,7 @@ async function convertURL(
         }
       }
       // Fallback to MP4-mobile
-      for (let source of gfycat) {
+      for (const source of gfycat) {
         if ((source as any).type == "video/mp4") {
           return [(source as any).src];
         }

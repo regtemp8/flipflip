@@ -1463,14 +1463,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   };
 
   onFinishMove = () => {
-    for (let source of this.props.library) {
+    for (const source of this.props.library) {
       if (source.offline) {
         window.ipc
           .moveLibrarySource(source.url, this.props.config)
           .then((result) => {
             if (result.moved) {
               this.props.onUpdateLibrary((l) => {
-                l.forEach((s, index) => {
+                l.forEach((s) => {
                   if (s.id == source.id) {
                     s.url = result.localPath;
                     s.offline = false;
@@ -1528,11 +1528,11 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       let matches = [source];
 
       // For the rest of the sources
-      for (let rs of remainingLibrary) {
+      for (const rs of remainingLibrary) {
         // Compare tags
         if (rs.tags.length == source.tags.length) {
           let hasAllTags = true;
-          for (let tag of rs.tags) {
+          for (const tag of rs.tags) {
             if (!tagNames.has(tag.name)) {
               hasAllTags = false;
             }
@@ -1545,7 +1545,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       }
       // If we've found matches
       if (matches.length > 1) {
-        for (let m of matches) {
+        for (const m of matches) {
           if (m != source) {
             // Remove them from the remaining library
             remainingLibrary.splice(remainingLibrary.indexOf(m), 1);
@@ -1742,7 +1742,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   onImportFromLibrary = () => {
     const selected = this.state.selected;
     const sources = new Array<LibrarySource>();
-    for (let url of selected) {
+    for (const url of selected) {
       const source = this.props.library.find((s) => s.url == url);
       if (source) {
         sources.push(source);
@@ -1758,7 +1758,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   onSelectAll = () => {
     const displaySources = this.state.displaySources;
     const newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       if (!newSelected.includes(source)) {
         newSelected.push(source);
       }
@@ -1769,7 +1769,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   onSelectNone = () => {
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       if (newSelected.includes(source)) {
         newSelected.splice(newSelected.indexOf(source), 1);
       }
@@ -1798,7 +1798,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     if (taggingMode) {
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of this.state.displaySources) {
+        for (const source of this.state.displaySources) {
           const librarySource = l.find((s) => s.id == source.id);
           if (librarySource != null) {
             librarySource.marked = true;
@@ -1808,7 +1808,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
     } else {
       // We're unmarking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of l) {
+        for (const source of l) {
           source.marked = false;
         }
       });
@@ -1825,14 +1825,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
         if (source == null) {
           continue;
         }
 
         source.tags = new Array<Tag>();
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           const tagID = this.props.tags.find((t) => t.name == tag)?.id;
           if (tagID != null) {
             source.tags.push(
@@ -1850,14 +1850,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
         if (source == null) {
           continue;
         }
 
         const sourceTags = new Set(source.tags.map((t) => t.name));
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             const tagID = this.props.tags.find((t) => t.name == tag)?.id;
             if (tagID != null) {
@@ -1877,14 +1877,14 @@ class Library extends React.Component<LibraryProps, LibraryState> {
 
   batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL);
         if (source == null) {
           continue;
         }
 
         const sourceTags = source.tags.map((t) => t.name);
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           if (sourceTags.includes(tag)) {
             const indexOf = sourceTags.indexOf(tag);
             source.tags.splice(indexOf, 1);
@@ -1899,7 +1899,7 @@ class Library extends React.Component<LibraryProps, LibraryState> {
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
-    for (let sourceURL of this.state.selected) {
+    for (const sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL);
       if (source == null) {
         continue;
@@ -1930,9 +1930,9 @@ class Library extends React.Component<LibraryProps, LibraryState> {
       const mergeSources = this.state.filters.includes("<Mergeable>")
         ? this.getMerges()
         : undefined;
-      for (let source of mergeSources ? mergeSources : this.props.library) {
+      for (const source of mergeSources ? mergeSources : this.props.library) {
         let matchesFilter = true;
-        for (let filter of this.state.filters) {
+        for (const filter of this.state.filters) {
           matchesFilter = filterSource(filter, source, undefined, mergeSources);
           if (!matchesFilter) break;
         }

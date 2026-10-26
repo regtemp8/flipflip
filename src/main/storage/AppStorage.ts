@@ -80,7 +80,7 @@ export default class AppStorage {
         case undefined:
           // Create Library from aggregate of previous scenes' directories
           let sources = new Array<string>();
-          for (let scene of data.scenes) {
+          for (const scene of data.scenes) {
             sources = sources.concat(scene.directories);
           }
           sources = removeDuplicatesBy((s: string) => s, sources);
@@ -125,7 +125,7 @@ export default class AppStorage {
           // Hydrate and add the library ! Yay!!! :)
           let libraryID = 0;
           const newLibrarySources = new Array<LibrarySource>();
-          for (let url of sources) {
+          for (const url of sources) {
             newLibrarySources.push(
               new LibrarySource({
                 url: url,
@@ -138,11 +138,11 @@ export default class AppStorage {
           this.initialState.library = newLibrarySources;
           // Convert and add old scenes
           const newScenes = new Array<Scene>();
-          for (let oldScene of data.scenes) {
+          for (const oldScene of data.scenes) {
             const newScene = new Scene(path.sep, process.platform, oldScene);
             let sourceID = 0;
             const newSources = new Array<LibrarySource>();
-            for (let oldDirectory of oldScene.directories) {
+            for (const oldDirectory of oldScene.directories) {
               newSources.push(
                 new LibrarySource({
                   url: oldDirectory,
@@ -208,7 +208,7 @@ export default class AppStorage {
           };
 
           // Port to new generator format
-          for (let scene of this.initialState.scenes) {
+          for (const scene of this.initialState.scenes) {
             if (!scene.generatorWeights) {
               scene.generatorWeights = [];
             }
@@ -304,7 +304,7 @@ export default class AppStorage {
 
                   // Ensure weights are valid
                   let remaining = 100;
-                  for (let rule of rules) {
+                  for (const rule of rules) {
                     if (rule.type == TT.weight) {
                       remaining = remaining - rule.percent;
                     }
@@ -322,13 +322,13 @@ export default class AppStorage {
 
             // Ensure weights are valid
             let remaining = 100;
-            for (let wg of scene.generatorWeights) {
+            for (const wg of scene.generatorWeights) {
               if (wg.type == TT.weight) {
                 remaining = remaining - wg.percent;
               }
             }
             if (remaining != 0 && remaining != 100) {
-              for (let wg of scene.generatorWeights) {
+              for (const wg of scene.generatorWeights) {
                 if (wg.type == TT.weight) {
                   wg.percent = wg.percent + remaining;
                   break;
@@ -415,7 +415,7 @@ export default class AppStorage {
             this.initialState.theme.palette.mode = data.theme.palette.type;
           }
           // Multiply all nextSceneTime
-          for (let scene of this.initialState.scenes) {
+          for (const scene of this.initialState.scenes) {
             scene.nextSceneTime = scene.nextSceneTime * 1000;
           }
           this.initialState.config.defaultScene.nextSceneTime =

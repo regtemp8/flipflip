@@ -562,7 +562,7 @@ class SceneGenerator extends React.Component<
     const orRules = wg.rules.filter((r) => r.type == TT.or);
     const weightRules = wg.rules.filter((r) => r.type == TT.weight);
     let rulesRemaining = 100;
-    for (let rule of weightRules) {
+    for (const rule of weightRules) {
       rulesRemaining = rulesRemaining - rule.percent;
     }
     return (
@@ -579,13 +579,13 @@ class SceneGenerator extends React.Component<
   getRemainingPercent(): number {
     let remaining = 100;
     if (this.state.isEditingIndex == -1) {
-      for (let wg of this.props.generatorWeights) {
+      for (const wg of this.props.generatorWeights) {
         if (wg.type == TT.weight) {
           remaining = remaining - wg.percent;
         }
       }
     } else {
-      for (let wg of this.props.generatorWeights[this.state.isEditingIndex]
+      for (const wg of this.props.generatorWeights[this.state.isEditingIndex]
         .rules) {
         if (wg.type == TT.weight) {
           remaining = remaining - wg.percent;
@@ -615,7 +615,7 @@ class SceneGenerator extends React.Component<
 
   onAddRule = (filters: Array<string>) => {
     let wg = this.props.generatorWeights[this.state.isEditingIndex];
-    for (let search of filters) {
+    for (const search of filters) {
       if (search.length > 0 && wg.rules.every((wg) => wg.search != search)) {
         const newWG = new WeightGroup();
         newWG.percent = 0;
@@ -692,7 +692,7 @@ class SceneGenerator extends React.Component<
       }
       const weightRules = wg.rules.filter((r) => r.type == TT.weight);
       if (weightRules.length > 0) {
-        for (let r of weightRules) {
+        for (const r of weightRules) {
           if (title != "") {
             title += ", ";
           }
@@ -781,7 +781,7 @@ class SceneGenerator extends React.Component<
   };
 
   changeGeneratorWeights(weights: WeightGroup[]) {
-    for (let wg of weights) {
+    for (const wg of weights) {
       wg.max = null;
       wg.chosen = null;
     }

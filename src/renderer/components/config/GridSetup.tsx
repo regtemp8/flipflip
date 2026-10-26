@@ -555,7 +555,7 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
       grid.push(newRow);
     }
     // Adjust width
-    for (let row of grid) {
+    for (const row of grid) {
       if (row.length > width) {
         row.splice(width, row.length - width);
       } else if (row.length < width) {
@@ -565,8 +565,8 @@ class GridSetup extends React.Component<GridSetupProps, GridSetupState> {
       }
     }
 
-    for (let row of grid) {
-      for (let cell of row) {
+    for (const row of grid) {
+      for (const cell of row) {
         if (
           cell.sceneCopy.length > 0 &&
           (cell.sceneCopy[0] > height - 1 || cell.sceneCopy[1] > width - 1)

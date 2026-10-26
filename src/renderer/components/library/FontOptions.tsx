@@ -62,7 +62,7 @@ class FontOptions extends React.Component<FontOptionsProps> {
     if (!this.props.systemFonts.length) {
       fontFamily = "";
     } else if (fontFamily.includes(",")) {
-      for (let font of fontFamily.split(",")) {
+      for (const font of fontFamily.split(",")) {
         if (this.props.systemFonts.includes(font)) {
           fontFamily = font;
           break;

@@ -1679,7 +1679,7 @@ class AudioLibrary extends React.Component<
       // Check to see if playlist already has any of these tracks
       const playlist = this.props.playlists.find((p) => p.id == playlistID);
       if (playlist != null) {
-        for (let url of this.state.selected) {
+        for (const url of this.state.selected) {
           const audio = this.props.library.find((a) => a.url == url);
           if (audio == null) {
             continue;
@@ -1714,13 +1714,13 @@ class AudioLibrary extends React.Component<
     this.props.onUpdatePlaylists((ps) => {
       const playlist = ps.find((p) => p.id == this.state.playlistID);
       if (playlist) {
-        for (let url of this.state.selected) {
+        for (const url of this.state.selected) {
           const audio = this.props.library.find((a) => a.url == url);
           if (audio != null && !playlist.audios.includes(audio.id)) {
             playlist.audios.push(audio.id);
           }
         }
-        for (let aID of playlist.audios) {
+        for (const aID of playlist.audios) {
           const audio = this.props.library.find((a) => a.id == aID);
           if (audio != null && !this.state.selected.includes(audio.url)) {
             playlist.audios.push(audio.id);
@@ -1749,7 +1749,7 @@ class AudioLibrary extends React.Component<
 
   onAddPlaylist = () => {
     const name = this.state.importURL;
-    for (let playlist of this.props.playlists) {
+    for (const playlist of this.props.playlists) {
       if (name == playlist.name) return;
     }
     let id = this.props.playlists.length + 1;
@@ -1845,7 +1845,7 @@ class AudioLibrary extends React.Component<
   onImportFromLibrary = () => {
     const selected = this.state.selected;
     const sources = new Array<Audio>();
-    for (let url of selected) {
+    for (const url of selected) {
       const source = this.props.library.find((s) => s.url == url);
       if (source) {
         sources.push(source);
@@ -1861,7 +1861,7 @@ class AudioLibrary extends React.Component<
   onSelectAll = () => {
     const displaySources = this.state.displaySources;
     const newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       if (!newSelected.includes(source)) {
         newSelected.push(source);
       }
@@ -1872,7 +1872,7 @@ class AudioLibrary extends React.Component<
   onSelectNone = () => {
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       const index = newSelected.indexOf(source);
       if (index !== -1) {
         newSelected.splice(index, 1);
@@ -1927,9 +1927,9 @@ class AudioLibrary extends React.Component<
   onFinishBatchEdit = (common: Audio) => {
     const keys = ["thumb", "name", "artist", "album", "comment", "trackNum"];
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source: any = l.find((s) => s.url === sourceURL);
-        for (let key of keys) {
+        for (const key of keys) {
           if ((common as any)[key] != null && (common as any)[key] != "") {
             source[key] = (common as any)[key];
           }
@@ -1941,10 +1941,10 @@ class AudioLibrary extends React.Component<
 
   batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         source.tags = new Array<Tag>();
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           source.tags.push(
             new Tag({
               name: tag,
@@ -1959,10 +1959,10 @@ class AudioLibrary extends React.Component<
 
   batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = new Set(source.tags.map((t) => t.name));
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
@@ -1979,10 +1979,10 @@ class AudioLibrary extends React.Component<
 
   batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = source.tags.map((t) => t.name);
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           if (sourceTags.includes(tag)) {
             const indexOf = sourceTags.indexOf(tag);
             source.tags.splice(indexOf, 1);
@@ -1997,9 +1997,9 @@ class AudioLibrary extends React.Component<
   getCommonAudio() {
     const keys = ["thumb", "name", "artist", "album", "comment", "trackNum"];
     let common: any = new Audio();
-    for (let sourceURL of this.state.selected) {
+    for (const sourceURL of this.state.selected) {
       const source: any = this.props.library.find((s) => s.url === sourceURL);
-      for (let key of keys) {
+      for (const key of keys) {
         if (common[key] === undefined) {
           common[key] = source[key];
         } else if (common[key] != null && common[key] != source[key]) {
@@ -2007,7 +2007,7 @@ class AudioLibrary extends React.Component<
         }
       }
     }
-    for (let key of keys) {
+    for (const key of keys) {
       if (common[key] == null) {
         common[key] = undefined;
       }
@@ -2018,7 +2018,7 @@ class AudioLibrary extends React.Component<
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
-    for (let sourceURL of this.state.selected) {
+    for (const sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL)!;
       const tags = source.tags;
       if (commonTags.length == 0) {

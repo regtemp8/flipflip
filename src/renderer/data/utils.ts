@@ -328,7 +328,7 @@ function areRulesValid(wg: WeightGroup) {
   const orRules = wg.rules.filter((r) => r.type == TT.or);
   const weightRules = wg.rules.filter((r) => r.type == TT.weight);
   let rulesRemaining = 100;
-  for (let rule of weightRules) {
+  for (const rule of weightRules) {
     rulesRemaining = rulesRemaining - rule.percent;
   }
   return (
@@ -346,7 +346,7 @@ export function areWeightsValid(scene: Scene): boolean {
   let remaining = 100;
   const orRules = scene.generatorWeights.filter((r) => r.type == TT.or);
   const weightRules = scene.generatorWeights.filter((r) => r.type == TT.weight);
-  for (let wg of scene.generatorWeights) {
+  for (const wg of scene.generatorWeights) {
     if (wg.rules) {
       const rulesValid = areRulesValid(wg);
       if (!rulesValid) return false;

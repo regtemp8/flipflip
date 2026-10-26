@@ -189,7 +189,7 @@ class BatchClipDialog extends React.Component<
       index++;
       if (index == this.props.selected.length) {
         this.props.onUpdateLibrary((l) => {
-          for (let sourceURL of this.props.selected) {
+          for (const sourceURL of this.props.selected) {
             const source = l.find((s) => s.url === sourceURL);
             const newSource = newLibrary.find((s) => s.url === sourceURL);
             if (source != null && newSource != null) {

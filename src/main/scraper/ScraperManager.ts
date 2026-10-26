@@ -142,7 +142,7 @@ const loadVideo = (
     let paths;
     if (source.clips && source.clips.length > 0) {
       const clipPaths = new Array<string>();
-      for (let clip of source.clips) {
+      for (const clip of source.clips) {
         if (!source.disabledClips || !source.disabledClips.includes(clip.id)) {
           let clipPath =
             url +
@@ -233,13 +233,13 @@ const loadPlaylist = (
           }
         }
       } else if (url.endsWith(".m3u8")) {
-        for (let l of data.split("\n")) {
+        for (const l of data.split("\n")) {
           if (l.length > 0 && !l.startsWith("#")) {
             urls.push(l.trim());
           }
         }
       } else if (url.endsWith(".pls")) {
-        for (let l of data.split("\n")) {
+        for (const l of data.split("\n")) {
           if (l.startsWith("File")) {
             urls.push(l.split("=")[1].trim());
           }

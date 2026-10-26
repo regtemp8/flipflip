@@ -505,8 +505,8 @@ export default class Scene implements SceneBase {
       this.countBorderpx = undefined;
       this.countBorderColor = undefined;
     }
-    for (let playlist of this.scriptPlaylists) {
-      for (let script of playlist.scripts) {
+    for (const playlist of this.scriptPlaylists) {
+      for (const script of playlist.scripts) {
         if (Number.isNaN(script.opacity)) {
           script.opacity = 100;
         }
@@ -519,7 +519,7 @@ export default class Scene implements SceneBase {
     }
 
     if (this.generatorWeights) {
-      for (let wg of this.generatorWeights as Array<any>) {
+      for (const wg of this.generatorWeights as Array<any>) {
         if (wg.tag != null) {
           if (wg.tag.typeTag) {
             wg.search = "{" + wg.tag.name + "}";
@@ -529,7 +529,7 @@ export default class Scene implements SceneBase {
           wg.tag = null;
         }
         if (wg.rules) {
-          for (let wgr of wg.rules) {
+          for (const wgr of wg.rules) {
             if (wgr.tag != null) {
               if (wgr.tag.typeTag) {
                 wgr.search = "{" + wgr.tag.name + "}";

@@ -217,7 +217,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         this._timeouts == null
       )
         return;
-      for (let canvas of document.getElementsByClassName(
+      for (const canvas of document.getElementsByClassName(
         "canvas-" + gridCoordinates[0] + "-" + gridCoordinates[1],
       )) {
         const context = (canvas as HTMLCanvasElement).getContext("2d");
@@ -241,7 +241,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         this._timeouts == null
       )
         return;
-      for (let canvas of document.getElementsByClassName(
+      for (const canvas of document.getElementsByClassName(
         "canvas-bg-" + gridCoordinates[0] + "-" + gridCoordinates[1],
       )) {
         const context = (canvas as HTMLCanvasElement).getContext("2d");
@@ -647,7 +647,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         }
       };
       if (this.props.gridCoordinates) {
-        for (let element of document.getElementsByClassName(
+        for (const element of document.getElementsByClassName(
           "copy-" +
             this.props.gridCoordinates[0] +
             "-" +
@@ -702,7 +702,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
         bg.appendChild(bgImg);
       };
       if (this.props.gridCoordinates) {
-        for (let element of document.getElementsByClassName(
+        for (const element of document.getElementsByClassName(
           "copy-bg-" +
             this.props.gridCoordinates[0] +
             "-" +
@@ -746,7 +746,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
       }
 
       if (this.props.gridCoordinates && type == null) {
-        for (let canvas of document.getElementsByClassName(
+        for (const canvas of document.getElementsByClassName(
           "canvas-bg-" +
             this.props.gridCoordinates[0] +
             "-" +
@@ -1072,7 +1072,7 @@ export default class ImageView extends React.Component<ImageViewProps> {
     const img = this._image;
     const scale = this._scale;
     if (this.props.gridCoordinates) {
-      for (let element of document.getElementsByClassName(
+      for (const element of document.getElementsByClassName(
         "copy-" +
           this.props.gridCoordinates[0] +
           "-" +

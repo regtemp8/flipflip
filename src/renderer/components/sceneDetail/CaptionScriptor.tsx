@@ -1470,8 +1470,8 @@ class CaptionScriptor extends React.Component<
       { scripts: [this.state.captionScript], shuffle: false, repeat: RP.one },
     ];
     const originalScripts = new Array<CaptionScript>();
-    for (let playlist of originalPlaylists) {
-      for (let script of playlist.scripts) {
+    for (const playlist of originalPlaylists) {
+      for (const script of playlist.scripts) {
         originalScripts.push(script);
       }
     }
@@ -1541,28 +1541,28 @@ class CaptionScriptor extends React.Component<
 
   addAllSetters() {
     let addString = "";
-    for (let setter of tupleSetters) {
+    for (const setter of tupleSetters) {
       let property = setter.replace("set", "");
       property = property.charAt(0).toLowerCase() + property.slice(1);
       const defaultVal = (captionProgramDefaults as any)[property];
       addString += setter + " " + defaultVal[0] + " " + defaultVal[1] + "\n";
     }
     addString += "\n";
-    for (let setter of stringSetters) {
+    for (const setter of stringSetters) {
       addString += setter + " constant\n";
     }
     addString += "\n";
-    for (let setter of singleSetters) {
+    for (const setter of singleSetters) {
       let property = setter.replace("set", "");
       property = property.charAt(0).toLowerCase() + property.slice(1);
       const defaultVal = (captionProgramDefaults as any)[property];
       addString += setter + " " + defaultVal + "\n";
     }
     addString += "\n";
-    for (let setter of booleanSetters) {
+    for (const setter of booleanSetters) {
       addString += setter + " false\n";
     }
-    for (let setter of colorSetters) {
+    for (const setter of colorSetters) {
       addString += setter + " 0 #FFFFFF\n";
     }
     this.onAddString(addString, true);

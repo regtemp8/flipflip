@@ -1679,7 +1679,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
 
   getRemainingPercent(): number {
     let remaining = 100;
-    for (let wg of this.props.scene.generatorWeights!) {
+    for (const wg of this.props.scene.generatorWeights!) {
       if (wg.type == TT.weight) {
         remaining = remaining - wg.percent;
       }
@@ -1732,7 +1732,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
       this.onCloseDialog();
     }
     let generatorWeights = this.props.scene.generatorWeights!;
-    for (let search of filters) {
+    for (const search of filters) {
       if (
         search.length > 0 &&
         generatorWeights.every((wg) => wg.search != search)
@@ -1928,7 +1928,7 @@ class SceneDetail extends React.Component<SceneDetailProps, SceneDetailState> {
     let displaySources = [];
     const filtering = this.state.filters.length > 0;
     if (filtering) {
-      for (let source of this.props.scene.sources) {
+      for (const source of this.props.scene.sources) {
         let matchesFilter = true;
         let countRegex;
         for (let filter of this.state.filters) {

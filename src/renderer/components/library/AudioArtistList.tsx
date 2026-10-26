@@ -192,7 +192,7 @@ class AudioArtistList extends React.Component<
         return aValue.localeCompare(bValue, "en", { numeric: true });
       }
     });
-    for (let song of songs) {
+    for (const song of songs) {
       if (
         song.artist &&
         (!artistsMap.has(song.artist) || !artistsMap.get(song.artist))

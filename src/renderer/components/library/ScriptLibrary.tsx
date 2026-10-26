@@ -999,7 +999,7 @@ class ScriptLibrary extends React.Component<
     });
 
     window.ipc.filterNewScriptSources(newSources).then((filteredSources) => {
-      for (let url of filteredSources) {
+      for (const url of filteredSources) {
         const newText = new CaptionScript({
           url: url,
           id: id,
@@ -1083,7 +1083,7 @@ class ScriptLibrary extends React.Component<
   onImportFromLibrary = () => {
     const selected = this.state.selected;
     const sources = new Array<CaptionScript>();
-    for (let url of selected) {
+    for (const url of selected) {
       const source = this.props.library.find((s) => s.url == url);
       if (source) {
         sources.push(source);
@@ -1093,7 +1093,7 @@ class ScriptLibrary extends React.Component<
   };
 
   onImportSingleFromLibrary = () => {
-    for (let url of this.state.selected) {
+    for (const url of this.state.selected) {
       const source = this.props.library.find((s) => s.url == url);
       if (source) {
         this.props.onImportToScriptor(source);
@@ -1109,7 +1109,7 @@ class ScriptLibrary extends React.Component<
   onSelectAll = () => {
     const displaySources = this.state.displaySources;
     const newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       if (!newSelected.includes(source)) {
         newSelected.push(source);
       }
@@ -1120,7 +1120,7 @@ class ScriptLibrary extends React.Component<
   onSelectNone = () => {
     const displaySources = this.state.displaySources;
     let newSelected = Array.from(this.state.selected);
-    for (let source of displaySources.map((s) => s.url)) {
+    for (const source of displaySources.map((s) => s.url)) {
       if (newSelected.includes(source)) {
         newSelected.splice(newSelected.indexOf(source), 1);
       }
@@ -1149,14 +1149,14 @@ class ScriptLibrary extends React.Component<
     if (taggingMode) {
       // We're marking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of this.state.displaySources) {
+        for (const source of this.state.displaySources) {
           l.find((s) => s.id == source.id)!.marked = true;
         }
       });
     } else {
       // We're unmarking sources
       this.props.onUpdateLibrary((l) => {
-        for (let source of l) {
+        for (const source of l) {
           source.marked = false;
         }
       });
@@ -1173,10 +1173,10 @@ class ScriptLibrary extends React.Component<
 
   batchTagOverwrite = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         source.tags = new Array<Tag>();
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           source.tags.push(
             new Tag({
               name: tag,
@@ -1191,10 +1191,10 @@ class ScriptLibrary extends React.Component<
 
   batchTagAdd = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = new Set(source.tags.map((t) => t.name));
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           if (!sourceTags.has(tag)) {
             source.tags.push(
               new Tag({
@@ -1211,10 +1211,10 @@ class ScriptLibrary extends React.Component<
 
   batchTagRemove = () => {
     this.props.onUpdateLibrary((l) => {
-      for (let sourceURL of this.state.selected) {
+      for (const sourceURL of this.state.selected) {
         const source = l.find((s) => s.url === sourceURL)!;
         const sourceTags = source.tags.map((t) => t.name);
-        for (let tag of this.state.selectedTags) {
+        for (const tag of this.state.selectedTags) {
           const indexOf = sourceTags.indexOf(tag);
           if (indexOf !== -1) {
             source.tags.splice(indexOf, 1);
@@ -1229,7 +1229,7 @@ class ScriptLibrary extends React.Component<
   getSelectedTags() {
     let tagSelectValue = new Array<string>();
     let commonTags = new Array<Tag>();
-    for (let sourceURL of this.state.selected) {
+    for (const sourceURL of this.state.selected) {
       const source = this.props.library.find((s) => s.url === sourceURL)!;
       const tags = source.tags;
       if (commonTags.length == 0) {
@@ -1253,7 +1253,7 @@ class ScriptLibrary extends React.Component<
     let displaySources = [];
     const filtering = this.state.filters.length > 0;
     if (filtering) {
-      for (let source of this.props.library) {
+      for (const source of this.props.library) {
         let matchesFilter = true;
         for (let filter of this.state.filters) {
           if (filter == "<Marked>") {

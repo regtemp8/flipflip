@@ -939,7 +939,7 @@ export default class CaptionProgram extends React.Component<
       const fns = this.state.timestampFn.get(this.state.timestamps[index])!;
       this._nextTimestamp = this.state.timestamps[index + 1];
 
-      for (let fn of fns) {
+      for (const fn of fns) {
         fn(() => {
           let newCounter = index;
           if (newCounter >= this.state.timestamps.length - 1) {
@@ -985,7 +985,7 @@ export default class CaptionProgram extends React.Component<
             this.state.timestamps.length >= index &&
             passed > this.state.timestamps[index + 1]
           ) {
-            for (let fn of this.state.timestampFn.get(
+            for (const fn of this.state.timestampFn.get(
               this.state.timestamps[index],
             )!) {
               if (/const command = \(\)/g.exec(fn.toString()) == null) {
@@ -1461,7 +1461,7 @@ export default class CaptionProgram extends React.Component<
         let fns = new Array<Function>();
         let i = 0;
         const length = values.length;
-        for (let val of values) {
+        for (const val of values) {
           let j = i;
           i += 1;
           fns.push(() => {
