@@ -87,7 +87,7 @@ export default class ImagePlayer extends React.Component<
   _isLooping: boolean = false;
   _loadedSources: Array<string> = [];
   _loadedURLs: Set<string> = new Set<string>();
-  _playedURLs: Array<string> = [];
+  _playedURLs: Set<string> = new Set<string>();
   _nextIndex: number = -1;
   _nextAdvIndex: number = 0;
   _sourceComplete: boolean = false;
@@ -148,8 +148,7 @@ export default class ImagePlayer extends React.Component<
                 size={300}
                 variant="determinate"
                 value={Math.round(
-                  (this._playedURLs?.length /
-                    this.props.scene.sources[0].count) *
+                  (this._playedURLs.size / this.props.scene.sources[0].count) *
                     100,
                 )}
               />
@@ -177,7 +176,7 @@ export default class ImagePlayer extends React.Component<
                   backgroundColor: "#2C2C2C",
                 }}
               >
-                {this._playedURLs?.length} / {this.props.scene.sources[0].count}
+                {this._playedURLs.size} / {this.props.scene.sources[0].count}
                 {this.props.scene.sources[0].countComplete ? "" : "+"}
               </Typography>
             </div>
@@ -278,7 +277,7 @@ export default class ImagePlayer extends React.Component<
     this._isLooping = false;
     this._loadedSources = [];
     this._loadedURLs = new Set<string>();
-    this._playedURLs = [];
+    this._playedURLs = new Set<string>();
     this._nextIndex = -1;
     this._nextAdvIndex = 0;
     this._sourceComplete = false;
@@ -956,9 +955,7 @@ export default class ImagePlayer extends React.Component<
               video.src)
           ) {
             const videoURL = unproxy(video.src);
-            if (!this._playedURLs.includes(videoURL)) {
-              this._playedURLs.push(videoURL);
-            }
+            this._playedURLs.add(videoURL);
           }
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
@@ -1109,9 +1106,7 @@ export default class ImagePlayer extends React.Component<
               img.src)
           ) {
             const imgURL = unproxy(img.src);
-            if (!this._playedURLs.includes(imgURL)) {
-              this._playedURLs.push(imgURL);
-            }
+            this._playedURLs.add(imgURL);
           }
           if (this.props.scene.orderFunction == OF.strict) {
             const lastIndex = this.state.historyPaths.length
@@ -1277,7 +1272,7 @@ export default class ImagePlayer extends React.Component<
     if (this.props.historyOffset == 0) {
       if (
         this.props.scene.downloadScene &&
-        this._playedURLs.length == this.props.scene.sources[0].count &&
+        this._playedURLs.size == this.props.scene.sources[0].count &&
         this.props.hasStarted
       ) {
         assertDefined(
@@ -1295,14 +1290,14 @@ export default class ImagePlayer extends React.Component<
         if (this.props.scene.weightFunction == WF.sources) {
           remainingLibrary = flatten(
             content().getAllURLValues(this.props.contentLookupKey),
-          ).filter((u: string) => !this._playedURLs.includes(u));
+          ).filter((u: string) => !this._playedURLs.has(u));
         } else {
           remainingLibrary = flatten(
             content().getURLKeys(this.props.contentLookupKey),
-          ).filter((u: string) => !this._playedURLs.includes(u));
+          ).filter((u: string) => !this._playedURLs.has(u));
         }
         if (remainingLibrary.length === 0) {
-          this._playedURLs = new Array<string>();
+          this._playedURLs = new Set<string>();
           this.props.playNextScene();
           return;
         }
@@ -1394,9 +1389,7 @@ export default class ImagePlayer extends React.Component<
             nextImg.src))
       ) {
         const nextImgURL = unproxy(nextImg.src);
-        if (!this._playedURLs.includes(nextImgURL)) {
-          this._playedURLs.push(nextImgURL);
-        }
+        this._playedURLs.add(nextImgURL);
       }
     } else {
       const newOffset = this.props.historyOffset + 1;
