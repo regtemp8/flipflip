@@ -18,7 +18,7 @@ interface AudioTextEffectsProps {
     sceneID: number,
     displayed: Array<CaptionScript>,
   ) => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   systemMessage: (message: string) => void;
 }
 

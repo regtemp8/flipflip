@@ -247,7 +247,7 @@ interface CaptionScriptorProps {
   onAddFromLibrary: () => void;
   getTags: (source: string) => Array<Tag>;
   goBack: () => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   onUpdateLibrary: (fn: (library: Array<CaptionScript>) => void) => void;
 }
 

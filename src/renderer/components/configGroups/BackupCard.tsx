@@ -80,7 +80,7 @@ interface BackupCardProps {
   onBackup: () => void;
   onClean: () => void;
   onRestore: (backupFile: string) => void;
-  onUpdateSettings: (fn: (settings: GeneralSettings) => void) => void;
+  onUpdateGeneralSettings: (update: Partial<GeneralSettings>) => void;
 }
 
 interface BackupCardState {

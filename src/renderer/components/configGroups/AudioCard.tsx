@@ -27,7 +27,7 @@ interface AudioCardProps {
   shorterSeek?: boolean;
   showMsTimestamp?: boolean;
   scenePaths?: Array<any>;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   goBack?: () => void;
   onAddTracks?: (playlistIndex: number) => void;
   onPlay?: (source: Audio, displayed: Array<Audio>) => void;

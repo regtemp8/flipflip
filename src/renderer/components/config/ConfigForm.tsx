@@ -561,9 +561,8 @@ class ConfigForm extends React.Component<ConfigFormProps, ConfigFormState> {
     this.setState({ config: newConfig, changeMade: true });
   };
 
-  onUpdateGeneralSettings = (fn: (keys: GeneralSettings) => void) => {
-    const newConfig = this.state.config;
-    fn(newConfig.generalSettings);
+  onUpdateGeneralSettings = (update: Partial<GeneralSettings>) => {
+    const newConfig = {...this.state.config, ...update};
     this.setState({ config: newConfig, changeMade: true });
   };
 

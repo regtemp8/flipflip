@@ -53,7 +53,7 @@ interface TextCardProps {
     sceneID: number,
     displayed: Array<CaptionScript>,
   ) => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: T, update: Partial<T>) => void;
   systemMessage?: (message: string) => void;
 }
 

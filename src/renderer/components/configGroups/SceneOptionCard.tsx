@@ -63,7 +63,7 @@ interface SceneOptionCardProps<T extends SceneBase> {
   sidebar?: boolean;
   tutorial?: string;
   isTagging?: boolean;
-  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
+  onUpdateScene: (scene: T, update: Partial<T>) => void;
   onGenerate?: (scene: Scene | SceneGrid, children?: boolean) => void;
 }
 

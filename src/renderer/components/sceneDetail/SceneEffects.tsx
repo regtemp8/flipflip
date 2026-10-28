@@ -14,7 +14,7 @@ interface SceneEffectsProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
   tutorial?: string;
-  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
+  onUpdateScene: (scene: T, update: Partial<T>) => void;
 }
 
 class SceneEffects<T extends SceneBase> extends React.Component<

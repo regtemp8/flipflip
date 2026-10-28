@@ -19,7 +19,7 @@ interface VideoCardProps {
   mainClipValue?: Array<number>;
   otherVideos: Array<Array<HTMLVideoElement | undefined>>;
   imagePlayerAdvanceHacks: Array<Array<ChildCallbackHack>>;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
 }
 
 export default class VideoCard extends React.Component<VideoCardProps> {

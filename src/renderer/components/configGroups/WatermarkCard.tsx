@@ -10,7 +10,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Switch,
   TextField,
   Theme,
@@ -24,6 +23,14 @@ import { GeneralSettings } from "../../../common/Config";
 import { WC } from "../../../common/const";
 import en from "../../../common/en";
 import ColorPicker from "../config/ColorPicker";
+import {
+  blurIntKey,
+  intToText,
+  onBoolInput,
+  onInput,
+  onIntInput,
+  onTextInput,
+} from "../../data/utils";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -35,7 +42,7 @@ const styles = (theme: Theme) =>
 interface WatermarkCardProps {
   classes: any;
   settings: GeneralSettings;
-  onUpdateSettings: (fn: (settings: GeneralSettings) => void) => void;
+  onUpdateGeneralSettings: (update: Partial<GeneralSettings>) => void;
 }
 
 interface WatermarkCardState {
@@ -104,7 +111,9 @@ class WatermarkCard extends React.Component<
                   control={
                     <Switch
                       checked={this.props.settings.watermark}
-                      onChange={(e) => this.onBoolInput("watermark", e)}
+                      onChange={onBoolInput((watermark) =>
+                        this.update({ watermark }),
+                      )}
                     />
                   }
                   label="Enable Watermark"
@@ -121,7 +130,9 @@ class WatermarkCard extends React.Component<
                     control={
                       <Switch
                         checked={this.props.settings.watermarkGrid}
-                        onChange={(e) => this.onBoolInput("watermarkGrid", e)}
+                        onChange={onBoolInput((watermarkGrid) =>
+                          this.update({ watermarkGrid }),
+                        )}
                       />
                     }
                     label="Show on Grids"
@@ -149,7 +160,9 @@ class WatermarkCard extends React.Component<
                 <Select
                   variant="standard"
                   value={this.props.settings.watermarkCorner}
-                  onChange={(e) => this.onInput("watermarkCorner", e)}
+                  onChange={onInput((watermarkCorner) =>
+                    this.update({ watermarkCorner }),
+                  )}
                 >
                   {Object.values(WC).map((wc) => (
                     <MenuItem value={wc} key={wc}>
@@ -166,7 +179,9 @@ class WatermarkCard extends React.Component<
                   label="Watermark Text"
                   value={this.props.settings.watermarkText}
                   margin="dense"
-                  onChange={(e) => this.onTextInput("watermarkText", e)}
+                  onChange={onTextInput((watermarkText) =>
+                    this.update({ watermarkText }),
+                  )}
                 />
               </Grid>
             </Grid>
@@ -195,7 +210,9 @@ class WatermarkCard extends React.Component<
                         },
                       },
                     }}
-                    onChange={(e) => this.onInput("watermarkFontFamily", e)}
+                    onChange={onInput((watermarkFontFamily) =>
+                      this.update({ watermarkFontFamily }),
+                    )}
                   >
                     {this.state.systemFonts.map((f) => (
                       <MenuItem key={f} value={f} style={{ fontFamily: f }}>
@@ -210,9 +227,14 @@ class WatermarkCard extends React.Component<
                   variant="standard"
                   label="Size"
                   margin="dense"
-                  value={this.props.settings.watermarkFontSize}
-                  onChange={(e) => this.onIntInput("watermarkFontSize", e)}
-                  onBlur={(e) => this.blurIntKey("watermarkFontSize", e)}
+                  value={intToText(this.props.settings.watermarkFontSize)}
+                  onChange={onIntInput((watermarkFontSize) =>
+                    this.update({ watermarkFontSize }),
+                  )}
+                  onBlur={blurIntKey(
+                    this.props.settings.watermarkFontSize,
+                    (watermarkFontSize) => this.update({ watermarkFontSize }),
+                  )}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">px</InputAdornment>
@@ -227,8 +249,8 @@ class WatermarkCard extends React.Component<
               <Grid item xs={12}>
                 <ColorPicker
                   currentColor={this.props.settings.watermarkColor}
-                  onChangeColor={(color) =>
-                    this.changeKey("watermarkColor", color)
+                  onChangeColor={(watermarkColor) =>
+                    this.update({ watermarkColor })
                   }
                 />
               </Grid>
@@ -258,55 +280,8 @@ class WatermarkCard extends React.Component<
     this._abortController.abort();
   }
 
-  onInput = (key: string, e: SelectChangeEvent<string>) => {
-    const input = e.target;
-    this.changeKey(key, input.value);
-  };
-
-  onTextInput = (
-    key: string,
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const input = e.target;
-    this.changeKey(key, input.value);
-  };
-
-  onIntInput = (
-    key: string,
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const input = e.target;
-    this.changeKey(key, input.value === "" ? "" : Number(input.value));
-  };
-
-  blurIntKey = (
-    key: string,
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { min, max } = e.currentTarget as HTMLInputElement;
-    if (min && (this.props.settings as any)[key] < Number(min)) {
-      this.changeIntKey(key, min);
-    } else if (max && (this.props.settings as any)[key] > Number(max)) {
-      this.changeIntKey(key, max);
-    }
-  };
-
-  changeIntKey(key: string, intString: string) {
-    this.changeKey(key, intString === "" ? "" : Number(intString));
-  }
-
-  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const checked = input.checked;
-    this.changeKey(key, checked);
-  };
-
-  changeKey(key: string, value: any) {
-    this.update((s) => (s[key] = value));
-  }
-
-  update(fn: (scene: any) => void) {
-    this.props.onUpdateSettings(fn);
+  update(update: Partial<GeneralSettings>) {
+    this.props.onUpdateGeneralSettings(update);
   }
 }
 

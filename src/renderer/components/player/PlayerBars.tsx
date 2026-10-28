@@ -277,7 +277,7 @@ interface PlayerBarsProps {
     force?: boolean,
   ) => void;
   onRecentPictureGrid: () => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   playNextScene?: () => void;
   play: () => void;
   pause: () => void;

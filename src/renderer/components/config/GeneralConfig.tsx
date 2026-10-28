@@ -34,7 +34,7 @@ interface GeneralConfigProps {
   onToggleDarkMode: () => void;
   onUpdateCachingSettings: (fn: (settings: CacheSettings) => void) => void;
   onUpdateDisplaySettings: (fn: (settings: DisplaySettings) => void) => void;
-  onUpdateGeneralSettings: (fn: (settings: GeneralSettings) => void) => void;
+  onUpdateGeneralSettings: (update: Partial<GeneralSettings>) => void;
   onUpdateRemoteSettings: (fn: (settings: RemoteSettings) => void) => void;
   onUpdateConfig: (fn: (config: Config) => void) => void;
 }
@@ -102,7 +102,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
               <CardContent>
                 <WatermarkCard
                   settings={this.props.config.generalSettings}
-                  onUpdateSettings={this.props.onUpdateGeneralSettings}
+                  onUpdateGeneralSettings={this.props.onUpdateGeneralSettings}
                 />
               </CardContent>
             </Card>
@@ -117,7 +117,7 @@ export default class GeneralConfig extends React.Component<GeneralConfigProps> {
                 onBackup={this.props.onBackup}
                 onRestore={this.props.onRestore}
                 onClean={() => this.props.onClean(this.props.config)}
-                onUpdateSettings={this.props.onUpdateGeneralSettings}
+                onUpdateGeneralSettings={this.props.onUpdateGeneralSettings}
               />
             </CardContent>
           </Card>

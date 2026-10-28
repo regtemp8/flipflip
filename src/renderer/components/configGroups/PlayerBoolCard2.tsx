@@ -13,11 +13,12 @@ import {
 } from "@mui/material";
 
 import { GeneralSettings } from "../../../common/Config";
+import { onBoolInput } from "../../data/utils";
 
 interface PlayerBoolCard2Props {
   generalSettings: GeneralSettings;
   onPortableOverride: () => void;
-  onUpdateGeneralSettings: (fn: (settings: GeneralSettings) => void) => void;
+  onUpdateGeneralSettings: (update: Partial<GeneralSettings>) => void;
 }
 
 interface PlayerBoolCard2State {
@@ -56,7 +57,9 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.prioritizePerformance}
-                  onChange={(e) => this.onBoolInput("prioritizePerformance", e)}
+                  onChange={onBoolInput((prioritizePerformance) =>
+                    this.update({ prioritizePerformance }),
+                  )}
                 />
               }
               label={
@@ -76,7 +79,9 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmSceneDeletion}
-                  onChange={(e) => this.onBoolInput("confirmSceneDeletion", e)}
+                  onChange={onBoolInput((confirmSceneDeletion) =>
+                    this.update({ confirmSceneDeletion }),
+                  )}
                 />
               }
               label="Confirm Scene Deletion"
@@ -92,7 +97,9 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmBlacklist}
-                  onChange={(e) => this.onBoolInput("confirmBlacklist", e)}
+                  onChange={onBoolInput((confirmBlacklist) =>
+                    this.update({ confirmBlacklist }),
+                  )}
                 />
               }
               label="Confirm Blacklist"
@@ -108,7 +115,9 @@ export default class PlayerBoolCard2 extends React.Component<
               control={
                 <Switch
                   checked={this.props.generalSettings.confirmFileDeletion}
-                  onChange={(e) => this.onBoolInput("confirmFileDeletion", e)}
+                  onChange={onBoolInput((confirmFileDeletion) =>
+                    this.update({ confirmFileDeletion }),
+                  )}
                 />
               }
               label="Confirm File Deletion"
@@ -141,7 +150,9 @@ export default class PlayerBoolCard2 extends React.Component<
                 control={
                   <Switch
                     checked={this.props.generalSettings.disableLocalSave}
-                    onChange={(e) => this.onBoolInput("disableLocalSave", e)}
+                    onChange={onBoolInput((disableLocalSave) =>
+                      this.update({ disableLocalSave }),
+                    )}
                   />
                 }
                 label="Disable Local Saves"
@@ -174,9 +185,8 @@ export default class PlayerBoolCard2 extends React.Component<
   }
 
   onTogglePortable = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const checked = input.checked;
-    if (checked) {
+    const portableMode = e.target.checked;
+    if (portableMode) {
       window.ipc.portablePathExists().then((exists) => {
         if (exists) {
           // Ask whether to keep local or keep portable
@@ -184,7 +194,7 @@ export default class PlayerBoolCard2 extends React.Component<
         }
       });
     }
-    this.changeKey("portableMode", checked);
+    this.update({ portableMode });
   };
 
   onToggleDialog = () => {
@@ -196,18 +206,8 @@ export default class PlayerBoolCard2 extends React.Component<
     this.onToggleDialog();
   };
 
-  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const checked = input.checked;
-    this.changeKey(key, checked);
-  };
-
-  changeKey(key: string, value: any) {
-    this.update((s) => (s[key] = value));
-  }
-
-  update(fn: (settings: any) => void) {
-    this.props.onUpdateGeneralSettings(fn);
+  update(update: Partial<GeneralSettings>) {
+    this.props.onUpdateGeneralSettings(update);
   }
 }
 

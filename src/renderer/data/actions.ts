@@ -1908,17 +1908,15 @@ export function generateScenes(
 export function updateScene(
   state: State,
   scene: Scene,
-  fn: (scene: Scene) => void,
+  update: Partial<Scene>,
 ): Object {
   const newScenes = new Array<Scene>();
   for (const s of state.scenes) {
     if (s.id == scene.id) {
-      const sceneCopy = JSON.parse(JSON.stringify(s));
-      fn(sceneCopy);
-      newScenes.push(sceneCopy);
-    } else {
-      newScenes.push(s);
+      Object.assign(s, update)
     }
+
+    newScenes.push(s);
   }
   return { scenes: newScenes };
 }

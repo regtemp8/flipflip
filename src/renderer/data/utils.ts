@@ -1,3 +1,4 @@
+import React from "react";
 import * as easings from "d3-ease";
 import "core-js/features/array/flat";
 
@@ -28,6 +29,50 @@ import Audio from "../../common/Audio";
 import WeightGroup from "../../common/WeightGroup";
 import Scene from "../../common/Scene";
 import Clip from "../../common/Clip";
+import { SelectChangeEvent } from "@mui/material";
+
+export function onBoolInput(fn: (input: boolean) => void) {
+  return (e: React.ChangeEvent<HTMLInputElement>) => {
+    fn(e.target.checked);
+  };
+}
+
+export function onInput(fn: (input: string) => void) {
+  return (e: SelectChangeEvent<string>) => {
+    fn(e.target.value);
+  };
+}
+
+export function onTextInput(fn: (input: string) => void) {
+  return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    fn(e.target.value);
+  };
+}
+
+export function intToText(int: number) {
+  return Number.isNaN(int) ? "" : int.toString();
+}
+
+function textToInt(text: string) {
+  return text.trim() === "" ? NaN : Number(text);
+}
+
+export function onIntInput(fn: (input: number) => void) {
+  return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    fn(textToInt(e.target.value));
+  };
+}
+
+export function blurIntKey(value: number, fn: (input: number) => void) {
+  return (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { min, max } = e.currentTarget as HTMLInputElement;
+    if (min && value < Number(min)) {
+      fn(textToInt(min));
+    } else if (max && value > Number(max)) {
+      fn(textToInt(max));
+    }
+  };
+}
 
 export function flatten(array: Array<any>) {
   return array.flat(1);

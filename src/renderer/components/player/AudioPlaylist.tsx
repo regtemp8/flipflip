@@ -105,7 +105,7 @@ interface AudioPlaylistProps {
   scenePaths?: Array<any>;
   onAddTracks?: (playlistIndex: number) => void;
   onSourceOptions: (playlistIndex: number, audio: Audio) => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   goBack?: () => void;
   orderAudioTags?: (audio: Audio) => void;
   onPlay?: (source: Audio, displaySources: Array<Audio>) => void;

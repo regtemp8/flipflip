@@ -87,7 +87,7 @@ interface ScriptPlaylistProps {
     displaySources: Array<CaptionScript>,
   ) => void;
   onSourceOptions: (playlistIndex: number, script: CaptionScript) => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   systemMessage?: (message: string) => void;
 }
 

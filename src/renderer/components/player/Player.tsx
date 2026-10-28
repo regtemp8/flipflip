@@ -62,7 +62,7 @@ interface PlayerProps {
   goToClipSource?: (source: LibrarySource) => void;
   navigateTagging?: (offset: number) => void;
   nextScene?: () => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   playTrack?: (url: string) => void;
   changeAudioRoute?: (aID: number) => void;
   toggleTag?: (sourceID: number | null, tag: Tag) => void;

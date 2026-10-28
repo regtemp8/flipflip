@@ -14,7 +14,7 @@ interface SceneOptionsProps<T extends SceneBase> {
   scene: T;
   tutorial?: string;
   isConfig?: boolean;
-  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
 }
 
 class SceneOptions<T extends SceneBase> extends React.Component<

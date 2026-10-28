@@ -471,7 +471,7 @@ interface SceneDetailProps {
   onSaveAsScene: (scene: Scene) => void;
   onSort: (algorithm: string, ascending: boolean, scene?: Scene) => void;
   onTutorial: (tutorial: string) => void;
-  onUpdateScene: (scene: Scene, fn: (scene: Scene) => void) => void;
+  onUpdateScene: (scene: Scene, update: Partial<Scene>) => void;
   systemMessage: (message: string) => void;
 }
 

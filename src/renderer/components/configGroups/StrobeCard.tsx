@@ -45,7 +45,7 @@ interface StrobeCardProps<T extends SceneBase> {
   scene: T;
   easingControls: boolean;
   sidebar?: boolean;
-  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
+  onUpdateScene: (scene: T, update: Partial<T>) => void;
 }
 
 interface StrobeCardState {

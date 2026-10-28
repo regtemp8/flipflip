@@ -28,6 +28,7 @@ import { GO, IF, OF, OT, SDT, SOF, VO, WF } from "../../../common/const";
 import en from "../../../common/en";
 import { SceneBase } from "../../../common/SceneBase";
 import { styled } from "@mui/material/styles";
+import { onBoolInput } from "../../data/utils";
 
 const FullWidthFormControl = styled(FormControl)(() => ({
   width: "100%",
@@ -39,7 +40,7 @@ interface ImageVideoCardProps<T extends SceneBase> {
   tutorial?: string;
   isConfig?: boolean;
   isPlayer?: boolean;
-  onUpdateScene: (scene: T, fn: (scene: T) => void) => void;
+  onUpdateScene: (scene: T, update: Partial<T>) => void;
 }
 
 class ImageVideoCard<T extends SceneBase> extends React.Component<
@@ -118,7 +119,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                     >
                       <Switch
                         checked={this.props.scene.regenerate}
-                        onChange={(e) => this.onBoolInput("regenerate", e)}
+                        onChange={onBoolInput((regenerate) =>
+                          this.update({ regenerate }),
+                        )}
                       />
                     </Tooltip>
                   }
@@ -154,7 +157,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                     >
                       <Switch
                         checked={this.props.scene.fullSource}
-                        onChange={(e) => this.onBoolInput("fullSource", e)}
+                        onChange={onBoolInput((fullSource) =>
+                          this.update({ fullSource }),
+                        )}
                       />
                     </Tooltip>
                   }
@@ -608,7 +613,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                   <Switch
                     checked={this.props.scene.videoRandomSpeed}
                     size="small"
-                    onChange={(e) => this.onBoolInput("videoRandomSpeed", e)}
+                    onChange={onBoolInput((videoRandomSpeed) =>
+                      this.update({ videoRandomSpeed }),
+                    )}
                   />
                 }
                 label="Random Speed"
@@ -680,7 +687,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                   <Switch
                     checked={this.props.scene.randomVideoStart}
                     size="small"
-                    onChange={(e) => this.onBoolInput("randomVideoStart", e)}
+                    onChange={onBoolInput((randomVideoStart) =>
+                      this.update({ randomVideoStart }),
+                    )}
                   />
                 }
                 label="Start at Random Time"
@@ -718,7 +727,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                     <Switch
                       checked={this.props.scene.continueVideo}
                       size="small"
-                      onChange={(e) => this.onBoolInput("continueVideo", e)}
+                      onChange={onBoolInput((continueVideo) =>
+                        this.update({ continueVideo }),
+                      )}
                     />
                   </Tooltip>
                 }
@@ -757,7 +768,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                   <Switch
                     checked={this.props.scene.playVideoClips}
                     size="small"
-                    onChange={(e) => this.onBoolInput("playVideoClips", e)}
+                    onChange={onBoolInput((playVideoClips) =>
+                      this.update({ playVideoClips }),
+                    )}
                   />
                 }
                 label="Use Clips"
@@ -956,7 +969,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                       disableWeightOptions
                     }
                     size="small"
-                    onChange={(e) => this.onBoolInput("forceAllSource", e)}
+                    onChange={onBoolInput((forceAllSource) =>
+                      this.update({ forceAllSource }),
+                    )}
                   />
                 }
                 label="Avoid Repeats"
@@ -995,7 +1010,9 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
                   <Switch
                     checked={this.props.scene.forceAll}
                     size="small"
-                    onChange={(e) => this.onBoolInput("forceAll", e)}
+                     onChange={onBoolInput((forceAll) =>
+                      this.update({ forceAll }),
+                    )}
                   />
                 }
                 label="Avoid Repeats"
@@ -1024,13 +1041,7 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
     e: Event | React.SyntheticEvent<Element, Event>,
     value: number | number[],
   ) => {
-    this.changeKey(key, value);
-  };
-
-  onBoolInput = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const checked = input.checked;
-    this.changeKey(key, checked);
+    this.update(key, value);
   };
 
   onIntInput = (
@@ -1038,24 +1049,20 @@ class ImageVideoCard<T extends SceneBase> extends React.Component<
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const input = e.target;
-    this.changeKey(key, input.value === "" ? "" : Number(input.value));
+    this.changeIntKey(key, input.value);
   };
 
   onInput = (key: string, e: SelectChangeEvent<string>) => {
     const input = e.target;
-    this.changeKey(key, input.value);
+    this.update(key, input.value);
   };
 
-  update(fn: (scene: any) => void) {
-    this.props.onUpdateScene(this.props.scene, fn);
+  update(update: Partial<T>) {
+    this.props.onUpdateScene(this.props.scene, update);
   }
 
   changeIntKey(key: string, intString: string) {
-    this.changeKey(key, intString === "" ? "" : Number(intString));
-  }
-
-  changeKey(key: string, value: any) {
-    this.update((s) => (s[key] = value));
+    this.update(key, intString === "" ? "" : Number(intString));
   }
 }
 
