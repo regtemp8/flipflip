@@ -204,11 +204,13 @@ export class SceneSettings implements SceneSettingsI {
   fadeIODelayMax = 5000;
   fadeIODelaySinRate = 100;
   fadeIODelayBPMMulti = 10;
+  fadeIOStartOpacity = 100;
   fadeIOStartEase = EA.linear;
   fadeIOStartExp = 6;
   fadeIOStartAmp = 20;
   fadeIOStartPer = 6;
   fadeIOStartOv = 3;
+  fadeIOEndOpacity = 0;
   fadeIOEndEase = EA.linear;
   fadeIOEndExp = 6;
   fadeIOEndAmp = 20;

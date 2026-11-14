@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+  Box,
   Collapse,
   Divider,
   FormControl,
@@ -311,6 +312,48 @@ class FadeIOCard<T extends SceneBase> extends React.Component<
                     type: "number",
                   }}
                 />
+              </Grid>
+            </Grid>
+          </FullWidthCollapse>
+        </Grid>
+        <Grid item xs={12}>
+          <FullWidthCollapse in={this.props.scene.fadeInOut}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
+                <Typography>
+                  Start Opacity: {this.props.scene.fadeIOStartOpacity}%
+                </Typography>
+                <Box sx={{ px: 1 }}>
+                  <Slider
+                    min={0}
+                    max={100}
+                    defaultValue={this.props.scene.fadeIOStartOpacity}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("fadeIOStartOpacity", e, value)
+                    }
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(v) => v + "%"}
+                    aria-labelledby="fadeio-start-opacity-slider"
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={this.props.sidebar ? 12 : 6}>
+                <Typography>
+                  End Opacity: {this.props.scene.fadeIOEndOpacity}%
+                </Typography>
+                <Box sx={{ px: 1 }}>
+                  <Slider
+                    min={0}
+                    max={100}
+                    defaultValue={this.props.scene.fadeIOEndOpacity}
+                    onChangeCommitted={(e, value) =>
+                      this.onSliderChange("fadeIOEndOpacity", e, value)
+                    }
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(v) => v + "%"}
+                    aria-labelledby="fadeio-end-opacity-slider"
+                  />
+                </Box>
               </Grid>
             </Grid>
           </FullWidthCollapse>

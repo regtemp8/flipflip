@@ -71,7 +71,11 @@ export default class ImageView extends React.Component<ImageViewProps> {
     this._applyImage(forceBG);
     if (!props.hasStarted && this.props.hasStarted) {
       const el = this.contentRef.current;
-      if (el && el.firstElementChild && el.firstElementChild instanceof HTMLVideoElement) {
+      if (
+        el &&
+        el.firstElementChild &&
+        el.firstElementChild instanceof HTMLVideoElement
+      ) {
         const volumeAttribute = el.firstElementChild.getAttribute("volume");
         const volume = volumeAttribute
           ? Number.parseInt(volumeAttribute)
