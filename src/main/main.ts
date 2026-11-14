@@ -59,7 +59,7 @@ app.on("ready", () => {
         }
       }
       if (url === "main_window/index.js") {
-        url = "index.js"
+        url = "index.js";
       }
       if (
         url === "src/renderer/icons/flipflip_logo.png" ||

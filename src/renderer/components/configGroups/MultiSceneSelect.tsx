@@ -53,7 +53,10 @@ class MultiSceneSelect<T extends SceneBase> extends React.Component<
         options={this.props.allScenes
           .filter((s) => s.id !== this.props.scene.id && s.sources.length > 0)
           .map((s) => {
-            return { label: this.props.getSceneName(s.id.toString()), value: s.id };
+            return {
+              label: this.props.getSceneName(s.id.toString()),
+              value: s.id,
+            };
           })}
         components={{ Option, MultiValue }}
         isClearable
