@@ -51,6 +51,9 @@ export default class FadeInOut extends React.Component<
       this._fadeOut = false;
       this._lastToggle = toggleFade;
     }
+
+    const startOpacity = this.props.scene.fadeIOStartOpacity / 100;
+    const endOpacity = this.props.scene.fadeIOEndOpacity / 100;
     let fadeTransitions: [{ item: any; props: any; key: any }];
     if (sceneTiming) {
       fadeTransitions = useTransition(
@@ -60,13 +63,13 @@ export default class FadeInOut extends React.Component<
         },
         {
           from: {
-            opacity: this._fadeOut ? 1 : 0,
+            opacity: this._fadeOut ? startOpacity : endOpacity,
           },
           enter: {
-            opacity: this._fadeOut ? 0 : 1,
+            opacity: this._fadeOut ? endOpacity : startOpacity,
           },
           leave: {
-            opacity: this._fadeOut ? 1 : 0,
+            opacity: this._fadeOut ? startOpacity : endOpacity,
           },
           unique: true,
           config: {
@@ -111,13 +114,13 @@ export default class FadeInOut extends React.Component<
         },
         {
           from: {
-            opacity: this.state.toggleFade ? 0 : 1,
+            opacity: this.state.toggleFade ? endOpacity : startOpacity,
           },
           enter: {
-            opacity: this.state.toggleFade ? 1 : 0,
+            opacity: this.state.toggleFade ? startOpacity : endOpacity,
           },
           leave: {
-            opacity: this.state.toggleFade ? 0 : 1,
+            opacity: this.state.toggleFade ? endOpacity : startOpacity,
           },
           unique: true,
           config: {

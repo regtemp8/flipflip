@@ -1,5 +1,8 @@
 # Changelog
 
+#### v5.3.0 <small>(unreleased)</small>
+- Add fade in/out start opacity and end opacity
+
 #### v5.2.2 <small>(10/26/2026)</small>
 - Remove ImageFap
 - Remove experimental VR controller mode

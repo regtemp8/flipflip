@@ -96,11 +96,13 @@ export interface SceneBase {
   fadeIODelayMax: number;
   fadeIODelaySinRate: number;
   fadeIODelayBPMMulti: number;
+  fadeIOStartOpacity: number;
   fadeIOStartEase: string;
   fadeIOStartExp: number;
   fadeIOStartAmp: number;
   fadeIOStartPer: number;
   fadeIOStartOv: number;
+  fadeIOEndOpacity: number;
   fadeIOEndEase: string;
   fadeIOEndExp: number;
   fadeIOEndAmp: number;
