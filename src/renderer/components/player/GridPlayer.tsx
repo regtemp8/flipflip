@@ -305,8 +305,8 @@ class GridPlayer extends React.Component<GridPlayerProps, GridPlayerState> {
                               }
                               setVideo={
                                 setVideo
-                                  ? () =>
-                                      setVideo(rowIndex * row.length + colIndex)
+                                  ? (video) =>
+                                      setVideo(rowIndex * row.length + colIndex, video)
                                   : undefined
                               }
                               systemMessage={this.props.systemMessage}
